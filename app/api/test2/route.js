@@ -1,0 +1,1 @@
+import { NextResponse } from 'next/server'; import { isFirebaseAdminConfigured } from '../../../lib/firebaseAdmin'; export async function GET() { return NextResponse.json({ isFirebaseAdminConfigured }); }
