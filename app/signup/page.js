@@ -12,3 +12,5 @@ export default async function SignupPage() {
 
   return <AuthForm defaultMode="signup" />;
 }
+
+export const dynamic = 'force-dynamic';

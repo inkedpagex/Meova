@@ -12,3 +12,5 @@ export default async function LoginPage() {
 
   return <AuthForm defaultMode="login" />;
 }
+
+export const dynamic = 'force-dynamic';

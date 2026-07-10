@@ -55,7 +55,7 @@ function CircleRow({ circle }) {
         <p style={{ fontSize:14, fontWeight:600, color:'var(--text-primary)', lineHeight:1.2 }}>{circle.name}</p>
         <p style={{ fontSize:12, color:'var(--text-muted)', marginTop:2 }}>{circle.category} · {circle.member_count} members</p>
       </div>
-      <button className="btn btn-outline flex-shrink-0" style={{ fontSize:12, padding:'7px 16px' }} onClick={e => e.preventDefault()}>
+      <button className="btn btn-outline flex-shrink-0" style={{ fontSize:12, padding:'7px 16px' }}>
         Join
       </button>
     </Link>
