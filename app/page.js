@@ -189,13 +189,21 @@ export default async function HomePage() {
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <button className="flex-1 flex items-center justify-center gap-1.5 text-[10px] font-black py-2 rounded-lg transition-all active:scale-95 uppercase tracking-wide" style={{ background: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}25` }}>
+                    <Link
+                      href={`/users/${u.id}`}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-[10px] font-black py-2 rounded-lg transition-all active:scale-95 uppercase tracking-wide hover:opacity-90"
+                      style={{ background: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}25` }}
+                    >
                       <Zap className="w-3 h-3" />
                       Book · 50 ⚡
-                    </button>
-                    <button className="p-2 rounded-lg transition-all active:scale-95 hover:bg-white/5" style={{ border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }}>
+                    </Link>
+                    <Link
+                      href="/messages"
+                      className="p-2 rounded-lg transition-all active:scale-95"
+                      style={{ border: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}
+                    >
                       <MessageCircle className="w-3.5 h-3.5" />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>

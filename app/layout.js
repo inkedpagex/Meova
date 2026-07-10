@@ -27,6 +27,10 @@ export default async function RootLayout({ children }) {
       }
     }
   } catch (err) {
+    // If it's a Next.js dynamic rendering error, rethrow it so Next.js handles it properly
+    if (err?.message?.includes('Dynamic server usage') || err?.digest?.startsWith('NEXT_')) {
+      throw err;
+    }
     // Firebase Admin failed to initialize (bad env vars, missing key, etc.)
     // App renders as logged-out — do not crash.
     console.error('[RootLayout] Firebase Admin init error:', err?.message);

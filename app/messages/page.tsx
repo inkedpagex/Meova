@@ -252,12 +252,13 @@ export default function MessagesPage() {
           groupedChats[msg.recipientName] = [];
         }
         // Remove default greeting when real message starts
+        const firstId = groupedChats[msg.recipientName][0]?.id;
         if (groupedChats[msg.recipientName].length === 1 && (
-          groupedChats[msg.recipientName][0].id.startsWith("init-") || 
-          groupedChats[msg.recipientName][0].id === "a-1" ||
-          groupedChats[msg.recipientName][0].id === "n-1" ||
-          groupedChats[msg.recipientName][0].id === "p-1" ||
-          groupedChats[msg.recipientName][0].id === "ai-1"
+          firstId?.startsWith("init-") ||
+          firstId === "a-1" ||
+          firstId === "n-1" ||
+          firstId === "p-1" ||
+          firstId === "ai-1"
         )) {
           groupedChats[msg.recipientName] = [];
         }
@@ -284,7 +285,7 @@ export default function MessagesPage() {
   const talkedClassmateNames = Object.keys(chats).filter(name => {
     const msgs = chats[name] || [];
     const hasRealMessages = msgs.some(m => 
-      !m.id.startsWith("init-") && 
+      !m.id?.startsWith("init-") && 
       m.id !== "a-1" && 
       m.id !== "n-1" && 
       m.id !== "p-1" && 

@@ -3,6 +3,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Compass, Users, User, LogIn, Calendar, Wallet, Shield, Plus, MessageSquare } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Sidebar({ user }) {
   const pathname = usePathname();
@@ -36,22 +37,24 @@ export default function Sidebar({ user }) {
           </div>
           <span className="font-extrabold text-[17px] text-white tracking-[-0.5px]">meetuply</span>
         </div>
-        {user ? (
-          <div className="flex items-center gap-3">
-            <Link href="/wallet" className="glass flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-white">
-              <span>{totalSparks.toLocaleString()}</span>
-              <span className="text-[#fb923c]">⚡</span>
-            </Link>
-            <Link href="/profile">
-              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10"
-                style={{ background:'var(--bg-overlay)' }}>
-                <img src={`https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(user.email||'u')}`} alt="me" className="w-full h-full" />
-              </div>
-            </Link>
-          </div>
-        ) : (
-          <Link href="/login" className="btn btn-primary text-xs px-4 py-2">Log in</Link>
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Link href="/wallet" className="glass flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold" style={{ color: 'var(--text-primary)' }}>
+                <span>{totalSparks.toLocaleString()}</span>
+                <span className="text-[#fb923c]">⚡</span>
+              </Link>
+              <Link href="/profile">
+                <div className="w-8 h-8 rounded-full overflow-hidden" style={{ border: '1px solid var(--border-mid)', background: 'var(--bg-overlay)' }}>
+                  <img src={`https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(user.email||'u')}`} alt="me" className="w-full h-full" />
+                </div>
+              </Link>
+            </div>
+          ) : (
+            <Link href="/login" className="btn btn-primary text-xs px-4 py-2">Log in</Link>
+          )}
+        </div>
       </header>
 
       {/* ── Desktop: left sidebar (Discord style) ─── */}
@@ -93,12 +96,13 @@ export default function Sidebar({ user }) {
           })}
         </nav>
 
-        {/* User card at bottom */}
+        {/* User card + theme toggle at bottom */}
         <div style={{ borderTop:'1px solid var(--border-subtle)', paddingTop:16, marginTop:16 }}>
           {user ? (
             <Link href="/profile"
-              className="flex items-center gap-2.5 p-2.5 rounded-xl transition-all hover:bg-white/[0.04]">
-              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
+              className="flex items-center gap-2.5 p-2.5 rounded-xl transition-all"
+              style={{ ':hover': { background: 'var(--bg-hover)' } }}>
+              <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0" style={{ border: '1px solid var(--border-mid)' }}>
                 <img src={`https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(user.email||'u')}`} alt="me" />
               </div>
               <div className="min-w-0">
@@ -111,6 +115,10 @@ export default function Sidebar({ user }) {
               <LogIn size={14} /> Log in
             </Link>
           )}
+          <div className="mt-3 flex items-center justify-between px-2">
+            <span className="text-[10px] font-semibold" style={{ color: 'var(--text-muted)' }}>Theme</span>
+            <ThemeToggle />
+          </div>
         </div>
       </aside>
 

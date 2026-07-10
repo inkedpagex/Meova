@@ -52,6 +52,81 @@
 }
 
 /* ═══════════════════════════════════════════════
+   LIGHT THEME OVERRIDES
+   ═══════════════════════════════════════════════ */
+[data-theme="light"] {
+  /* Backgrounds */
+  --bg-base:       #f5f5f7;
+  --bg-elevated:   #ffffff;
+  --bg-surface:    #f0f0f2;
+  --bg-overlay:    #e8e8ec;
+  --bg-hover:      rgba(0,0,0,0.04);
+  --bg-active:     rgba(0,0,0,0.07);
+
+  /* Glass */
+  --glass-bg:      rgba(255,255,255,0.7);
+  --glass-border:  rgba(0,0,0,0.08);
+  --glass-blur:    blur(16px);
+
+  /* Borders */
+  --border-subtle:  rgba(0,0,0,0.07);
+  --border-mid:     rgba(0,0,0,0.12);
+  --border-strong:  rgba(0,0,0,0.20);
+
+  /* Text */
+  --text-primary:   #0a0a0a;
+  --text-secondary: #555555;
+  --text-muted:     #999999;
+  --text-faint:     #cccccc;
+
+  /* Accent */
+  --accent:         #0a0a0a;
+  --accent-dim:     rgba(0,0,0,0.08);
+  --accent-glow:    rgba(0,0,0,0.04);
+
+  /* Shadows */
+  --shadow-card:   0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-popup:  0 8px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-glow:   0 0 24px rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.22);
+}
+
+/* Light theme: btn-primary inverts to black on white */
+[data-theme="light"] .btn-primary {
+  background: #0a0a0a;
+  color: #ffffff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+[data-theme="light"] .btn-primary:hover { background: #222222; }
+
+[data-theme="light"] .btn-ghost {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}
+[data-theme="light"] .btn-ghost:hover {
+  background: var(--bg-active);
+  color: var(--text-primary);
+  border-color: var(--border-mid);
+}
+
+/* Light theme nav active dot */
+[data-theme="light"] .nav-dot.active::after {
+  background: #0a0a0a;
+}
+
+/* ═══════════════════════════════════════════════
    RESET & BASE
    ═══════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
