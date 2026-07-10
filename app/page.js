@@ -51,17 +51,18 @@ const TAG_MAP = {
 };
 
 export default async function HomePage() {
-  const [currentUser, users, circles, events] = await Promise.all([
-    getUserAdmin(),
-    fetchUsersAdmin(30),
-    fetchCirclesAdmin(),
-    fetchUpcomingEventsAdmin(10),
-  ]);
+  try {
+    const [currentUser, users, circles, events] = await Promise.all([
+      getUserAdmin(),
+      fetchUsersAdmin(30),
+      fetchCirclesAdmin(),
+      fetchUpcomingEventsAdmin(10),
+    ]);
 
-  const firstName = currentUser?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0];
-  const discoverPeople = currentUser ? users.filter(u => u.id !== currentUser.id).slice(0, 12) : users.slice(0, 12);
+    const firstName = currentUser?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0];
+    const discoverPeople = currentUser ? users.filter(u => u.id !== currentUser.id).slice(0, 12) : users.slice(0, 12);
 
-  const now = new Date();
+    const now = new Date();
   const upcomingEvents = events.filter(e => new Date(e.date) >= now).slice(0, 5);
   const displayEvents = upcomingEvents.length > 0 ? upcomingEvents : events.slice(0, 5);
 
@@ -369,4 +370,13 @@ export default async function HomePage() {
       )}
     </div>
   );
+  } catch (pageErr) {
+    return (
+      <div style={{ background: '#000', color: 'red', padding: '20px', fontFamily: 'monospace' }}>
+        <h1>Fatal HomePage Rendering Error</h1>
+        <pre>{pageErr?.message || String(pageErr)}</pre>
+        <pre>{pageErr?.stack}</pre>
+      </div>
+    );
+  }
 }

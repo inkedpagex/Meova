@@ -40,23 +40,35 @@ export default async function RootLayout({ children }) {
     console.error('[RootLayout] Firebase Admin init error:', err?.message);
   }
 
-  return (
-    <html lang="en">
-      <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh' }}>
-        <div className="flex min-h-screen">
-          <Sidebar user={user} />
+  try {
+    return (
+      <html lang="en">
+        <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh' }}>
+          <div className="flex min-h-screen">
+            <Sidebar user={user} />
 
-          {/* Main content offset for sidebar (desktop) / top+bottom bar (mobile) */}
-          <div className="flex-1 md:pl-[220px] min-w-0">
-            <main
-              style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px 80px', paddingTop: 72 }}
-              className="md:!pt-8 md:!pb-8 md:px-8"
-            >
-              {children}
-            </main>
+            {/* Main content offset for sidebar (desktop) / top+bottom bar (mobile) */}
+            <div className="flex-1 md:pl-[220px] min-w-0">
+              <main
+                style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px 80px', paddingTop: 72 }}
+                className="md:!pt-8 md:!pb-8 md:px-8"
+              >
+                {children}
+              </main>
+            </div>
           </div>
-        </div>
-      </body>
-    </html>
-  );
+        </body>
+      </html>
+    );
+  } catch (renderErr) {
+    return (
+      <html lang="en">
+        <body style={{ background: '#000', color: 'red', padding: '20px', fontFamily: 'monospace' }}>
+          <h1>Fatal RootLayout Rendering Error</h1>
+          <pre>{renderErr?.message || String(renderErr)}</pre>
+          <pre>{renderErr?.stack}</pre>
+        </body>
+      </html>
+    );
+  }
 }
