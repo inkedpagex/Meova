@@ -25,6 +25,11 @@ export default async function RootLayout({ children }) {
         }
       }
     }
+    // Deep clone to remove any Firestore Timestamp classes or prototypes
+    // This prevents Next.js serialization crashes when passing to Client Components
+    if (user) {
+      user = JSON.parse(JSON.stringify(user));
+    }
   } catch (err) {
     // If it's a Next.js dynamic rendering error, rethrow it so Next.js handles it properly
     if (err?.message?.includes('Dynamic server usage') || err?.digest?.startsWith('NEXT_')) {
