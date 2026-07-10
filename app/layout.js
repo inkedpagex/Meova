@@ -3,6 +3,8 @@ import Sidebar from '../components/Sidebar';
 import { getUserWithRole } from '../lib/getAdminUser';
 import { getOrCreateWallet } from '../lib/wallet';
 
+import { isFirebaseAdminConfigured, adminAuth } from '../lib/firebaseAdmin';
+
 export const metadata = {
   title: 'meetuply',
   description: 'Your campus life, all in one place.',
@@ -11,10 +13,7 @@ export const metadata = {
 export default async function RootLayout({ children }) {
   let user = null;
 
-  // Wrap in try/catch — a Firebase Admin init failure must NOT crash every page
   try {
-    const { isFirebaseAdminConfigured, adminAuth } = await import('../lib/firebaseAdmin');
-
     if (isFirebaseAdminConfigured && adminAuth) {
       const fetchedUser = await getUserWithRole();
       if (fetchedUser) {
