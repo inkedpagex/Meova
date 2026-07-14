@@ -74,14 +74,13 @@ export default async function UserProfilePage({ params }) {
       />
 
       {/* Back nav */}
-      <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-bold text-neutral-500 hover:text-white transition-all mb-8 uppercase tracking-wider">
+      <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all mb-8 uppercase tracking-wider">
         <ArrowLeft className="w-3.5 h-3.5" /> Back
       </Link>
 
       {/* ── PROFILE HERO ─────────────────────── */}
       <div
-        className="relative overflow-hidden rounded-3xl mb-6 p-6 md:p-8"
-        style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.06)' }}
+        className="relative overflow-hidden rounded-3xl mb-6 p-6 md:p-8 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-lg"
       >
         {/* Top gradient accent */}
         <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl" style={{ background: `linear-gradient(to right, ${primaryMeta.color}, transparent)` }} />
@@ -91,7 +90,7 @@ export default async function UserProfilePage({ params }) {
           {/* Avatar */}
           <div className="relative flex-shrink-0">
             <div
-              className="w-20 h-20 rounded-2xl overflow-hidden"
+              className="w-20 h-20 rounded-2xl overflow-hidden bg-[var(--bg-surface)]"
               style={{ border: `2px solid ${primaryMeta.color}40` }}
             >
               <img
@@ -101,13 +100,13 @@ export default async function UserProfilePage({ params }) {
               />
             </div>
             {/* Online indicator */}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#080808]" />
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[var(--bg-elevated)]" />
           </div>
 
           {/* Core info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-3 mb-1">
-              <h1 className="text-2xl font-black text-white tracking-tight">
+              <h1 className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
                 {profile.full_name || 'Student'}
               </h1>
               {/* Rating badge */}
@@ -117,16 +116,16 @@ export default async function UserProfilePage({ params }) {
               </div>
             </div>
 
-            <p className="text-sm text-neutral-400 mb-3 flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-neutral-500" />
+            <p className="text-sm text-[var(--text-secondary)] mb-3 flex items-center gap-2 font-bold uppercase tracking-wider text-[11px]">
+              <GraduationCap className="w-4 h-4 text-[var(--text-muted)]" />
               {profile.year} Year · {profile.branch}
             </p>
 
             {/* Bio */}
             {profile.bio ? (
-              <p className="text-sm text-neutral-400 leading-relaxed mb-4">{profile.bio}</p>
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-4 font-semibold">{profile.bio}</p>
             ) : (
-              <p className="text-sm text-neutral-600 italic leading-relaxed mb-4">No bio added yet.</p>
+              <p className="text-xs text-[var(--text-muted)] italic leading-relaxed mb-4 font-semibold">No bio added yet.</p>
             )}
 
             {/* Interest tags */}
@@ -137,7 +136,7 @@ export default async function UserProfilePage({ params }) {
                 return (
                   <div
                     key={interest}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold"
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold shadow-sm"
                     style={{ background: `${meta.color}12`, color: meta.color, border: `1px solid ${meta.color}20` }}
                   >
                     <Icon className="w-3 h-3" />
@@ -158,8 +157,7 @@ export default async function UserProfilePage({ params }) {
                 />
                 <Link
                   href={`/messages?user=${encodeURIComponent(profile.full_name || 'Student')}`}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-neutral-400 hover:text-white transition-all active:scale-95"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--bg-overlay)] border border-[var(--border-subtle)] active:scale-95 shadow-sm"
                 >
                   <MessageCircle className="w-4 h-4" />
                   Message
@@ -177,31 +175,30 @@ export default async function UserProfilePage({ params }) {
 
       {/* ── COFFEE SESSION INFO ───────────────── */}
       <div
-        className="rounded-2xl p-5 mb-6 flex items-start gap-4"
-        style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)' }}
+        className="rounded-2xl p-5 mb-6 flex items-start gap-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-md"
       >
         <div className="p-2.5 rounded-xl flex-shrink-0" style={{ background: `${primaryMeta.color}12`, border: `1px solid ${primaryMeta.color}20` }}>
-          <Coffee className="w-5 h-5" style={{ color: primaryMeta.color }} />
+          <Layers className="w-5 h-5" style={{ color: primaryMeta.color }} />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-            Book a Coffee Chat
-            <span className="flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: 'rgba(250,204,21,0.1)', color: '#facc15' }}>
-              <Zap className="w-2.5 h-2.5" /> 50 Sparks
+          <h3 className="text-sm font-black text-[var(--text-primary)] mb-1 flex items-center gap-2">
+            Reserve Workspace Cabin
+            <span className="flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-500">
+              <Zap className="w-2.5 h-2.5 fill-current" /> 50 Sparks
             </span>
           </h3>
-          <p className="text-xs text-neutral-500 leading-relaxed">
-            Spend 50 Sparks to book a 30-min 1-on-1 coffee chat with {profile.full_name?.split(' ')[0] || 'this student'}. 
-            Great for study sessions, project collabs, or just campus advice.
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-semibold">
+            Spend 50 Sparks to reserve an active workspace cabin slot hosted by {profile.full_name?.split(' ')[0] || 'this student'}. 
+            Great for co-working, quiet study, or getting peer mentorship and code/design reviews.
           </p>
           <div className="flex items-center gap-4 mt-3">
             {[
-              { Icon: Calendar, text: 'Flexible timing' },
-              { Icon: MapPin, text: 'Campus café' },
-              { Icon: CheckCircle, text: 'Instant confirm' },
+              { Icon: Calendar, text: 'Flexible slots' },
+              { Icon: MapPin, text: 'Study Cabin' },
+              { Icon: CheckCircle, text: 'Auto approval' },
             ].map(({ Icon, text }) => (
-              <span key={text} className="flex items-center gap-1 text-[10px] font-medium text-neutral-500">
-                <Icon className="w-3 h-3" /> {text}
+              <span key={text} className="flex items-center gap-1 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                <Icon className="w-3 h-3 text-[var(--accent)]" /> {text}
               </span>
             ))}
           </div>
@@ -211,16 +208,15 @@ export default async function UserProfilePage({ params }) {
       {/* ── COMMUNITIES ───────────────────────── */}
       {joinedCircles.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-[11px] font-black text-neutral-500 tracking-[0.14em] uppercase mb-4 flex items-center gap-2">
-            <Users className="w-3.5 h-3.5" /> Active Circles
+          <h2 className="text-[11px] font-black text-[var(--text-muted)] tracking-[0.14em] uppercase mb-4 flex items-center gap-2">
+            <Users className="w-3.5 h-3.5 text-[var(--accent)]" /> Active Circles
           </h2>
           <div className="flex flex-wrap gap-2">
             {joinedCircles.map(c => (
               <Link
                 key={c.id}
                 href={`/circles/${c.id}`}
-                className="text-[11px] font-bold px-3 py-1.5 rounded-full transition-all hover:bg-white/5"
-                style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.06)' }}
+                className="text-[11px] font-bold px-3 py-1.5 rounded-full transition-all hover:bg-[var(--bg-hover)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)] shadow-sm"
               >
                 {c.name}
               </Link>
@@ -230,17 +226,17 @@ export default async function UserProfilePage({ params }) {
       )}
 
       {/* ── REVIEWS ───────────────────────────── */}
-      <section>
+      <section className="pb-12">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[11px] font-black text-neutral-500 tracking-[0.14em] uppercase flex items-center gap-2">
+          <h2 className="text-[11px] font-black text-[var(--text-muted)] tracking-[0.14em] uppercase flex items-center gap-2">
             <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
             Reviews ({MOCK_REVIEWS.length})
           </h2>
           <div className="flex items-center gap-1.5">
             {[1,2,3,4,5].map(i => (
-              <Star key={i} className={`w-3.5 h-3.5 ${i <= Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'text-neutral-700'}`} />
+              <Star key={i} className={`w-3.5 h-3.5 ${i <= Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'text-[var(--border-mid)]'}`} />
             ))}
-            <span className="text-xs font-black text-white ml-1">{avgRating}</span>
+            <span className="text-xs font-black text-[var(--text-primary)] ml-1">{avgRating}</span>
           </div>
         </div>
 
@@ -248,24 +244,23 @@ export default async function UserProfilePage({ params }) {
           {MOCK_REVIEWS.map(review => (
             <div
               key={review.id}
-              className="rounded-2xl p-4"
-              style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)' }}
+              className="rounded-2xl p-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-sm"
             >
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
                   <img src={avatarUrl(review.avatar)} alt={review.author} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-bold text-white">{review.author}</span>
+                    <span className="text-xs font-black text-[var(--text-primary)]">{review.author}</span>
                     <div className="flex items-center gap-0.5">
                       {[1,2,3,4,5].map(i => (
-                        <Star key={i} className={`w-2.5 h-2.5 ${i <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-neutral-700'}`} />
+                        <Star key={i} className={`w-2.5 h-2.5 ${i <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-[var(--border-mid)]'}`} />
                       ))}
                     </div>
                   </div>
-                  <p className="text-xs text-neutral-500 leading-relaxed">{review.text}</p>
-                  <p className="text-[10px] text-neutral-700 mt-2">{review.date}</p>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-semibold">{review.text}</p>
+                  <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-wider mt-2">{review.date}</p>
                 </div>
               </div>
             </div>

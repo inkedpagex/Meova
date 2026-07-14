@@ -2,200 +2,223 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Users, UserCheck, MessageCircle } from 'lucide-react';
+import {
+  Search, Users, UserCheck, MessageCircle, Calendar,
+  Briefcase, Gamepad2, Compass, Sparkles, MapPin
+} from 'lucide-react';
 import { CircleAvatar } from '../../components/CircleAvatar';
 import CircleJoinButton from '../../features/circles/CircleJoinButton';
 
 function avatarUrl(seed) {
-  return `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed || 'u')}&backgroundColor=transparent`;
-}
-
-function PersonRow({ user: u }) {
-  const interest = (u.interests || [])[0];
-
-  return (
-    <div className="flex items-center gap-4 px-5 py-4 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors duration-200">
-      <Link href={`/users/${u.id}`} className="flex-shrink-0 relative group">
-        <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 group-hover:border-white/30 transition-colors bg-neutral-900">
-          <img src={avatarUrl(u.full_name || u.id)} alt={u.full_name} className="w-full h-full object-cover" loading="lazy" />
-        </div>
-        <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full border-[2.5px] border-[#0a0a0a]" />
-      </Link>
-      <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <Link href={`/users/${u.id}`} className="truncate">
-          <p className="text-[15px] font-bold text-white hover:text-sky-400 transition-colors truncate">
-            {u.full_name || 'Student'}
-          </p>
-        </Link>
-        <p className="text-[13px] text-neutral-500 truncate font-medium mt-0.5">
-          {u.year} Year {u.branch ? `• ${u.branch.split(' ')[0]}` : ''}
-          {interest && <span className="hidden sm:inline text-neutral-400"> • {interest}</span>}
-        </p>
-      </div>
-      <div className="flex-shrink-0 ml-2">
-        <Link href={`/messages?user=${encodeURIComponent(u.full_name || 'Student')}`}>
-          <button className="bg-white/[0.08] text-white text-[13px] font-bold w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/[0.15] hover:scale-105 transition-all">
-            <MessageCircle className="w-[18px] h-[18px]" />
-          </button>
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function CircleRow({ circle, currentUserId }) {
-  const isJoined = (circle.circle_members || []).some((m) => m.user_id === currentUserId);
-  return (
-    <div className="flex items-center gap-4 px-5 py-4 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors duration-200">
-      <Link href={`/circles/${circle.id}`} className="flex-shrink-0 group">
-        <div className="w-12 h-12 rounded-[1rem] overflow-hidden border border-white/10 group-hover:border-white/30 transition-colors bg-neutral-900">
-          <CircleAvatar name={circle.name} size={48} radius={16} />
-        </div>
-      </Link>
-      <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <Link href={`/circles/${circle.id}`} className="truncate">
-          <p className="text-[15px] font-bold text-white hover:text-purple-400 transition-colors truncate">
-            {circle.name}
-          </p>
-        </Link>
-        <p className="text-[13px] text-neutral-500 truncate font-medium mt-0.5">
-          {circle.category} <span className="text-neutral-600 px-1">•</span> <span className="text-neutral-400">{circle.member_count || 0} members</span>
-        </p>
-      </div>
-      <div className="flex-shrink-0 ml-2 w-24">
-        <CircleJoinButton
-          circleId={circle.id}
-          userId={currentUserId}
-          isInitialMember={isJoined}
-          accentColor="#ffffff"
-        />
-      </div>
-    </div>
-  );
+  return `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(seed || 'u')}&backgroundColor=transparent`;
 }
 
 export default function DiscoverClient({ people, circles, currentUser }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeCategory, setActiveCategory] = useState('All'); // 'All' | 'Communities' | 'People'
 
-  const FILTERS = ['All', 'Coding', 'Music', 'Sports', 'Gaming', 'Art', 'Entrepreneurship'];
+  const categories = [
+    { name: 'All', icon: Compass, color: '#6366f1', bg: 'bg-[#6366f1]/10 border-[#6366f1]/20' },
+    { name: 'Communities', icon: Users, color: '#a855f7', bg: 'bg-purple-500/10 border-purple-500/20' },
+    { name: 'People', icon: UserCheck, color: '#10b981', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+    { name: 'Gigs', icon: Briefcase, color: '#14b8a6', bg: 'bg-teal-500/10 border-teal-500/20', href: '/gigs' },
+    { name: 'Events', icon: Calendar, color: '#f97316', bg: 'bg-orange-500/10 border-orange-500/20', href: '/events' }
+  ];
+
+  const popularSearches = ['Startup', 'Design', 'AI/ML', 'Music', 'Coding'];
 
   const query = searchQuery.toLowerCase();
 
-  const filteredPeople = people.filter((u) => {
-    const matchesSearch = (u.full_name || '').toLowerCase().includes(query) || (u.branch || '').toLowerCase().includes(query);
-    let matchesFilter = true;
-    if (activeFilter !== 'All') {
-      const tags = (u.interests || []).map((t) => t.toLowerCase());
-      if (activeFilter === 'Coding') matchesFilter = tags.some((t) => t.includes('coding') || t.includes('tech'));
-      else if (activeFilter === 'Music') matchesFilter = tags.some((t) => t.includes('music'));
-      else if (activeFilter === 'Sports') matchesFilter = tags.some((t) => t.includes('sport') || t.includes('fitness'));
-      else if (activeFilter === 'Gaming') matchesFilter = tags.some((t) => t.includes('game') || t.includes('esports'));
-      else if (activeFilter === 'Art') matchesFilter = tags.some((t) => t.includes('art') || t.includes('sketch'));
-      else if (activeFilter === 'Entrepreneurship') matchesFilter = tags.some((t) => t.includes('entrepreneur'));
-    }
-    return matchesSearch && matchesFilter;
-  });
+  // Filters
+  const filteredPeople = people.filter(u => 
+    (u.full_name || '').toLowerCase().includes(query) || 
+    (u.branch || '').toLowerCase().includes(query) ||
+    (u.interests || []).some(t => t.toLowerCase().includes(query))
+  );
 
-  const filteredCircles = circles.filter((c) => {
-    const matchesSearch = (c.name || '').toLowerCase().includes(query) || (c.category || '').toLowerCase().includes(query);
-    let matchesFilter = true;
-    if (activeFilter !== 'All') {
-      const cat = (c.category || '').toLowerCase();
-      if (activeFilter === 'Coding') matchesFilter = cat.includes('coding') || cat.includes('tech');
-      else if (activeFilter === 'Music') matchesFilter = cat.includes('music');
-      else if (activeFilter === 'Sports') matchesFilter = cat.includes('sport') || cat.includes('fitness');
-      else if (activeFilter === 'Gaming') matchesFilter = cat.includes('game') || cat.includes('esports');
-      else if (activeFilter === 'Art') matchesFilter = cat.includes('art') || cat.includes('sketch');
-      else if (activeFilter === 'Entrepreneurship') matchesFilter = cat.includes('entrepreneur');
-    }
-    return matchesSearch && matchesFilter;
-  });
+  const filteredCircles = circles.filter(c => 
+    (c.name || '').toLowerCase().includes(query) || 
+    (c.category || '').toLowerCase().includes(query)
+  );
+
+  const showPeople = activeCategory === 'All' || activeCategory === 'People';
+  const showCircles = activeCategory === 'All' || activeCategory === 'Communities';
 
   return (
-    <div className="w-full max-w-[600px] mx-auto pb-24 anim-fade-in">
-      {/* Header (Dark Glass) */}
-      <div className="relative overflow-hidden mb-6 rounded-b-[2.5rem] border-b border-white/[0.04]">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] to-black z-0" />
-        <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-sky-500/10 rounded-full blur-[80px] z-0 pointer-events-none" />
-        <div className="relative z-10 px-6 pt-10 pb-8">
-          <h1 className="text-[32px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-neutral-400 tracking-tight leading-tight">
+    <div className="w-full max-w-[640px] mx-auto pb-24 px-4 space-y-8 anim-fade-in">
+      
+      {/* ── HEADER ────────────────────────── */}
+      <div className="pt-6 space-y-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] tracking-tight">
             Discover
           </h1>
-          <p className="text-[14px] text-neutral-400 mt-2 font-medium">
+          <p className="text-xs text-[var(--text-secondary)] font-bold mt-1 uppercase tracking-widest">
             Find students and communities on your campus
           </p>
+        </div>
 
-          <div className="relative mt-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-neutral-500" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search people, circles, events…"
-              className="w-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md rounded-2xl pl-12 pr-4 py-3.5 text-[15px] text-white placeholder-neutral-500 focus:outline-none focus:border-white/20 transition-all font-medium"
-            />
-          </div>
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-[var(--text-muted)] pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search people, circles, interests..."
+            className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] focus:border-[#6366f1]/40 rounded-2xl pl-12 pr-4 py-3.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none transition-all font-semibold shadow-inner"
+          />
         </div>
       </div>
 
-      <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-6 mb-8 pb-2">
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            onClick={() => setActiveFilter(f)}
-            className={`flex-shrink-0 text-[13px] font-bold px-5 py-2.5 rounded-full transition-all active:scale-95 ${
-              activeFilter === f
-                ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]'
-                : 'bg-white/[0.04] text-neutral-400 border border-white/[0.08] hover:bg-white/[0.08] hover:text-white'
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+      {/* ── CATEGORY BUTTONS (Circular Row) ────────────────────────── */}
+      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-1">
+        {categories.map((cat) => {
+          const Icon = cat.icon;
+          const isSelected = activeCategory === cat.name;
+
+          if (cat.href) {
+            return (
+              <Link
+                key={cat.name}
+                href={cat.href}
+                className="flex flex-col items-center gap-2 flex-shrink-0 group"
+                style={{ width: '76px' }}
+              >
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-300 ${cat.bg} group-hover:scale-105 shadow-md`}>
+                  <Icon size={18} style={{ color: cat.color }} />
+                </div>
+                <span className="text-[10px] font-black text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                  {cat.name}
+                </span>
+              </Link>
+            );
+          }
+
+          return (
+            <button
+              key={cat.name}
+              onClick={() => setActiveCategory(cat.name)}
+              className="flex flex-col items-center gap-2 flex-shrink-0 group"
+              style={{ width: '76px' }}
+            >
+              <div
+                className={`w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-300 shadow-md ${
+                  isSelected 
+                    ? 'bg-[#6366f1] border-[#6366f1] text-white scale-105' 
+                    : `${cat.bg} text-neutral-400 group-hover:scale-105`
+                }`}
+              >
+                <Icon size={18} style={{ color: isSelected ? '#ffffff' : cat.color }} />
+              </div>
+              <span className={`text-[10px] font-black transition-colors ${
+                isSelected ? 'text-[#818cf8]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'
+              }`}>
+                {cat.name}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {filteredPeople.length > 0 && (
-        <section className="mb-8 px-3">
-          <div className="flex items-center gap-2 mb-3 px-3">
-            <UserCheck size={18} className="text-sky-400" />
-            <h2 className="text-[16px] font-extrabold text-white tracking-tight">
-              Students ({filteredPeople.length})
-            </h2>
-          </div>
-          <div className="flex flex-col bg-white/[0.02] border border-white/[0.04] rounded-[1.5rem] overflow-hidden">
-            {filteredPeople.slice(0, 50).map((u) => (
-              <PersonRow key={u.id} user={u} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {filteredCircles.length > 0 && (
-        <section className="px-3">
-          <div className="flex items-center gap-2 mb-3 px-3">
-            <Users size={18} className="text-purple-400" />
-            <h2 className="text-[16px] font-extrabold text-white tracking-tight">
-              Communities ({filteredCircles.length})
-            </h2>
-          </div>
-          <div className="flex flex-col bg-white/[0.02] border border-white/[0.04] rounded-[1.5rem] overflow-hidden">
-            {filteredCircles.map((c) => (
-              <CircleRow key={c.id} circle={c} currentUserId={currentUser?.id} />
-            ))}
-          </div>
-        </section>
-      )}
-      
-      {filteredPeople.length === 0 && filteredCircles.length === 0 && (
-        <div className="text-center py-20 px-6">
-          <div className="w-16 h-16 bg-white/[0.04] border border-white/[0.08] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Search className="w-8 h-8 text-neutral-600" />
-          </div>
-          <p className="text-white font-bold text-[16px]">No results found</p>
-          <p className="text-neutral-500 text-[14px] mt-2">Try adjusting your filters or search query.</p>
+      {/* ── POPULAR SEARCHES ────────────────────────── */}
+      <div className="space-y-2.5">
+        <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+          Popular Searches
+        </h4>
+        <div className="flex flex-wrap gap-2">
+          {popularSearches.map((term) => (
+            <button
+              key={term}
+              onClick={() => setSearchQuery(term)}
+              className="text-[11px] font-bold px-4 py-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[#818cf8] hover:border-[#6366f1]/30 transition-all active:scale-95"
+            >
+              #{term}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
+
+      {/* ── RECOMMENDED MIXED FEED ────────────────────────── */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-secondary)]">
+          Recommended For You
+        </h3>
+
+        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[2rem] overflow-hidden shadow-xl">
+          {/* Circles Render */}
+          {showCircles && filteredCircles.slice(0, 5).map((circle) => {
+            const isJoined = (circle.circle_members || []).some(m => m.user_id === currentUser?.id);
+            return (
+              <div key={circle.id} className="flex items-center justify-between p-4.5 border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)] transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface)] flex items-center justify-center flex-shrink-0">
+                    <CircleAvatar name={circle.name} size={44} radius={12} />
+                  </div>
+                  <div>
+                    <Link href={`/circles/${circle.id}`}>
+                      <h4 className="text-xs font-black text-[var(--text-primary)] hover:text-[#818cf8] transition-colors">
+                        {circle.name}
+                      </h4>
+                    </Link>
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-0.5 font-bold">
+                      {circle.category} • {circle.member_count || 120} members
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="w-24 flex-shrink-0">
+                  <CircleJoinButton
+                    circleId={circle.id}
+                    userId={currentUser?.id}
+                    isInitialMember={isJoined}
+                  />
+                </div>
+              </div>
+            );
+          })}
+
+          {/* People Render */}
+          {showPeople && filteredPeople.slice(0, 6).map((u) => {
+            const interest = (u.interests || [])[0];
+            return (
+              <div key={u.id} className="flex items-center justify-between p-4.5 border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)] transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface)] flex-shrink-0">
+                    <img src={avatarUrl(u.full_name || u.id)} alt={u.full_name} className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <Link href={`/users/${u.id}`}>
+                      <h4 className="text-xs font-black text-[var(--text-primary)] hover:text-[#818cf8] transition-colors">
+                        {u.full_name || 'Student'}
+                      </h4>
+                    </Link>
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-0.5 font-bold">
+                      {u.year} Year {u.branch ? `• ${u.branch.split(' ')[0]}` : ''}
+                      {interest && <span className="text-[var(--text-muted)]"> • {interest}</span>}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex-shrink-0">
+                  <Link href={`/messages?user=${encodeURIComponent(u.full_name || 'Student')}`}>
+                    <button className="bg-[var(--bg-overlay)] text-[var(--text-primary)] hover:text-white border border-[var(--border-subtle)] w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[#6366f1] hover:border-[#6366f1] transition-all">
+                      <MessageCircle size={14} />
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {filteredPeople.length === 0 && filteredCircles.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-xs text-[var(--text-secondary)]">No results match your search query.</p>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

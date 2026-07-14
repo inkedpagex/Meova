@@ -16,6 +16,23 @@ export function CircleAvatar({ name = '', size = 40, radius = '50%', className =
     .slice(0, 2)
     .toUpperCase();
 
+  // Simple deterministic hash based on name
+  let hash = 0;
+  for (let i = 0; i < safeName.length; i++) {
+    hash = safeName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const gradients = [
+    'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', // Indigo to Purple
+    'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', // Blue to Violet
+    'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)', // Pink to Rose
+    'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Emerald gradient
+    'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', // Amber gradient
+    'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', // Cyan gradient
+  ];
+
+  const gradient = gradients[Math.abs(hash) % gradients.length];
+
   return (
     <div
       className={`flex-shrink-0 flex items-center justify-center ${className}`}
@@ -23,12 +40,13 @@ export function CircleAvatar({ name = '', size = 40, radius = '50%', className =
         width: size,
         height: size,
         borderRadius: radius,
-        background: '#111111', // Solid dark premium background
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        background: gradient,
+        border: '1px solid rgba(255, 255, 255, 0.15)',
         color: '#ffffff',
-        fontWeight: 700,
-        fontSize: size * 0.4, // Scale font size based on container size
+        fontWeight: 800,
+        fontSize: size * 0.38, // Scale font size based on container size
         letterSpacing: '0.02em',
+        textShadow: '0 2px 4px rgba(0,0,0,0.15)',
       }}
     >
       {initials}

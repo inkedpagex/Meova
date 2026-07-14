@@ -2,9 +2,6 @@ import './globals.css';
 import Sidebar from '../components/Sidebar';
 import { getUserWithRole } from '../lib/getAdminUser';
 import { getOrCreateWallet } from '../lib/wallet';
-
-
-
 export const metadata = {
   title: 'meetuply',
   description: 'Your campus life, all in one place.',
@@ -41,6 +38,11 @@ export default async function RootLayout({ children }) {
   try {
     return (
       <html lang="en">
+        <head>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+        </head>
         <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh' }}>
           <div className="flex min-h-screen">
             <Sidebar user={user} />

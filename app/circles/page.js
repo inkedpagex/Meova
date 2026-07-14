@@ -19,16 +19,14 @@ export default async function CirclesPage() {
   }
 
   return (
-    <div className="w-full max-w-[800px] mx-auto pb-24 anim-fade-in">
-      {/* Header (Dark Glass) */}
-      <div className="relative overflow-hidden mb-6 rounded-b-[2.5rem] border-b border-white/[0.04]">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] to-black z-0" />
-        <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] z-0 pointer-events-none" />
-        <div className="relative z-10 px-6 pt-10 pb-8">
-          <h1 className="text-[32px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-neutral-400 tracking-tight leading-tight">
+    <div className="w-full max-w-[800px] mx-auto pb-24 anim-fade-in px-4">
+      {/* Header */}
+      <div className="relative overflow-hidden mb-6 border-b border-[var(--border-subtle)] pt-6 pb-4">
+        <div className="relative z-10">
+          <h1 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] tracking-tight">
             Communities
           </h1>
-          <p className="text-[14px] text-neutral-400 mt-2 font-medium">
+          <p className="text-xs text-[var(--text-secondary)] font-bold mt-1 uppercase tracking-widest">
             Find your tribe. {circles.length} communities on campus.
           </p>
         </div>

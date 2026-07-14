@@ -528,13 +528,13 @@ function MessagesContent() {
   return (
     <div className="flex flex-col relative animate-fade-in" style={{ height: "calc(100vh - 100px)" }}>
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/5 pb-4 px-6">
+      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4 px-6">
         <div>
-          <h1 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-neutral-400" />
+          <h1 className="text-xl font-extrabold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-[var(--text-secondary)]" />
             {activeChar ? (
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10 flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full overflow-hidden border border-[var(--border-subtle)] flex items-center justify-center">
                   <img src={getCharacterAvatar(activeChar)} alt={activeChar.name} className="w-full h-full" />
                 </div>
                 <span>{activeChar.name}</span>
@@ -543,7 +543,7 @@ function MessagesContent() {
               "Sparks Playground"
             )}
           </h1>
-          <p className="text-xs text-neutral-400 mt-1">
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
             {activeChar ? (activeChar.online ? "Online & ready to chat" : "Offline") : "Select an AI Host or classmate to start messaging"}
           </p>
         </div>
@@ -551,7 +551,7 @@ function MessagesContent() {
         {/* Directory Toggle Button */}
         <button
           onClick={() => setShowDirectory(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-neutral-300 hover:text-white hover:bg-white/10 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-overlay)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all"
         >
           <Users className="w-3.5 h-3.5" />
           <span>Directory</span>
@@ -562,8 +562,8 @@ function MessagesContent() {
       <div className="flex-1 overflow-y-auto px-6 py-4 no-scroll" style={{ paddingBottom: "100px" }}>
         {loading ? (
           <div className="flex flex-col items-center justify-center h-[50dvh]">
-            <Loader2 className="w-6 h-6 text-neutral-400 animate-spin" />
-            <p className="text-xs text-neutral-500 mt-2">Loading classmate directories...</p>
+            <Loader2 className="w-6 h-6 text-[var(--text-secondary)] animate-spin" />
+            <p className="text-xs text-[var(--text-secondary)] mt-2">Loading classmate directories...</p>
           </div>
         ) : (
           <AnimatePresence mode="wait">
@@ -581,7 +581,7 @@ function MessagesContent() {
                     className={`flex items-end gap-2.5 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                   >
                     {msg.sender === "character" && (
-                      <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 flex-shrink-0 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full overflow-hidden border border-[var(--border-subtle)] flex-shrink-0 flex items-center justify-center">
                         <img src={getCharacterAvatar(activeChar)} alt={activeChar.name} className="w-full h-full" />
                       </div>
                     )}
@@ -589,8 +589,8 @@ function MessagesContent() {
                     <div
                       className={`max-w-[75%] px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-lg ${
                         msg.sender === "user"
-                          ? "bg-white text-black rounded-br-none font-medium"
-                          : "bg-[#141414] text-neutral-200 border border-white/5 rounded-bl-none"
+                          ? "bg-[var(--accent)] text-white rounded-br-none font-semibold"
+                          : "bg-[var(--bg-overlay)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-bl-none"
                       }`}
                     >
                       {msg.text}
@@ -651,31 +651,31 @@ function MessagesContent() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#090909] border-l border-white/10 shadow-2xl z-50 flex flex-col"
+              className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[var(--bg-elevated)] border-l border-[var(--border-subtle)] shadow-2xl z-50 flex flex-col"
             >
               {/* Drawer Header */}
-              <div className="flex items-center justify-between p-5 border-b border-white/5">
+              <div className="flex items-center justify-between p-5 border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-neutral-400" />
-                  <h2 className="text-base font-extrabold text-white tracking-tight">Campus Directory</h2>
+                  <Users className="w-5 h-5 text-[var(--text-secondary)]" />
+                  <h2 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">Campus Directory</h2>
                 </div>
                 <button
                   onClick={() => setShowDirectory(false)}
-                  className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-neutral-400 hover:text-white transition-all"
+                  className="p-1.5 rounded-lg bg-[var(--bg-overlay)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Search Bar */}
-              <div className="p-4 border-b border-white/5 relative">
+              <div className="p-4 border-b border-[var(--border-subtle)] relative">
                 <Search className="w-4 h-4 text-neutral-500 absolute left-7 top-7" />
                 <input
                   type="text"
                   placeholder="Search classmates by name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white/20 transition-all font-medium"
+                  className="w-full bg-[var(--bg-overlay)] border border-[var(--border-subtle)] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[var(--text-primary)] placeholder-neutral-500 focus:outline-none focus:border-[var(--border-strong)] transition-all font-medium"
                 />
               </div>
 
@@ -683,20 +683,20 @@ function MessagesContent() {
               <div className="flex-1 overflow-y-auto p-4 space-y-2 no-scroll">
                 {filteredClassmates.length > 0 ? (
                   filteredClassmates.map((classmate) => {
-                    const isConnected = connectedIds.includes(classmate.id);
-                    return (
+                     const isConnected = connectedIds.includes(classmate.id);
+                     return (
                       <div
                         key={classmate.id}
                         onClick={() => startChatWithClassmate(classmate)}
-                        className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 cursor-pointer hover:bg-white/10 transition-all"
+                        className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-overlay)] border border-[var(--border-subtle)] hover:border-[var(--border-mid)] cursor-pointer hover:bg-[var(--bg-hover)] transition-all"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 flex items-center justify-center bg-white/5">
+                          <div className="w-10 h-10 rounded-full overflow-hidden border border-[var(--border-subtle)] flex items-center justify-center bg-white/5">
                             <img src={getCharacterAvatar(classmate)} alt={classmate.name} className="w-full h-full" />
                           </div>
                           <div>
-                            <h4 className="text-xs font-bold text-white tracking-tight">{classmate.name}</h4>
-                            <p className="text-[10px] text-neutral-500 mt-0.5">Online Classmate</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] tracking-tight">{classmate.name}</h4>
+                            <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">Online Classmate</p>
                           </div>
                         </div>
 
@@ -705,8 +705,8 @@ function MessagesContent() {
                           onClick={(e) => toggleConnection(classmate.id, e)}
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
                             isConnected
-                              ? "bg-white/10 text-neutral-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20"
-                              : "bg-white text-black hover:bg-neutral-200"
+                              ? "bg-[var(--bg-hover)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20"
+                              : "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
                           }`}
                         >
                           {isConnected ? (
@@ -722,7 +722,7 @@ function MessagesContent() {
                           )}
                         </button>
                       </div>
-                    );
+                     );
                   })
                 ) : (
                   <div className="text-center py-12">

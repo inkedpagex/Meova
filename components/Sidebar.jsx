@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Compass, Users, User, LogIn, Calendar, Wallet, Shield, Plus, MessageSquare } from 'lucide-react';
+import { Home, Compass, Users, User, LogIn, Calendar, Wallet, Shield, Plus, MessageSquare, Briefcase, Bell, Crown } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 export default function Sidebar({ user }) {
@@ -16,26 +16,28 @@ export default function Sidebar({ user }) {
     : 0;
 
   const NAV = [
-    { href: '/',        label: 'Home',     Icon: Home },
-    { href: '/discover',label: 'Discover', Icon: Compass },
-    { href: '/events',  label: 'Events',   Icon: Calendar },
-    { href: '/circles', label: 'Circles',  Icon: Users },
-    { href: '/messages',label: 'Messages', Icon: MessageSquare },
+    { href: '/',             label: 'Home',          Icon: Home },
+    { href: '/discover',     label: 'Discover',      Icon: Compass },
+    { href: '/events',       label: 'Events',        Icon: Calendar },
+    { href: '/circles',      label: 'Circles',       Icon: Users },
+    { href: '/gigs',         label: 'Campus Gigs',   Icon: Briefcase },
+    { href: '/messages',     label: 'Messages',      Icon: MessageSquare },
+    { href: '/notifications',label: 'Notifications', Icon: Bell },
     ...(user ? [{ href: '/wallet',  label: 'Wallet',   Icon: Wallet, badge: `${totalSparks.toLocaleString()} ⚡` }] : []),
-    { href: '/profile', label: 'Profile',  Icon: User },
+    { href: '/profile',      label: 'Profile',       Icon: User },
     ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin', Icon: Shield }] : []),
   ];
 
   return (
     <>
       {/* ── Mobile: frosted top header ────────────── */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[56px] flex items-center justify-between px-5"
-        style={{ background:'rgba(8,8,8,0.8)', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[56px] flex items-center justify-between px-5 backdrop-blur-md"
+        style={{ background:'var(--glass-bg)', borderBottom:'1px solid var(--border-subtle)' }}>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-xl bg-white flex items-center justify-center shadow-lg">
-            <span className="text-black font-black text-[15px] leading-none">M</span>
+          <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-[#6366f1] to-[#c084fc] flex items-center justify-center shadow-md">
+            <span className="text-white font-black text-[14px] leading-none">M</span>
           </div>
-          <span className="font-extrabold text-[17px] text-white tracking-[-0.5px]">meetuply</span>
+          <span className="font-black text-[17px] tracking-tight uppercase" style={{ color: 'var(--text-primary)' }}>meetuply</span>
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
@@ -63,10 +65,10 @@ export default function Sidebar({ user }) {
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-2 mb-10">
-          <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center">
-            <span className="text-black font-black text-[18px] leading-none">M</span>
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#6366f1] to-[#c084fc] flex items-center justify-center shadow-lg">
+            <span className="text-white font-black text-[16px] leading-none">M</span>
           </div>
-          <span className="font-extrabold text-[18px] tracking-[-0.5px]" style={{ color:'var(--text-primary)' }}>meetuply</span>
+          <span className="font-black text-[18px] tracking-tight uppercase" style={{ color:'var(--text-primary)' }}>meetuply</span>
         </div>
 
         {/* Nav */}
@@ -123,8 +125,8 @@ export default function Sidebar({ user }) {
       </aside>
 
       {/* ── Mobile: frosted bottom tab bar ────────── */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 h-[60px] flex"
-        style={{ background:'rgba(8,8,8,0.85)', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', borderTop:'1px solid rgba(255,255,255,0.06)' }}>
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 h-[60px] flex backdrop-blur-md"
+        style={{ background:'var(--glass-bg)', borderTop:'1px solid var(--border-subtle)' }}>
         {NAV.slice(0, 5).map(({ href, label, Icon }) => {
           if (href === '/profile' && !user) {
             return (

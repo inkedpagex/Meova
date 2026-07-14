@@ -28,17 +28,17 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
         return (
           <div
             key={circle.id}
-            className="group relative flex flex-col bg-white/[0.02] border border-white/[0.06] rounded-[1.5rem] p-5 hover:bg-white/[0.04] transition-all duration-300 overflow-hidden"
+            className="group relative flex flex-col bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[2rem] p-5 hover:bg-[var(--bg-hover)] transition-all duration-300 overflow-hidden shadow-md"
           >
             {/* Ambient background glow based on category color */}
             <div 
-              className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-[50px] opacity-20 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
+              className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-[50px] opacity-10 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
               style={{ background: meta.color }}
             />
 
             <div className="flex items-start justify-between mb-4 relative z-10">
               <Link href={`/circles/${circle.id}`} className="flex-shrink-0">
-                <div className="relative w-14 h-14 rounded-2xl overflow-hidden border border-white/10 group-hover:scale-105 transition-transform duration-300 bg-black shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+                <div className="relative w-14 h-14 rounded-2xl overflow-hidden border border-[var(--border-subtle)] group-hover:scale-105 transition-transform duration-300 bg-[var(--bg-surface)] shadow-md">
                   <CircleAvatar name={circle.name} size={56} radius={16} />
                 </div>
               </Link>
@@ -54,20 +54,20 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
 
             <div className="flex flex-col flex-1 relative z-10">
               <Link href={`/circles/${circle.id}`} className="mb-1">
-                <h3 className="font-extrabold text-white text-[17px] leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-neutral-400 transition-all duration-300">
+                <h3 className="font-extrabold text-[var(--text-primary)] text-[17px] leading-tight group-hover:text-[#818cf8] transition-all duration-300">
                   {circle.name}
                 </h3>
               </Link>
               
-              <div className="flex items-center gap-2 text-[13px] text-neutral-400 font-medium mb-4">
-                <span className="px-2.5 py-1 rounded-md bg-white/[0.05] border border-white/[0.05]">{circle.category}</span>
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.05] border border-white/[0.05]">
-                  <Users className="w-3.5 h-3.5 text-neutral-500" />
+              <div className="flex items-center gap-2 text-[13px] text-[var(--text-secondary)] font-medium mb-4">
+                <span className="px-2.5 py-1 rounded-md bg-[var(--bg-overlay)] border border-[var(--border-subtle)]">{circle.category}</span>
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-overlay)] border border-[var(--border-subtle)]">
+                  <Users className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                   {memberCount}
                 </span>
               </div>
 
-              <p className="text-[13px] text-neutral-500 font-medium line-clamp-2 mt-auto leading-relaxed">
+              <p className="text-[13px] text-[var(--text-secondary)] font-medium line-clamp-2 mt-auto leading-relaxed">
                 {circle.desc || "Join this community to connect with like-minded peers and stay updated on upcoming events."}
               </p>
             </div>
