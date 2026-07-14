@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '../../../../lib/getAdminUser';
-import { adminDb } from '../../../../lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
+// import { adminDb } from '../../../../lib/firebaseAdmin';
 
 export async function POST(request) {
   const admin = await requireAdmin();
@@ -54,8 +53,8 @@ export async function POST(request) {
       });
     } else {
       await walletRef.update({
-        purchased:          FieldValue.increment(pay.sparks),
-        lifetime_purchased: FieldValue.increment(pay.sparks),
+        purchased:          pay.sparks,
+        lifetime_purchased: pay.sparks,
         updated_at:         new Date().toISOString(),
       });
     }

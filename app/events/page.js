@@ -1,7 +1,7 @@
-import { getUserAdmin } from '../../lib/getUserAdmin';
+import { getUserAdmin } from '../../lib/getAdminUser';
 import { fetchUpcomingEventsAdmin } from '../../lib/firebaseAdminQueries';
 import Link from 'next/link';
-import { Calendar, MapPin, Users, Filter } from 'lucide-react';
+import { Calendar, MapPin, Users, Filter, Clock } from 'lucide-react';
 
 export const metadata = { title: 'Events — meetuply' };
 
@@ -11,57 +11,64 @@ function EventCard({ event, userId }) {
   const isRsvp = userId && (event.rsvps_list || []).some(r => r.user_id === userId);
 
   return (
-    <div className="card overflow-hidden group cursor-pointer"
-      style={{ background:'var(--bg-surface)', borderRadius:16, border:'1px solid var(--border-subtle)' }}>
+    <div className="group relative flex flex-col bg-white/[0.02] border border-white/[0.06] rounded-[1.5rem] p-4 hover:bg-white/[0.04] transition-all duration-300 overflow-hidden cursor-pointer h-full">
       {/* Cover image */}
-      <div style={{ height:140, background:'var(--bg-overlay)', position:'relative', overflow:'hidden' }}>
+      <div className="relative h-40 rounded-2xl overflow-hidden bg-neutral-900 border border-white/5 mb-4 shrink-0">
         {event.image_url ? (
           <img src={event.image_url} alt={event.title}
-            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             loading="lazy" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Calendar size={32} style={{ color:'var(--text-faint)' }} />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-900/40 to-black group-hover:scale-110 transition-transform duration-700">
+            <Calendar size={36} className="text-emerald-500/30" />
           </div>
         )}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)' }} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
         {/* Date badge */}
-        <div className="glass absolute top-3 right-3 text-center" style={{ borderRadius:10, padding:'6px 10px', minWidth:44 }}>
-          <p style={{ fontSize:11, fontWeight:800, color:'var(--text-primary)', lineHeight:1 }}>
+        <div className="absolute top-3 right-3 bg-white/10 backdrop-blur-md border border-white/20 text-center rounded-[0.8rem] px-3 py-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+          <p className="text-[13px] font-black text-white leading-none tracking-tight">
             {date.toLocaleDateString('en-US', { day:'numeric' })}
           </p>
-          <p style={{ fontSize:9, fontWeight:600, color:'var(--text-secondary)', lineHeight:1, marginTop:2 }}>
+          <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mt-0.5">
             {date.toLocaleDateString('en-US', { month:'short' })}
           </p>
         </div>
 
-        {/* Circle name */}
-        <div className="absolute bottom-3 left-3">
-          <span className="tag tag-neutral" style={{ fontSize:10 }}>{event.circle_name}</span>
+        {/* Circle tag */}
+        <div className="absolute bottom-3 left-3 bg-white/10 backdrop-blur-md border border-white/10 text-white text-[11px] font-bold px-2.5 py-1 rounded-md">
+          {event.circle_name}
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ padding:'14px 16px 16px' }}>
-        <h3 style={{ fontSize:14, fontWeight:700, color:'var(--text-primary)', lineHeight:1.35, marginBottom:8 }} className="line-clamp-2">
+      <div className="flex flex-col flex-1 px-1">
+        <h3 className="text-[16px] font-extrabold text-white leading-snug mb-3 group-hover:text-emerald-400 transition-colors line-clamp-2">
           {event.title}
         </h3>
 
-        <div className="flex items-center gap-4" style={{ marginBottom:12 }}>
+        <div className="flex flex-col gap-2 mb-5 mt-auto">
           {event.location && (
-            <span className="flex items-center gap-1.5" style={{ fontSize:11.5, color:'var(--text-muted)' }}>
-              <MapPin size={11} /> {event.location.split(',')[0]}
+            <span className="flex items-center gap-2 text-[12px] font-medium text-neutral-400">
+              <MapPin className="w-[14px] h-[14px] text-neutral-500" /> {event.location.split(',')[0]}
             </span>
           )}
-          <span className="flex items-center gap-1.5" style={{ fontSize:11.5, color:'var(--text-muted)' }}>
-            <Users size={11} /> {going} going
+          {event.time && (
+            <span className="flex items-center gap-2 text-[12px] font-medium text-neutral-400">
+              <Clock className="w-[14px] h-[14px] text-neutral-500" /> {event.time}
+            </span>
+          )}
+          <span className="flex items-center gap-2 text-[12px] font-medium text-neutral-400 mt-0.5">
+            <Users className="w-[14px] h-[14px] text-neutral-500" /> <span className="text-white">{going}</span> going
           </span>
         </div>
 
-        <button className={`btn w-full justify-center ${isRsvp ? 'btn-ghost' : 'btn-outline'}`}
-          style={{ fontSize:12, padding:'9px 16px' }}>
-          {isRsvp ? 'Going ✓' : 'RSVP'}
+        <button className={`w-full font-bold text-[13px] py-3 rounded-xl flex items-center justify-center transition-all ${
+          isRsvp 
+            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+            : 'bg-white text-black hover:bg-neutral-200 hover:scale-[1.02] active:scale-95'
+        }`}>
+          {isRsvp ? 'Going ✓' : 'RSVP Now'}
         </button>
       </div>
     </div>
@@ -73,31 +80,47 @@ export default async function EventsPage() {
   const events = await fetchUpcomingEventsAdmin(30);
 
   return (
-    <div style={{ maxWidth: 860 }} className="anim-fade-in">
-      <div className="flex items-end justify-between" style={{ marginBottom:24 }}>
-        <div>
-          <h1 style={{ fontSize:26, fontWeight:800, letterSpacing:'-0.04em', color:'var(--text-primary)' }}>Events</h1>
-          <p style={{ fontSize:13, color:'var(--text-secondary)', marginTop:4 }}>
-            {events.length} upcoming events on campus
-          </p>
+    <div className="w-full max-w-[900px] mx-auto pb-24 anim-fade-in">
+      {/* Header (Dark Glass) */}
+      <div className="relative overflow-hidden mb-8 rounded-b-[2.5rem] border-b border-white/[0.04]">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] to-black z-0" />
+        <div className="absolute top-[-50px] left-[-50px] w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] z-0 pointer-events-none" />
+        <div className="relative z-10 px-6 pt-10 pb-8 flex items-end justify-between">
+          <div>
+            <h1 className="text-[32px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-neutral-400 tracking-tight leading-tight">
+              Events
+            </h1>
+            <p className="text-[14px] text-neutral-400 mt-2 font-medium">
+              {events.length} upcoming events on campus.
+            </p>
+          </div>
+          <button className="hidden sm:flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-white text-[13px] font-bold px-4 py-2.5 rounded-full transition-all">
+            <Filter size={15} /> Filter
+          </button>
         </div>
-        <button className="btn btn-ghost flex items-center gap-2" style={{ fontSize:12 }}>
-          <Filter size={13} /> Filter
-        </button>
       </div>
 
-      {events.length === 0 ? (
-        <div className="glass rounded-2xl p-16 text-center">
-          <Calendar size={40} className="mx-auto mb-4" style={{ color:'var(--text-faint)' }} />
-          <p style={{ color:'var(--text-muted)', fontWeight:500 }}>No upcoming events</p>
+      <div className="px-4">
+        <div className="sm:hidden mb-6 flex justify-end">
+          <button className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-white text-[13px] font-bold px-4 py-2.5 rounded-full transition-all">
+            <Filter size={15} /> Filter
+          </button>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {events.map(ev => (
-            <EventCard key={ev.id} event={ev} userId={user?.id} />
-          ))}
-        </div>
-      )}
+
+        {events.length === 0 ? (
+          <div className="rounded-[1.5rem] bg-white/[0.02] border border-white/[0.04] p-16 text-center">
+            <Calendar size={48} className="mx-auto mb-5 text-neutral-700" />
+            <p className="text-white font-bold text-[16px]">No upcoming events</p>
+            <p className="text-neutral-500 text-[14px] mt-2">Check back later or host your own event.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {events.map(ev => (
+              <EventCard key={ev.id} event={ev} userId={user?.id} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

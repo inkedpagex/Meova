@@ -2,40 +2,40 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Users, UserCheck } from 'lucide-react';
+import { Search, Users, UserCheck, MessageCircle } from 'lucide-react';
 import { CircleAvatar } from '../../components/CircleAvatar';
 import CircleJoinButton from '../../features/circles/CircleJoinButton';
 
 function avatarUrl(seed) {
-  return `https://i.pravatar.cc/150?u=${encodeURIComponent(seed || 'u')}`;
+  return `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed || 'u')}&backgroundColor=transparent`;
 }
 
 function PersonRow({ user: u }) {
-  // Extract interests for easy display
-  const interests = Array.from(new Set(u.interests || [])).slice(0, 2).join(' • ');
+  const interest = (u.interests || [])[0];
 
   return (
-    <div className="flex items-center gap-4 px-2 py-3 border-b border-white/[0.08] hover:bg-white/[0.02] transition-colors duration-200">
-      <Link href={`/users/${u.id}`} className="flex-shrink-0">
-        <div className="w-11 h-11 rounded-full overflow-hidden border border-white/10">
+    <div className="flex items-center gap-4 px-5 py-4 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors duration-200">
+      <Link href={`/users/${u.id}`} className="flex-shrink-0 relative group">
+        <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 group-hover:border-white/30 transition-colors bg-neutral-900">
           <img src={avatarUrl(u.full_name || u.id)} alt={u.full_name} className="w-full h-full object-cover" loading="lazy" />
         </div>
+        <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full border-[2.5px] border-[#0a0a0a]" />
       </Link>
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         <Link href={`/users/${u.id}`} className="truncate">
-          <p className="text-[15px] font-bold text-white hover:underline underline-offset-2 truncate">
-            {u.full_name}
+          <p className="text-[15px] font-bold text-white hover:text-sky-400 transition-colors truncate">
+            {u.full_name || 'Student'}
           </p>
         </Link>
-        <p className="text-[13px] text-neutral-400 truncate mt-0.5">
-          {u.year} Year • {u.branch}
-          {interests && <span className="ml-1.5 hidden sm:inline">• {interests}</span>}
+        <p className="text-[13px] text-neutral-500 truncate font-medium mt-0.5">
+          {u.year} Year {u.branch ? `• ${u.branch.split(' ')[0]}` : ''}
+          {interest && <span className="hidden sm:inline text-neutral-400"> • {interest}</span>}
         </p>
       </div>
       <div className="flex-shrink-0 ml-2">
-        <Link href={`/messages?user=${encodeURIComponent(u.full_name)}`}>
-          <button className="bg-white text-black text-[13px] font-bold py-1.5 px-4 rounded-full hover:bg-neutral-200 transition-colors active:scale-95">
-            Connect
+        <Link href={`/messages?user=${encodeURIComponent(u.full_name || 'Student')}`}>
+          <button className="bg-white/[0.08] text-white text-[13px] font-bold w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/[0.15] hover:scale-105 transition-all">
+            <MessageCircle className="w-[18px] h-[18px]" />
           </button>
         </Link>
       </div>
@@ -46,24 +46,23 @@ function PersonRow({ user: u }) {
 function CircleRow({ circle, currentUserId }) {
   const isJoined = (circle.circle_members || []).some((m) => m.user_id === currentUserId);
   return (
-    <div className="flex items-center gap-4 px-2 py-3 border-b border-white/[0.08] hover:bg-white/[0.02] transition-colors duration-200">
-      <Link href={`/circles/${circle.id}`} className="flex-shrink-0">
-        <div className="w-11 h-11 rounded-full overflow-hidden border border-white/10">
-          <CircleAvatar name={circle.name} size={44} radius={50} />
+    <div className="flex items-center gap-4 px-5 py-4 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors duration-200">
+      <Link href={`/circles/${circle.id}`} className="flex-shrink-0 group">
+        <div className="w-12 h-12 rounded-[1rem] overflow-hidden border border-white/10 group-hover:border-white/30 transition-colors bg-neutral-900">
+          <CircleAvatar name={circle.name} size={48} radius={16} />
         </div>
       </Link>
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         <Link href={`/circles/${circle.id}`} className="truncate">
-          <p className="text-[15px] font-bold text-white hover:underline underline-offset-2 truncate">
+          <p className="text-[15px] font-bold text-white hover:text-purple-400 transition-colors truncate">
             {circle.name}
           </p>
         </Link>
-        <p className="text-[13px] text-neutral-400 truncate mt-0.5">
-          {circle.category} • {circle.member_count || 0} members
+        <p className="text-[13px] text-neutral-500 truncate font-medium mt-0.5">
+          {circle.category} <span className="text-neutral-600 px-1">•</span> <span className="text-neutral-400">{circle.member_count || 0} members</span>
         </p>
       </div>
       <div className="flex-shrink-0 ml-2 w-24">
-        {/* Reusing our beautiful CircleJoinButton from the Circles feature */}
         <CircleJoinButton
           circleId={circle.id}
           userId={currentUserId}
@@ -81,20 +80,13 @@ export default function DiscoverClient({ people, circles, currentUser }) {
 
   const FILTERS = ['All', 'Coding', 'Music', 'Sports', 'Gaming', 'Art', 'Entrepreneurship'];
 
-  // Filter Logic
   const query = searchQuery.toLowerCase();
 
   const filteredPeople = people.filter((u) => {
-    // Check search query
-    const matchesSearch =
-      (u.full_name || '').toLowerCase().includes(query) ||
-      (u.branch || '').toLowerCase().includes(query);
-
-    // Check tag filter
+    const matchesSearch = (u.full_name || '').toLowerCase().includes(query) || (u.branch || '').toLowerCase().includes(query);
     let matchesFilter = true;
     if (activeFilter !== 'All') {
       const tags = (u.interests || []).map((t) => t.toLowerCase());
-      // basic mapping
       if (activeFilter === 'Coding') matchesFilter = tags.some((t) => t.includes('coding') || t.includes('tech'));
       else if (activeFilter === 'Music') matchesFilter = tags.some((t) => t.includes('music'));
       else if (activeFilter === 'Sports') matchesFilter = tags.some((t) => t.includes('sport') || t.includes('fitness'));
@@ -102,15 +94,11 @@ export default function DiscoverClient({ people, circles, currentUser }) {
       else if (activeFilter === 'Art') matchesFilter = tags.some((t) => t.includes('art') || t.includes('sketch'));
       else if (activeFilter === 'Entrepreneurship') matchesFilter = tags.some((t) => t.includes('entrepreneur'));
     }
-
     return matchesSearch && matchesFilter;
   });
 
   const filteredCircles = circles.filter((c) => {
-    const matchesSearch =
-      (c.name || '').toLowerCase().includes(query) ||
-      (c.category || '').toLowerCase().includes(query);
-
+    const matchesSearch = (c.name || '').toLowerCase().includes(query) || (c.category || '').toLowerCase().includes(query);
     let matchesFilter = true;
     if (activeFilter !== 'All') {
       const cat = (c.category || '').toLowerCase();
@@ -121,42 +109,45 @@ export default function DiscoverClient({ people, circles, currentUser }) {
       else if (activeFilter === 'Art') matchesFilter = cat.includes('art') || cat.includes('sketch');
       else if (activeFilter === 'Entrepreneurship') matchesFilter = cat.includes('entrepreneur');
     }
-
     return matchesSearch && matchesFilter;
   });
 
   return (
-    <div className="w-full max-w-[600px] mx-auto pb-20 anim-fade-in">
-      {/* Header */}
-      <div className="mb-6 pt-2">
-        <h1 className="text-[26px] font-extrabold text-white tracking-tight">Discover</h1>
-        <p className="text-[13px] text-neutral-400 mt-1">
-          Find students and communities on your campus
-        </p>
+    <div className="w-full max-w-[600px] mx-auto pb-24 anim-fade-in">
+      {/* Header (Dark Glass) */}
+      <div className="relative overflow-hidden mb-6 rounded-b-[2.5rem] border-b border-white/[0.04]">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] to-black z-0" />
+        <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-sky-500/10 rounded-full blur-[80px] z-0 pointer-events-none" />
+        <div className="relative z-10 px-6 pt-10 pb-8">
+          <h1 className="text-[32px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-neutral-400 tracking-tight leading-tight">
+            Discover
+          </h1>
+          <p className="text-[14px] text-neutral-400 mt-2 font-medium">
+            Find students and communities on your campus
+          </p>
+
+          <div className="relative mt-6">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-neutral-500" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search people, circles, events…"
+              className="w-full bg-white/[0.04] border border-white/[0.08] backdrop-blur-md rounded-2xl pl-12 pr-4 py-3.5 text-[15px] text-white placeholder-neutral-500 focus:outline-none focus:border-white/20 transition-all font-medium"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Interactive Search bar */}
-      <div className="relative mb-5">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search people, circles, events…"
-          className="w-full bg-white/5 border border-white/10 rounded-full pl-11 pr-4 py-3 text-[14px] text-white placeholder-neutral-500 focus:outline-none focus:border-white/20 transition-all font-medium"
-        />
-      </div>
-
-      {/* Interactive Filter chips */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-6">
+      <div className="flex gap-2.5 overflow-x-auto no-scrollbar px-6 mb-8 pb-2">
         {FILTERS.map((f) => (
           <button
             key={f}
             onClick={() => setActiveFilter(f)}
-            className={`flex-shrink-0 text-[13px] font-bold px-4 py-2 rounded-full transition-all active:scale-95 ${
+            className={`flex-shrink-0 text-[13px] font-bold px-5 py-2.5 rounded-full transition-all active:scale-95 ${
               activeFilter === f
-                ? 'bg-white text-black'
-                : 'bg-white/5 text-neutral-300 border border-white/5 hover:bg-white/10'
+                ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]'
+                : 'bg-white/[0.04] text-neutral-400 border border-white/[0.08] hover:bg-white/[0.08] hover:text-white'
             }`}
           >
             {f}
@@ -164,16 +155,15 @@ export default function DiscoverClient({ people, circles, currentUser }) {
         ))}
       </div>
 
-      {/* People section */}
       {filteredPeople.length > 0 && (
-        <section className="mb-8">
-          <div className="flex items-center gap-2 mb-2 px-2">
-            <UserCheck size={16} className="text-neutral-500" />
-            <h2 className="text-[15px] font-bold text-neutral-200">
+        <section className="mb-8 px-3">
+          <div className="flex items-center gap-2 mb-3 px-3">
+            <UserCheck size={18} className="text-sky-400" />
+            <h2 className="text-[16px] font-extrabold text-white tracking-tight">
               Students ({filteredPeople.length})
             </h2>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col bg-white/[0.02] border border-white/[0.04] rounded-[1.5rem] overflow-hidden">
             {filteredPeople.slice(0, 50).map((u) => (
               <PersonRow key={u.id} user={u} />
             ))}
@@ -181,16 +171,15 @@ export default function DiscoverClient({ people, circles, currentUser }) {
         </section>
       )}
 
-      {/* Circles section */}
       {filteredCircles.length > 0 && (
-        <section>
-          <div className="flex items-center gap-2 mb-2 px-2">
-            <Users size={16} className="text-neutral-500" />
-            <h2 className="text-[15px] font-bold text-neutral-200">
+        <section className="px-3">
+          <div className="flex items-center gap-2 mb-3 px-3">
+            <Users size={18} className="text-purple-400" />
+            <h2 className="text-[16px] font-extrabold text-white tracking-tight">
               Communities ({filteredCircles.length})
             </h2>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col bg-white/[0.02] border border-white/[0.04] rounded-[1.5rem] overflow-hidden">
             {filteredCircles.map((c) => (
               <CircleRow key={c.id} circle={c} currentUserId={currentUser?.id} />
             ))}
@@ -199,8 +188,12 @@ export default function DiscoverClient({ people, circles, currentUser }) {
       )}
       
       {filteredPeople.length === 0 && filteredCircles.length === 0 && (
-        <div className="text-center py-16">
-          <p className="text-neutral-500 text-[14px]">No results found for your search.</p>
+        <div className="text-center py-20 px-6">
+          <div className="w-16 h-16 bg-white/[0.04] border border-white/[0.08] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Search className="w-8 h-8 text-neutral-600" />
+          </div>
+          <p className="text-white font-bold text-[16px]">No results found</p>
+          <p className="text-neutral-500 text-[14px] mt-2">Try adjusting your filters or search query.</p>
         </div>
       )}
     </div>

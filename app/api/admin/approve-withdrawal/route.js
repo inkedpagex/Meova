@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '../../../../lib/getAdminUser';
-import { adminDb } from '../../../../lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
+// import { adminDb } from '../../../../lib/firebaseAdmin';
 
 export async function POST(request) {
   const admin = await requireAdmin();
@@ -41,8 +40,8 @@ export async function POST(request) {
       if ((w.creator || 0) < wd.amount) throw new Error('Insufficient Creator Sparks');
 
       tx.update(walletRef, {
-        creator:            FieldValue.increment(-wd.amount),
-        lifetime_withdrawn: FieldValue.increment(wd.amount),
+        creator:            -wd.amount,
+        lifetime_withdrawn: wd.amount,
         updated_at:         now,
       });
     });

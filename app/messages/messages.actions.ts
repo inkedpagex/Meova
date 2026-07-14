@@ -1,8 +1,7 @@
 'use server';
 
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getUserAdmin } from '@/lib/getUserAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { getUserAdmin } from '@/lib/getAdminUser';
 
 export async function sendMessageAction(messageData: {
   recipientName: string;
@@ -19,7 +18,7 @@ export async function sendMessageAction(messageData: {
       recipientName: messageData.recipientName,
       sender: messageData.sender,
       text: messageData.text,
-      timestamp: FieldValue.serverTimestamp()
+      timestamp: new Date().toISOString()
     });
 
     return { success: true };
