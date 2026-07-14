@@ -39,7 +39,7 @@ export default function BuyPage() {
         data = await res.json();
       } catch (jsonErr) {
         console.warn("JSON parsing failed, simulating fallback code:", jsonErr);
-        data = { ok: true, reference_code: Math.floor(100000 + Math.random() * 900000).toString() };
+        data = { ok: true, reference_code: Math.random().toString(36).substring(2, 7).toUpperCase() };
       }
 
       if (data.ok) {
@@ -50,7 +50,7 @@ export default function BuyPage() {
       }
     } catch (err) {
       console.warn("API request failed, initiating client fallback:", err);
-      setRefCode(Math.floor(100000 + Math.random() * 900000).toString());
+      setRefCode(Math.random().toString(36).substring(2, 7).toUpperCase());
       setStep('pay');
     } finally {
       setLoading(false);

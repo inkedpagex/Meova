@@ -9,13 +9,22 @@ const PACKS = {
   pro:     { sparks: 1600, amount_inr: 499, name: 'Pro' },
 };
 
-async function generateUnique6DigitCode() {
+function generate5CharAlphanumeric() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 5; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+async function generateUnique5CharRefCode() {
   if (!adminDb) {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    return generate5CharAlphanumeric();
   }
   let attempts = 0;
   while (attempts < 100) {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = generate5CharAlphanumeric();
     try {
       const snap = await adminDb.collection('payment_requests')
         .where('reference_code', '==', code)
@@ -30,7 +39,7 @@ async function generateUnique6DigitCode() {
     }
     attempts++;
   }
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return generate5CharAlphanumeric();
 }
 
 export async function POST(request) {
@@ -63,7 +72,7 @@ export async function POST(request) {
       return NextResponse.json({ ok: true, reference_code: ex.data().reference_code, existing: true });
     }
 
-    const reference_code = await generateUnique6DigitCode();
+    const reference_code = await generateUnique5CharRefCode();
 
     await adminDb.collection('payment_requests').add({
       userId:         user.uid,
@@ -80,7 +89,7 @@ export async function POST(request) {
     return NextResponse.json({ ok: true, reference_code });
   } catch (err) {
     console.warn("Payment request creation in Firestore failed (likely quota limit). Using fallback code:", err.message);
-    const reference_code = Math.floor(100000 + Math.random() * 900000).toString();
+    const reference_code = generate5CharAlphanumeric();
     return NextResponse.json({ ok: true, reference_code, fallback: true });
   }
 }
