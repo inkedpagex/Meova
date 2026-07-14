@@ -575,9 +575,9 @@ function MessagesContent() {
                 exit={{ opacity: 0, y: -10 }}
                 className="space-y-4 max-w-2xl mx-auto"
               >
-                {activeMessages.map((msg) => (
+                {activeMessages.map((msg, idx) => (
                   <div
-                    key={msg.id}
+                    key={`${msg.id}-${idx}`}
                     className={`flex items-end gap-2.5 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                   >
                     {msg.sender === "character" && (

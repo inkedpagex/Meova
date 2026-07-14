@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar';
 import { getUserWithRole } from '../lib/getAdminUser';
 import { getOrCreateWallet } from '../lib/wallet';
 
-import { isFirebaseAdminConfigured, adminAuth } from '../lib/firebaseAdmin';
+
 
 export const metadata = {
   title: 'meetuply',
@@ -14,15 +14,13 @@ export default async function RootLayout({ children }) {
   let user = null;
 
   try {
-    if (isFirebaseAdminConfigured && adminAuth) {
-      const fetchedUser = await getUserWithRole();
-      if (fetchedUser) {
-        try {
-          const wallet = await getOrCreateWallet(fetchedUser.uid, fetchedUser.email);
-          user = { ...fetchedUser, wallet };
-        } catch {
-          user = fetchedUser;
-        }
+    const fetchedUser = await getUserWithRole();
+    if (fetchedUser) {
+      try {
+        const wallet = await getOrCreateWallet(fetchedUser.uid, fetchedUser.email);
+        user = { ...fetchedUser, wallet };
+      } catch {
+        user = fetchedUser;
       }
     }
     // Deep clone to remove any Firestore Timestamp classes or prototypes
