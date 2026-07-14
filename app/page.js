@@ -1,4 +1,5 @@
 import { getUserAdmin } from '../lib/getUserAdmin';
+import { getOrCreateWallet } from '../lib/wallet';
 import { fetchUsersAdmin, fetchCirclesAdmin, fetchUpcomingEventsAdmin } from '../lib/firebaseAdminQueries';
 import Link from 'next/link';
 import {
@@ -43,6 +44,12 @@ export default async function HomePage() {
     const upcomingEvents = events.filter(e => new Date(e.date) >= now).slice(0, 5);
     const displayEvents = upcomingEvents.length > 0 ? upcomingEvents : events.slice(0, 5);
 
+    let totalSparks = 0;
+    if (currentUser) {
+      const wallet = await getOrCreateWallet(currentUser.id, currentUser.email);
+      totalSparks = (wallet?.purchased || 0) + (wallet?.bonus || 0) + (wallet?.creator || 0);
+    }
+
     const hour = now.getHours();
     const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
@@ -67,7 +74,7 @@ export default async function HomePage() {
                   <CalendarDays className="w-3.5 h-3.5" /> {displayEvents.length} Events
                 </Link>
                 <Link href="/wallet" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-[12px] font-bold text-yellow-500 hover:bg-yellow-400/20 transition-colors whitespace-nowrap">
-                  <Zap className="w-3.5 h-3.5" /> 100 Sparks
+                  <Zap className="w-3.5 h-3.5" /> {totalSparks} Sparks
                 </Link>
               </div>
             </>
