@@ -8,7 +8,8 @@
 
 export function CircleAvatar({ name = '', size = 40, radius = '50%', className = '' }) {
   // Extract up to 2 initials (e.g., "Coding Club" -> "CC")
-  const initials = name
+  const safeName = name || 'Circle';
+  const initials = safeName
     .split(' ')
     .map((word) => word[0])
     .join('')

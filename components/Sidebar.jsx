@@ -106,7 +106,7 @@ export default function Sidebar({ user }) {
                 <img src={`https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(user.email||'u')}`} alt="me" />
               </div>
               <div className="min-w-0">
-                <p className="text-[12px] font-semibold truncate" style={{ color:'var(--text-primary)' }}>{user.email.split('@')[0]}</p>
+                <p className="text-[12px] font-semibold truncate" style={{ color:'var(--text-primary)' }}>{(user.email || 'user').split('@')[0]}</p>
                 <p className="text-[10px] truncate" style={{ color:'var(--text-muted)' }}>{user.role === 'admin' ? '🛡️ Admin' : 'View Profile'}</p>
               </div>
             </Link>
