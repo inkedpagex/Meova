@@ -1,37 +1,36 @@
 /**
- * CircleAvatar — Always uses a generated geometric icon, never Unsplash photos.
- * Uses DiceBear "shapes" style: clean colorful geometric brand-style icons.
+ * CircleAvatar — Minimalist Apple-style initials.
+ * Uses a pure dark background with clean white initials.
  *
  * Usage:
  *   <CircleAvatar name="Google Dev Club" size={56} radius={12} />
  */
 
-export function circleAvatarUrl(name) {
-  // DiceBear shapes: produces a unique colorful geometric logo per seed
-  return `https://api.dicebear.com/8.x/shapes/svg?seed=${encodeURIComponent(name)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf,c1f4c5,f4d7c1&shape1Color=ffffff&shape2Color=ffffff&shape3Color=ffffff`;
-}
-
 export function CircleAvatar({ name = '', size = 40, radius = '50%', className = '' }) {
-  const url = circleAvatarUrl(name);
+  // Extract up to 2 initials (e.g., "Coding Club" -> "CC")
+  const initials = name
+    .split(' ')
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <div
-      className={`flex-shrink-0 overflow-hidden ${className}`}
+      className={`flex-shrink-0 flex items-center justify-center ${className}`}
       style={{
         width: size,
         height: size,
         borderRadius: radius,
-        background: 'var(--bg-overlay)',
-        border: '1px solid var(--border-subtle)',
+        background: '#111111', // Solid dark premium background
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        color: '#ffffff',
+        fontWeight: 700,
+        fontSize: size * 0.4, // Scale font size based on container size
+        letterSpacing: '0.02em',
       }}
     >
-      <img
-        src={url}
-        alt={name}
-        width={size}
-        height={size}
-        loading="lazy"
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-      />
+      {initials}
     </div>
   );
 }

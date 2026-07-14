@@ -19,24 +19,15 @@ export default async function CirclesPage() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      {/* Editorial Header */}
-      <div className="mb-10">
-        <div className="flex items-baseline gap-3 mb-2">
-          <span className="text-[11px] font-black text-neutral-500 tracking-[0.18em] uppercase">
-            Campus
-          </span>
-          <div className="h-px flex-1 bg-white/[0.05]" />
-          <span className="text-[11px] font-bold text-neutral-600">
-            {circles.length} circles
-          </span>
-        </div>
-        <h1 className="text-4xl font-black text-white tracking-tight">
-          Find your tribe.
+    <div className="w-full max-w-[600px] mx-auto pb-20">
+      {/* Sleek App-style Header */}
+      <div className="sticky top-0 z-10 bg-[#000000]/80 backdrop-blur-md border-b border-white/[0.08] px-4 py-3 flex items-center justify-between">
+        <h1 className="text-[17px] font-bold text-white tracking-tight">
+          Find your tribe
         </h1>
-        <p className="text-sm text-neutral-500 mt-2 font-medium">
-          Join communities that match your vibe and make campus life count.
-        </p>
+        <span className="text-[13px] font-medium text-neutral-500">
+          {circles.length} circles
+        </span>
       </div>
 
       {circles.length === 0 ? (

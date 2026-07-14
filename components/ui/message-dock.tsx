@@ -147,20 +147,27 @@ export function MessageDock({
   }, [characters, isExpanded]);
 
 
-  // Synchronize expandedCharacter state with activeCharacterName prop
+  // Keep track of the last synchronized active character to prevent auto-expanding on character array updates
+  const lastActiveCharacterRef = useRef<string | null>(null);
+
+  // Synchronize expandedCharacter state with activeCharacterName prop ONLY when it changes
   useEffect(() => {
-    if (activeCharacterName) {
-      const idx = characters.findIndex(c => c.name === activeCharacterName);
-      if (idx !== -1) {
-        setExpandedCharacter(idx);
-        onDockToggle?.(true);
+    if (activeCharacterName !== lastActiveCharacterRef.current) {
+      lastActiveCharacterRef.current = activeCharacterName || null;
+      
+      if (activeCharacterName) {
+        const idx = characters.findIndex(c => c.name === activeCharacterName);
+        if (idx !== -1) {
+          setExpandedCharacter(idx);
+          onDockToggle?.(true);
+        } else {
+          setExpandedCharacter(null);
+          onDockToggle?.(false);
+        }
       } else {
         setExpandedCharacter(null);
         onDockToggle?.(false);
       }
-    } else {
-      setExpandedCharacter(null);
-      onDockToggle?.(false);
     }
   }, [activeCharacterName, characters, onDockToggle]);
 
@@ -220,8 +227,12 @@ export function MessageDock({
     if (expandedCharacter === index) {
       onCharacterSelect?.(null, -1);
       setMessageInput("");
+      setExpandedCharacter(null);
+      onDockToggle?.(false);
     } else {
       onCharacterSelect?.(character, index);
+      setExpandedCharacter(index);
+      onDockToggle?.(true);
     }
   };
 
@@ -294,55 +305,51 @@ export function MessageDock({
         } : { duration: 0 }}
       >
         <div ref={contentRef} className="flex items-center gap-2 relative">
-          {/* Sparkle button - slides out when expanded */}
-          {showSparkleButton && (
-            <motion.div
-            className="flex items-center justify-center"
-            animate={{
-              opacity: isExpanded ? 0 : 1,
-              x: isExpanded ? -20 : 0,
-              scale: isExpanded ? 0.8 : 1,
-            }}
-            transition={{
-              type: "spring" as const,
-              stiffness: 400,
-              damping: 30,
-              delay: isExpanded ? 0 : 0, // Remove delay when coming back
-            }}
-          >
-            <motion.button
-              className="w-12 h-12 flex items-center justify-center cursor-pointer"
-              onClick={handleSparkleClick}
-              whileHover={
-                !isExpanded
-                  ? {
-                      scale: 1.02,
-                      y: -2,
-                      transition: {
-                        type: "spring" as const,
-                        stiffness: 400,
-                        damping: 25,
-                      },
-                    }
-                  : undefined
-              }
-              whileTap={{ scale: 0.95 }}
-              aria-label="Sparkle"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="text-neutral-400 hover:text-white transition-colors"
-              >
-                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z" />
-              </svg>
-            </motion.button>
+          {/* Sparkle or Back button */}
+          <motion.div className="flex items-center justify-center z-20">
+            <AnimatePresence mode="wait">
+              {!isExpanded && showSparkleButton ? (
+                <motion.button
+                  key="sparkle"
+                  className="w-12 h-12 flex items-center justify-center cursor-pointer"
+                  onClick={handleSparkleClick}
+                  whileHover={{ scale: 1.02, y: -2, transition: { type: "spring", stiffness: 400, damping: 25 } }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label="Sparkle"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5, x: -10 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-neutral-400 hover:text-white transition-colors">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z" />
+                  </svg>
+                </motion.button>
+              ) : isExpanded ? (
+                <motion.button
+                  key="back"
+                  className="w-10 h-10 flex items-center justify-center cursor-pointer rounded-full hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
+                  onClick={() => {
+                     setExpandedCharacter(null);
+                     setMessageInput("");
+                     onDockToggle?.(false);
+                     onCharacterSelect?.(null, -1);
+                  }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  aria-label="Close"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m15 18-6-6 6-6"/>
+                  </svg>
+                </motion.button>
+              ) : null}
+            </AnimatePresence>
           </motion.div>
-          )}
 
           {/* First separator */}
           <motion.div
@@ -369,7 +376,7 @@ export function MessageDock({
                 key={character.name}
                 className={cn(
                   "relative",
-                  isSelected && isExpanded && "absolute left-1 top-1 z-20"
+                  isSelected && isExpanded && "absolute left-12 top-1 z-20"
                 )}
                 style={{
                   // When selected and expanded, don't take up space in flex layout
@@ -458,7 +465,7 @@ export function MessageDock({
                 }}
                 placeholder={placeholder(selectedCharacter?.name || "")}
                 className={cn(
-                  "w-[calc(100%-96px)] absolute left-14 right-0 bg-transparent border-none outline-none text-sm font-medium z-50 text-white placeholder-neutral-500"
+                  "w-[calc(100%-144px)] absolute left-24 right-0 bg-transparent border-none outline-none text-sm font-medium z-50 text-white placeholder-neutral-500"
                 )}
                 autoFocus={autoFocus}
                 initial={{ opacity: 0, x: 20 }}

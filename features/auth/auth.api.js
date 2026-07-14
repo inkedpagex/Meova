@@ -30,14 +30,16 @@ export async function signUpUser({ email, password, fullName, year, branch, inte
 
   // 2. Create profile document
   try {
-    await setDoc(doc(db, TABLE_PROFILES, user.uid), {
+    const idToken = await user.getIdToken();
+    const { createProfileAdmin } = await import('./auth.actions');
+    const res = await createProfileAdmin(idToken, {
       id: user.uid,
       full_name: fullName,
       year,
       branch,
       interests,
-      created_at: new Date().toISOString()
     });
+    if (!res.success) throw new Error(res.error);
   } catch (profileError) {
     console.error('Profile DB insert error:', profileError);
     throw new Error('User created but failed to save profile details.');
@@ -69,21 +71,18 @@ export async function logInWithGoogle() {
   try {
     const userCredential = await signInWithPopup(auth, provider);
     const user = userCredential.user;
-
-    // Check if profile exists
-    const profileRef = doc(db, TABLE_PROFILES, user.uid);
-    const profileSnap = await getDoc(profileRef);
-    if (!profileSnap.exists()) {
-      await setDoc(profileRef, {
-        id: user.uid,
-        email: user.email,
-        full_name: user.displayName || user.email.split('@')[0],
-        year: '1st',
-        branch: 'General',
-        interests: [],
-        created_at: new Date().toISOString()
-      });
-    }
+    // Check if profile exists and create using secure admin action
+    const idToken = await user.getIdToken();
+    const { createProfileAdmin } = await import('./auth.actions');
+    
+    await createProfileAdmin(idToken, {
+      id: user.uid,
+      email: user.email,
+      full_name: user.displayName || user.email.split('@')[0],
+      year: '1st',
+      branch: 'General',
+      interests: []
+    });
 
     // Create session cookie
     await createSessionCookie(user);

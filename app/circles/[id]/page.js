@@ -10,7 +10,7 @@ import RsvpButton from '../../../features/events/RsvpButton';
 import { ArrowLeft, Users, Send, Calendar, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { formatEventDate } from '../../../utils/dateFormatter';
-import { circleAvatarUrl } from '../../../components/CircleAvatar';
+import { CircleAvatar } from '../../../components/CircleAvatar';
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -49,7 +49,7 @@ export default async function CircleDetailPage({ params }) {
       <div className="bg-[#0a0a0a] border border-[#222222] rounded-[2rem] p-8 md:p-12 mb-10">
         <div className="flex flex-col items-center text-center">
           <div className="w-24 h-24 rounded-3xl overflow-hidden border border-[#333333] mb-6">
-            <img src={circleAvatarUrl(circle.name)} alt={circle.name} className="w-full h-full object-cover" />
+            <CircleAvatar name={circle.name} size={96} radius="1.5rem" />
           </div>
 
           <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-tight">{circle.name}</h1>

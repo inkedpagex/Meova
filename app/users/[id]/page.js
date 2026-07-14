@@ -157,7 +157,7 @@ export default async function UserProfilePage({ params }) {
                   accentColor={primaryMeta.color}
                 />
                 <Link
-                  href="/messages"
+                  href={`/messages?user=${encodeURIComponent(profile.full_name || 'Student')}`}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-neutral-400 hover:text-white transition-all active:scale-95"
                   style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
                 >

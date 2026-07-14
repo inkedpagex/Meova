@@ -103,7 +103,13 @@ const getCharacterAvatar = (character: Character) => {
   return `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(character.name)}`;
 };
 
-export default function MessagesPage() {
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+
+function MessagesContent() {
+  const searchParams = useSearchParams();
+  const initialUser = searchParams.get('user');
+
   const [allClassmates, setAllClassmates] = useState<any[]>(FALLBACK_CLASSMATES);
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -300,9 +306,26 @@ export default function MessagesPage() {
     (activeChar && activeChar.name === c.name)
   );
 
+  // If activeChar is a temp character (not in allClassmates), make sure it's included in the array
+  if (activeChar && !talkedClassmates.some(c => c.name === activeChar.name)) {
+    talkedClassmates.push(activeChar);
+  }
+
+  // To prevent the dock from overflowing, limit the number of classmates shown to 5 max
+  let recentClassmates = [...talkedClassmates];
+  if (recentClassmates.length > 4) {
+    if (activeChar) {
+      // Remove the active character from the list, get the last 4, then append active character at the end
+      const others = recentClassmates.filter(c => c.name !== activeChar.name);
+      recentClassmates = [...others.slice(-4), activeChar];
+    } else {
+      recentClassmates = recentClassmates.slice(-5);
+    }
+  }
+
   const characters: Character[] = [
     { emoji: "✨", name: "Sparkle", online: false },
-    ...talkedClassmates,
+    ...recentClassmates,
     CAMPUS_GUIDE_AI
   ];
 
@@ -314,7 +337,7 @@ export default function MessagesPage() {
           const data = await res.json();
           if (data.users && data.users.length > 0) {
             const userClassmates = data.users.map((u: any, idx: number) => {
-              const name = u.name || u.email.split("@")[0];
+              const name = u.full_name || u.name || u.email?.split("@")[0] || "Student";
               const emoji = EMOJIS[idx % EMOJIS.length];
               const gradient = GRADIENTS[idx % GRADIENTS.length];
               return {
@@ -328,6 +351,25 @@ export default function MessagesPage() {
             });
 
             setAllClassmates(userClassmates);
+
+            if (initialUser) {
+              const target = userClassmates.find(c => c.name === initialUser);
+              if (target) {
+                setActiveChar(target);
+                setConnectedIds(prev => prev.includes(target.id) ? prev : [...prev, target.id]);
+              } else {
+                // If user is not in the list for some reason, create a temporary character
+                const tempChar = {
+                  id: 'temp-' + Date.now(),
+                  name: initialUser,
+                  emoji: "👋",
+                  online: true,
+                  backgroundColor: "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400",
+                  gradientColors: "#064e3b, #047857"
+                };
+                setActiveChar(tempChar);
+              }
+            }
           }
         }
       } catch (err) {
@@ -338,7 +380,7 @@ export default function MessagesPage() {
     }
 
     loadRealUsers();
-  }, []);
+  }, [initialUser]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -372,12 +414,13 @@ export default function MessagesPage() {
 
     // Save user message to Firestore
     try {
-      if (db) {
-        await addDoc(collection(db, "chats"), {
-          ...userMsgDoc,
-          timestamp: serverTimestamp()
-        });
-      }
+      const { sendMessageAction } = await import('./messages.actions');
+      const res = await sendMessageAction({
+        recipientName: character.name,
+        sender: 'user',
+        text: message
+      });
+      if (!res.success) throw new Error(res.error);
     } catch (err: any) {
       console.warn("Saving message to Firestore failed:", err.message);
     }
@@ -425,12 +468,13 @@ export default function MessagesPage() {
 
       // Save character reply to Firestore
       try {
-        if (db) {
-          await addDoc(collection(db, "chats"), {
-            ...charMsgDoc,
-            timestamp: serverTimestamp()
-          });
-        }
+        const { sendMessageAction } = await import('./messages.actions');
+        const res = await sendMessageAction({
+          recipientName: character.name,
+          sender: 'character',
+          text: randomReply
+        });
+        if (!res.success) throw new Error(res.error);
       } catch (err: any) {
         console.warn("Saving reply to Firestore failed:", err.message);
       }
@@ -692,7 +736,7 @@ export default function MessagesPage() {
       </AnimatePresence>
 
       {/* Floating Message Dock */}
-      {!loading && (
+      {!loading && !showDirectory && (
         <MessageDock 
           characters={characters}
           activeCharacterName={activeChar?.name}
@@ -707,5 +751,18 @@ export default function MessagesPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center h-screen bg-[#090909]">
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+        <p className="text-xs text-neutral-500 mt-4">Loading messages...</p>
+      </div>
+    }>
+      <MessagesContent />
+    </Suspense>
   );
 }

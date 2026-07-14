@@ -2,8 +2,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { updateProfile } from './profile.api';
-import { User, GraduationCap, BookOpen, Tag, Loader2, Save } from 'lucide-react';
+import { updateProfileAdmin } from './profile.actions';
+import { User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const INTEREST_TAGS = [
@@ -23,6 +23,7 @@ export default function ProfileEditForm({ initialProfile }) {
   const [fullName, setFullName] = useState(initialProfile?.full_name || '');
   const [year, setYear] = useState(initialProfile?.year || '1st');
   const [branch, setBranch] = useState(initialProfile?.branch || '');
+  const [bio, setBio] = useState(initialProfile?.bio || '');
   const [selectedInterests, setSelectedInterests] = useState(initialProfile?.interests || []);
 
   const handleInterestToggle = (tag) => {
@@ -49,53 +50,103 @@ export default function ProfileEditForm({ initialProfile }) {
 
     setLoading(true);
     try {
-      await updateProfile(initialProfile.id, {
+      const res = await updateProfileAdmin({
         full_name: fullName,
         year,
         branch,
+        bio,
         interests: selectedInterests
       });
+      
+      if (!res.success) {
+        throw new Error(res.error || 'Failed to update profile.');
+      }
+      
       setSuccessMsg('Profile updated successfully!');
       router.refresh();
+      
+      // Auto-hide success message after 3 seconds
+      setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
       console.error(err);
-      setErrorMsg('Failed to update profile.');
+      setErrorMsg(err.message || 'Failed to update profile.');
     } finally {
       setLoading(false);
     }
   };
 
-  const inputClass = "w-full bg-[#111111] border border-[#333333] rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-white transition-all placeholder:text-[#555555] font-medium";
-  const labelClass = "block text-[10px] font-extrabold text-[#888888] mb-2 uppercase tracking-widest";
-  const iconClass = "absolute inset-y-0 left-0 pl-3 flex items-center text-[#555555]";
+  // Premium UI Classes mapping to globals.css variables
+  const inputClass = "w-full rounded-xl py-3.5 pl-11 pr-4 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-white/20";
+  const labelClass = "block text-[10px] font-black uppercase tracking-widest mb-2 flex items-center gap-1.5";
+  const iconWrapperClass = "absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none";
 
   return (
-    <form onSubmit={handleSave} className="space-y-6">
-      {errorMsg && (
-        <div className="bg-[#1a0f0f] border border-[#ff4444] text-[#ff4444] text-sm font-medium rounded-xl p-4">
-          {errorMsg}
-        </div>
-      )}
-      {successMsg && (
-        <div className="bg-[#0f1a14] border border-[#22c55e] text-[#22c55e] text-sm font-medium rounded-xl p-4">
-          {successMsg}
-        </div>
-      )}
+    <form onSubmit={handleSave} className="space-y-8 relative">
+      
+      {/* Toast Notifications */}
+      <div className="absolute -top-16 left-0 right-0 z-50 flex justify-center pointer-events-none">
+        {errorMsg && (
+          <div className="anim-fade-up flex items-center gap-2 px-4 py-3 rounded-2xl shadow-popup" style={{ background: '#2a1215', border: '1px solid #ff4444', color: '#ff4444' }}>
+            <AlertCircle size={16} />
+            <span className="text-xs font-bold">{errorMsg}</span>
+          </div>
+        )}
+        {successMsg && (
+          <div className="anim-fade-up flex items-center gap-2 px-4 py-3 rounded-2xl shadow-popup" style={{ background: '#12251a', border: '1px solid #22c55e', color: '#22c55e' }}>
+            <CheckCircle2 size={16} />
+            <span className="text-xs font-bold">{successMsg}</span>
+          </div>
+        )}
+      </div>
 
-      <div>
-        <label className={labelClass}>Full Name</label>
-        <div className="relative">
-          <span className={iconClass}><User size={16} /></span>
-          <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your Name" className={inputClass} required />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Full Name */}
+        <div>
+          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Full Name</label>
+          <div className="relative group">
+            <span className={iconWrapperClass} style={{ color: 'var(--text-muted)' }}><User size={16} className="group-focus-within:text-white transition-colors" /></span>
+            <input 
+              type="text" 
+              value={fullName} 
+              onChange={(e) => setFullName(e.target.value)} 
+              placeholder="e.g. Alex Johnson" 
+              className={inputClass} 
+              style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
+              required 
+            />
+          </div>
+        </div>
+
+        {/* Branch / Course */}
+        <div>
+          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Branch / Course</label>
+          <div className="relative group">
+            <span className={iconWrapperClass} style={{ color: 'var(--text-muted)' }}><BookOpen size={16} className="group-focus-within:text-white transition-colors" /></span>
+            <input 
+              type="text" 
+              value={branch} 
+              onChange={(e) => setBranch(e.target.value)} 
+              placeholder="e.g. B.Tech CSE" 
+              className={inputClass} 
+              style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
+              required 
+            />
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Year */}
         <div>
-          <label className={labelClass}>Year</label>
-          <div className="relative">
-            <span className={iconClass + " pointer-events-none"}><GraduationCap size={16} /></span>
-            <select value={year} onChange={(e) => setYear(e.target.value)} className={inputClass + " appearance-none cursor-pointer"}>
+          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Year of Study</label>
+          <div className="relative group">
+            <span className={iconWrapperClass} style={{ color: 'var(--text-muted)' }}><GraduationCap size={16} className="group-focus-within:text-white transition-colors" /></span>
+            <select 
+              value={year} 
+              onChange={(e) => setYear(e.target.value)} 
+              className={`${inputClass} appearance-none cursor-pointer`}
+              style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
+            >
               <option value="1st">1st Year</option>
               <option value="2nd">2nd Year</option>
               <option value="3rd">3rd Year</option>
@@ -103,32 +154,58 @@ export default function ProfileEditForm({ initialProfile }) {
             </select>
           </div>
         </div>
+
+        {/* Bio */}
         <div>
-          <label className={labelClass}>Branch / Course</label>
-          <div className="relative">
-            <span className={iconClass}><BookOpen size={16} /></span>
-            <input type="text" value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="e.g. B.Tech CSE" className={inputClass} required />
+          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Short Bio <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 'normal' }}>(Optional)</span></label>
+          <div className="relative group">
+            <span className={`${iconWrapperClass} top-3`} style={{ color: 'var(--text-muted)' }}><PenLine size={16} className="group-focus-within:text-white transition-colors" /></span>
+            <textarea 
+              value={bio} 
+              onChange={(e) => setBio(e.target.value)} 
+              placeholder="What are you currently working on?" 
+              className={`${inputClass} resize-none min-h-[50px] pt-3.5`} 
+              style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
+              rows={1}
+            />
           </div>
         </div>
       </div>
 
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <label className={labelClass + " mb-0 flex items-center gap-1.5"}><Tag size={12} /> Top 3 Interests</label>
-          <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${selectedInterests.length === 3 ? 'bg-white text-black' : 'bg-[#111111] text-[#555555] border border-[#222222]'}`}>
+      {/* Interactive Chip Cloud */}
+      <div className="pt-2">
+        <div className="flex justify-between items-end mb-3">
+          <div>
+            <label className={labelClass} style={{ color: 'var(--text-secondary)' }}><Tag size={12} /> Top 3 Interests</label>
+            <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Select exactly 3 tags that describe your campus vibe.</p>
+          </div>
+          <span 
+            className="text-[10px] font-black px-3 py-1.5 rounded-full transition-all" 
+            style={
+              selectedInterests.length === 3 
+                ? { background: 'var(--text-primary)', color: 'var(--bg-base)' } 
+                : { background: 'var(--bg-overlay)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }
+            }
+          >
             {selectedInterests.length}/3
           </span>
         </div>
-        <div className="flex flex-wrap gap-2 p-3 bg-[#111111] border border-[#222222] rounded-2xl max-h-48 overflow-y-auto">
+        
+        <div className="flex flex-wrap gap-2.5 p-4 rounded-2xl" style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)' }}>
           {INTEREST_TAGS.map((tag) => {
             const sel = selectedInterests.includes(tag);
             return (
-              <button key={tag} type="button" onClick={() => handleInterestToggle(tag)}
-                className={`text-[10px] uppercase tracking-widest py-2 px-4 rounded-full border transition-all cursor-pointer font-bold ${
+              <button 
+                key={tag} 
+                type="button" 
+                onClick={() => handleInterestToggle(tag)}
+                className="text-[11px] uppercase tracking-widest py-2 px-4 rounded-full transition-all duration-300 font-bold active:scale-95"
+                style={
                   sel 
-                    ? 'bg-white border-white text-black' 
-                    : 'bg-black border-[#333333] text-[#888888] hover:border-white hover:text-white'
-                }`}>
+                    ? { background: 'var(--text-primary)', color: 'var(--bg-base)', transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(255,255,255,0.1)' }
+                    : { background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }
+                }
+              >
                 {tag}
               </button>
             );
@@ -136,11 +213,14 @@ export default function ProfileEditForm({ initialProfile }) {
         </div>
       </div>
 
-      <div className="pt-4 flex justify-end">
-        <button type="submit" disabled={loading}
-          className="bg-white hover:bg-gray-200 text-black font-extrabold uppercase tracking-widest rounded-xl px-8 py-3 text-xs flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50">
+      <div className="pt-6 border-t flex justify-end" style={{ borderColor: 'var(--border-subtle)' }}>
+        <button 
+          type="submit" 
+          disabled={loading}
+          className="btn btn-primary text-xs px-8 py-3.5 shadow-xl hover:-translate-y-0.5"
+        >
           {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          Save Changes
+          Save Profile
         </button>
       </div>
     </form>

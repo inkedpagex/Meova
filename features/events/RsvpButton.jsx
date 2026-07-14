@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { rsvpToEvent, cancelRsvp } from './events.api';
+import { rsvpToEventAction, cancelRsvpAction } from './events.actions';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -14,11 +14,19 @@ export default function RsvpButton({ eventId, userId, isInitialRsvp }) {
     if (!userId) { router.push('/login'); return; }
     setLoading(true);
     try {
-      if (isRsvp) { await cancelRsvp(eventId, userId); setIsRsvp(false); }
-      else        { await rsvpToEvent(eventId, userId); setIsRsvp(true); }
+      if (isRsvp) { 
+        const res = await cancelRsvpAction(eventId);
+        if (!res.success) throw new Error(res.error);
+        setIsRsvp(false); 
+      } else { 
+        const res = await rsvpToEventAction(eventId);
+        if (!res.success) throw new Error(res.error);
+        setIsRsvp(true); 
+      }
       router.refresh();
     } catch (e) {
       console.error(e);
+      alert(e.message || 'Failed to update RSVP. Please try again.');
     } finally {
       setLoading(false);
     }

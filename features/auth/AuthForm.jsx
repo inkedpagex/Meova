@@ -32,25 +32,18 @@ export default function AuthForm({ defaultMode = 'login' }) {
         if (userCredential && userCredential.user) {
           const user = userCredential.user;
           
-          const { doc, getDoc, setDoc } = await import('firebase/firestore');
-          const { db } = await import('../../lib/firebaseClient');
-          const { TABLE_PROFILES } = await import('./constants');
-          
-          const profileRef = doc(db, TABLE_PROFILES, user.uid);
-          const profileSnap = await getDoc(profileRef);
-          if (!profileSnap.exists()) {
-            await setDoc(profileRef, {
-              id: user.uid,
-              email: user.email,
-              full_name: user.displayName || user.email.split('@')[0],
-              year: '1st',
-              branch: 'General',
-              interests: [],
-              created_at: new Date().toISOString()
-            });
-          }
-
+          const { createProfileAdmin } = await import('./auth.actions');
           const idToken = await user.getIdToken();
+          
+          await createProfileAdmin(idToken, {
+            id: user.uid,
+            email: user.email,
+            full_name: user.displayName || user.email.split('@')[0],
+            year: '1st',
+            branch: 'General',
+            interests: []
+          });
+
           const res = await fetch('/api/auth/session', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
