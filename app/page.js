@@ -1,9 +1,277 @@
-export default function HomePage() {
-  return (
-    <div style={{ color: 'white', padding: 50 }}>
-      <h1>TESTING MODE</h1>
-      <p>If you see this, the server is alive and the deployment works.</p>
-      <p>The error was happening in the homepage data fetching.</p>
-    </div>
-  );
+import { getUserAdmin } from '../lib/getUserAdmin';
+import { getOrCreateWallet } from '../lib/wallet';
+import { fetchUsersAdmin, fetchCirclesAdmin, fetchUpcomingEventsAdmin } from '../lib/firebaseAdminQueries';
+import Link from 'next/link';
+import {
+  ChevronRight, Calendar, MapPin, Users, Zap,
+  Sparkles, ArrowRight, GraduationCap, Star, UserPlus, BookOpen,
+  Music, Code, Dumbbell, Camera, Rocket, Palette,
+  MessageCircle, CalendarDays, Search
+} from 'lucide-react';
+import { CircleAvatar } from '../components/CircleAvatar';
+
+export const metadata = { title: 'meetuply — Home' };
+
+function avatarUrl(seed) {
+  return `https://i.pravatar.cc/150?u=${encodeURIComponent(seed || 'default')}`;
+}
+
+const CATEGORY_COLOR = {
+  'Coding & Tech': '#3b82f6',
+  'Music & Bands': '#a855f7',
+  'Sports & Fitness': '#22c55e',
+  'Dance': '#ec4899',
+  'Gaming & E-sports': '#f97316',
+  'Photography & Film': '#06b6d4',
+  'Entrepreneurship': '#f97316',
+  'Art & Sketching': '#ec4899',
+  'Theatre & Drama': '#a855f7',
+};
+
+export default async function HomePage() {
+  try {
+    const [currentUser, users, circles, events] = await Promise.all([
+      getUserAdmin(),
+      fetchUsersAdmin(30),
+      fetchCirclesAdmin(),
+      fetchUpcomingEventsAdmin(10),
+    ]);
+
+    const firstName = currentUser?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0];
+    const discoverPeople = currentUser ? users.filter(u => u.id !== currentUser.id).slice(0, 10) : users.slice(0, 10);
+
+    const now = new Date();
+    const upcomingEvents = events.filter(e => new Date(e.date) >= now).slice(0, 5);
+    const displayEvents = upcomingEvents.length > 0 ? upcomingEvents : events.slice(0, 5);
+
+    let totalSparks = 0;
+    if (currentUser) {
+      const wallet = await getOrCreateWallet(currentUser.id, currentUser.email);
+      totalSparks = (wallet?.purchased || 0) + (wallet?.bonus || 0) + (wallet?.creator || 0);
+    }
+
+    const hour = now.getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+    return (
+      <div className="w-full max-w-[600px] mx-auto anim-fade-in pb-20">
+        
+        {/* ── HEADER ──────────────────────── */}
+        <div className="px-4 pt-6 pb-4">
+          {currentUser ? (
+            <>
+              <p className="text-[12px] font-bold text-neutral-500 uppercase tracking-wider mb-1">
+                {greeting}, {firstName}
+              </p>
+              <h1 className="text-[24px] font-extrabold text-white tracking-tight leading-tight">
+                Campus Feed
+              </h1>
+              <div className="flex items-center gap-3 mt-3 overflow-x-auto no-scrollbar pb-1">
+                <Link href="/discover" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[12px] font-bold text-neutral-300 hover:bg-white/10 transition-colors whitespace-nowrap">
+                  <Users className="w-3.5 h-3.5" /> {discoverPeople.length} Students
+                </Link>
+                <Link href="/events" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[12px] font-bold text-neutral-300 hover:bg-white/10 transition-colors whitespace-nowrap">
+                  <CalendarDays className="w-3.5 h-3.5" /> {displayEvents.length} Events
+                </Link>
+                <Link href="/wallet" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-[12px] font-bold text-yellow-500 hover:bg-yellow-400/20 transition-colors whitespace-nowrap">
+                  <Zap className="w-3.5 h-3.5" /> {totalSparks} Sparks
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-[12px] font-bold text-neutral-500 uppercase tracking-wider mb-1">
+                Welcome to meetuply
+              </p>
+              <h1 className="text-[28px] font-extrabold text-white tracking-tight leading-tight">
+                Your campus,<br/>connected.
+              </h1>
+              <div className="flex gap-3 mt-5">
+                <Link href="/signup" className="bg-white text-black text-[13px] font-bold px-5 py-2.5 rounded-full hover:bg-neutral-200 transition-colors">
+                  Join Campus
+                </Link>
+                <Link href="/login" className="bg-white/5 text-white border border-white/10 text-[13px] font-bold px-5 py-2.5 rounded-full hover:bg-white/10 transition-colors">
+                  Log in
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ── QUICK ACTIONS (Horizontal Scroll) ──────── */}
+        {currentUser && (
+          <div className="px-4 mb-6">
+            <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+              {[
+                { Icon: Search,  label: 'Search', href: '/discover', color: '#ffffff' },
+                { Icon: Zap,       label: 'Earn', href: '/wallet',   color: '#facc15' },
+                { Icon: BookOpen,  label: 'Book', href: '/events',   color: '#22c55e' },
+                { Icon: Users,     label: 'Groups', href: '/circles',  color: '#a855f7' },
+              ].map(({ Icon, label, href, color }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  className="flex flex-col items-center gap-2 flex-shrink-0 group"
+                  style={{ width: '64px' }}
+                >
+                  <div 
+                    className="w-14 h-14 rounded-full flex items-center justify-center border border-white/10 bg-white/5 group-hover:bg-white/10 transition-colors"
+                  >
+                    <Icon className="w-5 h-5" style={{ color }} />
+                  </div>
+                  <p className="text-[11px] font-bold text-neutral-400 group-hover:text-white transition-colors">{label}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="w-full h-2 bg-white/[0.03] mb-2" />
+
+        {/* ── PEOPLE FEED (Flush Rows) ──────── */}
+        <section className="mb-2">
+          <div className="px-4 py-3 flex items-center justify-between border-b border-white/[0.08]">
+            <h2 className="text-[15px] font-bold text-white tracking-tight">Suggested Students</h2>
+            <Link href="/discover" className="text-[13px] font-bold text-neutral-500 hover:text-white transition-colors">
+              See all
+            </Link>
+          </div>
+
+          <div className="flex flex-col">
+            {discoverPeople.map((u) => {
+              const interest = (u.interests || [])[0];
+              return (
+                <div key={u.id} className="flex items-center gap-4 px-4 py-3 border-b border-white/[0.08] hover:bg-white/[0.02] transition-colors">
+                  <Link href={`/users/${u.id}`} className="flex-shrink-0 relative">
+                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10">
+                      <img src={avatarUrl(u.full_name || u.id)} alt={u.full_name} className="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                    {/* Online indicator */}
+                    <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-[#000000]" />
+                  </Link>
+                  
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <Link href={`/users/${u.id}`} className="truncate">
+                      <p className="text-[15px] font-bold text-white hover:underline underline-offset-2 truncate">
+                        {u.full_name || 'Student'}
+                      </p>
+                    </Link>
+                    <p className="text-[13px] text-neutral-400 truncate mt-0.5">
+                      {u.year} Year • {u.branch?.split(' ')[0]}
+                      {interest && <span className="hidden sm:inline"> • {interest}</span>}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2 flex-shrink-0 ml-2">
+                    <Link href={`/messages?user=${encodeURIComponent(u.full_name || 'Student')}`}>
+                      <button className="bg-white/10 text-white border border-white/20 text-[13px] font-bold w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors">
+                        <MessageCircle className="w-4 h-4" />
+                      </button>
+                    </Link>
+                    <Link href={`/users/${u.id}`}>
+                      <button className="bg-white text-black text-[13px] font-bold py-1.5 px-4 rounded-full hover:bg-neutral-200 transition-colors">
+                        Connect
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="w-full h-2 bg-white/[0.03] mb-2" />
+
+        {/* ── COMMUNITIES (Horizontal Minimal) ──────── */}
+        {circles.length > 0 && (
+          <section className="mb-2">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-white/[0.08]">
+              <h2 className="text-[15px] font-bold text-white tracking-tight">Active Communities</h2>
+              <Link href="/circles" className="text-[13px] font-bold text-neutral-500 hover:text-white transition-colors">
+                See all
+              </Link>
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto no-scrollbar px-4 py-4">
+              {circles.slice(0, 8).map(c => {
+                return (
+                  <Link
+                    key={c.id}
+                    href={`/circles/${c.id}`}
+                    className="flex flex-col items-center gap-2 flex-shrink-0 group"
+                    style={{ width: '72px' }}
+                  >
+                    <div className="w-16 h-16 rounded-full overflow-hidden border border-white/10 group-hover:scale-105 transition-transform">
+                      <CircleAvatar name={c.name} size={64} radius={50} />
+                    </div>
+                    <p className="text-[11px] font-bold text-white leading-tight text-center line-clamp-2 w-full">{c.name}</p>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        <div className="w-full h-2 bg-white/[0.03] mb-2" />
+
+        {/* ── UPCOMING EVENTS ───────────────────── */}
+        {displayEvents.length > 0 && (
+          <section className="mb-2">
+            <div className="px-4 py-3 flex items-center justify-between border-b border-white/[0.08]">
+              <h2 className="text-[15px] font-bold text-white tracking-tight">Upcoming Events</h2>
+              <Link href="/events" className="text-[13px] font-bold text-neutral-500 hover:text-white transition-colors">
+                Calendar
+              </Link>
+            </div>
+
+            <div className="flex flex-col">
+              {displayEvents.map(ev => {
+                const going = (ev.rsvps_list || []).length;
+                const d = new Date(ev.date);
+                const dayNum = d.getDate();
+                const month = d.toLocaleDateString('en-IN', { month: 'short' });
+                return (
+                  <Link
+                    key={ev.id}
+                    href="/events"
+                    className="flex items-center gap-4 px-4 py-3 border-b border-white/[0.08] hover:bg-white/[0.02] transition-colors"
+                  >
+                    <div className="flex-shrink-0 w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex flex-col items-center justify-center">
+                      <p className="text-[15px] font-extrabold text-white leading-none">{dayNum}</p>
+                      <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-0.5">{month}</p>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14px] font-bold text-white truncate">{ev.title}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-[12px] text-neutral-400 truncate max-w-[120px]">{ev.circle_name}</p>
+                        <span className="w-1 h-1 bg-neutral-600 rounded-full" />
+                        <span className="flex items-center gap-1 text-[12px] text-neutral-400">
+                          <Users className="w-3.5 h-3.5" /> {going}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex-shrink-0 ml-2">
+                      <button className="bg-transparent border border-white/30 text-white text-[12px] font-bold py-1.5 px-3 rounded-full hover:border-white/60 transition-colors">
+                        RSVP
+                      </button>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+      </div>
+    );
+  } catch (pageErr) {
+    return (
+      <div style={{ background: '#000', color: 'red', padding: '20px', fontFamily: 'monospace' }}>
+        <h1>Fatal HomePage Rendering Error</h1>
+        <pre>{pageErr?.message || String(pageErr)}</pre>
+        <pre>{pageErr?.stack}</pre>
+      </div>
+    );
+  }
 }
