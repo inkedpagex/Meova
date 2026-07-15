@@ -3,7 +3,7 @@ import { getUserAdmin } from '../../lib/getAdminUser';
 import { fetchCirclesAdmin } from '../../lib/firebaseAdminQueries';
 import CirclesList from '../../features/circles/CirclesList';
 
-export const metadata = { title: 'Communities — meetify' };
+export const metadata = { title: 'Communities — meetifyy.in' };
 
 export default async function CirclesPage() {
   const user = await getUserAdmin();

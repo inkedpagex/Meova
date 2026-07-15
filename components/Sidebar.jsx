@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Compass, Users, User, LogIn, Calendar, Wallet, Shield, Plus, MessageSquare, Briefcase, Bell, Crown } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import { getUserAvatarUrl } from '../utils/avatar';
 
 export default function Sidebar({ user }) {
   const pathname = usePathname();
@@ -17,10 +18,7 @@ export default function Sidebar({ user }) {
 
   const NAV = [
     { href: '/',             label: 'Home',          Icon: Home },
-    { href: '/discover',     label: 'Discover',      Icon: Compass },
-    { href: '/events',       label: 'Events',        Icon: Calendar },
-    { href: '/circles',      label: 'Circles',       Icon: Users },
-    { href: '/gigs',         label: 'Campus Gigs',   Icon: Briefcase },
+    { href: '/experiences',  label: 'Experiences',   Icon: Compass },
     { href: '/messages',     label: 'Messages',      Icon: MessageSquare },
     { href: '/notifications',label: 'Notifications', Icon: Bell },
     ...(user ? [{ href: '/wallet',  label: 'Wallet',   Icon: Wallet, badge: `${totalSparks.toLocaleString()} ⚡` }] : []),
@@ -28,16 +26,24 @@ export default function Sidebar({ user }) {
     ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin', Icon: Shield }] : []),
   ];
 
+  const MOBILE_NAV = [
+    { href: '/',             label: 'Home',          Icon: Home },
+    { href: '/experiences',  label: 'Experiences',   Icon: Compass },
+    { href: '/messages',     label: 'Messages',      Icon: MessageSquare },
+    { href: '/wallet',       label: 'Wallet',        Icon: Wallet },
+    { href: '/profile',      label: 'Profile',       Icon: User },
+  ];
+
   return (
     <>
       {/* ── Mobile: frosted top header ────────────── */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[56px] flex items-center justify-between px-5 backdrop-blur-md"
-        style={{ background:'var(--glass-bg)', borderBottom:'1px solid var(--border-subtle)' }}>
+      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[56px] flex items-center justify-between px-5"
+        style={{ background:'var(--bg-surface)', borderBottom:'2px solid var(--border-mid)', boxShadow: '0 2px 20px rgba(0,0,0,0.15)' }}>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-[#6366f1] to-[#c084fc] flex items-center justify-center shadow-md">
-            <span className="text-white font-black text-[14px] leading-none">M</span>
+          <div className="w-7 h-7 rounded-xl overflow-hidden shadow-md flex items-center justify-center">
+            <img src="/logo.png" alt="meetifyy logo" className="w-full h-full object-cover" />
           </div>
-          <span className="font-black text-[17px] tracking-tight uppercase" style={{ color: 'var(--text-primary)' }}>meetuply</span>
+          <span className="font-black text-[17px] tracking-tight uppercase" style={{ color: 'var(--text-primary)' }}>meetifyy</span>
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
@@ -49,7 +55,7 @@ export default function Sidebar({ user }) {
               </Link>
               <Link href="/profile">
                 <div className="w-8 h-8 rounded-full overflow-hidden" style={{ border: '1px solid var(--border-mid)', background: 'var(--bg-overlay)' }}>
-                  <img src={`https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(user.email||'u')}`} alt="me" className="w-full h-full" />
+                <img src={getUserAvatarUrl(user)} alt="me" className="w-full h-full object-cover" />
                 </div>
               </Link>
             </div>
@@ -58,17 +64,17 @@ export default function Sidebar({ user }) {
           )}
         </div>
       </header>
-
+ 
       {/* ── Desktop: left sidebar (Discord style) ─── */}
       <aside className="hidden md:flex flex-col fixed left-0 top-0 h-screen z-40"
         style={{ width:220, background:'var(--bg-elevated)', borderRight:'1px solid var(--border-subtle)', padding:'28px 16px' }}>
-
+ 
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-2 mb-10">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#6366f1] to-[#c084fc] flex items-center justify-center shadow-lg">
-            <span className="text-white font-black text-[16px] leading-none">M</span>
+          <div className="w-8 h-8 rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
+            <img src="/logo.png" alt="meetifyy logo" className="w-full h-full object-cover" />
           </div>
-          <span className="font-black text-[18px] tracking-tight uppercase" style={{ color:'var(--text-primary)' }}>meetuply</span>
+          <span className="font-black text-[18px] tracking-tight uppercase" style={{ color:'var(--text-primary)' }}>meetifyy</span>
         </div>
 
         {/* Nav */}
@@ -105,7 +111,7 @@ export default function Sidebar({ user }) {
               className="flex items-center gap-2.5 p-2.5 rounded-xl transition-all"
               style={{ ':hover': { background: 'var(--bg-hover)' } }}>
               <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0" style={{ border: '1px solid var(--border-mid)' }}>
-                <img src={`https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(user.email||'u')}`} alt="me" />
+                <img src={getUserAvatarUrl(user)} alt="me" className="w-full h-full object-cover" />
               </div>
               <div className="min-w-0">
                 <p className="text-[12px] font-semibold truncate" style={{ color:'var(--text-primary)' }}>{(user.email || 'user').split('@')[0]}</p>
@@ -125,14 +131,20 @@ export default function Sidebar({ user }) {
       </aside>
 
       {/* ── Mobile: frosted bottom tab bar ────────── */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 h-[60px] flex backdrop-blur-md"
-        style={{ background:'var(--glass-bg)', borderTop:'1px solid var(--border-subtle)' }}>
-        {NAV.slice(0, 5).map(({ href, label, Icon }) => {
-          if (href === '/profile' && !user) {
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 flex"
+        style={{ 
+          background: 'var(--bg-surface)', 
+          borderTop: '2px solid var(--border-mid)',
+          height: 'calc(60px + env(safe-area-inset-bottom))',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          boxShadow: '0 -4px 24px rgba(0,0,0,0.15)'
+        }}>
+        {MOBILE_NAV.map(({ href, label, Icon }) => {
+          if ((href === '/profile' || href === '/wallet' || href === '/messages') && !user) {
             return (
-              <Link key="login" href="/login" className="flex-1 flex flex-col items-center justify-center gap-[3px]" style={{ color:'var(--text-muted)' }}>
+              <Link key={href} href="/login" className="flex-1 flex flex-col items-center justify-center gap-[3px]" style={{ color:'var(--text-muted)' }}>
                 <LogIn size={18} strokeWidth={1.75} />
-                <span className="text-[9px] font-semibold">Login</span>
+                <span className="text-[9px] font-semibold">{label === 'Profile' ? 'Login' : label}</span>
               </Link>
             );
           }

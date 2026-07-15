@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Bell, Check, Zap, MessageSquare, UserPlus, Calendar, Music, Sparkles } from 'lucide-react';
 
+import { getCartoonAvatar } from '../../utils/avatar';
+
 const INITIAL_NEW = [
   {
     id: 'n_1',
@@ -9,7 +11,7 @@ const INITIAL_NEW = [
     title: 'Riya Sharma accepted your Coffee Meet request.',
     desc: 'You can now start messaging each other under the messages tab.',
     time: '2m ago',
-    avatar: 'https://api.dicebear.com/8.x/adventurer/svg?seed=Riya',
+    avatar: getCartoonAvatar('Riya'),
     unread: true,
   },
   {
@@ -26,7 +28,7 @@ const INITIAL_NEW = [
     title: 'Ananya invited you to join AI/ML Club.',
     desc: 'Join the circle to get access to custom research posts and events.',
     time: '1h ago',
-    avatar: 'https://api.dicebear.com/8.x/adventurer/svg?seed=Ananya',
+    avatar: getCartoonAvatar('Ananya'),
     unread: true,
   },
   {
@@ -35,7 +37,7 @@ const INITIAL_NEW = [
     title: 'Kabir replied to your post in Startup Circle.',
     desc: '"Let\'s connect, collaborate and open for all students."',
     time: '2h ago',
-    avatar: 'https://api.dicebear.com/8.x/adventurer/svg?seed=Kabir',
+    avatar: getCartoonAvatar('Kabir'),
     unread: true,
   },
 ];

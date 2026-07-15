@@ -3,6 +3,8 @@
 import { cn } from "@/lib/utils";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
+import { getCartoonAvatar } from "@/utils/avatar";
+
 
 export interface Character {
   id?: string | number;
@@ -96,10 +98,9 @@ const getGradientColors = (character: Character) => {
 
 const getCharacterAvatar = (character: Character) => {
   if (character.avatar) return character.avatar;
-  if (character.name === "Campus Guide AI") {
-    return "https://api.dicebear.com/8.x/bottts/svg?seed=campus-bot";
-  }
-  return `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(character.name)}`;
+  // Use deterministic cartoon avatar — clean, consistent, matches site aesthetic
+  const cleanName = character.name.replace(/\s*\(.*\)/, '').trim();
+  return getCartoonAvatar(cleanName);
 };
 
 export function MessageDock({
@@ -283,15 +284,15 @@ export function MessageDock({
       variants={enableAnimations ? containerVariants : {}}
     >
       <motion.div
-        className="rounded-full px-4 py-2 shadow-2xl border border-white/10 backdrop-blur-xl max-w-[calc(100vw-32px)]"
+        className="rounded-full px-4 py-2 shadow-2xl border border-[var(--border-subtle)] backdrop-blur-xl max-w-[calc(100vw-32px)]"
         animate={{
           width: isExpanded ? expandedWidth : collapsedWidth,
           background: isExpanded && selectedCharacter
-            ? "rgba(18, 18, 18, 0.95)"
-            : "rgba(12, 12, 12, 0.8)",
+            ? "var(--bg-elevated)"
+            : "var(--bg-overlay)",
           boxShadow: isExpanded && selectedCharacter
-            ? `0 12px 40px -10px ${selectedCharacter.gradientColors?.split(',')[0] || 'rgba(255,255,255,0.1)'}44`
-            : "0 12px 40px -12px rgba(0,0,0,0.8)",
+            ? `0 12px 40px -10px ${selectedCharacter.gradientColors?.split(',')[0] || 'var(--border-subtle)'}44`
+            : "0 12px 40px -12px rgba(0,0,0,0.15)",
         }}
         transition={enableAnimations ? { 
           type: "spring" as const, 
@@ -321,14 +322,14 @@ export function MessageDock({
                   exit={{ opacity: 0, scale: 0.5, x: -10 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-neutral-400 hover:text-white transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                     <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z" />
                   </svg>
                 </motion.button>
               ) : isExpanded ? (
                 <motion.button
                   key="back"
-                  className="w-10 h-10 flex items-center justify-center cursor-pointer rounded-full hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
+                  className="w-10 h-10 flex items-center justify-center cursor-pointer rounded-full hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   onClick={() => {
                      setExpandedCharacter(null);
                      setMessageInput("");
@@ -343,17 +344,17 @@ export function MessageDock({
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   aria-label="Close"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--text-primary)]">
                     <path d="m15 18-6-6 6-6"/>
                   </svg>
                 </motion.button>
               ) : null}
             </AnimatePresence>
           </motion.div>
-
+ 
           {/* First separator */}
           <motion.div
-            className="w-px h-6 bg-white/10 mr-2 -ml-2"
+            className="w-px h-6 bg-[var(--border-subtle)] mr-2 -ml-2"
             animate={{
               opacity: isExpanded ? 0 : 1,
               scaleY: isExpanded ? 0 : 1,

@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar';
 import { getUserWithRole } from '../lib/getAdminUser';
 import { getOrCreateWallet } from '../lib/wallet';
 export const metadata = {
-  title: 'meetuply',
+  title: 'meetifyy',
   description: 'Your campus life, all in one place.',
 };
 

@@ -8,9 +8,13 @@ import {
 } from 'lucide-react';
 import { CircleAvatar } from '../../components/CircleAvatar';
 import CircleJoinButton from '../../features/circles/CircleJoinButton';
+import BookCoffeeButton from '../../features/users/BookCoffeeButton';
 
-function avatarUrl(seed) {
-  return `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(seed || 'u')}&backgroundColor=transparent`;
+import { getUserAvatarUrl, getCartoonAvatar } from '../../utils/avatar';
+
+function avatarUrl(userOrSeed) {
+  if (userOrSeed && typeof userOrSeed === 'object') return getUserAvatarUrl(userOrSeed);
+  return getCartoonAvatar(userOrSeed);
 }
 
 export default function DiscoverClient({ people, circles, currentUser }) {
@@ -18,11 +22,11 @@ export default function DiscoverClient({ people, circles, currentUser }) {
   const [activeCategory, setActiveCategory] = useState('All'); // 'All' | 'Communities' | 'People'
 
   const categories = [
-    { name: 'All', icon: Compass, color: '#6366f1', bg: 'bg-[#6366f1]/10 border-[#6366f1]/20' },
-    { name: 'Communities', icon: Users, color: '#a855f7', bg: 'bg-purple-500/10 border-purple-500/20' },
-    { name: 'People', icon: UserCheck, color: '#10b981', bg: 'bg-emerald-500/10 border-emerald-500/20' },
-    { name: 'Gigs', icon: Briefcase, color: '#14b8a6', bg: 'bg-teal-500/10 border-teal-500/20', href: '/gigs' },
-    { name: 'Events', icon: Calendar, color: '#f97316', bg: 'bg-orange-500/10 border-orange-500/20', href: '/events' }
+    { name: 'All', emoji: '🧭', color: 'text-indigo-400', activeBg: 'bg-indigo-500/10 border-indigo-500/35' },
+    { name: 'Communities', emoji: '👥', color: 'text-purple-400', activeBg: 'bg-purple-500/10 border-purple-500/35' },
+    { name: 'People', emoji: '🎓', color: 'text-emerald-400', activeBg: 'bg-emerald-500/10 border-emerald-500/35' },
+    { name: 'Gigs', emoji: '💼', color: 'text-teal-400', activeBg: 'bg-teal-500/10 border-teal-500/35', href: '/gigs' },
+    { name: 'Events', emoji: '📅', color: 'text-orange-400', activeBg: 'bg-orange-500/10 border-orange-500/35', href: '/events' }
   ];
 
   const popularSearches = ['Startup', 'Design', 'AI/ML', 'Music', 'Coding'];
@@ -71,10 +75,9 @@ export default function DiscoverClient({ people, circles, currentUser }) {
         </div>
       </div>
 
-      {/* ── CATEGORY BUTTONS (Circular Row) ────────────────────────── */}
-      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-1">
+      {/* ── CATEGORY BUTTONS (Premium Pill Capsules) ────────────────────────── */}
+      <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 pt-1 snap-x">
         {categories.map((cat) => {
-          const Icon = cat.icon;
           const isSelected = activeCategory === cat.name;
 
           if (cat.href) {
@@ -82,15 +85,10 @@ export default function DiscoverClient({ people, circles, currentUser }) {
               <Link
                 key={cat.name}
                 href={cat.href}
-                className="flex flex-col items-center gap-2 flex-shrink-0 group"
-                style={{ width: '76px' }}
+                className="flex items-center gap-2 px-4.5 py-2.5 rounded-2xl border transition-all duration-300 flex-shrink-0 cursor-pointer snap-start bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-neutral-700 text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-bold hover:scale-[1.02] active:scale-95"
               >
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-300 ${cat.bg} group-hover:scale-105 shadow-md`}>
-                  <Icon size={18} style={{ color: cat.color }} />
-                </div>
-                <span className="text-[10px] font-black text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-                  {cat.name}
-                </span>
+                <span className="text-[14px] filter drop-shadow-sm select-none">{cat.emoji}</span>
+                <span className="text-[10px] uppercase tracking-wider">{cat.name}</span>
               </Link>
             );
           }
@@ -99,23 +97,14 @@ export default function DiscoverClient({ people, circles, currentUser }) {
             <button
               key={cat.name}
               onClick={() => setActiveCategory(cat.name)}
-              className="flex flex-col items-center gap-2 flex-shrink-0 group"
-              style={{ width: '76px' }}
+              className={`flex items-center gap-2 px-4.5 py-2.5 rounded-2xl border transition-all duration-300 flex-shrink-0 cursor-pointer snap-start hover:scale-[1.02] active:scale-95 ${
+                isSelected 
+                  ? `${cat.activeBg} ${cat.color} font-black border-current shadow-[0_2px_10px_rgba(0,0,0,0.15)]` 
+                  : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-neutral-700 text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-bold'
+              }`}
             >
-              <div
-                className={`w-14 h-14 rounded-full flex items-center justify-center border transition-all duration-300 shadow-md ${
-                  isSelected 
-                    ? 'bg-[#6366f1] border-[#6366f1] text-white scale-105' 
-                    : `${cat.bg} text-neutral-400 group-hover:scale-105`
-                }`}
-              >
-                <Icon size={18} style={{ color: isSelected ? '#ffffff' : cat.color }} />
-              </div>
-              <span className={`text-[10px] font-black transition-colors ${
-                isSelected ? 'text-[#818cf8]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'
-              }`}>
-                {cat.name}
-              </span>
+              <span className="text-[14px] filter drop-shadow-sm select-none">{cat.emoji}</span>
+              <span className="text-[10px] uppercase tracking-wider">{cat.name}</span>
             </button>
           );
         })}
@@ -179,7 +168,7 @@ export default function DiscoverClient({ people, circles, currentUser }) {
           })}
 
           {/* People Render */}
-          {showPeople && filteredPeople.slice(0, 6).map((u) => {
+          {showPeople && filteredPeople.slice(0, 12).map((u) => {
             const interest = (u.interests || [])[0];
             return (
               <div key={u.id} className="flex items-center justify-between p-4.5 border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)] transition-colors">
@@ -200,9 +189,15 @@ export default function DiscoverClient({ people, circles, currentUser }) {
                   </div>
                 </div>
 
-                <div className="flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <BookCoffeeButton 
+                    targetUserId={u.id}
+                    targetName={u.full_name || 'Student'}
+                    isLoggedIn={!!currentUser}
+                    accentColor="#6366f1"
+                  />
                   <Link href={`/messages?user=${encodeURIComponent(u.full_name || 'Student')}`}>
-                    <button className="bg-[var(--bg-overlay)] text-[var(--text-primary)] hover:text-white border border-[var(--border-subtle)] w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[#6366f1] hover:border-[#6366f1] transition-all">
+                    <button className="bg-[var(--bg-overlay)] text-[var(--text-primary)] hover:text-white border border-[var(--border-subtle)] w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[#6366f1] hover:border-[#6366f1] transition-all cursor-pointer">
                       <MessageCircle size={14} />
                     </button>
                   </Link>

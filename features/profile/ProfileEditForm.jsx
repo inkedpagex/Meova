@@ -3,8 +3,9 @@
 
 import React, { useState } from 'react';
 import { updateProfileAdmin } from './profile.actions';
-import { User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine, CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine, CheckCircle2, AlertCircle, Camera } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { mockDb } from '../../lib/mockDatabase';
 
 const INTEREST_TAGS = [
   'Coding & Tech', 'Music & Bands', 'Dance', 'Photography & Film',
@@ -23,6 +24,7 @@ export default function ProfileEditForm({ initialProfile }) {
   const [fullName, setFullName] = useState(initialProfile?.full_name || '');
   const [year, setYear] = useState(initialProfile?.year || '1st');
   const [branch, setBranch] = useState(initialProfile?.branch || '');
+  const [instagram, setInstagram] = useState(initialProfile?.instagram || '');
   const [bio, setBio] = useState(initialProfile?.bio || '');
   const [selectedInterests, setSelectedInterests] = useState(initialProfile?.interests || []);
 
@@ -55,13 +57,25 @@ export default function ProfileEditForm({ initialProfile }) {
         year,
         branch,
         bio,
-        interests: selectedInterests
+        interests: selectedInterests,
+        instagram: instagram
       });
       
       if (!res.success) {
         throw new Error(res.error || 'Failed to update profile.');
       }
       
+      if (typeof window !== 'undefined') {
+        mockDb.updateUser(initialProfile.id, {
+          full_name: fullName,
+          year,
+          branch,
+          bio,
+          interests: selectedInterests,
+          instagram: instagram
+        });
+      }
+
       setSuccessMsg('Profile updated successfully!');
       router.refresh();
       
@@ -169,6 +183,27 @@ export default function ProfileEditForm({ initialProfile }) {
               rows={1}
             />
           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Instagram Handle */}
+        <div>
+          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Instagram Username / Link <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 'normal' }}>(Optional)</span></label>
+          <div className="relative group">
+            <span className={iconWrapperClass} style={{ color: 'var(--text-muted)' }}><Camera size={16} className="group-focus-within:text-white transition-colors" /></span>
+            <input 
+              type="text" 
+              value={instagram} 
+              onChange={(e) => setInstagram(e.target.value)} 
+              placeholder="e.g. chir_ag897" 
+              className={inputClass} 
+              style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
+            />
+          </div>
+          <p className="text-[9px] text-[var(--text-muted)] mt-1.5 font-bold uppercase tracking-wider">
+            Used to show your Instagram profile embed on your public profile page.
+          </p>
         </div>
       </div>
 

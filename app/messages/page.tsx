@@ -95,12 +95,12 @@ const DEFAULT_REAL_RESPONSES = [
   "Awesome! Let's team up for some event soon."
 ];
 
+import { getCartoonAvatar } from '@/utils/avatar';
+
 const getCharacterAvatar = (character: Character) => {
   if (character.avatar) return character.avatar;
-  if (character.name === "Campus Guide AI") {
-    return "https://api.dicebear.com/8.x/bottts/svg?seed=campus-bot";
-  }
-  return `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(character.name)}`;
+  const cleanName = character.name.replace(/\s*\(.*\)/, '').trim();
+  return getCartoonAvatar(cleanName);
 };
 
 import { useSearchParams } from 'next/navigation';

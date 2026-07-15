@@ -7,12 +7,15 @@ import {
   ArrowLeft, GraduationCap, Users, Star,
   Code, Music, Dumbbell, Camera, Rocket, Palette, Gamepad2,
   BookOpen, Coffee, MessageCircle, Zap, Calendar, MapPin,
-  CheckCircle
+  CheckCircle, Layers
 } from 'lucide-react';
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
 
-function avatarUrl(seed) {
-  return `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(seed || 'u')}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+import { getUserAvatarUrl, getCartoonAvatar } from '../../../utils/avatar';
+
+function avatarUrl(userOrSeed) {
+  if (userOrSeed && typeof userOrSeed === 'object') return getUserAvatarUrl(userOrSeed);
+  return getCartoonAvatar(userOrSeed);
 }
 
 const INTEREST_META = {
@@ -204,6 +207,43 @@ export default async function UserProfilePage({ params }) {
           </div>
         </div>
       </div>
+
+      {/* ── INSTAGRAM PROFILE EMBED ────────────────── */}
+      {profile.instagram && (
+        <div className="rounded-3xl p-5 mb-6 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-md space-y-4">
+          <h3 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)] flex items-center gap-2">
+            <span className="text-[#e1306c]">📸</span> Host Instagram Vibe
+          </h3>
+          <div className="relative rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface)] h-[480px]">
+            <iframe
+              src={
+                profile.instagram.startsWith('http') 
+                  ? `${profile.instagram.replace(/\/$/, '')}/embed/` 
+                  : `https://www.instagram.com/${profile.instagram.replace(/^@/, '')}/embed/`
+              }
+              className="w-full h-full border-none"
+              allowFullScreen
+              scrolling="no"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            />
+            {/* Fallback open button in case of browser/CSP restrictions */}
+            <div className="absolute bottom-4 right-4 z-10">
+              <a
+                href={
+                  profile.instagram.startsWith('http') 
+                    ? profile.instagram 
+                    : `https://www.instagram.com/${profile.instagram.replace(/^@/, '')}/`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#e1306c] hover:bg-[#c13584] text-white text-[9px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 inline-flex items-center gap-1.5"
+              >
+                Open Instagram ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── COMMUNITIES ───────────────────────── */}
       {joinedCircles.length > 0 && (

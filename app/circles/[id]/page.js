@@ -15,7 +15,7 @@ import { CircleAvatar } from '../../../components/CircleAvatar';
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const circle = await fetchCircleDetailAdmin(id).catch(() => null);
-  return { title: circle ? `${circle.name} — meetify` : 'Circle — meetify' };
+  return { title: circle ? `${circle.name} — meetifyy.in` : 'Circle — meetifyy.in' };
 }
 
 export default async function CircleDetailPage({ params }) {

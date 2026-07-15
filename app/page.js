@@ -1,16 +1,20 @@
 import { getUserWithRole } from '../lib/getAdminUser';
 import { getOrCreateWallet } from '../lib/wallet';
+import { fetchUsersAdmin } from '../lib/firebaseAdminQueries';
 import Link from 'next/link';
 import { 
   Zap, Bell, Rocket, Calendar, MapPin, ArrowUpRight 
 } from 'lucide-react';
 import FeedClient from './FeedClient';
+import { getCartoonAvatar } from '../utils/avatar';
 
-export const metadata = { title: 'meetuply — Home' };
+export const metadata = { title: 'meetifyy — Home' };
 
 export default async function HomePage() {
   try {
     const currentUser = await getUserWithRole();
+    const users = await fetchUsersAdmin(50);
+    const people = currentUser ? users.filter(u => u.id !== currentUser.id) : users;
 
     let totalSparks = 0;
     if (currentUser) {
@@ -46,34 +50,39 @@ export default async function HomePage() {
         </div>
 
         {/* ── FEATURED EVENT BANNER ────────────────────────── */}
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#6366f1] via-[#818cf8] to-[#4f46e5] text-white p-6 md:p-8 shadow-[0_20px_50px_rgba(99,102,241,0.3)]">
-          {/* Floating graphic overlay */}
-          <div className="absolute right-[-20px] bottom-[-20px] w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute top-4 right-6 text-white/20 select-none pointer-events-none">
-            <Rocket size={100} className="transform rotate-12 opacity-40" />
+        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#12111d] to-[#1e1c31] border border-[#6366f1]/25 p-6 md:p-8 shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
+          {/* Top accent glow bar */}
+          <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#6366f1] via-[#a855f7] to-[#ec4899]" />
+          
+          {/* Floating graphic overlay & glow */}
+          <div className="absolute top-[-40px] right-[-40px] w-60 h-60 bg-[#6366f1]/10 rounded-full blur-[80px] pointer-events-none" />
+          <div className="absolute bottom-[-30px] left-[-30px] w-48 h-48 bg-[#ec4899]/10 rounded-full blur-[65px] pointer-events-none" />
+          
+          <div className="absolute top-6 right-6 text-white/5 select-none pointer-events-none">
+            <Rocket size={90} className="transform rotate-12 opacity-30" />
           </div>
 
-          <div className="relative z-10 space-y-4 max-w-[85%]">
-            <span className="inline-block bg-white/20 backdrop-blur-md text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-white">
+          <div className="relative z-10 space-y-4 max-w-[90%]">
+            <span className="inline-block bg-gradient-to-r from-[#ec4899] to-[#818cf8] text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm">
               Featured Event
             </span>
             
-            <div className="space-y-1">
-              <h2 className="text-xl md:text-2xl font-black tracking-tight leading-tight">
+            <div className="space-y-1.5">
+              <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-100 to-neutral-300 tracking-tight leading-tight">
                 Startup Networking Meetup
               </h2>
-              <p className="text-xs text-white/80 font-medium leading-relaxed">
+              <p className="text-[11px] text-[var(--text-secondary)] font-semibold leading-relaxed">
                 Connect with student founders, pitch your ideas, and team up for campus hackathons.
               </p>
             </div>
 
-            <div className="flex flex-col gap-1 text-[11px] text-white/90 font-bold uppercase tracking-wider">
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5 py-2 px-3 bg-white/[0.02] border border-white/[0.05] rounded-xl text-[9.5px] text-[var(--text-secondary)] font-black uppercase tracking-wider w-fit">
               <div className="flex items-center gap-1.5">
-                <Calendar size={12} />
-                <span>24 May • 4:00 PM</span>
+                <Calendar size={11} className="text-[#a855f7]" />
+                <span>24 May · 4:00 PM</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <MapPin size={12} />
+                <MapPin size={11} className="text-[#ec4899]" />
                 <span>Auditorium, Block 1</span>
               </div>
             </div>
@@ -81,20 +90,20 @@ export default async function HomePage() {
             <div className="pt-2 flex items-center justify-between">
               {/* Overlapping Attending Avatars */}
               <div className="flex -space-x-2.5 overflow-hidden">
-                {['Aarav', 'Neha', 'Kabir', 'Riya'].map((name, i) => (
+                {['Aarav', 'Neha', 'Kabir', 'Riya'].map((name) => (
                   <img
                     key={name}
-                    className="inline-block h-6.5 w-6.5 rounded-full ring-2 ring-[#6366f1] bg-neutral-900"
-                    src={`https://api.dicebear.com/8.x/adventurer/svg?seed=${name}`}
+                    className="inline-block h-6.5 w-6.5 rounded-full ring-2 ring-neutral-900 object-cover"
+                    src={getCartoonAvatar(name)}
                     alt="Attendee"
                   />
                 ))}
-                <div className="flex items-center justify-center h-6.5 w-6.5 rounded-full ring-2 ring-[#6366f1] bg-[#4f46e5] text-[9px] font-black">
+                <div className="flex items-center justify-center h-6.5 w-6.5 rounded-full ring-2 ring-neutral-900 bg-[#4f46e5] text-[9px] font-black text-white">
                   +18
                 </div>
               </div>
 
-              <Link href="/events" className="inline-flex items-center gap-1.5 bg-white text-[#4f46e5] text-[11px] font-black px-4.5 py-2.5 rounded-full hover:scale-105 transition-all shadow-md">
+              <Link href="/events" className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#6366f1] to-[#ec4899] hover:opacity-90 text-white text-[10px] font-black uppercase tracking-widest px-5 py-2.5 rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] hover:scale-105 active:scale-95 cursor-pointer">
                 <span>Join Now</span>
                 <ArrowUpRight size={13} />
               </Link>
@@ -103,7 +112,7 @@ export default async function HomePage() {
         </div>
 
         {/* ── DYNAMIC INFINITE FEED CLIENT ─────────────────── */}
-        <FeedClient currentUser={currentUser} initialSparks={totalSparks} />
+        <FeedClient currentUser={currentUser} initialSparks={totalSparks} people={people} />
 
       </div>
     );
