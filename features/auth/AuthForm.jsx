@@ -68,6 +68,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
   const [year, setYear] = useState('1st');
   const [branch, setBranch] = useState('');
   const [interests, setInterests] = useState([]);
+  const [photoUrl, setPhotoUrl] = useState('');
 
   const toggleInterest = (tag) => {
     setClientError(null);
@@ -94,8 +95,9 @@ export default function AuthForm({ defaultMode = 'login' }) {
     setClientError(null);
     if (isSignUp) {
       if (!fullName || !branch) return setClientError('Name and branch required.');
+      if (!photoUrl) return setClientError('Profile Image URL is compulsory.');
       if (interests.length !== 3) return setClientError('Select exactly 3 interests.');
-      const res = await signUp({ email, password, fullName, year, branch, interests });
+      const res = await signUp({ email, password, fullName, year, branch, interests, photoUrl });
       if (res.success) { router.push(nextPath); router.refresh(); }
     } else {
       if (!email || !password) return setClientError('Email and password required.');
@@ -239,6 +241,18 @@ export default function AuthForm({ defaultMode = 'login' }) {
                   <input type="text" value={branch} onChange={e => setBranch(e.target.value)}
                     placeholder="e.g. CSE" className={inputCls} required />
                 </div>
+              </div>
+
+              <div>
+                <label className={labelCls}>Profile Image URL</label>
+                <input 
+                  type="text" 
+                  value={photoUrl} 
+                  onChange={e => setPhotoUrl(e.target.value)}
+                  placeholder="Paste a direct image link (Compulsory)" 
+                  className={inputCls} 
+                  required 
+                />
               </div>
 
               <div>

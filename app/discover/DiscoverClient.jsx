@@ -9,6 +9,7 @@ import {
 import { CircleAvatar } from '../../components/CircleAvatar';
 import CircleJoinButton from '../../features/circles/CircleJoinButton';
 import BookCoffeeButton from '../../features/users/BookCoffeeButton';
+import { mockDb } from '../../lib/mockDatabase';
 
 import { getUserAvatarUrl, getCartoonAvatar } from '../../utils/avatar';
 
@@ -17,9 +18,27 @@ function avatarUrl(userOrSeed) {
   return getCartoonAvatar(userOrSeed);
 }
 
-export default function DiscoverClient({ people, circles, currentUser }) {
+export default function DiscoverClient({ people: initialPeople, circles: initialCircles, currentUser }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All'); // 'All' | 'Communities' | 'People'
+  const [people, setPeople] = useState(initialPeople || []);
+  const [circles, setCircles] = useState(initialCircles || []);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const allUsers = mockDb.getUsers() || [];
+      const filteredUsers = currentUser 
+        ? allUsers.filter(u => u.id !== currentUser.id && u.uid !== currentUser.id) 
+        : allUsers;
+      setPeople(filteredUsers);
+      
+      // If circles can be retrieved from mockDb/localStorage:
+      const allCircles = mockDb.getCircles ? mockDb.getCircles() : [];
+      if (allCircles && allCircles.length > 0) {
+        setCircles(allCircles);
+      }
+    }
+  }, [currentUser]);
 
   const categories = [
     { name: 'All', emoji: '🧭', color: 'text-indigo-400', activeBg: 'bg-indigo-500/10 border-indigo-500/35' },
@@ -35,9 +54,11 @@ export default function DiscoverClient({ people, circles, currentUser }) {
 
   // Filters
   const filteredPeople = people.filter(u => 
-    (u.full_name || '').toLowerCase().includes(query) || 
-    (u.branch || '').toLowerCase().includes(query) ||
-    (u.interests || []).some(t => t.toLowerCase().includes(query))
+    u.isIdOn !== false &&
+    u.id !== currentUser?.id &&
+    ((u.full_name || '').toLowerCase().includes(query) || 
+     (u.branch || '').toLowerCase().includes(query) ||
+     (u.interests || []).some(t => t.toLowerCase().includes(query)))
   );
 
   const filteredCircles = circles.filter(c => 
@@ -174,7 +195,7 @@ export default function DiscoverClient({ people, circles, currentUser }) {
               <div key={u.id} className="flex items-center justify-between p-4.5 border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-hover)] transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface)] flex-shrink-0">
-                    <img src={avatarUrl(u.full_name || u.id)} alt={u.full_name} className="w-full h-full object-cover" />
+                    <img src={avatarUrl(u)} alt={u.full_name} className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <Link href={`/users/${u.id}`}>

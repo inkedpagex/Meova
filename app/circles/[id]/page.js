@@ -48,7 +48,7 @@ export default async function CircleDetailPage({ params }) {
       {/* Circle Header */}
       <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[2rem] p-8 md:p-12 mb-10 shadow-lg relative overflow-hidden">
         {/* Decorative backdrop glow */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#6366f1]/5 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--banner-glow-1)]/5 rounded-full blur-[80px] pointer-events-none" />
         
         <div className="flex flex-col items-center text-center relative z-10">
           <div className="w-24 h-24 rounded-3xl overflow-hidden border border-[var(--border-subtle)] mb-6 shadow-md">
@@ -102,7 +102,7 @@ export default async function CircleDetailPage({ params }) {
             <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-3xl p-5 grid grid-cols-1 gap-3 shadow-md">
               {members.map((member) => (
                 <div key={member.id} className="flex items-center gap-3 bg-[var(--bg-base)] p-3 rounded-2xl border border-[var(--border-subtle)] hover:border-[var(--border-mid)] transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#6366f1] to-[#c084fc] text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-md">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[var(--ring-gradient-from)] to-[var(--ring-gradient-to)] text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-md">
                     {getInitials(member.full_name)}
                   </div>
                   <div className="min-w-0">
@@ -137,11 +137,11 @@ export default async function CircleDetailPage({ params }) {
                 return (
                   <div key={event.id} className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-3xl p-5 hover:border-[var(--accent)]/30 transition-colors group shadow-md">
                     <div className="mb-4">
-                      <h3 className="text-base font-black text-[var(--text-primary)] mb-2 leading-snug group-hover:text-[#818cf8] transition-colors">{event.title}</h3>
+                      <h3 className="text-base font-black text-[var(--text-primary)] mb-2 leading-snug group-hover:text-[var(--accent)] transition-colors">{event.title}</h3>
                       <p className="text-xs text-[var(--text-secondary)] mb-4 line-clamp-2 leading-relaxed">{event.description}</p>
                       <div className="space-y-1.5 text-[10px] text-[var(--text-muted)] font-bold border-l-2 border-[var(--border-mid)] pl-3 uppercase tracking-wider">
-                        <div className="flex items-center gap-2"><Calendar size={11} className="text-[#818cf8]" /> {formatEventDate(event.date)}</div>
-                        {event.location && <div className="flex items-center gap-2"><MapPin size={11} className="text-[#818cf8]" /> {event.location}</div>}
+                        <div className="flex items-center gap-2"><Calendar size={11} className="text-[var(--accent)]" /> {formatEventDate(event.date)}</div>
+                        {event.location && <div className="flex items-center gap-2"><MapPin size={11} className="text-[var(--accent)]" /> {event.location}</div>}
                       </div>
                     </div>
                     <div className="flex items-center justify-between border-t border-[var(--border-subtle)] pt-4">

@@ -23,12 +23,11 @@ export function CircleAvatar({ name = '', size = 40, radius = '50%', className =
   }
 
   const gradients = [
-    'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', // Indigo to Purple
-    'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', // Blue to Violet
-    'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)', // Pink to Rose
-    'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Emerald gradient
-    'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', // Amber gradient
-    'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', // Cyan gradient
+    'linear-gradient(135deg, var(--accent-gradient-from) 0%, var(--accent-gradient-to) 100%)',
+    'linear-gradient(135deg, var(--ring-gradient-from) 0%, var(--ring-gradient-to) 100%)',
+    'linear-gradient(135deg, var(--text-muted) 0%, var(--bg-overlay) 100%)',
+    'linear-gradient(135deg, var(--bg-surface) 0%, var(--border-strong) 100%)',
+    'linear-gradient(135deg, var(--accent) 0%, var(--bg-overlay) 100%)',
   ];
 
   const gradient = gradients[Math.abs(hash) % gradients.length];

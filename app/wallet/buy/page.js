@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Zap, CheckCircle, Copy, ArrowLeft, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { SlideButton } from '@/components/ui/slide-button';
+import { mockDb } from '@/lib/mockDatabase';
 
 const PACKS = [
   { key: 'starter', sparks: 100,  inr: 49,  label: 'Starter',  popular: false, bonus: 0 },
@@ -20,6 +21,14 @@ export default function BuyPage() {
   const [refCode, setRefCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(r => r.json())
+      .then(d => setUserId(d?.user?.id || d?.user?.uid || null))
+      .catch(() => {});
+  }, []);
 
   const qrData = selected ? `upi://pay?pa=${ADMIN_UPI}&pn=Meetuply&am=${selected.inr.toFixed(2)}&tn=${refCode}&cu=INR` : '';
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
@@ -28,33 +37,48 @@ export default function BuyPage() {
     if (!selected) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/wallet/request-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packKey: selected.key }),
-      });
-      // Safety check for empty or non-JSON responses (quota crashed)
-      let data = {};
+      // Generate reference code server-side (or fallback client-side)
+      let code = '';
       try {
-        data = await res.json();
-      } catch (jsonErr) {
-        console.warn("JSON parsing failed, simulating fallback code:", jsonErr);
-        data = { ok: true, reference_code: Math.random().toString(36).substring(2, 7).toUpperCase() };
+        const res = await fetch('/api/wallet/request-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packKey: selected.key }),
+        });
+        const data = await res.json().catch(() => ({}));
+        code = data.reference_code || '';
+      } catch (e) {}
+
+      // Fallback: generate code client-side
+      if (!code) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        code = Array.from({ length: 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
       }
 
-      if (data.ok) {
-        setRefCode(data.reference_code);
-        setStep('pay');
-      } else {
-        alert(data.error || 'Something went wrong');
-      }
-    } catch (err) {
-      console.warn("API request failed, initiating client fallback:", err);
-      setRefCode(Math.random().toString(36).substring(2, 7).toUpperCase());
+      setRefCode(code);
       setStep('pay');
+    } catch (err) {
+      console.warn('Proceed failed:', err);
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleSlideSuccess() {
+    // Save payment request to mockDb so admin can see and approve it
+    if (selected && userId) {
+      mockDb.createPaymentRequest({
+        userId,
+        pack_key:       selected.key,
+        pack_name:      selected.label,
+        sparks:         selected.sparks + (selected.bonus || 0),
+        amount_inr:     selected.inr,
+        reference_code: refCode,
+      });
+      // Dispatch event so wallet page can refresh
+      window.dispatchEvent(new Event('wallet-updated'));
+    }
+    setStep('done');
   }
 
   function copyCode() {
@@ -216,7 +240,7 @@ export default function BuyPage() {
           {/* Slider confirmation */}
           <div className="space-y-4">
             <SlideButton 
-              onSuccess={() => setStep('done')}
+              onSuccess={handleSlideSuccess}
               label="Slide to Confirm Payment"
             />
             <button 

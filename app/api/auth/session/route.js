@@ -2,9 +2,23 @@
 // Called from AuthForm after successful Firebase Auth sign-in.
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { getUserWithRole } from '../../../../lib/getAdminUser';
 
 const SESSION_COOKIE_NAME = '__meetify_session';
 const SESSION_DURATION_MS = 60 * 60 * 24 * 5 * 1000; // 5 days
+
+export async function GET() {
+  try {
+    const user = await getUserWithRole();
+    if (!user) {
+      return NextResponse.json({ user: null });
+    }
+    return NextResponse.json({ user });
+  } catch (err) {
+    console.error('Session retrieve failed:', err);
+    return NextResponse.json({ error: 'Session error' }, { status: 500 });
+  }
+}
 
 export async function POST(request) {
   const { idToken } = await request.json();
@@ -34,3 +48,4 @@ export async function DELETE() {
   cookieStore.delete(SESSION_COOKIE_NAME);
   return NextResponse.json({ success: true });
 }
+

@@ -30,9 +30,10 @@ export default function AdminClient() {
   const loadData = () => {
     const users = mockDb.getUsers();
     const verifs = mockDb.getHostVerifications();
-    const wds = mockDb.getWithdrawals();
+    const wds = mockDb.getAllWithdrawals();
     const reps = mockDb.getReports();
     const bks = mockDb.getBookings();
+    const prs = mockDb.getPaymentRequests();
 
     // calculate active escrow
     const activeEscrowVal = bks
@@ -42,7 +43,7 @@ export default function AdminClient() {
     setStats({
       totalUsers: users.length,
       activeEscrow: activeEscrowVal,
-      pendingPayments: verifs.filter(v => v.status === 'pending').length,
+      pendingPayments: prs.filter(p => p.status === 'pending').length,
       pendingWithdrawals: wds.filter(w => w.status === 'pending').length
     });
 
@@ -59,23 +60,12 @@ export default function AdminClient() {
   };
 
   const handleProcessWithdrawal = (wdId, approve = true) => {
-    const allWds = mockDb.getWithdrawals();
-    const idx = allWds.findIndex(w => w.id === wdId);
-    if (idx !== -1) {
-      allWds[idx].status = approve ? 'paid' : 'rejected';
-      localStorage.setItem('meetify_db_withdrawals', JSON.stringify(allWds));
-      
-      // If rejected, refund the creator earnings back to host
-      if (!approve) {
-        const wd = allWds[idx];
-        const wallet = mockDb.getWallet(wd.userId);
-        wallet.creator += wd.amount;
-        wallet.lifetime_withdrawn -= wd.amount;
-        mockDb.saveWallet(wd.userId, wallet);
-      }
-
+    const ok = mockDb.processWithdrawal(wdId, approve);
+    if (ok) {
       loadData();
-      alert(`Withdrawal request ${approve ? 'processed & paid' : 'declined and refunded'}.`);
+      alert(`Withdrawal request ${approve ? 'processed & paid — user notified' : 'declined and sparks refunded'}.`);
+    } else {
+      alert('Failed to process. Withdrawal may already be handled.');
     }
   };
 

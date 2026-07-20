@@ -16,6 +16,12 @@ export interface Character {
   gradientTo?: string;
   gradientColors?: string;
   avatar?: string; // Optional image URL
+  isGroup?: boolean;
+  category?: string;
+  isOfficial?: boolean;
+  price?: number;
+  isPaid?: boolean;
+  [key: string]: any;
 }
 
 export interface MessageDockProps {
@@ -305,9 +311,9 @@ export function MessageDock({
           }
         } : { duration: 0 }}
       >
-        <div ref={contentRef} className="flex items-center gap-2 relative">
+        <div ref={contentRef} className="flex items-center gap-2 relative w-full">
           {/* Sparkle or Back button */}
-          <motion.div className="flex items-center justify-center z-20">
+          <motion.div className="flex items-center justify-center z-20 flex-shrink-0">
             <AnimatePresence mode="wait">
               {!isExpanded && showSparkleButton ? (
                 <motion.button
@@ -353,55 +359,34 @@ export function MessageDock({
           </motion.div>
  
           {/* First separator */}
-          <motion.div
-            className="w-px h-6 bg-[var(--border-subtle)] mr-2 -ml-2"
-            animate={{
-              opacity: isExpanded ? 0 : 1,
-              scaleY: isExpanded ? 0 : 1,
-            }}
-            transition={{
-              type: "spring" as const,
-              stiffness: 300,
-              damping: 30,
-              delay: isExpanded ? 0 : 0.3,
-            }}
-          />
+          {!isExpanded && (
+            <div className="w-px h-6 bg-[var(--border-subtle)] mr-2 -ml-2 flex-shrink-0" />
+          )}
 
           {/* Character buttons */}
           {characters.slice(1, -1).map((character, index) => {
             const actualIndex = index + 1;
             const isSelected = expandedCharacter === actualIndex;
 
+            if (isExpanded && !isSelected) return null;
+
             return (
               <motion.div
                 key={character.name}
-                className={cn(
-                  "relative",
-                  isSelected && isExpanded && "absolute left-12 top-1 z-20"
-                )}
+                className="relative flex-shrink-0"
                 style={{
-                  // When selected and expanded, don't take up space in flex layout
-                  width: isSelected && isExpanded ? 0 : "auto",
-                  minWidth: isSelected && isExpanded ? 0 : "auto",
                   overflow: "visible",
                 }}
                 animate={{
-                  opacity: isExpanded && !isSelected ? 0 : 1,
-                  y: isExpanded && !isSelected ? 60 : 0,
-                  scale: isExpanded && !isSelected ? 0.8 : 1,
-                  // Only use translateX for non-selected or non-expanded
-                  x: isSelected && isExpanded ? 0 : 0,
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  x: 0,
                 }}
                 transition={{
                   type: "spring" as const,
                   stiffness: 400,
                   damping: 30,
-                  delay:
-                    isExpanded && !isSelected
-                      ? index * 0.05
-                      : isExpanded
-                      ? 0.1
-                      : 0, // Remove delay when coming back - immediate return
                 }}
               >
                 <motion.button
@@ -429,13 +414,8 @@ export function MessageDock({
                     <motion.div
                       className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"
                       initial={{ scale: 0 }}
-                      animate={{ scale: isExpanded && !isSelected ? 0 : 1 }}
+                      animate={{ scale: 1 }}
                       transition={{
-                        delay: isExpanded
-                          ? isSelected
-                            ? 0.3
-                            : 0
-                          : (index + 1) * 0.1 + 0.5,
                         type: "spring",
                         stiffness: 500,
                         damping: 30,
@@ -465,9 +445,7 @@ export function MessageDock({
                   }
                 }}
                 placeholder={placeholder(selectedCharacter?.name || "")}
-                className={cn(
-                  "w-[calc(100%-144px)] absolute left-24 right-0 bg-transparent border-none outline-none text-sm font-medium z-50 text-white placeholder-neutral-500"
-                )}
+                className="flex-grow mx-2 bg-transparent border-none outline-none text-sm font-medium text-white placeholder-neutral-500 min-w-0"
                 autoFocus={autoFocus}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ 
@@ -492,27 +470,14 @@ export function MessageDock({
           </AnimatePresence>
 
           {/* Second separator */}
-          <motion.div
-            className="w-px h-6 bg-white/10 ml-2 -mr-2"
-            animate={{
-              opacity: isExpanded ? 0 : 1,
-              scaleY: isExpanded ? 0 : 1,
-            }}
-            transition={{
-              type: "spring" as const,
-              stiffness: 300,
-              damping: 30,
-              delay: isExpanded ? 0 : 0, // Remove delay when coming back
-            }}
-          />
+          {!isExpanded && (
+            <div className="w-px h-6 bg-white/10 ml-2 -mr-2 flex-shrink-0" />
+          )}
 
           {/* Menu button / Send button - transforms in place */}
           {showMenuButton && (
             <motion.div
-              className={cn(
-                "flex items-center justify-center z-20",
-                isExpanded && "absolute right-0"
-              )}
+              className="flex items-center justify-center z-20 flex-shrink-0"
               transition={{ type: "spring" as const, stiffness: 400, damping: 30 }}
             >
               <AnimatePresence mode="wait">
@@ -595,8 +560,8 @@ export function MessageDock({
                   </svg>
                 </motion.button>
               )}
-            </AnimatePresence>
-          </motion.div>
+              </AnimatePresence>
+            </motion.div>
           )}
         </div>
       </motion.div>

@@ -5,11 +5,11 @@ import { useEffect, useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
 
   // On mount, read saved preference
   useEffect(() => {
-    const saved = localStorage.getItem('meetify-theme') || 'dark';
+    const saved = localStorage.getItem('meetify-theme') || 'light';
     setTheme(saved);
     document.documentElement.setAttribute('data-theme', saved);
   }, []);

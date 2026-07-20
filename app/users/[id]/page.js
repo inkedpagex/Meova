@@ -103,7 +103,9 @@ export default async function UserProfilePage({ params }) {
               />
             </div>
             {/* Online indicator */}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[var(--bg-elevated)]" />
+            <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[var(--bg-elevated)] ${
+              profile.isIdOn !== false ? 'bg-emerald-500' : 'bg-rose-500'
+            }`} />
           </div>
 
           {/* Core info */}
@@ -152,12 +154,18 @@ export default async function UserProfilePage({ params }) {
             {/* CTA buttons */}
             {!isSelf && (
               <div className="flex gap-2.5 flex-wrap">
-                <BookCoffeeButton
-                  targetUserId={params.id}
-                  targetName={profile.full_name}
-                  isLoggedIn={isLoggedIn}
-                  accentColor={primaryMeta.color}
-                />
+                {profile.isIdOn !== false ? (
+                  <BookCoffeeButton
+                    targetUserId={params.id}
+                    targetName={profile.full_name}
+                    isLoggedIn={isLoggedIn}
+                    accentColor={primaryMeta.color}
+                  />
+                ) : (
+                  <div className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-black text-rose-400 bg-rose-500/10 border border-rose-500/20 uppercase tracking-wider select-none">
+                    ID Offline
+                  </div>
+                )}
                 <Link
                   href={`/messages?user=${encodeURIComponent(profile.full_name || 'Student')}`}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--bg-overlay)] border border-[var(--border-subtle)] active:scale-95 shadow-sm"
@@ -177,36 +185,38 @@ export default async function UserProfilePage({ params }) {
       </div>
 
       {/* ── COFFEE SESSION INFO ───────────────── */}
-      <div
-        className="rounded-2xl p-5 mb-6 flex items-start gap-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-md"
-      >
-        <div className="p-2.5 rounded-xl flex-shrink-0" style={{ background: `${primaryMeta.color}12`, border: `1px solid ${primaryMeta.color}20` }}>
-          <Layers className="w-5 h-5" style={{ color: primaryMeta.color }} />
-        </div>
-        <div>
-          <h3 className="text-sm font-black text-[var(--text-primary)] mb-1 flex items-center gap-2">
-            Reserve Workspace Cabin
-            <span className="flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-500">
-              <Zap className="w-2.5 h-2.5 fill-current" /> 50 Sparks
-            </span>
-          </h3>
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-semibold">
-            Spend 50 Sparks to reserve an active workspace cabin slot hosted by {profile.full_name?.split(' ')[0] || 'this student'}. 
-            Great for co-working, quiet study, or getting peer mentorship and code/design reviews.
-          </p>
-          <div className="flex items-center gap-4 mt-3">
-            {[
-              { Icon: Calendar, text: 'Flexible slots' },
-              { Icon: MapPin, text: 'Study Cabin' },
-              { Icon: CheckCircle, text: 'Auto approval' },
-            ].map(({ Icon, text }) => (
-              <span key={text} className="flex items-center gap-1 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                <Icon className="w-3 h-3 text-[var(--accent)]" /> {text}
+      {profile.isIdOn !== false && (
+        <div
+          className="rounded-2xl p-5 mb-6 flex items-start gap-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-md"
+        >
+          <div className="p-2.5 rounded-xl flex-shrink-0" style={{ background: `${primaryMeta.color}12`, border: `1px solid ${primaryMeta.color}20` }}>
+            <Layers className="w-5 h-5" style={{ color: primaryMeta.color }} />
+          </div>
+          <div>
+            <h3 className="text-sm font-black text-[var(--text-primary)] mb-1 flex items-center gap-2">
+              Reserve Workspace Cabin
+              <span className="flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-500">
+                <Zap className="w-2.5 h-2.5 fill-current" /> 50 Sparks
               </span>
-            ))}
+            </h3>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-semibold">
+              Spend 50 Sparks to reserve an active workspace cabin slot hosted by {profile.full_name?.split(' ')[0] || 'this student'}. 
+              Great for co-working, quiet study, or getting peer mentorship and code/design reviews.
+            </p>
+            <div className="flex items-center gap-4 mt-3">
+              {[
+                { Icon: Calendar, text: 'Flexible slots' },
+                { Icon: MapPin, text: 'Study Cabin' },
+                { Icon: CheckCircle, text: 'Auto approval' },
+              ].map(({ Icon, text }) => (
+                <span key={text} className="flex items-center gap-1 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                  <Icon className="w-3 h-3 text-[var(--accent)]" /> {text}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── INSTAGRAM PROFILE EMBED ────────────────── */}
       {profile.instagram && (

@@ -19,8 +19,8 @@ function EventCard({ event, userId }) {
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             loading="lazy" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#6366f1]/20 to-[var(--bg-elevated)] group-hover:scale-110 transition-transform duration-700">
-            <Calendar size={36} className="text-[#818cf8]/30" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--accent-dim)] to-[var(--bg-elevated)] group-hover:scale-110 transition-transform duration-700">
+            <Calendar size={36} className="text-[var(--accent)]/30" />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
@@ -43,7 +43,7 @@ function EventCard({ event, userId }) {
 
       {/* Body */}
       <div className="flex flex-col flex-1 px-1">
-        <h3 className="text-[15px] font-black text-[var(--text-primary)] leading-snug mb-3 group-hover:text-[#818cf8] transition-colors line-clamp-2">
+        <h3 className="text-[15px] font-black text-[var(--text-primary)] leading-snug mb-3 group-hover:text-[var(--accent)] transition-colors line-clamp-2">
           {event.title}
         </h3>
 
@@ -65,7 +65,7 @@ function EventCard({ event, userId }) {
 
         <button className={`w-full font-black text-[11px] py-3.5 rounded-xl uppercase tracking-widest flex items-center justify-center transition-all ${
           isRsvp 
-            ? 'bg-[#6366f1]/10 text-[#818cf8] border border-[#6366f1]/20' 
+            ? 'bg-[var(--accent-dim)] text-[var(--accent)] border border-[var(--accent-glow)]' 
             : 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:scale-[1.02] active:scale-95'
         }`}>
           {isRsvp ? 'Going ✓' : 'RSVP Now'}

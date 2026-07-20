@@ -12,6 +12,11 @@ import { getUserAvatarUrl, getCartoonAvatar } from '../../../utils/avatar';
 
 function avatarUrl(userOrSeed) {
   if (userOrSeed && typeof userOrSeed === 'object') return getUserAvatarUrl(userOrSeed);
+  if (typeof userOrSeed === 'string' && typeof window !== 'undefined') {
+    const users = mockDb.getUsers();
+    const found = users.find(u => u.full_name === userOrSeed || u.id === userOrSeed || u.uid === userOrSeed);
+    if (found) return getUserAvatarUrl(found);
+  }
   return getCartoonAvatar(userOrSeed);
 }
 
@@ -142,7 +147,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
         {host && (
           <div className="absolute inset-0 opacity-20"
             style={{
-              backgroundImage: `url(${avatarUrl(host.full_name)})`,
+              backgroundImage: `url(${avatarUrl(host)})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               filter: 'blur(24px) saturate(1.5)',
@@ -158,7 +163,18 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
         <div className="relative z-10 flex flex-col items-center gap-2">
           <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl"
             style={{ boxShadow: '0 0 40px rgba(99,102,241,0.4)' }}>
-            <img src={host ? avatarUrl(host.full_name) : ''} alt={host?.full_name} className="w-full h-full object-cover" />
+            <img 
+              src={host ? avatarUrl(host) : ''} 
+              alt={host?.full_name} 
+              onError={(e) => {
+                if (e.target.src.includes('dicebear.com')) {
+                  e.target.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23c0aede"><rect width="100" height="100"/><circle cx="50" cy="40" r="20" fill="white"/><path d="M20,90 C20,70 80,70 80,90" fill="white"/></svg>`;
+                } else {
+                  e.target.src = getCartoonAvatar(host?.full_name || exp.hostId);
+                }
+              }}
+              className="w-full h-full object-cover" 
+            />
           </div>
           <p className="text-[10px] font-black uppercase tracking-widest text-white/70">{host?.full_name}</p>
         </div>
@@ -170,7 +186,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
         </div>
 
         {/* Category chip */}
-        <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-0.5 rounded text-[9px] font-black uppercase text-white tracking-widest border border-white/10">
+        <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-0.5 rounded text-[9px] font-black uppercase text-neutral-100 tracking-widest border border-white/10">
           {exp.category}
         </div>
       </div>
@@ -217,7 +233,18 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
 
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-2xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex-shrink-0">
-            <img src={avatarUrl(host?.full_name)} alt={host?.full_name} className="w-full h-full object-cover" />
+            <img 
+              src={avatarUrl(host)} 
+              alt={host?.full_name} 
+              onError={(e) => {
+                if (e.target.src.includes('dicebear.com')) {
+                  e.target.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23c0aede"><rect width="100" height="100"/><circle cx="50" cy="40" r="20" fill="white"/><path d="M20,90 C20,70 80,70 80,90" fill="white"/></svg>`;
+                } else {
+                  e.target.src = getCartoonAvatar(host?.full_name || exp.hostId);
+                }
+              }}
+              className="w-full h-full object-cover" 
+            />
           </div>
 
           <div className="space-y-1.5 min-w-0 flex-1">
@@ -322,7 +349,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
           onClick={handleBook}
           className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-black uppercase tracking-wider px-6 py-3 rounded-xl transition-all cursor-pointer active:scale-95 shadow-md"
         >
-          Book Experience
+          Meet Host
         </button>
       </div>
 
@@ -370,10 +397,16 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
               <>
                 <div className="flex items-center gap-3 mb-5 border-b border-[var(--border-subtle)] pb-3">
                   <div className="w-11 h-11 rounded-xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex-shrink-0">
-                    <img src={avatarUrl(host?.full_name)} alt="host" />
+                    <img 
+                      src={avatarUrl(host)} 
+                      alt="host" 
+                      onError={(e) => {
+                        e.target.src = getCartoonAvatar(host?.full_name || exp.hostId);
+                      }}
+                    />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-[var(--text-primary)] tracking-tight">Book Experience</h3>
+                    <h3 className="text-sm font-black text-[var(--text-primary)] tracking-tight">Meet Host</h3>
                     <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mt-0.5">Host: {host?.full_name}</p>
                   </div>
                 </div>
@@ -450,12 +483,12 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
                   {bookingLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Requesting Booking...</span>
+                      <span>Requesting Meetup...</span>
                     </>
                   ) : (
                     <>
                       <Zap className="w-4 h-4 fill-current" />
-                      <span>Spend {exp.price} Sparks &amp; Book</span>
+                      <span>Spend {exp.price} Sparks &amp; Meet</span>
                     </>
                   )}
                 </button>

@@ -13,8 +13,13 @@ export async function updateProfileAdmin(updates) {
       throw new Error('Unauthorized');
     }
 
+    const cookieUpdates = { ...updates };
+    if (cookieUpdates.photo_url && cookieUpdates.photo_url.startsWith('data:')) {
+      delete cookieUpdates.photo_url;
+    }
+
     const cookieStore = await cookies();
-    cookieStore.set('__meetify_profile_overrides', JSON.stringify(updates), {
+    cookieStore.set('__meetify_profile_overrides', JSON.stringify(cookieUpdates), {
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/'
     });

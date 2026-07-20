@@ -23,7 +23,7 @@ async function createSessionCookie(user) {
   if (!res.ok) throw new Error('Failed to create session');
 }
 
-export async function signUpUser({ email, password, fullName, year, branch, interests }) {
+export async function signUpUser({ email, password, fullName, year, branch, interests, photoUrl }) {
   // 1. Sign up credentials
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
@@ -38,6 +38,7 @@ export async function signUpUser({ email, password, fullName, year, branch, inte
       year,
       branch,
       interests,
+      photo_url: photoUrl
     });
     if (!res.success) throw new Error(res.error);
   } catch (profileError) {

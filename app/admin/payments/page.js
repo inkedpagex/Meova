@@ -1,120 +1,174 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Search, Zap, Clock } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { CheckCircle, XCircle, Zap, Clock, RefreshCw } from 'lucide-react';
+import { mockDb } from '../../../lib/mockDatabase';
+
+function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
+function fmtDate(s) {
+  if (!s) return '';
+  return new Date(s).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+const STATUS_STYLE = {
+  pending:  { color: 'text-amber-400',   bg: 'bg-amber-500/10',   border: 'border-amber-500/20',   label: 'Pending' },
+  approved: { color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', label: 'Approved' },
+  rejected: { color: 'text-rose-400',    bg: 'bg-rose-500/10',    border: 'border-rose-500/20',    label: 'Rejected' },
+};
 
 export default function AdminPaymentsPage() {
-  const [code, setCode]       = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult]   = useState(null);
   const [payments, setPayments] = useState([]);
+  const [filter, setFilter]     = useState('pending'); // 'pending' | 'all'
+  const [loading, setLoading]   = useState('');
+  const [result, setResult]     = useState(null);
+
+  const loadPayments = useCallback(() => {
+    const all = mockDb.getPaymentRequests();
+    // Newest first
+    setPayments([...all].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+  }, []);
 
   useEffect(() => {
-    fetch('/api/admin/list-payments').then(r => r.json()).then(d => setPayments(d.payments || []));
-  }, [result]);
+    loadPayments();
+    // Auto-refresh every 20s
+    const interval = setInterval(loadPayments, 20000);
+    return () => clearInterval(interval);
+  }, [loadPayments]);
 
-  async function handle(action) {
-    if (!code.trim()) return;
-    setLoading(true);
+  function handleAction(id, approve) {
+    setLoading(id + (approve ? '_approve' : '_reject'));
     setResult(null);
     try {
-      const res = await fetch('/api/admin/verify-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ referenceCode: code.trim(), action }),
-      });
-      const data = await res.json();
-      setResult({ ok: data.ok, message: data.message || data.error });
-      if (data.ok) setCode('');
+      const ok = approve
+        ? mockDb.approvePaymentRequest(id)
+        : mockDb.rejectPaymentRequest(id);
+
+      if (ok) {
+        setResult({ ok: true, message: `Payment ${approve ? 'approved — Sparks credited to user wallet!' : 'rejected — user notified.'}` });
+      } else {
+        setResult({ ok: false, message: 'Action failed. Payment may already be processed.' });
+      }
+      loadPayments();
+    } catch (e) {
+      setResult({ ok: false, message: e.message });
     } finally {
-      setLoading(false);
+      setLoading('');
     }
   }
 
+  const shown = filter === 'pending'
+    ? payments.filter(p => p.status === 'pending')
+    : payments;
+
   return (
-    <div className="anim-fade-in">
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>Payment Verification</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-          Verify QR payments by entering the reference code sent with the UPI transfer.
-        </p>
-      </div>
-
-      {/* Code input */}
-      <div className="glass" style={{ borderRadius: 18, padding: 24, marginBottom: 28 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          Enter Reference Code
-        </p>
-        <div className="flex gap-3 flex-wrap">
-          <div className="flex-1" style={{ position: 'relative', minWidth: 260 }}>
-            <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input
-              value={code}
-              onChange={e => setCode(e.target.value.toUpperCase())}
-              placeholder="SPK-XXXX-POPULAR-..."
-              style={{
-                width: '100%', background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)',
-                borderRadius: 12, padding: '12px 14px 12px 40px', color: 'var(--text-primary)',
-                fontSize: 13, fontFamily: 'monospace', fontWeight: 600, outline: 'none',
-              }}
-              onKeyDown={e => e.key === 'Enter' && handle('approve')}
-            />
-          </div>
-          <button onClick={() => handle('approve')} disabled={!code || loading}
-            className="btn btn-primary flex items-center gap-2" style={{ fontSize: 13 }}>
-            <CheckCircle size={14} /> Approve
-          </button>
-          <button onClick={() => handle('reject')} disabled={!code || loading}
-            className="btn btn-outline flex items-center gap-2" style={{ fontSize: 13, color: '#f87171', borderColor: '#f8717140' }}>
-            <XCircle size={14} /> Reject
-          </button>
+    <div className="anim-fade-in space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>
+            Payment Verification
+          </h1>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
+            Verify UPI payments and credit Sparks to user wallets.
+          </p>
         </div>
-
-        {result && (
-          <div style={{ marginTop: 14, padding: '10px 14px', borderRadius: 10, background: result.ok ? 'rgba(74,222,128,0.1)' : 'rgba(248,113,113,0.1)', border: `1px solid ${result.ok ? 'rgba(74,222,128,0.2)' : 'rgba(248,113,113,0.2)'}` }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: result.ok ? '#4ade80' : '#f87171' }}>
-              {result.ok ? '✅' : '❌'} {result.message}
-            </p>
-          </div>
-        )}
+        <button
+          onClick={loadPayments}
+          className="p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
+        >
+          <RefreshCw size={14} />
+        </button>
       </div>
 
-      {/* Pending payments list */}
-      <div>
-        <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 14 }}>Pending Payments</h2>
-        {payments.length === 0 ? (
-          <div className="glass rounded-2xl p-10 text-center" style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-            No pending payments 🎉
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {payments.map(p => (
-              <div key={p.id} className="card flex items-center gap-4"
-                style={{ background: 'var(--bg-surface)', borderRadius: 14, padding: '14px 18px', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ flexShrink: 0 }}>
-                  <Clock size={16} style={{ color: '#fb923c' }} />
+      {/* Filter tabs */}
+      <div className="flex gap-2">
+        {['pending', 'all'].map(f => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+              filter === f
+                ? 'bg-[var(--accent)] text-white'
+                : 'bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            {f === 'pending' ? `Pending (${payments.filter(p => p.status === 'pending').length})` : `All (${payments.length})`}
+          </button>
+        ))}
+      </div>
+
+      {/* Result banner */}
+      {result && (
+        <div className={`p-3.5 rounded-xl border text-sm font-bold flex items-center gap-2 ${
+          result.ok
+            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+            : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+        }`}>
+          {result.ok ? <CheckCircle size={15} /> : <XCircle size={15} />}
+          {result.message}
+        </div>
+      )}
+
+      {/* Payments list */}
+      {shown.length === 0 ? (
+        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12 text-center">
+          <Zap size={24} className="text-[var(--text-muted)] mx-auto mb-3" />
+          <p className="text-sm font-bold text-[var(--text-muted)]">
+            {filter === 'pending' ? 'No pending payments 🎉' : 'No payment requests yet'}
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {shown.map(p => {
+            const st = STATUS_STYLE[p.status] || STATUS_STYLE.pending;
+            const isActing = loading.startsWith(p.id);
+            return (
+              <div
+                key={p.id}
+                className={`rounded-2xl border p-5 flex flex-col sm:flex-row sm:items-center gap-4 transition-all ${
+                  p.status === 'pending'
+                    ? 'bg-[var(--bg-elevated)] border-[var(--border-subtle)]'
+                    : `${st.bg} ${st.border} border opacity-70`
+                }`}
+              >
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-black text-[var(--text-primary)]">
+                      {p.pack_name} Pack — {fmt(p.sparks)} ⚡
+                    </p>
+                    <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${st.color} ${st.bg} ${st.border}`}>
+                      {st.label}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[var(--text-muted)] font-bold">{p.email}</p>
+                  <div className="flex items-center gap-3 flex-wrap text-[10px] font-bold text-[var(--text-secondary)]">
+                    <span>Ref: <code className="font-mono text-amber-400 tracking-widest">{p.reference_code}</code></span>
+                    <span>₹{p.amount_inr}</span>
+                    <span>{fmtDate(p.created_at)}</span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {p.pack_name} Pack — {p.sparks} ⚡
-                  </p>
-                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                    {p.email} · ₹{p.amount_inr}
-                  </p>
-                  <code style={{ fontSize: 11, color: '#fb923c', letterSpacing: '0.04em', marginTop: 4, display: 'block' }}>
-                    {p.reference_code}
-                  </code>
-                </div>
-                <div className="flex gap-2 flex-shrink-0">
-                  <button onClick={() => { setCode(p.reference_code); handle('approve'); }}
-                    className="btn btn-ghost" style={{ fontSize: 11, padding: '6px 12px', color: '#4ade80', borderColor: '#4ade8030' }}>
-                    Approve
-                  </button>
-                </div>
+
+                {p.status === 'pending' && (
+                  <div className="flex gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => handleAction(p.id, true)}
+                      disabled={isActing}
+                      className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black uppercase text-[10px] px-4 py-2.5 rounded-xl transition-all cursor-pointer"
+                    >
+                      <CheckCircle size={12} /> Approve
+                    </button>
+                    <button
+                      onClick={() => handleAction(p.id, false)}
+                      disabled={isActing}
+                      className="flex items-center gap-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 hover:border-transparent disabled:opacity-50 font-black uppercase text-[10px] px-4 py-2.5 rounded-xl transition-all cursor-pointer"
+                    >
+                      <XCircle size={12} /> Reject
+                    </button>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

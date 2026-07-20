@@ -15,7 +15,7 @@ const INTEREST_TAGS = [
   'Fashion & Styling', 'Astronomy & Science',
 ];
 
-export default function ProfileEditForm({ initialProfile }) {
+export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -25,8 +25,63 @@ export default function ProfileEditForm({ initialProfile }) {
   const [year, setYear] = useState(initialProfile?.year || '1st');
   const [branch, setBranch] = useState(initialProfile?.branch || '');
   const [instagram, setInstagram] = useState(initialProfile?.instagram || '');
+  const [photoUrl, setPhotoUrl] = useState(initialProfile?.photo_url || '');
   const [bio, setBio] = useState(initialProfile?.bio || '');
   const [selectedInterests, setSelectedInterests] = useState(initialProfile?.interests || []);
+
+  const fileInputRef = React.useRef(null);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorMsg('Image size must be less than 5MB.');
+        return;
+      }
+      
+      setLoading(true);
+      setErrorMsg('');
+      setSuccessMsg('');
+      
+      try {
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
+        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'unsigned_preset';
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', uploadPreset);
+        
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!res.ok) {
+          throw new Error('Failed to upload image to Cloudinary. Please check your cloud configuration.');
+        }
+        
+        const data = await res.json();
+        if (data.secure_url) {
+          setPhotoUrl(data.secure_url);
+          setSuccessMsg('Photo uploaded to Cloudinary successfully!');
+        } else {
+          throw new Error('Invalid response from Cloudinary.');
+        }
+      } catch (err) {
+        console.error('Cloudinary upload error:', err);
+        setErrorMsg(err.message || 'Failed to upload photo to Cloudinary.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleInterestToggle = (tag) => {
     setErrorMsg('');
@@ -58,7 +113,8 @@ export default function ProfileEditForm({ initialProfile }) {
         branch,
         bio,
         interests: selectedInterests,
-        instagram: instagram
+        instagram: instagram,
+        photo_url: photoUrl
       });
       
       if (!res.success) {
@@ -72,12 +128,25 @@ export default function ProfileEditForm({ initialProfile }) {
           branch,
           bio,
           interests: selectedInterests,
-          instagram: instagram
+          instagram: instagram,
+          photo_url: photoUrl
         });
       }
 
       setSuccessMsg('Profile updated successfully!');
       router.refresh();
+      
+      if (onSaveSuccess) {
+        onSaveSuccess({
+          full_name: fullName,
+          year,
+          branch,
+          bio,
+          interests: selectedInterests,
+          instagram: instagram,
+          photo_url: photoUrl
+        });
+      }
       
       // Auto-hide success message after 3 seconds
       setTimeout(() => setSuccessMsg(''), 3000);
@@ -203,6 +272,57 @@ export default function ProfileEditForm({ initialProfile }) {
           </div>
           <p className="text-[9px] text-[var(--text-muted)] mt-1.5 font-bold uppercase tracking-wider">
             Used to show your Instagram profile embed on your public profile page.
+          </p>
+        </div>
+
+        {/* Profile Image Upload */}
+        <div>
+          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Profile Photo <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 'normal' }}>(Optional)</span></label>
+          
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            accept="image/*" 
+            className="hidden" 
+          />
+
+          <div className="flex items-center gap-4 p-3 rounded-2xl bg-[var(--bg-overlay)] border border-[var(--border-subtle)]">
+            {photoUrl ? (
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-14 h-14 rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface)] flex-shrink-0">
+                  <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <button 
+                    type="button" 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-[10px] font-black uppercase tracking-wider text-[#818cf8] hover:text-[#a5b4fc] text-left transition-colors cursor-pointer"
+                  >
+                    Change Photo
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={handleRemovePhoto}
+                    className="text-[10px] font-black uppercase tracking-wider text-rose-400 hover:text-rose-300 text-left transition-colors cursor-pointer"
+                  >
+                    Remove Photo
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button 
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full flex items-center justify-center gap-2 py-4 border border-dashed border-[var(--border-subtle)] hover:border-neutral-500 rounded-xl transition-all text-xs font-bold text-[var(--text-secondary)] hover:text-white cursor-pointer active:scale-95"
+              >
+                <Camera size={16} />
+                <span>Upload Profile Photo</span>
+              </button>
+            )}
+          </div>
+          <p className="text-[9px] text-[var(--text-muted)] mt-1.5 font-bold uppercase tracking-wider">
+            Upload a photo to use as your custom avatar. Keep it under 2MB.
           </p>
         </div>
       </div>

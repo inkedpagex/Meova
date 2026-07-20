@@ -5,23 +5,66 @@ import { usePathname } from 'next/navigation';
 import { Home, Compass, Users, User, LogIn, Calendar, Wallet, Shield, Plus, MessageSquare, Briefcase, Bell, Crown } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { getUserAvatarUrl } from '../utils/avatar';
+import { mockDb } from '../lib/mockDatabase';
 
 export default function Sidebar({ user }) {
   const pathname = usePathname();
+  const [dbUser, setDbUser] = React.useState(user);
+  const [sparks, setSparks] = React.useState(0);
+
+  React.useEffect(() => {
+    const syncUserAndWallet = () => {
+      if (user && typeof window !== 'undefined') {
+        const u = mockDb.getUser(user.id);
+        if (u) {
+          setDbUser(u);
+        } else {
+          // If the user isn't in mockDb, initialize their local record!
+          mockDb.updateUser(user.id, {
+            id: user.id,
+            uid: user.id,
+            full_name: user.full_name || 'User',
+            email: user.email || '',
+            branch: user.branch || 'General',
+            year: user.year || '1st',
+            bio: user.bio || '',
+            interests: user.interests || [],
+            instagram: user.instagram || '',
+            isIdOn: true
+          });
+          const fresh = mockDb.getUser(user.id);
+          if (fresh) setDbUser(fresh);
+        }
+
+        // Fetch wallet live from mockDb
+        const wallet = mockDb.getWallet(user.id);
+        if (wallet) {
+          setSparks((wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0));
+        }
+      }
+    };
+
+    syncUserAndWallet();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('profile-updated', syncUserAndWallet);
+      window.addEventListener('wallet-updated', syncUserAndWallet);
+      return () => {
+        window.removeEventListener('profile-updated', syncUserAndWallet);
+        window.removeEventListener('wallet-updated', syncUserAndWallet);
+      };
+    }
+  }, [user]);
 
   const isActive = (href) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href);
-
-  const totalSparks = user?.wallet
-    ? (user.wallet.purchased || 0) + (user.wallet.bonus || 0) + (user.wallet.creator || 0)
-    : 0;
 
   const NAV = [
     { href: '/',             label: 'Home',          Icon: Home },
     { href: '/experiences',  label: 'Experiences',   Icon: Compass },
     { href: '/messages',     label: 'Messages',      Icon: MessageSquare },
     { href: '/notifications',label: 'Notifications', Icon: Bell },
-    ...(user ? [{ href: '/wallet',  label: 'Wallet',   Icon: Wallet, badge: `${totalSparks.toLocaleString()} ⚡` }] : []),
+    ...(user ? [{ href: '/wallet',  label: 'Wallet',   Icon: Wallet, badge: `${sparks.toLocaleString()} ⚡` }] : []),
     { href: '/profile',      label: 'Profile',       Icon: User },
     ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin', Icon: Shield }] : []),
   ];
@@ -50,12 +93,12 @@ export default function Sidebar({ user }) {
           {user ? (
             <div className="flex items-center gap-2">
               <Link href="/wallet" className="glass flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold" style={{ color: 'var(--text-primary)' }}>
-                <span>{totalSparks.toLocaleString()}</span>
+                <span>{sparks.toLocaleString()}</span>
                 <span className="text-[#fb923c]">⚡</span>
               </Link>
               <Link href="/profile">
                 <div className="w-8 h-8 rounded-full overflow-hidden" style={{ border: '1px solid var(--border-mid)', background: 'var(--bg-overlay)' }}>
-                <img src={getUserAvatarUrl(user)} alt="me" className="w-full h-full object-cover" />
+                <img src={getUserAvatarUrl(dbUser)} alt="me" className="w-full h-full object-cover" />
                 </div>
               </Link>
             </div>
@@ -111,10 +154,10 @@ export default function Sidebar({ user }) {
               className="flex items-center gap-2.5 p-2.5 rounded-xl transition-all"
               style={{ ':hover': { background: 'var(--bg-hover)' } }}>
               <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0" style={{ border: '1px solid var(--border-mid)' }}>
-                <img src={getUserAvatarUrl(user)} alt="me" className="w-full h-full object-cover" />
+                <img src={getUserAvatarUrl(dbUser)} alt="me" className="w-full h-full object-cover" />
               </div>
               <div className="min-w-0">
-                <p className="text-[12px] font-semibold truncate" style={{ color:'var(--text-primary)' }}>{(user.email || 'user').split('@')[0]}</p>
+                <p className="text-[12px] font-semibold truncate" style={{ color:'var(--text-primary)' }}>{dbUser?.full_name || (user.email || 'user').split('@')[0]}</p>
                 <p className="text-[10px] truncate" style={{ color:'var(--text-muted)' }}>{user.role === 'admin' ? '🛡️ Admin' : 'View Profile'}</p>
               </div>
             </Link>
