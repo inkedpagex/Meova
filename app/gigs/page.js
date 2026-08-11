@@ -4,58 +4,7 @@ import { Search, Briefcase, Zap, CheckCircle2, DollarSign, Filter, ArrowRight } 
 
 const CATEGORIES = ['All', 'Design', 'Development', 'Writing', 'Marketing'];
 
-const INITIAL_GIGS = [
-  {
-    id: 'gig_1',
-    title: 'Video Editor Needed',
-    category: 'Design',
-    budget: 600,
-    type: 'Video & Motion',
-    company: 'Fintech Club',
-    desc: 'Edit short videos/Reels for our upcoming finance tech event. Must know Premiere/CapCut.',
-    duration: '3 days',
-  },
-  {
-    id: 'gig_2',
-    title: 'Logo Design for Startup',
-    category: 'Design',
-    budget: 400,
-    type: 'Branding',
-    company: 'Campus E-Cell',
-    desc: 'Minimal logo for an AI campus startup. Need high-res files and source SVGs.',
-    duration: '1 week',
-  },
-  {
-    id: 'gig_3',
-    title: 'Instagram Post Designer',
-    category: 'Marketing',
-    budget: 400,
-    type: 'Social Media',
-    company: 'Music Society',
-    desc: 'Design 5 promotional posts for our acoustic night. Theme should be retro-modern.',
-    duration: '5 days',
-  },
-  {
-    id: 'gig_4',
-    title: 'Content Writer for Newsletter',
-    category: 'Writing',
-    budget: 300,
-    type: 'Copywriting',
-    company: 'GDSC',
-    desc: 'Write an engaging summary of our Web3 workshop for the monthly campus tech digest.',
-    duration: '2 days',
-  },
-  {
-    id: 'gig_5',
-    title: 'Next.js Frontend Bug Fixes',
-    category: 'Development',
-    budget: 800,
-    type: 'Coding',
-    company: 'Meetify Core',
-    desc: 'Fix routing and state sync issues on our local Next.js client. Direct payout.',
-    duration: '24 hours',
-  },
-];
+const INITIAL_GIGS = [];
 
 export default function CampusGigsPage() {
   const [search, setSearch] = useState('');

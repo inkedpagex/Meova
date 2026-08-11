@@ -31,11 +31,12 @@ const gradients = [
 export function getUserAvatarUrl(user) {
   if (!user) return getCartoonAvatar('default');
 
-  // 1. Uploaded profile photo
-  if (user.photo_url) return user.photo_url;
+  // Check all possible photo_url properties across Firebase Auth, Firestore, and session JWTs
+  const photo = user.photo_url || user.photoURL || user.picture || user.avatar || user.photo;
+  if (photo) return photo;
 
-  // 2. Cartoon fallback
-  return getCartoonAvatar(user.full_name || user.id || 'user');
+  // Cartoon fallback
+  return getCartoonAvatar(user.full_name || user.displayName || user.name || user.id || 'user');
 }
 
 /**
@@ -43,30 +44,9 @@ export function getUserAvatarUrl(user) {
  * Use this when you don't have a full user object.
  */
 export function getCartoonAvatar(seed) {
-  const cleanSeed = (seed || 'default').toString();
-  const hash = hashCode(cleanSeed);
-  const grad = gradients[hash % gradients.length];
-
-  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-    <defs>
-      <linearGradient id="grad-${hash}" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="${grad.from}"/>
-        <stop offset="100%" stop-color="${grad.to}"/>
-      </linearGradient>
-      <linearGradient id="sil-${hash}" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="white" stop-opacity="0.95"/>
-        <stop offset="100%" stop-color="white" stop-opacity="0.75"/>
-      </linearGradient>
-      <filter id="shadow-${hash}" x="-10%" y="-10%" width="120%" height="120%">
-        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.15"/>
-      </filter>
-    </defs>
-    <rect width="100" height="100" fill="url(%23grad-${hash})"/>
-    <g filter="url(%23shadow-${hash})">
-      <circle cx="50" cy="38" r="16" fill="url(%23sil-${hash})"/>
-      <path d="M 22 84 C 22 66, 32 58, 50 58 C 68 58, 78 66, 78 84" fill="url(%23sil-${hash})"/>
-    </g>
-  </svg>`;
+  const cleanSeed = encodeURIComponent((seed || 'default').toString());
+  // Use public Dicebear Adventurer SVG avatar API
+  return `https://api.dicebear.com/7.x/adventurer/svg?seed=${cleanSeed}`;
 }
 
 /**

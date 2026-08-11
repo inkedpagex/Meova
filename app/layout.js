@@ -37,22 +37,19 @@ export default async function RootLayout({ children }) {
 
   try {
     return (
-      <html lang="en" data-theme="light">
+      <html lang="en" data-theme="light" style={{ colorScheme: 'light' }}>
         <head>
+          <meta name="theme-color" content="#ffffff" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+          <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         </head>
-        <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh' }}>
+        <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh', fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif" }}>
           <div className="flex min-h-screen">
             <Sidebar user={user} />
-
-            {/* Main content offset for sidebar (desktop) / top+bottom bar (mobile) */}
             <div className="flex-1 md:pl-[220px] min-w-0">
-              <main
-                style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px 80px', paddingTop: 72 }}
-                className="md:!pt-8 md:!pb-8 md:px-8"
-              >
+              <main style={{ maxWidth: 640, margin: '0 auto', padding: '16px 16px 88px', paddingTop: 68 }}
+                className="md:!pt-8 md:!pb-8 md:px-6">
                 {children}
               </main>
             </div>

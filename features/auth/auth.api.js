@@ -13,17 +13,17 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { TABLE_PROFILES } from './constants';
 
 // Helper to create the session cookie via our Next.js Route Handler
-async function createSessionCookie(user) {
+async function createSessionCookie(user, profileOverrides = null) {
   const idToken = await user.getIdToken();
   const res = await fetch('/api/auth/session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idToken })
+    body: JSON.stringify({ idToken, profileOverrides })
   });
   if (!res.ok) throw new Error('Failed to create session');
 }
 
-export async function signUpUser({ email, password, fullName, year, branch, interests, photoUrl }) {
+export async function signUpUser({ email, password, fullName, year, branch, interests, photoUrl, age, lookingFor, studyStyle, isHost }) {
   // 1. Sign up credentials
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
@@ -38,7 +38,11 @@ export async function signUpUser({ email, password, fullName, year, branch, inte
       year,
       branch,
       interests,
-      photo_url: photoUrl
+      photo_url: photoUrl,
+      age: Number(age) || 20,
+      lookingFor: lookingFor || 'New friends & hangouts',
+      studyStyle: studyStyle || 'Interactive group study',
+      isHost: isHost === undefined ? false : isHost
     });
     if (!res.success) throw new Error(res.error);
   } catch (profileError) {
@@ -46,8 +50,19 @@ export async function signUpUser({ email, password, fullName, year, branch, inte
     throw new Error('User created but failed to save profile details.');
   }
 
-  // 3. Create session cookie
-  await createSessionCookie(user);
+  // 3. Create session cookie with profile overrides
+  const profileOverrides = {
+    full_name: fullName,
+    year,
+    branch,
+    interests,
+    photo_url: photoUrl,
+    age: Number(age) || 20,
+    lookingFor: lookingFor || 'New friends & hangouts',
+    studyStyle: studyStyle || 'Interactive group study',
+    isHost: isHost === undefined ? false : isHost
+  };
+  await createSessionCookie(user, profileOverrides);
 
   return user;
 }

@@ -21,7 +21,7 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const { idToken } = await request.json();
+  const { idToken, profileOverrides } = await request.json();
   if (!idToken) {
     return NextResponse.json({ error: 'ID token required' }, { status: 400 });
   }
@@ -35,6 +35,14 @@ export async function POST(request) {
       path: '/',
       sameSite: 'lax',
     });
+
+    if (profileOverrides) {
+      cookieStore.set('__meetify_profile_overrides', JSON.stringify(profileOverrides), {
+        maxAge: SESSION_DURATION_MS / 1000,
+        path: '/',
+        sameSite: 'lax',
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -19,22 +19,11 @@ export default async function CirclesPage() {
   }
 
   return (
-    <div className="w-full max-w-[800px] mx-auto pb-24 anim-fade-in px-4">
-      {/* Header */}
-      <div className="relative overflow-hidden mb-6 border-b border-[var(--border-subtle)] pt-6 pb-4">
-        <div className="relative z-10">
-          <h1 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] tracking-tight">
-            Communities
-          </h1>
-          <p className="text-xs text-[var(--text-secondary)] font-bold mt-1 uppercase tracking-widest">
-            Find your tribe. {circles.length} communities on campus.
-          </p>
-        </div>
-      </div>
-
+    <div className="w-full max-w-[640px] mx-auto pb-24 anim-fade-in px-0">
       {circles.length === 0 ? (
-        <div className="rounded-[1.5rem] bg-white/[0.02] border border-white/[0.04] p-14 text-center text-neutral-500 font-bold mx-4">
-          No circles yet. Check back soon!
+        <div className="rounded-3xl p-14 text-center font-bold mt-4"
+          style={{ background: '#ffffff', border: '1px solid #f0f0f0', color: '#71717a' }}>
+          No communities yet. Check back soon!
         </div>
       ) : (
         <CirclesList circles={circles} joinedCircleIds={joinedCircleIds} userId={user?.id} />

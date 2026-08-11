@@ -8,7 +8,8 @@ import {
   Sparkles, Layers, BookOpen, UserCheck, MessageSquare,
   Send, X, CheckCircle, Loader2, Star, Check, Search,
   ShieldAlert, Clock, AlertTriangle, ShieldCheck, Compass, Users,
-  Coffee, Briefcase, Camera, Activity, Music, Bell, ChevronRight
+  Coffee, Briefcase, Camera, Activity, Music, Bell, ChevronRight,
+  SlidersHorizontal, Trophy, Gamepad, TrendingUp, HelpCircle, Film
 } from 'lucide-react';
 import { mockDb } from '../lib/mockDatabase';
 import confetti from 'canvas-confetti';
@@ -49,9 +50,34 @@ const cardColorsDark = [
   { bg: 'from-cyan-950/70 to-cyan-900/50 border-cyan-500/25', text: 'text-cyan-50', sub: 'text-cyan-300', btn: 'bg-cyan-500/20 text-cyan-200 border-cyan-500/30 hover:bg-cyan-500/30' }
 ];
 
-function getCardColors(index, isDark) {
-  const list = isDark ? cardColorsDark : cardColorsLight;
-  return list[index % list.length];
+function getExpCardTheme(category) {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('coffee') || cat.includes('meet') || cat.includes('startup')) {
+    return {
+      bg: 'bg-[#f5f3ff] border-[#ddd6fe]/50',
+      text: 'text-[#7c3aed]',
+      muted: 'text-[#9061f9]',
+      circleBg: 'bg-[#ede9fe]',
+      priceBg: 'bg-[#ede9fe] text-[#7c3aed]'
+    };
+  }
+  if (cat.includes('study') || cat.includes('class') || cat.includes('learn') || cat.includes('design') || cat.includes('together')) {
+    return {
+      bg: 'bg-[#fffbeb] border-[#fef3c7]/50',
+      text: 'text-[#d97706]',
+      muted: 'text-[#b45309]',
+      circleBg: 'bg-[#fef3c7]',
+      priceBg: 'bg-[#fef3c7] text-[#d97706]'
+    };
+  }
+  // Default to green (Sports, coding, general)
+  return {
+    bg: 'bg-[#f0fdf4] border-[#bbf7d0]/50',
+    text: 'text-[#16a34a]',
+    muted: 'text-[#15803d]',
+    circleBg: 'bg-[#dcfce7]',
+    priceBg: 'bg-[#dcfce7] text-[#16a34a]'
+  };
 }
 
 export default function FeedClient({ currentUser, initialSparks, people = [] }) {
@@ -95,6 +121,7 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
   const [stackIndex, setStackIndex] = useState(0);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBookingsModal, setShowBookingsModal] = useState(false);
+  const [dismissedVibes, setDismissedVibes] = useState({});
 
   // Form states for creating experience
   const [newExpTitle, setNewExpTitle] = useState('');
@@ -132,20 +159,21 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
 
   const handleJoinGroup = (group) => {
     if (!currentUser) {
-      alert("Please log in to join campus groups!");
+      router.push('/login');
       return;
     }
     if (joinedGroups[group.name]) {
-      alert(`Opening ${group.name} group chat...`);
+      // Already joined — open group in messages
+      router.push(`/messages?user=${encodeURIComponent(group.name)}`);
       return;
     }
 
     if (group.isPaid) {
       if (sparksBalance < group.price) {
-        alert(`Insufficient Sparks! You need ${group.price} Sparks to join this group. Current balance: ${sparksBalance} Sparks.`);
+        router.push('/wallet');
         return;
       }
-      const confirmJoin = window.confirm(`Do you want to subscribe to ${group.name} for ${group.price} Sparks?`);
+      const confirmJoin = window.confirm(`Join ${group.name} for ${group.price} Sparks?`);
       if (confirmJoin) {
         setSparksBalance(prev => {
           const nextBal = prev - group.price;
@@ -163,11 +191,13 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
           return nextBal;
         });
         saveJoinedGroups({ ...joinedGroups, [group.name]: true });
-        alert(`Successfully joined ${group.name}!`);
+        confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
+        setTimeout(() => router.push(`/messages?user=${encodeURIComponent(group.name)}`), 600);
       }
     } else {
       saveJoinedGroups({ ...joinedGroups, [group.name]: true });
-      alert(`Joined ${group.name} successfully!`);
+      confetti({ particleCount: 40, spread: 40, origin: { y: 0.6 } });
+      setTimeout(() => router.push(`/messages?user=${encodeURIComponent(group.name)}`), 600);
     }
   };
 
@@ -384,522 +414,477 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
     ['Requested', 'Confirmed', 'Meeting Completed'].includes(b.status)
   );
 
+  const defaultVibeUsers = [
+    {
+      id: 'aarav_sharma',
+      full_name: 'Aarav',
+      year: '3rd',
+      branch: 'CSE',
+      college: 'GLA University',
+      interests: ['Coding', 'Gaming', 'AI'],
+      photo_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav'
+    },
+    {
+      id: 'priya_p',
+      full_name: 'Priya',
+      year: '2nd',
+      branch: 'BBA',
+      college: 'GLA University',
+      interests: ['Music', 'Art', 'Travel'],
+      photo_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Priya'
+    }
+  ];
+
+  const vibeUsers = popularHosts.length > 0
+    ? popularHosts.map(u => ({
+        id: u.id,
+        full_name: u.full_name,
+        year: u.year || '3rd',
+        branch: u.branch || 'CSE',
+        college: u.college || 'GLA University',
+        interests: u.interests?.slice(0, 3) || ['Tech', 'Design', 'Music'],
+        photo_url: avatarUrl(u)
+      }))
+    : defaultVibeUsers;
+
+  const defaultExperiences = [
+    { id: 'exp_1', title: 'Coffee Connect', category: 'Coffee', price: 250, days: ['Today'], slots: ['5:00 PM'], location: 'Campus Cafe', hostId: 'ananya' },
+    { id: 'exp_2', title: 'Study Together', category: 'Study', price: 150, days: ['Tomorrow'], slots: ['11:00 AM'], location: 'Library Central', hostId: 'aarav' },
+    { id: 'exp_3', title: 'Badminton Match', category: 'Sports', price: 200, days: ['Fri'], slots: ['4:00 PM'], location: 'Sports Complex', hostId: 'neha' }
+  ];
+
+  const topExps = filteredExperiences.length > 0 ? filteredExperiences.slice(0, 4) : defaultExperiences;
+
+  const GROUP_ICON_MAP = { Tech: 'code', Design: 'palette', Music: 'music', Career: 'briefcase', Athletics: 'trophy', default: 'users' };
+
+  const campusGroups = [
+    { name: 'Google Developer Student Club', category: 'Tech', isPaid: false, price: 0, desc: 'Official updates on campus hackathons, coding tasks & bootcamps.', members: 180, isOfficial: true },
+    { name: 'Figma UI/UX Masterclass VIP', category: 'Design', isPaid: true, price: 50, desc: 'Premium design templates, personal project reviews & job opportunities.', members: 42, isOfficial: false },
+    { name: 'Campus Symphony Chat', category: 'Music', isPaid: false, price: 0, desc: 'Open mic coordination, jamming sessions & campus playlist sharing.', members: 96, isOfficial: true },
+    { name: 'Placement Prep & Referrals', category: 'Career', isPaid: true, price: 120, desc: 'Interview preparation sheets & direct referrals.', members: 115, isOfficial: true },
+    { name: 'Gladiators FC', category: 'Athletics', isPaid: false, price: 0, desc: 'Match schedule updates, football practice slots & gym meets.', members: 140, isOfficial: false }
+  ];
+
+  const GROUP_THEME = {
+    Tech:      { bg: '#eff6ff', color: '#3b82f6', border: '#bfdbfe', Icon: BookOpen },
+    Design:    { bg: '#fdf4ff', color: '#a855f7', border: '#e9d5ff', Icon: Layers },
+    Music:     { bg: '#fdf2f8', color: '#ec4899', border: '#fbcfe8', Icon: Music },
+    Career:    { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0', Icon: Briefcase },
+    Athletics: { bg: '#fff7ed', color: '#ea580c', border: '#fed7aa', Icon: Activity },
+    default:   { bg: '#f5f3ff', color: '#7c3aed', border: '#ddd6fe', Icon: Users },
+  };
+
+  const filteredGroups = campusGroups.filter(g => {
+    if (groupFilter === 'Free') return !g.isPaid;
+    if (groupFilter === 'Premium') return g.isPaid;
+    return true;
+  });
+
   return (
-    <div className="space-y-8 pb-20 pt-4">
+    <div className="space-y-6 pb-24 pt-4 px-2 select-none">
 
       {/* ── HEADER SECTION ────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2.5xl md:text-3xl font-black text-[var(--text-primary)] tracking-tight">
-            Hi, {userData?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'Student'} 👋
+          <h1 className="text-2xl font-extrabold text-zinc-950 tracking-tight">
+            Hi, {userData?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'Chirag'}
           </h1>
-          <p className="text-xs text-[var(--text-secondary)] font-bold mt-1 uppercase tracking-widest">
-            Let's make today amazing!
+          <p className="text-xs text-zinc-500 font-bold mt-1">
+            Who are you meeting today?
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Sparks balance badge */}
-          <Link href="/wallet" className="flex items-center gap-1.5 bg-[var(--accent-dim)] border border-[var(--accent-glow)] rounded-full px-3 py-2 text-xs font-black text-[var(--accent)] hover:opacity-90 transition-opacity shadow-sm">
-            <Zap size={11} className="fill-current text-amber-500 animate-pulse" />
-            <span>{sparksBalance} ⚡</span>
+          <Link href="/wallet" className="flex items-center gap-1.5 bg-[#f3f0ff] border border-[#ddd6fe]/50 rounded-full px-3.5 py-2 text-xs font-black text-[#7c3aed] hover:opacity-90 transition-opacity shadow-sm">
+            <Zap size={11} className="fill-current text-[#7c3aed]" />
+            <span>{sparksBalance}</span>
           </Link>
           
-          <Link href="/notifications" className="w-10 h-10 rounded-full bg-[var(--bg-overlay)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all relative">
-            <Bell size={16} />
-            {activeUserBookings.length > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
-            )}
-          </Link>
-          
-          <Link href="/profile" className="w-10 h-10 rounded-full overflow-hidden bg-[var(--bg-overlay)] border border-[var(--border-subtle)] flex items-center justify-center hover:scale-105 transition-all shadow-sm">
-            <img src={avatarUrl(userData)} alt="profile" className="w-full h-full object-cover" />
+          <Link href="/notifications" className="w-10 h-10 rounded-full bg-white border border-zinc-100 flex items-center justify-center text-zinc-800 hover:text-indigo-600 transition-all relative shadow-sm">
+            <Bell size={18} className="text-zinc-800" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-[#7c3aed] rounded-full border border-white" />
           </Link>
         </div>
       </div>
 
-      {/* Active Meetings Quick Banner */}
-      {currentUser && activeUserBookings.length > 0 && (
-        <button
-          onClick={() => setShowBookingsModal(true)}
-          className="w-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/25 text-emerald-400 p-3 rounded-2xl text-[10px] font-black uppercase tracking-wider flex items-center justify-between hover:from-emerald-500/15 transition-all"
-        >
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
-            <span>You have {activeUserBookings.length} active meeting{activeUserBookings.length > 1 ? 's' : ''} today</span>
-          </div>
-          <span className="text-[9px] font-black text-white bg-emerald-600/40 px-2.5 py-1 rounded-lg">View Code</span>
-        </button>
-      )}
-
-      {/* ── UPCOMING FOR YOU (STACKED CARD CAROUSEL) ─────────── */}
-      {(() => {
-        const defaultDeck = [
-          { id: 'exp_1', title: 'Coffee Connect with Ananya', hostId: 'ananya', location: 'Campus Cafe', duration: 45, price: 250, days: ['Monday'], slots: ['5:00 PM'] },
-          { id: 'exp_2', title: 'Study Together with Aarav', hostId: 'aarav', location: 'Central Library', duration: 60, price: 150, days: ['Monday'], slots: ['4:00 PM'] },
-          { id: 'exp_3', title: 'Portfolio Review with Neha', hostId: 'neha', location: 'Design Studio Loft', duration: 30, price: 200, days: ['Monday'], slots: ['3:00 PM'] }
-        ];
-        const deckExps = experiences.filter(e => e.hostId !== currentUser?.id);
-        const displayDeck = deckExps.length > 0 ? deckExps.slice(0, 3) : defaultDeck;
-
-        return (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-secondary)]">Upcoming For You</h3>
-              <button
-                onClick={() => setStackIndex(prev => (prev + 1) % displayDeck.length)}
-                className="text-[10px] font-black text-[var(--accent)] hover:text-white uppercase tracking-widest flex items-center gap-1 cursor-pointer"
-              >
-                <span>Cycle Deck</span>
-                <ChevronRight size={12} />
-              </button>
-            </div>
-
-            {/* Deck Stack */}
-            <div className="relative h-[240px] w-full select-none">
-              {displayDeck.map((exp, idx) => {
-                const offset = (idx - stackIndex + displayDeck.length) % displayDeck.length;
-                const isFront = offset === 0;
-                const isSecond = offset === 1;
-                const isThird = offset === 2;
-
-                let transform = '';
-                let zIndex = 0;
-                let opacity = 0;
-                let rotate = '0deg';
-
-                if (isFront) {
-                  transform = 'translate3d(0, 0, 0) scale(1)';
-                  zIndex = 30;
-                  opacity = 1;
-                  rotate = '0deg';
-                } else if (isSecond) {
-                  transform = 'translate3d(12px, 8px, 0) scale(0.96)';
-                  zIndex = 20;
-                  opacity = 0.95;
-                  rotate = '2deg';
-                } else if (isThird) {
-                  transform = 'translate3d(-14px, 12px, 0) scale(0.92)';
-                  zIndex = 10;
-                  opacity = 0.85;
-                  rotate = '-3deg';
-                }
-
-                const host = mockDb.getUser(exp.hostId);
-                const palette = getCardColors(idx, typeof window !== 'undefined' && document.documentElement.classList.contains('dark'));
-
-                return (
-                  <div
-                    key={exp.id}
-                    onClick={() => {
-                      if (!isFront) {
-                        setStackIndex(idx);
-                      }
-                    }}
-                    className={`absolute top-0 left-0 w-full h-full rounded-[2rem] p-6 border transition-all duration-500 ease-out flex flex-col justify-between shadow-[0_15px_30px_-5px_rgba(0,0,0,0.15)] bg-gradient-to-br ${palette.bg} ${palette.text} ${isFront ? 'cursor-default pointer-events-auto' : 'cursor-pointer pointer-events-none'}`}
-                    style={{
-                      transform: `${transform} rotate(${rotate})`,
-                      zIndex,
-                      opacity,
-                    }}
-                  >
-                    <div className="space-y-4 text-left">
-                      <div className="flex items-center justify-between">
-                        <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider">
-                          ✨ Recommended
-                        </span>
-                        <div className="w-8 h-1.5 bg-current/25 rounded-full" />
-                      </div>
-
-                      <div className="space-y-1">
-                        <h4 className="text-lg font-black leading-tight tracking-tight uppercase">
-                          {exp.title}
-                        </h4>
-                        <p className={`text-[11px] font-bold ${palette.sub}`}>
-                          with {host?.full_name || exp.hostId}
-                        </p>
-                      </div>
-
-                      <div className="space-y-0.5 text-[10.5px] font-bold uppercase tracking-wider opacity-80">
-                        <p>{exp.location.split(',')[0]}</p>
-                        <p>Today, 5:00 PM · {exp.duration} min</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between border-t border-current/15 pt-4">
-                      <div className="flex items-center gap-1 text-sm font-black">
-                        <span>{exp.price}</span>
-                        <Zap size={13} className="fill-current text-amber-500" />
-                      </div>
-                      
-                      {isFront ? (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedExp(exp);
-                          }}
-                          className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${palette.btn}`}
-                        >
-                          Book Now
-                        </button>
-                      ) : (
-                        <span className="text-[9px] font-black uppercase tracking-widest opacity-60">
-                          Tap to view
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ── QUICK ACTIONS ─────────────────────────── */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-secondary)]">Quick Actions</h3>
-        
-        <div className="grid grid-cols-4 gap-2">
-          {/* Find Hosts */}
-          <button
-            onClick={() => {
-              setSearchQuery('');
-              setActiveCategory('All');
-              document.getElementById('classmates-available')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="flex flex-col items-center gap-2 text-center group cursor-pointer focus:outline-none"
-          >
-            <div className="w-14 h-14 rounded-full flex items-center justify-center transition-all bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:border dark:border-emerald-800/30 dark:text-emerald-400 group-hover:scale-105 group-active:scale-95 shadow-sm">
-              <UserCheck size={20} strokeWidth={2.5} />
-            </div>
-            <span className="text-[9.5px] font-black uppercase tracking-wider text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
-              Find Hosts
-            </span>
-          </button>
-
-          {/* Join Groups */}
-          <button
-            onClick={() => {
-              document.getElementById('campus-groups')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="flex flex-col items-center gap-2 text-center group cursor-pointer focus:outline-none"
-          >
-            <div className="w-14 h-14 rounded-full flex items-center justify-center transition-all bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:border dark:border-blue-800/30 dark:text-blue-400 group-hover:scale-105 group-active:scale-95 shadow-sm">
-              <Users size={20} strokeWidth={2.5} />
-            </div>
-            <span className="text-[9.5px] font-black uppercase tracking-wider text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
-              Join Groups
-            </span>
-          </button>
-
-          {/* Create Event */}
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex flex-col items-center gap-2 text-center group cursor-pointer focus:outline-none"
-          >
-            <div className="w-14 h-14 rounded-full flex items-center justify-center transition-all bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:border dark:border-rose-800/30 dark:text-rose-400 group-hover:scale-105 group-active:scale-95 shadow-sm">
-              <Calendar size={20} strokeWidth={2.5} />
-            </div>
-            <span className="text-[9.5px] font-black uppercase tracking-wider text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
-              Create Event
-            </span>
-          </button>
-
-          {/* My Bookings */}
-          <button
-            onClick={() => setShowBookingsModal(true)}
-            className="flex flex-col items-center gap-2 text-center group cursor-pointer focus:outline-none"
-          >
-            <div className="w-14 h-14 rounded-full flex items-center justify-center transition-all bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:border dark:border-indigo-800/30 dark:text-indigo-400 group-hover:scale-105 group-active:scale-95 shadow-sm">
-              <Clock size={20} strokeWidth={2.5} />
-            </div>
-            <span className="text-[9.5px] font-black uppercase tracking-wider text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
-              Bookings
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* ── SEARCH & CATEGORIES ───────── */}
-      <div className="space-y-4 pt-2">
-        <div className="relative">
-          <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-[var(--text-muted)] pointer-events-none" />
+      {/* ── SEARCH BAR ─────────────────────────── */}
+      <div className="relative flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search campus experiences, hosts, tags, or public locations..."
-            className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] focus:border-[var(--accent)]/40 rounded-2xl pl-12 pr-4 py-3.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none transition-all font-semibold shadow-inner"
+            placeholder="Search people, experiences, groups..."
+            className="w-full bg-[#f3f4f6]/60 border border-transparent focus:border-zinc-205 focus:bg-white rounded-2xl pl-12 pr-4 py-3.5 text-xs font-bold text-zinc-850 placeholder-zinc-500/80 focus:outline-none transition-all shadow-inner"
           />
         </div>
+        <button
+          type="button"
+          className="w-11 h-11 rounded-2xl bg-[#f3f4f6]/60 border border-transparent flex items-center justify-center text-zinc-650 hover:bg-[#eaebeb] transition-all cursor-pointer flex-shrink-0"
+        >
+          <SlidersHorizontal size={16} />
+        </button>
+      </div>
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          {[
-            { name: 'All', value: 'All', Icon: Compass },
-            { name: 'Coffee', value: 'Coffee', Icon: Coffee },
-            { name: 'Study', value: 'Study', Icon: BookOpen },
-            { name: 'Startup', value: 'Startup', Icon: Briefcase },
-            { name: 'Photo', value: 'Photography', Icon: Camera },
-            { name: 'Sports', value: 'Sports', Icon: Activity },
-            { name: 'Music', value: 'Music', Icon: Music },
-          ].map((cat) => {
-            const isSelected = activeCategory === cat.value;
+      {/* ── PEOPLE YOU MIGHT VIBE WITH ─────────────────────────── */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-black text-zinc-950 tracking-tight">People you might vibe with</h3>
+          <Link href="/discover" className="text-xs font-black text-[#7c3aed] hover:text-indigo-850 transition-colors">
+            See all
+          </Link>
+        </div>
+
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+          {vibeUsers.map((user) => {
+            if (dismissedVibes[user.id]) return null;
             return (
-              <button
-                key={cat.value}
-                onClick={() => setActiveCategory(cat.value)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border transition-all duration-200 flex-shrink-0 cursor-pointer text-[10px] font-bold uppercase tracking-wider ${isSelected
-                    ? 'text-white border-transparent'
-                    : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-mid)]'
-                  }`}
-                style={isSelected ? { background: 'var(--accent)', boxShadow: 'var(--shadow-glow)' } : {}}
+              <div
+                key={user.id}
+                className="w-[185px] flex-shrink-0 bg-white border border-zinc-100 rounded-[2rem] p-5 flex flex-col items-center justify-between text-center shadow-[0_4px_16px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
               >
-                <cat.Icon size={12} strokeWidth={isSelected ? 2.5 : 1.75} />
-                <span>{cat.name}</span>
-              </button>
+                {/* Avatar with circle bg */}
+                <div className="relative w-[84px] h-[84px] rounded-full bg-[#e8e4ff] p-[3px] mb-3.5 flex items-center justify-center">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-white">
+                    <img src={getUserAvatarUrl(user)} alt={user.full_name} className="w-full h-full object-cover" />
+                  </div>
+                </div>
+
+                {/* Name & online dot */}
+                <div className="flex items-center gap-1.5 mb-1 justify-center">
+                  <span className="text-xs font-black text-zinc-950 uppercase tracking-tight truncate max-w-[120px]">
+                    {user.full_name}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                </div>
+
+                {/* Details */}
+                <p className="text-[9.5px] font-black text-zinc-400 uppercase tracking-wider leading-none">
+                  {user.year} Year · {user.branch}
+                </p>
+                <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider leading-none">
+                  {user.college}
+                </p>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1 mt-3 justify-center mb-4">
+                  {user.interests.map((tag) => (
+                    <span key={tag} className="text-[8px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-full bg-[#f3f0ff] text-[#7c3aed]">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="w-full flex items-center gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setDismissedVibes(prev => ({ ...prev, [user.id]: true }))}
+                    className="flex-shrink-0 w-9 h-9 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 flex items-center justify-center transition-all cursor-pointer active:scale-90"
+                  >
+                    <X size={14} strokeWidth={2.5} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      confetti({ particleCount: 80, spread: 55, origin: { y: 0.6 } });
+                      setDismissedVibes(prev => ({ ...prev, [user.id]: true }));
+                      router.push(`/messages?user=${encodeURIComponent(user.full_name)}`);
+                    }}
+                    className="flex-1 h-9 rounded-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-[11px] font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95"
+                  >
+                    Connect
+                  </button>
+                </div>
+              </div>
             );
           })}
         </div>
       </div>
 
-      {/* ── TRENDING THIS WEEK ─────────────────────── */}
+      {/* ── TOP EXPERIENCES FOR YOU ─────────────────────────── */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2">
-          <div className="flex items-center gap-1.5">
-            <h3 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)]">Trending This Week</h3>
-            <span className="text-xs">🔥</span>
-          </div>
-          <Link href="/experiences" className="text-[10px] font-black text-[var(--accent)] hover:text-white uppercase tracking-widest">
-            View all
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-black text-zinc-950 tracking-tight">Top Experiences for you</h3>
+          <Link href="/experiences" className="text-xs font-black text-[#7c3aed] hover:text-[#5b21b6] transition-colors">
+            See all
           </Link>
         </div>
 
-        {filteredExperiences.length === 0 ? (
-          <div className="p-8 text-center bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl text-xs text-[var(--text-muted)] italic">
-            No matching experiences found.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredExperiences.slice(0, 4).map((exp, idx) => {
-              // Colors for icons on the left
-              const iconThemes = [
-                { bg: 'bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400', Icon: Briefcase },
-                { bg: 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400', Icon: BookOpen },
-                { bg: 'bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400', Icon: Sparkles },
-                { bg: 'bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400', Icon: Coffee }
-              ];
-              const theme = iconThemes[idx % iconThemes.length];
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+          {topExps.map((exp) => {
+            const theme = getExpCardTheme(exp.category);
+            const cat = (exp.category || '').toLowerCase();
+            let ExpIcon = Coffee;
+            if (cat.includes('study') || cat.includes('learn') || cat.includes('together')) ExpIcon = BookOpen;
+            else if (cat.includes('sport') || cat.includes('match') || cat.includes('fitness') || cat.includes('badminton')) ExpIcon = Activity;
+            else if (cat.includes('music') || cat.includes('jam')) ExpIcon = Music;
+            else if (cat.includes('design') || cat.includes('figma') || cat.includes('art')) ExpIcon = Layers;
+            else if (cat.includes('camera') || cat.includes('photo')) ExpIcon = Camera;
 
-              return (
-                <div
-                  key={exp.id}
-                  onClick={() => setSelectedExp(exp)}
-                  className="flex items-center justify-between p-4 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] rounded-2xl cursor-pointer transition-all duration-300"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 ${theme.bg}`}>
-                      <theme.Icon size={18} strokeWidth={2.5} />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-xs font-black text-[var(--text-primary)] uppercase truncate pr-2">
-                        {exp.title}
-                      </h4>
-                      <p className="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase tracking-wider">
-                        {exp.days[0]} · {exp.location.split(',')[0]}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 bg-[var(--accent-dim)] border border-[var(--accent-glow)] text-[var(--accent)] text-xs font-black px-3.5 py-1.5 rounded-full flex-shrink-0 shadow-sm">
-                    <span>{exp.price}</span>
-                    <Zap size={11} className="fill-current text-amber-500 animate-pulse" />
-                  </div>
+            return (
+              <div
+                key={exp.id}
+                onClick={() => setSelectedExp(exp)}
+                className={`w-[175px] flex-shrink-0 border rounded-3xl p-4 flex flex-col cursor-pointer transition-all hover:shadow-md active:scale-[0.98] ${theme.bg}`}
+                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
+              >
+                {/* Icon circle */}
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 ${theme.circleBg}`}>
+                  <ExpIcon size={20} className={theme.text} strokeWidth={2} />
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
 
-      {/* ── CLASSMATES AVAILABLE TO MEET (Campus Suggestions Carousel) ── */}
-      <div className="space-y-3.5">
-        <div className="flex items-end justify-between border-b border-[var(--border-subtle)] pb-2">
-          <div>
-            <h3 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)]">Classmates Available</h3>
-            <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase mt-0.5">Students available to co-study or meet up on campus</p>
-          </div>
-        </div>
+                {/* Title */}
+                <h4 className={`text-[11px] font-black uppercase tracking-wide leading-tight ${theme.text}`}>
+                  {exp.title}
+                </h4>
 
-        <div className="flex gap-5 overflow-x-auto no-scrollbar py-2">
-          {popularHosts.map((host) => (
-            <button
-              key={host.id}
-              onClick={() => {
-                if (host.instagram) {
-                  setActiveInstagramUser(host.instagram);
-                } else {
-                  setSearchQuery(host.full_name);
-                }
-              }}
-              className="flex flex-col items-center gap-2 flex-shrink-0 group cursor-pointer"
-              style={{ width: '80px' }}
-            >
-              <div className="relative w-16 h-16 rounded-full p-[3px] bg-gradient-to-tr from-[var(--accent-gradient-from)] to-[var(--accent-gradient-to)] transition-transform duration-300 group-hover:scale-105 shadow-md">
-                <div className="w-full h-full rounded-full overflow-hidden bg-[var(--bg-surface)] border border-[var(--bg-elevated)]">
-                  <img src={avatarUrl(host)} alt={host.full_name} className="w-full h-full object-cover" />
-                </div>
-                {host.instagram && (
-                  <span className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] border border-[var(--bg-elevated)] flex items-center justify-center text-[9px] shadow-md select-none">
-                    📸
-                  </span>
-                )}
-              </div>
-              <div className="text-center">
-                <p className="text-[10px] font-black text-[var(--text-primary)] truncate max-w-[75px] group-hover:text-[var(--accent)] transition-colors">
-                  {host.full_name.split(' ')[0]}
+                {/* Schedule */}
+                <p className="text-[9.5px] font-bold text-zinc-500 mt-2 uppercase tracking-wider">
+                  {exp.days ? exp.days[0] : 'Today'} · {exp.slots ? exp.slots[0] : '5:00 PM'}
                 </p>
-                <span className="text-[8px] font-black text-yellow-400 flex items-center justify-center gap-0.5">
-                  <Star size={7} className="fill-current" />
-                  {host.rating}
-                </span>
+
+                {/* Location */}
+                <div className="flex items-center gap-1 mt-0.5">
+                  <MapPin size={8} className="text-zinc-400 flex-shrink-0" />
+                  <p className="text-[9px] font-semibold text-zinc-400 truncate">
+                    {exp.location?.split(',')[0] || 'Campus Cafe'}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-black/5 pt-2.5 mt-3">
+                  {/* Sparks price */}
+                  <div className={`text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 ${theme.priceBg}`}>
+                    <span>{exp.price}</span>
+                    <Zap size={8} className="fill-current" />
+                  </div>
+                  {/* Facepile */}
+                  <div className="flex -space-x-1.5">
+                    {['Rahul', 'Neha', 'Aarav'].map((name, i) => (
+                      <div key={i} className="w-5 h-5 rounded-full overflow-hidden border-2 border-white">
+                        <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`} alt={name} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 
+      {/* ── LOWER GRID SECTION ─────────────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+        
+        {/* Live Tournaments Column */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
+            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-950">Live Tournaments</h3>
+            <Link href="/gigs" className="text-[10px] font-black text-[#7c3aed] uppercase tracking-wider">
+              See all
+            </Link>
+          </div>
 
-      {/* ── CAMPUS GROUPS & CHANNELS (WHATSAPP STYLE) ────────────────── */}
-      {(() => {
-        const campusGroups = [
-          { name: 'Google Developer Student Club', category: 'Tech', isPaid: false, price: 0, desc: 'Official updates on campus hackathons, coding tasks & bootcamps.', logo: 'GD', members: 180, isOfficial: true },
-          { name: 'Figma UI/UX Masterclass VIP', category: 'Design', isPaid: true, price: 50, desc: 'Premium design templates, personal project reviews & job opportunities.', logo: 'FM', members: 42, isOfficial: false },
-          { name: 'Campus Symphony Chat', category: 'Music', isPaid: false, price: 0, desc: 'Open mic coordination, jamming sessions & campus playlist sharing.', logo: 'CS', members: 96, isOfficial: true },
-          { name: 'Placement Prep & Referrals', category: 'Career', isPaid: true, price: 120, desc: 'Placement test leaks, interview preparation sheets & direct referrals.', logo: 'PP', members: 115, isOfficial: true },
-          { name: 'Gladiators FC (Sports)', category: 'Athletics', isPaid: false, price: 0, desc: 'Match schedule updates, football practice slots & gym meets.', logo: 'GF', members: 140, isOfficial: false }
-        ];
-
-        const filteredGroups = campusGroups.filter(g => {
-          if (groupFilter === 'Free') return !g.isPaid;
-          if (groupFilter === 'Premium') return g.isPaid;
-          return true;
-        });
-
-        return (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-[var(--border-subtle)] pb-3 gap-3">
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)]">Campus Groups & Channels</h3>
-                <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase mt-0.5">Join paid or free campus discussion groups and channels</p>
+          <div className="space-y-3">
+            {/* BGMI Campus Cup */}
+            <div className="flex items-center justify-between p-3.5 bg-white border border-zinc-100 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.01)] hover:border-zinc-200 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-[#f5f3ff] text-[#7c3aed] flex items-center justify-center">
+                  <Trophy size={20} className="stroke-[2.5]" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wide text-zinc-900 leading-tight">
+                    BGMI Campus Cup
+                  </h4>
+                  <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">
+                    32 Teams · <span className="text-rose-500 font-extrabold animate-pulse">Live</span>
+                  </p>
+                </div>
               </div>
-              
-              {/* Filter Chips */}
-              <div className="flex items-center gap-1.5 self-start sm:self-auto">
-                {['All', 'Free', 'Premium'].map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setGroupFilter(filter)}
-                    className={`text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-lg border transition-all cursor-pointer ${
-                      groupFilter === filter
-                        ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
-                        : 'bg-[var(--bg-surface)] text-[var(--text-muted)] border-[var(--border-subtle)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]'
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
+              <span className="text-[8px] font-black uppercase bg-rose-500 text-white px-2 py-0.5 rounded-md animate-pulse">
+                Live
+              </span>
             </div>
 
-            <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-3xl overflow-hidden divide-y divide-[var(--border-subtle)]/60 shadow-lg">
-              {filteredGroups.map((group) => {
-                const hasJoined = joinedGroups[group.name];
-                return (
-                  <div key={group.name} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-[var(--bg-hover)] transition-colors gap-3">
-                    <div className="flex items-start gap-3.5">
-                      {/* Channel Icon */}
-                      <div className="w-11 h-11 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-black text-[var(--accent)] flex-shrink-0 shadow-sm relative">
-                        {group.logo}
-                        {group.isOfficial && (
-                          <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center border border-[var(--bg-elevated)] shadow">
-                            <Check size={8} className="text-white stroke-[3.5]" />
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <h4 className="text-xs font-extrabold text-[var(--text-primary)] flex items-center gap-1">
-                            {group.name}
-                          </h4>
-                          <span className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-muted)]">
-                            {group.category}
-                          </span>
-                          <span className="text-[8px] font-bold text-[var(--text-muted)]">
-                            • {group.members + (hasJoined ? 1 : 0)} followers
-                          </span>
-                        </div>
-                        
-                        <p className="text-[11px] text-[var(--text-secondary)] font-semibold leading-relaxed">
-                          {group.desc}
-                        </p>
-
-                        {/* Price Tag */}
-                        <div className="pt-0.5">
-                          {group.isPaid ? (
-                            <span className="inline-flex items-center gap-0.5 text-[8px] font-black uppercase tracking-wider text-purple-400 bg-purple-500/10 border border-purple-500/20 px-1.5 py-0.5 rounded">
-                              ⚡ {group.price} Sparks
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-0.5 text-[8px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-                              Free Group
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex-shrink-0 self-end sm:self-auto pt-1 sm:pt-0">
-                      {hasJoined ? (
-                        <button
-                          onClick={() => handleJoinGroup(group)}
-                          className="w-full sm:w-auto bg-emerald-500/10 border border-emerald-500/35 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider px-4 py-2 rounded-xl transition-all flex items-center gap-1 cursor-pointer"
-                        >
-                          <Check size={11} className="stroke-[3.5]" />
-                          <span>Chat Opened</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleJoinGroup(group)}
-                          className={`w-full sm:w-auto text-[10px] font-black uppercase tracking-wider px-4 py-2 rounded-xl transition-all cursor-pointer active:scale-95 ${
-                            group.isPaid
-                              ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-md'
-                              : 'bg-[var(--bg-overlay)] border border-[var(--border-subtle)] hover:bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                          }`}
-                        >
-                          {group.isPaid ? `Subscribe (⚡ ${group.price})` : 'Join Group'}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+            {/* FIFA 24 Showdown */}
+            <div className="flex items-center justify-between p-3.5 bg-white border border-zinc-100 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.01)] hover:border-zinc-200 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-[#eef2ff] text-[#4f46e5] flex items-center justify-center">
+                  <Gamepad size={20} className="stroke-[2.5]" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wide text-zinc-900 leading-tight">
+                    FIFA 24 Showdown
+                  </h4>
+                  <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">
+                    16 Players · Reg. Open
+                  </p>
+                </div>
+              </div>
+              <span className="text-[8px] font-black uppercase bg-[#eef2ff] text-[#4f46e5] px-2 py-0.5 rounded-md">
+                Open
+              </span>
             </div>
           </div>
-        );
-      })()}
+        </div>
+
+        {/* What's Trending Column */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
+            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-950">What's Trending</h3>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              { id: 1, title: 'Campus Confessions', posts: '125 posts', bg: 'bg-[#eff6ff]', text: 'text-[#2563eb]', Icon: TrendingUp },
+              { id: 2, title: 'Assignment Help', posts: '98 posts', bg: 'bg-[#fff7ed]', text: 'text-[#ea580c]', Icon: HelpCircle },
+              { id: 3, title: 'Movie Night', posts: '72 posts', bg: 'bg-[#f0fdf4]', text: 'text-[#16a34a]', Icon: Film }
+            ].map((item, idx) => (
+              <div key={item.id} className="flex items-center justify-between p-2.5 bg-white border border-transparent hover:border-zinc-100 hover:bg-zinc-50/40 rounded-2xl transition-all">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-black text-zinc-400 w-4 text-center">
+                    {idx + 1}
+                  </span>
+                  <div className={`w-10 h-10 rounded-xl ${item.bg} ${item.text} flex items-center justify-center flex-shrink-0`}>
+                    <item.Icon size={18} className="stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-zinc-900 leading-tight">
+                      {item.title}
+                    </h4>
+                    <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">
+                      {item.posts}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── CAMPUS GROUPS SECTION ─────────────────────────── */}
+      <div className="space-y-4 pt-8 border-t border-zinc-200/60">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
+              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-900">Campus Groups & Channels</h3>
+            </div>
+            <p className="text-[11px] text-zinc-500 font-semibold mt-0.5">Join paid or free campus discussion communities</p>
+          </div>
+          
+          <div className="flex items-center gap-1 bg-zinc-100/80 p-1 rounded-xl self-start sm:self-auto border border-zinc-200/60">
+            {['All', 'Free', 'Premium'].map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setGroupFilter(filter)}
+                className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  groupFilter === filter
+                    ? 'bg-white text-purple-700 shadow-sm font-black'
+                    : 'text-zinc-500 hover:text-zinc-900 font-bold'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {filteredGroups.map((group) => {
+            const hasJoined = joinedGroups[group.name];
+            const groupTheme = GROUP_THEME[group.category] || GROUP_THEME.default;
+            const GroupIcon = groupTheme.Icon;
+            return (
+              <div 
+                key={group.name}
+                className="group relative flex items-center justify-between p-4 bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:border-purple-300 hover:shadow-[0_8px_24px_rgba(124,58,237,0.06)] transition-all duration-200 cursor-pointer"
+                onClick={() => handleJoinGroup(group)}
+              >
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  {/* Category Icon Avatar */}
+                  <div className="relative flex-shrink-0">
+                    <div 
+                      className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform"
+                      style={{ background: groupTheme.bg, border: `1px solid ${groupTheme.border}`, color: groupTheme.color }}
+                    >
+                      <GroupIcon size={20} strokeWidth={2.2} />
+                    </div>
+                    {group.isOfficial && (
+                      <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                        <Check size={9} className="text-white" strokeWidth={3.5} />
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0 pr-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-[13px] font-black text-zinc-950 tracking-tight group-hover:text-purple-700 transition-colors">
+                        {group.name}
+                      </h4>
+                      <span 
+                        className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+                        style={{ background: groupTheme.bg, color: groupTheme.color, border: `1px solid ${groupTheme.border}` }}
+                      >
+                        {group.category}
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-medium text-zinc-500 mt-1 leading-snug truncate max-w-[420px]">
+                      {group.desc}
+                    </p>
+                    
+                    <div className="flex items-center gap-3 mt-2">
+                      {group.isPaid ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 bg-purple-50 border border-purple-200/80 px-2.5 py-0.5 rounded-full">
+                          <Zap size={10} className="fill-current text-purple-600" />
+                          {group.price} Sparks
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
+                          Free Group
+                        </span>
+                      )}
+                      <span className="text-[11px] text-zinc-400 font-semibold">
+                        {group.members + (hasJoined ? 1 : 0)} members
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action CTA Button */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleJoinGroup(group); }}
+                  className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-sm ${
+                    hasJoined
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                      : group.isPaid
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-purple-500/20'
+                        : 'bg-zinc-950 hover:bg-zinc-800 text-white'
+                  }`}
+                >
+                  {hasJoined ? 'Open Chat' : group.isPaid ? 'Subscribe' : 'Join'}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
 
       {/* ── BOOKING MODAL (PREMIUM AIRBNB STYLE) ───────────────────── */}
       {selectedExp && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pb-20 sm:pb-4 px-4 pt-4"
           style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
           onClick={() => !bookingLoading && setSelectedExp(null)}
         >
           <div
-            className="relative w-full max-w-sm rounded-3xl p-6 anim-scale-in"
+            className="relative w-full max-w-sm rounded-3xl p-6 anim-scale-in max-h-[80vh] overflow-y-auto"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}
             onClick={e => e.stopPropagation()}
           >
@@ -934,8 +919,8 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
             ) : (
               <>
                 <div className="flex items-center gap-3 mb-5 border-b border-[var(--border-subtle)] pb-3">
-                  <div className="w-11 h-11 rounded-xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex-shrink-0">
-                    <img src={avatarUrl(mockDb.getUser(selectedExp.hostId))} alt="host" />
+                  <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0" style={{ border: '2px solid #ede9fe' }}>
+                    <img src={avatarUrl(mockDb.getUser(selectedExp.hostId))} alt="host" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-[var(--text-primary)] tracking-tight">Meet Host</h3>
@@ -1026,12 +1011,12 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
       {/* ── REVIEW DIALOG DIALOG MODAL (POST MEETING) ───────────────── */}
       {reviewBooking && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center pb-20 sm:pb-4 px-4 pt-4"
           style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
         >
           <form
             onSubmit={handleSubmitReview}
-            className="relative w-full max-w-sm rounded-3xl p-6 space-y-4 anim-scale-in"
+            className="relative w-full max-w-sm rounded-3xl p-6 space-y-4 anim-scale-in max-h-[80vh] overflow-y-auto"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}
           >
             <div className="text-center">
@@ -1106,12 +1091,12 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
       {/* ── ACTIVE BOOKING DETAILS & MEETUP QR VERIFICATION MODAL ───── */}
       {selectedActiveBooking && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center pb-20 sm:pb-4 px-4 pt-4"
           style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
           onClick={() => !isScanningMock && setSelectedActiveBooking(null)}
         >
           <div
-            className="relative w-full max-w-sm rounded-[2rem] p-6 space-y-5 anim-scale-in text-center"
+            className="relative w-full max-w-sm rounded-[2rem] p-6 space-y-5 anim-scale-in text-center max-h-[80vh] overflow-y-auto"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -1351,12 +1336,12 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
       {/* ── CREATE CUSTOM EXPERIENCE MODAL ───────────────────────── */}
       {showCreateModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center pb-20 sm:pb-4 px-4 pt-4"
           style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
           onClick={() => !createLoading && setShowCreateModal(false)}
         >
           <div
-            className="relative w-full max-w-sm rounded-[2rem] p-6 space-y-4 anim-scale-in text-left"
+            className="relative w-full max-w-sm rounded-[2rem] p-6 space-y-4 anim-scale-in text-left max-h-[80vh] overflow-y-auto"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -1491,12 +1476,12 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
       {/* ── MY BOOKINGS MODAL ─────────────────────────────────────── */}
       {showBookingsModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center pb-20 sm:pb-4 px-4 pt-4"
           style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
           onClick={() => setShowBookingsModal(false)}
         >
           <div
-            className="relative w-full max-w-md rounded-[2.5rem] p-6 space-y-4 anim-scale-in text-left max-h-[85vh] overflow-y-auto"
+            className="relative w-full max-w-md rounded-[2.5rem] p-6 space-y-4 anim-scale-in text-left max-h-[80vh] overflow-y-auto"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}
             onClick={(e) => e.stopPropagation()}
           >
