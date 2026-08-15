@@ -1,75 +1,134 @@
 import { getUserAdmin } from '../../lib/getAdminUser';
 import { fetchUpcomingEventsAdmin } from '../../lib/firebaseAdminQueries';
 import Link from 'next/link';
-import { Calendar, MapPin, Users, Filter, Clock } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Zap, Music, Code, Trophy, BookOpen, Palette, Mic } from 'lucide-react';
 
-export const metadata = { title: 'Events — meetuply' };
+export const metadata = { title: 'Events — meetifyy' };
+
+// Category → premium gradient + icon
+const CATEGORY_THEMES = {
+  tech:        { from: '#4f46e5', to: '#7c3aed', icon: Code,    label: 'Tech' },
+  music:       { from: '#db2777', to: '#ec4899', icon: Music,   label: 'Music' },
+  gaming:      { from: '#0ea5e9', to: '#6366f1', icon: Trophy,  label: 'Gaming' },
+  study:       { from: '#10b981', to: '#059669', icon: BookOpen, label: 'Study' },
+  art:         { from: '#f97316', to: '#ef4444', icon: Palette, label: 'Art' },
+  talk:        { from: '#8b5cf6', to: '#a855f7', icon: Mic,     label: 'Talk' },
+  default:     { from: '#7c3aed', to: '#6366f1', icon: Zap,     label: 'Event' },
+};
+
+function getTheme(event) {
+  const cat = (event.category || event.circle_name || '').toLowerCase();
+  if (cat.includes('tech') || cat.includes('web') || cat.includes('code') || cat.includes('blockchain') || cat.includes('developer')) return CATEGORY_THEMES.tech;
+  if (cat.includes('music') || cat.includes('jam') || cat.includes('acoustic')) return CATEGORY_THEMES.music;
+  if (cat.includes('game') || cat.includes('gaming') || cat.includes('esport')) return CATEGORY_THEMES.gaming;
+  if (cat.includes('study') || cat.includes('learn') || cat.includes('book')) return CATEGORY_THEMES.study;
+  if (cat.includes('art') || cat.includes('design') || cat.includes('photo')) return CATEGORY_THEMES.art;
+  if (cat.includes('talk') || cat.includes('seminar') || cat.includes('speaker')) return CATEGORY_THEMES.talk;
+  return CATEGORY_THEMES.default;
+}
 
 function EventCard({ event, userId }) {
   const going = (event.rsvps_list || []).length;
   const date = new Date(event.date);
   const isRsvp = userId && (event.rsvps_list || []).some(r => r.user_id === userId);
+  const theme = getTheme(event);
+  const ThemeIcon = theme.icon;
+
+  const day   = date.toLocaleDateString('en-US', { day: 'numeric' });
+  const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
 
   return (
-    <div className="group relative flex flex-col bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[2rem] p-4 hover:bg-[var(--bg-hover)] transition-all duration-300 overflow-hidden cursor-pointer h-full shadow-md">
-      {/* Cover image */}
-      <div className="relative h-40 rounded-2xl overflow-hidden bg-[var(--bg-base)] border border-[var(--border-subtle)] mb-4 shrink-0">
+    <div className="group relative flex flex-col bg-white border border-zinc-100 rounded-[2rem] overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
+
+      {/* ── Premium Banner ── */}
+      <div className="relative h-44 overflow-hidden shrink-0">
         {event.image_url ? (
-          <img src={event.image_url} alt={event.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            loading="lazy" />
+          <img
+            src={event.image_url}
+            alt={event.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            loading="lazy"
+          />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--accent-dim)] to-[var(--bg-elevated)] group-hover:scale-110 transition-transform duration-700">
-            <Calendar size={36} className="text-[var(--accent)]/30" />
+          // Rich gradient placeholder instead of plain gray
+          <div
+            className="w-full h-full flex flex-col items-center justify-center gap-3"
+            style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+              <ThemeIcon size={26} className="text-white" strokeWidth={2} />
+            </div>
+            <span className="text-white/80 text-[10px] font-black uppercase tracking-[0.2em]">
+              {theme.label}
+            </span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-        {/* Date badge */}
-        <div className="absolute top-3 right-3 bg-[var(--glass-bg)] backdrop-blur-md border border-[var(--glass-border)] text-center rounded-[0.8rem] px-3 py-1.5 shadow-sm">
-          <p className="text-[13px] font-black text-[var(--text-primary)] leading-none tracking-tight">
-            {date.toLocaleDateString('en-US', { day:'numeric' })}
-          </p>
-          <p className="text-[10px] font-black text-[var(--accent)] uppercase tracking-widest mt-0.5">
-            {date.toLocaleDateString('en-US', { month:'short' })}
-          </p>
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+        {/* Date badge — top right */}
+        <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-md text-center rounded-2xl px-3 py-2 shadow-md min-w-[44px]">
+          <p className="text-[15px] font-black text-zinc-950 leading-none">{day}</p>
+          <p className="text-[9px] font-black uppercase tracking-widest mt-0.5" style={{ color: theme.from }}>{month}</p>
         </div>
 
-        {/* Circle tag */}
-        <div className="absolute bottom-3 left-3 bg-[var(--glass-bg)] backdrop-blur-md border border-[var(--glass-border)] text-[var(--text-primary)] text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">
+        {/* Circle tag — bottom left */}
+        <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-md text-white text-[9px] font-black px-2.5 py-1.5 rounded-full uppercase tracking-wider border border-white/20">
           {event.circle_name}
         </div>
       </div>
 
-      {/* Body */}
-      <div className="flex flex-col flex-1 px-1">
-        <h3 className="text-[15px] font-black text-[var(--text-primary)] leading-snug mb-3 group-hover:text-[var(--accent)] transition-colors line-clamp-2">
+      {/* ── Body ── */}
+      <div className="flex flex-col flex-1 p-4">
+        {/* Weekday pill */}
+        <span
+          className="self-start text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full mb-2"
+          style={{ background: `${theme.from}15`, color: theme.from }}
+        >
+          {weekday}
+        </span>
+
+        <h3 className="text-[15px] font-black text-zinc-950 leading-snug mb-3 group-hover:text-indigo-700 transition-colors line-clamp-2">
           {event.title}
         </h3>
 
-        <div className="flex flex-col gap-2 mb-5 mt-auto">
-          {event.location && (
-            <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--text-secondary)]">
-              <MapPin className="w-[14px] h-[14px] text-[var(--text-muted)]" /> {event.location.split(',')[0]}
-            </span>
-          )}
+        <div className="flex flex-col gap-1.5 mb-4">
           {event.time && (
-            <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--text-secondary)]">
-              <Clock className="w-[14px] h-[14px] text-[var(--text-muted)]" /> {event.time}
+            <span className="flex items-center gap-2 text-[11px] font-semibold text-zinc-500">
+              <Clock className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" /> {event.time}
             </span>
           )}
-          <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--text-secondary)] mt-0.5">
-            <Users className="w-[14px] h-[14px] text-[var(--text-muted)]" /> <span className="text-[var(--text-primary)]">{going}</span> going
+          {event.location && (
+            <span className="flex items-center gap-2 text-[11px] font-semibold text-zinc-500">
+              <MapPin className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" /> {event.location.split(',')[0]}
+            </span>
+          )}
+          <span className="flex items-center gap-2 text-[11px] font-semibold text-zinc-500">
+            <Users className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
+            <span className="text-zinc-900 font-black">{going}</span> going
           </span>
         </div>
 
-        <button className={`w-full font-black text-[11px] py-3.5 rounded-xl uppercase tracking-widest flex items-center justify-center transition-all ${
-          isRsvp 
-            ? 'bg-[var(--accent-dim)] text-[var(--accent)] border border-[var(--accent-glow)]' 
-            : 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:scale-[1.02] active:scale-95'
-        }`}>
-          {isRsvp ? 'Going ✓' : 'RSVP Now'}
-        </button>
+        {/* Premium CTA — no chunky blue button */}
+        <div className="mt-auto">
+          {isRsvp ? (
+            <div
+              className="w-full py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-center border"
+              style={{ background: `${theme.from}10`, color: theme.from, borderColor: `${theme.from}30` }}
+            >
+              ✓ Going
+            </div>
+          ) : (
+            <div
+              className="w-full py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-center text-white transition-all group-hover:opacity-90 active:scale-95"
+              style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}
+            >
+              RSVP Now
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -81,42 +140,50 @@ export default async function EventsPage() {
 
   return (
     <div className="w-full max-w-[900px] mx-auto pb-24 anim-fade-in px-4">
-      {/* Header */}
-      <div className="relative overflow-hidden mb-8 border-b border-[var(--border-subtle)] pt-6 pb-4 flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] tracking-tight">
-            Events
-          </h1>
-          <p className="text-xs text-[var(--text-secondary)] font-bold mt-1 uppercase tracking-widest">
-            {events.length} upcoming events on campus.
-          </p>
-        </div>
-        <button className="hidden sm:flex items-center gap-2 bg-[var(--bg-overlay)] border border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] text-[12px] font-bold px-4 py-2.5 rounded-xl transition-all">
-          <Filter size={15} /> Filter
-        </button>
-      </div>
 
-      <div>
-        <div className="sm:hidden mb-6 flex justify-end">
-          <button className="flex items-center gap-2 bg-[var(--bg-overlay)] border border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] text-[12px] font-bold px-4 py-2.5 rounded-xl transition-all">
-            <Filter size={15} /> Filter
-          </button>
-        </div>
-
-        {events.length === 0 ? (
-          <div className="rounded-[2rem] bg-[var(--bg-elevated)] border border-[var(--border-subtle)] p-16 text-center shadow-lg">
-            <Calendar size={48} className="mx-auto mb-5 text-[var(--text-muted)]" />
-            <p className="text-[var(--text-primary)] font-bold text-[16px]">No upcoming events</p>
-            <p className="text-[var(--text-secondary)] text-[14px] mt-2">Check back later or host your own event.</p>
+      {/* ── Header ── */}
+      <div className="pt-6 pb-5 mb-6 border-b border-zinc-100">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-black text-zinc-950 tracking-tight">Events</h1>
+            <p className="text-[11px] text-zinc-400 font-bold mt-1 uppercase tracking-widest">
+              {events.length > 0 ? `${events.length} upcoming on campus` : 'No upcoming events'}
+            </p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {events.map(ev => (
-              <EventCard key={ev.id} event={ev} userId={user?.id} />
+          {/* Category filter chips — premium look, no ugly button */}
+          <div className="flex items-center gap-1.5 flex-wrap justify-end">
+            {['All', 'Tech', 'Music', 'Gaming'].map((f) => (
+              <span
+                key={f}
+                className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
+                  f === 'All'
+                    ? 'bg-zinc-950 text-white border-zinc-950'
+                    : 'bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400 hover:text-zinc-700'
+                }`}
+              >
+                {f}
+              </span>
             ))}
           </div>
-        )}
+        </div>
       </div>
+
+      {/* ── Grid ── */}
+      {events.length === 0 ? (
+        <div className="rounded-[2rem] bg-white border border-zinc-100 p-16 text-center shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-5">
+            <Calendar size={28} className="text-indigo-500" />
+          </div>
+          <p className="text-zinc-900 font-black text-[16px]">No upcoming events</p>
+          <p className="text-zinc-400 text-[13px] font-medium mt-2">Check back later or host your own.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {events.map(ev => (
+            <EventCard key={ev.id} event={ev} userId={user?.id} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,17 +1,22 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, Search, Users, User, LogIn, Wallet, Shield, Plus, Bell, Zap, MessageSquare } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  Home, Search, Users, User, LogIn, Wallet, Shield, Plus, Bell, Zap, MessageSquare,
+  LayoutDashboard, CreditCard, ArrowUpRight, ShieldCheck, FileText, Settings, MoreHorizontal
+} from 'lucide-react';
 import { getUserAvatarUrl } from '../utils/avatar';
-import { mockDb } from '../lib/mockDatabase';
+import { db } from '../lib/firebaseClient';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 const AUTH_PATHS = ['/login', '/signup'];
 
-// Inline SVG logo — no image file needed
-function MeetifyLogo({ size = 32 }) {
+function MeetifyLogo({ size = 32, animate = false }) {
   return (
     <div
+      className={animate ? 'logo-ring-animation' : ''}
       style={{
         width: size,
         height: size,
@@ -21,24 +26,15 @@ function MeetifyLogo({ size = 32 }) {
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
-        boxShadow: '0 2px 8px rgba(124,58,237,0.3)',
+        boxShadow: animate
+          ? '0 0 0 4px rgba(124,58,237,0.25), 0 2px 8px rgba(124,58,237,0.3)'
+          : '0 2px 8px rgba(124,58,237,0.3)',
+        transition: 'box-shadow 0.3s ease',
       }}
     >
       <svg width={size * 0.6} height={size * 0.6} viewBox="0 0 24 24" fill="none">
-        <path
-          d="M3 18V9l9 6 9-6v9"
-          stroke="white"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M3 9l9-6 9 6"
-          stroke="white"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        <path d="M3 18V9l9 6 9-6v9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3 9l9-6 9 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
   );
@@ -46,32 +42,106 @@ function MeetifyLogo({ size = 32 }) {
 
 export default function Sidebar({ user }) {
   const pathname = usePathname();
-  const [dbUser, setDbUser] = React.useState(user);
-  const [sparks, setSparks] = React.useState(0);
+  const router = useRouter();
+  const isAdminRoute = pathname.startsWith('/admin');
 
-  React.useEffect(() => {
-    const sync = () => {
-      if (user && typeof window !== 'undefined') {
-        const u = mockDb.getUser(user.id);
-        if (u) setDbUser(u);
-        else {
-          mockDb.updateUser(user.id, { id: user.id, uid: user.id, full_name: user.full_name || 'User', email: user.email || '', branch: user.branch || 'General', year: user.year || '1st', bio: user.bio || '', interests: user.interests || [], instagram: user.instagram || '', isIdOn: true });
-          const fresh = mockDb.getUser(user.id);
-          if (fresh) setDbUser(fresh);
+  const [sparks, setSparks] = useState(
+    user?.wallet ? (user.wallet.purchased || 0) + (user.wallet.bonus || 0) + (user.wallet.creator || 0) : 0
+  );
+
+  // ── Notification state ─────────────────────────────────────────────────────
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [logoAnimating, setLogoAnimating] = useState(false);
+  const prevCountRef = useRef(0);
+  const isOnNotifPage = pathname === '/notifications';
+
+  // Notification loader
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let unsub = null;
+    let pollInterval = null;
+
+    const fetchApiCount = async () => {
+      try {
+        const res = await fetch('/api/notifications');
+        if (!res.ok) return;
+        const data = await res.json();
+        const count = data.unreadCount || 0;
+        setUnreadCount(count);
+        if (count > prevCountRef.current && prevCountRef.current !== 0) {
+          setLogoAnimating(true);
+          setTimeout(() => setLogoAnimating(false), 2000);
         }
-        const w = mockDb.getWallet(user.id);
-        if (w) setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
-      }
+        prevCountRef.current = count;
+      } catch { /* silent */ }
     };
-    sync();
-    if (typeof window !== 'undefined') {
-      window.addEventListener('profile-updated', sync);
+
+    fetchApiCount();
+
+    if (db) {
+      try {
+        const notifRef = collection(db, 'users', user.id, 'notifications');
+        const q = query(notifRef, where('read', '==', false));
+
+        unsub = onSnapshot(q, (snap) => {
+          const count = snap.size;
+          setUnreadCount(count);
+          if (count > prevCountRef.current && prevCountRef.current !== 0) {
+            setLogoAnimating(true);
+            setTimeout(() => setLogoAnimating(false), 2000);
+          }
+          prevCountRef.current = count;
+        }, () => {
+          if (!pollInterval) {
+            pollInterval = setInterval(fetchApiCount, 15000);
+          }
+        });
+      } catch {
+        pollInterval = setInterval(fetchApiCount, 15000);
+      }
+    } else {
+      pollInterval = setInterval(fetchApiCount, 15000);
+    }
+
+    return () => {
+      if (unsub) unsub();
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (isOnNotifPage && unreadCount > 0 && user?.id) {
+      fetch('/api/notifications', { method: 'PATCH' })
+        .then(() => setUnreadCount(0))
+        .catch(() => {});
+    }
+  }, [isOnNotifPage]);
+
+  // ── Wallet sync ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const sync = async () => {
+      try {
+        const res = await fetch('/api/wallet');
+        if (!res.ok) return;
+        const data = await res.json();
+        const w = data.wallet;
+        if (w) setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
+      } catch { /* silent */ }
+    };
+
+    if (user && typeof window !== 'undefined') {
+      sync();
       window.addEventListener('wallet-updated', sync);
-      return () => { window.removeEventListener('profile-updated', sync); window.removeEventListener('wallet-updated', sync); };
+      return () => window.removeEventListener('wallet-updated', sync);
     }
   }, [user]);
 
-  const isActive = (href) => href === '/' ? pathname === '/' : pathname.startsWith(href);
+  const isActive = (href) => {
+    if (href === '/') return pathname === '/';
+    if (href === '/admin') return pathname === '/admin';
+    return pathname.startsWith(href);
+  };
 
   const NAV = [
     { href: '/',              label: 'Home',          Icon: Home },
@@ -92,51 +162,69 @@ export default function Sidebar({ user }) {
     { href: '/profile', label: 'Profile',     Icon: User },
   ];
 
-  const avatarSrc = getUserAvatarUrl(dbUser);
+  const avatarSrc = getUserAvatarUrl(user);
 
-  // Hide all navigation chrome on auth pages
   if (AUTH_PATHS.includes(pathname)) return null;
 
   return (
     <>
+      <style>{`
+        @keyframes logo-ring {
+          0%   { transform: rotate(0deg) scale(1); }
+          15%  { transform: rotate(-12deg) scale(1.1); }
+          30%  { transform: rotate(10deg) scale(1.1); }
+          45%  { transform: rotate(-8deg) scale(1.05); }
+          60%  { transform: rotate(6deg) scale(1.05); }
+          75%  { transform: rotate(-4deg) scale(1.02); }
+          100% { transform: rotate(0deg) scale(1); }
+        }
+        .logo-ring-animation {
+          animation: logo-ring 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+          animation-iteration-count: 2;
+        }
+      `}</style>
+
       {/* ── Mobile top header ────────────────── */}
       <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[60px] flex items-center justify-between px-4"
         style={{ background: '#ffffff', borderBottom: '1px solid #f0f0f0', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
         
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <MeetifyLogo size={28} />
+          <MeetifyLogo size={28} animate={logoAnimating} />
           <span className="font-black text-[17px] tracking-tight text-zinc-900">meetifyy</span>
         </Link>
 
-        {/* Right actions */}
         <div className="flex items-center gap-2">
           {user ? (
             <>
-              {/* Sparks badge */}
-              <Link href="/wallet" className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black"
-                style={{ background: '#f3f0ff', color: '#7c3aed' }}>
-                <Zap size={11} className="fill-current" />
-                <span>{sparks.toLocaleString()}</span>
-              </Link>
+              {!isAdminRoute && (
+                <Link href="/wallet" className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black"
+                  style={{ background: '#f3f0ff', color: '#7c3aed' }}>
+                  <Zap size={11} className="fill-current" />
+                  <span>{sparks.toLocaleString()}</span>
+                </Link>
+              )}
 
-              {/* Messages icon */}
-              <Link href="/messages" className="relative w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ background: '#f8f8fa', border: '1px solid #e8e8ea' }}>
-                <MessageSquare size={16} className="text-zinc-600" strokeWidth={2} />
-              </Link>
-
-              {/* Notification bell */}
               <Link href="/notifications" className="relative w-9 h-9 rounded-full flex items-center justify-center"
                 style={{ background: '#f8f8fa', border: '1px solid #e8e8ea' }}>
-                <Bell size={16} className="text-zinc-600" strokeWidth={2} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#7c3aed] rounded-full border-2 border-white" />
+                <Bell size={16} className={unreadCount > 0 ? 'text-[#7c3aed]' : 'text-zinc-600'} strokeWidth={2} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#7c3aed] border-2 border-white flex items-center justify-center text-[9px] font-black text-white px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </Link>
 
-              {/* Avatar */}
+              {user?.role === 'admin' && (
+                <Link href="/admin" className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
+                  style={{ background: '#f3f0ff', border: '1px solid #e9d5ff', color: '#7c3aed' }}
+                  title="Admin Dashboard">
+                  <Shield size={16} strokeWidth={2.2} />
+                </Link>
+              )}
+
               <Link href="/profile">
-                <div className="w-8 h-8 rounded-full overflow-hidden" style={{ border: '2px solid #e8e8ea' }}>
-                  <img src={avatarSrc} alt="me" className="w-full h-full object-cover" />
+                <div className="w-8 h-8 rounded-full overflow-hidden relative" style={{ border: '2px solid #e8e8ea' }}>
+                  <Image src={avatarSrc} alt="me" fill sizes="32px" style={{ objectFit: 'cover' }} />
                 </div>
               </Link>
             </>
@@ -154,25 +242,29 @@ export default function Sidebar({ user }) {
       <aside className="hidden md:flex flex-col fixed left-0 top-0 h-screen z-40"
         style={{ width: 220, background: '#ffffff', borderRight: '1px solid #f0f0f0', padding: '28px 16px' }}>
 
-        <div className="flex items-center gap-2.5 px-2 mb-10">
-          <MeetifyLogo size={32} />
+        <Link href="/" className="flex items-center gap-2.5 px-2 mb-10">
+          <MeetifyLogo size={32} animate={logoAnimating} />
           <span className="font-black text-[18px] tracking-tight text-zinc-900">meetifyy</span>
-        </div>
+        </Link>
 
         <nav className="flex-1 space-y-0.5">
           {NAV.map(({ href, label, Icon }) => {
             if (href === '/profile' && !user) return null;
             const active = isActive(href);
+            const isNotif = label === 'Notifications';
+            const hasUnread = isNotif && unreadCount > 0;
             return (
               <Link key={href} href={href}
                 className="flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all"
                 style={{ background: active ? '#f3f0ff' : 'transparent', color: active ? '#7c3aed' : '#71717a' }}>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 relative">
                   <Icon size={17} strokeWidth={active ? 2.5 : 1.75} />
                   <span style={{ fontWeight: active ? 700 : 500 }}>{label}</span>
                 </div>
-                {label === 'Notifications' && (
-                  <span className="w-2 h-2 rounded-full bg-[#7c3aed]" />
+                {hasUnread && (
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#7c3aed] text-white text-[10px] font-black flex items-center justify-center px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
                 )}
                 {label === 'Wallet' && sparks > 0 && (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#f3f0ff', color: '#7c3aed' }}>
@@ -187,12 +279,14 @@ export default function Sidebar({ user }) {
         <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 16, marginTop: 16 }}>
           {user ? (
             <Link href="/profile" className="flex items-center gap-2.5 p-2.5 rounded-xl transition-all hover:bg-zinc-50">
-              <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0" style={{ border: '1.5px solid #e8e8ea' }}>
-                <img src={avatarSrc} alt="me" className="w-full h-full object-cover" />
+              <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 relative" style={{ border: '1.5px solid #e8e8ea' }}>
+                <Image src={avatarSrc} alt="me" fill sizes="32px" style={{ objectFit: 'cover' }} />
               </div>
               <div className="min-w-0">
-                <p className="text-[12px] font-semibold truncate text-zinc-900">{dbUser?.full_name || (user.email || 'user').split('@')[0]}</p>
-                <p className="text-[10px] truncate text-zinc-400">View Profile</p>
+                <p className="text-[12px] font-semibold truncate text-zinc-900">{user.full_name || (user.email || 'user').split('@')[0]}</p>
+                <p className="text-[10px] truncate text-zinc-400">
+                  {isAdminRoute ? 'Super Admin' : `${user.year || '1st'} · ${user.branch || 'General'}`}
+                </p>
               </div>
             </Link>
           ) : (

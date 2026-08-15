@@ -2,7 +2,9 @@
 // Force compile: 2026-07-16
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import Skeleton from '../components/Skeleton';
 import {
   Zap, MessageCircle, Heart, Share2, Calendar, MapPin,
   Sparkles, Layers, BookOpen, UserCheck, MessageSquare,
@@ -11,8 +13,79 @@ import {
   Coffee, Briefcase, Camera, Activity, Music, Bell, ChevronRight,
   SlidersHorizontal, Trophy, Gamepad, TrendingUp, HelpCircle, Film
 } from 'lucide-react';
-import { mockDb } from '../lib/mockDatabase';
+import useSWR from 'swr';
+import { useUserContext } from '../components/providers/UserProvider';
+// mockDatabase removed — using real Firebase API routes
 import confetti from 'canvas-confetti';
+
+const fetcher = (url) => fetch(url).then((res) => res.json());
+
+function FeedSkeleton() {
+  return (
+    <div className="space-y-6 pb-24 pt-4 px-2 select-none animate-in fade-in duration-300">
+      {/* HEADER SECTION SKELETON */}
+      <div className="flex items-center justify-between">
+        <div>
+          <Skeleton variant="text" className="h-8 w-32 mb-2" />
+          <Skeleton variant="text" className="h-4 w-48" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton variant="rectangular" className="h-8 w-16 rounded-full" />
+          <Skeleton variant="circular" className="h-10 w-10" />
+        </div>
+      </div>
+
+      {/* MATCH THE VIBE SKELETON */}
+      <div>
+        <Skeleton variant="text" className="h-5 w-32 mb-4" />
+        <div className="flex gap-4 overflow-hidden">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="w-[185px] h-[220px] flex-shrink-0 bg-white border border-zinc-100 rounded-[2rem] p-5 flex flex-col items-center">
+              <Skeleton variant="circular" className="w-[84px] h-[84px] mb-4" />
+              <Skeleton variant="text" className="h-4 w-24 mb-2" />
+              <Skeleton variant="text" className="h-3 w-16 mb-4" />
+              <Skeleton variant="rectangular" className="h-8 w-20 rounded-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CAMPUS EXPERIENCES SKELETON */}
+      <div>
+        <Skeleton variant="text" className="h-5 w-48 mb-4" />
+        <div className="flex gap-4 overflow-hidden">
+          {[1, 2].map(i => (
+            <div key={i} className="w-[280px] h-[340px] flex-shrink-0 bg-white border border-zinc-100 rounded-3xl p-4 flex flex-col">
+              <Skeleton variant="rectangular" className="w-full h-[180px] rounded-2xl mb-4" />
+              <Skeleton variant="text" className="h-5 w-40 mb-2" />
+              <Skeleton variant="text" className="h-4 w-full mb-2" />
+              <div className="mt-auto flex justify-between items-end">
+                <Skeleton variant="circular" className="w-8 h-8" />
+                <Skeleton variant="rectangular" className="h-8 w-24 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CAMPUS GROUPS SKELETON */}
+      <div>
+        <Skeleton variant="text" className="h-5 w-40 mb-4" />
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="flex items-center p-4 bg-white border border-zinc-200/80 rounded-2xl">
+              <Skeleton variant="rectangular" className="w-12 h-12 rounded-xl flex-shrink-0 mr-4" />
+              <div className="flex-1">
+                <Skeleton variant="text" className="h-4 w-32 mb-2" />
+                <Skeleton variant="text" className="h-3 w-48" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 
@@ -80,15 +153,22 @@ function getExpCardTheme(category) {
   };
 }
 
-export default function FeedClient({ currentUser, initialSparks, people = [] }) {
+export default function FeedClient() {
   const router = useRouter();
-  // Database hydration
-  const [dbHydrated, setDbHydrated] = useState(false);
-  const [experiences, setExperiences] = useState([]);
-  const [bookings, setBookings] = useState([]);
+  const { user: currentUser, wallet: currentWallet, people } = useUserContext();
+  const initialSparks = currentWallet ? (currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0) : 0;
+  
+  // SWR Hooks for data fetching (cached & instantly available)
+  const { data: expData, mutate: mutateExp } = useSWR('/api/experiences', fetcher);
+  const { data: bkData, mutate: mutateBk } = useSWR(currentUser ? '/api/bookings' : null, fetcher);
+  
+  const experiences = expData?.experiences || [];
+  const bookings = bkData?.bookings || [];
+  const dbHydrated = expData !== undefined; // True once SWR has data
+  
   const [userData, setUserData] = useState(currentUser);
   const [sparksBalance, setSparksBalance] = useState(initialSparks || 0);
-  const [popularHosts, setPopularHosts] = useState([]);
+  const popularHosts = people?.filter(u => u.id !== currentUser?.id) || [];
 
   // Search & Filtering
   const [searchQuery, setSearchQuery] = useState('');
@@ -157,100 +237,41 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
     }
   };
 
-  const handleJoinGroup = (group) => {
-    if (!currentUser) {
-      router.push('/login');
-      return;
-    }
+  const handleJoinGroup = async (group) => {
+    if (!currentUser) { router.push('/login'); return; }
     if (joinedGroups[group.name]) {
-      // Already joined — open group in messages
       router.push(`/messages?user=${encodeURIComponent(group.name)}`);
       return;
     }
-
     if (group.isPaid) {
-      if (sparksBalance < group.price) {
-        router.push('/wallet');
-        return;
-      }
-      const confirmJoin = window.confirm(`Join ${group.name} for ${group.price} Sparks?`);
-      if (confirmJoin) {
-        setSparksBalance(prev => {
-          const nextBal = prev - group.price;
-          const w = mockDb.getWallet(currentUser.id);
-          if (w) {
-            w.purchased = Math.max(0, (w.purchased || 0) - group.price);
-            mockDb.saveWallet(currentUser.id, w);
-          }
-          mockDb.addTransaction(currentUser.id, {
-            type: 'SPEND',
-            amount: group.price,
-            description: `Subscribed to ${group.name}`,
-            status: 'COMPLETED'
-          });
-          return nextBal;
-        });
-        saveJoinedGroups({ ...joinedGroups, [group.name]: true });
-        confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
-        setTimeout(() => router.push(`/messages?user=${encodeURIComponent(group.name)}`), 600);
-      }
-    } else {
-      saveJoinedGroups({ ...joinedGroups, [group.name]: true });
-      confetti({ particleCount: 40, spread: 40, origin: { y: 0.6 } });
-      setTimeout(() => router.push(`/messages?user=${encodeURIComponent(group.name)}`), 600);
+      if (sparksBalance < group.price) { router.push('/wallet'); return; }
+      if (!window.confirm(`Join ${group.name} for ${group.price} Sparks?`)) return;
+      // Deduct via server
+      const res = await fetch('/api/wallet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sparks: -group.price, pack_name: group.name, pack_key: 'group_join', amount_inr: 0 }),
+      });
+      setSparksBalance(prev => prev - group.price);
+      window.dispatchEvent(new Event('wallet-updated'));
     }
+    saveJoinedGroups({ ...joinedGroups, [group.name]: true });
+    confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
+    setTimeout(() => router.push(`/messages?user=${encodeURIComponent(group.name)}`), 600);
   };
 
-  // Load from local storage DB on client mount
+  // SWR automatically handles caching and background updates.
+  // We sync local sparks balance if currentWallet changes, or listen to events
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Fetch initial data
-      setExperiences(mockDb.getExperiences());
-      setBookings(mockDb.getBookings());
-      setPopularHosts(mockDb.getUsers().filter(u => u.isIdOn !== false && u.id !== currentUser?.id));
-      if (currentUser) {
-        const u = mockDb.getUser(currentUser.id);
-        if (u) setUserData(u);
-        const w = mockDb.getWallet(currentUser.id);
-        setSparksBalance((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
-      }
-      setDbHydrated(true);
-
-      const handleUpdate = () => {
-        setExperiences(mockDb.getExperiences());
-        setBookings(mockDb.getBookings());
-        setPopularHosts(mockDb.getUsers().filter(u => u.isIdOn !== false && u.id !== currentUser?.id));
-        if (currentUser) {
-          const u = mockDb.getUser(currentUser.id);
-          if (u) setUserData(u);
-          const w = mockDb.getWallet(currentUser.id);
-          setSparksBalance((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
-        }
-      };
-
-      window.addEventListener('wallet-updated', handleUpdate);
-      window.addEventListener('profile-updated', handleUpdate);
-      return () => {
-        window.removeEventListener('wallet-updated', handleUpdate);
-        window.removeEventListener('profile-updated', handleUpdate);
-      };
+    if (currentWallet) {
+      setSparksBalance((currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0));
     }
-  }, [currentUser]);
+  }, [currentWallet]);
 
-  // Synchronise state with local storage updates
-  const refreshDbState = () => {
-    setExperiences(mockDb.getExperiences());
-    setBookings(mockDb.getBookings());
-    setPopularHosts(mockDb.getUsers().filter(u => u.isIdOn !== false && u.id !== currentUser?.id));
-    if (currentUser) {
-      const u = mockDb.getUser(currentUser.id);
-      if (u) setUserData(u);
-      const w = mockDb.getWallet(currentUser.id);
-      setSparksBalance((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
-    }
+  const refreshDbState = async () => {
+    await Promise.all([mutateExp(), mutateBk()]);
   };
 
-  // Booking confirming action
   const handleConfirmBooking = async () => {
     if (!selectedExp || !currentUser) return;
     if (sparksBalance < selectedExp.price) {
@@ -258,68 +279,83 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
       setSelectedExp(null);
       return;
     }
-
     setBookingLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
-
-    mockDb.createBooking({
-      experienceId: selectedExp.id,
-      title: selectedExp.title,
-      price: selectedExp.price,
-      duration: selectedExp.duration,
-      location: selectedExp.location,
-      category: selectedExp.category,
-      hostId: selectedExp.hostId,
-      hostName: mockDb.getUser(selectedExp.hostId)?.full_name || 'Host',
-      guestId: currentUser.id,
-      guestName: userData?.full_name || 'Guest',
-      date: bookingDate,
-      time: bookingTime
-    });
-
-    setBookingLoading(false);
-    setBookingSuccess(true);
-    refreshDbState();
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          experienceId: selectedExp.id,
+          title: selectedExp.title,
+          price: selectedExp.price,
+          duration: selectedExp.duration,
+          location: selectedExp.location,
+          category: selectedExp.category,
+          hostId: selectedExp.hostId,
+          hostName: selectedExp.hostName || '',
+          date: bookingDate,
+          time: bookingTime,
+        }),
+      });
+      if (res.ok) {
+        setBookingSuccess(true);
+        await refreshDbState();
+        window.dispatchEvent(new Event('wallet-updated'));
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Booking failed');
+      }
+    } catch(e) {
+      alert('Network error. Try again.');
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
-  const handleCreateExperience = () => {
+  const handleCreateExperience = async () => {
     if (!newExpTitle.trim() || !newExpLocation.trim()) {
       alert('Please fill in all fields!');
       return;
     }
     setCreateLoading(true);
-    const newExp = {
-      title: newExpTitle,
-      category: newExpCategory,
-      price: Number(newExpPrice),
-      duration: Number(newExpDuration),
-      location: newExpLocation,
-      days: [newExpDays],
-      slots: [newExpSlots],
-      hostId: currentUser.id,
-      rating: 5.0,
-      tags: [newExpCategory.toLowerCase()]
-    };
-    mockDb.createExperience(newExp);
-    setCreateLoading(false);
-    setShowCreateModal(false);
-    alert('Experience created successfully!');
-    // Clear fields
-    setNewExpTitle('');
-    setNewExpLocation('');
-    refreshDbState();
+    try {
+      const res = await fetch('/api/experiences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newExpTitle,
+          category: newExpCategory,
+          price: Number(newExpPrice),
+          duration: Number(newExpDuration),
+          location: newExpLocation,
+          days: [newExpDays],
+          slots: [newExpSlots],
+        }),
+      });
+      if (res.ok) {
+        setShowCreateModal(false);
+        setNewExpTitle(''); setNewExpLocation('');
+        await refreshDbState();
+        confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Failed to create');
+      }
+    } catch(e) {
+      alert('Network error.');
+    } finally {
+      setCreateLoading(false);
+    }
   };
 
-  // Host Action: Accept Request
-  const handleAcceptRequest = (bookingId) => {
-    mockDb.updateBookingStatus(bookingId, 'Confirmed');
-    refreshDbState();
+  const handleAcceptRequest = async (bookingId) => {
+    await fetch('/api/bookings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bookingId, action: 'accept' }) });
+    await refreshDbState();
   };
 
-  // Host Action: Decline Request
-  const handleDeclineRequest = (bookingId) => {
-    mockDb.updateBookingStatus(bookingId, 'Rejected');
-    refreshDbState();
+  const handleDeclineRequest = async (bookingId) => {
+    await fetch('/api/bookings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bookingId, action: 'reject' }) });
+    await refreshDbState();
   };
 
   // Host Action: Code validation & Completion
@@ -392,16 +428,15 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
   // Filter & Search queries
   const query = searchQuery.toLowerCase().trim();
   const filteredExperiences = experiences.filter(exp => {
-    const host = mockDb.getUser(exp.hostId);
     const matchesSearch =
-      exp.title.toLowerCase().includes(query) ||
-      exp.description.toLowerCase().includes(query) ||
-      exp.category.toLowerCase().includes(query) ||
-      exp.location.toLowerCase().includes(query) ||
-      (host?.full_name || '').toLowerCase().includes(query) ||
-      exp.tags.some(t => t.toLowerCase().includes(query));
+      (exp.title || '').toLowerCase().includes(query) ||
+      (exp.description || '').toLowerCase().includes(query) ||
+      (exp.category || '').toLowerCase().includes(query) ||
+      (exp.location || '').toLowerCase().includes(query) ||
+      (exp.hostName || '').toLowerCase().includes(query) ||
+      (exp.tags || []).some(t => t.toLowerCase().includes(query));
 
-    const matchesCategory = activeCategory === 'All' || exp.category.toLowerCase() === activeCategory.toLowerCase();
+    const matchesCategory = activeCategory === 'All' || (exp.category || '').toLowerCase() === activeCategory.toLowerCase();
 
     return matchesSearch && matchesCategory;
   });
@@ -422,7 +457,8 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
       branch: 'CSE',
       college: 'GLA University',
       interests: ['Coding', 'Gaming', 'AI'],
-      photo_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav'
+      photo_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav',
+      spark_charge: 50
     },
     {
       id: 'priya_p',
@@ -431,7 +467,8 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
       branch: 'BBA',
       college: 'GLA University',
       interests: ['Music', 'Art', 'Travel'],
-      photo_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Priya'
+      photo_url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Priya',
+      spark_charge: 50
     }
   ];
 
@@ -443,7 +480,8 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
         branch: u.branch || 'CSE',
         college: u.college || 'GLA University',
         interests: u.interests?.slice(0, 3) || ['Tech', 'Design', 'Music'],
-        photo_url: avatarUrl(u)
+        photo_url: avatarUrl(u),
+        spark_charge: u.spark_charge || 50
       }))
     : defaultVibeUsers;
 
@@ -479,6 +517,10 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
     if (groupFilter === 'Premium') return g.isPaid;
     return true;
   });
+
+  if (!dbHydrated) {
+    return <FeedSkeleton />;
+  }
 
   return (
     <div className="space-y-6 pb-24 pt-4 px-2 select-none">
@@ -547,8 +589,8 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
               >
                 {/* Avatar with circle bg */}
                 <div className="relative w-[84px] h-[84px] rounded-full bg-[#e8e4ff] p-[3px] mb-3.5 flex items-center justify-center">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-white">
-                    <img src={getUserAvatarUrl(user)} alt={user.full_name} className="w-full h-full object-cover" />
+                  <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
+                    <Image src={getUserAvatarUrl(user)} alt={user.full_name} fill sizes="84px" style={{ objectFit: 'cover' }} />
                   </div>
                 </div>
 
@@ -570,8 +612,8 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1 mt-3 justify-center mb-4">
-                  {user.interests.map((tag) => (
-                    <span key={tag} className="text-[8px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-full bg-[#f3f0ff] text-[#7c3aed]">
+                  {user.interests.map((tag, idx) => (
+                    <span key={`${tag}-${idx}`} className="text-[8px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-full bg-[#f3f0ff] text-[#7c3aed]">
                       {tag}
                     </span>
                   ))}
@@ -591,11 +633,11 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
                     onClick={() => {
                       confetti({ particleCount: 80, spread: 55, origin: { y: 0.6 } });
                       setDismissedVibes(prev => ({ ...prev, [user.id]: true }));
-                      router.push(`/messages?user=${encodeURIComponent(user.full_name)}`);
+                      router.push(`/users/${user.id}`);
                     }}
                     className="flex-1 h-9 rounded-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-[11px] font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95"
                   >
-                    Connect
+                    Meet {user.spark_charge} <Zap size={12} className="fill-current text-yellow-300" />
                   </button>
                 </div>
               </div>
@@ -920,13 +962,14 @@ export default function FeedClient({ currentUser, initialSparks, people = [] }) 
               <>
                 <div className="flex items-center gap-3 mb-5 border-b border-[var(--border-subtle)] pb-3">
                   <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0" style={{ border: '2px solid #ede9fe' }}>
-                    <img src={avatarUrl(mockDb.getUser(selectedExp.hostId))} alt="host" className="w-full h-full object-cover" />
+                    <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedExp.hostId}`} alt="host" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-[var(--text-primary)] tracking-tight">Meet Host</h3>
-                    <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mt-0.5">Host: {mockDb.getUser(selectedExp.hostId)?.full_name}</p>
+                    <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mt-0.5">Host: {selectedExp.hostName || selectedExp.hostId}</p>
                   </div>
                 </div>
+
 
                 <div className="space-y-4 mb-6">
                   {/* Select Slots */}

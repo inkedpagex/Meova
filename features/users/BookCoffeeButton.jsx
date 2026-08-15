@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Zap, Layers, X, CheckCircle, Loader2, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Zap, Layers, X, CheckCircle, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -12,7 +12,36 @@ export default function BookCoffeeButton({ targetUserId, targetName, isLoggedIn,
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [booked, setBooked] = useState(false);
+  const [wallet, setWallet] = useState(null);
+  const [loadingWallet, setLoadingWallet] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    if (open && isLoggedIn) {
+      setLoadingWallet(true);
+      setError('');
+      fetch('/api/wallet')
+        .then((res) => {
+          if (!res.ok) throw new Error('Failed to load wallet');
+          return res.json();
+        })
+        .then((data) => {
+          if (data.wallet) {
+            setWallet(data.wallet);
+          } else {
+            setError('Could not retrieve wallet balance.');
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          setError('Could not load wallet balance.');
+        })
+        .finally(() => {
+          setLoadingWallet(false);
+        });
+    }
+  }, [open, isLoggedIn]);
 
   function handleClick() {
     if (!isLoggedIn) {
@@ -24,11 +53,39 @@ export default function BookCoffeeButton({ targetUserId, targetName, isLoggedIn,
 
   async function handleConfirm() {
     setLoading(true);
-    // Simulate booking (in production this would call an API to deduct Sparks & create a booking)
-    await new Promise(r => setTimeout(r, 1400));
-    setLoading(false);
-    setBooked(true);
+    setError('');
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          experienceId: `cabin_${targetUserId}`,
+          title: 'Reserve Workspace Cabin',
+          price: COFFEE_COST,
+          duration: 60,
+          location: 'Workspace Cabin Slot',
+          category: 'Study',
+          hostId: targetUserId,
+          hostName: targetName,
+          date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
+          time: 'Flexible slot'
+        })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to complete booking request.');
+      }
+      setBooked(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
+
+  const spendableSparks = wallet ? (wallet.purchased || 0) + (wallet.bonus || 0) : 0;
+  const hasEnoughSparks = spendableSparks >= COFFEE_COST;
 
   return (
     <>
@@ -52,7 +109,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, isLoggedIn,
           <div
             className="relative w-full max-w-sm mx-4 mb-4 sm:mb-0 rounded-3xl p-6 anim-scale-in"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Close */}
             {!booked && !loading && (
@@ -72,10 +129,14 @@ export default function BookCoffeeButton({ targetUserId, targetName, isLoggedIn,
                 </div>
                 <h3 className="text-lg font-black text-[var(--text-primary)] mb-2">Cabin Spot Reserved!</h3>
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-6 font-semibold">
-                  Your reservation request has been sent to <strong className="text-[var(--text-primary)]">{targetName}</strong>. 50 Sparks have been deducted from your wallet. You'll receive a slot confirmation in dynamic alerts soon!
+                  Your reservation request has been sent to <strong className="text-[var(--text-primary)]">{targetName}</strong>. {COFFEE_COST} Sparks have been deducted from your wallet. You'll receive a slot confirmation in dynamic alerts soon!
                 </p>
                 <button
-                  onClick={() => { setOpen(false); setBooked(false); }}
+                  onClick={() => {
+                    setOpen(false);
+                    setBooked(false);
+                    router.refresh();
+                  }}
                   className="w-full py-3 rounded-xl text-xs font-black text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] active:scale-95 transition-all shadow-md cursor-pointer"
                 >
                   Done
@@ -95,7 +156,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, isLoggedIn,
                 </div>
 
                 {/* Details */}
-                <div className="rounded-2xl p-4 mb-5 space-y-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                <div className="rounded-2xl p-4 mb-4 space-y-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                   {[
                     { label: 'Space Cabin', value: 'Private Study Cabin / Workspace' },
                     { label: 'Duration', value: '1-Hour Session' },
@@ -109,20 +170,56 @@ export default function BookCoffeeButton({ targetUserId, targetName, isLoggedIn,
                   ))}
                 </div>
 
-                {/* Cost */}
-                <div className="flex items-center justify-between p-4 rounded-2xl mb-5" style={{ background: 'rgba(250,204,21,0.05)', border: '1px solid rgba(250,204,21,0.1)' }}>
-                  <span className="text-xs font-bold text-[var(--text-secondary)]">Booking cost</span>
-                  <span className="flex items-center gap-1.5 text-sm font-black text-yellow-500">
-                    <Zap className="w-4 h-4" />
-                    {COFFEE_COST} Sparks
-                  </span>
+                {/* Balance & Cost Info */}
+                <div className="space-y-2 mb-4">
+                  {/* Cost */}
+                  <div className="flex items-center justify-between p-4 rounded-2xl" style={{ background: '#fef3c7', border: '1px solid #fde68a' }}>
+                    <span className="text-xs font-bold text-[#92400e]">Booking cost</span>
+                    <span className="flex items-center gap-1.5 text-sm font-black text-[#d97706]">
+                      <Zap className="w-4 h-4 fill-current" />
+                      {COFFEE_COST} Sparks
+                    </span>
+                  </div>
+
+                  {/* Wallet Balance */}
+                  <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                    <span className="text-[11px] font-bold text-[var(--text-secondary)]">Your Balance</span>
+                    {loadingWallet ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+                    ) : (
+                      <span className="text-xs font-black text-[var(--text-primary)]">
+                        {spendableSparks} Sparks
+                      </span>
+                    )}
+                  </div>
                 </div>
+
+                {/* Errors & Low Balance Alert */}
+                {error && (
+                  <div className="p-3 mb-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px] font-semibold text-center">
+                    {error}
+                  </div>
+                )}
+
+                {wallet && !hasEnoughSparks && !loadingWallet && (
+                  <div className="p-3.5 rounded-2xl mb-4 text-[11px] font-bold leading-relaxed" style={{ background: '#fff1f2', border: '1px solid #fecdd3', color: '#be123c' }}>
+                    ⚠️ Low Balance: You need {COFFEE_COST} Sparks, but only have {spendableSparks} Sparks. Please buy Sparks to reserve a spot.
+                  </div>
+                )}
 
                 <button
                   onClick={handleConfirm}
-                  disabled={loading}
-                  className="w-full py-3.5 rounded-xl text-xs font-black text-white flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-60 cursor-pointer shadow-md"
-                  style={{ background: `${color}` }}
+                  disabled={loading || loadingWallet || !wallet || !hasEnoughSparks}
+                  className="w-full py-3.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-95 disabled:cursor-not-allowed cursor-pointer shadow-md"
+                  style={hasEnoughSparks ? {
+                    background: color,
+                    color: '#ffffff',
+                    border: 'none'
+                  } : {
+                    background: '#f4f4f5',
+                    color: '#a1a1aa',
+                    border: '1px solid #e4e4e7'
+                  }}
                 >
                   {loading ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Confirming...</>

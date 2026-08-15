@@ -1,18 +1,31 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '../../../../lib/getAdminUser';
-// import { adminDb } from '../../../../lib/firebaseAdmin';
+import { adminDb } from '../../../../lib/firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
+import { logger } from '../../../../utils/logger';
+import { sendAdminAlert } from '../../../../utils/alerts';
+import { sanitizeText } from '../../../../lib/validations';
 
 export async function POST(request) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
-  const { withdrawalId, action, remarks } = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
+  }
+
+  const withdrawalId = sanitizeText(body.withdrawalId, 64);
+  const action = sanitizeText(body.action, 20);
+  const remarks = sanitizeText(body.remarks || '', 200);
 
   if (!withdrawalId || !action) {
     return NextResponse.json({ error: 'withdrawalId and action required' }, { status: 400 });
   }
 
-  const wdRef  = adminDb.collection('withdrawals').doc(withdrawalId);
+  const wdRef = adminDb.collection('withdrawals').doc(withdrawalId);
   const wdSnap = await wdRef.get();
 
   if (!wdSnap.exists) return NextResponse.json({ error: 'Withdrawal not found' }, { status: 404 });
@@ -25,30 +38,46 @@ export async function POST(request) {
   const now = new Date().toISOString();
 
   if (action === 'reject') {
-    await wdRef.update({ status: 'rejected', admin_id: admin.uid, remarks: remarks || '', reviewed_at: now });
+    await wdRef.update({ status: 'rejected', admin_id: admin.uid, remarks, reviewed_at: now });
+    logger.audit('WITHDRAWAL_REJECTED', admin.uid, { withdrawalId, targetUid: wd.userId });
     return NextResponse.json({ ok: true });
   }
 
   if (action === 'approve') {
-    // Deduct from wallet (creator balance)
     const walletRef = adminDb.collection('wallets').doc(wd.userId);
 
-    await adminDb.runTransaction(async (tx) => {
-      const walletSnap = await tx.get(walletRef);
-      if (!walletSnap.exists) throw new Error('Wallet not found');
-      const w = walletSnap.data();
-      if ((w.creator || 0) < wd.amount) throw new Error('Insufficient Creator Sparks');
+    try {
+      // Atomic ACID transaction: re-check status + deduct creator sparks + mark approved — all in one transaction
+      await adminDb.runTransaction(async (tx) => {
+        const freshWd = await tx.get(wdRef);
+        if (!freshWd.exists || freshWd.data().status !== 'pending') {
+          throw new Error(`Already ${freshWd.data()?.status || 'processed'}`);
+        }
 
-      tx.update(walletRef, {
-        creator:            -wd.amount,
-        lifetime_withdrawn: wd.amount,
-        updated_at:         now,
+        const walletSnap = await tx.get(walletRef);
+        if (!walletSnap.exists) throw new Error('Wallet not found');
+        const w = walletSnap.data();
+        if ((w.creator || 0) < wd.amount) throw new Error('Insufficient Creator Sparks');
+
+        // Decrement creator sparks using FieldValue.increment
+        tx.update(walletRef, {
+          creator: FieldValue.increment(-wd.amount),
+          lifetime_withdrawn: FieldValue.increment(wd.amount),
+          updated_at: now,
+        });
+
+        // Mark withdrawal as approved inside the same transaction
+        tx.update(wdRef, { status: 'approved', admin_id: admin.uid, remarks, approved_at: now });
       });
-    });
+    } catch (err) {
+      logger.error('Withdrawal approval failed inside transaction', err, { withdrawalId, targetUid: wd.userId });
+      if (err.message?.startsWith('Already ')) {
+        return NextResponse.json({ error: err.message }, { status: 409 });
+      }
+      return NextResponse.json({ error: err.message }, { status: 500 });
+    }
 
-    await wdRef.update({ status: 'approved', admin_id: admin.uid, remarks: remarks || '', approved_at: now });
-
-    // Transaction record
+    // Ledger audit records
     await adminDb.collection('transactions').add({
       userId:    wd.userId,
       type:      'withdrawal',
@@ -59,7 +88,6 @@ export async function POST(request) {
       created_at: now,
     });
 
-    // Audit log
     await adminDb.collection('audit_logs').add({
       admin_id:   admin.uid,
       action:     'APPROVE_WITHDRAWAL',
@@ -68,6 +96,23 @@ export async function POST(request) {
       new_value:  { status: 'approved', amount: wd.amount },
       timestamp:  now,
     });
+
+    logger.audit('WITHDRAWAL_APPROVED', admin.uid, {
+      withdrawalId,
+      targetUid: wd.userId,
+      amount: wd.amount,
+    });
+
+    // Alert
+    sendAdminAlert({
+      title: 'Withdrawal Approved',
+      message: `Admin approved payout of ${wd.amount} Sparks for user ${wd.userEmail || wd.userId}`,
+      fields: [
+        { name: 'Withdrawal ID', value: withdrawalId },
+        { name: 'Sparks', value: wd.amount },
+        { name: 'Method', value: wd.method || 'UPI' },
+      ],
+    }).catch(() => {});
 
     return NextResponse.json({ ok: true });
   }

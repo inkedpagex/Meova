@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { mockDb } from '../../../lib/mockDatabase';
 
 export default function WithdrawPage() {
   const [amount, setAmount]           = useState('');
@@ -16,38 +15,49 @@ export default function WithdrawPage() {
   const [step, setStep]       = useState('form'); // 'form' | 'success'
   const [userId, setUserId]   = useState(null);
   const [error, setError]     = useState('');
-  const [hasPendingWd, setHasPendingWd] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
-    fetch('/api/auth/session')
-      .then(r => r.json())
-      .then(d => {
-        const uid = d?.user?.id || d?.user?.uid;
+    async function loadData() {
+      try {
+        const sessionRes = await fetch('/api/auth/session');
+        const sessionData = await sessionRes.json();
+        const uid = sessionData?.user?.id || sessionData?.user?.uid;
         if (!uid) return;
         setUserId(uid);
-        const w = mockDb.getWallet(uid);
-        setWallet(w);
-        const wds = mockDb.getWithdrawals(uid);
-        setHasPendingWd(wds.some(w => w.status === 'pending'));
-      })
-      .catch(() => {});
+
+        const walletRes = await fetch('/api/wallet');
+        const walletData = await walletRes.json();
+        if (walletData.wallet) setWallet(walletData.wallet);
+
+        const wdRes = await fetch('/api/wallet/withdraw');
+        const wdData = await wdRes.json();
+        if (wdData.withdrawals) {
+          const pending = wdData.withdrawals.filter(w => w.status === 'pending').length;
+          setPendingCount(pending);
+        }
+      } catch (err) {
+        console.error('Error loading withdrawal data:', err);
+      }
+    }
+    loadData();
   }, []);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     const amt = parseInt(amount, 10);
 
-    if (isNaN(amt) || amt < 1000) {
-      setError('Minimum withdrawal is 1,000 Creator Sparks.');
+    if (isNaN(amt) || amt < 500) {
+      setError('Minimum withdrawal is 500 Creator Sparks.');
       return;
     }
     if (!wallet || (wallet.creator || 0) < amt) {
       setError('Insufficient Creator Earnings balance.');
       return;
     }
-    if (hasPendingWd) {
-      setError('You already have a pending withdrawal. Please wait for it to be processed.');
+    if (pendingCount >= 3) {
+      setError('You have reached the limit of 3 pending withdrawals. Please wait for admin to process them.');
       return;
     }
     if (method === 'upi' && !upiId.trim()) {
@@ -65,17 +75,24 @@ export default function WithdrawPage() {
         ? upiId
         : `${bankDetails.account_name} · ${bankDetails.bank_name} · A/C ${bankDetails.account_number} · IFSC ${bankDetails.ifsc_code}`;
 
-      const result = mockDb.createWithdrawal(userId, amt, method, details);
+      const res = await fetch('/api/wallet/withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: amt,
+          method,
+          upi_id: method === 'upi' ? upiId : null,
+          bank_details: method === 'bank' ? bankDetails : null,
+        }),
+      });
+      const data = await res.json();
 
-      if (!result) {
-        setError('Failed to process withdrawal. Please try again.');
+      if (!res.ok) {
+        setError(data.error || 'Failed to process withdrawal. Please try again.');
         setLoading(false);
         return;
       }
 
-      // Refresh local wallet display
-      setWallet(mockDb.getWallet(userId));
-      setHasPendingWd(true);
       window.dispatchEvent(new Event('wallet-updated'));
       setStep('success');
     } catch (err) {
@@ -107,29 +124,29 @@ export default function WithdrawPage() {
             </p>
           </div>
 
-          {/* Already pending */}
-          {hasPendingWd && (
+          {/* Already pending limit */}
+          {pendingCount >= 3 && (
             <div className="bg-amber-500/5 border border-amber-500/20 p-4 rounded-2xl mb-6 flex items-start gap-3">
               <Clock size={16} className="text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p style={{ fontSize: 13, color: '#fbbf24', fontWeight: 800 }}>Withdrawal Pending</p>
+                <p style={{ fontSize: 13, color: '#fbbf24', fontWeight: 800 }}>Withdrawal Limit Reached</p>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, fontWeight: '600' }}>
-                  You have a pending withdrawal being processed by admin. Please wait for it to complete before submitting a new one.
+                  You have 3 pending withdrawals being processed by admin. Please wait for them to be processed before submitting a new request.
                 </p>
               </div>
             </div>
           )}
 
-          {creatorBalance < 1000 ? (
+          {creatorBalance < 500 ? (
             <div className="bg-[var(--bg-elevated)] border border-red-500/20 p-5 rounded-2xl mb-6 shadow-sm">
               <p style={{ fontSize: 13, color: '#f87171', fontWeight: 800 }}>
-                ⚠️ You need at least 1,000 Creator Sparks to withdraw.
+                ⚠️ You need at least 500 Creator Sparks to withdraw.
               </p>
               <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, fontWeight: '600' }}>
                 Host premium workshops, coffee sessions, and gigs to accumulate Creator Earnings.
               </p>
             </div>
-          ) : !hasPendingWd && (
+          ) : pendingCount < 3 && (
             <>
               {error && (
                 <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 rounded-xl p-3 mb-5">
@@ -145,8 +162,8 @@ export default function WithdrawPage() {
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input
-                    type="number" min="1000" max={creatorBalance}
-                    placeholder="1000"
+                    type="number"
+                    placeholder="500"
                     value={amount}
                     onChange={e => setAmount(e.target.value)}
                     required
@@ -157,7 +174,7 @@ export default function WithdrawPage() {
                   </span>
                 </div>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5, fontWeight: '700' }}>
-                  1 Spark ≈ ₹1. Sparks deducted immediately. Minimum: 1,000.
+                  1 Spark ≈ ₹1. Sparks deducted immediately. Minimum: 500.
                 </p>
               </div>
 

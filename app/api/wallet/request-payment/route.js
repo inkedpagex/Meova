@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../../lib/getAdminUser';
 import { adminDb } from '../../../../lib/firebaseAdmin';
+import { rateLimit, getClientIp } from '../../../../lib/rateLimit';
+import { logger } from '../../../../utils/logger';
+import { sendAdminAlert } from '../../../../utils/alerts';
+import { sanitizeText } from '../../../../lib/validations';
 
 const PACKS = {
   starter: { sparks: 100,  amount_inr: 49,  name: 'Starter' },
@@ -34,7 +38,7 @@ async function generateUnique5CharRefCode() {
         return code;
       }
     } catch (err) {
-      console.warn("Firestore unique code check failed. Returning generated code:", err.message);
+      logger.warn('Firestore unique code check failed. Returning generated code:', { error: err.message });
       return code;
     }
     attempts++;
@@ -43,19 +47,28 @@ async function generateUnique5CharRefCode() {
 }
 
 export async function POST(request) {
+  const ip = getClientIp(request);
+  const { ok, retryAfter } = rateLimit(`payment_req:${ip}`, { limit: 10, windowMs: 60_000 });
+  if (!ok) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait a minute.' },
+      { status: 429, headers: { 'Retry-After': retryAfter } }
+    );
+  }
+
   const user = await requireAuth();
   if (!user) return NextResponse.json({ error: 'Login required' }, { status: 401 });
 
   let packKey;
   try {
     const body = await request.json();
-    packKey = body.packKey;
+    packKey = sanitizeText(body.packKey, 20);
   } catch (err) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
   const pack = PACKS[packKey];
-  if (!pack) return NextResponse.json({ error: 'Invalid pack' }, { status: 400 });
+  if (!pack) return NextResponse.json({ error: 'Invalid pack selection' }, { status: 400 });
 
   try {
     if (!adminDb) throw new Error('Database not configured');
@@ -86,9 +99,26 @@ export async function POST(request) {
       created_at:     new Date().toISOString(),
     });
 
+    logger.audit('PAYMENT_REQUEST_CREATED', user.uid, {
+      reference_code,
+      packKey,
+      amount: pack.amount_inr,
+    });
+
+    // Send real-time alert to admin webhook if configured
+    sendAdminAlert({
+      title: 'New Payment Recharge Request',
+      message: `User ${user.email} requested ${pack.sparks} Sparks (₹${pack.amount_inr})`,
+      fields: [
+        { name: 'Ref Code', value: reference_code },
+        { name: 'Amount', value: `₹${pack.amount_inr}` },
+        { name: 'User', value: user.email },
+      ],
+    }).catch(() => {});
+
     return NextResponse.json({ ok: true, reference_code });
   } catch (err) {
-    console.warn("Payment request creation in Firestore failed (likely quota limit). Using fallback code:", err.message);
+    logger.error('Payment request creation failed', err, { userId: user.uid });
     const reference_code = generate5CharAlphanumeric();
     return NextResponse.json({ ok: true, reference_code, fallback: true });
   }

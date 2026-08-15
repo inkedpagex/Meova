@@ -6,6 +6,9 @@ const PUBLIC_ROUTES = ['/login', '/signup', '/api'];
 export function proxy(request) {
   const { pathname } = request.nextUrl;
 
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', pathname);
+
   // Allow all public routes and static files
   if (
     PUBLIC_ROUTES.some(r => pathname.startsWith(r)) ||
@@ -14,7 +17,7 @@ export function proxy(request) {
     pathname.startsWith('/logo') ||
     pathname.startsWith('/public')
   ) {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   // Check for session cookie
@@ -27,7 +30,7 @@ export function proxy(request) {
     return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {

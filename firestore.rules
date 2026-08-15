@@ -17,6 +17,15 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if request.auth != null;
       allow write: if isOwner(uid) || isAdmin();
+
+      // Notifications Sub-Collection
+      match /notifications/{notifId} {
+        // User can read and mark their own notifications as read
+        allow read, update: if isOwner(uid);
+        // Server (admin) can create notifications for anyone
+        allow create: if request.auth != null;
+        allow delete: if isOwner(uid) || isAdmin();
+      }
     }
 
     // Wallets Collection (Only server/functions modify balances)

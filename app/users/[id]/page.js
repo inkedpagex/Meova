@@ -37,17 +37,19 @@ const MOCK_REVIEWS = [
 ];
 
 export async function generateMetadata({ params }) {
-  const profile = await fetchProfileAdmin(params.id);
+  const { id } = await params;
+  const profile = await fetchProfileAdmin(id);
   return {
     title: profile ? `${profile.full_name} — meetuply` : 'Student Profile — meetuply',
   };
 }
 
 export default async function UserProfilePage({ params }) {
+  const { id } = await params;
   const [profile, currentUser, joinedCircles] = await Promise.all([
-    fetchProfileAdmin(params.id),
+    fetchProfileAdmin(id),
     getUserAdmin(),
-    fetchJoinedCirclesAdmin(params.id),
+    fetchJoinedCirclesAdmin(id),
   ]);
 
   if (!profile) {
@@ -59,7 +61,7 @@ export default async function UserProfilePage({ params }) {
     );
   }
 
-  const isSelf = currentUser?.id === params.id;
+  const isSelf = currentUser?.id === id;
   const isLoggedIn = !!currentUser;
   const interests = profile.interests || [];
   const primaryInterest = interests[0];
@@ -97,7 +99,7 @@ export default async function UserProfilePage({ params }) {
               style={{ border: `2px solid ${primaryMeta.color}40` }}
             >
               <img
-                src={avatarUrl(profile.full_name || params.id)}
+                src={avatarUrl(profile.full_name || id)}
                 alt={profile.full_name}
                 className="w-full h-full object-cover"
               />
@@ -107,7 +109,7 @@ export default async function UserProfilePage({ params }) {
               profile.isIdOn !== false ? 'bg-emerald-500' : 'bg-rose-500'
             }`} />
           </div>
-
+ 
           {/* Core info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-3 mb-1">
@@ -120,19 +122,19 @@ export default async function UserProfilePage({ params }) {
                 <span className="text-xs font-black text-yellow-400">{avgRating}</span>
               </div>
             </div>
-
+ 
             <p className="text-sm text-[var(--text-secondary)] mb-3 flex items-center gap-2 font-bold uppercase tracking-wider text-[11px]">
               <GraduationCap className="w-4 h-4 text-[var(--text-muted)]" />
               {profile.year} Year · {profile.branch}
             </p>
-
+ 
             {/* Bio */}
             {profile.bio ? (
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-4 font-semibold">{profile.bio}</p>
             ) : (
               <p className="text-xs text-[var(--text-muted)] italic leading-relaxed mb-4 font-semibold">No bio added yet.</p>
             )}
-
+ 
             {/* Interest tags */}
             <div className="flex flex-wrap gap-2 mb-5">
               {interests.map(interest => {
@@ -150,13 +152,13 @@ export default async function UserProfilePage({ params }) {
                 );
               })}
             </div>
-
+ 
             {/* CTA buttons */}
             {!isSelf && (
               <div className="flex gap-2.5 flex-wrap">
                 {profile.isIdOn !== false ? (
                   <BookCoffeeButton
-                    targetUserId={params.id}
+                    targetUserId={id}
                     targetName={profile.full_name}
                     isLoggedIn={isLoggedIn}
                     accentColor={primaryMeta.color}

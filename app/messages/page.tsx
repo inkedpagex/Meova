@@ -150,17 +150,35 @@ function MessagesContent() {
 
   // Open chat from URL param
   useEffect(() => {
-    if (initialUser && contacts.length) {
-      const found = contacts.find(c => c.name.toLowerCase().includes(initialUser.toLowerCase()));
-      if (found) setActiveContact(found);
-      else {
-        // Create a temp contact
-        const temp: Contact = { id: "temp-" + Date.now(), name: initialUser, avatar: getCartoonAvatar(initialUser), online: true, lastMessage: "", lastTime: "now", unread: 0 };
-        setContacts(prev => [temp, ...prev]);
-        setActiveContact(temp);
-      }
+    if (initialUser) {
+      const lowerUser = initialUser.toLowerCase();
+      const tempId = "temp-" + initialUser.replace(/\s+/g, '-').toLowerCase();
+      
+      setContacts(prev => {
+        const exists = prev.some(c => c.name.toLowerCase().includes(lowerUser) || c.id === tempId);
+        if (exists) return prev;
+        
+        const temp: Contact = { 
+          id: tempId, 
+          name: initialUser, 
+          avatar: getCartoonAvatar(initialUser), 
+          online: true, 
+          lastMessage: "", 
+          lastTime: "now", 
+          unread: 0 
+        };
+        return [temp, ...prev];
+      });
+
+      setContacts(prev => {
+        const active = prev.find(c => c.name.toLowerCase().includes(lowerUser) || c.id === tempId);
+        if (active) {
+          setActiveContact(active);
+        }
+        return prev;
+      });
     }
-  }, [initialUser, contacts.length]);
+  }, [initialUser]);
 
   // Scroll to bottom
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chats, activeContact, isTyping]);
@@ -210,7 +228,15 @@ function MessagesContent() {
 
   const dismissRequest = (id: string) => setRequests(prev => prev.filter(r => r.id !== id));
 
-  const filteredContacts = contacts.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+  const filteredContacts = (() => {
+    const list = contacts.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+    const seen = new Set();
+    return list.filter(c => {
+      if (seen.has(c.id)) return false;
+      seen.add(c.id);
+      return true;
+    });
+  })();
 
   // ── Inbox View ────────────────────────────────────────────────
   const InboxView = (

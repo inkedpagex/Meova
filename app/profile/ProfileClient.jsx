@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert,
+  Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert, ShieldCheck,
   Edit3, Users, Calendar, Tag, ChevronRight
 } from 'lucide-react';
 import ProfileEditForm from '../../features/profile/ProfileEditForm';
@@ -58,13 +58,6 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
   useEffect(() => {
     if (profile?.id && typeof window !== 'undefined') {
       const load = () => {
-        // Only update wallet from mockDb if it has a real non-zero value
-        const wallet = mockDb.getWallet(profile.id);
-        if (wallet) {
-          const balance = (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0);
-          // Only override if mockDb has a real balance stored (not the 1250 default seed)
-          if (balance > 0 && balance !== 1250) setSparksBalance(balance);
-        }
         const u = mockDb.getUser(profile.id);
         if (u?.isIdOn !== undefined) setIsIdOn(u.isIdOn);
       };
@@ -148,6 +141,12 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
                   style={{ color: 'var(--text-primary)' }}>
                   <Edit3 size={13} /> Edit Profile
                 </button>
+                {profile?.role === 'admin' && (
+                  <button onClick={() => { router.push('/admin'); setShowSettingsMenu(false); }}
+                    className="w-full text-left px-4 py-2.5 text-xs font-black transition-colors cursor-pointer flex items-center gap-2 text-[#7c3aed]">
+                    <ShieldCheck size={14} /> Admin Dashboard
+                  </button>
+                )}
                 <div style={{ borderTop: '1px solid var(--border-subtle)', margin: '4px 0' }} />
                 <div className="px-3 py-1.5">
                   <LogoutButton />
@@ -164,6 +163,26 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
         </div>
       ) : (
         <div className="space-y-4">
+
+          {/* ── ADMIN ACCESS CARD (Mobile Admin Button) ────────────────── */}
+          {profile?.role === 'admin' && (
+            <button
+              onClick={() => router.push('/admin')}
+              className="w-full rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all active:scale-95 shadow-md"
+              style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)', color: '#ffffff' }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm">
+                  <ShieldCheck size={22} />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-black tracking-wide">Admin Dashboard</p>
+                  <p className="text-[10px] text-purple-100 font-medium">Manage users, payments & host approvals</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-purple-200" />
+            </button>
+          )}
 
           {/* ── Avatar Card ─────────────────────────────── */}
           <div className="rounded-3xl p-5 flex flex-col items-center text-center"

@@ -1,73 +1,220 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Info, Zap, Plus, HelpCircle, Circle } from 'lucide-react';
-import { mockDb } from '../../lib/mockDatabase';
+import { ArrowLeft, Info, Zap, Plus, HelpCircle, Loader2, CheckCircle, Download, Copy, Check, X } from 'lucide-react';
+import Skeleton from '../../components/Skeleton';
+
+function WalletSkeleton() {
+  return (
+    <div className="min-h-screen px-4 py-4 max-w-[500px] mx-auto pb-24 anim-fade-in animate-pulse">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <Skeleton variant="rectangular" className="w-10 h-10 rounded-xl" />
+          <Skeleton variant="text" className="w-32 h-4" />
+        </div>
+        <Skeleton variant="rectangular" className="w-10 h-10 rounded-xl" />
+      </div>
+
+      {/* Hero Balance Card */}
+      <Skeleton variant="rectangular" className="w-full h-[220px] rounded-3xl mb-5" />
+
+      {/* Quick Add */}
+      <div className="mb-5">
+        <Skeleton variant="text" className="w-24 h-3 mb-3" />
+        <div className="grid grid-cols-4 gap-2 mb-3">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} variant="rectangular" className="h-[60px] rounded-2xl" />)}
+        </div>
+        <Skeleton variant="rectangular" className="w-full h-12 rounded-2xl" />
+      </div>
+
+      {/* Transactions */}
+      <div>
+        <Skeleton variant="text" className="w-32 h-3 mb-3 mt-8" />
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="flex items-center justify-between p-4 bg-white border border-zinc-100 rounded-2xl">
+              <div className="flex items-center gap-3">
+                <Skeleton variant="circular" className="w-10 h-10" />
+                <div>
+                  <Skeleton variant="text" className="w-24 h-3 mb-1" />
+                  <Skeleton variant="text" className="w-16 h-2" />
+                </div>
+              </div>
+              <Skeleton variant="text" className="w-12 h-4" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const PACKS = [
+  { sparks: 100,  inr: 100,  key: 'pack_100' },
+  { sparks: 250,  inr: 250,  key: 'pack_250' },
+  { sparks: 500,  inr: 500,  key: 'pack_500' },
+  { sparks: 1000, inr: 1000, key: 'pack_1000' },
+];
+
+function formatDate(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) +
+      ' · ' + d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+  } catch { return iso; }
+}
 
 export default function WalletPage() {
   const router = useRouter();
-  const [userId, setUserId] = useState(null);
-  const [balance, setBalance] = useState(1250);
+  const [wallet, setWallet] = useState(null);
+  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPack, setSelectedPack] = useState(250);
-  const [addSuccess, setAddSuccess] = useState('');
-  const packs = [100, 250, 500, 1000];
+  const [selectedPack, setSelectedPack] = useState(PACKS[1]);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [toast, setToast] = useState('');
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [intentId, setIntentId] = useState(null);
+  const [exactAmountInr, setExactAmountInr] = useState(0);
+  const [intentLoading, setIntentLoading] = useState(false);
 
-  const [transactions, setTransactions] = useState([
-    { id: 'tx1', title: 'Joined Coffee Connect', date: 'May 20, 2026 · 5:02 PM', amount: -150, type: 'spend' },
-    { id: 'tx2', title: 'Added to wallet', date: 'May 18, 2026 · 1:15 PM', amount: 250, type: 'add' },
-    { id: 'tx3', title: 'Joined Photography Walk', date: 'May 17, 2026 · 4:30 PM', amount: -200, type: 'spend' },
-    { id: 'tx4', title: 'Event Refund (Movie Night)', date: 'May 15, 2026 · 9:10 PM', amount: 150, type: 'refund' },
-  ]);
+  const balance = wallet
+    ? (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0)
+    : 0;
 
-  const loadWallet = (uid) => {
-    const w = mockDb.getWallet(uid);
-    if (w) {
-      const total = (w.purchased || 0) + (w.bonus || 0) + (w.creator || 0);
-      setBalance(total > 0 ? total : 1250);
+  const loadWallet = useCallback(async () => {
+    try {
+      const res = await fetch('/api/wallet');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.wallet) setWallet(data.wallet);
+      if (data.transactions) setTransactions(data.transactions);
+      if (data.pendingRequests) setPendingRequests(data.pendingRequests);
+    } catch (err) {
+      console.error('[WalletPage] load error:', err);
+    } finally {
+      await new Promise(r => setTimeout(r, 300));
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadWallet();
+    const onUpdate = () => loadWallet();
+    window.addEventListener('wallet-updated', onUpdate);
+    return () => window.removeEventListener('wallet-updated', onUpdate);
+  }, [loadWallet]);
+
+  const openPaymentModal = async (pack = selectedPack) => {
+    if (pendingRequests.length >= 3) {
+      setToast('⚠️ You have reached the limit of 3 pending payment requests. Please wait for verification.');
+      return;
+    }
+    setSelectedPack(pack);
+    setIntentLoading(true);
+    
+    try {
+      const res = await fetch('/api/wallet/intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sparks: pack.sparks,
+          amount_inr: pack.inr > 1 ? pack.inr - 1 : pack.inr,
+          pack_name: `${pack.sparks} Sparks`,
+          pack_key: pack.key
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIntentId(data.intentId);
+        setExactAmountInr(data.amount_inr);
+        setIsModalOpen(true);
+      } else {
+        setToast(data.error || 'Failed to generate payment intent');
+      }
+    } catch (err) {
+      setToast('Network error');
+    } finally {
+      setIntentLoading(false);
     }
   };
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const res = await fetch('/api/auth/session');
-        const data = await res.json();
-        const uid = data?.user?.id || data?.user?.uid || 'local';
-        setUserId(uid);
-        loadWallet(uid);
-      } catch { /* use defaults */ }
-      setLoading(false);
-    };
-    init();
-    const onUpdate = () => { if (userId) loadWallet(userId); };
-    window.addEventListener('wallet-updated', onUpdate);
-    return () => window.removeEventListener('wallet-updated', onUpdate);
-  }, [userId]);
-
-  const handleAddSparks = () => {
-    if (!userId) { alert('Please log in first'); return; }
-    const w = mockDb.getWallet(userId) || { purchased: 0, bonus: 0, creator: 0 };
-    w.purchased += selectedPack;
-    mockDb.saveWallet(userId, w);
-    const now = new Date();
-    const fmt = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    setTransactions(prev => [{ id: 'tx-' + Date.now(), title: 'Added to wallet', date: fmt, amount: selectedPack, type: 'add' }, ...prev]);
-    setBalance(prev => prev + selectedPack);
-    window.dispatchEvent(new Event('wallet-updated'));
-    setAddSuccess(`${selectedPack} Sparks added successfully!`);
-    setTimeout(() => setAddSuccess(''), 3000);
+  const closeModal = async () => {
+    setIsModalOpen(false);
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="w-6 h-6 rounded-full border-2 border-[#7c3aed] border-t-transparent animate-spin" />
-    </div>
-  );
+  const downloadQRCode = async () => {
+    try {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetifyy&am=${exactAmountInr}&cu=INR`)}`;
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `meetify-payment-₹${exactAmountInr}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetifyy&am=${exactAmountInr}&cu=INR`)}`;
+      window.open(qrUrl, '_blank');
+    }
+  };
+
+  const submitPaymentRequest = async () => {
+    if (requestLoading) return; // Guard against double-clicks
+    setRequestLoading(true);
+    try {
+      const res = await fetch('/api/wallet/intent', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intentId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setToast(`✅ Payment request submitted for ₹${exactAmountInr}! We will verify it shortly.`);
+        loadWallet(); // Reload to show in pending requests
+        setIsModalOpen(false);
+      } else {
+        setToast(data.error || 'Something went wrong. Try again.');
+      }
+    } catch {
+      setToast('Network error. Please try again.');
+    } finally {
+      setRequestLoading(false);
+      setTimeout(() => setToast(''), 6000);
+    }
+  };
+
+  const cancelRequest = async (id) => {
+    try {
+      const res = await fetch('/api/wallet/intent', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intentId: id }),
+      });
+      if (res.ok) {
+        setToast('✅ Request cancelled successfully.');
+        loadWallet();
+      } else {
+        const data = await res.json();
+        setToast(data.error || 'Failed to cancel request.');
+      }
+    } catch (err) {
+      setToast('Network error while cancelling.');
+    } finally {
+      setTimeout(() => setToast(''), 4000);
+    }
+  };
+
+  if (loading) return <WalletSkeleton />;
 
   return (
-    <div className="min-h-screen px-4 py-4 max-w-[500px] mx-auto pb-24 anim-fade-in" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen px-4 py-4 max-w-[500px] mx-auto pb-24 anim-fade-in relative" style={{ background: 'var(--bg-base)' }}>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
@@ -84,11 +231,11 @@ export default function WalletPage() {
         </button>
       </div>
 
-      {/* Success toast */}
-      {addSuccess && (
-        <div className="mb-4 px-4 py-3 rounded-2xl text-xs font-bold text-emerald-700 anim-fade-up"
-          style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}>
-          {addSuccess}
+      {/* Toast */}
+      {toast && (
+        <div className="mb-4 px-4 py-3 rounded-2xl text-xs font-semibold leading-relaxed anim-fade-up"
+          style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)', color: '#065f46' }}>
+          {toast}
         </div>
       )}
 
@@ -102,14 +249,32 @@ export default function WalletPage() {
             <Zap size={24} className="text-orange-400 fill-current" />
           </div>
           <span className="text-[9px] text-white/50 font-semibold mt-1 block">1 Spark = ₹1</span>
+
+          {/* Breakdown */}
+          {wallet && (
+            <div className="flex gap-4 mt-3">
+              {[
+                { label: 'Purchased', val: wallet.purchased || 0 },
+                { label: 'Bonus',     val: wallet.bonus || 0 },
+                { label: 'Earnings',  val: wallet.creator || 0 },
+              ].map(({ label, val }) => (
+                <div key={label}>
+                  <p className="text-[8px] uppercase tracking-wider text-white/40 font-bold">{label}</p>
+                  <p className="text-[13px] font-black text-white">{val}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="flex gap-3 mt-5">
-            <button onClick={handleAddSparks}
-              className="flex-1 bg-white text-zinc-900 font-black text-[11px] uppercase tracking-wider py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-all shadow-md">
-              Add Sparks
+            <button onClick={() => openPaymentModal(selectedPack)} disabled={intentLoading}
+              className="flex-1 bg-white text-zinc-900 font-black text-[11px] uppercase tracking-wider py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50">
+              {intentLoading ? <Loader2 size={14} className="animate-spin" /> : 'Add Sparks'}
             </button>
-            <button className="flex-1 text-white font-black text-[11px] uppercase tracking-wider py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-all"
+            <button onClick={() => router.push('/wallet/withdraw')}
+              className="flex-1 text-white font-black text-[11px] uppercase tracking-wider py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-all"
               style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)' }}>
-              History
+              Withdraw
             </button>
           </div>
         </div>
@@ -119,56 +284,131 @@ export default function WalletPage() {
       <div className="mb-5">
         <span className="text-[10px] font-black uppercase tracking-widest block mb-3" style={{ color: 'var(--text-muted)' }}>Quick Add</span>
         <div className="grid grid-cols-4 gap-2 mb-3">
-          {packs.map(p => (
-            <button key={p} onClick={() => setSelectedPack(p)}
+          {PACKS.map(p => (
+            <button key={p.key} onClick={() => setSelectedPack(p)}
               className="py-3.5 rounded-2xl flex flex-col items-center cursor-pointer transition-all active:scale-95"
               style={{
-                background: selectedPack === p ? 'rgba(124,58,237,0.08)' : 'var(--bg-elevated)',
-                border: selectedPack === p ? '2px solid #7c3aed' : '1px solid var(--border-subtle)',
-                color: selectedPack === p ? '#7c3aed' : 'var(--text-primary)',
+                background: selectedPack.key === p.key ? 'rgba(124,58,237,0.08)' : 'var(--bg-elevated)',
+                border: selectedPack.key === p.key ? '2px solid #7c3aed' : '1px solid var(--border-subtle)',
+                color: selectedPack.key === p.key ? '#7c3aed' : 'var(--text-primary)',
               }}>
-              <span className="text-sm font-black">{p}</span>
-              <span className="text-[8px] font-semibold mt-0.5" style={{ color: 'var(--text-muted)' }}>₹{p}</span>
+              <span className="text-sm font-black">{p.sparks}</span>
+              <span className="text-[8px] font-semibold mt-0.5" style={{ color: 'var(--text-muted)' }}>₹{p.inr}</span>
             </button>
           ))}
         </div>
-        <button onClick={handleAddSparks}
-          className="w-full py-4 rounded-2xl text-white font-black text-[12px] uppercase tracking-wider cursor-pointer active:scale-[0.98] transition-all shadow-md"
+        <button onClick={() => openPaymentModal(selectedPack)} disabled={intentLoading}
+          className="w-full py-4 rounded-2xl text-white font-black text-[12px] uppercase tracking-wider cursor-pointer active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-80"
           style={{ background: '#7c3aed' }}>
-          Add {selectedPack} Sparks · ₹{selectedPack}
+          {intentLoading ? <Loader2 size={16} className="animate-spin" /> : `Add ${selectedPack.sparks} Sparks · ₹${selectedPack.inr}`}
         </button>
       </div>
+
+      {/* Pending Requests */}
+      {pendingRequests.length > 0 && (
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#d97706]">Pending Verification</span>
+          </div>
+          <div className="space-y-2">
+            {pendingRequests.map(req => (
+              <div key={req.id} className="p-4 rounded-2xl flex items-center justify-between gap-3 bg-[#fffbeb] border border-[#fde68a]">
+                <div className="min-w-0">
+                  <p className="text-[12px] font-bold text-[#b45309]">
+                    {req.pack_name}
+                  </p>
+                  <p className="text-[10px] text-[#d97706] mt-0.5 font-medium flex items-center gap-1.5">
+                    Requested: <strong className="font-black">₹{req.amount_inr}</strong>
+                    <span>·</span>
+                    <Loader2 size={10} className="animate-spin inline" />
+                    Reviewing
+                  </p>
+                </div>
+                <button 
+                  onClick={() => cancelRequest(req.id)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#fef3c7] transition-colors flex-shrink-0 cursor-pointer text-[#d97706]"
+                  title="Cancel Request"
+                >
+                  <X size={16} strokeWidth={2.5} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Transactions */}
       <div className="mb-5">
         <div className="flex items-center justify-between mb-3">
           <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Recent Transactions</span>
-          <button className="text-[10px] font-bold text-[#7c3aed] cursor-pointer">See all</button>
         </div>
-        <div className="space-y-2">
-          {transactions.map(tx => (
-            <div key={tx.id} className="p-4 rounded-2xl flex items-center justify-between gap-3 transition-all"
-              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: tx.amount > 0 ? 'rgba(16,185,129,0.1)' : 'var(--bg-surface)',
-                    border: tx.amount > 0 ? '1px solid rgba(16,185,129,0.3)' : '1px solid var(--border-subtle)',
-                    color: tx.amount > 0 ? '#10b981' : 'var(--text-muted)',
-                  }}>
-                  {tx.amount > 0 ? <Plus size={14} strokeWidth={3} /> : <Zap size={14} className="opacity-50" />}
+        {transactions.length === 0 ? (
+          <div className="py-8 text-center">
+            <p className="text-xs text-zinc-400 font-semibold">No transactions yet</p>
+            <p className="text-[10px] text-zinc-300 mt-1">Your activity will appear here</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {transactions.map(tx => {
+              const isRejected = tx.requestStatus === 'rejected';
+              const isPending = tx.requestStatus === 'pending';
+              const isCancelled = tx.requestStatus === 'cancelled';
+              const isPositive = tx.amount > 0 && !isRejected && !isPending && !isCancelled;
+              
+              let bgColor = isPositive ? 'rgba(16,185,129,0.1)' : 'var(--bg-surface)';
+              let borderColor = isPositive ? '1px solid rgba(16,185,129,0.3)' : '1px solid var(--border-subtle)';
+              let iconColor = isPositive ? '#10b981' : 'var(--text-muted)';
+              let amountColor = isPositive ? '#10b981' : 'var(--text-primary)';
+              
+              if (isRejected) {
+                bgColor = 'rgba(239,68,68,0.1)';
+                borderColor = '1px solid rgba(239,68,68,0.3)';
+                iconColor = '#ef4444';
+                amountColor = '#ef4444';
+              } else if (isPending) {
+                bgColor = 'rgba(245,158,11,0.1)';
+                borderColor = '1px solid rgba(245,158,11,0.3)';
+                iconColor = '#f59e0b';
+                amountColor = '#f59e0b';
+              } else if (isCancelled) {
+                bgColor = 'rgba(161,161,170,0.1)';
+                borderColor = '1px solid rgba(161,161,170,0.3)';
+                iconColor = '#a1a1aa';
+                amountColor = '#a1a1aa';
+              }
+
+              return (
+                <div key={tx.id} className="p-4 rounded-2xl flex items-center justify-between gap-3 transition-all"
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: bgColor, border: borderColor, color: iconColor }}>
+                      {isPositive ? <Plus size={14} strokeWidth={3} /> : <Zap size={14} className="opacity-50" />}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                        {tx.description || tx.title || 'Transaction'}
+                      </p>
+                      <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                        {formatDate(tx.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <span className="text-[12px] font-black block" style={{ color: amountColor }}>
+                      {isPositive ? '+' : ''}{tx.amount}
+                    </span>
+                    {(isRejected || isPending || isCancelled) && (
+                      <span className="text-[9px] font-bold uppercase tracking-wider block mt-0.5" style={{ color: iconColor }}>
+                        {tx.requestStatus}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[12px] font-bold truncate" style={{ color: 'var(--text-primary)' }}>{tx.title}</p>
-                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{tx.date}</p>
-                </div>
-              </div>
-              <span className="text-[12px] font-black flex-shrink-0" style={{ color: tx.amount > 0 ? '#10b981' : 'var(--text-primary)' }}>
-                {tx.amount > 0 ? '+' : ''}{tx.amount}
-              </span>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* How Sparks Work */}
@@ -179,8 +419,9 @@ export default function WalletPage() {
         <ul className="space-y-2.5">
           {[
             'Use Sparks to join experiences, events and tournaments.',
-            'Earn Sparks by joining, creating and being active.',
-            '1 Spark = ₹1',
+            'Earn Sparks by hosting and participating.',
+            '1 Spark = ₹1 · Minimum withdrawal: 500 Sparks',
+            'Sparks never expire.',
           ].map((t, i) => (
             <li key={i} className="flex items-start gap-2 text-[11px] font-medium leading-relaxed" style={{ color: 'var(--text-muted)' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-[#7c3aed] mt-1.5 flex-shrink-0" />
@@ -189,6 +430,51 @@ export default function WalletPage() {
           ))}
         </ul>
       </div>
+
+      {/* QR Code Payment Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm anim-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-[360px] overflow-hidden shadow-2xl relative">
+            <div className="p-6 text-center">
+              <h2 className="text-lg font-black text-zinc-900 mb-1">Pay with UPI</h2>
+              <p className="text-[13px] text-zinc-600 font-medium mb-1">Please pay the <b className="text-purple-700">exact amount</b> below</p>
+              <p className="text-[26px] font-black text-zinc-900 tracking-tight mb-6">₹{exactAmountInr}</p>
+              
+              <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center justify-center mb-6">
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetifyy&am=${exactAmountInr}&cu=INR`)}`} 
+                  alt="UPI QR Code" 
+                  className="w-[180px] h-[180px] rounded-lg mb-3"
+                />
+                <button 
+                  onClick={downloadQRCode}
+                  className="flex items-center gap-1.5 text-[11px] font-black text-purple-700 bg-purple-50 hover:bg-purple-100 px-3.5 py-1.5 rounded-full transition-all cursor-pointer"
+                >
+                  <Download size={12} />
+                  Download QR Image
+                </button>
+              </div>
+
+              <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 mb-6 text-left">
+                <p className="text-[11px] text-purple-700 font-bold leading-relaxed">
+                  Please pay the exact amount shown above to verify your payment automatically.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button onClick={closeModal} disabled={requestLoading}
+                  className="flex-1 py-3.5 rounded-xl font-bold text-xs text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-all">
+                  Cancel
+                </button>
+                <button onClick={submitPaymentRequest} disabled={requestLoading}
+                  className="flex-1 py-3.5 rounded-xl font-black text-xs text-white bg-[#7c3aed] hover:bg-[#6d28d9] transition-all flex items-center justify-center gap-2">
+                  {requestLoading ? <Loader2 size={14} className="animate-spin" /> : 'I have paid'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

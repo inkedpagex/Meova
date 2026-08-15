@@ -26,6 +26,13 @@ export default function AdminWithdrawalsPage() {
 
   async function handleWithdrawal(id, action) {
     setActionLoading(id);
+    const originalWithdrawals = [...withdrawals];
+
+    // Optimistically update
+    setWithdrawals(prev =>
+      prev.map(w => w.id === id ? { ...w, status: action === 'approve' ? 'approved' : 'rejected' } : w)
+    );
+
     try {
       const res = await fetch('/api/admin/approve-withdrawal', {
         method: 'POST',
@@ -42,9 +49,11 @@ export default function AdminWithdrawalsPage() {
         fetchWithdrawals();
       } else {
         alert(data.error || 'Failed to update withdrawal');
+        setWithdrawals(originalWithdrawals); // Rollback
       }
     } catch (e) {
       alert('Network error');
+      setWithdrawals(originalWithdrawals); // Rollback
     } finally {
       setActionLoading(null);
     }
@@ -99,11 +108,11 @@ export default function AdminWithdrawalsPage() {
                           Payment Details ({w.method})
                         </p>
                         {w.method === 'upi' ? (
-                          <p style={{ fontSize: 13, fontWeight: 700, color: 'white', fontFamily: 'monospace' }}>
+                          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'monospace' }}>
                             {w.upi_id}
                           </p>
                         ) : (
-                          <div style={{ fontSize: 11, color: 'white' }}>
+                          <div style={{ fontSize: 11, color: 'var(--text-primary)' }}>
                             <p>Bank: {w.bank_details?.bank_name}</p>
                             <p>A/C: {w.bank_details?.account_number}</p>
                             <p>IFSC: {w.bank_details?.ifsc_code}</p>

@@ -5,9 +5,7 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithRedirect
+  signInWithCustomToken
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { TABLE_PROFILES } from './constants';
@@ -82,16 +80,27 @@ export async function logOutUser() {
   await fetch('/api/auth/session', { method: 'DELETE' });
 }
 
-export async function logInWithGoogle() {
-  const provider = new GoogleAuthProvider();
+export async function logInWithGoogle(idToken = null, accessToken = null) {
   try {
-    const userCredential = await signInWithPopup(auth, provider);
+    // Exchange Google token for a Firebase Custom Token via our backend
+    const res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accessToken })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to authenticate with backend');
+
+    // Sign into Firebase using the custom token
+    const userCredential = await signInWithCustomToken(auth, data.customToken);
     const user = userCredential.user;
+    
     // Check if profile exists and create using secure admin action
-    const idToken = await user.getIdToken();
+    const firebaseIdToken = await user.getIdToken();
     const { createProfileAdmin } = await import('./auth.actions');
     
-    await createProfileAdmin(idToken, {
+    await createProfileAdmin(firebaseIdToken, {
       id: user.uid,
       email: user.email,
       full_name: user.displayName || user.email.split('@')[0],
@@ -104,11 +113,7 @@ export async function logInWithGoogle() {
     await createSessionCookie(user);
     return user;
   } catch (err) {
-    console.error("Google popup login failed, trying redirect:", err);
-    if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
-      await signInWithRedirect(auth, provider);
-      return null;
-    }
+    console.error("Custom Token Google Auth failed:", err);
     throw err;
   }
 }

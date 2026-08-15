@@ -35,21 +35,20 @@ export function useAuth() {
     }
   };
 
-  const handleGoogleLogIn = async () => {
+  const handleGoogleLogIn = async (idToken = null, accessToken = null) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await logInWithGoogle();
+      const data = await logInWithGoogle(idToken, accessToken);
       return { success: true, data };
     } catch (err) {
       console.error("Google Auth error:", err);
       let errMsg = err.message || 'Google login failed';
       if (err.code === 'auth/operation-not-allowed') {
-        errMsg = "Google Sign-In is disabled in your Firebase console. Please go to Firebase Console -> Authentication -> Sign-in Method, and enable Google Sign-In.";
+        errMsg = "Google Sign-In is not enabled. Go to Firebase Console → Authentication → Sign-in Method and enable Google.";
       }
-      alert(errMsg);
       setError(errMsg);
-      return { success: false, error: err };
+      return { success: false, error: { message: errMsg } };
     } finally {
       setLoading(false);
     }

@@ -7,9 +7,13 @@ import {
   Layers, Camera, Trophy, Gamepad2, Users, Rocket, Palette, Star,
   AlertTriangle
 } from 'lucide-react';
+import useSWR from 'swr';
+import { useUserContext } from '../../components/providers/UserProvider';
 import { mockDb } from '../../lib/mockDatabase';
 import { getCartoonAvatar, getUserAvatarUrl } from '../../utils/avatar';
 import confetti from 'canvas-confetti';
+
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const INTEREST_COLORS = {
   'Coding': '#7c3aed', 'Tech': '#7c3aed', 'AI': '#7c3aed', 'AI/ML': '#7c3aed',
@@ -21,17 +25,24 @@ const INTEREST_COLORS = {
 
 const FILTERS = ['All', 'People', 'Experiences', 'Communities', 'Tournaments'];
 
-export default function DiscoverClient({ people: initialPeople = [], circles: initialCircles = [], currentUser }) {
+export default function DiscoverClient() {
   const router = useRouter();
+  const { user: currentUser, people: contextPeople } = useUserContext();
+  
   const [activeFilter, setActiveFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [connectedIds, setConnectedIds] = useState(new Set());
   const [joinedIds, setJoinedIds] = useState(new Set());
   
-  // Real dynamic states loaded from Firebase props & local database
-  const [people, setPeople] = useState(initialPeople);
-  const [experiences, setExperiences] = useState([]);
-  const [circles, setCircles] = useState(initialCircles);
+  // Real dynamic states loaded from Firebase API & Context
+  const [people, setPeople] = useState(contextPeople || []);
+  
+  // SWR Hooks for caching and instant data fetching
+  const { data: expData } = useSWR('/api/experiences', fetcher);
+  const { data: circlesData } = useSWR('/api/circles', fetcher);
+  
+  const experiences = expData?.experiences || [];
+  const circles = circlesData?.circles || [];
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -41,17 +52,14 @@ export default function DiscoverClient({ people: initialPeople = [], circles: in
         ? dbUsers.filter(u => u.id !== currentUser.id && u.isIdOn !== false) 
         : dbUsers.filter(u => u.isIdOn !== false);
 
-      // Merge real Firebase initialPeople and dynamic localStorage users
-      const mergedUsers = [...initialPeople];
+      // Merge real Firebase contextPeople and dynamic localStorage users
+      const mergedUsers = [...(contextPeople || [])];
       filteredUsers.forEach(u => {
         if (!mergedUsers.some(mu => mu.id === u.id)) {
           mergedUsers.push(u);
         }
       });
       setPeople(mergedUsers);
-
-      // Fetch dynamic experiences
-      setExperiences(mockDb.getExperiences() || []);
 
       const savedJoined = localStorage.getItem('meetify_disc_joined');
       if (savedJoined) {
@@ -60,7 +68,7 @@ export default function DiscoverClient({ people: initialPeople = [], circles: in
         } catch {}
       }
     }
-  }, [currentUser, initialPeople]);
+  }, [currentUser, contextPeople]);
 
   const handleConnect = (person) => {
     confetti({ particleCount: 40, spread: 40, origin: { y: 0.6 } });
@@ -128,8 +136,8 @@ export default function DiscoverClient({ people: initialPeople = [], circles: in
                     {person.year ? `${person.year} Yr` : ''} {person.branch ? `· ${person.branch}` : ''}
                   </span>
                   <div className="flex flex-wrap gap-1 mt-2 justify-center" style={{ minHeight: 24 }}>
-                    {(person.interests || []).slice(0, 2).map(tag => (
-                      <span key={tag} className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase"
+                    {(person.interests || []).slice(0, 2).map((tag, idx) => (
+                      <span key={`${tag}-${idx}`} className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase"
                         style={{ background: `${INTEREST_COLORS[tag] || INTEREST_COLORS.default}18`, color: INTEREST_COLORS[tag] || INTEREST_COLORS.default }}>
                         {tag}
                       </span>

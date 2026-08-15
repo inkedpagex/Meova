@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Zap, Clock, RefreshCw } from 'lucide-react';
-import { mockDb } from '../../../lib/mockDatabase';
 
 function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
 function fmtDate(s) {
@@ -21,10 +20,17 @@ export default function AdminPaymentsPage() {
   const [loading, setLoading]   = useState('');
   const [result, setResult]     = useState(null);
 
-  const loadPayments = useCallback(() => {
-    const all = mockDb.getPaymentRequests();
-    // Newest first
-    setPayments([...all].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+  const loadPayments = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/list-payments');
+      if (!res.ok) throw new Error('Failed to fetch payments');
+      const data = await res.json();
+      const all = data.payments || [];
+      // Newest first
+      setPayments([...all].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+    } catch (err) {
+      console.error('[AdminPaymentsPage] load error:', err.message);
+    }
   }, []);
 
   useEffect(() => {
@@ -34,22 +40,38 @@ export default function AdminPaymentsPage() {
     return () => clearInterval(interval);
   }, [loadPayments]);
 
-  function handleAction(id, approve) {
+  async function handleAction(id, approve) {
     setLoading(id + (approve ? '_approve' : '_reject'));
     setResult(null);
-    try {
-      const ok = approve
-        ? mockDb.approvePaymentRequest(id)
-        : mockDb.rejectPaymentRequest(id);
 
-      if (ok) {
+    // Store original state for potential rollback
+    const originalPayments = [...payments];
+    
+    // Optimistic Update: Update status instantly in the UI
+    setPayments(prev =>
+      prev.map(p => p.id === id ? { ...p, status: approve ? 'approved' : 'rejected' } : p)
+    );
+
+    try {
+      const res = await fetch('/api/admin/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          action: approve ? 'approve' : 'reject'
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
         setResult({ ok: true, message: `Payment ${approve ? 'approved — Sparks credited to user wallet!' : 'rejected — user notified.'}` });
       } else {
-        setResult({ ok: false, message: 'Action failed. Payment may already be processed.' });
+        setResult({ ok: false, message: data.error || 'Action failed.' });
+        setPayments(originalPayments); // Rollback
       }
       loadPayments();
     } catch (e) {
       setResult({ ok: false, message: e.message });
+      setPayments(originalPayments); // Rollback
     } finally {
       setLoading('');
     }
@@ -139,9 +161,11 @@ export default function AdminPaymentsPage() {
                     </span>
                   </div>
                   <p className="text-[11px] text-[var(--text-muted)] font-bold">{p.email}</p>
-                  <div className="flex items-center gap-3 flex-wrap text-[10px] font-bold text-[var(--text-secondary)]">
-                    <span>Ref: <code className="font-mono text-amber-400 tracking-widest">{p.reference_code}</code></span>
-                    <span>₹{p.amount_inr}</span>
+                  <div className="flex items-center gap-4 flex-wrap text-[10px] font-bold text-[var(--text-secondary)] mt-1">
+                    <span className="text-[14px] text-emerald-400 font-black px-2.5 py-1 bg-emerald-500/10 rounded-lg">₹{p.amount_inr}</span>
+                    {p.reference_code && (
+                      <span>Ref: <code className="font-mono text-amber-400 tracking-widest">{p.reference_code}</code></span>
+                    )}
                     <span>{fmtDate(p.created_at)}</span>
                   </div>
                 </div>

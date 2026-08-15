@@ -6,8 +6,10 @@ import CirclesList from '../../features/circles/CirclesList';
 export const metadata = { title: 'Communities — meetifyy.in' };
 
 export default async function CirclesPage() {
-  const user = await getUserAdmin();
-  const circles = await fetchCirclesAdmin();
+  const [user, circles] = await Promise.all([
+    getUserAdmin(),
+    fetchCirclesAdmin()
+  ]);
 
   // Build the set of circles the current user has joined
   let joinedCircleIds = new Set();
