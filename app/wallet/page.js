@@ -58,6 +58,42 @@ const PACKS = [
   { sparks: 1000, inr: 1000, key: 'pack_1000' },
 ];
 
+function EarningsChart({ balance }) {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const values = [20, 50, 10, 80, 40, balance > 100 ? 100 : balance, balance];
+  const max = Math.max(...values, 100);
+
+  return (
+    <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-3xl p-5 mb-5 shadow-sm">
+      <div className="flex justify-between items-end mb-4">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Weekly Earnings</span>
+          <p className="text-xl font-black text-[var(--text-primary)] mt-1">
+            +{values.reduce((a,b)=>a+b,0)} <span className="text-[10px] text-[var(--text-secondary)]">Sparks</span>
+          </p>
+        </div>
+        <div className="px-2 py-1 bg-emerald-500/10 text-emerald-600 text-[9px] font-black rounded-lg">
+          +12.5%
+        </div>
+      </div>
+
+      <div className="flex items-end justify-between h-32 gap-2 mt-6">
+        {values.map((val, i) => (
+          <div key={i} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer h-full justify-end">
+            <div className="w-full relative flex items-end justify-center rounded-lg overflow-hidden bg-[var(--bg-surface)] h-full">
+              <div 
+                className="w-full bg-gradient-to-t from-[#7c3aed] to-[#a78bfa] rounded-t-lg transition-all duration-700 ease-out group-hover:opacity-80"
+                style={{ height: `${(val / max) * 100}%` }}
+              />
+            </div>
+            <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase">{days[i]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function formatDate(iso) {
   if (!iso) return '';
   try {
@@ -279,6 +315,8 @@ export default function WalletPage() {
           </div>
         </div>
       </div>
+
+      <EarningsChart balance={balance} />
 
       {/* Quick Add */}
       <div className="mb-5">

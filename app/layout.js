@@ -8,6 +8,7 @@ import Script from 'next/script';
 import GoogleAuthProviderWrapper from '../components/GoogleAuthProviderWrapper';
 import { headers } from 'next/headers';
 import { UserProvider } from '../components/providers/UserProvider';
+import FCMInitializer from '../components/FCMInitializer';
 
 export const metadata = {
   title: 'Meetify — Your Campus Life',
@@ -70,6 +71,8 @@ export default async function RootLayout({ children }) {
       <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh', fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif" }}>
         <GoogleAuthProviderWrapper>
           <UserProvider initialUser={user} initialWallet={user?.wallet} initialPeople={people}>
+            {/* FCM Push Notification initializer — client-only, non-rendering */}
+            <FCMInitializer />
             <div className="flex min-h-screen">
               <Sidebar user={user} />
 

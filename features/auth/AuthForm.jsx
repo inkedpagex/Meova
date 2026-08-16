@@ -50,7 +50,11 @@ export default function AuthForm({ defaultMode = 'login' }) {
       // useGoogleLogin implicit flow returns an access_token. We pass this to Firebase.
       const res = await logInWithGoogle(null, tokenResponse.access_token);
       if (res?.success) {
-        window.location.href = nextPath;
+        if (res.data?.isNewUser) {
+          window.location.href = '/profile';
+        } else {
+          window.location.href = nextPath;
+        }
       } else if (res?.error) {
         setError(res.error.message || 'Google sign-in failed. Please try again.');
       }

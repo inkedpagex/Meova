@@ -1,6 +1,8 @@
 'use client';
 // Force compile: 2026-07-16
 import React, { useState, useEffect } from 'react';
+import QRCode from 'react-qr-code';
+import { Scanner } from '@yudiel/react-qr-scanner';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -368,23 +370,33 @@ export default function FeedClient() {
 
     setVerifyingId(bookingId);
     setVerificationError(prev => ({ ...prev, [bookingId]: '' }));
-    await new Promise(r => setTimeout(r, 1000));
 
-    const res = mockDb.completeMeeting(bookingId, code);
-    setVerifyingId(null);
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId, action: 'complete', code })
+      });
+      const data = await res.json();
+      setVerifyingId(null);
 
-    if (res.success) {
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      refreshDbState();
-      // Open review dialog immediately for the host to review the guest
-      setReviewBooking(res.booking);
-    } else {
-      setVerificationError(prev => ({ ...prev, [bookingId]: res.error }));
+      if (data.success) {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        refreshDbState();
+        // Find the completed booking to open the review dialog
+        const completedBooking = bookings.find(b => b.id === bookingId);
+        if (completedBooking) setReviewBooking(completedBooking);
+      } else {
+        setVerificationError(prev => ({ ...prev, [bookingId]: data.error || 'Verification failed' }));
+      }
+    } catch (err) {
+      setVerifyingId(null);
+      setVerificationError(prev => ({ ...prev, [bookingId]: 'Network error, try again' }));
     }
   };
 
   // Guest Action: Complete Review
-  const handleSubmitReview = (e) => {
+  const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!reviewBooking) return;
 
@@ -392,29 +404,36 @@ export default function FeedClient() {
     const isHost = currentUser.id === reviewBooking.hostId;
     const targetUserId = isHost ? reviewBooking.guestId : reviewBooking.hostId;
 
-    mockDb.addReview({
-      experienceId: reviewBooking.experienceId,
-      hostId: targetUserId,
-      authorName: userData?.full_name || 'Student',
-      authorAvatar: userData?.full_name || 'Student',
-      rating: reviewRating,
-      written: reviewText,
-      categories: reviewCategories
-    });
+    try {
+      await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: reviewBooking.id,
+          experienceId: reviewBooking.experienceId,
+          targetUserId: targetUserId,
+          rating: reviewRating,
+          written: reviewText,
+          categories: reviewCategories
+        })
+      });
 
-    // Mark booking as Closed if review completed
-    const bookingsList = mockDb.getBookings();
-    const bIdx = bookingsList.findIndex(b => b.id === reviewBooking.id);
-    if (bIdx !== -1) {
-      bookingsList[bIdx].status = 'Booking Closed';
-      mockDb.updateBookingStatus(reviewBooking.id, 'Booking Closed');
+      // Mark booking as Closed (we update it via API)
+      await fetch('/api/bookings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: reviewBooking.id, action: 'close' })
+      });
+
+      setReviewBooking(null);
+      setReviewText('');
+      setReviewCategories([]);
+      refreshDbState();
+      alert('Thank you for the review!');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to submit review');
     }
-
-    setReviewBooking(null);
-    setReviewText('');
-    setReviewCategories([]);
-    refreshDbState();
-    alert('Thank you for the review!');
   };
 
   const toggleReviewCategory = (cat) => {
@@ -523,10 +542,10 @@ export default function FeedClient() {
   }
 
   return (
-    <div className="space-y-6 pb-24 pt-4 px-2 select-none">
+    <div className="space-y-6 pb-24 px-2 select-none">
 
       {/* ── HEADER SECTION ────────────────────────── */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-2">
         <div>
           <h1 className="text-2xl font-extrabold text-zinc-950 tracking-tight">
             Hi, {userData?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'Chirag'}
@@ -534,19 +553,6 @@ export default function FeedClient() {
           <p className="text-xs text-zinc-500 font-bold mt-1">
             Who are you meeting today?
           </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Sparks balance badge */}
-          <Link href="/wallet" className="flex items-center gap-1.5 bg-[#f3f0ff] border border-[#ddd6fe]/50 rounded-full px-3.5 py-2 text-xs font-black text-[#7c3aed] hover:opacity-90 transition-opacity shadow-sm">
-            <Zap size={11} className="fill-current text-[#7c3aed]" />
-            <span>{sparksBalance}</span>
-          </Link>
-          
-          <Link href="/notifications" className="w-10 h-10 rounded-full bg-white border border-zinc-100 flex items-center justify-center text-zinc-800 hover:text-indigo-600 transition-all relative shadow-sm">
-            <Bell size={18} className="text-zinc-800" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-[#7c3aed] rounded-full border border-white" />
-          </Link>
         </div>
       </div>
 
@@ -921,8 +927,7 @@ export default function FeedClient() {
       {/* ── BOOKING MODAL (PREMIUM AIRBNB STYLE) ───────────────────── */}
       {selectedExp && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pb-20 sm:pb-4 px-4 pt-4"
-          style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
+          className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-zinc-900/40 backdrop-blur-md p-4 sm:p-0"
           onClick={() => !bookingLoading && setSelectedExp(null)}
         >
           <div
@@ -1134,8 +1139,7 @@ export default function FeedClient() {
       {/* ── ACTIVE BOOKING DETAILS & MEETUP QR VERIFICATION MODAL ───── */}
       {selectedActiveBooking && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center pb-20 sm:pb-4 px-4 pt-4"
-          style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/40 backdrop-blur-md"
           onClick={() => !isScanningMock && setSelectedActiveBooking(null)}
         >
           <div
@@ -1166,27 +1170,18 @@ export default function FeedClient() {
             {/* QR Scanner Mock / Host Scan Screen */}
             {selectedActiveBooking.status === 'Confirmed' ? (
               <div className="space-y-4">
-                {/* QR Display frame */}
-                <div className="relative w-44 h-44 mx-auto bg-white rounded-2xl p-4 flex items-center justify-center shadow-inner overflow-hidden border border-[var(--border-subtle)]">
-                  {/* Scanner moving green line overlay if scanning */}
-                  {isScanningMock && (
-                    <div className="absolute left-0 right-0 h-1 bg-emerald-500 shadow-[0_0_10px_#10b981] animate-[bounce_1.5s_infinite]" />
-                  )}
-                  {/* Simulated QR Code blocks */}
-                  <div className="grid grid-cols-5 gap-1 w-32 h-32 opacity-90">
-                    {[...Array(25)].map((_, i) => (
-                      <div
-                        key={i}
-                        className={`w-full h-full rounded-sm ${(i % 5 === 0 || i < 5 || i > 20 || i % 6 === 0) ? 'bg-black' : 'bg-transparent'
-                          }`}
-                      />
-                    ))}
-                  </div>
-                </div>
 
-                {/* 6-digit Code */}
-                <div>
+                {/* 6-digit Code & QR Display */}
+                <div className="flex flex-col items-center gap-3">
                   <p className="text-[8px] text-[var(--text-muted)] font-black uppercase tracking-wider">Meeting Code (Share at meetup)</p>
+                  
+                  {/* Guest View: Show actual QR Code */}
+                  {selectedActiveBooking.guestId === currentUser.id ? (
+                    <div className="bg-white p-3 rounded-2xl shadow-inner border border-[var(--border-subtle)] inline-block">
+                      <QRCode value={selectedActiveBooking.meetingCode} size={130} />
+                    </div>
+                  ) : null}
+
                   <p className="text-2xl font-black text-white tracking-widest mt-1 bg-[var(--bg-surface)] py-2.5 rounded-xl border border-[var(--border-subtle)] inline-block px-6">
                     {selectedActiveBooking.meetingCode}
                   </p>
@@ -1198,41 +1193,61 @@ export default function FeedClient() {
                   <div className="space-y-3 pt-1 border-t border-[var(--border-subtle)] text-left">
                     <p className="text-[8.5px] text-[var(--text-muted)] font-black uppercase text-center">Host Controls</p>
 
-                    {/* Simulated Instant Scan Button */}
-                    <button
-                      type="button"
-                      disabled={isScanningMock}
-                      onClick={async () => {
-                        setIsScanningMock(true);
-                        await new Promise(r => setTimeout(r, 1500));
-                        setIsScanningMock(false);
+                    {/* Actual Scanner Screen for Host */}
+                    {isScanningMock ? (
+                      <div className="rounded-xl overflow-hidden shadow-md border border-[var(--border-subtle)] h-48 relative">
+                        <Scanner 
+                          onScan={async (result) => {
+                            if (result && result.length > 0) {
+                              const scannedCode = result[0].rawValue;
+                              setIsScanningMock(false);
+                              setVerificationCodes(prev => ({ ...prev, [selectedActiveBooking.id]: scannedCode }));
+                              
+                              // Auto-verify with the scanned code
+                              setVerifyingId(selectedActiveBooking.id);
+                              try {
+                                const res = await fetch('/api/bookings', {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ bookingId: selectedActiveBooking.id, action: 'complete', code: scannedCode })
+                                });
+                                const data = await res.json();
+                                setVerifyingId(null);
 
-                        // Execute check inline
-                        const res = mockDb.completeMeeting(selectedActiveBooking.id, selectedActiveBooking.meetingCode);
-                        if (res.success) {
-                          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                          refreshDbState();
-                          setSelectedActiveBooking(null);
-                          setReviewBooking(res.booking);
-                          alert('Meeting Verified Successfully via Scan! Payout released.');
-                        } else {
-                          alert(res.error || 'Scan failed.');
-                        }
-                      }}
-                      className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-black uppercase py-3.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
-                    >
-                      {isScanningMock ? (
-                        <>
-                          <Loader2 size={13} className="animate-spin" />
-                          <span>Scanning Guest QR...</span>
-                        </>
-                      ) : (
-                        <>
-                          <ShieldCheck size={14} />
-                          <span>Instant Scan Guest QR</span>
-                        </>
-                      )}
-                    </button>
+                                if (data.success) {
+                                  confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                                  refreshDbState();
+                                  const b = bookings.find(bk => bk.id === selectedActiveBooking.id);
+                                  setSelectedActiveBooking(null);
+                                  if (b) setReviewBooking(b);
+                                  alert('Meeting Verified Successfully via Scan! Payout released.');
+                                } else {
+                                  alert(data.error || 'Verification failed.');
+                                }
+                              } catch (err) {
+                                setVerifyingId(null);
+                                alert('Network error during scan verification.');
+                              }
+                            }
+                          }}
+                        />
+                        <button 
+                          onClick={() => setIsScanningMock(false)}
+                          className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1.5"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsScanningMock(true)}
+                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase py-3.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
+                      >
+                        <ShieldCheck size={14} />
+                        <span>Scan Guest QR Code</span>
+                      </button>
+                    )}
 
                     {/* Numeric Entry option */}
                     <div className="space-y-1.5 text-left">
@@ -1254,17 +1269,28 @@ export default function FeedClient() {
                               return;
                             }
                             setIsScanningMock(true);
-                            await new Promise(r => setTimeout(r, 800));
-                            setIsScanningMock(false);
-                            const res = mockDb.completeMeeting(selectedActiveBooking.id, code);
-                            if (res.success) {
-                              confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                              refreshDbState();
-                              setSelectedActiveBooking(null);
-                              setReviewBooking(res.booking);
-                              alert('Verified successfully! Payout released.');
-                            } else {
-                              alert(res.error || 'Verification failed.');
+                            try {
+                              const res = await fetch('/api/bookings', {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ bookingId: selectedActiveBooking.id, action: 'complete', code })
+                              });
+                              const data = await res.json();
+                              setIsScanningMock(false);
+
+                              if (data.success) {
+                                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                                refreshDbState();
+                                const b = bookings.find(bk => bk.id === selectedActiveBooking.id);
+                                setSelectedActiveBooking(null);
+                                if (b) setReviewBooking(b);
+                                alert('Verified successfully! Payout released.');
+                              } else {
+                                alert(data.error || 'Verification failed.');
+                              }
+                            } catch (err) {
+                              setIsScanningMock(false);
+                              alert('Network error during manual verification.');
                             }
                           }}
                           className="flex-1 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-black uppercase text-[10px] rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-95"

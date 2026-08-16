@@ -76,8 +76,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Too many concurrent requests for this pack right now. Please try again later.' }, { status: 429 });
     }
 
-    // 5. Calculate exact unique amount
-    const uniqueAmount = amount_inr + (randomDecimal / 100);
+    // 5. Calculate exact unique amount and fix JS float precision issues
+    const uniqueAmount = Number((amount_inr + (randomDecimal / 100)).toFixed(2));
 
     // 6. Create intent
     const ref = await adminDb.collection('payment_requests').add({

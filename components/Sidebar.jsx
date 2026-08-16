@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Home, Search, Users, User, LogIn, Wallet, Shield, Plus, Bell, Zap, MessageSquare,
-  LayoutDashboard, CreditCard, ArrowUpRight, ShieldCheck, FileText, Settings, MoreHorizontal
+  LayoutDashboard, CreditCard, ArrowUpRight, ShieldCheck, FileText, Settings, MoreHorizontal, Calendar
 } from 'lucide-react';
 import { getUserAvatarUrl } from '../utils/avatar';
 import { db } from '../lib/firebaseClient';
@@ -147,6 +147,7 @@ export default function Sidebar({ user }) {
     { href: '/',              label: 'Home',          Icon: Home },
     { href: '/discover',      label: 'Discover',      Icon: Search },
     { href: '/messages',      label: 'Messages',      Icon: MessageSquare },
+    { href: '/bookings',      label: 'My Bookings',   Icon: Calendar },
     { href: '/notifications', label: 'Notifications', Icon: Bell },
     { href: '/circles',       label: 'Communities',   Icon: Users },
     ...(user ? [{ href: '/wallet', label: 'Wallet', Icon: Wallet }] : []),
@@ -193,7 +194,7 @@ export default function Sidebar({ user }) {
           <span className="font-black text-[17px] tracking-tight text-zinc-900">meetifyy</span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {user ? (
             <>
               {!isAdminRoute && (
@@ -203,6 +204,11 @@ export default function Sidebar({ user }) {
                   <span>{sparks.toLocaleString()}</span>
                 </Link>
               )}
+
+              <Link href="/bookings" className="relative w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ background: '#f8f8fa', border: '1px solid #e8e8ea' }}>
+                <Calendar size={16} className={pathname === '/bookings' ? 'text-[#7c3aed]' : 'text-zinc-600'} strokeWidth={2} />
+              </Link>
 
               <Link href="/notifications" className="relative w-9 h-9 rounded-full flex items-center justify-center"
                 style={{ background: '#f8f8fa', border: '1px solid #e8e8ea' }}>
@@ -214,13 +220,6 @@ export default function Sidebar({ user }) {
                 )}
               </Link>
 
-              {user?.role === 'admin' && (
-                <Link href="/admin" className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
-                  style={{ background: '#f3f0ff', border: '1px solid #e9d5ff', color: '#7c3aed' }}
-                  title="Admin Dashboard">
-                  <Shield size={16} strokeWidth={2.2} />
-                </Link>
-              )}
 
               <Link href="/profile">
                 <div className="w-8 h-8 rounded-full overflow-hidden relative" style={{ border: '2px solid #e8e8ea' }}>
@@ -299,10 +298,9 @@ export default function Sidebar({ user }) {
       </aside>
 
       {/* ── Mobile bottom tab bar ───────────── */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 flex items-end justify-around"
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 flex items-end justify-around bg-white/75 backdrop-blur-xl"
         style={{
-          background: '#ffffff',
-          borderTop: '1px solid #f0f0f0',
+          borderTop: '1px solid rgba(255,255,255,0.2)',
           height: 'calc(64px + env(safe-area-inset-bottom))',
           paddingBottom: 'calc(6px + env(safe-area-inset-bottom))',
           boxShadow: '0 -2px 16px rgba(0,0,0,0.04)',

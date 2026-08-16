@@ -52,7 +52,17 @@ export async function POST(request) {
     };
 
     const ref = await adminDb.collection('experiences').add(exp);
-    return NextResponse.json({ experience: { id: ref.id, ...exp } });
+    const created = { id: ref.id, ...exp };
+
+    // Sync to Algolia for instant search (fire-and-forget, non-blocking)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    fetch(`${baseUrl}/api/algolia/sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'experience', data: created }),
+    }).catch(() => {}); // Non-fatal
+
+    return NextResponse.json({ experience: created });
   } catch (err) {
     console.error('[POST /api/experiences]', err.message);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });

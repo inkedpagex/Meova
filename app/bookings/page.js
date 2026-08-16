@@ -1,0 +1,461 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import useSWR from "swr";
+import { useUserContext } from "../../components/providers/UserProvider";
+import { useRouter } from "next/navigation";
+import {
+  Calendar, Clock, MapPin, QrCode, ScanLine, X, Loader2,
+  CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight
+} from "lucide-react";
+import QRCode from "react-qr-code";
+import { Scanner } from "@yudiel/react-qr-scanner";
+
+const fetcher = (url) => fetch(url).then((res) => res.json());
+
+export default function BookingsPage() {
+  const router = useRouter();
+  const { user } = useUserContext();
+  const [activeTab, setActiveTab] = useState("Active"); // "Active" | "History"
+
+  // Modals state
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [showScanModal, setShowScanModal] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+
+  // Scanner state
+  const [scanStatus, setScanStatus] = useState("idle"); // idle, scanning, processing, success, error
+  const [scanMessage, setScanMessage] = useState("");
+
+  // Dispute state
+  const [disputeLoading, setDisputeLoading] = useState(false);
+  const [disputeSuccess, setDisputeSuccess] = useState(false);
+
+  const { data, error, mutate, isLoading } = useSWR(user ? "/api/bookings" : null, fetcher);
+  const bookings = data?.bookings || [];
+
+  const activeBookings = bookings.filter(b => b.status === "Requested" || b.status === "Accepted" || b.status === "Confirmed");
+  const pastBookings = bookings.filter(b => ["Completed", "Rejected", "Cancelled", "Meeting Completed", "Booking Closed", "AutoRefunded", "Disputed", "Canceled"].includes(b.status));
+
+  const displayList = activeTab === "Active" ? activeBookings : pastBookings;
+
+  useEffect(() => {
+    if (!user && typeof window !== "undefined") {
+      router.push("/login");
+    }
+  }, [user, router]);
+
+  if (!user) return null;
+
+  // Has the meeting time passed? (for showing Report Issue button)
+  const isMeetingTimePassed = (booking) => {
+    if (!booking.scheduledAt) {
+      // Fallback: if no scheduledAt, allow reporting after 2 hours from creation
+      const created = booking.created_at ? new Date(booking.created_at) : null;
+      if (!created) return false;
+      return Date.now() > created.getTime() + 2 * 60 * 60 * 1000;
+    }
+    return Date.now() > new Date(booking.scheduledAt).getTime();
+  };
+
+  // Handle QR scanning
+  const handleScan = async (text) => {
+    if (scanStatus === "processing" || scanStatus === "success" || !selectedBooking) return;
+    
+    if (text === selectedBooking.meetingCode) {
+      setScanStatus("processing");
+      try {
+        const res = await fetch("/api/bookings", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId: selectedBooking.id, action: "complete", meetingCode: text })
+        });
+        
+        const data = await res.json();
+        if (data.ok || data.success) {
+          setScanStatus("success");
+          setScanMessage("Verification successful! Sparks have been credited.");
+          setTimeout(() => {
+            setShowScanModal(false);
+            setScanStatus("idle");
+            setSelectedBooking(null);
+            mutate();
+          }, 2000);
+        } else {
+          setScanStatus("error");
+          setScanMessage(data.error || "Verification failed");
+          setTimeout(() => setScanStatus("idle"), 2500);
+        }
+      } catch (e) {
+        setScanStatus("error");
+        setScanMessage("Network error during verification.");
+        setTimeout(() => setScanStatus("idle"), 2500);
+      }
+    } else {
+      setScanStatus("error");
+      setScanMessage("Invalid QR Code for this meeting.");
+      setTimeout(() => setScanStatus("idle"), 2500);
+    }
+  };
+
+  // Handle Report Issue (Dispute)
+  const handleDispute = async () => {
+    if (!selectedBooking || disputeLoading) return;
+    setDisputeLoading(true);
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: selectedBooking.id, action: "dispute" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDisputeSuccess(true);
+        setTimeout(() => {
+          setShowDisputeModal(false);
+          setDisputeSuccess(false);
+          setSelectedBooking(null);
+          mutate();
+        }, 2200);
+      } else {
+        alert(data.error || "Failed to report issue. Please try again.");
+      }
+    } catch (e) {
+      alert("Network error. Please try again.");
+    } finally {
+      setDisputeLoading(false);
+    }
+  };
+
+  const statusColor = (status) => {
+    if (status === "Completed" || status === "Meeting Completed") return "text-emerald-600 bg-emerald-50 border-emerald-100";
+    if (status === "Rejected" || status === "Cancelled" || status === "Canceled") return "text-rose-600 bg-rose-50 border-rose-100";
+    if (status === "AutoRefunded") return "text-amber-600 bg-amber-50 border-amber-100";
+    if (status === "Disputed") return "text-orange-600 bg-orange-50 border-orange-100";
+    if (status === "Booking Closed") return "text-zinc-500 bg-zinc-50 border-zinc-200";
+    return "text-purple-600 bg-purple-50 border-purple-100";
+  };
+
+  const statusLabel = (status) => {
+    if (status === "AutoRefunded") return "Auto Refunded";
+    if (status === "Meeting Completed") return "Completed";
+    if (status === "Booking Closed") return "Closed";
+    return status;
+  };
+
+  return (
+    <div className="min-h-screen bg-[#fafafa] pb-24 anim-fade-in">
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-zinc-100 px-4 py-4 shadow-sm flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
+            <Calendar size={20} className="text-[#7c3aed]" />
+            My Meetings
+          </h1>
+        </div>
+      </header>
+
+      {/* Tabs */}
+      <div className="px-4 mt-4">
+        <div className="flex bg-zinc-100/80 p-1 rounded-xl">
+          {["Active", "History"].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-2 text-[13px] font-bold rounded-lg transition-all duration-200 ${
+                activeTab === tab
+                  ? "bg-white text-zinc-900 shadow-sm"
+                  : "text-zinc-500 hover:text-zinc-700"
+              }`}
+            >
+              {tab}
+              {tab === "Active" && activeBookings.length > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 bg-[#7c3aed] text-white text-[9px] font-black rounded-full">
+                  {activeBookings.length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* List */}
+      <div className="px-4 mt-6 space-y-4">
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
+            <Loader2 className="animate-spin mb-2" size={24} />
+            <p className="text-xs font-bold">Loading meetings...</p>
+          </div>
+        )}
+
+        {!isLoading && displayList.length === 0 && (
+          <div className="flex flex-col items-center text-center justify-center py-16 px-6 bg-white rounded-2xl border border-dashed border-zinc-200">
+            <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center text-purple-600 mb-3">
+              <Calendar size={20} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-sm font-black text-zinc-900 mb-1">No {activeTab.toLowerCase()} meetings</h3>
+            <p className="text-xs text-zinc-500 font-medium">
+              {activeTab === "Active" 
+                ? "You don't have any upcoming experiences right now." 
+                : "You haven't completed any meetings yet."}
+            </p>
+            {activeTab === "Active" && (
+              <button 
+                onClick={() => router.push("/")}
+                className="mt-5 bg-zinc-900 text-white text-xs font-bold px-5 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all"
+              >
+                Browse Experiences
+              </button>
+            )}
+          </div>
+        )}
+
+        {displayList.map(booking => {
+          const isGuest = booking.guestId === user.uid;
+          const otherPerson = isGuest ? booking.hostName : booking.guestName;
+          const roleLabel = isGuest ? "You are joining" : "You are hosting";
+          const canReport = isGuest && isMeetingTimePassed(booking) && 
+            ["Requested", "Confirmed", "Accepted"].includes(booking.status);
+
+          return (
+            <div key={booking.id} className="bg-white rounded-2xl p-4 border border-zinc-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all hover:shadow-[0_8px_30px_rgba(124,58,237,0.08)]">
+              {/* Card Header */}
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${statusColor(booking.status)} mb-2`}>
+                    {statusLabel(booking.status)}
+                  </span>
+                  <h3 className="text-[15px] font-black text-zinc-900 leading-tight">
+                    {booking.title}
+                  </h3>
+                  <p className="text-[11px] text-zinc-500 font-bold flex items-center gap-1.5 mt-1">
+                    <User size={12} /> {roleLabel} <span className="text-zinc-800">{otherPerson}</span>
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-black text-[#7c3aed] flex items-center gap-1 justify-end">
+                    ⚡ {booking.price}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card Details */}
+              <div className="flex flex-wrap gap-y-2 gap-x-4 mt-4 bg-zinc-50 rounded-xl p-3 border border-zinc-100/50">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600">
+                  <Calendar size={13} className="text-zinc-400" />
+                  {booking.date || "Any Day"}
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600">
+                  <Clock size={13} className="text-zinc-400" />
+                  {booking.time || "Flexible"}
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600 w-full truncate">
+                  <MapPin size={13} className="text-zinc-400 flex-shrink-0" />
+                  <span className="truncate">{booking.location || "Campus"}</span>
+                </div>
+              </div>
+
+              {/* Auto-refund info banner */}
+              {booking.status === "AutoRefunded" && (
+                <div className="mt-3 flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
+                  <AlertTriangle size={14} className="text-amber-500 flex-shrink-0" />
+                  <p className="text-[10px] font-bold text-amber-700">
+                    Meeting time passed without QR scan — {booking.price} Sparks auto-refunded.
+                  </p>
+                </div>
+              )}
+
+              {/* Disputed info banner */}
+              {booking.status === "Disputed" && (
+                <div className="mt-3 flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2">
+                  <AlertTriangle size={14} className="text-orange-500 flex-shrink-0" />
+                  <p className="text-[10px] font-bold text-orange-700">
+                    Issue reported — Sparks held in escrow pending review.
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons (Only for Active tab) */}
+              {activeTab === "Active" && (
+                <div className="mt-4 flex gap-2">
+                  {isGuest ? (
+                    <>
+                      <button 
+                        onClick={() => { setSelectedBooking(booking); setShowQrModal(true); }}
+                        className="flex-1 bg-zinc-900 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-800 active:scale-[0.98] transition-all"
+                      >
+                        <QrCode size={16} /> View Ticket
+                      </button>
+                      {canReport && (
+                        <button
+                          onClick={() => { setSelectedBooking(booking); setShowDisputeModal(true); }}
+                          className="w-12 h-[46px] bg-rose-50 text-rose-500 border border-rose-100 rounded-xl flex items-center justify-center hover:bg-rose-100 active:scale-[0.98] transition-all"
+                          title="Report Issue"
+                        >
+                          <AlertTriangle size={16} strokeWidth={2.5} />
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <button 
+                      onClick={() => { setSelectedBooking(booking); setShowScanModal(true); setScanStatus("idle"); }}
+                      className="flex-1 bg-[#7c3aed] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#6d28d9] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(124,58,237,0.3)]"
+                    >
+                      <ScanLine size={16} /> Scan Guest QR
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ─── MODAL: GUEST QR TICKET ─── */}
+      {showQrModal && selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm anim-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-[340px] overflow-hidden shadow-2xl anim-scale-in flex flex-col">
+            <div className="p-4 border-b flex items-center justify-between bg-zinc-50">
+              <h3 className="text-sm font-black text-zinc-900">Meeting Ticket</h3>
+              <button onClick={() => setShowQrModal(false)} className="w-8 h-8 rounded-full bg-white border flex items-center justify-center text-zinc-500 hover:text-black">
+                <X size={16} strokeWidth={2.5} />
+              </button>
+            </div>
+            
+            <div className="p-8 flex flex-col items-center text-center">
+              <p className="text-xs font-bold text-zinc-500 mb-6 max-w-[200px]">
+                Show this QR code to <strong className="text-zinc-900">{selectedBooking.hostName}</strong> when you meet.
+              </p>
+              
+              <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_rgba(124,58,237,0.15)] border-2 border-purple-100">
+                <QRCode value={selectedBooking.meetingCode} size={180} fgColor="#000" />
+              </div>
+              
+              <div className="mt-8 bg-zinc-50 px-4 py-2 rounded-xl border border-dashed border-zinc-300 w-full">
+                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-1">Manual Code</p>
+                <p className="text-xl font-black tracking-[0.3em] text-zinc-900">{selectedBooking.meetingCode}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL: HOST QR SCANNER ─── */}
+      {showScanModal && selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md anim-fade-in">
+          <div className="absolute top-4 right-4 z-50">
+             <button onClick={() => setShowScanModal(false)} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
+               <X size={20} strokeWidth={2.5} />
+             </button>
+          </div>
+          
+          <div className="w-full max-w-[400px] flex flex-col items-center">
+            <h3 className="text-white text-lg font-black mb-2">Scan Guest Ticket</h3>
+            <p className="text-white/60 text-xs font-medium mb-8 text-center px-6">
+              Scan the QR code on {selectedBooking.guestName}'s phone to verify the meeting and receive your Sparks.
+            </p>
+
+            <div className="w-[280px] h-[280px] rounded-3xl overflow-hidden relative shadow-[0_0_50px_rgba(124,58,237,0.3)] border-2 border-white/20">
+              {scanStatus === "success" ? (
+                <div className="absolute inset-0 bg-emerald-500 flex flex-col items-center justify-center text-white anim-fade-in z-10">
+                  <CheckCircle2 size={64} className="mb-4" />
+                  <p className="font-black text-lg">Verified!</p>
+                </div>
+              ) : scanStatus === "processing" ? (
+                <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white anim-fade-in z-10 backdrop-blur-sm">
+                  <Loader2 size={40} className="animate-spin mb-4 text-[#7c3aed]" />
+                  <p className="font-bold text-sm">Verifying Ticket...</p>
+                </div>
+              ) : (
+                <Scanner 
+                  onResult={handleScan}
+                  options={{ delayBetweenScanAttempts: 1000 }}
+                  components={{ audio: false, finder: false }}
+                />
+              )}
+              {/* Scanner Frame UI */}
+              <div className="absolute inset-0 border-[3px] border-[#7c3aed] rounded-3xl pointer-events-none opacity-50" />
+            </div>
+
+            {scanStatus === "error" && (
+              <div className="mt-6 bg-rose-500/20 text-rose-200 px-4 py-2 rounded-xl text-xs font-bold border border-rose-500/50 anim-fade-up">
+                {scanMessage}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL: REPORT ISSUE ─── */}
+      {showDisputeModal && selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm anim-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-[380px] overflow-hidden shadow-2xl anim-scale-in">
+            <div className="p-5 border-b border-zinc-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center">
+                  <AlertTriangle size={16} className="text-rose-500" />
+                </div>
+                <h3 className="text-sm font-black text-zinc-900">Report Issue</h3>
+              </div>
+              <button 
+                onClick={() => { setShowDisputeModal(false); setDisputeSuccess(false); }}
+                className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-200"
+              >
+                <X size={16} strokeWidth={2.5} />
+              </button>
+            </div>
+
+            {disputeSuccess ? (
+              <div className="p-8 flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-4">
+                  <CheckCircle2 size={32} className="text-emerald-500" />
+                </div>
+                <h4 className="text-base font-black text-zinc-900 mb-2">Issue Reported!</h4>
+                <p className="text-xs text-zinc-500 font-medium">
+                  Your Sparks are held safely. Auto-refund will process within 1 hour if the meeting didn't happen.
+                </p>
+              </div>
+            ) : (
+              <div className="p-5">
+                <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 mb-5">
+                  <p className="text-xs font-bold text-rose-700 leading-relaxed">
+                    Did <strong>{selectedBooking.hostName}</strong> not show up for "{selectedBooking.title}"?
+                  </p>
+                  <p className="text-[11px] text-rose-500 mt-1.5">
+                    If the QR code was never scanned, your {selectedBooking.price} Sparks will be auto-refunded within 1 hour.
+                  </p>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5 mb-5 flex items-start gap-2">
+                  <AlertTriangle size={13} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-[10px] text-amber-700 font-semibold leading-relaxed">
+                    Only report if the meeting genuinely didn't happen. False reports may affect your account standing.
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setShowDisputeModal(false)}
+                    className="flex-1 py-3 rounded-xl border border-zinc-200 text-xs font-black text-zinc-600 hover:bg-zinc-50 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleDispute}
+                    disabled={disputeLoading}
+                    className="flex-1 py-3 rounded-xl bg-rose-500 text-white text-xs font-black flex items-center justify-center gap-2 hover:bg-rose-600 active:scale-[0.98] transition-all disabled:opacity-60"
+                  >
+                    {disputeLoading ? <Loader2 size={14} className="animate-spin" /> : <AlertTriangle size={14} />}
+                    {disputeLoading ? "Reporting..." : "Report Issue"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}

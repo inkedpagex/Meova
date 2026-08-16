@@ -100,7 +100,7 @@ export async function logInWithGoogle(idToken = null, accessToken = null) {
     const firebaseIdToken = await user.getIdToken();
     const { createProfileAdmin } = await import('./auth.actions');
     
-    await createProfileAdmin(firebaseIdToken, {
+    const profileRes = await createProfileAdmin(firebaseIdToken, {
       id: user.uid,
       email: user.email,
       full_name: user.displayName || user.email.split('@')[0],
@@ -111,7 +111,7 @@ export async function logInWithGoogle(idToken = null, accessToken = null) {
 
     // Create session cookie
     await createSessionCookie(user);
-    return user;
+    return { user, isNewUser: profileRes.isNewUser };
   } catch (err) {
     console.error("Custom Token Google Auth failed:", err);
     throw err;

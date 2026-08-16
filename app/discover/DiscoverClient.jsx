@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search, Check, MapPin, Zap, Coffee, BookOpen, Activity, Music,
-  Layers, Camera, Trophy, Gamepad2, Users, Rocket, Palette, Star,
+  Layers, Camera, Trophy, Users, Palette, Star,
   AlertTriangle
 } from 'lucide-react';
 import useSWR from 'swr';
@@ -12,6 +12,7 @@ import { useUserContext } from '../../components/providers/UserProvider';
 import { mockDb } from '../../lib/mockDatabase';
 import { getCartoonAvatar, getUserAvatarUrl } from '../../utils/avatar';
 import confetti from 'canvas-confetti';
+import { useCampusPresence } from '../../lib/useCampusPresence';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -25,6 +26,78 @@ const INTEREST_COLORS = {
 
 const FILTERS = ['All', 'People', 'Experiences', 'Communities', 'Tournaments'];
 
+// ── Algolia Search Hook ───────────────────────────────────────────────────────
+// Gracefully falls back to local data if Algolia is not configured
+const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
+const ALGOLIA_SEARCH_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY;
+
+function useAlgoliaSearch(query) {
+  const [peopleResults, setPeopleResults] = useState(null);
+  const [experienceResults, setExperienceResults] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const debounceRef = useRef(null);
+
+  const search = useCallback(async (q) => {
+    if (!q || q.length < 2 || !ALGOLIA_APP_ID || !ALGOLIA_SEARCH_KEY) {
+      setPeopleResults(null);
+      setExperienceResults(null);
+      return;
+    }
+
+    setIsSearching(true);
+    clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        // Use Algolia's search API directly (no heavy SDK needed)
+        const [usersRes, expRes] = await Promise.all([
+          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/meetify_users/query`, {
+            method: 'POST',
+            headers: {
+              'X-Algolia-Application-Id': ALGOLIA_APP_ID,
+              'X-Algolia-API-Key': ALGOLIA_SEARCH_KEY,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: q, hitsPerPage: 12, attributesToRetrieve: ['objectID', 'full_name', 'year', 'branch', 'interests', 'photo_url', 'isLiveOnCampus'] }),
+          }),
+          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/meetify_experiences/query`, {
+            method: 'POST',
+            headers: {
+              'X-Algolia-Application-Id': ALGOLIA_APP_ID,
+              'X-Algolia-API-Key': ALGOLIA_SEARCH_KEY,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: q, hitsPerPage: 8, attributesToRetrieve: ['objectID', 'title', 'category', 'price', 'location', 'days', 'slots', 'hostId'] }),
+          }),
+        ]);
+
+        if (usersRes.ok) {
+          const ud = await usersRes.json();
+          setPeopleResults((ud.hits || []).map(h => ({ ...h, id: h.objectID })));
+        }
+        if (expRes.ok) {
+          const ed = await expRes.json();
+          setExperienceResults((ed.hits || []).map(h => ({ ...h, id: h.objectID })));
+        }
+      } catch {
+        // Algolia unavailable — fall back to local filtering
+        setPeopleResults(null);
+        setExperienceResults(null);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+  }, []);
+
+  useEffect(() => {
+    search(query);
+    return () => clearTimeout(debounceRef.current);
+  }, [query, search]);
+
+  return { peopleResults, experienceResults, isSearching };
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 export default function DiscoverClient() {
   const router = useRouter();
   const { user: currentUser, people: contextPeople } = useUserContext();
@@ -34,7 +107,6 @@ export default function DiscoverClient() {
   const [connectedIds, setConnectedIds] = useState(new Set());
   const [joinedIds, setJoinedIds] = useState(new Set());
   
-  // Real dynamic states loaded from Firebase API & Context
   const [people, setPeople] = useState(contextPeople || []);
   
   // SWR Hooks for caching and instant data fetching
@@ -44,15 +116,20 @@ export default function DiscoverClient() {
   const experiences = expData?.experiences || [];
   const circles = circlesData?.circles || [];
 
+  // Algolia search
+  const { peopleResults, experienceResults, isSearching } = useAlgoliaSearch(search);
+  const isAlgoliaSearch = search.length >= 2 && !!ALGOLIA_APP_ID;
+
+  // Campus presence hook — marks user as "Live on Campus" when nearby
+  const { isOnCampus } = useCampusPresence(currentUser);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Fetch dynamic users from local mockDb first
       const dbUsers = mockDb.getUsers() || [];
       const filteredUsers = currentUser 
         ? dbUsers.filter(u => u.id !== currentUser.id && u.isIdOn !== false) 
         : dbUsers.filter(u => u.isIdOn !== false);
 
-      // Merge real Firebase contextPeople and dynamic localStorage users
       const mergedUsers = [...(contextPeople || [])];
       filteredUsers.forEach(u => {
         if (!mergedUsers.some(mu => mu.id === u.id)) {
@@ -100,18 +177,50 @@ export default function DiscoverClient() {
     </button>
   );
 
-  /* ─── People grid ─── */
+  /* ─── People Section ─── */
   const PeopleSection = () => {
-    const list = people
-      .filter(p => !search || p.full_name?.toLowerCase().includes(search.toLowerCase()) || p.branch?.toLowerCase().includes(search.toLowerCase()))
+    // Use Algolia results if searching, else local data
+    const rawList = isAlgoliaSearch && peopleResults !== null ? peopleResults : people;
+    
+    // Sort: isLiveOnCampus first, then rest
+    const sorted = [...rawList].sort((a, b) => {
+      const aLive = a.isLiveOnCampus ? 1 : 0;
+      const bLive = b.isLiveOnCampus ? 1 : 0;
+      return bLive - aLive;
+    });
+
+    const list = sorted
+      .filter(p => !search || search.length < 2 || isAlgoliaSearch
+        ? true
+        : p.full_name?.toLowerCase().includes(search.toLowerCase()) || 
+          p.branch?.toLowerCase().includes(search.toLowerCase()))
       .slice(0, 12);
+
+    const liveCount = list.filter(p => p.isLiveOnCampus).length;
 
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-[15px] font-black" style={{ color: '#09090b' }}>People nearby</h2>
-          <span className="text-[11px] font-bold" style={{ color: '#7c3aed' }}>{list.length} online</span>
+          <h2 className="text-[15px] font-black" style={{ color: '#09090b' }}>
+            People nearby
+          </h2>
+          <div className="flex items-center gap-2">
+            {liveCount > 0 && (
+              <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                {liveCount} Live on Campus
+              </span>
+            )}
+            <span className="text-[11px] font-bold" style={{ color: '#7c3aed' }}>{list.length} online</span>
+          </div>
         </div>
+
+        {isSearching && (
+          <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-medium px-1">
+            <div className="w-3 h-3 border-2 border-[#7c3aed] border-t-transparent rounded-full animate-spin" />
+            Searching...
+          </div>
+        )}
 
         {list.length === 0 ? (
           <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-[#f0f0f0]">
@@ -122,15 +231,23 @@ export default function DiscoverClient() {
             {list.map(person => (
               <div key={person.id}
                 className="rounded-3xl p-4 flex flex-col items-center text-center"
-                style={{ background: '#ffffff', border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                style={{ background: '#ffffff', border: person.isLiveOnCampus ? '1.5px solid #bbf7d0' : '1px solid #f0f0f0', boxShadow: person.isLiveOnCampus ? '0 0 0 3px rgba(16,185,129,0.06)' : '0 2px 8px rgba(0,0,0,0.03)' }}>
                 <div className="relative mb-3">
                   <div className="w-16 h-16 rounded-full overflow-hidden"
-                    style={{ border: '3px solid #ede9fe' }}>
+                    style={{ border: person.isLiveOnCampus ? '3px solid #6ee7b7' : '3px solid #ede9fe' }}>
                     <img src={getAvatar(person)} alt={person.full_name} className="w-full h-full object-cover" />
                   </div>
-                  {person.online !== false && <span className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />}
+                  {/* Live on Campus indicator */}
+                  {person.isLiveOnCampus ? (
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-emerald-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full whitespace-nowrap shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      Live Near You
+                    </span>
+                  ) : (
+                    person.online !== false && <span className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                  )}
                 </div>
-                <div className="flex-1 w-full flex flex-col items-center">
+                <div className="flex-1 w-full flex flex-col items-center" style={{ marginTop: person.isLiveOnCampus ? 8 : 0 }}>
                   <span className="text-[13px] font-black truncate max-w-full" style={{ color: '#09090b' }}>{person.full_name}</span>
                   <span className="text-[10px] font-semibold mt-0.5" style={{ color: '#a1a1aa' }}>
                     {person.year ? `${person.year} Yr` : ''} {person.branch ? `· ${person.branch}` : ''}
@@ -155,13 +272,19 @@ export default function DiscoverClient() {
             ))}
           </div>
         )}
+        {/* Algolia attribution */}
+        {isAlgoliaSearch && ALGOLIA_APP_ID && (
+          <p className="text-center text-[9px] text-zinc-300 font-medium mt-1">Search powered by Algolia</p>
+        )}
       </div>
     );
   };
 
   /* ─── Experiences ─── */
   const ExperiencesSection = () => {
-    const list = experiences.filter(e => !search || e.title.toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase()));
+    const list = isAlgoliaSearch && experienceResults !== null
+      ? experienceResults
+      : experiences.filter(e => !search || e.title.toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase()));
 
     return (
       <div className="space-y-4">
@@ -304,14 +427,27 @@ export default function DiscoverClient() {
           placeholder="Search people, experiences, communities..."
           className="w-full pl-11 pr-4 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all"
           style={{ background: '#f0f0f3', border: '1px solid #e4e4e7', color: '#09090b' }} />
+        {isSearching && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            <div className="w-4 h-4 border-2 border-[#7c3aed] border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
       </div>
+
+      {/* Campus presence banner */}
+      {isOnCampus && (
+        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-2xl px-3 py-2.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+          <p className="text-[11px] font-bold text-emerald-700">You're Live on Campus! Others can see you nearby.</p>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
         {FILTERS.map(f => chip(f))}
       </div>
 
-      {/* Sections — shown/hidden by active filter */}
+      {/* Sections */}
       {showPeople && <PeopleSection />}
       {showExp && <ExperiencesSection />}
       {showComm && <CommunitiesSection />}

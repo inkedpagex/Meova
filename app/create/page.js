@@ -45,7 +45,7 @@ export default function CreateSelectorPage() {
       color: '#ec4899',
       badgeBg: 'bg-pink-50 border-pink-100 text-pink-600',
       gradient: 'from-pink-500/10 via-pink-500/5 to-transparent',
-      href: '/gigs'
+      href: '/events'
     },
     {
       title: 'Post a Gig',

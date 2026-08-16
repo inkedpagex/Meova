@@ -6,11 +6,11 @@ import { Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, ArrowLeft, Edit3, MoreHorizontal, Check, X,
-  Send, Loader2, Users, MessageSquare, Plus
+  Send, Loader2, Users, MessageSquare, Plus, CheckCheck
 } from "lucide-react";
 import { db, auth } from "@/lib/firebaseClient";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, addDoc, serverTimestamp, query, where, getDocs, writeBatch } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, where, getDocs, writeBatch, onSnapshot, orderBy, limit } from "firebase/firestore";
 import { mockDb } from "@/lib/mockDatabase";
 import { getCartoonAvatar, getUserAvatarUrl } from "@/utils/avatar";
 
@@ -22,6 +22,7 @@ interface ChatMsg {
   senderAvatar?: string;
   text: string;
   timestamp: Date;
+  status?: "sent" | "delivered" | "read";
 }
 
 interface Contact {
@@ -190,32 +191,73 @@ function MessagesContent() {
     }
   }, [activeContact?.id]);
 
+  // Real-time Firebase Sync with Limit
+  useEffect(() => {
+    if (!activeContact || !currentUser) return;
+    
+    // Create a unique chat ID by sorting the two user IDs alphabetically
+    const sortedIds = [currentUser.uid, activeContact.id].sort();
+    const chatId = `${sortedIds[0]}_${sortedIds[1]}`;
+    
+    const messagesRef = collection(db, "chats", chatId, "messages");
+    const q = query(messagesRef, orderBy("timestamp", "asc"), limit(50));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgs: ChatMsg[] = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        msgs.push({
+          id: doc.id,
+          sender: data.senderId === currentUser.uid ? "user" : "character",
+          text: data.text,
+          timestamp: data.timestamp?.toDate() || new Date(),
+          status: data.status || "delivered"
+        });
+      });
+      
+      setChats(prev => ({ ...prev, [activeContact.id]: msgs }));
+      
+      if (msgs.length > 0) {
+        const lastMsg = msgs[msgs.length - 1];
+        setContacts(prev => prev.map(c => 
+          c.id === activeContact.id 
+            ? { ...c, lastMessage: lastMsg.text, lastTime: "now", unread: 0 } 
+            : c
+        ));
+      }
+    });
+
+    return () => unsubscribe(); // Memory cleanup
+  }, [activeContact, currentUser]);
+
   const sendMessage = async () => {
-    if (!input.trim() || !activeContact) return;
-    const msg: ChatMsg = { id: Date.now().toString(), sender: "user", text: input.trim(), timestamp: new Date() };
+    if (!input.trim() || !activeContact || !currentUser) return;
+    
+    const text = input.trim();
+    setInput("");
+    
+    // Optimistic UI Update
+    const tempId = Date.now().toString();
+    const msg: ChatMsg = { id: tempId, sender: "user", text, timestamp: new Date(), status: "sent" };
     setChats(prev => ({ ...prev, [activeContact.id]: [...(prev[activeContact.id] || []), msg] }));
     
-    // Update last message in contact list
-    setContacts(prev => prev.map(c => c.id === activeContact.id ? { ...c, lastMessage: input.trim(), lastTime: "now" } : c));
-    setInput("");
+    // Update last message in contact list optimistically
+    setContacts(prev => prev.map(c => c.id === activeContact.id ? { ...c, lastMessage: text, lastTime: "now" } : c));
 
-    // Persist to Firestore
+    // Send to Firestore
     try {
-      const { sendMessageAction } = await import("./messages.actions");
-      await sendMessageAction({ recipientName: activeContact.name, sender: "user", text: msg.text });
-    } catch {}
-
-    // Auto reply
-    if (activeContact.isGroup || true) {
-      setIsTyping(true);
-      setTimeout(() => {
-        const pool = activeContact.isGroup ? (GROUP_RESPONSES[activeContact.name] || GROUP_RESPONSES.default) : (PEER_RESPONSES[activeContact.name] || PEER_RESPONSES.default);
-        const reply = pool[Math.floor(Math.random() * pool.length)];
-        const replyMsg: ChatMsg = { id: Date.now().toString() + "r", sender: "character", senderName: activeContact.isGroup ? activeContact.name : activeContact.name, text: reply, timestamp: new Date() };
-        setChats(prev => ({ ...prev, [activeContact.id]: [...(prev[activeContact.id] || []), replyMsg] }));
-        setContacts(prev => prev.map(c => c.id === activeContact.id ? { ...c, lastMessage: reply, lastTime: "now" } : c));
-        setIsTyping(false);
-      }, 1200 + Math.random() * 800);
+      const sortedIds = [currentUser.uid, activeContact.id].sort();
+      const chatId = `${sortedIds[0]}_${sortedIds[1]}`;
+      const messagesRef = collection(db, "chats", chatId, "messages");
+      
+      await addDoc(messagesRef, {
+        text,
+        senderId: currentUser.uid,
+        timestamp: serverTimestamp(),
+        status: "delivered"
+      });
+    } catch (err) {
+      console.error("Failed to send message:", err);
     }
   };
 
@@ -354,8 +396,8 @@ function MessagesContent() {
               <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-[#7c3aed]/10 text-[#7c3aed]">Group</span>
             )}
           </div>
-          <span className="text-[11px]" style={{ color: activeContact.online ? "#10b981" : "var(--text-muted)" }}>
-            {activeContact.online ? "Online" : "Offline"}
+          <span className="text-[11px] font-medium" style={{ color: isTyping ? "#10b981" : (activeContact.online ? "#10b981" : "var(--text-muted)") }}>
+            {isTyping ? "typing..." : (activeContact.online ? "Online" : "Offline")}
           </span>
         </div>
         <button className="p-1.5" style={{ color: "var(--text-muted)" }}><MoreHorizontal size={18} /></button>
@@ -376,9 +418,20 @@ function MessagesContent() {
                 <img src={activeContact.avatar || getGroupAvatar(activeContact.name, activeContact.category)} alt={activeContact.name} className="w-full h-full object-cover" />
               </div>
             )}
-            <div className={`max-w-[72%] px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed ${msg.sender === "user" ? "bg-[#7c3aed] text-white rounded-br-md" : "rounded-bl-md"}`}
+            <div className={`max-w-[72%] px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed relative ${msg.sender === "user" ? "bg-[#7c3aed] text-white rounded-br-md pr-8" : "rounded-bl-md"}`}
               style={msg.sender !== "user" ? { background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", color: "var(--text-primary)" } : {}}>
               {msg.text}
+              {msg.sender === "user" && (
+                <div className="absolute right-2 bottom-1.5 flex items-center justify-end">
+                  {msg.status === "read" ? (
+                    <CheckCheck size={14} className="text-blue-300" />
+                  ) : msg.status === "delivered" ? (
+                    <CheckCheck size={14} className="text-white/70" />
+                  ) : (
+                    <Check size={14} className="text-white/70" />
+                  )}
+                </div>
+              )}
             </div>
           </div>
         ))}

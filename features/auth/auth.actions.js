@@ -80,7 +80,7 @@ export async function createProfileAdmin(idToken, profileData) {
       }
     }
 
-    return { success: true };
+    return { success: true, isNewUser: !snap.exists };
   } catch (err) {
     console.error('[createProfileAdmin] Error:', err.message);
     return { success: false, error: err.message };
