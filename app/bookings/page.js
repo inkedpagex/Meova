@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { Scanner } from "@yudiel/react-qr-scanner";
+import { toast } from "../../lib/toast";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -31,8 +32,13 @@ export default function BookingsPage() {
   // Dispute state
   const [disputeLoading, setDisputeLoading] = useState(false);
   const [disputeSuccess, setDisputeSuccess] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(null); // bookingId being cancelled
 
   const { data, error, mutate, isLoading } = useSWR(user ? "/api/bookings" : null, fetcher);
+  const { data: walletData } = useSWR(user ? "/api/wallet" : null, fetcher);
+  const sparksBalance = walletData?.wallet
+    ? (walletData.wallet.purchased || 0) + (walletData.wallet.bonus || 0) + (walletData.wallet.creator || 0)
+    : null;
   const bookings = data?.bookings || [];
 
   const activeBookings = bookings.filter(b => b.status === "Requested" || b.status === "Accepted" || b.status === "Confirmed");
@@ -49,14 +55,16 @@ export default function BookingsPage() {
   if (!user) return null;
 
   // Has the meeting time passed? (for showing Report Issue button)
+  // - If scheduledAt exists: check if it's passed
+  // - Fallback: show button 2h after booking was created (covers weekday-name bookings)
   const isMeetingTimePassed = (booking) => {
-    if (!booking.scheduledAt) {
-      // Fallback: if no scheduledAt, allow reporting after 2 hours from creation
-      const created = booking.created_at ? new Date(booking.created_at) : null;
-      if (!created) return false;
-      return Date.now() > created.getTime() + 2 * 60 * 60 * 1000;
+    if (booking.scheduledAt) {
+      return Date.now() > new Date(booking.scheduledAt).getTime();
     }
-    return Date.now() > new Date(booking.scheduledAt).getTime();
+    // Fallback for bookings without a parseable scheduledAt
+    const created = booking.created_at ? new Date(booking.created_at) : null;
+    if (!created || isNaN(created.getTime())) return false;
+    return Date.now() > created.getTime() + 2 * 60 * 60 * 1000; // 2 hours after creation
   };
 
   // Handle QR scanning
@@ -99,7 +107,31 @@ export default function BookingsPage() {
     }
   };
 
-  // Handle Report Issue (Dispute)
+  // Handle Cancel Request (guest cancels before host accepts)
+  const handleCancel = async (bookingId) => {
+    if (cancelLoading) return;
+    if (!confirm('Cancel this booking request? Your Sparks will be refunded immediately.')) return;
+    setCancelLoading(bookingId);
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, action: "cancel" })
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success('Booking cancelled. Sparks refunded! ⚡');
+        mutate();
+      } else {
+        toast.error(d.error || 'Failed to cancel. Please try again.');
+      }
+    } catch {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setCancelLoading(null);
+    }
+  };
+
   const handleDispute = async () => {
     if (!selectedBooking || disputeLoading) return;
     setDisputeLoading(true);
@@ -154,6 +186,13 @@ export default function BookingsPage() {
             My Meetings
           </h1>
         </div>
+        {/* Sparks balance — helps user know how many Sparks they have before booking */}
+        {sparksBalance !== null && (
+          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black" style={{ background: '#f3f0ff', color: '#7c3aed' }}>
+            <span>⚡</span>
+            <span>{sparksBalance.toLocaleString()}</span>
+          </div>
+        )}
       </header>
 
       {/* Tabs */}
@@ -281,6 +320,19 @@ export default function BookingsPage() {
                 <div className="mt-4 flex gap-2">
                   {isGuest ? (
                     <>
+                      {/* Cancel button: only for Requested (before host accepts), with instant refund */}
+                      {booking.status === "Requested" && (
+                        <button
+                          onClick={() => handleCancel(booking.id)}
+                          disabled={cancelLoading === booking.id}
+                          className="w-12 h-[46px] bg-zinc-50 text-zinc-500 border border-zinc-200 rounded-xl flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 active:scale-[0.98] transition-all disabled:opacity-50"
+                          title="Cancel Request (full refund)"
+                        >
+                          {cancelLoading === booking.id
+                            ? <Loader2 size={16} className="animate-spin" />
+                            : <X size={16} strokeWidth={2.5} />}
+                        </button>
+                      )}
                       <button 
                         onClick={() => { setSelectedBooking(booking); setShowQrModal(true); }}
                         className="flex-1 bg-zinc-900 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-800 active:scale-[0.98] transition-all"

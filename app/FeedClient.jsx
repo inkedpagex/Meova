@@ -19,6 +19,7 @@ import useSWR from 'swr';
 import { useUserContext } from '../components/providers/UserProvider';
 // mockDatabase removed — using real Firebase API routes
 import confetti from 'canvas-confetti';
+import { toast } from '../lib/toast';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -188,6 +189,7 @@ export default function FeedClient() {
   const [bookingTime, setBookingTime] = useState('4:00 PM');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingConfirmStep, setBookingConfirmStep] = useState(false); // 2-tap confirmation
 
   // Review Dialog State
   const [reviewBooking, setReviewBooking] = useState(null);
@@ -198,6 +200,17 @@ export default function FeedClient() {
   // QR & Booking Details Modal
   const [selectedActiveBooking, setSelectedActiveBooking] = useState(null);
   const [isScanningMock, setIsScanningMock] = useState(false);
+
+  // PWA Install Prompt
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
 
   // Redesign Home page active modals and deck states
   const [stackIndex, setStackIndex] = useState(0);
@@ -217,6 +230,7 @@ export default function FeedClient() {
 
   const [joinedGroups, setJoinedGroups] = useState({});
   const [groupFilter, setGroupFilter] = useState('All');
+  const [actionLoadingId, setActionLoadingId] = useState(null); // bookingId being accepted/declined
 
   // Load joined groups on mount
   useEffect(() => {
@@ -341,23 +355,39 @@ export default function FeedClient() {
         confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
       } else {
         const d = await res.json();
-        alert(d.error || 'Failed to create');
+        toast.error(d.error || 'Failed to create experience.');
       }
     } catch(e) {
-      alert('Network error.');
+      toast.error('Network error. Please try again.');
     } finally {
       setCreateLoading(false);
     }
   };
 
   const handleAcceptRequest = async (bookingId) => {
-    await fetch('/api/bookings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bookingId, action: 'accept' }) });
+    if (actionLoadingId) return;
+    setActionLoadingId(bookingId + '_accept');
+    try {
+      const res = await fetch('/api/bookings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bookingId, action: 'accept' }) });
+      const data = await res.json();
+      if (data.success) toast.success('Booking accepted!');
+      else toast.error(data.error || 'Failed to accept.');
+    } catch { toast.error('Network error.'); }
     await refreshDbState();
+    setActionLoadingId(null);
   };
 
   const handleDeclineRequest = async (bookingId) => {
-    await fetch('/api/bookings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bookingId, action: 'reject' }) });
+    if (actionLoadingId) return;
+    setActionLoadingId(bookingId + '_decline');
+    try {
+      const res = await fetch('/api/bookings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bookingId, action: 'reject' }) });
+      const data = await res.json();
+      if (data.success) toast.info('Booking declined. Sparks refunded to guest.');
+      else toast.error(data.error || 'Failed to decline.');
+    } catch { toast.error('Network error.'); }
     await refreshDbState();
+    setActionLoadingId(null);
   };
 
   // Host Action: Code validation & Completion
@@ -556,6 +586,38 @@ export default function FeedClient() {
         </div>
       </div>
 
+      {/* ── PWA INSTALL PROMPT ──────────────────────── */}
+      {deferredPrompt && (
+        <div className="bg-[#7c3aed] text-white rounded-2xl p-4 flex items-center justify-between shadow-lg mb-4">
+          <div>
+            <h4 className="text-xs font-black">Install Meetify</h4>
+            <p className="text-[10px] font-semibold mt-0.5 opacity-90">Add to home screen for a better experience.</p>
+          </div>
+          <button 
+            onClick={() => {
+              deferredPrompt.prompt();
+              deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
+            }}
+            className="text-[10px] font-black uppercase bg-white text-[#7c3aed] px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
+          >
+            Install
+          </button>
+        </div>
+      )}
+
+      {/* ── PROFILE COMPLETENESS NUDGE ────────────────────────── */}
+      {currentUser && (!currentUser.year || !currentUser.branch || !currentUser.interests?.length) && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between mb-4">
+          <div>
+            <h4 className="text-xs font-black text-amber-900">Complete your profile</h4>
+            <p className="text-[10px] font-semibold text-amber-700 mt-0.5">Add year, branch & interests to get discovered.</p>
+          </div>
+          <Link href="/profile" className="text-[10px] font-black uppercase bg-amber-100 text-amber-800 px-3 py-1.5 rounded-lg hover:bg-amber-200 transition-colors">
+            Edit Profile
+          </Link>
+        </div>
+      )}
+
       {/* ── SEARCH BAR ─────────────────────────── */}
       <div className="relative flex items-center gap-3">
         <div className="relative flex-1">
@@ -568,12 +630,6 @@ export default function FeedClient() {
             className="w-full bg-[#f3f4f6]/60 border border-transparent focus:border-zinc-205 focus:bg-white rounded-2xl pl-12 pr-4 py-3.5 text-xs font-bold text-zinc-850 placeholder-zinc-500/80 focus:outline-none transition-all shadow-inner"
           />
         </div>
-        <button
-          type="button"
-          className="w-11 h-11 rounded-2xl bg-[#f3f4f6]/60 border border-transparent flex items-center justify-center text-zinc-650 hover:bg-[#eaebeb] transition-all cursor-pointer flex-shrink-0"
-        >
-          <SlidersHorizontal size={16} />
-        </button>
       </div>
 
       {/* ── PEOPLE YOU MIGHT VIBE WITH ─────────────────────────── */}
@@ -585,8 +641,15 @@ export default function FeedClient() {
           </Link>
         </div>
 
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-          {vibeUsers.map((user) => {
+        {vibeUsers.filter(u => !dismissedVibes[u.id]).length === 0 ? (
+          <div className="text-center py-8 bg-zinc-50 border border-zinc-100 rounded-2xl">
+            <Users className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
+            <h4 className="text-xs font-black text-zinc-500">No one is active nearby</h4>
+            <p className="text-[10px] text-zinc-400 font-semibold mt-1">Check back later when students are online.</p>
+          </div>
+        ) : (
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+            {vibeUsers.map((user) => {
             if (dismissedVibes[user.id]) return null;
             return (
               <div
@@ -650,6 +713,7 @@ export default function FeedClient() {
             );
           })}
         </div>
+        )}
       </div>
 
       {/* ── TOP EXPERIENCES FOR YOU ─────────────────────────── */}
@@ -661,8 +725,15 @@ export default function FeedClient() {
           </Link>
         </div>
 
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-          {topExps.map((exp) => {
+        {topExps.length === 0 ? (
+          <div className="text-center py-8 bg-zinc-50 border border-zinc-100 rounded-2xl">
+            <Calendar className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
+            <h4 className="text-xs font-black text-zinc-500">No experiences found</h4>
+            <p className="text-[10px] text-zinc-400 font-semibold mt-1">Be the first to host an experience!</p>
+          </div>
+        ) : (
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+            {topExps.map((exp) => {
             const theme = getExpCardTheme(exp.category);
             const cat = (exp.category || '').toLowerCase();
             let ExpIcon = Coffee;
@@ -721,6 +792,7 @@ export default function FeedClient() {
             );
           })}
         </div>
+        )}
       </div>
 
       {/* ── LOWER GRID SECTION ─────────────────────────── */}
@@ -737,43 +809,43 @@ export default function FeedClient() {
 
           <div className="space-y-3">
             {/* BGMI Campus Cup */}
-            <div className="flex items-center justify-between p-3.5 bg-white border border-zinc-100 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.01)] hover:border-zinc-200 transition-all">
+            <div 
+              onClick={() => toast.info('Tournaments feature coming in the next update!')}
+              className="flex items-center justify-between p-3.5 bg-zinc-50/50 border border-zinc-100 rounded-2xl opacity-80 cursor-not-allowed hover:bg-zinc-50 transition-all"
+            >
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-[#f5f3ff] text-[#7c3aed] flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-zinc-100 text-zinc-400 flex items-center justify-center">
                   <Trophy size={20} className="stroke-[2.5]" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase tracking-wide text-zinc-900 leading-tight">
+                  <h4 className="text-xs font-black uppercase tracking-wide text-zinc-700 leading-tight">
                     BGMI Campus Cup
                   </h4>
                   <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">
-                    32 Teams · <span className="text-rose-500 font-extrabold animate-pulse">Live</span>
+                    Coming Soon
                   </p>
                 </div>
               </div>
-              <span className="text-[8px] font-black uppercase bg-rose-500 text-white px-2 py-0.5 rounded-md animate-pulse">
-                Live
-              </span>
             </div>
 
             {/* FIFA 24 Showdown */}
-            <div className="flex items-center justify-between p-3.5 bg-white border border-zinc-100 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.01)] hover:border-zinc-200 transition-all">
+            <div 
+              onClick={() => toast.info('Tournaments feature coming in the next update!')}
+              className="flex items-center justify-between p-3.5 bg-zinc-50/50 border border-zinc-100 rounded-2xl opacity-80 cursor-not-allowed hover:bg-zinc-50 transition-all"
+            >
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-[#eef2ff] text-[#4f46e5] flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-zinc-100 text-zinc-400 flex items-center justify-center">
                   <Gamepad size={20} className="stroke-[2.5]" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase tracking-wide text-zinc-900 leading-tight">
+                  <h4 className="text-xs font-black uppercase tracking-wide text-zinc-700 leading-tight">
                     FIFA 24 Showdown
                   </h4>
                   <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">
-                    16 Players · Reg. Open
+                    Coming Soon
                   </p>
                 </div>
               </div>
-              <span className="text-[8px] font-black uppercase bg-[#eef2ff] text-[#4f46e5] px-2 py-0.5 rounded-md">
-                Open
-              </span>
             </div>
           </div>
         </div>
@@ -786,11 +858,11 @@ export default function FeedClient() {
 
           <div className="space-y-3">
             {[
-              { id: 1, title: 'Campus Confessions', posts: '125 posts', bg: 'bg-[#eff6ff]', text: 'text-[#2563eb]', Icon: TrendingUp },
-              { id: 2, title: 'Assignment Help', posts: '98 posts', bg: 'bg-[#fff7ed]', text: 'text-[#ea580c]', Icon: HelpCircle },
-              { id: 3, title: 'Movie Night', posts: '72 posts', bg: 'bg-[#f0fdf4]', text: 'text-[#16a34a]', Icon: Film }
+              { id: 1, title: 'Campus Confessions', posts: 'Coming soon', bg: 'bg-zinc-100', text: 'text-zinc-400', Icon: TrendingUp },
+              { id: 2, title: 'Assignment Help', posts: 'Coming soon', bg: 'bg-zinc-100', text: 'text-zinc-400', Icon: HelpCircle },
+              { id: 3, title: 'Movie Night', posts: 'Coming soon', bg: 'bg-zinc-100', text: 'text-zinc-400', Icon: Film }
             ].map((item, idx) => (
-              <div key={item.id} className="flex items-center justify-between p-2.5 bg-white border border-transparent hover:border-zinc-100 hover:bg-zinc-50/40 rounded-2xl transition-all">
+              <div key={item.id} onClick={() => toast.info('Trending feature coming in the next update!')} className="flex items-center justify-between p-2.5 bg-zinc-50/50 border border-transparent rounded-2xl opacity-80 cursor-not-allowed transition-all">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-black text-zinc-400 w-4 text-center">
                     {idx + 1}
@@ -799,7 +871,7 @@ export default function FeedClient() {
                     <item.Icon size={18} className="stroke-[2.5]" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black text-zinc-900 leading-tight">
+                    <h4 className="text-xs font-black text-zinc-700 leading-tight">
                       {item.title}
                     </h4>
                     <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">
@@ -928,7 +1000,7 @@ export default function FeedClient() {
       {selectedExp && (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-zinc-900/40 backdrop-blur-md p-4 sm:p-0"
-          onClick={() => !bookingLoading && setSelectedExp(null)}
+          onClick={() => { if (!bookingLoading) { setSelectedExp(null); setBookingConfirmStep(false); } }}
         >
           <div
             className="relative w-full max-w-sm rounded-3xl p-6 anim-scale-in max-h-[80vh] overflow-y-auto"
@@ -953,7 +1025,7 @@ export default function FeedClient() {
                 <div>
                   <h3 className="text-lg font-black text-[var(--text-primary)]">Booking Requested!</h3>
                   <p className="text-xs text-[var(--text-secondary)] leading-relaxed mt-2 font-semibold">
-                    You have successfully requested <strong className="text-white">{selectedExp.title}</strong>. {selectedExp.price} Sparks have been locked in platform escrow. Check the **Active Experience Hub** at the top of the homepage for updates!
+                    You have successfully requested <strong className="text-[var(--text-primary)]">{selectedExp.title}</strong>. {selectedExp.price} Sparks have been locked in platform escrow. Check the <strong className="text-[var(--text-primary)]">Active Experience Hub</strong> at the top of the homepage for updates!
                   </p>
                 </div>
                 <button
@@ -965,13 +1037,34 @@ export default function FeedClient() {
               </div>
             ) : (
               <>
+                {/* Host header: avatar + name + rating */}
                 <div className="flex items-center gap-3 mb-5 border-b border-[var(--border-subtle)] pb-3">
                   <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0" style={{ border: '2px solid #ede9fe' }}>
                     <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedExp.hostId}`} alt="host" className="w-full h-full object-cover" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-black text-[var(--text-primary)] tracking-tight">Meet Host</h3>
-                    <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mt-0.5">Host: {selectedExp.hostName || selectedExp.hostId}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-black text-[var(--text-primary)] tracking-tight truncate">
+                      {selectedExp.hostName || 'Host'}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      {/* Star rating from experience data */}
+                      {selectedExp.rating != null && (
+                        <span className="flex items-center gap-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} size={10}
+                              className={s <= Math.round(selectedExp.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-zinc-300'}
+                            />
+                          ))}
+                          <span className="text-[10px] font-bold text-[var(--text-secondary)] ml-1">
+                            {Number(selectedExp.rating).toFixed(1)}
+                            {selectedExp.reviewsCount > 0 && ` (${selectedExp.reviewsCount})`}
+                          </span>
+                        </span>
+                      )}
+                      <span className="text-[10px] text-[var(--text-muted)] font-semibold uppercase tracking-wide">
+                        {selectedExp.category}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1032,24 +1125,44 @@ export default function FeedClient() {
                   </div>
                 </div>
 
-                {/* Confirm Book CTA */}
-                <button
-                  onClick={handleConfirmBooking}
-                  disabled={bookingLoading}
-                  className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-black uppercase tracking-wider py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-60 cursor-pointer shadow-md"
-                >
-                  {bookingLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Requesting Meetup...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="w-4 h-4 fill-current" />
-                      <span>Spend {selectedExp.price} Sparks &amp; Meet</span>
-                    </>
-                  )}
-                </button>
+                {/* Confirm Book CTA — 2-tap protection */}
+                {bookingConfirmStep ? (
+                  <div className="space-y-2">
+                    <div className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 text-center">
+                      <p className="text-[11px] font-black text-amber-700">
+                        Tap confirm to spend <strong>{selectedExp.price} ⚡</strong> Sparks
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setBookingConfirmStep(false)}
+                        className="flex-1 py-3 rounded-xl border border-[var(--border-subtle)] text-xs font-black text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] transition-all"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleConfirmBooking}
+                        disabled={bookingLoading}
+                        className="flex-1 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-black uppercase tracking-wider py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-60 cursor-pointer shadow-md"
+                      >
+                        {bookingLoading ? (
+                          <><Loader2 className="w-4 h-4 animate-spin" /><span>Booking...</span></>
+                        ) : (
+                          <><Zap className="w-4 h-4 fill-current" /><span>Confirm — {selectedExp.price} Sparks</span></>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setBookingConfirmStep(true)}
+                    disabled={bookingLoading}
+                    className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-black uppercase tracking-wider py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-60 cursor-pointer shadow-md"
+                  >
+                    <Zap className="w-4 h-4 fill-current" />
+                    <span>Spend {selectedExp.price} Sparks &amp; Meet</span>
+                  </button>
+                )}
               </>
             )}
           </div>
@@ -1220,13 +1333,13 @@ export default function FeedClient() {
                                   const b = bookings.find(bk => bk.id === selectedActiveBooking.id);
                                   setSelectedActiveBooking(null);
                                   if (b) setReviewBooking(b);
-                                  alert('Meeting Verified Successfully via Scan! Payout released.');
+                                  toast.success('Meeting verified! Payout released. 🎉');
                                 } else {
-                                  alert(data.error || 'Verification failed.');
+                                  toast.error(data.error || 'Verification failed. Try manual code entry.');
                                 }
                               } catch (err) {
                                 setVerifyingId(null);
-                                alert('Network error during scan verification.');
+                                toast.error('Network error. Please try again.');
                               }
                             }
                           }}
@@ -1265,7 +1378,7 @@ export default function FeedClient() {
                           onClick={async () => {
                             const code = verificationCodes[selectedActiveBooking.id];
                             if (!code || code.length !== 6) {
-                              alert('Enter a valid 6-digit code');
+                              toast.warn('Please enter a valid 6-digit code.');
                               return;
                             }
                             setIsScanningMock(true);
@@ -1284,13 +1397,13 @@ export default function FeedClient() {
                                 const b = bookings.find(bk => bk.id === selectedActiveBooking.id);
                                 setSelectedActiveBooking(null);
                                 if (b) setReviewBooking(b);
-                                alert('Verified successfully! Payout released.');
+                                toast.success('Verified! Payout released. 🎉');
                               } else {
-                                alert(data.error || 'Verification failed.');
+                                toast.error(data.error || 'Verification failed. Check the code and retry.');
                               }
                             } catch (err) {
                               setIsScanningMock(false);
-                              alert('Network error during manual verification.');
+                              toast.error('Network error. Please try again.');
                             }
                           }}
                           className="flex-1 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-black uppercase text-[10px] rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-95"
@@ -1587,7 +1700,7 @@ export default function FeedClient() {
                         className="p-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--accent)] rounded-2xl flex items-center justify-between cursor-pointer transition-all"
                       >
                         <div>
-                          <h5 className="text-[11px] font-bold text-white uppercase truncate max-w-[180px]">{b.title}</h5>
+                          <h5 className="text-[11px] font-bold text-zinc-900 uppercase truncate max-w-[180px]">{b.title}</h5>
                           <p className="text-[9px] text-[var(--text-muted)] mt-0.5 font-semibold">
                             Host: {b.hostName} · {b.date} · {b.time}
                           </p>
@@ -1628,7 +1741,7 @@ export default function FeedClient() {
                           }}
                           className="cursor-pointer"
                         >
-                          <h5 className="text-[11px] font-bold text-white uppercase truncate max-w-[200px]">{b.title}</h5>
+                          <h5 className="text-[11px] font-bold text-zinc-900 uppercase truncate max-w-[200px]">{b.title}</h5>
                           <p className="text-[9px] text-[var(--text-muted)] mt-0.5 font-semibold">
                             Guest: {b.guestName} · {b.date} · {b.time}
                           </p>
@@ -1638,14 +1751,18 @@ export default function FeedClient() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleAcceptRequest(b.id)}
-                              className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] font-black uppercase py-1.5 rounded-lg transition-all"
+                              disabled={!!actionLoadingId}
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[9px] font-black uppercase py-1.5 rounded-lg transition-all flex items-center justify-center gap-1"
                             >
+                              {actionLoadingId === b.id + '_accept' ? <Loader2 size={10} className="animate-spin" /> : null}
                               Accept
                             </button>
                             <button
                               onClick={() => handleDeclineRequest(b.id)}
-                              className="flex-1 bg-rose-950/30 hover:bg-rose-900/40 border border-rose-800/35 text-rose-400 text-[9px] font-black uppercase py-1.5 rounded-lg transition-all"
+                              disabled={!!actionLoadingId}
+                              className="flex-1 bg-rose-950/30 hover:bg-rose-900/40 disabled:opacity-50 border border-rose-800/35 text-rose-400 text-[9px] font-black uppercase py-1.5 rounded-lg transition-all flex items-center justify-center gap-1"
                             >
+                              {actionLoadingId === b.id + '_decline' ? <Loader2 size={10} className="animate-spin" /> : null}
                               Decline
                             </button>
                           </div>

@@ -44,8 +44,16 @@ export async function GET(request) {
 
     const eligibleBookings = snap.docs.filter(doc => {
       const data = doc.data();
-      // scheduledAt must exist and be before cutoff
-      return data.scheduledAt && data.scheduledAt < cutoff;
+      if (data.scheduledAt) {
+        // Real scheduled time exists — check if it's past the cutoff
+        return data.scheduledAt < cutoff;
+      }
+      // Fallback: no scheduledAt (weekday-name bookings) — use created_at + 24h
+      if (data.created_at) {
+        const fallbackCutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+        return data.created_at < fallbackCutoff;
+      }
+      return false;
     });
 
     for (const doc of eligibleBookings) {

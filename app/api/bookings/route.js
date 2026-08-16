@@ -56,13 +56,25 @@ export async function POST(request) {
       return NextResponse.json({ error: spendResult.error || 'Insufficient Sparks' }, { status: 402 });
     }
 
-    // Build scheduledAt (ISO string) from date + time strings for auto-refund eligibility
+    // Build scheduledAt from date + time.
+    // Since experience days are stored as weekday names ("Monday" etc.),
+    // we first try to parse it as a real date. If that fails (NaN),
+    // we store null — the auto-refund cron will fall back to created_at + 24h.
     let scheduledAt = null;
     try {
       if (date && time) {
-        // Normalize: "Monday" etc. won't parse — only store real date strings
         const parsed = new Date(`${date} ${time}`);
-        if (!isNaN(parsed.getTime())) scheduledAt = parsed.toISOString();
+        if (!isNaN(parsed.getTime())) {
+          scheduledAt = parsed.toISOString();
+        }
+        // Also accept ISO date strings directly (for future calendar picker)
+        const iso = new Date(date);
+        if (!scheduledAt && !isNaN(iso.getTime()) && time) {
+          const [h, m] = time.replace(/ ?[AP]M/i, '').split(':').map(Number);
+          const isPM = /PM/i.test(time);
+          iso.setHours(isPM && h !== 12 ? h + 12 : (!isPM && h === 12 ? 0 : h), m || 0, 0, 0);
+          if (!isNaN(iso.getTime())) scheduledAt = iso.toISOString();
+        }
       }
     } catch (_) {}
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Home, Search, Users, User, LogIn, Wallet, Shield, Plus, Bell, Zap, MessageSquare,
-  LayoutDashboard, CreditCard, ArrowUpRight, ShieldCheck, FileText, Settings, MoreHorizontal, Calendar
+  LayoutDashboard, CreditCard, ArrowUpRight, ShieldCheck, FileText, Settings, MoreHorizontal, Calendar, BookOpen
 } from 'lucide-react';
 import { getUserAvatarUrl } from '../utils/avatar';
 import { db } from '../lib/firebaseClient';
@@ -51,6 +51,7 @@ export default function Sidebar({ user }) {
 
   // ── Notification state ─────────────────────────────────────────────────────
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0); // Unread messages badge
   const [logoAnimating, setLogoAnimating] = useState(false);
   const prevCountRef = useRef(0);
   const isOnNotifPage = pathname === '/notifications';
@@ -118,6 +119,28 @@ export default function Sidebar({ user }) {
     }
   }, [isOnNotifPage]);
 
+  // ── Unread Messages listener ────────────────────────────────────────────────
+  useEffect(() => {
+    if (!user?.id || !db) return;
+    const isOnMessagesPage = pathname === '/messages';
+
+    // Listen to conversations where the user has unread messages
+    // Pattern: messages/{conversationId}/msgs where read=false and senderId != user.id
+    // Simpler: poll /api/messages/unread or use a denormalized counter
+    // For now: listen to user's message_unread counter doc
+    try {
+      const { doc: firestoreDoc, onSnapshot: firestoreOnSnapshot } = require('firebase/firestore');
+      const counterRef = firestoreDoc(db, 'users', user.id, 'meta', 'unread');
+      const unsub = firestoreOnSnapshot(counterRef, (snap) => {
+        if (snap.exists()) {
+          const count = snap.data()?.messages || 0;
+          setUnreadMsgCount(isOnMessagesPage ? 0 : count);
+        }
+      }, () => {});
+      return () => unsub();
+    } catch { /* graceful fail */ }
+  }, [user?.id, pathname]);
+
   // ── Wallet sync ────────────────────────────────────────────────────────────
   useEffect(() => {
     const sync = async () => {
@@ -156,11 +179,11 @@ export default function Sidebar({ user }) {
   ];
 
   const MOBILE_NAV = [
-    { href: '/',        label: 'Home',        Icon: Home },
-    { href: '/discover',label: 'Discover',    Icon: Search },
-    { href: '/create',  label: 'Plus',        Icon: Plus, isCenter: true },
-    { href: '/circles', label: 'Communities', Icon: Users },
-    { href: '/profile', label: 'Profile',     Icon: User },
+    { href: '/',         label: 'Home',     Icon: Home },
+    { href: '/discover', label: 'Discover', Icon: Search },
+    { href: '/create',   label: 'Plus',     Icon: Plus, isCenter: true },
+    { href: '/bookings', label: 'Bookings', Icon: Calendar },
+    { href: '/profile',  label: 'Profile',  Icon: User },
   ];
 
   const avatarSrc = getUserAvatarUrl(user);
@@ -204,6 +227,17 @@ export default function Sidebar({ user }) {
                   <span>{sparks.toLocaleString()}</span>
                 </Link>
               )}
+
+              {/* Messages icon with badge */}
+              <Link href="/messages" className="relative w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ background: '#f8f8fa', border: '1px solid #e8e8ea' }}>
+                <MessageSquare size={16} className={unreadMsgCount > 0 ? 'text-[#7c3aed]' : 'text-zinc-600'} strokeWidth={2} />
+                {unreadMsgCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-[#7c3aed] border-2 border-white flex items-center justify-center text-[8px] font-black text-white px-0.5">
+                    {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
+                  </span>
+                )}
+              </Link>
 
               <Link href="/bookings" className="relative w-9 h-9 rounded-full flex items-center justify-center"
                 style={{ background: '#f8f8fa', border: '1px solid #e8e8ea' }}>
@@ -252,6 +286,9 @@ export default function Sidebar({ user }) {
             const active = isActive(href);
             const isNotif = label === 'Notifications';
             const hasUnread = isNotif && unreadCount > 0;
+            const isMessages = label === 'Messages';
+            const hasUnreadMsgs = isMessages && unreadMsgCount > 0;
+
             return (
               <Link key={href} href={href}
                 className="flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all"
@@ -263,6 +300,11 @@ export default function Sidebar({ user }) {
                 {hasUnread && (
                   <span className="min-w-[20px] h-[20px] rounded-full bg-[#7c3aed] text-white text-[10px] font-black flex items-center justify-center px-1">
                     {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+                {hasUnreadMsgs && (
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#7c3aed] text-white text-[10px] font-black flex items-center justify-center px-1">
+                    {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
                   </span>
                 )}
                 {label === 'Wallet' && sparks > 0 && (
