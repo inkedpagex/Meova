@@ -1,1 +1,0 @@
-import { NextResponse } from 'next/server'; import { getUserAdmin } from '../../../lib/getUserAdmin'; export async function GET() { try { const user = await getUserAdmin(); return NextResponse.json({ user }); } catch(err) { return NextResponse.json({ error: err.message }); } }

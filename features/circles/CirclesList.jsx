@@ -115,7 +115,16 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
     setJoinedMap(initial);
 
     if (userId && typeof window !== 'undefined') {
-      setSparks(500); // Temporary fake balance since mockDb was removed
+      // Fetch real wallet balance from API
+      fetch('/api/wallet')
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.wallet) {
+            const total = (data.wallet.purchased || 0) + (data.wallet.bonus || 0) + (data.wallet.creator || 0);
+            setSparks(total);
+          }
+        })
+        .catch(() => {}); // Fail silently — balance shows as 0 if API unavailable
     }
   }, [joinedCircleIds, userId]);
 

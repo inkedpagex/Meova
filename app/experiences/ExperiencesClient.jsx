@@ -134,8 +134,10 @@ export default function ExperiencesClient({ currentUser, initialSparks }) {
 
     const matchesCategory = selectedCategory === 'All' || exp.category.toLowerCase() === selectedCategory.toLowerCase();
 
-    // Check if available today (Mock availability - assume Monday is "today")
-    const matchesToday = !availableTodayOnly || exp.days.includes('Monday');
+    // Check if available today using the real current day of week
+    const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const todayName = DAYS[new Date().getDay()];
+    const matchesToday = !availableTodayOnly || (exp.days || []).includes(todayName);
 
     return matchesSearch && matchesCategory && matchesToday;
   });

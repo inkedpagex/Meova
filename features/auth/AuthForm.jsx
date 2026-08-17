@@ -192,9 +192,9 @@ export default function AuthForm({ defaultMode = 'login' }) {
           {/* Terms */}
           <p className="text-center text-[11px] text-zinc-400 mt-6 leading-relaxed">
             By continuing, you agree to our{' '}
-            <a href="#" className="text-[#7c3aed] font-semibold hover:underline">Terms of Service</a>
+            <a href="/terms" target="_blank" className="text-[#7c3aed] font-semibold hover:underline">Terms of Service</a>
             {' '}·{' '}
-            <a href="#" className="text-[#7c3aed] font-semibold hover:underline">Privacy Policy</a>
+            <a href="/privacy" target="_blank" className="text-[#7c3aed] font-semibold hover:underline">Privacy Policy</a>
           </p>
 
           {/* Secure badge */}
