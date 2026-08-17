@@ -35,7 +35,6 @@ function getRealInstagramHandle(username) {
 
 export default function ExperiencesClient({ currentUser, initialSparks }) {
   const router = useRouter();
-  const [experiences, setExperiences] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [activeInstagramUser, setActiveInstagramUser] = useState(null);

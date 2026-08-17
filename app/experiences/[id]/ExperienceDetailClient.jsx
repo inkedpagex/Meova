@@ -22,9 +22,6 @@ function avatarUrl(userOrSeed, users = []) {
 
 export default function ExperienceDetailClient({ experienceId, currentUser, initialSparks }) {
   const router = useRouter();
-  const [exp, setExp] = useState(null);
-  const [host, setHost] = useState(null);
-  const [reviews, setReviews] = useState([]);
   const [sparksBalance, setSparksBalance] = useState(initialSparks || 0);
 
   // Booking Flow

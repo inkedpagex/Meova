@@ -6,7 +6,6 @@ import {
   Search, SlidersHorizontal, Check, Zap, Users, Rocket,
   Gamepad2, Music2, Code2, Palette, Trophy, Star, MessageSquare
 } from 'lucide-react';
-import { mockDb } from '../../lib/mockDatabase';
 import { getCartoonAvatar } from '../../utils/avatar';
 
 const CATEGORY_ICONS = {
@@ -116,8 +115,7 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
     setJoinedMap(initial);
 
     if (userId && typeof window !== 'undefined') {
-      const w = mockDb.getWallet(userId);
-      if (w) setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
+      setSparks(500); // Temporary fake balance since mockDb was removed
     }
   }, [joinedCircleIds, userId]);
 
@@ -155,11 +153,8 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
         return;
       }
       if (!window.confirm(`Join ${circle.name} for ${circle.price} Sparks?`)) return;
-      // Deduct sparks
+      // Deduct sparks (UI only for now)
       if (userId) {
-        const w = mockDb.getWallet(userId) || { purchased: 0, bonus: 0, creator: 0 };
-        w.purchased = Math.max(0, (w.purchased || 0) - circle.price);
-        mockDb.saveWallet(userId, w);
         setSparks(prev => prev - circle.price);
         window.dispatchEvent(new Event('wallet-updated'));
       }
