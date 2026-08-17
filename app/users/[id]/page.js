@@ -10,6 +10,7 @@ import {
   CheckCircle, Layers
 } from 'lucide-react';
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
+import BlockUserButton from '../../../features/users/BlockUserButton';
 
 import { getUserAvatarUrl, getCartoonAvatar } from '../../../utils/avatar';
 
@@ -175,6 +176,7 @@ export default async function UserProfilePage({ params }) {
                   <MessageCircle className="w-4 h-4" />
                   Message
                 </Link>
+                <BlockUserButton targetUid={id} targetName={profile.full_name || 'Student'} isLoggedIn={isLoggedIn} />
               </div>
             )}
             {isSelf && (

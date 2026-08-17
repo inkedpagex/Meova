@@ -2,6 +2,28 @@ import { NextResponse } from 'next/server';
 import { getUserWithRole } from '../../../lib/getAdminUser';
 import { adminDb } from '../../../lib/firebaseAdmin';
 
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const targetUserId = searchParams.get('targetUserId');
+    
+    if (!adminDb) return NextResponse.json({ reviews: [] });
+
+    let query = adminDb.collection('reviews');
+    if (targetUserId) {
+      query = query.where('targetUserId', '==', targetUserId);
+    }
+    
+    const snap = await query.orderBy('created_at', 'desc').limit(20).get();
+    const reviews = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    return NextResponse.json({ reviews });
+  } catch (err) {
+    console.error('[GET /api/reviews]', err.message);
+    return NextResponse.json({ reviews: [] });
+  }
+}
+
 export async function POST(request) {
   try {
     const user = await getUserWithRole();

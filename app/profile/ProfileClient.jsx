@@ -8,8 +8,8 @@ import {
 } from 'lucide-react';
 import ProfileEditForm from '../../features/profile/ProfileEditForm';
 import LogoutButton from '../../features/auth/LogoutButton';
-import { mockDb } from '../../lib/mockDatabase';
 import { getUserAvatarUrl } from '../../utils/avatar';
+import { updateProfileAdmin } from '../../features/profile/profile.actions';
 
 const InstagramIcon = ({ size = 14 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -58,8 +58,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
   useEffect(() => {
     if (profile?.id && typeof window !== 'undefined') {
       const load = () => {
-        const u = mockDb.getUser(profile.id);
-        if (u?.isIdOn !== undefined) setIsIdOn(u.isIdOn);
+        if (profile?.isIdOn !== undefined) setIsIdOn(profile.isIdOn);
       };
       load();
       window.addEventListener('profile-updated', load);
@@ -79,11 +78,11 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const handleToggleId = () => {
+  const handleToggleId = async () => {
     const next = !isIdOn;
     setIsIdOn(next);
     if (profile?.id) {
-      mockDb.updateUser(profile.id, { isIdOn: next });
+      await updateProfileAdmin({ isIdOn: next });
       window.dispatchEvent(new Event('profile-updated'));
     }
   };

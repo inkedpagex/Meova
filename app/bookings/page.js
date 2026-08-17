@@ -9,7 +9,6 @@ import {
   CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight
 } from "lucide-react";
 import QRCode from "react-qr-code";
-import { Scanner } from "@yudiel/react-qr-scanner";
 import { toast } from "../../lib/toast";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -25,9 +24,10 @@ export default function BookingsPage() {
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
 
-  // Scanner state
-  const [scanStatus, setScanStatus] = useState("idle"); // idle, scanning, processing, success, error
+  // Verification state
+  const [scanStatus, setScanStatus] = useState("idle"); // idle, processing, success, error
   const [scanMessage, setScanMessage] = useState("");
+  const [manualCode, setManualCode] = useState("");
 
   // Dispute state
   const [disputeLoading, setDisputeLoading] = useState(false);
@@ -67,17 +67,17 @@ export default function BookingsPage() {
     return Date.now() > created.getTime() + 2 * 60 * 60 * 1000; // 2 hours after creation
   };
 
-  // Handle QR scanning
-  const handleScan = async (text) => {
+  // Handle Manual Code Verification
+  const handleVerifyCode = async () => {
     if (scanStatus === "processing" || scanStatus === "success" || !selectedBooking) return;
     
-    if (text === selectedBooking.meetingCode) {
+    if (manualCode.trim() === selectedBooking.meetingCode) {
       setScanStatus("processing");
       try {
         const res = await fetch("/api/bookings", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bookingId: selectedBooking.id, action: "complete", meetingCode: text })
+          body: JSON.stringify({ bookingId: selectedBooking.id, action: "complete", meetingCode: manualCode.trim() })
         });
         
         const data = await res.json();
@@ -87,6 +87,7 @@ export default function BookingsPage() {
           setTimeout(() => {
             setShowScanModal(false);
             setScanStatus("idle");
+            setManualCode("");
             setSelectedBooking(null);
             mutate();
           }, 2000);
@@ -102,7 +103,7 @@ export default function BookingsPage() {
       }
     } else {
       setScanStatus("error");
-      setScanMessage("Invalid QR Code for this meeting.");
+      setScanMessage("Invalid Code for this meeting.");
       setTimeout(() => setScanStatus("idle"), 2500);
     }
   };
@@ -393,41 +394,51 @@ export default function BookingsPage() {
         </div>
       )}
 
-      {/* ─── MODAL: HOST QR SCANNER ─── */}
+      {/* ─── MODAL: HOST VERIFICATION ─── */}
       {showScanModal && selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md anim-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md anim-fade-in">
           <div className="absolute top-4 right-4 z-50">
-             <button onClick={() => setShowScanModal(false)} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
+             <button onClick={() => { setShowScanModal(false); setManualCode(""); }} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
                <X size={20} strokeWidth={2.5} />
              </button>
           </div>
           
-          <div className="w-full max-w-[400px] flex flex-col items-center">
-            <h3 className="text-white text-lg font-black mb-2">Scan Guest Ticket</h3>
-            <p className="text-white/60 text-xs font-medium mb-8 text-center px-6">
-              Scan the QR code on {selectedBooking.guestName}'s phone to verify the meeting and receive your Sparks.
+          <div className="w-full max-w-[340px] flex flex-col items-center">
+            <h3 className="text-white text-lg font-black mb-2">Verify Meeting</h3>
+            <p className="text-white/60 text-xs font-medium mb-6 text-center">
+              Enter the 6-digit code from {selectedBooking.guestName}'s phone to receive your Sparks.
             </p>
 
-            <div className="w-[280px] h-[280px] rounded-3xl overflow-hidden relative shadow-[0_0_50px_rgba(124,58,237,0.3)] border-2 border-white/20">
+            <div className="w-full bg-zinc-900/50 p-6 rounded-3xl border border-white/10 relative">
               {scanStatus === "success" ? (
-                <div className="absolute inset-0 bg-emerald-500 flex flex-col items-center justify-center text-white anim-fade-in z-10">
-                  <CheckCircle2 size={64} className="mb-4" />
-                  <p className="font-black text-lg">Verified!</p>
+                <div className="absolute inset-0 bg-emerald-500 rounded-3xl flex flex-col items-center justify-center text-white anim-fade-in z-10">
+                  <CheckCircle2 size={48} className="mb-2" />
+                  <p className="font-black text-base">Verified!</p>
                 </div>
               ) : scanStatus === "processing" ? (
-                <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white anim-fade-in z-10 backdrop-blur-sm">
-                  <Loader2 size={40} className="animate-spin mb-4 text-[#7c3aed]" />
-                  <p className="font-bold text-sm">Verifying Ticket...</p>
+                <div className="absolute inset-0 bg-black/80 rounded-3xl flex flex-col items-center justify-center text-white anim-fade-in z-10 backdrop-blur-sm">
+                  <Loader2 size={32} className="animate-spin mb-3 text-[#7c3aed]" />
+                  <p className="font-bold text-xs">Verifying...</p>
                 </div>
               ) : (
-                <Scanner 
-                  onResult={handleScan}
-                  options={{ delayBetweenScanAttempts: 1000 }}
-                  components={{ audio: false, finder: false }}
-                />
+                <div className="flex flex-col gap-4">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={manualCode}
+                    onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+                    placeholder="Enter 6-digit code"
+                    className="w-full bg-black/50 border border-white/20 rounded-xl px-4 py-4 text-center text-2xl font-black text-white tracking-[0.3em] uppercase outline-none focus:border-[#7c3aed] transition-colors"
+                  />
+                  <button
+                    onClick={handleVerifyCode}
+                    disabled={manualCode.length !== 6}
+                    className="w-full bg-[#7c3aed] disabled:bg-zinc-800 disabled:text-zinc-500 hover:bg-[#6d28d9] text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all"
+                  >
+                    Verify & Claim Sparks
+                  </button>
+                </div>
               )}
-              {/* Scanner Frame UI */}
-              <div className="absolute inset-0 border-[3px] border-[#7c3aed] rounded-3xl pointer-events-none opacity-50" />
             </div>
 
             {scanStatus === "error" && (

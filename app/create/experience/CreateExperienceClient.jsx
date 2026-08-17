@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { 
   ArrowLeft, Coffee, Pencil, CheckCircle, ShieldAlert, Loader2, Calendar, Clock, MapPin, Zap 
 } from 'lucide-react';
-import { mockDb } from '../../../lib/mockDatabase';
+import { APPROVED_LOCATIONS } from '../../../lib/constants';
 
 export default function CreateExperienceClient({ currentUser }) {
   const router = useRouter();
@@ -13,11 +13,8 @@ export default function CreateExperienceClient({ currentUser }) {
   // Form states
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Coffee');
-  const [description, setDescription] = useState('');
-  const [duration, setDuration] = useState('1.5 hours');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [location, setLocation] = useState(mockDb.APPROVED_LOCATIONS[3]); // Default to Tech Hub Cafeteria
+  const [duration, setDuration] = useState(60);
+  const [location, setLocation] = useState(APPROVED_LOCATIONS[3]); // Default to Tech Hub Cafeteria
   const [price, setPrice] = useState(150);
 
   // Status states
@@ -30,41 +27,39 @@ export default function CreateExperienceClient({ currentUser }) {
   const handlePublish = async (e) => {
     e.preventDefault();
     if (!title.trim()) return alert('Please enter an experience title.');
-    if (!description.trim()) return alert('Please enter a description.');
-    if (!date) return alert('Please choose a date.');
-    if (!time) return alert('Please choose a time.');
 
     setLoading(true);
-    // Simulate API delay
-    await new Promise((r) => setTimeout(r, 1500));
 
-    const hostUser = currentUser || { id: 'chirag', full_name: 'Chirag Chak', branch: 'CSE', year: '4th' };
+    try {
+      const res = await fetch('/api/experiences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          category,
+          price: Number(price),
+          duration: Number(duration),
+          location,
+          days: ['Any'],
+          slots: ['Anytime'],
+        }),
+      });
 
-    mockDb.createExperience({
-      title,
-      category,
-      description,
-      duration: duration.replace(' hours', '').replace(' hour', '') * 60 || 90, // in minutes
-      date,
-      time,
-      location,
-      price,
-      hostId: hostUser.id,
-      hostName: hostUser.full_name,
-      rating: 5.0,
-      reviewsCount: 0,
-      days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], // default mock availability
-      slots: ['12:00 PM', '2:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'],
-      tags: [category, location.split(' ')[0]]
-    });
-
-    setLoading(false);
-    setSuccess(true);
-
-    // Redirect to homepage after 1.5 seconds
-    setTimeout(() => {
-      router.push('/');
-    }, 1800);
+      if (res.ok) {
+        setSuccess(true);
+        // Redirect to homepage after 1.5 seconds
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Failed to create experience.');
+      }
+    } catch (err) {
+      alert('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -160,92 +155,25 @@ export default function CreateExperienceClient({ currentUser }) {
             </div>
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 ml-1">
-              Description
-            </label>
-            <textarea
-              required
-              maxLength={200}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Let's connect over coffee, chat about college life, ideas and everything in between!"
-              className="w-full min-h-[100px] bg-white border border-zinc-200 focus:border-[#7c3aed] focus:ring-4 focus:ring-[#7c3aed]/10 rounded-2xl p-3.5 text-xs text-zinc-950 placeholder-zinc-400 focus:outline-none transition-all font-semibold resize-none shadow-sm"
-            />
-            <div className="text-[9px] text-zinc-400 text-right mt-1 font-bold">
-              {description.length}/200
-            </div>
-          </div>
-
-          {/* Duration & Date */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 ml-1">
-                Duration
-              </label>
-              <select
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                className="w-full bg-white border border-zinc-200 text-xs font-bold text-zinc-950 rounded-2xl p-3.5 outline-none cursor-pointer shadow-sm"
-              >
-                <option value="1 hour">1 hour</option>
-                <option value="1.5 hours">1.5 hours</option>
-                <option value="2 hours">2 hours</option>
-                <option value="3 hours">3 hours</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 ml-1">
-                Date
-              </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  required
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full bg-white border border-zinc-200 text-xs font-bold text-zinc-950 rounded-2xl p-3.5 outline-none cursor-pointer pr-10 shadow-sm"
-                />
-                <Calendar size={13} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
-              </div>
-            </div>
-          </div>
-
-          {/* Time & Location */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 ml-1">
-                Time
-              </label>
-              <div className="relative">
-                <input
-                  type="time"
-                  required
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="w-full bg-white border border-zinc-200 text-xs font-bold text-zinc-950 rounded-2xl p-3.5 outline-none cursor-pointer pr-10 shadow-sm"
-                />
-                <Clock size={13} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
-              </div>
-            </div>
+          {/* Location Grid */}
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 ml-1">
                 Location (Approved)
               </label>
-              <div className="relative flex items-center">
+              <div className="relative flex items-center h-full">
                 <select
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="w-full bg-white border border-zinc-200 text-xs font-bold text-zinc-950 rounded-2xl p-3.5 outline-none cursor-pointer pr-10 shadow-sm appearance-none"
+                  className="w-full h-full bg-white border border-zinc-200 text-xs font-bold text-zinc-950 rounded-2xl px-3.5 py-0 outline-none cursor-pointer pr-10 shadow-sm appearance-none"
                 >
-                  {mockDb.APPROVED_LOCATIONS.map((loc) => (
+                  {APPROVED_LOCATIONS.map((loc) => (
                     <option key={loc} value={loc}>
                       {loc.replace(/[^\x00-\x7F]/g, '').trim()}
                     </option>
                   ))}
                 </select>
-                <CheckCircle size={14} className="absolute right-3 text-emerald-500 fill-emerald-500/10 flex-shrink-0" />
+                <CheckCircle size={14} className="absolute right-3 text-emerald-500 fill-emerald-500/10 flex-shrink-0 pointer-events-none" />
               </div>
             </div>
           </div>

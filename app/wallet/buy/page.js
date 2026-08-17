@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Zap, CheckCircle, Copy, ArrowLeft, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { SlideButton } from '@/components/ui/slide-button';
-import { mockDb } from '@/lib/mockDatabase';
 
 const PACKS = [
   { key: 'starter', sparks: 100,  inr: 49,  label: 'Starter',  popular: false, bonus: 0 },
@@ -65,17 +64,9 @@ export default function BuyPage() {
   }
 
   function handleSlideSuccess() {
-    // Save payment request to mockDb so admin can see and approve it
+    // Payment request is already created server-side in handleProceed.
+    // Dispatch event so wallet page can refresh if needed.
     if (selected && userId) {
-      mockDb.createPaymentRequest({
-        userId,
-        pack_key:       selected.key,
-        pack_name:      selected.label,
-        sparks:         selected.sparks + (selected.bonus || 0),
-        amount_inr:     selected.inr,
-        reference_code: refCode,
-      });
-      // Dispatch event so wallet page can refresh
       window.dispatchEvent(new Event('wallet-updated'));
     }
     setStep('done');

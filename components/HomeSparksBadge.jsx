@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Zap } from 'lucide-react';
-import { mockDb } from '../lib/mockDatabase';
 
 export default function HomeSparksBadge({ userId, initialSparks }) {
   const [sparks, setSparks] = useState(initialSparks || 0);
@@ -11,10 +10,18 @@ export default function HomeSparksBadge({ userId, initialSparks }) {
   useEffect(() => {
     if (!userId || typeof window === 'undefined') return;
 
-    const updateSparks = () => {
-      const wallet = mockDb.getWallet(userId);
-      if (wallet) {
-        setSparks((wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0));
+    const updateSparks = async () => {
+      try {
+        const res = await fetch('/api/wallet');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.wallet) {
+            const w = data.wallet;
+            setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
+          }
+        }
+      } catch (err) {
+        // ignore
       }
     };
 

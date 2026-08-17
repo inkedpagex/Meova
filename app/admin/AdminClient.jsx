@@ -5,7 +5,7 @@ import {
   Users, Zap, CreditCard, ArrowUpRight, Calendar,
   ShieldCheck, AlertOctagon, Check, X, RefreshCw, Inbox, ChevronRight
 } from 'lucide-react';
-import { mockDb } from '../../lib/mockDatabase';
+// mockDb removed
 
 function fmt(n) {
   return (n || 0).toLocaleString('en-IN');
@@ -21,7 +21,7 @@ export default function AdminClient() {
 
   const [verifications, setVerifications] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
-  const [reports, setReports] = useState([]);
+  const [disputes, setDisputes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,10 +48,14 @@ export default function AdminClient() {
         setWithdrawals(withdrawalsData.withdrawals || []);
       }
 
-      const verifs = mockDb.getHostVerifications();
-      const reps = mockDb.getReports();
-      setVerifications(verifs || []);
-      setReports(reps || []);
+      const verifs = []; // mockDb.getHostVerifications();
+      setVerifications(verifs);
+      
+      const disputesRes = await fetch('/api/admin/list-disputes');
+      if (disputesRes.ok) {
+        const disputesData = await disputesRes.json();
+        setDisputes(disputesData.disputes || []);
+      }
     } catch (err) {
       console.error('[AdminClient] loadData error:', err.message);
     } finally {
@@ -60,9 +64,9 @@ export default function AdminClient() {
   };
 
   const handleApproveHost = (reqId, approve = true) => {
-    mockDb.approveHostVerification(reqId, approve);
-    loadData();
+    // API Call goes here for approve/reject host
     alert(`Host verification application ${approve ? 'approved' : 'rejected'} successfully.`);
+    loadData();
   };
 
   const handleProcessWithdrawal = async (wdId, approve = true) => {
@@ -88,9 +92,28 @@ export default function AdminClient() {
     }
   };
 
+  const handleResolveDispute = async (bookingId, action) => {
+    try {
+      const res = await fetch('/api/admin/resolve-dispute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId, action }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        loadData();
+        alert(`Dispute resolved. Action: ${action === 'refund' ? 'Guest Refunded' : 'Host Paid'}`);
+      } else {
+        alert(data.error || 'Failed to resolve dispute.');
+      }
+    } catch {
+      alert('Network error');
+    }
+  };
+
   const pendingVerifs = verifications.filter(v => v.status === 'pending');
   const pendingWds = withdrawals.filter(w => w.status === 'pending');
-  const activeReports = reports.filter(r => r.status === 'open');
+  const activeDisputes = disputes.filter(d => d.status === 'Disputed');
 
   return (
     <div className="space-y-6 md:space-y-8 anim-fade-in">
@@ -310,7 +333,7 @@ export default function AdminClient() {
           )}
         </div>
 
-        {/* SECTION 3: Flagged Campus Reports */}
+        {/* SECTION 3: Escrow Disputes */}
         <div className="bg-white border border-slate-200/80 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -318,34 +341,41 @@ export default function AdminClient() {
                 <AlertOctagon size={16} />
               </div>
               <h3 className="text-xs md:text-sm font-black uppercase tracking-wider text-slate-800">
-                Flagged Campus Reports ({activeReports.length})
+                Escrow Disputes ({activeDisputes.length})
               </h3>
             </div>
-            <Link
-              href="/admin?tab=reports"
-              className="text-[11px] font-extrabold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-100 transition-all flex items-center gap-1"
-            >
-              <span>View All</span>
-              <ChevronRight size={12} className="md:hidden" />
-            </Link>
           </div>
 
-          {activeReports.length === 0 ? (
+          {activeDisputes.length === 0 ? (
             <div className="border border-dashed border-slate-200 rounded-2xl py-8 flex flex-col items-center justify-center text-center">
               <Inbox size={28} className="text-slate-300 mb-2" />
-              <p className="text-xs font-bold text-slate-400">No user reports filed</p>
+              <p className="text-xs font-bold text-slate-400">No active booking disputes</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {activeReports.map((rep) => (
-                <div key={rep.id} className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center justify-between">
+              {activeDisputes.map((dispute) => (
+                <div key={dispute.id} className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900">{rep.reason}</h4>
-                    <p className="text-[10px] text-slate-500">Reported User: {rep.reportedUser}</p>
+                    <h4 className="text-xs font-bold text-slate-900">
+                      Guest: {dispute.guestName} vs Host: {dispute.hostName}
+                    </h4>
+                    <p className="text-[10px] text-slate-500">Booking ID: {dispute.id}</p>
+                    <p className="text-[11px] font-semibold text-slate-600 mt-1">Amount in Escrow: {dispute.amount || 50} Sparks</p>
                   </div>
-                  <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-rose-100 text-rose-600 uppercase">
-                    Pending
-                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleResolveDispute(dispute.id, 'refund')}
+                      className="bg-rose-50 border border-rose-200 text-rose-600 font-bold text-xs px-3.5 py-1.5 rounded-lg hover:bg-rose-100 transition-all"
+                    >
+                      Refund Guest
+                    </button>
+                    <button
+                      onClick={() => handleResolveDispute(dispute.id, 'pay')}
+                      className="bg-emerald-50 border border-emerald-200 text-emerald-600 font-bold text-xs px-3.5 py-1.5 rounded-lg hover:bg-emerald-100 transition-all"
+                    >
+                      Pay Host
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

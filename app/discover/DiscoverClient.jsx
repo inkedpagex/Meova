@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import useSWR from 'swr';
 import { useUserContext } from '../../components/providers/UserProvider';
-import { mockDb } from '../../lib/mockDatabase';
 import { getCartoonAvatar, getUserAvatarUrl } from '../../utils/avatar';
 import confetti from 'canvas-confetti';
 import { useCampusPresence } from '../../lib/useCampusPresence';
@@ -112,6 +111,7 @@ export default function DiscoverClient() {
   // SWR Hooks for caching and instant data fetching
   const { data: expData } = useSWR('/api/experiences', fetcher);
   const { data: circlesData } = useSWR('/api/circles', fetcher);
+  const { data: usersData } = useSWR('/api/users', fetcher);
   
   const experiences = expData?.experiences || [];
   const circles = circlesData?.circles || [];
@@ -125,18 +125,12 @@ export default function DiscoverClient() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const dbUsers = mockDb.getUsers() || [];
+      const dbUsers = usersData?.users || contextPeople || [];
       const filteredUsers = currentUser 
-        ? dbUsers.filter(u => u.id !== currentUser.id && u.isIdOn !== false) 
+        ? dbUsers.filter(u => u.id !== currentUser.uid && u.isIdOn !== false) 
         : dbUsers.filter(u => u.isIdOn !== false);
 
-      const mergedUsers = [...(contextPeople || [])];
-      filteredUsers.forEach(u => {
-        if (!mergedUsers.some(mu => mu.id === u.id)) {
-          mergedUsers.push(u);
-        }
-      });
-      setPeople(mergedUsers);
+      setPeople(filteredUsers);
 
       const savedJoined = localStorage.getItem('meetify_disc_joined');
       if (savedJoined) {
@@ -223,8 +217,13 @@ export default function DiscoverClient() {
         )}
 
         {list.length === 0 ? (
-          <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-[#f0f0f0]">
-            No classmates found matching your query.
+          <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-[#f0f0f0] flex flex-col items-center gap-2">
+            <span>No classmates found matching your query.</span>
+            {search && (
+              <button onClick={() => setSearch('')} className="px-4 py-2 mt-2 bg-zinc-100 text-zinc-900 text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer">
+                Clear Search
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -297,9 +296,15 @@ export default function DiscoverClient() {
           <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-[#f0f0f0] flex flex-col items-center gap-2">
             <Coffee size={24} className="text-[#7c3aed]" />
             <span>No campus experiences found.</span>
-            <button onClick={() => router.push('/create/experience')} className="mt-2 px-4 py-2 bg-[#7c3aed] text-white text-[10px] font-black uppercase tracking-wider rounded-xl">
-              Host first experience
-            </button>
+            {search ? (
+              <button onClick={() => setSearch('')} className="mt-2 px-4 py-2 bg-zinc-100 text-zinc-900 text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer">
+                Clear Search
+              </button>
+            ) : (
+              <button onClick={() => router.push('/create/experience')} className="mt-2 px-4 py-2 bg-[#7c3aed] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer">
+                Host first experience
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">

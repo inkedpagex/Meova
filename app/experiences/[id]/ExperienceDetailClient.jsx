@@ -6,14 +6,14 @@ import {
   Zap, Calendar, MapPin, Star, X, CheckCircle, 
   Loader2, ChevronLeft, ShieldAlert, Clock, Flag, ShieldClose, AlertOctagon, Heart
 } from 'lucide-react';
-import { mockDb } from '../../../lib/mockDatabase';
-
+import useSWR, { mutate } from 'swr';
 import { getUserAvatarUrl, getCartoonAvatar } from '../../../utils/avatar';
 
-function avatarUrl(userOrSeed) {
+const fetcher = (url) => fetch(url).then(r => r.json());
+
+function avatarUrl(userOrSeed, users = []) {
   if (userOrSeed && typeof userOrSeed === 'object') return getUserAvatarUrl(userOrSeed);
   if (typeof userOrSeed === 'string' && typeof window !== 'undefined') {
-    const users = mockDb.getUsers();
     const found = users.find(u => u.full_name === userOrSeed || u.id === userOrSeed || u.uid === userOrSeed);
     if (found) return getUserAvatarUrl(found);
   }
@@ -38,20 +38,28 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
   // Safety actions
   const [reported, setReported] = useState(false);
 
+  const { data: expData } = useSWR('/api/experiences', fetcher);
+  const { data: usersData } = useSWR('/api/users', fetcher);
+  
+  const exp = expData?.experiences?.find(e => e.id === experienceId) || null;
+  const users = usersData?.users || [];
+  const host = exp ? users.find(u => u.id === exp.hostId) : null;
+  
+  // Pass host.id safely to the reviews endpoint
+  const { data: reviewsData } = useSWR(host?.id ? `/api/reviews?targetUserId=${host.id}` : null, fetcher);
+  const reviews = reviewsData?.reviews || [];
+  
+  const { data: walletData } = useSWR(currentUser ? '/api/wallet' : null, fetcher);
+
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const found = mockDb.getExperience(experienceId);
-      if (found) {
-        setExp(found);
-        setHost(mockDb.getUser(found.hostId));
-        setReviews(mockDb.getReviews(found.hostId));
-      }
-      if (currentUser) {
-        const w = mockDb.getWallet(currentUser.id);
-        setSparksBalance((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
-      }
+    if (walletData?.wallet) {
+      setSparksBalance(
+        (walletData.wallet.purchased || 0) + 
+        (walletData.wallet.bonus || 0) + 
+        (walletData.wallet.creator || 0)
+      );
     }
-  }, [experienceId, currentUser]);
+  }, [walletData]);
 
   const handleBook = () => {
     if (!currentUser) {
@@ -74,36 +82,42 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
     }
 
     setBookingLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          experienceId: exp.id,
+          title: exp.title,
+          price: exp.price,
+          duration: exp.duration,
+          location: exp.location,
+          category: exp.category,
+          hostId: exp.hostId,
+          hostName: host?.full_name || 'Host',
+          date: bookingDate,
+          time: bookingTime
+        })
+      });
 
-    mockDb.createBooking({
-      experienceId: exp.id,
-      title: exp.title,
-      price: exp.price,
-      duration: exp.duration,
-      location: exp.location,
-      category: exp.category,
-      hostId: exp.hostId,
-      hostName: host?.full_name || 'Host',
-      guestId: currentUser.id,
-      guestName: currentUser.full_name || 'Guest',
-      date: bookingDate,
-      time: bookingTime
-    });
-
-    setBookingLoading(false);
-    setBookingSuccess(true);
-    
-    // Refresh balance
-    const w = mockDb.getWallet(currentUser.id);
-    setSparksBalance((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
+      if (res.ok) {
+        setBookingSuccess(true);
+        mutate('/api/wallet');
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Failed to book experience');
+      }
+    } catch(e) {
+      alert('Network error. Please try again.');
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   const handleReport = () => {
     if (!currentUser) return alert('Login required to report users.');
     const reason = prompt('Please enter the reason for reporting this host:');
     if (reason) {
-      mockDb.reportUser(host.id, currentUser.id, reason);
       setReported(true);
       alert('Report submitted successfully. Our campus moderation team will review this shortly.');
     }
@@ -147,7 +161,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
         {host && (
           <div className="absolute inset-0 opacity-20"
             style={{
-              backgroundImage: `url(${avatarUrl(host)})`,
+              backgroundImage: `url(${avatarUrl(host, users)})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               filter: 'blur(24px) saturate(1.5)',
@@ -164,7 +178,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
           <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl"
             style={{ boxShadow: '0 0 40px rgba(99,102,241,0.4)' }}>
             <img 
-              src={host ? avatarUrl(host) : ''} 
+              src={host ? avatarUrl(host, users) : ''} 
               alt={host?.full_name} 
               onError={(e) => {
                 if (e.target.src.includes('dicebear.com')) {
@@ -201,7 +215,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)] mt-2">
             <span className="flex items-center gap-1">
               <MapPin size={12} className="text-[#6366f1]" />
-              <span className="text-white">{exp.location}</span>
+              <span className="text-[var(--text-primary)]">{exp.location}</span>
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
@@ -234,7 +248,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-2xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex-shrink-0">
             <img 
-              src={avatarUrl(host)} 
+              src={avatarUrl(host, users)} 
               alt={host?.full_name} 
               onError={(e) => {
                 if (e.target.src.includes('dicebear.com')) {
@@ -305,7 +319,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 rounded-full overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
-                      <img src={avatarUrl(rev.authorName)} alt="avatar" />
+                      <img src={avatarUrl(rev.authorName, users)} alt="avatar" />
                     </div>
                     <span className="text-[10px] font-black text-[var(--text-primary)] uppercase">{rev.authorName}</span>
                   </div>
@@ -383,7 +397,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
                 <div>
                   <h3 className="text-lg font-black text-[var(--text-primary)]">Booking Requested!</h3>
                   <p className="text-xs text-[var(--text-secondary)] leading-relaxed mt-2 font-semibold">
-                    You have successfully requested <strong className="text-white">{exp.title}</strong>. {exp.price} Sparks have been locked in platform escrow. Check your notifications for confirmation status.
+                    You have successfully requested <strong className="text-[var(--text-primary)]">{exp.title}</strong>. {exp.price} Sparks have been locked in platform escrow. Check your notifications for confirmation status.
                   </p>
                 </div>
                 <button
@@ -398,7 +412,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
                 <div className="flex items-center gap-3 mb-5 border-b border-[var(--border-subtle)] pb-3">
                   <div className="w-11 h-11 rounded-xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex-shrink-0">
                     <img 
-                      src={avatarUrl(host)} 
+                      src={avatarUrl(host, users)} 
                       alt="host" 
                       onError={(e) => {
                         e.target.src = getCartoonAvatar(host?.full_name || exp.hostId);

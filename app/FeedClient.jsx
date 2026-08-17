@@ -95,11 +95,6 @@ import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 // Pass the full user object for best resolution (photo > instagram > cartoon)
 function avatarUrl(userOrSeed) {
   if (userOrSeed && typeof userOrSeed === 'object') return getUserAvatarUrl(userOrSeed);
-  if (typeof userOrSeed === 'string' && typeof window !== 'undefined') {
-    const users = mockDb.getUsers();
-    const found = users.find(u => u.full_name === userOrSeed || u.id === userOrSeed || u.uid === userOrSeed);
-    if (found) return getUserAvatarUrl(found);
-  }
   return getCartoonAvatar(userOrSeed);
 }
 
@@ -185,8 +180,8 @@ export default function FeedClient() {
 
   // Booking Modal State
   const [selectedExp, setSelectedExp] = useState(null);
-  const [bookingDate, setBookingDate] = useState('Monday');
-  const [bookingTime, setBookingTime] = useState('4:00 PM');
+  const [bookingDate, setBookingDate] = useState(new Date().toISOString().split('T')[0]);
+  const [bookingTime, setBookingTime] = useState('16:00');
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingConfirmStep, setBookingConfirmStep] = useState(false); // 2-tap confirmation
@@ -222,10 +217,8 @@ export default function FeedClient() {
   const [newExpTitle, setNewExpTitle] = useState('');
   const [newExpCategory, setNewExpCategory] = useState('Coffee');
   const [newExpPrice, setNewExpPrice] = useState(100);
-  const [newExpDuration, setNewExpDuration] = useState(45);
+  const [newExpDuration, setNewExpDuration] = useState(60);
   const [newExpLocation, setNewExpLocation] = useState('');
-  const [newExpDays, setNewExpDays] = useState('Monday');
-  const [newExpSlots, setNewExpSlots] = useState('5:00 PM');
   const [createLoading, setCreateLoading] = useState(false);
 
   const [joinedGroups, setJoinedGroups] = useState({});
@@ -344,8 +337,8 @@ export default function FeedClient() {
           price: Number(newExpPrice),
           duration: Number(newExpDuration),
           location: newExpLocation,
-          days: [newExpDays],
-          slots: [newExpSlots],
+          days: ['Any'],
+          slots: ['Anytime'],
         }),
       });
       if (res.ok) {
@@ -1073,24 +1066,24 @@ export default function FeedClient() {
                   {/* Select Slots */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Available Day</label>
-                      <select
+                      <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Available Date</label>
+                      <input
+                        type="date"
+                        min={new Date().toISOString().split('T')[0]}
+                        max={new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]}
                         value={bookingDate}
                         onChange={(e) => setBookingDate(e.target.value)}
-                        className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none cursor-pointer"
-                      >
-                        {selectedExp.days.map(d => <option key={d} value={d}>{d}</option>)}
-                      </select>
+                        className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none focus:border-[var(--accent)]"
+                      />
                     </div>
                     <div>
-                      <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Time Slot</label>
-                      <select
+                      <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Time</label>
+                      <input
+                        type="time"
                         value={bookingTime}
                         onChange={(e) => setBookingTime(e.target.value)}
-                        className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none cursor-pointer"
-                      >
-                        {selectedExp.slots.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                        className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none focus:border-[var(--accent)]"
+                      />
                     </div>
                   </div>
 
@@ -1229,10 +1222,9 @@ export default function FeedClient() {
 
             {/* Written testimonial */}
             <div className="space-y-1">
-              <label className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-wider block">Written Review</label>
+              <label className="text-[9px] text-[var(--text-muted)] font-black uppercase tracking-wider block">Written Review (Optional)</label>
               <textarea
                 placeholder="Share details of your meetup (keep public, no numbers)..."
-                required
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
                 className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl text-xs font-semibold p-3 outline-none text-[var(--text-primary)] min-h-[70px] focus:border-[var(--accent)]"
@@ -1457,64 +1449,6 @@ export default function FeedClient() {
         </div>
       )}
 
-      {/* ── INSTAGRAM VIEW MODAL (IFRAME) ─────────────────────────── */}
-      {activeInstagramUser && (() => {
-        const realHandle = getRealInstagramHandle(activeInstagramUser);
-        return (
-          <div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-            style={{ background: 'rgba(6, 7, 19, 0.85)', backdropFilter: 'blur(16px)' }}
-            onClick={() => setActiveInstagramUser(null)}
-          >
-            <div
-              className="relative w-full max-w-lg h-[80vh] rounded-[2.5rem] p-5 flex flex-col anim-scale-in"
-              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-popup)' }}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)] mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-[18px]">📸</span>
-                  <div>
-                    <h4 className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)]">Instagram Vibe</h4>
-                    <p className="text-[9px] text-pink-400 font-bold uppercase mt-0.5">@{activeInstagramUser}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <a
-                    href={`https://www.instagram.com/${realHandle}/`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider bg-pink-500/10 border border-pink-500/20 text-pink-400 hover:bg-pink-500/20 transition-all flex items-center gap-1 cursor-pointer"
-                  >
-                    Open ↗
-                  </a>
-                  <button
-                    onClick={() => setActiveInstagramUser(null)}
-                    className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] cursor-pointer"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Iframe Container */}
-              <div className="flex-1 w-full rounded-2xl overflow-hidden bg-neutral-950 border border-[var(--border-subtle)] relative">
-                <iframe
-                  src={`https://www.instagram.com/${realHandle}/embed/`}
-                  className="w-full h-full border-0"
-                  allowFullScreen
-                  scrolling="no"
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  title="Instagram Profile View"
-                />
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
       {/* ── CREATE CUSTOM EXPERIENCE MODAL ───────────────────────── */}
       {showCreateModal && (
         <div
@@ -1574,7 +1508,7 @@ export default function FeedClient() {
                     onChange={(e) => setNewExpDuration(Number(e.target.value))}
                     className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none cursor-pointer"
                   >
-                    {[15, 30, 45, 60, 90, 120].map(d => (
+                    {[30, 60].map(d => (
                       <option key={d} value={d}>{d} Mins</option>
                     ))}
                   </select>

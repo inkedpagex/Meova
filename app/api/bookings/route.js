@@ -50,6 +50,16 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Cannot book your own experience' }, { status: 400 });
     }
 
+    // Rate Limiting (Anti-Spam): Max 3 pending requests
+    const pendingSnap = await adminDb.collection('bookings')
+      .where('guestId', '==', user.uid)
+      .where('status', '==', 'Requested')
+      .get();
+      
+    if (pendingSnap.size >= 3) {
+      return NextResponse.json({ error: 'You have too many pending requests (Max: 3). Please wait for hosts to respond.' }, { status: 429 });
+    }
+
     // Deduct sparks atomically
     const spendResult = await spendSparks(user.uid, price || 0);
     if (!spendResult.ok) {
@@ -169,6 +179,25 @@ export async function PATCH(request) {
           type: 'accepted', bookingId, read: false,
           created_at: FieldValue.serverTimestamp(),
         });
+
+        // System Chat Nudge
+        const sortedIds = [booking.guestId, booking.hostId].sort();
+        const chatId = `${sortedIds[0]}_${sortedIds[1]}`;
+        
+        const chatDocRef = adminDb.collection('chats').doc(chatId);
+        t.set(chatDocRef, {
+          participants: [booking.guestId, booking.hostId],
+          updatedAt: FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        const chatMsgRef = chatDocRef.collection('messages').doc();
+        t.set(chatMsgRef, {
+          senderId: 'system',
+          text: `Meeting confirmed for "${booking.title}"! Say hi 👋`,
+          timestamp: FieldValue.serverTimestamp(),
+          status: 'delivered'
+        });
+
         return;
       }
 

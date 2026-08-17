@@ -10,8 +10,7 @@ import {
 } from "lucide-react";
 import { db, auth } from "@/lib/firebaseClient";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, addDoc, serverTimestamp, query, where, getDocs, writeBatch, onSnapshot, orderBy, limit } from "firebase/firestore";
-import { mockDb } from "@/lib/mockDatabase";
+import { collection, addDoc, serverTimestamp, query, where, getDocs, writeBatch, onSnapshot, orderBy, limit, doc, setDoc } from "firebase/firestore";
 import { getCartoonAvatar, getUserAvatarUrl } from "@/utils/avatar";
 
 // ─── Types ───────────────────────────────────────────────────────
@@ -137,9 +136,21 @@ function MessagesContent() {
   // Auth
   useEffect(() => {
     if (!auth) { setLoading(false); return; }
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       if (u) {
-        const full = mockDb.getUser(u.uid);
+        let full = {};
+        try {
+          const res = await fetch('/api/users');
+          const data = await res.json();
+          full = data.users?.find((x: any) => x.id === u.uid || x.uid === u.uid) || {};
+        } catch (e) {}
+        try {
+          const blockRes = await fetch('/api/users/blocks');
+          const blockData = await blockRes.json();
+          if (blockData.blocks) {
+            setContacts(prev => prev.filter(c => !blockData.blocks.includes(c.id)));
+          }
+        } catch(e) {}
         setCurrentUser({ id: u.uid, email: u.email, name: u.displayName || u.email?.split("@")[0] || "User", ...full });
       } else {
         setCurrentUser({ id: "local-user", name: "You", email: "user@example.com" });
@@ -227,8 +238,35 @@ function MessagesContent() {
       }
     });
 
-    return () => unsubscribe(); // Memory cleanup
+    // Listen to typing status
+    const typingRef = doc(db, "chats", chatId, "typing", activeContact.id);
+    const typingUnsub = onSnapshot(typingRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setIsTyping(docSnap.data().isTyping || false);
+      } else {
+        setIsTyping(false);
+      }
+    });
+
+    return () => { unsubscribe(); typingUnsub(); }; // Memory cleanup
   }, [activeContact, currentUser]);
+
+  let typingTimeout: NodeJS.Timeout | null = null;
+  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+    if (!activeContact || !currentUser) return;
+    
+    const sortedIds = [currentUser.uid, activeContact.id].sort();
+    const chatId = `${sortedIds[0]}_${sortedIds[1]}`;
+    const myTypingRef = doc(db, "chats", chatId, "typing", currentUser.uid);
+    
+    setDoc(myTypingRef, { isTyping: true }, { merge: true });
+    
+    if (typingTimeout) clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      setDoc(myTypingRef, { isTyping: false }, { merge: true });
+    }, 2000);
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || !activeContact || !currentUser) return;
@@ -453,7 +491,7 @@ function MessagesContent() {
         <div className="flex items-center gap-2">
           <input
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={handleTyping}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
             placeholder={`Message ${activeContact.name}...`}
             className="flex-1 rounded-2xl px-4 py-3 text-[13px] focus:outline-none transition-all"

@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { updateProfileAdmin } from './profile.actions';
 import { User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine, CheckCircle2, AlertCircle, Camera } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { mockDb } from '../../lib/mockDatabase';
+import imageCompression from 'browser-image-compression';
 
 const INTEREST_TAGS = [
   'Coding & Tech', 'Music & Bands', 'Dance', 'Photography & Film',
@@ -44,11 +44,14 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       setSuccessMsg('');
       
       try {
+        const options = { maxSizeMB: 0.2, maxWidthOrHeight: 1024, useWebWorker: true };
+        const compressedFile = await imageCompression(file, options);
+
         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
         const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'unsigned_preset';
         
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', compressedFile);
         formData.append('upload_preset', uploadPreset);
         
         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
@@ -63,7 +66,20 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         const data = await res.json();
         if (data.secure_url) {
           setPhotoUrl(data.secure_url);
-          setSuccessMsg('Photo uploaded to Cloudinary successfully!');
+          
+          // Auto-save to prevent data loss trap
+          await updateProfileAdmin({
+            full_name: fullName,
+            year,
+            branch,
+            bio,
+            interests: selectedInterests,
+            instagram: instagram,
+            photo_url: data.secure_url
+          });
+          
+          setSuccessMsg('Photo uploaded and saved successfully!');
+          router.refresh();
         } else {
           throw new Error('Invalid response from Cloudinary.');
         }
@@ -119,18 +135,6 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       
       if (!res.success) {
         throw new Error(res.error || 'Failed to update profile.');
-      }
-      
-      if (typeof window !== 'undefined') {
-        mockDb.updateUser(initialProfile.id, {
-          full_name: fullName,
-          year,
-          branch,
-          bio,
-          interests: selectedInterests,
-          instagram: instagram,
-          photo_url: photoUrl
-        });
       }
 
       setSuccessMsg('Profile updated successfully!');

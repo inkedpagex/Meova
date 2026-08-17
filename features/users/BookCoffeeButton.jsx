@@ -201,32 +201,36 @@ export default function BookCoffeeButton({ targetUserId, targetName, isLoggedIn,
                   </div>
                 )}
 
-                {wallet && !hasEnoughSparks && !loadingWallet && (
-                  <div className="p-3.5 rounded-2xl mb-4 text-[11px] font-bold leading-relaxed" style={{ background: '#fff1f2', border: '1px solid #fecdd3', color: '#be123c' }}>
-                    ⚠️ Low Balance: You need {COFFEE_COST} Sparks, but only have {spendableSparks} Sparks. Please buy Sparks to reserve a spot.
+                {wallet && !hasEnoughSparks && !loadingWallet ? (
+                  <div className="flex flex-col gap-3 mt-4">
+                    <div className="p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2" style={{ background: 'linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%)', border: '1px solid #fecdd3' }}>
+                      <Zap className="w-8 h-8 text-rose-500 fill-rose-500 mb-1 drop-shadow-sm" />
+                      <h4 className="text-sm font-black text-rose-600 uppercase tracking-widest">Out of Sparks</h4>
+                      <p className="text-[11px] font-bold text-rose-500/80 leading-relaxed px-4">
+                        You are short <strong className="text-rose-600">{COFFEE_COST - spendableSparks} Sparks</strong>. Recharge your wallet to continue connecting!
+                      </p>
+                    </div>
+                    <Link
+                      href="/wallet/buy"
+                      className="w-full py-3.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md bg-rose-500 hover:bg-rose-600 text-white"
+                    >
+                      Buy Sparks Now ⚡
+                    </Link>
                   </div>
+                ) : (
+                  <button
+                    onClick={handleConfirm}
+                    disabled={loading || loadingWallet || !wallet}
+                    className="w-full py-3.5 mt-2 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-95 disabled:cursor-not-allowed cursor-pointer shadow-md"
+                    style={{ background: color, color: '#ffffff', border: 'none' }}
+                  >
+                    {loading ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Confirming...</>
+                    ) : (
+                      <><Layers className="w-4 h-4" /> Confirm &amp; Spend {COFFEE_COST} ⚡</>
+                    )}
+                  </button>
                 )}
-
-                <button
-                  onClick={handleConfirm}
-                  disabled={loading || loadingWallet || !wallet || !hasEnoughSparks}
-                  className="w-full py-3.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-95 disabled:cursor-not-allowed cursor-pointer shadow-md"
-                  style={hasEnoughSparks ? {
-                    background: color,
-                    color: '#ffffff',
-                    border: 'none'
-                  } : {
-                    background: '#f4f4f5',
-                    color: '#a1a1aa',
-                    border: '1px solid #e4e4e7'
-                  }}
-                >
-                  {loading ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Confirming...</>
-                  ) : (
-                    <><Layers className="w-4 h-4" /> Confirm &amp; Spend {COFFEE_COST} ⚡</>
-                  )}
-                </button>
 
                 <p className="text-[10px] text-[var(--text-muted)] text-center mt-3 font-semibold">
                   Sparks will be deducted from your wallet immediately.{' '}

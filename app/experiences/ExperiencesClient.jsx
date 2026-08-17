@@ -8,14 +8,14 @@ import {
   Loader2, Search, ArrowUpDown, ShieldAlert, Clock, Compass,
   Coffee, BookOpen, Briefcase, Camera, Activity, Music, Sparkles
 } from 'lucide-react';
-import { mockDb } from '../../lib/mockDatabase';
-
+import useSWR, { mutate } from 'swr';
 import { getUserAvatarUrl, getCartoonAvatar } from '../../utils/avatar';
 
-function avatarUrl(userOrSeed) {
+const fetcher = (url) => fetch(url).then((res) => res.json());
+
+function avatarUrl(userOrSeed, users = []) {
   if (userOrSeed && typeof userOrSeed === 'object') return getUserAvatarUrl(userOrSeed);
   if (typeof userOrSeed === 'string' && typeof window !== 'undefined') {
-    const users = mockDb.getUsers();
     const found = users.find(u => u.full_name === userOrSeed || u.id === userOrSeed || u.uid === userOrSeed);
     if (found) return getUserAvatarUrl(found);
   }
@@ -51,15 +51,23 @@ export default function ExperiencesClient({ currentUser, initialSparks }) {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
 
+  // SWR hooks for fetching real data
+  const { data: expData } = useSWR('/api/experiences', fetcher);
+  const { data: usersData } = useSWR('/api/users', fetcher);
+  const { data: walletData } = useSWR(currentUser ? '/api/wallet' : null, fetcher);
+
+  const experiences = expData?.experiences || [];
+  const users = usersData?.users || [];
+  
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setExperiences(mockDb.getExperiences());
-      if (currentUser) {
-        const w = mockDb.getWallet(currentUser.id);
-        setSparksBalance((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
-      }
+    if (walletData?.wallet) {
+      setSparksBalance(
+        (walletData.wallet.purchased || 0) + 
+        (walletData.wallet.bonus || 0) + 
+        (walletData.wallet.creator || 0)
+      );
     }
-  }, [currentUser]);
+  }, [walletData]);
 
   const handleConfirmBooking = async () => {
     if (!selectedExp || !currentUser) return;
@@ -70,29 +78,37 @@ export default function ExperiencesClient({ currentUser, initialSparks }) {
     }
 
     setBookingLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          experienceId: selectedExp.id,
+          title: selectedExp.title,
+          price: selectedExp.price,
+          duration: selectedExp.duration,
+          location: selectedExp.location,
+          category: selectedExp.category,
+          hostId: selectedExp.hostId,
+          hostName: users.find(u => u.id === selectedExp.hostId)?.full_name || 'Host',
+          date: bookingDate,
+          time: bookingTime
+        })
+      });
 
-    mockDb.createBooking({
-      experienceId: selectedExp.id,
-      title: selectedExp.title,
-      price: selectedExp.price,
-      duration: selectedExp.duration,
-      location: selectedExp.location,
-      category: selectedExp.category,
-      hostId: selectedExp.hostId,
-      hostName: mockDb.getUser(selectedExp.hostId)?.full_name || 'Host',
-      guestId: currentUser.id,
-      guestName: currentUser.full_name || 'Guest',
-      date: bookingDate,
-      time: bookingTime
-    });
-
-    setBookingLoading(false);
-    setBookingSuccess(true);
-
-    // Refresh balance
-    const w = mockDb.getWallet(currentUser.id);
-    setSparksBalance((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
+      if (res.ok) {
+        setBookingSuccess(true);
+        // Refresh wallet balance
+        mutate('/api/wallet');
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Failed to book experience');
+      }
+    } catch(e) {
+      alert('Network error. Please try again.');
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   // Categories list — Lucide icons to match nav bar aesthetic
@@ -109,7 +125,7 @@ export default function ExperiencesClient({ currentUser, initialSparks }) {
   // Filtering & Sorting
   const query = searchQuery.toLowerCase().trim();
   let filtered = experiences.filter(exp => {
-    const host = mockDb.getUser(exp.hostId);
+    const host = users.find(u => u.id === exp.hostId);
     const matchesSearch =
       exp.title.toLowerCase().includes(query) ||
       exp.description.toLowerCase().includes(query) ||
@@ -260,7 +276,7 @@ export default function ExperiencesClient({ currentUser, initialSparks }) {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map((exp) => {
-            const host = mockDb.getUser(exp.hostId);
+            const host = users.find(u => u.id === exp.hostId);
             return (
               <div
                 key={exp.id}
@@ -273,7 +289,7 @@ export default function ExperiencesClient({ currentUser, initialSparks }) {
                     <div className="w-20 h-20 rounded-full p-[2px] bg-gradient-to-tr from-[var(--ring-gradient-from)] to-[var(--ring-gradient-to)] shadow-sm">
                       <div className="w-full h-full rounded-full overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                         <img 
-                          src={avatarUrl(host) || getCartoonAvatar(host?.full_name || exp.hostId)} 
+                          src={avatarUrl(host, users) || getCartoonAvatar(host?.full_name || exp.hostId)} 
                           alt={host?.full_name} 
                           onError={(e) => {
                             if (e.target.src.includes('dicebear.com')) {
@@ -394,11 +410,11 @@ export default function ExperiencesClient({ currentUser, initialSparks }) {
               <>
                 <div className="flex items-center gap-3 mb-5 border-b border-[var(--border-subtle)] pb-3">
                   <div className="w-11 h-11 rounded-xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex-shrink-0">
-                    <img src={avatarUrl(mockDb.getUser(selectedExp.hostId))} alt="host" />
+                    <img src={avatarUrl(users.find(u => u.id === selectedExp.hostId), users)} alt="host" />
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-[var(--text-primary)] tracking-tight">Meet Host</h3>
-                    <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mt-0.5">Host: {mockDb.getUser(selectedExp.hostId)?.full_name}</p>
+                    <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider mt-0.5">Host: {users.find(u => u.id === selectedExp.hostId)?.full_name}</p>
                   </div>
                 </div>
 
