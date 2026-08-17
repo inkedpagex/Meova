@@ -180,7 +180,7 @@ export default async function UserProfilePage({ params }) {
                   </div>
                 )}
                 <Link
-                  href={`/messages?user=${encodeURIComponent(profile.full_name || 'Student')}`}
+                  href={`/messages?uid=${id}`}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--bg-overlay)] border border-[var(--border-subtle)] active:scale-95 shadow-sm"
                 >
                   <MessageCircle className="w-4 h-4" />

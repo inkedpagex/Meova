@@ -74,5 +74,29 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null;
     }
+
+    // Chats Collection — only participants can read/write
+    match /chats/{chatId} {
+      allow read: if request.auth != null &&
+        request.auth.uid in resource.data.participants;
+      // Only server (Admin SDK) creates chats — client cannot create
+      allow create: if false;
+      // Participants can update lastMessage, unreadCount etc.
+      allow update: if request.auth != null &&
+        request.auth.uid in resource.data.participants;
+      allow delete: if false;
+
+      // Messages sub-collection
+      match /messages/{msgId} {
+        // Only participants can read messages
+        allow read: if request.auth != null &&
+          request.auth.uid in get(/databases/$(db)/documents/chats/$(chatId)).data.participants;
+        // Participants can send messages (but only as themselves)
+        allow create: if request.auth != null &&
+          request.auth.uid in get(/databases/$(db)/documents/chats/$(chatId)).data.participants &&
+          request.resource.data.senderId == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
   }
 }
