@@ -328,8 +328,9 @@ export default function BookingsPage() {
                     ⚡ {booking.price}
                   </span>
                 </div>
+              </div>
+              
               {/* Card Details */}
-              <div className="flex flex-wrap gap-y-2 gap-x-4 mt-4 bg-zinc-50 rounded-xl p-3 border border-zinc-100/50">
               <div className="flex flex-wrap gap-y-2 gap-x-4 mt-4 bg-zinc-50 rounded-xl p-3 border border-zinc-100/50">
                 <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600">
                   <Calendar size={13} className="text-zinc-400" />
