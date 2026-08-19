@@ -13,6 +13,56 @@ import { toast } from "../../lib/toast";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
+function MeetingCountdownTimer({ booking }) {
+  const [timeLeft, setTimeLeft] = useState('');
+  const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    const calculateTime = () => {
+      let targetDate = null;
+      if (booking.date) {
+        const dateStr = booking.date === 'Today' 
+          ? new Date().toISOString().split('T')[0] 
+          : booking.date;
+        const timeStr = booking.time || '18:00';
+        targetDate = new Date(`${dateStr}T${timeStr}:00`);
+      }
+      
+      if (!targetDate || isNaN(targetDate.getTime())) {
+        const created = booking.created_at ? new Date(booking.created_at) : new Date();
+        targetDate = new Date(created.getTime() + 2 * 60 * 60 * 1000);
+      }
+
+      const diff = targetDate.getTime() - Date.now();
+      if (diff <= 0 && diff > -3600000) {
+        setIsLive(true);
+        setTimeLeft('🟢 Happening Now');
+      } else if (diff <= -3600000) {
+        setTimeLeft('');
+      } else {
+        const hrs = Math.floor(diff / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        setTimeLeft(`⏳ Starts in ${hrs > 0 ? `${hrs}h ` : ''}${mins}m ${secs}s`);
+      }
+    };
+
+    calculateTime();
+    const interval = setInterval(calculateTime, 1000);
+    return () => clearInterval(interval);
+  }, [booking]);
+
+  if (!timeLeft) return null;
+
+  return (
+    <div className={`mt-2 flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-extrabold border ${
+      isLive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse' : 'bg-purple-50 text-purple-700 border-purple-100'
+    }`}>
+      <span>{timeLeft}</span>
+    </div>
+  );
+}
+
 export default function BookingsPage() {
   const router = useRouter();
   const { user } = useUserContext();
@@ -278,9 +328,8 @@ export default function BookingsPage() {
                     ⚡ {booking.price}
                   </span>
                 </div>
-              </div>
-
               {/* Card Details */}
+              <div className="flex flex-wrap gap-y-2 gap-x-4 mt-4 bg-zinc-50 rounded-xl p-3 border border-zinc-100/50">
               <div className="flex flex-wrap gap-y-2 gap-x-4 mt-4 bg-zinc-50 rounded-xl p-3 border border-zinc-100/50">
                 <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600">
                   <Calendar size={13} className="text-zinc-400" />
@@ -295,6 +344,11 @@ export default function BookingsPage() {
                   <span className="truncate">{booking.location || "Campus"}</span>
                 </div>
               </div>
+
+              {/* Countdown Timer for Active Bookings */}
+              {activeTab === "Active" && (
+                <MeetingCountdownTimer booking={booking} />
+              )}
 
               {/* Auto-refund info banner */}
               {booking.status === "AutoRefunded" && (

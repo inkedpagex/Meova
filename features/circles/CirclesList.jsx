@@ -106,6 +106,9 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
   const [joinedMap, setJoinedMap] = useState({});
   const [sparks, setSparks] = useState(0);
 
+  // Group Rules Modal state
+  const [rulesCircle, setRulesCircle] = useState(null);
+
   useEffect(() => {
     const initial = {};
     if (joinedCircleIds) joinedCircleIds.forEach(id => { initial[id] = true; });
@@ -115,7 +118,6 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
     setJoinedMap(initial);
 
     if (userId && typeof window !== 'undefined') {
-      // Fetch real wallet balance from API
       fetch('/api/wallet')
         .then(r => r.ok ? r.json() : null)
         .then(data => {
@@ -124,7 +126,7 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
             setSparks(total);
           }
         })
-        .catch(() => {}); // Fail silently — balance shows as 0 if API unavailable
+        .catch(() => {});
     }
   }, [joinedCircleIds, userId]);
 
@@ -146,23 +148,27 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
     return matchSearch && matchFilter;
   });
 
-  const handleJoin = (circle) => {
+  const handleJoinClick = (circle) => {
     const isJoined = joinedMap[circle.id];
-
     if (isJoined) {
-      // Already joined — go to messages/community chat
       router.push(`/messages?user=${encodeURIComponent(circle.name)}`);
       return;
     }
+    // Show Group Rules & Agenda Modal before completing join
+    setRulesCircle(circle);
+  };
+
+  const confirmJoinCircle = () => {
+    if (!rulesCircle) return;
+    const circle = rulesCircle;
 
     if (circle.isPaid) {
       if (sparks < circle.price) {
         alert(`You need ${circle.price} Sparks to join. Your balance: ${sparks} Sparks.\n\nVisit Wallet to add more Sparks.`);
+        setRulesCircle(null);
         router.push('/wallet');
         return;
       }
-      if (!window.confirm(`Join ${circle.name} for ${circle.price} Sparks?`)) return;
-      // Deduct sparks (UI only for now)
       if (userId) {
         setSparks(prev => prev - circle.price);
         window.dispatchEvent(new Event('wallet-updated'));
@@ -173,22 +179,16 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
     setJoinedMap(next);
     if (typeof window !== 'undefined') localStorage.setItem('meetify_joined_circles', JSON.stringify(next));
 
-    // After joining, open community chat
+    setRulesCircle(null);
     setTimeout(() => router.push(`/messages?user=${encodeURIComponent(circle.name)}`), 400);
   };
 
-  const getInitials = (name) => name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-
-  const CommunityAvatar = ({ circle, size = 48 }) => {
-    const theme = CATEGORY_COLORS[circle.category] || CATEGORY_COLORS.default;
-    const Icon = CATEGORY_ICONS[circle.category] || Users;
-    return (
-      <div className="rounded-2xl flex items-center justify-center flex-shrink-0"
-        style={{ width: size, height: size, background: theme.bg, border: `1px solid ${theme.border}`, color: theme.color }}>
-        <Icon size={size * 0.4} strokeWidth={2} />
-      </div>
-    );
-  };
+  // Helper to get avatar mock stack
+  const getAvatarStack = (circleId) => [
+    getCartoonAvatar(`${circleId}_1`),
+    getCartoonAvatar(`${circleId}_2`),
+    getCartoonAvatar(`${circleId}_3`),
+  ];
 
   return (
     <div className="space-y-5 pb-24 pt-2">
@@ -241,7 +241,7 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
                   <p className="text-[11px] text-white/75 mt-0.5 font-medium max-w-[200px] leading-snug">{featured.desc}</p>
                 </div>
               </div>
-              <button onClick={() => handleJoin(featured)}
+              <button onClick={() => handleJoinClick(featured)}
                 className="px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer active:scale-95 transition-all flex-shrink-0"
                 style={joinedMap[featured.id]
                   ? { background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }
@@ -282,10 +282,11 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
           const isJoined = joinedMap[circle.id];
           const theme = CATEGORY_COLORS[circle.category] || CATEGORY_COLORS.default;
           const Icon = CATEGORY_ICONS[circle.category] || Users;
+          const avatarStack = getAvatarStack(circle.id);
 
           return (
             <div key={circle.id}
-              onClick={() => handleJoin(circle)}
+              onClick={() => handleJoinClick(circle)}
               className="p-4 rounded-2xl flex items-center gap-3 cursor-pointer transition-all hover:shadow-sm active:scale-[0.99]"
               style={{ background: '#ffffff', border: '1px solid #f0f0f0', boxShadow: '0 1px 4px rgba(0,0,0,0.02)' }}>
 
@@ -312,17 +313,31 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
                 </div>
                 <p className="text-[11px] text-zinc-400 mt-0.5 font-medium truncate">{circle.desc}</p>
 
-                {/* Bottom row */}
-                <div className="flex items-center gap-3 mt-2">
+                {/* Overlapping Member Avatar Stack + Tag Row */}
+                <div className="flex items-center justify-between mt-2.5 pt-1 border-t border-zinc-100/60">
+                  <div className="flex items-center">
+                    <div className="flex -space-x-2 overflow-hidden">
+                      {avatarStack.map((src, i) => (
+                        <img 
+                          key={i} 
+                          src={src} 
+                          alt="member" 
+                          className="inline-block h-5 w-5 rounded-full ring-2 ring-white object-cover bg-zinc-100" 
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[9px] font-extrabold text-zinc-500 ml-1.5">
+                      +{Math.max(1, (circle.member_count || 12) - 3)} members
+                    </span>
+                  </div>
+
                   {circle.isPaid ? (
-                    <span className="flex items-center gap-1 text-[10px] font-black text-orange-600"
-                      style={{ background: '#fff7ed', border: '1px solid #fed7aa', padding: '2px 8px', borderRadius: 99 }}>
+                    <span className="flex items-center gap-1 text-[9.5px] font-black text-orange-600 px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200">
                       <Zap size={9} className="fill-current" />
                       {circle.price} Sparks
                     </span>
                   ) : (
-                    <span className="text-[10px] font-black text-emerald-600"
-                      style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: 99 }}>
+                    <span className="text-[9.5px] font-black text-emerald-600 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
                       Free
                     </span>
                   )}
@@ -331,7 +346,7 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
 
               {/* Join button */}
               <button
-                onClick={(e) => { e.stopPropagation(); handleJoin(circle); }}
+                onClick={(e) => { e.stopPropagation(); handleJoinClick(circle); }}
                 className="px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95 flex-shrink-0"
                 style={isJoined
                   ? { background: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe' }
@@ -349,6 +364,63 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
           <p className="text-sm font-bold text-zinc-400">No communities found</p>
           <button onClick={() => { setSearch(''); setActiveFilter('All'); }}
             className="mt-3 text-[11px] font-black text-[#7c3aed] cursor-pointer">Clear filters</button>
+        </div>
+      )}
+
+      {/* ── GROUP RULES & MEETING AGENDA PRE-JOIN MODAL ───────── */}
+      {rulesCircle && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
+          onClick={() => setRulesCircle(null)}
+        >
+          <div 
+            className="w-full max-w-sm bg-white rounded-3xl p-6 space-y-4 animate-in fade-in zoom-in duration-200 shadow-2xl border border-purple-100"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 border-b border-zinc-100 pb-3">
+              <div className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600 font-black text-sm">
+                👥
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-black text-zinc-900 truncate">{rulesCircle.name}</h3>
+                <p className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">{rulesCircle.category} Community</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 py-1 text-left">
+              <h4 className="text-xs font-black text-zinc-800 uppercase tracking-wider">Community Guidelines & Rules:</h4>
+              <ul className="space-y-2 text-xs font-medium text-zinc-600">
+                <li className="flex items-start gap-2">
+                  <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">1</span>
+                  <span><strong>Respect & Kindness:</strong> Maintain constructive, friendly discussions with campus peers.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">2</span>
+                  <span><strong>No Spam or Promo:</strong> Share relevant projects, meets, or notes only.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">3</span>
+                  <span><strong>Campus Safety:</strong> Keep meetups in verified public campus spots.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setRulesCircle(null)}
+                className="flex-1 py-3 rounded-2xl text-xs font-black text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-colors"
+              >
+                Decline
+              </button>
+              <button
+                onClick={confirmJoinCircle}
+                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-purple-600 hover:bg-purple-700 transition-all shadow-sm flex items-center justify-center gap-1.5"
+              >
+                {rulesCircle.isPaid ? `Agree & Join (${rulesCircle.price} ⚡)` : 'Agree & Join Group'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

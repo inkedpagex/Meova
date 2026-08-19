@@ -13,9 +13,10 @@ import {
   Send, X, CheckCircle, Loader2, Star, Check, Search,
   ShieldAlert, Clock, AlertTriangle, ShieldCheck, Compass, Users,
   Coffee, Briefcase, Camera, Activity, Music, Bell, ChevronRight,
-  SlidersHorizontal, Trophy, Gamepad, TrendingUp, HelpCircle, Film
+  SlidersHorizontal, Trophy, Gamepad, TrendingUp, HelpCircle, Film, Plus
 } from 'lucide-react';
 import useSWR from 'swr';
+import imageCompression from 'browser-image-compression';
 import { useUserContext } from '../components/providers/UserProvider';
 // mockDatabase removed — using real Firebase API routes
 import confetti from 'canvas-confetti';
@@ -151,6 +152,93 @@ function getExpCardTheme(category) {
   };
 }
 
+const DEFAULT_MOCK_POSTS = [
+  {
+    id: 'mock-1',
+    authorName: 'Aarav Sharma',
+    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav',
+    authorBranch: 'B.Tech CSE · 3rd Year',
+    photoUrl: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&auto=format&fit=crop&q=80',
+    caption: 'Finished redesigning the GLA Tech Fest dashboard UI mockups! Feedback is welcome 🚀✨',
+    category: 'UI/UX Work',
+    location: 'Innovation Lab',
+    likes: 24,
+    timeAgo: '2h ago'
+  },
+  {
+    id: 'mock-2',
+    authorName: 'Ananya Roy',
+    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Ananya',
+    authorBranch: 'MBA · 1st Year',
+    photoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
+    caption: 'Post-lecture iced matcha @ Central Library Cafe ☕ who is up for a quick study break?',
+    category: 'Campus Vibes',
+    location: 'Central Cafe',
+    likes: 42,
+    timeAgo: '4h ago'
+  },
+  {
+    id: 'mock-3',
+    authorName: 'Rohan Verma',
+    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Rohan',
+    authorBranch: 'B.Tech ECE · 2nd Year',
+    photoUrl: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&auto=format&fit=crop&q=80',
+    caption: 'Building real-time peer matching algorithms for Meetify! Exciting updates coming soon 💻🔥',
+    category: 'Project Showcase',
+    location: 'Library Quiet Zone',
+    likes: 38,
+    timeAgo: '6h ago'
+  },
+  {
+    id: 'mock-4',
+    authorName: 'Kavya Patel',
+    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Kavya',
+    authorBranch: 'B.Des · 2nd Year',
+    photoUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80',
+    caption: 'Jamming at the open-air amphitheater for tomorrow acoustic night! Come vibe with us 🎸🎤',
+    category: 'Campus Event',
+    location: 'Amphitheater',
+    likes: 56,
+    timeAgo: '8h ago'
+  },
+  {
+    id: 'mock-5',
+    authorName: 'Vikram Singh',
+    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Vikram',
+    authorBranch: 'B.Tech AI · 4th Year',
+    photoUrl: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80',
+    caption: '3AM energy drinks & final pitch deck prep for HackCampus 2026! 🚀🏆',
+    category: 'Hackathon',
+    location: 'Incubation Hub',
+    likes: 61,
+    timeAgo: '12h ago'
+  },
+  {
+    id: 'mock-6',
+    authorName: 'Priya Nair',
+    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Priya',
+    authorBranch: 'B.Arch · 3rd Year',
+    photoUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&auto=format&fit=crop&q=80',
+    caption: 'Golden hour light hitting the main quad courtyard today ✨📸',
+    category: 'Photography',
+    location: 'Main Lawn',
+    likes: 79,
+    timeAgo: '1d ago'
+  },
+  {
+    id: 'mock-7',
+    authorName: 'Siddharth Mehta',
+    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Siddharth',
+    authorBranch: 'B.Tech ME · 3rd Year',
+    photoUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&auto=format&fit=crop&q=80',
+    caption: 'Inter-branch basketball finals tonight at 7 PM! Cheer for CSE! 🏀🔥',
+    category: 'Sports Fest',
+    location: 'Sports Complex',
+    likes: 88,
+    timeAgo: '1d ago'
+  }
+];
+
 export default function FeedClient() {
   const router = useRouter();
   const { user: currentUser, wallet: currentWallet, people } = useUserContext();
@@ -159,14 +247,33 @@ export default function FeedClient() {
   // SWR Hooks for data fetching (cached & instantly available)
   const { data: expData, mutate: mutateExp } = useSWR('/api/experiences', fetcher);
   const { data: bkData, mutate: mutateBk } = useSWR(currentUser ? '/api/bookings' : null, fetcher);
+  const { data: postsData, mutate: mutatePosts } = useSWR('/api/posts', fetcher);
   
   const experiences = expData?.experiences || [];
   const bookings = bkData?.bookings || [];
+  const campusPosts = postsData?.posts || [];
+  const [localPosts, setLocalPosts] = useState([]);
+  const displayPosts = localPosts.length > 0 
+    ? [...localPosts, ...(campusPosts.length > 0 ? campusPosts : DEFAULT_MOCK_POSTS)] 
+    : (campusPosts.length > 0 ? campusPosts : DEFAULT_MOCK_POSTS);
   const dbHydrated = expData !== undefined; // True once SWR has data
   
+  const [likedPosts, setLikedPosts] = useState({});
   const [userData, setUserData] = useState(currentUser);
   const [sparksBalance, setSparksBalance] = useState(initialSparks || 0);
   const popularHosts = people?.filter(u => u.id !== currentUser?.id) || [];
+
+  // Low-Balance Alert Modal State
+  const [showLowBalanceModal, setShowLowBalanceModal] = useState(false);
+
+  // Campus Photo Post State
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [selectedPostPhoto, setSelectedPostPhoto] = useState(null);
+  const [postCaption, setPostCaption] = useState('');
+  const [postCategory, setPostCategory] = useState('UI/UX Work');
+  const [postLocation, setPostLocation] = useState('Innovation Lab');
+  const [postFilePreview, setPostFilePreview] = useState('https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&auto=format&fit=crop&q=80');
+  const [postUploading, setPostUploading] = useState(false);
 
   // Search & Filtering
   const [searchQuery, setSearchQuery] = useState('');
@@ -246,6 +353,51 @@ export default function FeedClient() {
     }
   };
 
+  const handlePublishPost = async () => {
+    if (!postFilePreview) {
+      toast.error('Please select or upload a photo!');
+      return;
+    }
+    setPostUploading(true);
+    try {
+      const newPost = {
+        id: `post-${Date.now()}`,
+        authorId: currentUser?.id || 'demo-user',
+        authorName: currentUser?.name || 'Chirag',
+        authorPhoto: currentUser?.photoURL || avatarUrl(currentUser?.id, currentUser?.name || 'Chirag'),
+        authorBranch: currentUser?.branch || 'B.Tech CSE · 3rd Year',
+        photoUrl: postFilePreview,
+        caption: postCaption || 'Check out my latest campus photo showcase! ✨',
+        category: postCategory || 'Campus Work',
+        location: postLocation || 'Main Campus',
+        likes: 1,
+        timeAgo: 'Just now',
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        await fetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newPost)
+        });
+        mutatePosts();
+      } catch (e) {
+        console.warn('API post fallback to local:', e);
+      }
+
+      setLocalPosts(prev => [newPost, ...prev]);
+      setShowPostModal(false);
+      setPostCaption('');
+      confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+      toast.success('Your photo work has been posted to the Campus Feed!');
+    } catch (e) {
+      toast.error('Failed to publish post. Try again.');
+    } finally {
+      setPostUploading(false);
+    }
+  };
+
   const handleFreeNowToggle = async () => {
     if (!currentUser) return;
     const isCurrentlyFree = userData?.isLiveOnCampus;
@@ -307,8 +459,7 @@ export default function FeedClient() {
   const handleConfirmBooking = async () => {
     if (!selectedExp || !currentUser) return;
     if (sparksBalance < selectedExp.price) {
-      alert('Insufficient Sparks! Please buy sparks in your wallet first.');
-      setSelectedExp(null);
+      setShowLowBalanceModal(true);
       return;
     }
     setBookingLoading(true);
@@ -341,6 +492,64 @@ export default function FeedClient() {
       alert('Network error. Try again.');
     } finally {
       setBookingLoading(false);
+    }
+  };
+
+  const handleCreatePost = async () => {
+    if (!postFile) {
+      toast.error('Please select a photo to share!');
+      return;
+    }
+    setPostUploading(true);
+    try {
+      // 1. Compress image before uploading
+      const options = { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true };
+      const compressedFile = await imageCompression(postFile, options);
+
+      // 2. Upload to Cloudinary using unsigned preset
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'meetify_unsigned';
+
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+      formData.append('upload_preset', uploadPreset);
+
+      const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!cloudRes.ok) throw new Error('Cloudinary image upload failed');
+      const cloudData = await cloudRes.json();
+      const photoUrl = cloudData.secure_url;
+
+      // 3. Post to backend
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          photoUrl,
+          caption: postCaption,
+          category: postCategory,
+          location: 'Campus',
+        }),
+      });
+
+      if (res.ok) {
+        toast.success('Campus Moment posted!');
+        setShowPostModal(false);
+        setPostFile(null);
+        setPostFilePreview('');
+        setPostCaption('');
+        mutatePosts();
+      } else {
+        toast.error('Failed to save post.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Upload failed. Try again.');
+    } finally {
+      setPostUploading(false);
     }
   };
 
@@ -588,7 +797,7 @@ export default function FeedClient() {
   }
 
   return (
-    <div className="space-y-6 pb-24 px-2 select-none">
+    <div className="space-y-6 pb-24 px-1 sm:px-2 select-none">
 
       {/* ── HEADER SECTION ────────────────────────── */}
       <div className="flex items-center justify-between mb-2">
@@ -622,37 +831,7 @@ export default function FeedClient() {
         </button>
       </div>
 
-      {/* ── PWA INSTALL PROMPT ──────────────────────── */}
-      {deferredPrompt && (
-        <div className="bg-[#7c3aed] text-white rounded-2xl p-4 flex items-center justify-between shadow-lg mb-4">
-          <div>
-            <h4 className="text-xs font-black">Install Meetify</h4>
-            <p className="text-[10px] font-semibold mt-0.5 opacity-90">Add to home screen for a better experience.</p>
-          </div>
-          <button 
-            onClick={() => {
-              deferredPrompt.prompt();
-              deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
-            }}
-            className="text-[10px] font-black uppercase bg-white text-[#7c3aed] px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-colors"
-          >
-            Install
-          </button>
-        </div>
-      )}
 
-      {/* ── PROFILE COMPLETENESS NUDGE ────────────────────────── */}
-      {currentUser && (!currentUser.year || !currentUser.branch || !currentUser.interests?.length) && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between mb-4">
-          <div>
-            <h4 className="text-xs font-black text-amber-900">Complete your profile</h4>
-            <p className="text-[10px] font-semibold text-amber-700 mt-0.5">Add year, branch & interests to get discovered.</p>
-          </div>
-          <Link href="/profile" className="text-[10px] font-black uppercase bg-amber-100 text-amber-800 px-3 py-1.5 rounded-lg hover:bg-amber-200 transition-colors">
-            Edit Profile
-          </Link>
-        </div>
-      )}
 
       {/* ── SEARCH BAR ─────────────────────────── */}
       <div className="relative flex items-center gap-3">
@@ -684,14 +863,14 @@ export default function FeedClient() {
             <p className="text-[10px] text-zinc-400 font-semibold mt-1">Check back later when students are online.</p>
           </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+          <div className="flex gap-3.5 overflow-x-auto no-scrollbar pt-1.5 pb-4 px-4 -mx-4">
             {vibeUsers.map((user) => {
             if (dismissedVibes[user.id]) return null;
             return (
               <div
                 key={user.id}
                 onClick={() => router.push(`/users/${user.id}`)}
-                className="w-[185px] flex-shrink-0 bg-white border border-zinc-100 rounded-[2rem] p-5 flex flex-col items-center justify-between text-center shadow-[0_4px_16px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_24px_rgba(124,58,237,0.1)] hover:border-purple-200 cursor-pointer group"
+                className="w-[170px] sm:w-[180px] flex-shrink-0 bg-white border border-zinc-100 rounded-[2rem] p-4.5 flex flex-col items-center justify-between text-center shadow-[0_4px_16px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_24px_rgba(124,58,237,0.1)] hover:border-purple-200 cursor-pointer group"
               >
                 {/* Avatar with circle bg */}
                 <div className="relative w-[84px] h-[84px] rounded-full bg-[#e8e4ff] p-[3px] mb-3.5 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -758,175 +937,243 @@ export default function FeedClient() {
         )}
       </div>
 
-      {/* ── TOP EXPERIENCES FOR YOU ─────────────────────────── */}
+      {/* ── RECENT CAMPUS GIGS & FREELANCE ───────────────────── */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black text-zinc-950 tracking-tight">Top Experiences for you</h3>
-          <Link href="/experiences" className="text-xs font-black text-[#7c3aed] hover:text-[#5b21b6] transition-colors">
-            See all
-          </Link>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-black text-zinc-950 tracking-tight">Recent Campus Gigs</h3>
+            <span className="text-[9px] font-black uppercase tracking-wider bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+              Earn Sparks <Zap size={9} className="fill-current" />
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <Link
+              href="/gigs?action=post"
+              className="text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3.5 py-1.5 rounded-xl hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-1 shadow-xs"
+            >
+              <Plus size={12} strokeWidth={3} />
+              <span>Post a Gig</span>
+            </Link>
+            <Link href="/gigs" className="text-xs font-black text-[#7c3aed] hover:text-[#5b21b6] transition-colors flex items-center gap-0.5">
+              <span>See all</span>
+              <ChevronRight size={14} />
+            </Link>
+          </div>
         </div>
 
-        {topExps.length === 0 ? (
-          <div className="text-center py-8 bg-zinc-50 border border-zinc-100 rounded-2xl">
-            <Calendar className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
-            <h4 className="text-xs font-black text-zinc-500">No experiences found</h4>
-            <p className="text-[10px] text-zinc-400 font-semibold mt-1">Be the first to host an experience!</p>
-          </div>
-        ) : (
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-            {topExps.map((exp) => {
-            const theme = getExpCardTheme(exp.category);
-            const cat = (exp.category || '').toLowerCase();
-            let ExpIcon = Coffee;
-            if (cat.includes('study') || cat.includes('learn') || cat.includes('together')) ExpIcon = BookOpen;
-            else if (cat.includes('sport') || cat.includes('match') || cat.includes('fitness') || cat.includes('badminton')) ExpIcon = Activity;
-            else if (cat.includes('music') || cat.includes('jam')) ExpIcon = Music;
-            else if (cat.includes('design') || cat.includes('figma') || cat.includes('art')) ExpIcon = Layers;
-            else if (cat.includes('camera') || cat.includes('photo')) ExpIcon = Camera;
-
-            return (
-              <div
-                key={exp.id}
-                onClick={() => setSelectedExp(exp)}
-                className={`w-[175px] flex-shrink-0 border rounded-3xl p-4 flex flex-col cursor-pointer transition-all hover:shadow-md active:scale-[0.98] ${theme.bg}`}
-                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
-              >
-                {/* Icon circle */}
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 ${theme.circleBg}`}>
-                  <ExpIcon size={20} className={theme.text} strokeWidth={2} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            {
+              id: 'gig-1',
+              title: 'Figma UI Designer for Campus App',
+              company: 'Meetify Team',
+              category: 'Design',
+              categoryColor: 'bg-purple-50 text-purple-700 border-purple-100',
+              budget: '500',
+              duration: '3 Days',
+              type: 'FREELANCE',
+              desc: 'Looking for a student designer to create sleek dark-mode UI mockups for campus app.'
+            },
+            {
+              id: 'gig-2',
+              title: 'Next.js Frontend Bug Fixes',
+              company: 'Coding Club',
+              category: 'Development',
+              categoryColor: 'bg-blue-50 text-blue-700 border-blue-100',
+              budget: '750',
+              duration: '1 Week',
+              type: 'PROJECT',
+              desc: 'Help integrate Tailwind CSS components and optimize client page load speed.'
+            },
+            {
+              id: 'gig-3',
+              title: 'Campus Fest Poster & Reel Creation',
+              company: 'Media Circle',
+              category: 'Marketing',
+              categoryColor: 'bg-pink-50 text-pink-700 border-pink-100',
+              budget: '400',
+              duration: '2 Days',
+              type: 'CREATIVE',
+              desc: 'Create 3 Instagram reels and event posters for the upcoming cultural fest.'
+            }
+          ].map((gig) => (
+            <div 
+              key={gig.id}
+              onClick={() => router.push('/gigs')}
+              className="bg-white border border-zinc-200/80 rounded-3xl p-4.5 flex flex-col justify-between h-full cursor-pointer hover:border-purple-300 hover:shadow-lg transition-all duration-300 group hover:-translate-y-1 relative overflow-hidden"
+            >
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${gig.categoryColor}`}>
+                    {gig.category}
+                  </span>
+                  <span className="text-[11px] font-black text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/60 flex items-center gap-1 shadow-2xs">
+                    {gig.budget} <Zap size={10} className="fill-current text-amber-500" />
+                  </span>
                 </div>
-
-                {/* Title */}
-                <h4 className={`text-[11px] font-black uppercase tracking-wide leading-tight ${theme.text}`}>
-                  {exp.title}
+                <h4 className="text-xs font-black text-zinc-950 tracking-tight group-hover:text-purple-700 transition-colors line-clamp-1">
+                  {gig.title}
                 </h4>
-
-                {/* Schedule */}
-                <p className="text-[9.5px] font-bold text-zinc-500 mt-2 uppercase tracking-wider">
-                  {exp.days ? exp.days[0] : 'Today'} · {exp.slots ? exp.slots[0] : '5:00 PM'}
+                <p className="text-[11px] text-zinc-500 font-medium line-clamp-2 h-9 leading-relaxed">
+                  {gig.desc}
                 </p>
+              </div>
 
-                {/* Location */}
-                <div className="flex items-center gap-1 mt-0.5">
-                  <MapPin size={8} className="text-zinc-400 flex-shrink-0" />
-                  <p className="text-[9px] font-semibold text-zinc-400 truncate">
-                    {exp.location?.split(',')[0] || 'Campus Cafe'}
-                  </p>
+              <div className="flex items-center justify-between border-t border-zinc-100 pt-3 mt-4 gap-2">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <div className="w-5 h-5 rounded-full bg-purple-100 text-purple-700 font-black text-[9px] flex items-center justify-center border border-purple-200 flex-shrink-0">
+                    {gig.company[0]}
+                  </div>
+                  <span className="text-[10px] font-bold text-zinc-500 truncate">by {gig.company}</span>
+                </div>
+                <span className="text-[10px] font-black text-white bg-purple-600 group-hover:bg-purple-700 px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-0.5 transition-all shadow-xs flex-shrink-0">
+                  Apply <ChevronRight size={12} />
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── CAMPUS SHOWCASE & WORK FEED ───────────────────── */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-black text-zinc-950 tracking-tight">Campus Feed & Work Showcase</h3>
+            <span className="text-[9px] font-black uppercase tracking-wider bg-purple-50 border border-purple-200 text-purple-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+              Live Work <Sparkles size={9} className="text-purple-600" />
+            </span>
+          </div>
+
+          <button
+            onClick={() => setShowPostModal(true)}
+            className="text-[10.5px] font-black uppercase tracking-wider bg-zinc-900 hover:bg-black text-white px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1 shadow-xs active:scale-95 cursor-pointer self-start sm:self-auto"
+          >
+            <Camera size={12} strokeWidth={2.5} />
+            <span>Post Work / Photo</span>
+          </button>
+        </div>
+
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pt-1.5 pb-4 px-4 -mx-4">
+          {displayPosts.map((post) => {
+            const isLiked = likedPosts[post.id];
+            const currentLikes = (post.likes || 0) + (isLiked ? 1 : 0);
+            return (
+              <div 
+                key={post.id}
+                className="w-[260px] sm:w-[275px] flex-shrink-0 bg-white border border-zinc-200/80 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 group flex flex-col justify-between"
+              >
+                <div>
+                  {/* Author Header */}
+                  <div className="p-3 flex items-center justify-between border-b border-zinc-100/60 bg-zinc-50/40">
+                    <div 
+                      onClick={() => post.authorId && router.push(`/users/${post.authorId}`)}
+                      className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+                    >
+                      <img 
+                        src={post.authorPhoto || avatarUrl(post.authorId, post.authorName)} 
+                        alt={post.authorName || 'Student'} 
+                        className="w-7 h-7 rounded-full object-cover border border-purple-200 flex-shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-black text-zinc-900 truncate leading-none">{post.authorName || 'Campus Peer'}</p>
+                        <p className="text-[9px] font-bold text-zinc-400 truncate mt-0.5">{post.authorBranch || 'Student'}</p>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-bold text-zinc-400 flex-shrink-0">{post.timeAgo || 'Recently'}</span>
+                  </div>
+
+                  {/* Photo Banner with aspect ratio 4/3 */}
+                  <div 
+                    onClick={() => setSelectedPostPhoto(post)}
+                    className="relative aspect-[4/3] w-full bg-zinc-950 overflow-hidden cursor-pointer group/img"
+                  >
+                    <img 
+                      src={post.photoUrl} 
+                      alt={post.caption || 'Campus Post'} 
+                      className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-[10px] font-black text-white bg-black/60 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 border border-white/20">
+                        <Search size={11} /> View Full Photo
+                      </span>
+                    </div>
+                    <span className="absolute top-2.5 left-2.5 text-[9px] font-black text-white bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-white/10 shadow-xs">
+                      {post.category || 'Showcase'}
+                    </span>
+                    {post.location && (
+                      <span className="absolute bottom-2.5 left-2.5 text-[9px] font-semibold text-white/90 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <MapPin size={9} /> {post.location}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Caption - only rendered if caption exists */}
+                  {post.caption ? (
+                    <div className="p-3 pt-2.5 pb-1">
+                      <p className="text-[11px] font-semibold text-zinc-700 leading-snug line-clamp-2">
+                        {post.caption}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
 
-                <div className="flex items-center justify-between border-t border-black/5 pt-2.5 mt-3">
-                  {/* Sparks price */}
-                  <div className={`text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 ${theme.priceBg}`}>
-                    <span>{exp.price}</span>
-                    <Zap size={8} className="fill-current" />
+                {/* Footer Actions */}
+                <div className="p-3 pt-2 flex items-center justify-between border-t border-zinc-100/80">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        const nextLiked = !isLiked;
+                        setLikedPosts(prev => ({ ...prev, [post.id]: nextLiked }));
+                        if (nextLiked) {
+                          confetti({ particleCount: 35, spread: 50, origin: { y: 0.7 } });
+                        }
+                      }}
+                      className={`flex items-center gap-1.5 text-[11px] font-black transition-all cursor-pointer ${
+                        isLiked ? 'text-rose-500 scale-105' : 'text-zinc-500 hover:text-rose-500'
+                      }`}
+                    >
+                      <Heart size={14} className={isLiked ? 'fill-current text-rose-500' : ''} />
+                      <span>{currentLikes}</span>
+                    </button>
+
+                    <button 
+                      onClick={() => {
+                        if (post.authorId) {
+                          router.push(`/chats?userId=${post.authorId}`);
+                        } else {
+                          toast.info(`Connecting with ${post.authorName || 'Peer'}...`);
+                          router.push('/chats');
+                        }
+                      }}
+                      className="flex items-center gap-1.5 text-[11px] font-black text-zinc-500 hover:text-purple-600 transition-colors cursor-pointer"
+                    >
+                      <MessageCircle size={14} />
+                      <span>Chat</span>
+                    </button>
                   </div>
-                  {/* Facepile */}
-                  <div className="flex -space-x-1.5">
-                    {['Rahul', 'Neha', 'Aarav'].map((name, i) => (
-                      <div key={i} className="w-5 h-5 rounded-full overflow-hidden border-2 border-white">
-                        <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`} alt={name} className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
+
+                  <button 
+                    onClick={() => {
+                      if (typeof window !== 'undefined' && navigator.share) {
+                        navigator.share({ title: post.caption || 'Campus Post', url: window.location.href });
+                      } else {
+                        toast.success('Post link copied to clipboard!');
+                      }
+                    }}
+                    className="text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer p-1"
+                  >
+                    <Share2 size={13} />
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
-        )}
       </div>
 
-      {/* ── LOWER GRID SECTION ─────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-        
-        {/* Live Tournaments Column */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
-            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-950">Live Tournaments</h3>
-            <Link href="/gigs" className="text-[10px] font-black text-[#7c3aed] uppercase tracking-wider">
-              See all
-            </Link>
-          </div>
 
-          <div className="space-y-3">
-            {/* BGMI Campus Cup */}
-            <div 
-              onClick={() => toast.info('Tournaments feature coming in the next update!')}
-              className="flex items-center justify-between p-3.5 bg-zinc-50/50 border border-zinc-100 rounded-2xl opacity-80 cursor-not-allowed hover:bg-zinc-50 transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-zinc-100 text-zinc-400 flex items-center justify-center">
-                  <Trophy size={20} className="stroke-[2.5]" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-black uppercase tracking-wide text-zinc-700 leading-tight">
-                    BGMI Campus Cup
-                  </h4>
-                  <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">
-                    Coming Soon
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* FIFA 24 Showdown */}
-            <div 
-              onClick={() => toast.info('Tournaments feature coming in the next update!')}
-              className="flex items-center justify-between p-3.5 bg-zinc-50/50 border border-zinc-100 rounded-2xl opacity-80 cursor-not-allowed hover:bg-zinc-50 transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-zinc-100 text-zinc-400 flex items-center justify-center">
-                  <Gamepad size={20} className="stroke-[2.5]" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-black uppercase tracking-wide text-zinc-700 leading-tight">
-                    FIFA 24 Showdown
-                  </h4>
-                  <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">
-                    Coming Soon
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* What's Trending Column */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
-            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-950">What's Trending</h3>
-          </div>
-
-          <div className="space-y-3">
-            {[
-              { id: 1, title: 'Campus Confessions', posts: 'Coming soon', bg: 'bg-zinc-100', text: 'text-zinc-400', Icon: TrendingUp },
-              { id: 2, title: 'Assignment Help', posts: 'Coming soon', bg: 'bg-zinc-100', text: 'text-zinc-400', Icon: HelpCircle },
-              { id: 3, title: 'Movie Night', posts: 'Coming soon', bg: 'bg-zinc-100', text: 'text-zinc-400', Icon: Film }
-            ].map((item, idx) => (
-              <div key={item.id} onClick={() => toast.info('Trending feature coming in the next update!')} className="flex items-center justify-between p-2.5 bg-zinc-50/50 border border-transparent rounded-2xl opacity-80 cursor-not-allowed transition-all">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-black text-zinc-400 w-4 text-center">
-                    {idx + 1}
-                  </span>
-                  <div className={`w-10 h-10 rounded-xl ${item.bg} ${item.text} flex items-center justify-center flex-shrink-0`}>
-                    <item.Icon size={18} className="stroke-[2.5]" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-black text-zinc-700 leading-tight">
-                      {item.title}
-                    </h4>
-                    <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider">
-                      {item.posts}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>
 
       {/* ── CAMPUS GROUPS SECTION ─────────────────────────── */}
       <div className="space-y-4 pt-8 border-t border-zinc-200/60">
@@ -1773,6 +2020,243 @@ export default function FeedClient() {
                     ))}
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── LOW BALANCE ALERT POPOVER ─────────────────────────────── */}
+      {showLowBalanceModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
+          onClick={() => setShowLowBalanceModal(false)}
+        >
+          <div 
+            className="w-full max-w-sm bg-white rounded-3xl p-6 text-center space-y-4 animate-in fade-in zoom-in duration-200 shadow-2xl border border-purple-100"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-16 h-16 rounded-full bg-purple-100 border-4 border-purple-50 flex items-center justify-center mx-auto text-purple-600">
+              <Zap size={28} className="fill-purple-600 animate-pulse" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-zinc-900 tracking-tight">Low Sparks Balance!</h3>
+              <p className="text-xs font-semibold text-zinc-500 mt-1.5 leading-relaxed">
+                You need <span className="font-extrabold text-purple-600">{selectedExp?.price} Sparks</span> to book <strong className="text-zinc-800">{selectedExp?.title}</strong>. Your current balance is {sparksBalance} Sparks.
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setShowLowBalanceModal(false)}
+                className="flex-1 py-3 rounded-2xl text-xs font-black text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <Link
+                href="/wallet"
+                onClick={() => { setShowLowBalanceModal(false); setSelectedExp(null); }}
+                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-sm transition-all flex items-center justify-center gap-1.5"
+              >
+                <Zap size={14} className="fill-white" />
+                Top Up Sparks
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CREATE / POST PHOTO WORK MODAL ───────────────────────── */}
+      {showPostModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md anim-fade-in"
+          onClick={() => !postUploading && setShowPostModal(false)}
+        >
+          <div
+            className="relative w-full max-w-md bg-white rounded-3xl p-5 space-y-4 shadow-2xl border border-zinc-200 overflow-hidden text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+              <div>
+                <h3 className="text-sm font-black text-zinc-900 flex items-center gap-1.5">
+                  <Camera size={16} className="text-purple-600" />
+                  Post Work or Campus Photo
+                </h3>
+                <p className="text-[10px] font-bold text-zinc-400 mt-0.5">Share your design, project, or campus vibe with peers</p>
+              </div>
+              <button
+                onClick={() => setShowPostModal(false)}
+                className="w-7 h-7 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            {/* Quick Preset Sample Photos */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider block">Choose Sample Photo or Upload</label>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { label: 'UI Mockup', url: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&auto=format&fit=crop&q=80' },
+                  { label: 'Coffee Vibe', url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80' },
+                  { label: 'Coding Lab', url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&auto=format&fit=crop&q=80' },
+                  { label: 'Jam Session', url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80' }
+                ].map((sample) => (
+                  <button
+                    key={sample.label}
+                    type="button"
+                    onClick={() => setPostFilePreview(sample.url)}
+                    className={`relative rounded-xl overflow-hidden aspect-square border-2 transition-all cursor-pointer ${
+                      postFilePreview === sample.url ? 'border-purple-600 ring-2 ring-purple-200 scale-95' : 'border-transparent opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={sample.url} alt={sample.label} className="w-full h-full object-cover" />
+                    <span className="absolute bottom-0 inset-x-0 bg-black/60 text-[8px] font-bold text-white text-center py-0.5 truncate">
+                      {sample.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Image URL */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider block">Image URL / Custom Photo</label>
+              <input
+                type="text"
+                placeholder="Paste image link or select preset above..."
+                value={postFilePreview}
+                onChange={(e) => setPostFilePreview(e.target.value)}
+                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:border-purple-500 focus:bg-white transition-all"
+              />
+            </div>
+
+            {/* Caption Input */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider block">Caption</label>
+              <textarea
+                rows={2}
+                placeholder="What are you working on or showcasing today?"
+                value={postCaption}
+                onChange={(e) => setPostCaption(e.target.value)}
+                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:border-purple-500 focus:bg-white transition-all resize-none"
+              />
+            </div>
+
+            {/* Category & Location inputs */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider block mb-1">Category</label>
+                <select
+                  value={postCategory}
+                  onChange={(e) => setPostCategory(e.target.value)}
+                  className="w-full bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-800 rounded-xl p-2.5 outline-none cursor-pointer"
+                >
+                  {['UI/UX Work', 'Campus Vibes', 'Project Showcase', 'Campus Event', 'Hackathon', 'Photography'].map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider block mb-1">Location</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Innovation Lab"
+                  value={postLocation}
+                  onChange={(e) => setPostLocation(e.target.value)}
+                  className="w-full bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-800 rounded-xl p-2.5 outline-none focus:border-purple-500"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              onClick={handlePublishPost}
+              disabled={postUploading}
+              className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              {postUploading ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <>
+                  <Camera size={14} />
+                  <span>Publish Photo to Feed</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── FULL SCREEN PHOTO LIGHTBOX MODAL ───────────────── */}
+      {selectedPostPhoto && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 anim-fade-in"
+          onClick={() => setSelectedPostPhoto(null)}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-xl w-full bg-zinc-950 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl flex flex-col max-h-[90vh]"
+          >
+            {/* Header */}
+            <div className="p-4 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between text-white">
+              <div className="flex items-center gap-3">
+                <img 
+                  src={selectedPostPhoto.authorPhoto || avatarUrl(selectedPostPhoto.authorId, selectedPostPhoto.authorName)} 
+                  alt={selectedPostPhoto.authorName || 'Student'} 
+                  className="w-9 h-9 rounded-full object-cover border border-purple-500/50"
+                />
+                <div>
+                  <h4 className="text-xs font-black text-white">{selectedPostPhoto.authorName || 'Campus Peer'}</h4>
+                  <p className="text-[10px] text-zinc-400 font-bold">{selectedPostPhoto.authorBranch || 'Student'}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedPostPhoto(null)}
+                className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* High Res Image */}
+            <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden min-h-[300px] max-h-[60vh]">
+              <img 
+                src={selectedPostPhoto.photoUrl} 
+                alt={selectedPostPhoto.caption || 'Campus Photo'} 
+                className="w-full h-full object-contain max-h-[60vh]"
+              />
+            </div>
+
+            {/* Caption & Actions Footer */}
+            <div className="p-4 bg-zinc-900 border-t border-zinc-800 text-white space-y-3">
+              <p className="text-xs font-semibold text-zinc-200 leading-relaxed">
+                {selectedPostPhoto.caption}
+              </p>
+
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-full border border-purple-500/20 uppercase tracking-wider">
+                  {selectedPostPhoto.category || 'Showcase'}
+                </span>
+                
+                <button
+                  onClick={() => {
+                    const authorId = selectedPostPhoto.authorId;
+                    setSelectedPostPhoto(null);
+                    if (authorId) {
+                      router.push(`/chats?userId=${authorId}`);
+                    } else {
+                      router.push('/chats');
+                    }
+                  }}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-black rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <MessageCircle size={14} />
+                  <span>Send Message</span>
+                </button>
               </div>
             </div>
           </div>

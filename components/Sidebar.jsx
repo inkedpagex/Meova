@@ -209,62 +209,65 @@ export default function Sidebar({ user }) {
       `}</style>
 
       {/* ── Mobile top header ────────────────── */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[60px] flex items-center justify-between px-4"
-        style={{ background: '#ffffff', borderBottom: '1px solid #f0f0f0', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[58px] flex items-center justify-between px-4 bg-white/90 backdrop-blur-xl border-b border-zinc-100 shadow-2xs">
         
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 group">
           <MeetifyLogo size={28} animate={logoAnimating} />
-          <span className="font-black text-[17px] tracking-tight text-zinc-900">meetifyy</span>
+          <span className="font-black text-lg tracking-tight text-zinc-900">
+            meetifyy
+          </span>
         </Link>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2.5">
           {user ? (
             <>
               {!isAdminRoute && (
-                <Link href="/wallet" className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black"
-                  style={{ background: '#f3f0ff', color: '#7c3aed' }}>
-                  <Zap size={11} className="fill-current" />
+                <Link 
+                  href="/wallet" 
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-purple-50 text-purple-700 border border-purple-100/80 hover:bg-purple-100/70 transition-all active:scale-95"
+                >
+                  <Zap size={13} className="fill-purple-600 text-purple-600" />
                   <span>{sparks.toLocaleString()}</span>
                 </Link>
               )}
 
-              {/* Messages icon with badge */}
-              <Link href="/messages" className="relative w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ background: '#f8f8fa', border: '1px solid #e8e8ea' }}>
-                <MessageSquare size={16} className={unreadMsgCount > 0 ? 'text-[#7c3aed]' : 'text-zinc-600'} strokeWidth={2} />
-                {unreadMsgCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-[#7c3aed] border-2 border-white flex items-center justify-center text-[8px] font-black text-white px-0.5">
-                    {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
-                  </span>
-                )}
-              </Link>
-
-              <Link href="/bookings" className="relative w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ background: '#f8f8fa', border: '1px solid #e8e8ea' }}>
-                <Calendar size={16} className={pathname === '/bookings' ? 'text-[#7c3aed]' : 'text-zinc-600'} strokeWidth={2} />
-              </Link>
-
-              <Link href="/notifications" className="relative w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ background: '#f8f8fa', border: '1px solid #e8e8ea' }}>
-                <Bell size={16} className={unreadCount > 0 ? 'text-[#7c3aed]' : 'text-zinc-600'} strokeWidth={2} />
+              {/* Notifications */}
+              <Link 
+                href="/notifications" 
+                className={`relative p-2 rounded-full transition-all ${
+                  pathname === '/notifications' 
+                    ? 'text-purple-600 bg-purple-50' 
+                    : 'text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100/80'
+                }`}
+                title="Notifications"
+              >
+                <Bell size={20} className={unreadCount > 0 ? 'text-purple-600 fill-purple-100' : ''} strokeWidth={2.2} />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-[#7c3aed] border-2 border-white flex items-center justify-center text-[9px] font-black text-white px-1">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-purple-600 ring-2 ring-white" />
                 )}
               </Link>
 
-
-              <Link href="/profile">
-                <div className="w-8 h-8 rounded-full overflow-hidden relative" style={{ border: '2px solid #e8e8ea' }}>
-                  <Image src={avatarSrc} alt="me" fill sizes="32px" style={{ objectFit: 'cover' }} />
-                </div>
+              {/* Messages */}
+              <Link 
+                href="/messages" 
+                className={`relative p-2 rounded-full transition-all ${
+                  pathname === '/messages' 
+                    ? 'text-purple-600 bg-purple-50' 
+                    : 'text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100/80'
+                }`}
+                title="Messages"
+              >
+                <MessageSquare size={20} className={unreadMsgCount > 0 ? 'text-purple-600 fill-purple-100' : ''} strokeWidth={2.2} />
+                {unreadMsgCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-purple-600 ring-2 ring-white" />
+                )}
               </Link>
             </>
           ) : (
-            <Link href="/login"
-              className="px-4 py-2 rounded-full text-[11px] font-black text-white"
-              style={{ background: '#7c3aed' }}>
+            <Link 
+              href="/login"
+              className="px-4 py-1.5 rounded-full text-xs font-black text-white bg-purple-600 hover:bg-purple-700 active:scale-95 transition-all shadow-2xs"
+            >
               Log in
             </Link>
           )}
@@ -277,7 +280,7 @@ export default function Sidebar({ user }) {
 
         <Link href="/" className="flex items-center gap-2.5 px-2 mb-10">
           <MeetifyLogo size={32} animate={logoAnimating} />
-          <span className="font-black text-[18px] tracking-tight text-zinc-900">meetifyy</span>
+          <span className="font-black text-[18px] tracking-tight bg-gradient-to-r from-purple-700 via-indigo-600 to-pink-600 bg-clip-text text-transparent">meetifyy</span>
         </Link>
 
         <nav className="flex-1 space-y-0.5">
@@ -291,24 +294,24 @@ export default function Sidebar({ user }) {
 
             return (
               <Link key={href} href={href}
-                className="flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all"
+                className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all"
                 style={{ background: active ? '#f3f0ff' : 'transparent', color: active ? '#7c3aed' : '#71717a' }}>
                 <div className="flex items-center gap-3 relative">
-                  <Icon size={17} strokeWidth={active ? 2.5 : 1.75} />
-                  <span style={{ fontWeight: active ? 700 : 500 }}>{label}</span>
+                  <Icon size={18} strokeWidth={active ? 2.5 : 1.75} />
+                  <span style={{ fontWeight: active ? 800 : 500 }}>{label}</span>
                 </div>
                 {hasUnread && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#7c3aed] text-white text-[10px] font-black flex items-center justify-center px-1">
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white text-[10px] font-black flex items-center justify-center px-1 shadow-2xs">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
                 {hasUnreadMsgs && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#7c3aed] text-white text-[10px] font-black flex items-center justify-center px-1">
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white text-[10px] font-black flex items-center justify-center px-1 shadow-2xs">
                     {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
                   </span>
                 )}
                 {label === 'Wallet' && sparks > 0 && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#f3f0ff', color: '#7c3aed' }}>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
                     {sparks.toLocaleString()}
                   </span>
                 )}
@@ -319,20 +322,21 @@ export default function Sidebar({ user }) {
 
         <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 16, marginTop: 16 }}>
           {user ? (
-            <Link href="/profile" className="flex items-center gap-2.5 p-2.5 rounded-xl transition-all hover:bg-zinc-50">
-              <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 relative" style={{ border: '1.5px solid #e8e8ea' }}>
-                <Image src={avatarSrc} alt="me" fill sizes="32px" style={{ objectFit: 'cover' }} />
+            <Link href="/profile" className="flex items-center gap-2.5 p-2.5 rounded-xl transition-all hover:bg-purple-50/50 group">
+              <div className="w-9 h-9 rounded-full p-[1.5px] bg-gradient-to-tr from-purple-600 to-indigo-500 flex-shrink-0">
+                <div className="w-full h-full rounded-full overflow-hidden relative border border-white">
+                  <Image src={avatarSrc} alt="me" fill sizes="36px" style={{ objectFit: 'cover' }} />
+                </div>
               </div>
               <div className="min-w-0">
-                <p className="text-[12px] font-semibold truncate text-zinc-900">{user.full_name || (user.email || 'user').split('@')[0]}</p>
-                <p className="text-[10px] truncate text-zinc-400">
+                <p className="text-xs font-black truncate text-zinc-900 group-hover:text-purple-600 transition-colors">{user.full_name || (user.email || 'user').split('@')[0]}</p>
+                <p className="text-[10px] truncate text-zinc-400 font-semibold">
                   {isAdminRoute ? 'Super Admin' : `${user.year || '1st'} · ${user.branch || 'General'}`}
                 </p>
               </div>
             </Link>
           ) : (
-            <Link href="/login" className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-black text-white"
-              style={{ background: '#7c3aed' }}>
+            <Link href="/login" className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all shadow-xs">
               <LogIn size={14} /> Log in
             </Link>
           )}
@@ -340,19 +344,19 @@ export default function Sidebar({ user }) {
       </aside>
 
       {/* ── Mobile bottom tab bar ───────────── */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 flex items-end justify-around bg-white/75 backdrop-blur-xl"
+      <nav 
+        className="md:hidden fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-white/90 backdrop-blur-2xl border-t border-zinc-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]"
         style={{
-          borderTop: '1px solid rgba(255,255,255,0.2)',
-          height: 'calc(64px + env(safe-area-inset-bottom))',
-          paddingBottom: 'calc(6px + env(safe-area-inset-bottom))',
-          boxShadow: '0 -2px 16px rgba(0,0,0,0.04)',
-        }}>
+          height: 'calc(62px + env(safe-area-inset-bottom))',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
+      >
         {MOBILE_NAV.map(({ href, label, Icon, isCenter }) => {
           if ((href === '/profile') && !user) {
             return (
-              <Link key={href} href="/login" className="flex-1 flex flex-col items-center justify-center h-12 text-zinc-400">
-                <LogIn size={19} strokeWidth={1.75} />
-                <span className="text-[9px] font-bold mt-0.5">Login</span>
+              <Link key={href} href="/login" className="flex-1 flex flex-col items-center justify-center h-full text-zinc-400 hover:text-purple-600 transition-colors">
+                <LogIn size={20} strokeWidth={2} />
+                <span className="text-[10px] font-black mt-0.5">Login</span>
               </Link>
             );
           }
@@ -360,24 +364,36 @@ export default function Sidebar({ user }) {
 
           if (isCenter) {
             return (
-              <Link key={href} href={href}
-                className="flex-1 flex flex-col items-center justify-center relative -top-4 h-16 select-none"
-                style={{ zIndex: 60 }}>
-                <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95"
-                  style={{ background: '#7c3aed', boxShadow: '0 8px 24px rgba(124,58,237,0.35)' }}>
-                  <Plus size={24} strokeWidth={2.5} className="text-white" />
+              <Link 
+                key={href} 
+                href={href}
+                className="flex-1 flex flex-col items-center justify-center relative -top-3 h-full select-none"
+                style={{ zIndex: 60 }}
+              >
+                <div className="w-13 h-13 rounded-full flex items-center justify-center bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 text-white shadow-[0_8px_20px_rgba(124,58,237,0.4)] active:scale-90 transition-all ring-4 ring-white">
+                  <Plus size={24} strokeWidth={2.8} />
                 </div>
               </Link>
             );
           }
 
           return (
-            <Link key={href} href={href}
-              className="flex-1 flex flex-col items-center justify-center h-12 relative select-none transition-all"
-              style={{ color: active ? '#7c3aed' : '#a1a1aa' }}>
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.75} />
-              <span className="text-[9.5px] font-bold mt-0.5" style={{ color: active ? '#7c3aed' : '#a1a1aa' }}>{label}</span>
-              {active && <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-[#7c3aed]" />}
+            <Link 
+              key={href} 
+              href={href}
+              className={`flex-1 flex flex-col items-center justify-center h-full relative select-none transition-all ${
+                active ? 'text-purple-600' : 'text-zinc-400 hover:text-zinc-600'
+              }`}
+            >
+              <div className={`p-1.5 rounded-full transition-all ${active ? 'bg-purple-50/90 text-purple-600' : ''}`}>
+                <Icon size={20} strokeWidth={active ? 2.6 : 1.9} />
+              </div>
+              <span className={`text-[10px] font-black -mt-0.5 tracking-tight ${active ? 'text-purple-600' : 'text-zinc-400'}`}>
+                {label}
+              </span>
+              {active && (
+                <span className="absolute top-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600" />
+              )}
             </Link>
           );
         })}

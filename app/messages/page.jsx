@@ -477,33 +477,7 @@ function MessagesContent() {
           </div>
         </div>
 
-        {/* Active Campus Notes Row */}
-        {!q && suggestedStudents.length > 0 && (
-          <div className="py-3 border-b border-zinc-100 bg-zinc-50/40">
-            <p className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-2.5 px-4">Active on Campus</p>
-            <div className="flex gap-4 overflow-x-auto no-scrollbar px-4 pb-1">
-              {suggestedStudents.slice(0, 8).map(student => (
-                <div 
-                  key={student.id} 
-                  onClick={() => openChatWithUser(student.id)}
-                  className="flex flex-col items-center flex-shrink-0 cursor-pointer group"
-                >
-                  <div className="relative w-[58px] h-[58px] flex-shrink-0 rounded-full p-[2px] bg-gradient-to-tr from-purple-600 via-pink-500 to-indigo-600 shadow-xs group-hover:scale-105 transition-transform">
-                    <img 
-                      src={avatarUrl(student.id, student.full_name, student.photo_url)} 
-                      alt={student.full_name} 
-                      className="w-full h-full rounded-full object-cover border-2 border-white bg-zinc-100" 
-                    />
-                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-xs" />
-                  </div>
-                  <span className="text-xs font-extrabold text-zinc-800 truncate max-w-[64px] mt-1.5 group-hover:text-purple-600 transition-colors">
-                    {student.full_name?.split(' ')[0] || 'Student'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* List Content */}
         <div className="flex-1 overflow-y-auto no-scrollbar py-1">
@@ -688,7 +662,7 @@ function MessagesContent() {
                   onKeyDown={handleKeyDown}
                   placeholder="Message..."
                   rows={1}
-                  className="flex-1 resize-none bg-transparent text-xs sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none max-h-28 font-medium"
+                  className="flex-1 resize-none bg-transparent text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none max-h-28 font-medium"
                   style={{ lineHeight: '1.4' }}
                   onInput={e => {
                     e.target.style.height = 'auto';

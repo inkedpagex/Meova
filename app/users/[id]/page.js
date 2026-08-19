@@ -91,10 +91,7 @@ export default async function UserProfilePage({ params }) {
         style={{ background: primaryMeta.color }}
       />
 
-      {/* Back nav */}
-      <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all mb-8 uppercase tracking-wider">
-        <ArrowLeft className="w-3.5 h-3.5" /> Back
-      </Link>
+
 
       {/* ── INSTAGRAM HEADER BAR ─────────────────────── */}
       <div className="flex items-center justify-between py-3 mb-4 border-b border-zinc-100">
@@ -159,9 +156,15 @@ export default async function UserProfilePage({ params }) {
 
         {/* Bio & Details Section */}
         <div className="space-y-1 mb-5">
-          <h1 className="text-sm sm:text-base font-black text-zinc-900">
-            {profile.full_name || 'Student'}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-sm sm:text-base font-black text-zinc-900">
+              {profile.full_name || 'Student'}
+            </h1>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-50 text-purple-700 border border-purple-200 shadow-2xs">
+              <CheckCircle className="w-3 h-3 text-purple-600 fill-purple-100" />
+              <span>{reviews.length || 1} Meets Completed</span>
+            </span>
+          </div>
 
           <p className="text-xs font-bold text-purple-700 flex items-center gap-1">
             <GraduationCap className="w-3.5 h-3.5" />

@@ -4,13 +4,22 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
-  Coffee, Users, Sparkles, Gamepad, Briefcase, Pencil, ChevronRight, X, ArrowLeft
+  Coffee, Users, Sparkles, Gamepad, Briefcase, Pencil, ChevronRight, X, ArrowLeft, Camera
 } from 'lucide-react';
 
 export default function CreateSelectorPage() {
   const router = useRouter();
 
   const options = [
+    {
+      title: 'Post Photo / Moment',
+      desc: 'Share campus food photos, coffee meets, or campus vibes.',
+      icon: Camera,
+      color: '#ec4899',
+      badgeBg: 'bg-pink-50 border-pink-100 text-pink-600',
+      gradient: 'from-pink-500/10 via-pink-500/5 to-transparent',
+      href: '/create/photo'
+    },
     {
       title: 'Create Experience',
       desc: 'Host a coffee connect, study session, or casual meet-up.',
@@ -54,7 +63,7 @@ export default function CreateSelectorPage() {
       color: '#d97706',
       badgeBg: 'bg-amber-50 border-amber-100 text-amber-600',
       gradient: 'from-amber-500/10 via-amber-500/5 to-transparent',
-      href: '/gigs'
+      href: '/gigs?action=post-gig'
     },
   ];
 
