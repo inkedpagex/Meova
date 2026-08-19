@@ -9,6 +9,7 @@ import {
   BookOpen, Star, Sparkles, X, ChevronRight, Zap
 } from 'lucide-react';
 import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
+import BookCoffeeButton from '../features/users/BookCoffeeButton';
 
 const INTEREST_META = {
   'Coding & Tech':        { Icon: Code,        color: '#3b82f6' },
@@ -156,9 +157,25 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
                   <span className="text-[9.5px] font-semibold text-zinc-400 mt-0.5 truncate">
                     {student.year ? `${student.year} Yr` : ''} {student.branch ? `· ${student.branch}` : ''}
                   </span>
-                  <div className="mt-2 w-full py-1.5 rounded-xl bg-purple-600 text-white text-[10px] font-black flex items-center justify-center gap-1 shadow-sm">
-                    Meet 50 <Zap className="w-3 h-3 text-yellow-300 fill-current" />
-                  </div>
+                  <BookCoffeeButton 
+                    targetUserId={student.id}
+                    targetName={student.full_name}
+                    targetPhoto={student.photo || student.instagram_photo || getCartoonAvatar(student.id)}
+                    isLoggedIn={!!currentUserId}
+                    accentColor="#7c3aed"
+                    renderButton={({ onClick }) => (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onClick(e);
+                        }}
+                        className="mt-2 w-full py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 transition-colors text-white text-[10px] font-black flex items-center justify-center gap-1 shadow-sm cursor-pointer"
+                      >
+                        Meet 50 <Zap className="w-3 h-3 text-yellow-300 fill-current" />
+                      </button>
+                    )}
+                  />
                 </div>
               ))}
             </div>

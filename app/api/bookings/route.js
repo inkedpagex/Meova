@@ -40,7 +40,7 @@ export async function POST(request) {
     if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
     const body = await request.json();
-    const { experienceId, title, price, duration, location, category, hostId, hostName, date, time, agenda } = body;
+    const { experienceId, title, price, duration, location, category, hostId, hostName, hostPhoto, date, time, agenda } = body;
 
     if (!experienceId || !hostId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -99,8 +99,10 @@ export async function POST(request) {
       category: category || '',
       hostId,
       hostName: hostName || '',
+      hostPhoto: hostPhoto || '',
       guestId: user.uid,
       guestName: user.full_name || '',
+      guestPhoto: user.photo || user.instagram_photo || '',
       date: date || '',
       time: time || '',
       agenda: agenda || '',

@@ -50,10 +50,10 @@ function avatarUrl(uid, name, photo) {
 
 // ─── Chat List Item ───────────────────────────────────────────────────────────
 
-function ChatListItem({ chat, currentUid, isActive, onClick }) {
+function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
   const otherId = chat.participants?.find(p => p !== currentUid) || '';
-  const otherName = chat.participantNames?.[otherId] || 'Campus Student';
-  const otherPhoto = chat.participantPhotos?.[otherId] || '';
+  const otherName = directoryUser?.full_name || chat.participantNames?.[otherId] || 'Campus Student';
+  const otherPhoto = directoryUser?.photo_url || chat.participantPhotos?.[otherId] || '';
   const unread = chat.unreadCount?.[currentUid] || 0;
   const isMe = chat.lastSenderId === currentUid;
 
@@ -424,8 +424,9 @@ function MessagesContent() {
   });
 
   const otherId = activeChat?.participants?.find(p => p !== currentUid) || '';
-  const otherName = activeChat?.participantNames?.[otherId] || 'Campus Student';
-  const otherPhoto = activeChat?.participantPhotos?.[otherId] || '';
+  const directoryUser = suggestedStudents.find(s => s.id === otherId);
+  const otherName = directoryUser?.full_name || activeChat?.participantNames?.[otherId] || 'Campus Student';
+  const otherPhoto = directoryUser?.photo_url || activeChat?.participantPhotos?.[otherId] || '';
 
   if (!loadingChats && (!currentUid || !firebaseUid)) {
     return (
@@ -449,7 +450,11 @@ function MessagesContent() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-156px)] md:h-[calc(100vh-64px)] min-h-0 w-full bg-white text-zinc-900 overflow-hidden border border-zinc-200/80 rounded-2xl md:rounded-3xl shadow-xs">
+    <div className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs transition-all duration-300 ${
+      !showList
+        ? 'fixed inset-0 z-[60] h-[100dvh] pt-[env(safe-area-inset-top)] flex-row md:relative md:h-[calc(100vh-64px)] md:pt-0 md:z-0 md:rounded-3xl rounded-none border-0'
+        : 'h-[calc(100dvh-156px)] md:h-[calc(100vh-64px)] rounded-2xl border flex-row relative'
+    }`}>
 
       {/* ── LEFT SIDEBAR: Chat List ───────────────────────────────────────────── */}
       <div className={`
@@ -517,6 +522,7 @@ function MessagesContent() {
                         currentUid={currentUid}
                         isActive={chat.id === activeChatId}
                         onClick={() => openChat(chat)}
+                        directoryUser={suggestedStudents.find(s => s.id === chat.participants?.find(p => p !== currentUid))}
                       />
                     ))}
                   </div>

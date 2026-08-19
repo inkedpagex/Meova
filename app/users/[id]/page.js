@@ -196,6 +196,7 @@ export default async function UserProfilePage({ params }) {
                 <BookCoffeeButton
                   targetUserId={id}
                   targetName={profile.full_name}
+                  targetPhoto={avatarUrl(profile)}
                   isLoggedIn={isLoggedIn}
                   accentColor={primaryMeta.color}
                 />

@@ -92,7 +92,8 @@ function FeedSkeleton() {
   );
 }
 
-import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
+import { getUserAvatarUrl, getCartoonAvatar } from '@/utils/avatar';
+import BookCoffeeButton from '@/features/users/BookCoffeeButton';
 
 // Pass the full user object for best resolution (photo > instagram > cartoon)
 function avatarUrl(userOrSeed) {
@@ -837,19 +838,27 @@ export default function FeedClient() {
                     >
                       <X size={13} strokeWidth={2.5} />
                     </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        confetti({ particleCount: 80, spread: 55, origin: { y: 0.6 } });
-                        setDismissedVibes(prev => ({ ...prev, [user.id]: true }));
-                        router.push(`/users/${user.id}`);
-                      }}
-                      className="flex-1 h-8 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[10.5px] font-black flex items-center justify-center gap-1 transition-all cursor-pointer shadow-md active:scale-95 shadow-purple-500/20"
-                    >
-                      <span>Meet {user.spark_charge}</span>
-                      <Zap size={11} className="fill-current text-yellow-300" />
-                    </button>
+                    <BookCoffeeButton 
+                      targetUserId={user.id}
+                      targetName={user.full_name}
+                      targetPhoto={avatarUrl(user)}
+                      isLoggedIn={!!currentUser}
+                      accentColor="#7c3aed"
+                      renderButton={({ onClick }) => (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            confetti({ particleCount: 80, spread: 55, origin: { y: 0.6 } });
+                            onClick(e);
+                          }}
+                          className="flex-1 h-8 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[10.5px] font-black flex items-center justify-center gap-1 transition-all cursor-pointer shadow-md active:scale-95 shadow-purple-500/20"
+                        >
+                          <span>Meet {user.spark_charge}</span>
+                          <Zap size={11} className="fill-current text-yellow-300" />
+                        </button>
+                      )}
+                    />
                   </div>
                 </div>
               );

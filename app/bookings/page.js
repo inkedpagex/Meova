@@ -72,7 +72,9 @@ export default function BookingsPage() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [showScanModal, setShowScanModal] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [bookingToCancel, setBookingToCancel] = useState(null);
 
   // Verification state
   const [scanStatus, setScanStatus] = useState("idle"); // idle, processing, success, error
@@ -159,20 +161,26 @@ export default function BookingsPage() {
   };
 
   // Handle Cancel Request (guest cancels before host accepts)
-  const handleCancel = async (bookingId) => {
-    if (cancelLoading) return;
-    if (!confirm('Cancel this booking request? Your Sparks will be refunded immediately.')) return;
-    setCancelLoading(bookingId);
+  const initiateCancel = (booking) => {
+    setBookingToCancel(booking);
+    setShowCancelModal(true);
+  };
+
+  const handleCancel = async () => {
+    if (!bookingToCancel || cancelLoading) return;
+    setCancelLoading(bookingToCancel.id);
     try {
       const res = await fetch("/api/bookings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId, action: "cancel" })
+        body: JSON.stringify({ bookingId: bookingToCancel.id, action: "cancel" })
       });
       const d = await res.json();
       if (d.success) {
         toast.success('Booking cancelled. Sparks refunded! ⚡');
         mutate();
+        setShowCancelModal(false);
+        setBookingToCancel(null);
       } else {
         toast.error(d.error || 'Failed to cancel. Please try again.');
       }
@@ -379,7 +387,7 @@ export default function BookingsPage() {
                       {/* Cancel button: only for Requested (before host accepts), with instant refund */}
                       {booking.status === "Requested" && (
                         <button
-                          onClick={() => handleCancel(booking.id)}
+                          onClick={() => initiateCancel(booking)}
                           disabled={cancelLoading === booking.id}
                           className="w-12 h-[46px] bg-zinc-50 text-zinc-500 border border-zinc-200 rounded-xl flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 active:scale-[0.98] transition-all disabled:opacity-50"
                           title="Cancel Request (full refund)"
@@ -444,6 +452,44 @@ export default function BookingsPage() {
                 <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-1">Manual Code</p>
                 <p className="text-xl font-black tracking-[0.3em] text-zinc-900">{selectedBooking.meetingCode}</p>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL: CANCEL REQUEST ─── */}
+      {showCancelModal && bookingToCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm anim-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-[340px] p-6 shadow-2xl anim-scale-in text-center border border-zinc-100">
+            <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle size={24} />
+            </div>
+            <h3 className="text-lg font-black text-zinc-900 mb-2">Cancel Booking?</h3>
+            <p className="text-xs text-zinc-500 font-medium mb-6 leading-relaxed">
+              Are you sure you want to cancel this booking request? Your <strong className="text-zinc-800">{bookingToCancel.price} Sparks</strong> will be refunded immediately.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setBookingToCancel(null);
+                }}
+                disabled={cancelLoading === bookingToCancel.id}
+                className="flex-1 py-3 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-all disabled:opacity-50"
+              >
+                Keep it
+              </button>
+              <button
+                onClick={handleCancel}
+                disabled={cancelLoading === bookingToCancel.id}
+                className="flex-1 bg-rose-500 text-white py-3 rounded-xl text-xs font-black hover:bg-rose-600 active:scale-95 transition-all shadow-md flex items-center justify-center gap-1 disabled:opacity-50"
+              >
+                {cancelLoading === bookingToCancel.id ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <>Yes, Cancel</>
+                )}
+              </button>
             </div>
           </div>
         </div>
