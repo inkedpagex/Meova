@@ -19,6 +19,7 @@ import {
   doc, updateDoc, increment, getDoc, where
 } from 'firebase/firestore';
 import { getUserAvatarUrl, getCartoonAvatar } from '@/utils/avatar';
+import { useUserContext } from '@/components/providers/UserProvider';
 
 const fetcher = (url) => fetch(url).then(res => res.json());
 
@@ -197,8 +198,12 @@ function MessagesContent() {
   const router = useRouter();
   const openUserId = searchParams.get('uid');
 
-  const [currentUser, setCurrentUser] = useState(null);
-  const [currentUid, setCurrentUid] = useState(null);
+  const { user: globalUser } = useUserContext();
+  const currentUid = globalUser?.id || globalUser?.uid || null;
+  const currentUser = globalUser;
+
+  const [firebaseUid, setFirebaseUid] = useState(null);
+
   const [chats, setChats] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeChatId, setActiveChatId] = useState(null);
@@ -218,29 +223,37 @@ function MessagesContent() {
   const unsubChatsRef = useRef(null);
   const unsubMsgsRef = useRef(null);
 
-  // ── Auth ───────────────────────────────────────────────────────────────────
+  // ── Wait for Firebase Client Auth ──────────────────────────────────────────
+  // Firestore rules require request.auth.uid. We MUST wait for Firebase Auth to initialize on the client
+  // before sending queries, otherwise we get "Missing or insufficient permissions".
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (fbUser) => {
-      if (!fbUser) { setCurrentUid(null); setLoadingChats(false); return; }
-      setCurrentUid(fbUser.uid);
-      try {
-        const snap = await getDoc(doc(db, 'users', fbUser.uid));
-        if (snap.exists()) setCurrentUser({ uid: fbUser.uid, ...snap.data() });
-        else setCurrentUser({ uid: fbUser.uid, full_name: fbUser.displayName || 'You', photo_url: fbUser.photoURL || '' });
-      } catch {
-        setCurrentUser({ uid: fbUser.uid, full_name: fbUser.displayName || 'You', photo_url: fbUser.photoURL || '' });
+    let timeoutId;
+    const unsub = onAuthStateChanged(auth, (fbUser) => {
+      clearTimeout(timeoutId);
+      if (fbUser) {
+        setFirebaseUid(fbUser.uid);
+      } else {
+        setFirebaseUid(null);
+        // Give Firebase Auth 3 seconds to restore from IndexedDB. If it fails, give up.
+        timeoutId = setTimeout(() => {
+          setLoadingChats(false);
+        }, 3000);
       }
     });
-    return () => unsub();
+    return () => {
+      unsub();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // ── Subscribe to chat list ──────────────────────────────────────────────────
   useEffect(() => {
-    if (!currentUid || !db) return;
+    // We strictly wait for firebaseUid so Firestore doesn't reject us!
+    if (!firebaseUid || !db) return;
 
     const q2 = query(
       collection(db, 'chats'),
-      where('participants', 'array-contains', currentUid)
+      where('participants', 'array-contains', firebaseUid)
     );
 
     if (unsubChatsRef.current) unsubChatsRef.current();
@@ -268,7 +281,7 @@ function MessagesContent() {
     return () => {
       if (unsubChatsRef.current) unsubChatsRef.current();
     };
-  }, [currentUid]);
+  }, [currentUid, firebaseUid]);
 
   // ── Open Chat ──────────────────────────────────────────────────────────────
   const openChat = useCallback((chat) => {
@@ -328,9 +341,9 @@ function MessagesContent() {
   };
 
   useEffect(() => {
-    if (!openUserId || !currentUid || loadingChats) return;
+    if (!openUserId || !currentUid || loadingChats || !firebaseUid) return;
     openChatWithUser(openUserId);
-  }, [openUserId, currentUid, loadingChats]);
+  }, [openUserId, currentUid, loadingChats, firebaseUid]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -414,14 +427,20 @@ function MessagesContent() {
   const otherName = activeChat?.participantNames?.[otherId] || 'Campus Student';
   const otherPhoto = activeChat?.participantPhotos?.[otherId] || '';
 
-  if (!loadingChats && !currentUid) {
+  if (!loadingChats && (!currentUid || !firebaseUid)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
         <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mb-4 text-zinc-800">
           <MessageSquare className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-black text-zinc-900 mb-1">Sign in to Message</h2>
-        <p className="text-xs text-zinc-500 max-w-xs mb-6">Connect with GLA campus students directly.</p>
+        <h2 className="text-xl font-black text-zinc-900 mb-1">
+          {currentUid && !firebaseUid ? 'Session Sync Error' : 'Sign in to Message'}
+        </h2>
+        <p className="text-xs text-zinc-500 max-w-xs mb-6">
+          {currentUid && !firebaseUid 
+            ? 'Your secure chat session could not be verified. Please log out and log in again to fix this.'
+            : 'Connect with GLA campus students directly.'}
+        </p>
         <Link href="/" className="px-6 py-2.5 rounded-full bg-purple-600 text-white font-black text-xs hover:bg-purple-700 transition-all">
           Go Home
         </Link>

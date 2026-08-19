@@ -7,40 +7,13 @@ import {
 } from 'lucide-react';
 import { toast } from '../../lib/toast';
 
+import useSWR from 'swr';
+
+const fetcher = (url) => fetch(url).then(res => res.json());
+
 const CATEGORIES = ['All', 'Design', 'Development', 'Writing', 'Marketing'];
 
-const DEFAULT_GIGS = [
-  {
-    id: 'gig-1',
-    title: 'Figma UI Designer for Campus App',
-    company: 'Meetify Team',
-    category: 'Design',
-    budget: '500',
-    duration: '3 Days',
-    type: 'FREELANCE',
-    desc: 'Looking for a talented student designer to create sleek UI mockups for our campus community events app.'
-  },
-  {
-    id: 'gig-2',
-    title: 'Next.js Frontend Bug Fixes',
-    company: 'Coding Club',
-    category: 'Development',
-    budget: '750',
-    duration: '1 Week',
-    type: 'PROJECT',
-    desc: 'Help integrate Tailwind CSS components and optimize client page load speed for the annual tech fest website.'
-  },
-  {
-    id: 'gig-3',
-    title: 'Campus Fest Poster & Reel Creation',
-    company: 'Media Circle',
-    category: 'Marketing',
-    budget: '400',
-    duration: '2 Days',
-    type: 'CREATIVE',
-    desc: 'Create 3 Instagram reels and event posters for the upcoming inter-college cultural fest.'
-  }
-];
+// Mock data removed - using live backend data
 
 export default function CampusGigsPage() {
   const searchParams = useSearchParams();
@@ -48,9 +21,10 @@ export default function CampusGigsPage() {
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('All');
   const [appliedGigs, setAppliedGigs] = useState(new Set());
-  const [gigs, setGigs] = useState(DEFAULT_GIGS);
-
-  // Post Gig Modal State
+  const { data: gigsData, mutate: mutateGigs } = useSWR('/api/gigs', fetcher);
+  const gigs = gigsData?.gigs || [];
+  
+  // Create Gig Modal State
   const [showModal, setShowModal] = useState(false);
   const [gigTitle, setGigTitle] = useState('');
   const [gigCompany, setGigCompany] = useState('');
@@ -58,44 +32,42 @@ export default function CampusGigsPage() {
   const [gigBudget, setGigBudget] = useState('300');
   const [gigDuration, setGigDuration] = useState('3 Days');
   const [gigDesc, setGigDesc] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Load from localStorage or check URL params
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('meetify_posted_gigs');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          setGigs([...parsed, ...DEFAULT_GIGS]);
-        } catch (e) {}
-      }
-    }
-
     if (searchParams?.get('action') === 'post-gig') {
       setShowModal(true);
     }
   }, [searchParams]);
 
-  const handleApply = (id) => {
+  const handleApply = async (id) => {
     setAppliedGigs(prev => {
       const next = new Set(prev);
       next.add(id);
       return next;
     });
-    toast.success('Application submitted to host! 🚀');
+    
+    try {
+      const res = await fetch(`/api/gigs/${id}/apply`, { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to apply');
+      toast.success('Application submitted to host! 🚀');
+    } catch (e) {
+      toast.error('Failed to submit application.');
+    }
   };
 
-  const handleCreateGig = (e) => {
+  const handleCreateGig = async (e) => {
     e.preventDefault();
     if (!gigTitle.trim() || !gigDesc.trim()) {
       toast.error('Please fill in the gig title and description.');
       return;
     }
 
-    const newGig = {
-      id: `gig-${Date.now()}`,
+    setIsSubmitting(true);
+    
+    const newGigPayload = {
       title: gigTitle,
-      company: gigCompany.trim() || 'Campus Host',
+      company: gigCompany.trim(),
       category: gigCategory,
       budget: gigBudget || '250',
       duration: gigDuration || 'Flexible',
@@ -103,19 +75,30 @@ export default function CampusGigsPage() {
       desc: gigDesc
     };
 
-    const updated = [newGig, ...gigs];
-    setGigs(updated);
+    try {
+      const res = await fetch('/api/gigs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newGigPayload)
+      });
+      
+      if (!res.ok) throw new Error('Failed to post gig');
+      
+      const { gig } = await res.json();
+      
+      // Optimistic update
+      mutateGigs({ gigs: [gig, ...gigs] }, false);
 
-    if (typeof window !== 'undefined') {
-      const customOnly = updated.filter(g => !g.id.startsWith('gig-1') && !g.id.startsWith('gig-2') && !g.id.startsWith('gig-3'));
-      localStorage.setItem('meetify_posted_gigs', JSON.stringify(customOnly));
+      setShowModal(false);
+      setGigTitle('');
+      setGigCompany('');
+      setGigDesc('');
+      toast.success('Gig posted successfully! 🎉');
+    } catch (e) {
+      toast.error('Failed to post gig. Try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setShowModal(false);
-    setGigTitle('');
-    setGigCompany('');
-    setGigDesc('');
-    toast.success('Gig posted successfully! 🎉');
   };
 
   const filtered = gigs.filter(gig => {
@@ -371,10 +354,11 @@ export default function CampusGigsPage() {
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer"
+                disabled={isSubmitting}
+                className="w-full py-3.5 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50"
               >
                 <Sparkles size={15} />
-                <span>Publish Gig to Campus</span>
+                <span>{isSubmitting ? 'Publishing...' : 'Publish Gig to Campus'}</span>
               </button>
             </form>
           </div>

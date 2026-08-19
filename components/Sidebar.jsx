@@ -54,6 +54,7 @@ export default function Sidebar({ user }) {
   const [unreadMsgCount, setUnreadMsgCount] = useState(0); // Unread messages badge
   const [logoAnimating, setLogoAnimating] = useState(false);
   const prevCountRef = useRef(0);
+  const prevMsgCountRef = useRef(0);
   const isOnNotifPage = pathname === '/notifications';
 
   // Notification loader
@@ -124,19 +125,42 @@ export default function Sidebar({ user }) {
     if (!user?.id || !db) return;
     const isOnMessagesPage = pathname === '/messages';
 
-    // Listen to conversations where the user has unread messages
-    // Pattern: messages/{conversationId}/msgs where read=false and senderId != user.id
-    // Simpler: poll /api/messages/unread or use a denormalized counter
-    // For now: listen to user's message_unread counter doc
+    // Request Notification permission for PWA if not already granted/denied
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
     try {
-      const { doc: firestoreDoc, onSnapshot: firestoreOnSnapshot } = require('firebase/firestore');
-      const counterRef = firestoreDoc(db, 'users', user.id, 'meta', 'unread');
-      const unsub = firestoreOnSnapshot(counterRef, (snap) => {
-        if (snap.exists()) {
-          const count = snap.data()?.messages || 0;
-          setUnreadMsgCount(isOnMessagesPage ? 0 : count);
+      const q = query(
+        collection(db, 'chats'),
+        where('participants', 'array-contains', user.id)
+      );
+
+      const unsub = onSnapshot(q, (snap) => {
+        let totalUnread = 0;
+        
+        snap.forEach(d => {
+          const data = d.data();
+          const count = data.unreadCount?.[user.id] || 0;
+          totalUnread += count;
+        });
+
+        setUnreadMsgCount(isOnMessagesPage ? 0 : totalUnread);
+
+        // Trigger PWA notification if count goes up (new message received)
+        if (totalUnread > prevMsgCountRef.current && prevMsgCountRef.current !== 0 && !isOnMessagesPage) {
+          if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+            new Notification('New Message on Meetify', {
+              body: 'You received a new message from a campus student.',
+              icon: '/icon-192.png',
+              badge: '/icon-192.png',
+            });
+          }
         }
+        
+        prevMsgCountRef.current = totalUnread;
       }, () => {});
+      
       return () => unsub();
     } catch { /* graceful fail */ }
   }, [user?.id, pathname]);

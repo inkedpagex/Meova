@@ -13,7 +13,8 @@ import {
   Send, X, CheckCircle, Loader2, Star, Check, Search,
   ShieldAlert, Clock, AlertTriangle, ShieldCheck, Compass, Users,
   Coffee, Briefcase, Camera, Activity, Music, Bell, ChevronRight,
-  SlidersHorizontal, Trophy, Gamepad, TrendingUp, HelpCircle, Film, Plus
+  SlidersHorizontal, Trophy, Gamepad, TrendingUp, HelpCircle, Film, Plus,
+  MoreHorizontal, Bookmark
 } from 'lucide-react';
 import useSWR from 'swr';
 import imageCompression from 'browser-image-compression';
@@ -152,92 +153,7 @@ function getExpCardTheme(category) {
   };
 }
 
-const DEFAULT_MOCK_POSTS = [
-  {
-    id: 'mock-1',
-    authorName: 'Aarav Sharma',
-    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Aarav',
-    authorBranch: 'B.Tech CSE · 3rd Year',
-    photoUrl: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&auto=format&fit=crop&q=80',
-    caption: 'Finished redesigning the GLA Tech Fest dashboard UI mockups! Feedback is welcome 🚀✨',
-    category: 'UI/UX Work',
-    location: 'Innovation Lab',
-    likes: 24,
-    timeAgo: '2h ago'
-  },
-  {
-    id: 'mock-2',
-    authorName: 'Ananya Roy',
-    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Ananya',
-    authorBranch: 'MBA · 1st Year',
-    photoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
-    caption: 'Post-lecture iced matcha @ Central Library Cafe ☕ who is up for a quick study break?',
-    category: 'Campus Vibes',
-    location: 'Central Cafe',
-    likes: 42,
-    timeAgo: '4h ago'
-  },
-  {
-    id: 'mock-3',
-    authorName: 'Rohan Verma',
-    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Rohan',
-    authorBranch: 'B.Tech ECE · 2nd Year',
-    photoUrl: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&auto=format&fit=crop&q=80',
-    caption: 'Building real-time peer matching algorithms for Meetify! Exciting updates coming soon 💻🔥',
-    category: 'Project Showcase',
-    location: 'Library Quiet Zone',
-    likes: 38,
-    timeAgo: '6h ago'
-  },
-  {
-    id: 'mock-4',
-    authorName: 'Kavya Patel',
-    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Kavya',
-    authorBranch: 'B.Des · 2nd Year',
-    photoUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80',
-    caption: 'Jamming at the open-air amphitheater for tomorrow acoustic night! Come vibe with us 🎸🎤',
-    category: 'Campus Event',
-    location: 'Amphitheater',
-    likes: 56,
-    timeAgo: '8h ago'
-  },
-  {
-    id: 'mock-5',
-    authorName: 'Vikram Singh',
-    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Vikram',
-    authorBranch: 'B.Tech AI · 4th Year',
-    photoUrl: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80',
-    caption: '3AM energy drinks & final pitch deck prep for HackCampus 2026! 🚀🏆',
-    category: 'Hackathon',
-    location: 'Incubation Hub',
-    likes: 61,
-    timeAgo: '12h ago'
-  },
-  {
-    id: 'mock-6',
-    authorName: 'Priya Nair',
-    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Priya',
-    authorBranch: 'B.Arch · 3rd Year',
-    photoUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&auto=format&fit=crop&q=80',
-    caption: 'Golden hour light hitting the main quad courtyard today ✨📸',
-    category: 'Photography',
-    location: 'Main Lawn',
-    likes: 79,
-    timeAgo: '1d ago'
-  },
-  {
-    id: 'mock-7',
-    authorName: 'Siddharth Mehta',
-    authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Siddharth',
-    authorBranch: 'B.Tech ME · 3rd Year',
-    photoUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&auto=format&fit=crop&q=80',
-    caption: 'Inter-branch basketball finals tonight at 7 PM! Cheer for CSE! 🏀🔥',
-    category: 'Sports Fest',
-    location: 'Sports Complex',
-    likes: 88,
-    timeAgo: '1d ago'
-  }
-];
+// Mock posts removed - using live backend data
 
 export default function FeedClient() {
   const router = useRouter();
@@ -252,10 +168,9 @@ export default function FeedClient() {
   const experiences = expData?.experiences || [];
   const bookings = bkData?.bookings || [];
   const campusPosts = postsData?.posts || [];
-  const [localPosts, setLocalPosts] = useState([]);
-  const displayPosts = localPosts.length > 0 
-    ? [...localPosts, ...(campusPosts.length > 0 ? campusPosts : DEFAULT_MOCK_POSTS)] 
-    : (campusPosts.length > 0 ? campusPosts : DEFAULT_MOCK_POSTS);
+  
+  // Use real backend posts exclusively
+  const displayPosts = campusPosts;
   const dbHydrated = expData !== undefined; // True once SWR has data
   
   const [likedPosts, setLikedPosts] = useState({});
@@ -328,70 +243,88 @@ export default function FeedClient() {
   const [newExpLocation, setNewExpLocation] = useState('');
   const [createLoading, setCreateLoading] = useState(false);
 
-  const [joinedGroups, setJoinedGroups] = useState({});
+  const [joinedGroups, setJoinedGroups] = useState(currentUser?.joinedGroups || {});
   const [groupFilter, setGroupFilter] = useState('All');
   const [actionLoadingId, setActionLoadingId] = useState(null); // bookingId being accepted/declined
 
-  // Load joined groups on mount
+  // Initialize from user context
   useEffect(() => {
-    if (currentUser && typeof window !== 'undefined') {
-      const stored = localStorage.getItem(`joined_groups_${currentUser.id}`);
-      if (stored) {
-        try {
-          setJoinedGroups(JSON.parse(stored));
-        } catch (e) {
-          console.error(e);
-        }
-      }
+    if (currentUser?.joinedGroups) {
+      setJoinedGroups(currentUser.joinedGroups);
     }
   }, [currentUser]);
 
-  const saveJoinedGroups = (nextJoined) => {
+  const saveJoinedGroups = async (nextJoined) => {
     setJoinedGroups(nextJoined);
-    if (currentUser && typeof window !== 'undefined') {
-      localStorage.setItem(`joined_groups_${currentUser.id}`, JSON.stringify(nextJoined));
+    if (currentUser) {
+      try {
+        await fetch('/api/users/groups', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ groups: nextJoined })
+        });
+      } catch (err) {
+        console.error('Failed to sync groups', err);
+      }
     }
   };
 
   const handlePublishPost = async () => {
-    if (!postFilePreview) {
+    if (!postFile) {
       toast.error('Please select or upload a photo!');
       return;
     }
     setPostUploading(true);
     try {
-      const newPost = {
-        id: `post-${Date.now()}`,
-        authorId: currentUser?.id || 'demo-user',
-        authorName: currentUser?.name || 'Chirag',
-        authorPhoto: currentUser?.photoURL || avatarUrl(currentUser?.id, currentUser?.name || 'Chirag'),
-        authorBranch: currentUser?.branch || 'B.Tech CSE · 3rd Year',
-        photoUrl: postFilePreview,
-        caption: postCaption || 'Check out my latest campus photo showcase! ✨',
+      // 1. Compress image before uploading
+      const options = { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true };
+      const compressedFile = await imageCompression(postFile, options);
+
+      // 2. Upload to Cloudinary using unsigned preset
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'meetify_unsigned';
+
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+      formData.append('upload_preset', uploadPreset);
+
+      const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!cloudRes.ok) throw new Error('Cloudinary image upload failed');
+      const cloudData = await cloudRes.json();
+      const photoUrl = cloudData.secure_url;
+
+      const newPostPayload = {
+        photoUrl,
+        caption: postCaption || '',
         category: postCategory || 'Campus Work',
-        location: postLocation || 'Main Campus',
-        likes: 1,
-        timeAgo: 'Just now',
-        createdAt: new Date().toISOString()
+        location: postLocation || 'Main Campus'
       };
 
-      try {
-        await fetch('/api/posts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newPost)
-        });
-        mutatePosts();
-      } catch (e) {
-        console.warn('API post fallback to local:', e);
-      }
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPostPayload)
+      });
+      
+      if (!res.ok) throw new Error('Failed to create post');
+      
+      const { post } = await res.json();
+      
+      // Optimistic update of SWR cache
+      mutatePosts({ posts: [post, ...campusPosts] }, false);
 
-      setLocalPosts(prev => [newPost, ...prev]);
       setShowPostModal(false);
+      setPostFile(null);
+      setPostFilePreview(null);
       setPostCaption('');
       confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
       toast.success('Your photo work has been posted to the Campus Feed!');
     } catch (e) {
+      console.error(e);
       toast.error('Failed to publish post. Try again.');
     } finally {
       setPostUploading(false);
@@ -495,63 +428,7 @@ export default function FeedClient() {
     }
   };
 
-  const handleCreatePost = async () => {
-    if (!postFile) {
-      toast.error('Please select a photo to share!');
-      return;
-    }
-    setPostUploading(true);
-    try {
-      // 1. Compress image before uploading
-      const options = { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true };
-      const compressedFile = await imageCompression(postFile, options);
 
-      // 2. Upload to Cloudinary using unsigned preset
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'meetify_unsigned';
-
-      const formData = new FormData();
-      formData.append('file', compressedFile);
-      formData.append('upload_preset', uploadPreset);
-
-      const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!cloudRes.ok) throw new Error('Cloudinary image upload failed');
-      const cloudData = await cloudRes.json();
-      const photoUrl = cloudData.secure_url;
-
-      // 3. Post to backend
-      const res = await fetch('/api/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          photoUrl,
-          caption: postCaption,
-          category: postCategory,
-          location: 'Campus',
-        }),
-      });
-
-      if (res.ok) {
-        toast.success('Campus Moment posted!');
-        setShowPostModal(false);
-        setPostFile(null);
-        setPostFilePreview('');
-        setPostCaption('');
-        mutatePosts();
-      } else {
-        toast.error('Failed to save post.');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Upload failed. Try again.');
-    } finally {
-      setPostUploading(false);
-    }
-  };
 
   const handleCreateExperience = async () => {
     if (!newExpTitle.trim() || !newExpLocation.trim()) {
@@ -797,143 +674,187 @@ export default function FeedClient() {
   }
 
   return (
-    <div className="space-y-6 pb-24 px-1 sm:px-2 select-none">
+    <div className="space-y-7 pb-24 px-1 sm:px-2 select-none animate-in fade-in duration-300">
 
       {/* ── HEADER SECTION ────────────────────────── */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h1 className="text-2xl font-extrabold text-zinc-950 tracking-tight">
-            Hi, {userData?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'Chirag'}
-          </h1>
-          <p className="text-xs text-zinc-500 font-bold mt-1">
-            Who are you meeting today?
-          </p>
+      <div className="bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/60 border border-indigo-100/80 rounded-3xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(99,102,241,0.04)]">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0">
+              <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
+                <img 
+                  src={getUserAvatarUrl(currentUser)} 
+                  alt={currentUser?.full_name || 'User'} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-zinc-950 tracking-tight truncate">
+                  Hi, {userData?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'Chirag'} 👋
+                </h1>
+              </div>
+              <p className="text-xs text-zinc-500 font-bold mt-0.5 truncate">
+                Who are you meeting on campus today?
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Sparks Balance Badge */}
+            <Link 
+              href="/wallet"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 hover:bg-amber-500/20 transition-all cursor-pointer shadow-xs active:scale-95"
+              title="View Spark Wallet"
+            >
+              <Zap size={14} className="fill-current text-amber-500 animate-pulse" />
+              <span className="text-xs font-black tracking-tight">{sparksBalance}</span>
+            </Link>
+
+            {/* Live Free Now Toggle Button */}
+            <button 
+              onClick={handleFreeNowToggle}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-[10.5px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95 ${
+                userData?.isLiveOnCampus 
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-emerald-600 shadow-emerald-500/20' 
+                  : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300'
+              }`}
+            >
+              {userData?.isLiveOnCampus ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                  <span>Live Now</span>
+                </>
+              ) : (
+                <>
+                  <MapPin size={13} className="text-indigo-600" />
+                  <span>Free Now</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
-        <button 
-          onClick={handleFreeNowToggle}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-wider transition-all shadow-sm ${
-            userData?.isLiveOnCampus 
-              ? 'bg-emerald-500 text-white border-emerald-600' 
-              : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
-          }`}
-        >
-          {userData?.isLiveOnCampus ? (
-            <>
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              Live Now
-            </>
-          ) : (
-            <>
-              <MapPin size={12} />
-              Free Now
-            </>
-          )}
-        </button>
       </div>
 
-
-
       {/* ── SEARCH BAR ─────────────────────────── */}
-      <div className="relative flex items-center gap-3">
+      <div className="relative flex items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400 pointer-events-none" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-500 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search people, experiences, groups..."
-            className="w-full bg-[#f3f4f6]/60 border border-transparent focus:border-zinc-205 focus:bg-white rounded-2xl pl-12 pr-4 py-3.5 text-xs font-bold text-zinc-850 placeholder-zinc-500/80 focus:outline-none transition-all shadow-inner"
+            placeholder="Search peers, campus experiences, gigs & groups..."
+            className="w-full bg-white border border-zinc-200/90 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl pl-11 pr-10 py-3.5 text-xs font-bold text-zinc-900 placeholder-zinc-400 focus:outline-none transition-all shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
           />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 p-1"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 
       {/* ── PEOPLE YOU MIGHT VIBE WITH ─────────────────────────── */}
-      <div className="space-y-4">
+      <div className="space-y-4 pt-1">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black text-zinc-950 tracking-tight">People you might vibe with</h3>
-          <Link href="/discover" className="text-xs font-black text-[#7c3aed] hover:text-indigo-850 transition-colors">
-            See all
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm sm:text-base font-black text-zinc-950 tracking-tight">People you might vibe with</h3>
+            <span className="text-[9.5px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full border border-indigo-100">
+              Campus Peers
+            </span>
+          </div>
+          <Link href="/discover" className="text-xs font-black text-[#7c3aed] hover:text-indigo-850 transition-colors flex items-center gap-0.5">
+            <span>See all</span>
+            <ChevronRight size={14} />
           </Link>
         </div>
 
         {vibeUsers.filter(u => !dismissedVibes[u.id]).length === 0 ? (
-          <div className="text-center py-8 bg-zinc-50 border border-zinc-100 rounded-2xl">
-            <Users className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
-            <h4 className="text-xs font-black text-zinc-500">No one is active nearby</h4>
-            <p className="text-[10px] text-zinc-400 font-semibold mt-1">Check back later when students are online.</p>
+          <div className="text-center py-9 bg-white border border-zinc-200/80 rounded-3xl p-6 shadow-xs">
+            <Users className="w-9 h-9 text-indigo-300 mx-auto mb-2.5" />
+            <h4 className="text-xs font-black text-zinc-700">No active campus peers right now</h4>
+            <p className="text-[10.5px] text-zinc-400 font-semibold mt-1">Check back later when more students toggle "Free Now".</p>
           </div>
         ) : (
-          <div className="flex gap-3.5 overflow-x-auto no-scrollbar pt-1.5 pb-4 px-4 -mx-4">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pt-1 pb-4 px-4 -mx-4 scroll-smooth">
             {vibeUsers.map((user) => {
-            if (dismissedVibes[user.id]) return null;
-            return (
-              <div
-                key={user.id}
-                onClick={() => router.push(`/users/${user.id}`)}
-                className="w-[170px] sm:w-[180px] flex-shrink-0 bg-white border border-zinc-100 rounded-[2rem] p-4.5 flex flex-col items-center justify-between text-center shadow-[0_4px_16px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_24px_rgba(124,58,237,0.1)] hover:border-purple-200 cursor-pointer group"
-              >
-                {/* Avatar with circle bg */}
-                <div className="relative w-[84px] h-[84px] rounded-full bg-[#e8e4ff] p-[3px] mb-3.5 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
-                    <Image src={getUserAvatarUrl(user)} alt={user.full_name} fill sizes="84px" style={{ objectFit: 'cover' }} />
+              if (dismissedVibes[user.id]) return null;
+              return (
+                <div
+                  key={user.id}
+                  onClick={() => router.push(`/users/${user.id}`)}
+                  className="w-[185px] sm:w-[195px] flex-shrink-0 bg-white border border-purple-100/90 rounded-[2.2rem] p-4 flex flex-col items-center justify-between text-center shadow-[0_4px_20px_rgba(124,58,237,0.04)] hover:shadow-[0_12px_32px_rgba(124,58,237,0.14)] hover:border-purple-300 transition-all duration-300 cursor-pointer group hover:-translate-y-1 relative"
+                >
+                  {/* Avatar with Halo Border & Live Badge */}
+                  <div className="relative w-[88px] h-[88px] rounded-full p-[3px] bg-gradient-to-tr from-purple-500 via-indigo-500 to-pink-500 mb-3 group-hover:scale-105 transition-transform duration-300 shadow-sm">
+                    <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
+                      <Image src={getUserAvatarUrl(user)} alt={user.full_name} fill sizes="88px" style={{ objectFit: 'cover' }} />
+                    </div>
+                    {/* Live Online Badge */}
+                    <span className="absolute bottom-0.5 right-0.5 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full shadow-xs flex items-center justify-center">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    </span>
+                  </div>
+
+                  {/* Name */}
+                  <div className="w-full mb-1">
+                    <span className="text-xs font-black text-zinc-950 tracking-tight truncate block">
+                      {user.full_name}
+                    </span>
+                    <span className="inline-block text-[9.5px] font-bold text-indigo-600 bg-indigo-50/80 px-2.5 py-0.5 rounded-full border border-indigo-100 mt-1 uppercase tracking-wider">
+                      {user.year} Yr · {user.branch}
+                    </span>
+                  </div>
+
+                  <p className="text-[9.5px] font-bold text-zinc-400 uppercase tracking-wider leading-none mt-1">
+                    {user.college}
+                  </p>
+
+                  {/* Interest Chips */}
+                  <div className="flex flex-wrap gap-1 mt-3 justify-center mb-4">
+                    {user.interests.slice(0, 3).map((tag, idx) => (
+                      <span key={`${tag}-${idx}`} className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="w-full flex items-center gap-2 mt-auto">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDismissedVibes(prev => ({ ...prev, [user.id]: true }));
+                      }}
+                      className="flex-shrink-0 w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 flex items-center justify-center transition-all cursor-pointer active:scale-90"
+                      title="Dismiss"
+                    >
+                      <X size={13} strokeWidth={2.5} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        confetti({ particleCount: 80, spread: 55, origin: { y: 0.6 } });
+                        setDismissedVibes(prev => ({ ...prev, [user.id]: true }));
+                        router.push(`/users/${user.id}`);
+                      }}
+                      className="flex-1 h-8 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[10.5px] font-black flex items-center justify-center gap-1 transition-all cursor-pointer shadow-md active:scale-95 shadow-purple-500/20"
+                    >
+                      <span>Meet {user.spark_charge}</span>
+                      <Zap size={11} className="fill-current text-yellow-300" />
+                    </button>
                   </div>
                 </div>
-
-                {/* Name & online dot */}
-                <div className="flex items-center gap-1.5 mb-1 justify-center">
-                  <span className="text-xs font-black text-zinc-950 uppercase tracking-tight truncate max-w-[120px]">
-                    {user.full_name}
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                </div>
-
-                {/* Details */}
-                <p className="text-[9.5px] font-black text-zinc-400 uppercase tracking-wider leading-none">
-                  {user.year} Year · {user.branch}
-                </p>
-                <p className="text-[9.5px] font-bold text-zinc-400 mt-1 uppercase tracking-wider leading-none">
-                  {user.college}
-                </p>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1 mt-3 justify-center mb-4">
-                  {user.interests.map((tag, idx) => (
-                    <span key={`${tag}-${idx}`} className="text-[8px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-full bg-[#f3f0ff] text-[#7c3aed]">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="w-full flex items-center gap-2 mt-1">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDismissedVibes(prev => ({ ...prev, [user.id]: true }));
-                    }}
-                    className="flex-shrink-0 w-9 h-9 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 flex items-center justify-center transition-all cursor-pointer active:scale-90"
-                    title="Dismiss"
-                  >
-                    <X size={14} strokeWidth={2.5} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      confetti({ particleCount: 80, spread: 55, origin: { y: 0.6 } });
-                      setDismissedVibes(prev => ({ ...prev, [user.id]: true }));
-                      router.push(`/users/${user.id}`);
-                    }}
-                    className="flex-1 h-9 rounded-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-[11px] font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95"
-                  >
-                    Meet {user.spark_charge} <Zap size={12} className="fill-current text-yellow-300" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
         )}
       </div>
 
@@ -1036,135 +957,175 @@ export default function FeedClient() {
         </div>
       </div>
 
-      {/* ── CAMPUS SHOWCASE & WORK FEED ───────────────────── */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      {/* ── CAMPUS SHOWCASE & WORK FEED (INSTA / TWITTER X STYLE) ───────────────────── */}
+      <div className="space-y-4 pt-3">
+        <div className="flex items-center justify-between gap-2 pb-1 border-b border-zinc-100">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-black text-zinc-950 tracking-tight">Campus Feed & Work Showcase</h3>
-            <span className="text-[9px] font-black uppercase tracking-wider bg-purple-50 border border-purple-200 text-purple-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-              Live Work <Sparkles size={9} className="text-purple-600" />
+            <h3 className="text-sm sm:text-base font-black text-zinc-950 tracking-tight">Campus Feed & Activity</h3>
+            <span className="text-[9.5px] font-black uppercase tracking-wider bg-purple-50 border border-purple-200/80 text-purple-700 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              Live Feed <Sparkles size={10} className="text-purple-600" />
             </span>
           </div>
 
           <button
             onClick={() => setShowPostModal(true)}
-            className="text-[10.5px] font-black uppercase tracking-wider bg-zinc-900 hover:bg-black text-white px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1 shadow-xs active:scale-95 cursor-pointer self-start sm:self-auto"
+            className="text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 py-2 rounded-2xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
           >
-            <Camera size={12} strokeWidth={2.5} />
+            <Camera size={13} strokeWidth={2.5} />
             <span>Post Work / Photo</span>
           </button>
         </div>
 
-        <div className="flex gap-4 overflow-x-auto no-scrollbar pt-1.5 pb-4 px-4 -mx-4">
+        {/* Stacked Vertical Post Feed - Signature Meetify Campus Design */}
+        <div className="space-y-6 max-w-xl mx-auto pt-2">
           {displayPosts.map((post) => {
             const isLiked = likedPosts[post.id];
             const currentLikes = (post.likes || 0) + (isLiked ? 1 : 0);
             return (
               <div 
                 key={post.id}
-                className="w-[260px] sm:w-[275px] flex-shrink-0 bg-white border border-zinc-200/80 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 group flex flex-col justify-between"
+                className="bg-gradient-to-b from-white via-white to-purple-50/20 border border-zinc-200/90 rounded-[2rem] p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(124,58,237,0.08)] hover:border-purple-200 transition-all duration-300 space-y-3.5 group"
               >
-                <div>
-                  {/* Author Header */}
-                  <div className="p-3 flex items-center justify-between border-b border-zinc-100/60 bg-zinc-50/40">
-                    <div 
-                      onClick={() => post.authorId && router.push(`/users/${post.authorId}`)}
-                      className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
-                    >
+                {/* 1. Student Header & Quick Collab CTA */}
+                <div className="flex items-center justify-between gap-3">
+                  <div 
+                    onClick={() => post.authorId && router.push(`/users/${post.authorId}`)}
+                    className="flex items-center gap-3 min-w-0 cursor-pointer group/author"
+                  >
+                    <div className="relative flex-shrink-0">
                       <img 
                         src={post.authorPhoto || avatarUrl(post.authorId, post.authorName)} 
                         alt={post.authorName || 'Student'} 
-                        className="w-7 h-7 rounded-full object-cover border border-purple-200 flex-shrink-0"
+                        className="w-11 h-11 rounded-2xl object-cover border border-purple-100 shadow-2xs group-hover/author:scale-105 transition-transform"
                       />
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-black text-zinc-900 truncate leading-none">{post.authorName || 'Campus Peer'}</p>
-                        <p className="text-[9px] font-bold text-zinc-400 truncate mt-0.5">{post.authorBranch || 'Student'}</p>
-                      </div>
+                      <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full" />
                     </div>
-                    <span className="text-[9px] font-bold text-zinc-400 flex-shrink-0">{post.timeAgo || 'Recently'}</span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="text-sm font-black text-zinc-950 group-hover/author:text-purple-600 transition-colors truncate">
+                          {post.authorName || 'Campus Peer'}
+                        </h4>
+                        <span className="text-[9.5px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md border border-indigo-100/80 flex-shrink-0">
+                          {post.authorBranch || 'CSE'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-bold text-zinc-400 truncate mt-0.5">
+                        {post.location || 'Campus'} · {post.timeAgo || 'Recently'}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Photo Banner with aspect ratio 4/3 */}
+                  {/* Direct Campus Collab Action */}
+                  <button
+                    onClick={() => {
+                      if (post.authorId) router.push(`/chats?userId=${post.authorId}`);
+                      else router.push('/chats');
+                    }}
+                    className="flex-shrink-0 text-[11px] font-black text-purple-700 bg-purple-50 hover:bg-purple-600 hover:text-white px-3.5 py-1.5 rounded-full border border-purple-200/80 transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1.5"
+                  >
+                    <MessageCircle size={13} />
+                    <span>Collab</span>
+                  </button>
+                </div>
+
+                {/* 2. Framed Portfolio Photo Banner */}
+                {post.photoUrl && (
                   <div 
                     onClick={() => setSelectedPostPhoto(post)}
-                    className="relative aspect-[4/3] w-full bg-zinc-950 overflow-hidden cursor-pointer group/img"
+                    className="relative w-full aspect-[4/3] sm:aspect-[16/10] rounded-2xl overflow-hidden bg-zinc-950 cursor-pointer group/img shadow-2xs"
                   >
                     <img 
                       src={post.photoUrl} 
-                      alt={post.caption || 'Campus Post'} 
-                      className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-500"
+                      alt={post.caption || 'Campus Showcase'} 
+                      className="w-full h-full object-cover group-hover/img:scale-103 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="text-[10px] font-black text-white bg-black/60 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 border border-white/20">
-                        <Search size={11} /> View Full Photo
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-xs font-black text-white bg-black/60 backdrop-blur-md px-4 py-2 rounded-full uppercase tracking-wider flex items-center gap-2 border border-white/20">
+                        <Search size={14} /> Full View
                       </span>
                     </div>
-                    <span className="absolute top-2.5 left-2.5 text-[9px] font-black text-white bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-white/10 shadow-xs">
-                      {post.category || 'Showcase'}
+                    
+                    {/* Meetify Category Chip */}
+                    <span className="absolute top-3 left-3 text-[10px] font-black text-white bg-purple-600/90 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider border border-white/20 shadow-xs flex items-center gap-1">
+                      <Sparkles size={10} />
+                      <span>{post.category || 'Showcase'}</span>
                     </span>
-                    {post.location && (
-                      <span className="absolute bottom-2.5 left-2.5 text-[9px] font-semibold text-white/90 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-md flex items-center gap-1">
-                        <MapPin size={9} /> {post.location}
-                      </span>
-                    )}
                   </div>
+                )}
 
-                  {/* Caption - only rendered if caption exists */}
-                  {post.caption ? (
-                    <div className="p-3 pt-2.5 pb-1">
-                      <p className="text-[11px] font-semibold text-zinc-700 leading-snug line-clamp-2">
-                        {post.caption}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
+                {/* 3. Caption Box */}
+                {post.caption && (
+                  <div className="pt-0.5">
+                    <p className="text-[13px] sm:text-sm text-zinc-800 leading-snug font-medium">
+                      {post.caption}
+                    </p>
+                  </div>
+                )}
 
-                {/* Footer Actions */}
-                <div className="p-3 pt-2 flex items-center justify-between border-t border-zinc-100/80">
+                {/* 4. Action Dock with Vibe Counter & Quick Share */}
+                <div className="pt-2 flex items-center justify-between border-t border-zinc-100/90">
                   <div className="flex items-center gap-3">
+                    {/* Dynamic Vibe Button */}
                     <button
                       onClick={() => {
                         const nextLiked = !isLiked;
                         setLikedPosts(prev => ({ ...prev, [post.id]: nextLiked }));
+                        
+                        // Optimistic SWR Update
+                        const updatedPosts = campusPosts.map(p => 
+                          p.id === post.id 
+                            ? { ...p, likes: currentLikes + (nextLiked ? 1 : -1) } 
+                            : p
+                        );
+                        mutatePosts({ posts: updatedPosts }, false);
+
                         if (nextLiked) {
-                          confetti({ particleCount: 35, spread: 50, origin: { y: 0.7 } });
+                          confetti({ particleCount: 50, spread: 60, origin: { y: 0.65 } });
+                          
+                          // Actual API Call
+                          fetch(`/api/posts/${post.id}/like`, { method: 'POST' })
+                            .then(res => res.json())
+                            .then(data => {
+                               if (data.ok) {
+                                  // Update cache with real server count silently
+                                  mutatePosts({ posts: campusPosts.map(p => p.id === post.id ? { ...p, likes: data.likes } : p) }, false);
+                               }
+                            }).catch(console.error);
                         }
                       }}
-                      className={`flex items-center gap-1.5 text-[11px] font-black transition-all cursor-pointer ${
-                        isLiked ? 'text-rose-500 scale-105' : 'text-zinc-500 hover:text-rose-500'
+                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer ${
+                        isLiked 
+                          ? 'bg-rose-50 text-rose-600 border border-rose-200 scale-105 shadow-xs' 
+                          : 'bg-zinc-100/80 text-zinc-600 hover:bg-rose-50 hover:text-rose-600'
                       }`}
                     >
-                      <Heart size={14} className={isLiked ? 'fill-current text-rose-500' : ''} />
-                      <span>{currentLikes}</span>
+                      <Heart size={15} className={isLiked ? 'fill-current text-rose-600' : ''} />
+                      <span>{currentLikes} Vibes</span>
                     </button>
 
+                    {/* Share Button */}
                     <button 
                       onClick={() => {
-                        if (post.authorId) {
-                          router.push(`/chats?userId=${post.authorId}`);
+                        if (typeof window !== 'undefined' && navigator.share) {
+                          navigator.share({ title: post.caption || 'Campus Post', url: window.location.href });
                         } else {
-                          toast.info(`Connecting with ${post.authorName || 'Peer'}...`);
-                          router.push('/chats');
+                          toast.success('Link copied!');
                         }
                       }}
-                      className="flex items-center gap-1.5 text-[11px] font-black text-zinc-500 hover:text-purple-600 transition-colors cursor-pointer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 transition-all cursor-pointer"
                     >
-                      <MessageCircle size={14} />
-                      <span>Chat</span>
+                      <Share2 size={14} />
+                      <span>Share</span>
                     </button>
                   </div>
 
+                  {/* Bookmark Button */}
                   <button 
-                    onClick={() => {
-                      if (typeof window !== 'undefined' && navigator.share) {
-                        navigator.share({ title: post.caption || 'Campus Post', url: window.location.href });
-                      } else {
-                        toast.success('Post link copied to clipboard!');
-                      }
-                    }}
-                    className="text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer p-1"
+                    onClick={() => toast.success('Saved to bookmarks!')}
+                    className="text-zinc-400 hover:text-purple-600 p-2 rounded-full hover:bg-purple-50 transition-colors cursor-pointer"
+                    title="Save"
                   >
-                    <Share2 size={13} />
+                    <Bookmark size={17} />
                   </button>
                 </div>
               </div>
@@ -1173,20 +1134,18 @@ export default function FeedClient() {
         </div>
       </div>
 
-
-
       {/* ── CAMPUS GROUPS SECTION ─────────────────────────── */}
-      <div className="space-y-4 pt-8 border-t border-zinc-200/60">
+      <div className="space-y-4 pt-6 border-t border-zinc-200/70">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
-              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-900">Campus Groups & Channels</h3>
+              <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest text-zinc-900">Campus Groups & Channels</h3>
             </div>
-            <p className="text-[11px] text-zinc-500 font-semibold mt-0.5">Join paid or free campus discussion communities</p>
+            <p className="text-[11px] text-zinc-500 font-semibold mt-0.5">Join campus discussion hubs & exclusive communities</p>
           </div>
           
-          <div className="flex items-center gap-1 bg-zinc-100/80 p-1 rounded-xl self-start sm:self-auto border border-zinc-200/60">
+          <div className="flex items-center gap-1 bg-zinc-100/90 p-1 rounded-xl self-start sm:self-auto border border-zinc-200/60">
             {['All', 'Free', 'Premium'].map((filter) => (
               <button
                 key={filter}
@@ -1211,21 +1170,21 @@ export default function FeedClient() {
             return (
               <div 
                 key={group.name}
-                className="group relative flex items-center justify-between p-4 bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:border-purple-300 hover:shadow-[0_8px_24px_rgba(124,58,237,0.06)] transition-all duration-200 cursor-pointer"
+                className="group relative flex items-center justify-between p-4 sm:p-4 bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-purple-300 hover:shadow-[0_8px_24px_rgba(124,58,237,0.08)] transition-all duration-200 cursor-pointer"
                 onClick={() => handleJoinGroup(group)}
               >
                 <div className="flex items-center gap-4 min-w-0 flex-1">
                   {/* Category Icon Avatar */}
                   <div className="relative flex-shrink-0">
                     <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform"
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform"
                       style={{ background: groupTheme.bg, border: `1px solid ${groupTheme.border}`, color: groupTheme.color }}
                     >
-                      <GroupIcon size={20} strokeWidth={2.2} />
+                      <GroupIcon size={21} strokeWidth={2.2} />
                     </div>
                     {group.isOfficial && (
-                      <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                        <Check size={9} className="text-white" strokeWidth={3.5} />
+                      <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white shadow-xs">
+                        <Check size={10} className="text-white" strokeWidth={3.5} />
                       </span>
                     )}
                   </div>
@@ -1233,7 +1192,7 @@ export default function FeedClient() {
                   {/* Info */}
                   <div className="flex-1 min-w-0 pr-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-[13px] font-black text-zinc-950 tracking-tight group-hover:text-purple-700 transition-colors">
+                      <h4 className="text-[13px] sm:text-sm font-black text-zinc-950 tracking-tight group-hover:text-purple-700 transition-colors">
                         {group.name}
                       </h4>
                       <span 
@@ -1268,7 +1227,7 @@ export default function FeedClient() {
                 {/* Action CTA Button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); handleJoinGroup(group); }}
-                  className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-sm ${
+                  className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-xs ${
                     hasJoined
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
                       : group.isPaid
