@@ -16,12 +16,17 @@ export async function GET() {
     const snap = await adminDb
       .collection('chats')
       .where('participants', 'array-contains', user.uid)
-      .orderBy('lastMessageAt', 'desc')
-      .limit(50)
       .get();
 
     const chats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return NextResponse.json({ chats });
+    // Client-side sort by lastMessageAt descending
+    chats.sort((a, b) => {
+      const timeA = a.lastMessageAt?.toMillis ? a.lastMessageAt.toMillis() : 0;
+      const timeB = b.lastMessageAt?.toMillis ? b.lastMessageAt.toMillis() : 0;
+      return timeB - timeA;
+    });
+
+    return NextResponse.json({ chats: chats.slice(0, 50) });
   } catch (err) {
     console.error('[GET /api/chats]', err.message);
     return NextResponse.json({ chats: [] });

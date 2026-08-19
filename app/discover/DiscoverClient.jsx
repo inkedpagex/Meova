@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search, Check, MapPin, Zap, Coffee, BookOpen, Activity, Music,
   Layers, Camera, Trophy, Users, Palette, Star,
@@ -99,12 +99,21 @@ function useAlgoliaSearch(query) {
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function DiscoverClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const interestParam = searchParams ? searchParams.get('interest') || searchParams.get('category') : null;
   const { user: currentUser, people: contextPeople } = useUserContext();
   
-  const [activeFilter, setActiveFilter] = useState('All');
-  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState(interestParam ? 'People' : 'All');
+  const [search, setSearch] = useState(interestParam || '');
   const [connectedIds, setConnectedIds] = useState(new Set());
   const [joinedIds, setJoinedIds] = useState(new Set());
+
+  useEffect(() => {
+    if (interestParam) {
+      setSearch(interestParam);
+      setActiveFilter('People');
+    }
+  }, [interestParam]);
   
   const [people, setPeople] = useState(contextPeople || []);
   
@@ -184,10 +193,14 @@ export default function DiscoverClient() {
     });
 
     const list = sorted
-      .filter(p => !search || search.length < 2 || isAlgoliaSearch
-        ? true
-        : p.full_name?.toLowerCase().includes(search.toLowerCase()) || 
-          p.branch?.toLowerCase().includes(search.toLowerCase()))
+      .filter(p => {
+        if (!search || search.length < 2 || isAlgoliaSearch) return true;
+        const q = search.toLowerCase();
+        const nameMatch = p.full_name?.toLowerCase().includes(q);
+        const branchMatch = p.branch?.toLowerCase().includes(q);
+        const interestMatch = (p.interests || []).some(i => i.toLowerCase().includes(q) || q.includes(i.toLowerCase()));
+        return nameMatch || branchMatch || interestMatch;
+      })
       .slice(0, 12);
 
     const liveCount = list.filter(p => p.isLiveOnCampus).length;
@@ -229,10 +242,11 @@ export default function DiscoverClient() {
           <div className="grid grid-cols-2 gap-3">
             {list.map(person => (
               <div key={person.id}
-                className="rounded-3xl p-4 flex flex-col items-center text-center"
+                onClick={() => router.push(`/users/${person.id}`)}
+                className="rounded-3xl p-4 flex flex-col items-center text-center cursor-pointer transition-all hover:border-purple-300 hover:shadow-md group"
                 style={{ background: '#ffffff', border: person.isLiveOnCampus ? '1.5px solid #bbf7d0' : '1px solid #f0f0f0', boxShadow: person.isLiveOnCampus ? '0 0 0 3px rgba(16,185,129,0.06)' : '0 2px 8px rgba(0,0,0,0.03)' }}>
                 <div className="relative mb-3">
-                  <div className="w-16 h-16 rounded-full overflow-hidden"
+                  <div className="w-16 h-16 rounded-full overflow-hidden group-hover:scale-105 transition-transform"
                     style={{ border: person.isLiveOnCampus ? '3px solid #6ee7b7' : '3px solid #ede9fe' }}>
                     <img src={getAvatar(person)} alt={person.full_name} className="w-full h-full object-cover" />
                   </div>
@@ -247,7 +261,7 @@ export default function DiscoverClient() {
                   )}
                 </div>
                 <div className="flex-1 w-full flex flex-col items-center" style={{ marginTop: person.isLiveOnCampus ? 8 : 0 }}>
-                  <span className="text-[13px] font-black truncate max-w-full" style={{ color: '#09090b' }}>{person.full_name}</span>
+                  <span className="text-[13px] font-black truncate max-w-full group-hover:text-purple-600 transition-colors" style={{ color: '#09090b' }}>{person.full_name}</span>
                   <span className="text-[10px] font-semibold mt-0.5" style={{ color: '#a1a1aa' }}>
                     {person.year ? `${person.year} Yr` : ''} {person.branch ? `· ${person.branch}` : ''}
                   </span>
@@ -260,7 +274,10 @@ export default function DiscoverClient() {
                     ))}
                   </div>
                 </div>
-                <button onClick={() => connectedIds.has(person.id) ? router.push(`/messages?user=${encodeURIComponent(person.full_name)}`) : handleConnect(person)}
+                <button onClick={(e) => {
+                  e.stopPropagation();
+                  connectedIds.has(person.id) ? router.push(`/messages?user=${encodeURIComponent(person.full_name)}`) : handleConnect(person);
+                }}
                   className="mt-3 w-full py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
                   style={connectedIds.has(person.id)
                     ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }

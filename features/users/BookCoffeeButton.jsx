@@ -92,11 +92,12 @@ export default function BookCoffeeButton({ targetUserId, targetName, isLoggedIn,
       {/* Trigger button */}
       <button
         onClick={handleClick}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 hover:opacity-90 uppercase tracking-wide cursor-pointer shadow-md"
-        style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}
+        className="w-full flex items-center justify-center gap-1.5 px-3 py-3 rounded-2xl text-[11px] sm:text-xs font-black transition-all active:scale-95 hover:opacity-90 uppercase tracking-wide cursor-pointer shadow-md whitespace-nowrap"
+        style={{ background: `linear-gradient(135deg, ${color}, #9333ea)`, color: '#ffffff', border: 'none' }}
       >
-        <Layers className="w-3.5 h-3.5" />
-        Reserve Cabin · {COFFEE_COST} ⚡
+        <Layers className="w-3.5 h-3.5 text-white flex-shrink-0" />
+        <span>Reserve {COFFEE_COST}</span>
+        <Zap className="w-3 h-3 text-yellow-300 fill-current flex-shrink-0" />
       </button>
 
       {/* Modal overlay */}

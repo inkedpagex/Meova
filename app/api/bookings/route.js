@@ -40,7 +40,7 @@ export async function POST(request) {
     if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
     const body = await request.json();
-    const { experienceId, title, price, duration, location, category, hostId, hostName, date, time } = body;
+    const { experienceId, title, price, duration, location, category, hostId, hostName, date, time, agenda } = body;
 
     if (!experienceId || !hostId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -103,6 +103,7 @@ export async function POST(request) {
       guestName: user.full_name || '',
       date: date || '',
       time: time || '',
+      agenda: agenda || '',
       status: 'Requested',
       meetingCode,
       scheduledAt,
@@ -128,7 +129,7 @@ export async function POST(request) {
       .collection('notifications')
       .add({
         title: 'New Booking Request ⚡',
-        body: `${user.full_name || 'Someone'} requested to join "${title}"`,
+        body: `${user.full_name || 'Someone'} requested ${title}. ${agenda ? `Agenda: "${agenda}"` : ''}`,
         type: 'booking',
         bookingId: ref.id,
         read: false,

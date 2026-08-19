@@ -11,7 +11,7 @@ import { getUserAvatarUrl } from '../utils/avatar';
 import { db } from '../lib/firebaseClient';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
-const AUTH_PATHS = ['/login', '/signup'];
+const AUTH_PATHS = ['/login', '/signup', '/onboarding'];
 
 function MeetifyLogo({ size = 32, animate = false }) {
   return (

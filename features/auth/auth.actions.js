@@ -21,15 +21,18 @@ export async function createProfileAdmin(idToken, profileData) {
     const snap = await docRef.get();
 
     if (!snap.exists) {
-      // New user — create full profile
+      // New user — create full profile (profileComplete: false forces onboarding)
       await docRef.set({
         id: uid,
         uid,
         email: decodedToken.email || profileData.email || '',
         full_name: profileData.full_name || decodedToken.name || '',
         photo_url: profileData.photo_url || decodedToken.picture || '',
-        year: profileData.year || '1st',
+        username: '',           // set during onboarding
+        profileComplete: false, // gate: must complete onboarding before accessing app
+        year: profileData.year || '',
         branch: profileData.branch || '',
+        university: profileData.university || '',
         interests: profileData.interests || [],
         bio: profileData.bio || '',
         instagram: profileData.instagram || '',

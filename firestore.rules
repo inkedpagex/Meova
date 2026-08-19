@@ -98,5 +98,17 @@ service cloud.firestore {
         allow update, delete: if false;
       }
     }
+
+    // Usernames shadow collection — uniqueness enforcement
+    // Each doc id is the username, contains { uid }
+    match /usernames/{username} {
+      // Anyone logged in can read (for availability check)
+      allow read: if request.auth != null;
+      // Only the owner can write their own username slot
+      allow create, update: if request.auth != null &&
+        request.resource.data.uid == request.auth.uid;
+      allow delete: if request.auth != null &&
+        resource.data.uid == request.auth.uid;
+    }
   }
 }

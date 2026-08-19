@@ -37,20 +37,24 @@ export default function RightPanel({ people = [], upcomingEvents = [] }) {
             <p className="text-[11px] text-zinc-400 font-semibold italic">No users found</p>
           ) : (
             topPeople.map((person) => (
-              <div key={person.id || person.uid} className="flex items-center justify-between p-3 rounded-2xl border border-zinc-100 hover:border-purple-200 hover:bg-purple-50/30 transition-all">
+              <Link
+                key={person.id || person.uid}
+                href={`/users/${person.id || person.uid}`}
+                className="flex items-center justify-between p-3 rounded-2xl border border-zinc-100 hover:border-purple-200 hover:bg-purple-50/30 transition-all cursor-pointer group"
+              >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border border-purple-100 flex-shrink-0 relative">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border border-purple-100 flex-shrink-0 relative group-hover:scale-105 transition-transform">
                     <Image src={getUserAvatarUrl(person)} alt={person.full_name || 'User'} fill sizes="40px" style={{ objectFit: 'cover' }} />
                   </div>
                   <div className="min-w-0">
-                    <h5 className="text-xs font-black text-zinc-900 truncate">{person.full_name || 'Student'}</h5>
+                    <h5 className="text-xs font-black text-zinc-900 truncate group-hover:text-purple-600 transition-colors">{person.full_name || 'Student'}</h5>
                     <p className="text-[10px] font-bold text-zinc-400 truncate">{person.year || '1st'} Year · {person.branch || 'General'}</p>
                   </div>
                 </div>
-                <Link href={`/users/${person.id || person.uid}`} className="text-[10px] font-black px-3 py-1.5 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-all flex-shrink-0 flex items-center gap-1">
+                <div className="text-[10px] font-black px-3 py-1.5 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-all flex-shrink-0 flex items-center gap-1">
                   Meet {person.spark_charge || 50} <Sparkles size={10} className="fill-current text-yellow-300" />
-                </Link>
-              </div>
+                </div>
+              </Link>
             ))
           )}
         </div>

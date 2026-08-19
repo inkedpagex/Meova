@@ -25,10 +25,10 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
   const [sparksBalance, setSparksBalance] = useState(initialSparks || 0);
 
   // Booking Flow
-  const [bookingDate, setBookingDate] = useState('Monday');
-  const [bookingTime, setBookingTime] = useState('4:00 PM');
+  const [selectedSlot, setSelectedSlot] = useState(null); // { day, time }
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [agenda, setAgenda] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [agreedSafety, setAgreedSafety] = useState(false);
 
@@ -64,12 +64,23 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
       router.push(`/login?next=/experiences/${experienceId}`);
       return;
     }
+    // Pre-select first slot
+    const structuredSlots = Array.isArray(exp?.slots) && exp.slots.length > 0 && typeof exp.slots[0] === 'object'
+      ? exp.slots
+      : [];
+    if (structuredSlots.length > 0 && !selectedSlot) {
+      setSelectedSlot(structuredSlots[0]);
+    }
     setShowModal(true);
   };
 
   const handleConfirmBooking = async () => {
     if (!agreedSafety) {
       alert('Please read and agree to the campus safety reminder before booking.');
+      return;
+    }
+    if (!selectedSlot) {
+      alert('Please select a time slot.');
       return;
     }
     if (sparksBalance < exp.price) {
@@ -80,21 +91,23 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
 
     setBookingLoading(true);
     try {
+      const body = {
+        experienceId: exp.id,
+        title: exp.title,
+        price: exp.price,
+        duration: exp.duration,
+        location: exp.location,
+        category: exp.category,
+        hostId: exp.hostId,
+        hostName: host?.full_name || 'Host',
+        date: selectedSlot?.day || '',
+        time: selectedSlot?.time || '',
+        agenda: agenda.trim()
+      };
       const res = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          experienceId: exp.id,
-          title: exp.title,
-          price: exp.price,
-          duration: exp.duration,
-          location: exp.location,
-          category: exp.category,
-          hostId: exp.hostId,
-          hostName: host?.full_name || 'Host',
-          date: bookingDate,
-          time: bookingTime
-        })
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
@@ -203,38 +216,40 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
       </div>
 
       {/* ── TITLE & MAIN STATS ─────────────────────────────────────── */}
-      <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-3xl p-5 md:p-6 space-y-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
-            {exp.title}
-          </h1>
-          
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)] mt-2">
-            <span className="flex items-center gap-1">
-              <MapPin size={12} className="text-[#6366f1]" />
-              <span className="text-[var(--text-primary)]">{exp.location}</span>
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <Clock size={12} className="text-[#6366f1]" />
-              <span>{exp.duration} Mins duration</span>
-            </span>
+        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-3xl p-5 md:p-6 space-y-4">
+          <div>
+            <h1 className="text-xl md:text-2xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
+              {exp.title}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)] mt-2">
+              <span className="flex items-center gap-1">
+                <MapPin size={12} className="text-[#6366f1]" />
+                <span className="text-[var(--text-primary)]">{exp.location}</span>
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <Clock size={12} className="text-[#6366f1]" />
+                <span>{exp.duration} Mins duration</span>
+              </span>
+            </div>
+          </div>
+
+          {exp.description && (
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-semibold">
+              {exp.description}
+            </p>
+          )}
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {(exp.tags || []).map((t) => (
+              <span key={t} className="text-[9px] font-black uppercase tracking-wider bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] px-3 py-1 rounded-md">
+                {t}
+              </span>
+            ))}
           </div>
         </div>
-
-        <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-semibold">
-          {exp.description}
-        </p>
-
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {exp.tags.map((t) => (
-            <span key={t} className="text-[9px] font-black uppercase tracking-wider bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] px-3 py-1 rounded-md">
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
 
       {/* ── HOST DETAILS CARD (AIRBNB STYLE) ────────────────────────── */}
       <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-3xl p-5 md:p-6 space-y-4">
@@ -423,29 +438,48 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
                 </div>
 
                 <div className="space-y-4 mb-6">
-                  {/* Select Slots */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Available Day</label>
-                      <select 
-                        value={bookingDate} 
-                        onChange={(e) => setBookingDate(e.target.value)}
-                        className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none cursor-pointer"
-                      >
-                        {exp.days.map(d => <option key={d} value={d}>{d}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Time Slot</label>
-                      <select 
-                        value={bookingTime} 
-                        onChange={(e) => setBookingTime(e.target.value)}
-                        className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none cursor-pointer"
-                      >
-                        {exp.slots.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                    </div>
-                  </div>
+                  {/* Slot Picker */}
+                  {(() => {
+                    const structuredSlots = Array.isArray(exp?.slots) && exp.slots.length > 0 && typeof exp.slots[0] === 'object'
+                      ? exp.slots
+                      : [];
+
+                    if (structuredSlots.length === 0) {
+                      return (
+                        <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl p-4">
+                          <p className="text-[10px] font-bold text-[var(--text-muted)] text-center">No time slots set by host</p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div>
+                        <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-2">
+                          Pick a Time Slot
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {structuredSlots.map((slot, i) => {
+                            const isSelected = selectedSlot?.day === slot.day && selectedSlot?.time === slot.time;
+                            return (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() => setSelectedSlot(slot)}
+                                className={`flex flex-col items-center py-3 px-2 rounded-xl border text-center transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-md'
+                                    : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--primary)]'
+                                }`}
+                              >
+                                <span className="text-[10px] font-black uppercase tracking-wide">{slot.day.slice(0,3)}</span>
+                                <span className={`text-[11px] font-black mt-0.5 ${isSelected ? 'text-white' : 'text-[var(--text-primary)]'}`}>{slot.time}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Summary Details */}
                   <div className="rounded-2xl p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-3 text-left">
@@ -460,6 +494,19 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
                         <span className="text-[10px] font-bold text-[var(--text-secondary)] text-right leading-tight">{value}</span>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Pre-Meeting Agenda */}
+                  <div>
+                    <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-2">
+                      Your Goal / Agenda (Optional)
+                    </label>
+                    <textarea 
+                      value={agenda}
+                      onChange={(e) => setAgenda(e.target.value)}
+                      placeholder="e.g., I want to review my resume, or learn about binary trees..."
+                      className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] rounded-xl p-3 outline-none resize-none h-20 placeholder:text-zinc-500"
+                    />
                   </div>
 
                   {/* Safety advisory checkbox */}

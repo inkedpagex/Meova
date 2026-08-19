@@ -246,6 +246,29 @@ export default function FeedClient() {
     }
   };
 
+  const handleFreeNowToggle = async () => {
+    if (!currentUser) return;
+    const isCurrentlyFree = userData?.isLiveOnCampus;
+    const nextState = !isCurrentlyFree;
+    
+    // Optimistic update
+    setUserData(prev => ({ ...prev, isLiveOnCampus: nextState }));
+    if (nextState) toast.success("You are now live! Students nearby can see you.");
+    else toast.info("You are no longer live on campus.");
+
+    try {
+      await fetch('/api/users/free-now', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFree: nextState, location: 'Campus', durationMinutes: 60 })
+      });
+      // Optionally trigger revalidation or SWR mutate here
+    } catch (e) {
+      toast.error("Failed to update status.");
+      setUserData(prev => ({ ...prev, isLiveOnCampus: isCurrentlyFree })); // Revert
+    }
+  };
+
   const handleJoinGroup = async (group) => {
     if (!currentUser) { router.push('/login'); return; }
     if (joinedGroups[group.name]) {
@@ -577,6 +600,26 @@ export default function FeedClient() {
             Who are you meeting today?
           </p>
         </div>
+        <button 
+          onClick={handleFreeNowToggle}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-wider transition-all shadow-sm ${
+            userData?.isLiveOnCampus 
+              ? 'bg-emerald-500 text-white border-emerald-600' 
+              : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
+          }`}
+        >
+          {userData?.isLiveOnCampus ? (
+            <>
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              Live Now
+            </>
+          ) : (
+            <>
+              <MapPin size={12} />
+              Free Now
+            </>
+          )}
+        </button>
       </div>
 
       {/* ── PWA INSTALL PROMPT ──────────────────────── */}
@@ -647,10 +690,11 @@ export default function FeedClient() {
             return (
               <div
                 key={user.id}
-                className="w-[185px] flex-shrink-0 bg-white border border-zinc-100 rounded-[2rem] p-5 flex flex-col items-center justify-between text-center shadow-[0_4px_16px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
+                onClick={() => router.push(`/users/${user.id}`)}
+                className="w-[185px] flex-shrink-0 bg-white border border-zinc-100 rounded-[2rem] p-5 flex flex-col items-center justify-between text-center shadow-[0_4px_16px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_24px_rgba(124,58,237,0.1)] hover:border-purple-200 cursor-pointer group"
               >
                 {/* Avatar with circle bg */}
-                <div className="relative w-[84px] h-[84px] rounded-full bg-[#e8e4ff] p-[3px] mb-3.5 flex items-center justify-center">
+                <div className="relative w-[84px] h-[84px] rounded-full bg-[#e8e4ff] p-[3px] mb-3.5 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
                     <Image src={getUserAvatarUrl(user)} alt={user.full_name} fill sizes="84px" style={{ objectFit: 'cover' }} />
                   </div>
@@ -685,14 +729,19 @@ export default function FeedClient() {
                 <div className="w-full flex items-center gap-2 mt-1">
                   <button
                     type="button"
-                    onClick={() => setDismissedVibes(prev => ({ ...prev, [user.id]: true }))}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDismissedVibes(prev => ({ ...prev, [user.id]: true }));
+                    }}
                     className="flex-shrink-0 w-9 h-9 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 flex items-center justify-center transition-all cursor-pointer active:scale-90"
+                    title="Dismiss"
                   >
                     <X size={14} strokeWidth={2.5} />
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       confetti({ particleCount: 80, spread: 55, origin: { y: 0.6 } });
                       setDismissedVibes(prev => ({ ...prev, [user.id]: true }));
                       router.push(`/users/${user.id}`);

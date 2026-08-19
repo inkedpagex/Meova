@@ -198,6 +198,14 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
               </h2>
             </div>
 
+            {/* Username badge */}
+            {profile?.username && (
+              <span className="inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+                style={{ background: '#f3f0ff', color: '#7c3aed' }}>
+                @{profile.username}
+              </span>
+            )}
+
             {/* Year · Branch (only if filled) */}
             {(yearLabel || branchLabel) && (
               <p className="text-[10px] font-bold mt-1" style={{ color: 'var(--text-secondary)' }}>
