@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Clock, CheckCircle, XCircle, Search, DollarSign, CreditCard } from 'lucide-react';
 
 export default function AdminWithdrawalsPage() {
@@ -8,7 +8,7 @@ export default function AdminWithdrawalsPage() {
   const [remarks, setRemarks] = useState({});
   const [actionLoading, setActionLoading] = useState(null);
 
-  async function fetchWithdrawals() {
+  const fetchWithdrawals = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/list-withdrawals');
       const data = await res.json();
@@ -18,11 +18,12 @@ export default function AdminWithdrawalsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchWithdrawals();
-  }, []);
+  }, [fetchWithdrawals]);
 
   async function handleWithdrawal(id, action) {
     setActionLoading(id);
@@ -67,7 +68,7 @@ export default function AdminWithdrawalsPage() {
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>Withdrawal Requests</h1>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-          Review and approve Creator Earnings withdrawal requests. Payments must be processed manually to the user's details shown below.
+          Review and approve Creator Earnings withdrawal requests. Payments must be processed manually to the user&apos;s details shown below.
         </p>
       </div>
 

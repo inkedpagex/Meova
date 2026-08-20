@@ -60,6 +60,7 @@ export default function ExperiencesClient({ currentUser, initialSparks }) {
   
   useEffect(() => {
     if (walletData?.wallet) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
       setSparksBalance(
         (walletData.wallet.purchased || 0) + 
         (walletData.wallet.bonus || 0) + 

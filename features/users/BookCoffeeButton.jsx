@@ -20,29 +20,30 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
   const router = useRouter();
 
   useEffect(() => {
-    if (open && isLoggedIn) {
+    if (!open || !isLoggedIn) return;
+    let cancelled = false;
+    (async () => {
       setLoadingWallet(true);
       setError('');
-      fetch('/api/wallet')
-        .then((res) => {
-          if (!res.ok) throw new Error('Failed to load wallet');
-          return res.json();
-        })
-        .then((data) => {
-          if (data.wallet) {
-            setWallet(data.wallet);
-          } else {
-            setError('Could not retrieve wallet balance.');
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          setError('Could not load wallet balance.');
-        })
-        .finally(() => {
-          setLoadingWallet(false);
-        });
-    }
+      try {
+        const res = await fetch('/api/wallet');
+        if (!res.ok) throw new Error('Failed to load wallet');
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.wallet) {
+          setWallet(data.wallet);
+        } else {
+          setError('Could not retrieve wallet balance.');
+        }
+      } catch (err) {
+        if (cancelled) return;
+        console.error(err);
+        setError('Could not load wallet balance.');
+      } finally {
+        if (!cancelled) setLoadingWallet(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, [open, isLoggedIn]);
 
   function handleClick() {
@@ -137,7 +138,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                 </div>
                 <h3 className="text-lg font-black text-[var(--text-primary)] mb-2">Cabin Spot Reserved!</h3>
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-6 font-semibold">
-                  Your reservation request has been sent to <strong className="text-[var(--text-primary)]">{targetName}</strong>. {COFFEE_COST} Sparks have been deducted from your wallet. You'll receive a slot confirmation in dynamic alerts soon!
+                  Your reservation request has been sent to <strong className="text-[var(--text-primary)]">{targetName}</strong>. {COFFEE_COST} Sparks have been deducted from your wallet. You&apos;ll receive a slot confirmation in dynamic alerts soon!
                 </p>
                 <button
                   onClick={() => {

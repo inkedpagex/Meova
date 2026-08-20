@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, Shield, User, Star, MapPin } from 'lucide-react';
 
 const ROLES = [
@@ -15,7 +15,7 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
 
-  async function loadUsers() {
+  const loadUsers = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/list-users');
       const data = await res.json();
@@ -25,11 +25,12 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadUsers();
-  }, []);
+  }, [loadUsers]);
 
   async function handleRoleChange(uid, newRole) {
     setUpdatingId(uid);

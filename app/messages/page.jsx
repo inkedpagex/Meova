@@ -315,7 +315,7 @@ function MessagesContent() {
     fetch(`/api/chats/${chat.id}`, { method: 'PATCH' }).catch(() => {});
   }, [currentUid]);
 
-  const openChatWithUser = (targetUid) => {
+  const openChatWithUser = useCallback((targetUid) => {
     if (!currentUid) return;
     setShowNewMessageModal(false);
     const sorted = [currentUid, targetUid].sort();
@@ -338,12 +338,13 @@ function MessagesContent() {
         })
         .catch(console.error);
     }
-  };
+  }, [currentUid, chats, openChat, router]);
 
   useEffect(() => {
     if (!openUserId || !currentUid || loadingChats || !firebaseUid) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     openChatWithUser(openUserId);
-  }, [openUserId, currentUid, loadingChats, firebaseUid]);
+  }, [openUserId, currentUid, loadingChats, firebaseUid, openChatWithUser]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

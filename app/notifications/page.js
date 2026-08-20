@@ -158,7 +158,7 @@ export default function NotificationsPage() {
         <div className="text-center py-16">
           <Bell size={36} className="mx-auto mb-3 text-zinc-300" />
           <p className="text-[13px] font-black text-zinc-400">No notifications yet</p>
-          <p className="text-[11px] text-zinc-300 mt-1">You'll see booking requests, Sparks, and messages here</p>
+          <p className="text-[11px] text-zinc-300 mt-1">You&apos;ll see booking requests, Sparks, and messages here</p>
         </div>
       )}
 
@@ -166,7 +166,7 @@ export default function NotificationsPage() {
       {filtered.length > 0 && (
         <div className="text-center py-8">
           <CheckCircle2 size={28} className="mx-auto mb-2" style={{ color: 'var(--border-mid)' }} />
-          <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>You're all caught up</p>
+          <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>You&apos;re all caught up</p>
         </div>
       )}
 

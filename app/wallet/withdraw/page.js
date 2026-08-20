@@ -262,7 +262,7 @@ export default function WithdrawPage() {
             Your withdrawal of <strong style={{ color: 'var(--text-primary)' }}>{parseInt(amount, 10).toLocaleString()} Sparks</strong> has been submitted. Your Creator balance has been deducted and will be paid once the admin processes it.
           </p>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 24, fontWeight: '600' }}>
-            You'll receive a notification once it's processed (usually within 24 hours).
+            You&apos;ll receive a notification once it&apos;s processed (usually within 24 hours).
           </p>
           <Link href="/wallet" className="btn btn-primary w-full justify-center" style={{ fontSize: 13 }}>
             Go to Wallet

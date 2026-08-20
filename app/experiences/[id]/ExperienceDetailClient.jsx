@@ -50,6 +50,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
 
   useEffect(() => {
     if (walletData?.wallet) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
       setSparksBalance(
         (walletData.wallet.purchased || 0) + 
         (walletData.wallet.bonus || 0) + 
@@ -290,7 +291,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
             </p>
             
             <p className="text-[10px] text-[var(--text-secondary)] leading-normal font-semibold italic">
-              "{host?.bio}"
+              &quot;{host?.bio}&quot;
             </p>
           </div>
         </div>
@@ -343,7 +344,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
                 </div>
 
                 <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed font-semibold italic">
-                  "{rev.written}"
+                  &quot;{rev.written}&quot;
                 </p>
 
                 <div className="flex flex-wrap gap-1">

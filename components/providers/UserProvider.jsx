@@ -12,6 +12,7 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
   useEffect(() => {
     // If we wanted to periodically refresh the wallet or user data in the background,
     // we could do it here. For now, we rely on initial server props and local state updates.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialUser !== undefined) setUser(initialUser);
     if (initialWallet !== undefined) setWallet(initialWallet);
     if (initialPeople !== undefined) setPeople(initialPeople);

@@ -110,17 +110,19 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
   const [rulesCircle, setRulesCircle] = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
     const initial = {};
     if (joinedCircleIds) joinedCircleIds.forEach(id => { initial[id] = true; });
-
     const ls = typeof window !== 'undefined' ? localStorage.getItem('meetify_joined_circles') : null;
     if (ls) try { Object.assign(initial, JSON.parse(ls)); } catch {}
-    setJoinedMap(initial);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!cancelled) setJoinedMap(initial);
 
     if (userId && typeof window !== 'undefined') {
       fetch('/api/wallet')
         .then(r => r.ok ? r.json() : null)
         .then(data => {
+          if (cancelled) return;
           if (data?.wallet) {
             const total = (data.wallet.purchased || 0) + (data.wallet.bonus || 0) + (data.wallet.creator || 0);
             setSparks(total);
@@ -128,6 +130,7 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
         })
         .catch(() => {});
     }
+    return () => { cancelled = true; };
   }, [joinedCircleIds, userId]);
 
   // Merge DB circles

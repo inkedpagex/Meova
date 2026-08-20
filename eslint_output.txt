@@ -1,0 +1,634 @@
+
+E:\Main\projects\Meetify\app\FeedClient.jsx
+   254:7    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  252 |   useEffect(() => {
+  253 |     if (currentUser?.joinedGroups) {
+> 254 |       setJoinedGroups(currentUser.joinedGroups);
+      |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  255 |     }
+  256 |   }, [currentUser]);
+  257 |                                                            react-hooks/set-state-in-effect
+   385:7    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  383 |   useEffect(() => {
+  384 |     if (currentWallet) {
+> 385 |       setSparksBalance((currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0));
+      |       ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  386 |     }
+  387 |   }, [currentWallet]);
+  388 |  react-hooks/set-state-in-effect
+   686:17   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+   782:118  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react/no-unescaped-entities
+   782:127  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react/no-unescaped-entities
+  1005:23   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+  1046:21   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+  1300:21   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+  1337:39   error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  1335 |                         type="date"
+  1336 |                         min={new Date().toISOString().split('T')[0]}
+> 1337 |                         max={new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]}
+       |                                       ^^^^^^^^^^ Cannot call impure function
+  1338 |                         value={bookingDate}
+  1339 |                         onChange={(e) => setBookingDate(e.target.value)}
+  1340 |                         className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none focus:border-[var(--accent)]"                                react-hooks/purity
+  2083:21   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+  2175:17   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+  2195:15   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\admin\AdminClient.jsx
+  28:5  error  Error: Cannot access variable before it is declared
+
+`loadData` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  26 |
+  27 |   useEffect(() => {
+> 28 |     loadData();
+     |     ^^^^^^^^ `loadData` accessed before it is declared
+  29 |   }, []);
+  30 |
+  31 |   const loadData = async () => {
+
+  29 |   }, []);
+  30 |
+> 31 |   const loadData = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 32 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 33 |     try {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 63 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 64 |   };
+     | ^^^^^ `loadData` is declared here
+  65 |
+  66 |   const handleApproveHost = (reqId, approve = true) => {
+  67 |     // API Call goes here for approve/reject host  react-hooks/immutability
+
+E:\Main\projects\Meetify\app\admin\payments\page.js
+  37:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  35 |
+  36 |   useEffect(() => {
+> 37 |     loadPayments();
+     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  38 |     // Auto-refresh every 20s
+  39 |     const interval = setInterval(loadPayments, 20000);
+  40 |     return () => clearInterval(interval);  react-hooks/set-state-in-effect
+
+E:\Main\projects\Meetify\app\admin\users\page.js
+  31:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  29 |
+  30 |   useEffect(() => {
+> 31 |     loadUsers();
+     |     ^^^^^^^^^ Avoid calling setState() directly within an effect
+  32 |   }, []);
+  33 |
+  34 |   async function handleRoleChange(uid, newRole) {  react-hooks/set-state-in-effect
+
+E:\Main\projects\Meetify\app\admin\withdrawals\page.js
+  24:5    error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  22 |
+  23 |   useEffect(() => {
+> 24 |     fetchWithdrawals();
+     |     ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  25 |   }, []);
+  26 |
+  27 |   async function handleWithdrawal(id, action) {  react-hooks/set-state-in-effect
+  70:115  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react/no-unescaped-entities
+
+E:\Main\projects\Meetify\app\bookings\page.js
+  114:14   error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  112 |   const isMeetingTimePassed = (booking) => {
+  113 |     if (booking.scheduledAt) {
+> 114 |       return Date.now() > new Date(booking.scheduledAt).getTime();
+      |              ^^^^^^^^^^ Cannot call impure function
+  115 |     }
+  116 |     // Fallback for bookings without a parseable scheduledAt
+  117 |     const created = booking.created_at ? new Date(booking.created_at) : null;  react-hooks/purity
+  119:12   error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  117 |     const created = booking.created_at ? new Date(booking.created_at) : null;
+  118 |     if (!created || isNaN(created.getTime())) return false;
+> 119 |     return Date.now() > created.getTime() + 2 * 60 * 60 * 1000; // 2 hours after creation
+      |            ^^^^^^^^^^ Cannot call impure function
+  120 |   };
+  121 |
+  122 |   // Handle Manual Code Verification                      react-hooks/purity
+  510:70   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react/no-unescaped-entities
+  580:106  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react/no-unescaped-entities
+  587:85   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react/no-unescaped-entities
+  587:109  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react/no-unescaped-entities
+  597:62   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react/no-unescaped-entities
+
+E:\Main\projects\Meetify\app\create\photo\CreatePhotoClient.jsx
+  124:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\discover\DiscoverClient.jsx
+   92:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  90 |
+  91 |   useEffect(() => {
+> 92 |     search(query);
+     |     ^^^^^^ Avoid calling setState() directly within an effect
+  93 |     return () => clearTimeout(debounceRef.current);
+  94 |   }, [query, search]);
+  95 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/set-state-in-effect
+  113:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  111 |   useEffect(() => {
+  112 |     if (interestParam) {
+> 113 |       setSearch(interestParam);
+      |       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  114 |       setActiveFilter('People');
+  115 |     }
+  116 |   }, [interestParam]);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-hooks/set-state-in-effect
+  142:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  140 |         : dbUsers.filter(u => u.isIdOn !== false);
+  141 |
+> 142 |       setPeople(filteredUsers);
+      |       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  143 |
+  144 |       const savedJoined = localStorage.getItem('meetify_disc_joined');
+  145 |       if (savedJoined) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/set-state-in-effect
+  151:6   warning  React Hook useEffect has a missing dependency: 'usersData?.users'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+  251:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+  463:68  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react/no-unescaped-entities
+  473:23  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  471 |
+  472 |       {/* Sections */}
+> 473 |       {showPeople && <PeopleSection />}
+      |                       ^^^^^^^^^^^^^ This component is created during render
+  474 |       {showExp && <ExperiencesSection />}
+  475 |       {showComm && <CommunitiesSection />}
+  476 |       {showTourn && <TournamentsSection />}
+
+  182 |
+  183 |   /* ─── People Section ─── */
+> 184 |   const PeopleSection = () => {
+      |                         ^^^^^^^
+> 185 |     // Use Algolia results if searching, else local data
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 186 |     const rawList = isAlgoliaSearch && peopleResults !== null ? peopleResults : people;
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 296 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 297 |   };
+      | ^^^^ The component is created during render here
+  298 |
+  299 |   /* ─── Experiences ─── */
+  300 |   const ExperiencesSection = () => {                                                                                                                                                                                                                                                                                                                                                                             react-hooks/static-components
+  474:20  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  472 |       {/* Sections */}
+  473 |       {showPeople && <PeopleSection />}
+> 474 |       {showExp && <ExperiencesSection />}
+      |                    ^^^^^^^^^^^^^^^^^^ This component is created during render
+  475 |       {showComm && <CommunitiesSection />}
+  476 |       {showTourn && <TournamentsSection />}
+  477 |     </div>
+
+  298 |
+  299 |   /* ─── Experiences ─── */
+> 300 |   const ExperiencesSection = () => {
+      |                              ^^^^^^^
+> 301 |     const list = isAlgoliaSearch && experienceResults !== null
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 302 |       ? experienceResults
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 371 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 372 |   };
+      | ^^^^ The component is created during render here
+  373 |
+  374 |   /* ─── Communities ─── */
+  375 |   const CommunitiesSection = () => {                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/static-components
+  475:21  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  473 |       {showPeople && <PeopleSection />}
+  474 |       {showExp && <ExperiencesSection />}
+> 475 |       {showComm && <CommunitiesSection />}
+      |                     ^^^^^^^^^^^^^^^^^^ This component is created during render
+  476 |       {showTourn && <TournamentsSection />}
+  477 |     </div>
+  478 |   );
+
+  373 |
+  374 |   /* ─── Communities ─── */
+> 375 |   const CommunitiesSection = () => {
+      |                              ^^^^^^^
+> 376 |     const list = circles.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || (c.category || '').toLowerCase().includes(search.toLowerCase()));
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 377 |
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 421 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 422 |   };
+      | ^^^^ The component is created during render here
+  423 |
+  424 |   /* ─── Tournaments ─── */
+  425 |   const TournamentsSection = () => (  react-hooks/static-components
+  476:22  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  474 |       {showExp && <ExperiencesSection />}
+  475 |       {showComm && <CommunitiesSection />}
+> 476 |       {showTourn && <TournamentsSection />}
+      |                      ^^^^^^^^^^^^^^^^^^ This component is created during render
+  477 |     </div>
+  478 |   );
+  479 | }
+
+  423 |
+  424 |   /* ─── Tournaments ─── */
+> 425 |   const TournamentsSection = () => (
+      |                              ^^^^^^^
+> 426 |     <div className="space-y-4">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 427 |       <div className="flex items-center justify-between">
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 435 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 436 |   );
+      | ^^^^ The component is created during render here
+  437 |
+  438 |   const showPeople = activeFilter === 'All' || activeFilter === 'People';
+  439 |   const showExp = activeFilter === 'All' || activeFilter === 'Experiences';                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/static-components
+
+E:\Main\projects\Meetify\app\events\page.js
+  47:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\experiences\ExperiencesClient.jsx
+   63:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  61 |   useEffect(() => {
+  62 |     if (walletData?.wallet) {
+> 63 |       setSparksBalance(
+     |       ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  64 |         (walletData.wallet.purchased || 0) + 
+  65 |         (walletData.wallet.bonus || 0) + 
+  66 |         (walletData.wallet.creator || 0)  react-hooks/set-state-in-effect
+  292:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @next/next/no-img-element
+  414:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\experiences\[id]\ExperienceDetailClient.jsx
+   53:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  51 |   useEffect(() => {
+  52 |     if (walletData?.wallet) {
+> 53 |       setSparksBalance(
+     |       ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  54 |         (walletData.wallet.purchased || 0) + 
+  55 |         (walletData.wallet.bonus || 0) + 
+  56 |         (walletData.wallet.creator || 0)  react-hooks/set-state-in-effect
+  190:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @next/next/no-img-element
+  262:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @next/next/no-img-element
+  293:15  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react/no-unescaped-entities
+  293:27  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react/no-unescaped-entities
+  334:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @next/next/no-img-element
+  346:19  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react/no-unescaped-entities
+  346:33  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react/no-unescaped-entities
+  426:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\gigs\page.js
+  39:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  37 |   useEffect(() => {
+  38 |     if (searchParams?.get('action') === 'post-gig') {
+> 39 |       setShowModal(true);
+     |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  40 |     }
+  41 |   }, [searchParams]);
+  42 |  react-hooks/set-state-in-effect
+
+E:\Main\projects\Meetify\app\layout.js
+  81:11  warning  A font-display parameter is missing (adding `&display=optional` is recommended). See: https://nextjs.org/docs/messages/google-font-display                       @next/next/google-font-display
+  81:11  warning  Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+
+E:\Main\projects\Meetify\app\login\page.js
+  17:7   error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+  15 |
+  16 |     return (
+> 17 |       <Suspense fallback={<div className="p-8 text-center">Loading login...</div>}>
+     |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 18 |         <AuthForm defaultMode="login" />
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 19 |       </Suspense>
+     | ^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  20 |     );
+  21 |   } catch (error) {
+  22 |     if (error?.message?.includes('NEXT_REDIRECT')) throw error;  react-hooks/error-boundaries
+  17:27  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+  15 |
+  16 |     return (
+> 17 |       <Suspense fallback={<div className="p-8 text-center">Loading login...</div>}>
+     |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  18 |         <AuthForm defaultMode="login" />
+  19 |       </Suspense>
+  20 |     );                                                                                                                                                                                react-hooks/error-boundaries
+  18:9   error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+  16 |     return (
+  17 |       <Suspense fallback={<div className="p-8 text-center">Loading login...</div>}>
+> 18 |         <AuthForm defaultMode="login" />
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  19 |       </Suspense>
+  20 |     );
+  21 |   } catch (error) {                                                                                                                                                                                                     react-hooks/error-boundaries
+
+E:\Main\projects\Meetify\app\messages\page.jsx
+   72:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @next/next/no-img-element
+  114:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @next/next/no-img-element
+  165:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @next/next/no-img-element
+  345:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  343 |   useEffect(() => {
+  344 |     if (!openUserId || !currentUid || loadingChats || !firebaseUid) return;
+> 345 |     openChatWithUser(openUserId);
+      |     ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  346 |   }, [openUserId, currentUid, loadingChats, firebaseUid]);
+  347 |
+  348 |   useEffect(() => {  react-hooks/set-state-in-effect
+  346:6   warning  React Hook useEffect has a missing dependency: 'openChatWithUser'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  react-hooks/exhaustive-deps
+  608:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @next/next/no-img-element
+  641:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\notifications\page.js
+  161:60   error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  169:115  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\Main\projects\Meetify\app\onboarding\_parts.jsx
+  118:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\premium\page.js
+  63:17  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\Main\projects\Meetify\app\profile\ProfileClient.jsx
+   71:6   warning  React Hook useEffect has a missing dependency: 'profile.isIdOn'. Either include it or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setIsIdOn' needs the current value of 'profile.isIdOn'                                           react-hooks/exhaustive-deps
+  191:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\signup\page.js
+  17:7   error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+  15 |
+  16 |     return (
+> 17 |       <Suspense fallback={<div className="p-8 text-center">Loading signup...</div>}>
+     |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 18 |         <AuthForm defaultMode="signup" />
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 19 |       </Suspense>
+     | ^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  20 |     );
+  21 |   } catch (error) {
+  22 |     if (error?.message?.includes('NEXT_REDIRECT')) throw error;  react-hooks/error-boundaries
+  17:27  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+  15 |
+  16 |     return (
+> 17 |       <Suspense fallback={<div className="p-8 text-center">Loading signup...</div>}>
+     |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  18 |         <AuthForm defaultMode="signup" />
+  19 |       </Suspense>
+  20 |     );                                                                                                                                                                                 react-hooks/error-boundaries
+  18:9   error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+  16 |     return (
+  17 |       <Suspense fallback={<div className="p-8 text-center">Loading signup...</div>}>
+> 18 |         <AuthForm defaultMode="signup" />
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  19 |       </Suspense>
+  20 |     );
+  21 |   } catch (error) {                                                                                                                                                                                                      react-hooks/error-boundaries
+
+E:\Main\projects\Meetify\app\users\[id]\page.js
+  121:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  357:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\wallet\buy\page.js
+  188:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\wallet\page.js
+  141:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  139 |
+  140 |   useEffect(() => {
+> 141 |     loadWallet();
+      |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  142 |     const onUpdate = () => loadWallet();
+  143 |     window.addEventListener('wallet-updated', onUpdate);
+  144 |     return () => window.removeEventListener('wallet-updated', onUpdate);  react-hooks/set-state-in-effect
+  482:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @next/next/no-img-element
+
+E:\Main\projects\Meetify\app\wallet\withdraw\page.js
+  265:16  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  265:50  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+E:\Main\projects\Meetify\components\ProfileHighlightsSection.jsx
+  148:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\components\Sidebar.jsx
+  121:6  warning  React Hook useEffect has missing dependencies: 'unreadCount' and 'user?.id'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+E:\Main\projects\Meetify\components\TopNav.jsx
+  28:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\components\providers\UserProvider.jsx
+  15:36  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  13 |     // If we wanted to periodically refresh the wallet or user data in the background,
+  14 |     // we could do it here. For now, we rely on initial server props and local state updates.
+> 15 |     if (initialUser !== undefined) setUser(initialUser);
+     |                                    ^^^^^^^ Avoid calling setState() directly within an effect
+  16 |     if (initialWallet !== undefined) setWallet(initialWallet);
+  17 |     if (initialPeople !== undefined) setPeople(initialPeople);
+  18 |   }, [initialUser, initialWallet, initialPeople]);  react-hooks/set-state-in-effect
+
+E:\Main\projects\Meetify\components\ui\message-dock.tsx
+  168:11  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\Main\projects\Meetify\components\ui\message-dock.tsx:168:11
+  166 |         const idx = characters.findIndex(c => c.name === activeCharacterName);
+  167 |         if (idx !== -1) {
+> 168 |           setExpandedCharacter(idx);
+      |           ^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  169 |           onDockToggle?.(true);
+  170 |         } else {
+  171 |           setExpandedCharacter(null);  react-hooks/set-state-in-effect
+  405:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @next/next/no-img-element
+
+E:\Main\projects\Meetify\features\auth\AuthForm.jsx
+  121:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\features\circles\CirclesList.jsx
+  118:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  116 |     const ls = typeof window !== 'undefined' ? localStorage.getItem('meetify_joined_circles') : null;
+  117 |     if (ls) try { Object.assign(initial, JSON.parse(ls)); } catch {}
+> 118 |     setJoinedMap(initial);
+      |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  119 |
+  120 |     if (userId && typeof window !== 'undefined') {
+  121 |       fetch('/api/wallet')  react-hooks/set-state-in-effect
+  321:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @next/next/no-img-element
+
+E:\Main\projects\Meetify\features\events\EventCard.jsx
+   86:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  115:9   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\features\profile\ProfileEditForm.jsx
+  298:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Main\projects\Meetify\features\users\BookCoffeeButton.jsx
+   24:7    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  22 |   useEffect(() => {
+  23 |     if (open && isLoggedIn) {
+> 24 |       setLoadingWallet(true);
+     |       ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  25 |       setError('');
+  26 |       fetch('/api/wallet')
+  27 |         .then((res) => {  react-hooks/set-state-in-effect
+  140:192  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react/no-unescaped-entities
+  159:23   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @next/next/no-img-element
+
+✖ 92 problems (50 errors, 42 warnings)

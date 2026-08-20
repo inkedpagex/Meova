@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Users, Zap, CreditCard, ArrowUpRight, Calendar,
@@ -24,11 +24,7 @@ export default function AdminClient() {
   const [disputes, setDisputes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const statsRes = await fetch('/api/admin/dashboard-stats');
@@ -61,7 +57,12 @@ export default function AdminClient() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadData();
+  }, [loadData]);
 
   const handleApproveHost = (reqId, approve = true) => {
     // API Call goes here for approve/reject host

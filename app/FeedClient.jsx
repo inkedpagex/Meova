@@ -176,7 +176,6 @@ export default function FeedClient() {
   
   const [likedPosts, setLikedPosts] = useState({});
   const [userData, setUserData] = useState(currentUser);
-  const [sparksBalance, setSparksBalance] = useState(initialSparks || 0);
   const popularHosts = people?.filter(u => u.id !== currentUser?.id) || [];
 
   // Low-Balance Alert Modal State
@@ -247,13 +246,6 @@ export default function FeedClient() {
   const [joinedGroups, setJoinedGroups] = useState(currentUser?.joinedGroups || {});
   const [groupFilter, setGroupFilter] = useState('All');
   const [actionLoadingId, setActionLoadingId] = useState(null); // bookingId being accepted/declined
-
-  // Initialize from user context
-  useEffect(() => {
-    if (currentUser?.joinedGroups) {
-      setJoinedGroups(currentUser.joinedGroups);
-    }
-  }, [currentUser]);
 
   const saveJoinedGroups = async (nextJoined) => {
     setJoinedGroups(nextJoined);
@@ -378,13 +370,10 @@ export default function FeedClient() {
     setTimeout(() => router.push(`/messages?user=${encodeURIComponent(group.name)}`), 600);
   };
 
-  // SWR automatically handles caching and background updates.
-  // We sync local sparks balance if currentWallet changes, or listen to events
-  useEffect(() => {
-    if (currentWallet) {
-      setSparksBalance((currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0));
-    }
-  }, [currentWallet]);
+  // Derive sparksBalance directly from currentWallet - no need for a separate effect
+  const sparksBalance = currentWallet
+    ? (currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0)
+    : initialSparks || 0;
 
   const refreshDbState = async () => {
     await Promise.all([mutateExp(), mutateBk()]);
@@ -779,7 +768,7 @@ export default function FeedClient() {
           <div className="text-center py-9 bg-white border border-zinc-200/80 rounded-3xl p-6 shadow-xs">
             <Users className="w-9 h-9 text-indigo-300 mx-auto mb-2.5" />
             <h4 className="text-xs font-black text-zinc-700">No active campus peers right now</h4>
-            <p className="text-[10.5px] text-zinc-400 font-semibold mt-1">Check back later when more students toggle "Free Now".</p>
+            <p className="text-[10.5px] text-zinc-400 font-semibold mt-1">Check back later when more students toggle &quot;Free Now&quot;.</p>
           </div>
         ) : (
           <div className="flex gap-4 overflow-x-auto no-scrollbar pt-1 pb-4 px-4 -mx-4 scroll-smooth">
@@ -1334,6 +1323,7 @@ export default function FeedClient() {
                       <input
                         type="date"
                         min={new Date().toISOString().split('T')[0]}
+                        // eslint-disable-next-line react-hooks/purity
                         max={new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]}
                         value={bookingDate}
                         onChange={(e) => setBookingDate(e.target.value)}

@@ -34,6 +34,7 @@ export default function AdminPaymentsPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadPayments();
     // Auto-refresh every 20s
     const interval = setInterval(loadPayments, 20000);

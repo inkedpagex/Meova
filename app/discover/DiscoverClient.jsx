@@ -89,6 +89,7 @@ function useAlgoliaSearch(query) {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     search(query);
     return () => clearTimeout(debounceRef.current);
   }, [query, search]);
@@ -110,6 +111,7 @@ export default function DiscoverClient() {
 
   useEffect(() => {
     if (interestParam) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearch(interestParam);
       setActiveFilter('People');
     }
@@ -139,6 +141,7 @@ export default function DiscoverClient() {
         ? dbUsers.filter(u => u.id !== currentUser.uid && u.isIdOn !== false) 
         : dbUsers.filter(u => u.isIdOn !== false);
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
       setPeople(filteredUsers);
 
       const savedJoined = localStorage.getItem('meetify_disc_joined');
@@ -181,7 +184,7 @@ export default function DiscoverClient() {
   );
 
   /* ─── People Section ─── */
-  const PeopleSection = () => {
+  const renderPeopleSection = () => {
     // Use Algolia results if searching, else local data
     const rawList = isAlgoliaSearch && peopleResults !== null ? peopleResults : people;
     
@@ -297,7 +300,7 @@ export default function DiscoverClient() {
   };
 
   /* ─── Experiences ─── */
-  const ExperiencesSection = () => {
+  const renderExperiencesSection = () => {
     const list = isAlgoliaSearch && experienceResults !== null
       ? experienceResults
       : experiences.filter(e => !search || e.title.toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase()));
@@ -372,7 +375,7 @@ export default function DiscoverClient() {
   };
 
   /* ─── Communities ─── */
-  const CommunitiesSection = () => {
+  const renderCommunitiesSection = () => {
     const list = circles.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || (c.category || '').toLowerCase().includes(search.toLowerCase()));
 
     return (
@@ -422,7 +425,7 @@ export default function DiscoverClient() {
   };
 
   /* ─── Tournaments ─── */
-  const TournamentsSection = () => (
+  const renderTournamentsSection = () => (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-[15px] font-black" style={{ color: '#09090b' }}>Live Tournaments</h2>
@@ -460,7 +463,7 @@ export default function DiscoverClient() {
       {isOnCampus && (
         <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-2xl px-3 py-2.5">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-          <p className="text-[11px] font-bold text-emerald-700">You're Live on Campus! Others can see you nearby.</p>
+          <p className="text-[11px] font-bold text-emerald-700">You&apos;re Live on Campus! Others can see you nearby.</p>
         </div>
       )}
 
@@ -470,10 +473,10 @@ export default function DiscoverClient() {
       </div>
 
       {/* Sections */}
-      {showPeople && <PeopleSection />}
-      {showExp && <ExperiencesSection />}
-      {showComm && <CommunitiesSection />}
-      {showTourn && <TournamentsSection />}
+      {showPeople && renderPeopleSection()}
+      {showExp && renderExperiencesSection()}
+      {showComm && renderCommunitiesSection()}
+      {showTourn && renderTournamentsSection()}
     </div>
   );
 }

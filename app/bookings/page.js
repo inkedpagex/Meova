@@ -109,14 +109,16 @@ export default function BookingsPage() {
   // Has the meeting time passed? (for showing Report Issue button)
   // - If scheduledAt exists: check if it's passed
   // - Fallback: show button 2h after booking was created (covers weekday-name bookings)
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
   const isMeetingTimePassed = (booking) => {
     if (booking.scheduledAt) {
-      return Date.now() > new Date(booking.scheduledAt).getTime();
+      return now > new Date(booking.scheduledAt).getTime();
     }
     // Fallback for bookings without a parseable scheduledAt
     const created = booking.created_at ? new Date(booking.created_at) : null;
     if (!created || isNaN(created.getTime())) return false;
-    return Date.now() > created.getTime() + 2 * 60 * 60 * 1000; // 2 hours after creation
+    return now > created.getTime() + 2 * 60 * 60 * 1000; // 2 hours after creation
   };
 
   // Handle Manual Code Verification
@@ -507,7 +509,7 @@ export default function BookingsPage() {
           <div className="w-full max-w-[340px] flex flex-col items-center">
             <h3 className="text-white text-lg font-black mb-2">Verify Meeting</h3>
             <p className="text-white/60 text-xs font-medium mb-6 text-center">
-              Enter the 6-digit code from {selectedBooking.guestName}'s phone to receive your Sparks.
+              Enter the 6-digit code from {selectedBooking.guestName}&apos;s phone to receive your Sparks.
             </p>
 
             <div className="w-full bg-zinc-900/50 p-6 rounded-3xl border border-white/10 relative">
@@ -577,14 +579,14 @@ export default function BookingsPage() {
                 </div>
                 <h4 className="text-base font-black text-zinc-900 mb-2">Issue Reported!</h4>
                 <p className="text-xs text-zinc-500 font-medium">
-                  Your Sparks are held safely. Auto-refund will process within 1 hour if the meeting didn't happen.
+                  Your Sparks are held safely. Auto-refund will process within 1 hour if the meeting didn&apos;t happen.
                 </p>
               </div>
             ) : (
               <div className="p-5">
                 <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 mb-5">
                   <p className="text-xs font-bold text-rose-700 leading-relaxed">
-                    Did <strong>{selectedBooking.hostName}</strong> not show up for "{selectedBooking.title}"?
+                    Did <strong>{selectedBooking.hostName}</strong> not show up for &quot;{selectedBooking.title}&quot;?
                   </p>
                   <p className="text-[11px] text-rose-500 mt-1.5">
                     If the QR code was never scanned, your {selectedBooking.price} Sparks will be auto-refunded within 1 hour.
@@ -594,7 +596,7 @@ export default function BookingsPage() {
                 <div className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5 mb-5 flex items-start gap-2">
                   <AlertTriangle size={13} className="text-amber-500 mt-0.5 flex-shrink-0" />
                   <p className="text-[10px] text-amber-700 font-semibold leading-relaxed">
-                    Only report if the meeting genuinely didn't happen. False reports may affect your account standing.
+                    Only report if the meeting genuinely didn&apos;t happen. False reports may affect your account standing.
                   </p>
                 </div>
 

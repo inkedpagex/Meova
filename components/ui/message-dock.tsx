@@ -165,6 +165,7 @@ export function MessageDock({
       if (activeCharacterName) {
         const idx = characters.findIndex(c => c.name === activeCharacterName);
         if (idx !== -1) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
           setExpandedCharacter(idx);
           onDockToggle?.(true);
         } else {

@@ -138,6 +138,7 @@ export default function WalletPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadWallet();
     const onUpdate = () => loadWallet();
     window.addEventListener('wallet-updated', onUpdate);

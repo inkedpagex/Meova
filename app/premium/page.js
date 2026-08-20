@@ -60,7 +60,7 @@ export default function PremiumPage() {
         {/* Features List */}
         <div className="space-y-6">
           <h2 className="text-xs font-black uppercase tracking-wider text-[var(--text-secondary)]">
-            What's included in Premium
+            What&apos;s included in Premium
           </h2>
 
           <div className="space-y-5">

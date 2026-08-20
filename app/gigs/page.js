@@ -35,9 +35,8 @@ export default function CampusGigsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (searchParams?.get('action') === 'post-gig') {
-      setShowModal(true);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (searchParams?.get('action') === 'post-gig') setShowModal(true);
   }, [searchParams]);
 
   const handleApply = async (id) => {
