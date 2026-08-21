@@ -116,6 +116,7 @@ export default function ExperiencesClient({ currentUser, initialSparks }) {
     { name: 'All', value: 'All', Icon: Compass, accent: '#818cf8' },
     { name: 'Coffee', value: 'Coffee', Icon: Coffee, accent: '#f59e0b' },
     { name: 'Study', value: 'Study', Icon: BookOpen, accent: '#34d399' },
+    { name: 'Tutoring', value: 'Tutoring', Icon: Sparkles, accent: '#22d3ee' },
     { name: 'Startup', value: 'Startup', Icon: Briefcase, accent: '#a78bfa' },
     { name: 'Photo', value: 'Photography', Icon: Camera, accent: '#f472b6' },
     { name: 'Sports', value: 'Sports', Icon: Activity, accent: '#fb923c' },

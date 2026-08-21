@@ -3,6 +3,11 @@
     {
       "path": "/api/cron/auto-refund",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/expire-gigs",
+      "schedule": "0 1 * * *"
     }
   ]
 }
+
