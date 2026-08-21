@@ -28,6 +28,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
   const [data, setData] = useState({ ...INITIAL, full_name: initialName, photo_url: initialPhoto });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
 
   const onChange = (field, value) => setData(prev => ({ ...prev, [field]: value }));
 
@@ -53,8 +54,11 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
         }),
       });
       const json = await res.json();
-      if (!res.ok) { setError(json.error || 'Something went wrong. Please try again.'); return; }
-      // Force a full reload so layout.js picks up profileComplete: true from the session
+      if (!res.ok) { setError(json.error || 'Something went wrong. Please try again.'); setLoading(false); return; }
+      // Show success screen while Firestore propagates profileComplete:true.
+      // Without this delay, slower devices get a redirect loop (/ → onboarding → /) = ERR_FAILED.
+      setDone(true);
+      await new Promise(resolve => setTimeout(resolve, 1800));
       window.location.href = '/';
     } catch (err) {
       setError('Network error. Please try again.');
@@ -62,6 +66,20 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
       setLoading(false);
     }
   };
+
+  if (done) {
+    return (
+      <div className="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center gap-4">
+        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px #7c3aed44' }}>
+          <svg width={36} height={36} viewBox="0 0 24 24" fill="none">
+            <path d="M5 13l4 4L19 7" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <p style={{ fontWeight: 800, fontSize: 20, color: '#18181b' }}>Profile created! 🎉</p>
+        <p style={{ fontSize: 14, color: '#71717a' }}>Taking you to Meetify…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-hidden">
