@@ -188,6 +188,7 @@ export default function FeedClient() {
   const [postCategory, setPostCategory] = useState('UI/UX Work');
   const [postLocation, setPostLocation] = useState('Innovation Lab');
   const [postFilePreview, setPostFilePreview] = useState('https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&auto=format&fit=crop&q=80');
+  const [postFile, setPostFile] = useState(null); // actual File object for upload
   const [postUploading, setPostUploading] = useState(false);
 
   // Search & Filtering
@@ -370,10 +371,18 @@ export default function FeedClient() {
     setTimeout(() => router.push(`/messages?user=${encodeURIComponent(group.name)}`), 600);
   };
 
-  // Derive sparksBalance directly from currentWallet - no need for a separate effect
-  const sparksBalance = currentWallet
-    ? (currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0)
-    : initialSparks || 0;
+  // sparksBalance as state so setSparksBalance works (used in group join deduction)
+  const [sparksBalance, setSparksBalance] = useState(
+    currentWallet
+      ? (currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0)
+      : initialSparks || 0
+  );
+  // Keep sparksBalance in sync when wallet updates
+  React.useEffect(() => {
+    if (currentWallet) {
+      setSparksBalance((currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0));
+    }
+  }, [currentWallet]);
 
   const refreshDbState = async () => {
     await Promise.all([mutateExp(), mutateBk()]);
