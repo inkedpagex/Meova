@@ -615,13 +615,14 @@ export default function FeedClient() {
 
   const vibeUsers = popularHosts.length > 0
     ? popularHosts.map(u => ({
+        ...u,
         id: u.id,
         full_name: u.full_name,
         year: u.year || '3rd',
         branch: u.branch || 'CSE',
         college: u.college || 'GLA University',
         interests: u.interests?.slice(0, 3) || ['Tech', 'Design', 'Music'],
-        photo_url: avatarUrl(u),
+        photo_url: u.photo_url || u.photoURL || u.photo || avatarUrl(u),
         spark_charge: u.spark_charge || 50
       }))
     : defaultVibeUsers;
@@ -676,6 +677,9 @@ export default function FeedClient() {
                   src={getUserAvatarUrl(currentUser)} 
                   alt={currentUser?.full_name || 'User'} 
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = getCartoonAvatar(currentUser?.full_name || currentUser?.id || 'user');
+                  }}
                 />
               </div>
             </div>
@@ -783,7 +787,14 @@ export default function FeedClient() {
                   {/* Avatar with Halo Border & Live Badge */}
                   <div className="relative w-[88px] h-[88px] rounded-full p-[3px] bg-gradient-to-tr from-purple-500 via-indigo-500 to-pink-500 mb-3 group-hover:scale-105 transition-transform duration-300 shadow-sm">
                     <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
-                      <Image src={getUserAvatarUrl(user)} alt={user.full_name} fill sizes="88px" style={{ objectFit: 'cover' }} />
+                      <img 
+                        src={getUserAvatarUrl(user)} 
+                        alt={user.full_name || 'User'} 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => {
+                          e.target.src = getCartoonAvatar(user.full_name || user.id || 'user');
+                        }}
+                      />
                     </div>
                     {/* Live Online Badge */}
                     <span className="absolute bottom-0.5 right-0.5 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full shadow-xs flex items-center justify-center">
@@ -995,6 +1006,9 @@ export default function FeedClient() {
                         src={post.authorPhoto || avatarUrl(post.authorId, post.authorName)} 
                         alt={post.authorName || 'Student'} 
                         className="w-11 h-11 rounded-2xl object-cover border border-purple-100 shadow-2xs group-hover/author:scale-105 transition-transform"
+                        onError={(e) => {
+                          e.target.src = getCartoonAvatar(post.authorName || post.authorId || 'user');
+                        }}
                       />
                       <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full" />
                     </div>
@@ -2166,6 +2180,9 @@ export default function FeedClient() {
                   src={selectedPostPhoto.authorPhoto || avatarUrl(selectedPostPhoto.authorId, selectedPostPhoto.authorName)} 
                   alt={selectedPostPhoto.authorName || 'Student'} 
                   className="w-9 h-9 rounded-full object-cover border border-purple-500/50"
+                  onError={(e) => {
+                    e.target.src = getCartoonAvatar(selectedPostPhoto.authorName || selectedPostPhoto.authorId || 'user');
+                  }}
                 />
                 <div>
                   <h4 className="text-xs font-black text-white">{selectedPostPhoto.authorName || 'Campus Peer'}</h4>

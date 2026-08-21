@@ -160,7 +160,7 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
                   <BookCoffeeButton 
                     targetUserId={student.id}
                     targetName={student.full_name}
-                    targetPhoto={student.photo || student.instagram_photo || getCartoonAvatar(student.id)}
+                    targetPhoto={getUserAvatarUrl(student)}
                     isLoggedIn={!!currentUserId}
                     accentColor="#7c3aed"
                     renderButton={({ onClick }) => (

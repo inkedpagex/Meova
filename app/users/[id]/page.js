@@ -12,6 +12,7 @@ import {
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
 import BlockUserButton from '../../../features/users/BlockUserButton';
 import ProfileHighlightsSection from '../../../components/ProfileHighlightsSection';
+import InstagramEmbed from '../../../components/InstagramEmbed';
 
 import { getUserAvatarUrl, getCartoonAvatar } from '../../../utils/avatar';
 
@@ -119,8 +120,8 @@ export default async function UserProfilePage({ params }) {
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full p-[3px]" style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #4f46e5 100%)' }}>
               <div className="w-full h-full rounded-full overflow-hidden border-2 border-white bg-zinc-100">
                 <img
-                  src={avatarUrl(profile.full_name || id)}
-                  alt={profile.full_name}
+                  src={avatarUrl(profile)}
+                  alt={profile.full_name || 'User'}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -265,42 +266,8 @@ export default async function UserProfilePage({ params }) {
         </div>
       )}
 
-      {/* ── INSTAGRAM PROFILE EMBED ────────────────── */}
-      {profile.instagram && (
-        <div className="rounded-3xl p-5 mb-6 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-md space-y-4">
-          <h3 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)] flex items-center gap-2">
-            <span className="text-[#e1306c]">📸</span> Host Instagram Vibe
-          </h3>
-          <div className="relative rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface)] h-[480px]">
-            <iframe
-              src={
-                profile.instagram.startsWith('http') 
-                  ? `${profile.instagram.replace(/\/$/, '')}/embed/` 
-                  : `https://www.instagram.com/${profile.instagram.replace(/^@/, '')}/embed/`
-              }
-              className="w-full h-full border-none"
-              allowFullScreen
-              scrolling="no"
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            />
-            {/* Fallback open button in case of browser/CSP restrictions */}
-            <div className="absolute bottom-4 right-4 z-10">
-              <a
-                href={
-                  profile.instagram.startsWith('http') 
-                    ? profile.instagram 
-                    : `https://www.instagram.com/${profile.instagram.replace(/^@/, '')}/`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#e1306c] hover:bg-[#c13584] text-white text-[9px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 inline-flex items-center gap-1.5"
-              >
-                Open Instagram ↗
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── INSTAGRAM EMBED ────────────────── */}
+      <InstagramEmbed instagramInput={profile.instagram} />
 
       {/* ── COMMUNITIES ───────────────────────── */}
       {joinedCircles.length > 0 && (
@@ -354,7 +321,11 @@ export default async function UserProfilePage({ params }) {
               >
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
-                    <img src={avatarUrl(review.authorId || 'user')} alt={review.authorName} className="w-full h-full object-cover" />
+                    <img
+                      src={avatarUrl(review.authorId || 'user')}
+                      alt={review.authorName}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1.5">

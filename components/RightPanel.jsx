@@ -4,11 +4,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Calendar, MapPin, Sparkles, Compass, Users } from 'lucide-react';
-import { getUserAvatarUrl } from '../utils/avatar';
+import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 
 export default function RightPanel({ people = [], upcomingEvents = [] }) {
   const pathname = usePathname();
-  if (pathname?.startsWith('/admin')) return null;
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/messages')) return null;
 
   const topPeople = people.slice(0, 3);
 
@@ -44,7 +44,14 @@ export default function RightPanel({ people = [], upcomingEvents = [] }) {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-purple-100 flex-shrink-0 relative group-hover:scale-105 transition-transform">
-                    <Image src={getUserAvatarUrl(person)} alt={person.full_name || 'User'} fill sizes="40px" style={{ objectFit: 'cover' }} />
+                    <img 
+                      src={getUserAvatarUrl(person)} 
+                      alt={person.full_name || 'User'} 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => {
+                        e.target.src = getCartoonAvatar(person.full_name || person.id || 'user');
+                      }}
+                    />
                   </div>
                   <div className="min-w-0">
                     <h5 className="text-xs font-black text-zinc-900 truncate group-hover:text-purple-600 transition-colors">{person.full_name || 'Student'}</h5>

@@ -33,7 +33,24 @@ export function getUserAvatarUrl(user) {
 
   // Check all possible photo_url properties across Firebase Auth, Firestore, and session JWTs
   const photo = user.photo_url || user.photoURL || user.picture || user.avatar || user.photo;
-  if (photo) return photo;
+  if (
+    photo &&
+    typeof photo === 'string' &&
+    photo.trim() !== '' &&
+    photo !== 'undefined' &&
+    photo !== 'null' &&
+    photo !== '[object Object]'
+  ) {
+    // Upgrade Google OAuth avatars from low-res thumbnail (s96-c / s50) to crisp s400-c HD quality
+    if (photo.includes('googleusercontent.com')) {
+      if (photo.includes('=')) {
+        return photo.replace(/=[^/]+$/, '=s400-c');
+      } else {
+        return `${photo}=s400-c`;
+      }
+    }
+    return photo;
+  }
 
   // Cartoon fallback
   return getCartoonAvatar(user.full_name || user.displayName || user.name || user.id || 'user');

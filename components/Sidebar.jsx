@@ -7,7 +7,7 @@ import {
   Home, Search, Users, User, LogIn, Wallet, Shield, Plus, Bell, Zap, MessageSquare,
   LayoutDashboard, CreditCard, ArrowUpRight, ShieldCheck, FileText, Settings, MoreHorizontal, Calendar, BookOpen
 } from 'lucide-react';
-import { getUserAvatarUrl } from '../utils/avatar';
+import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import { db } from '../lib/firebaseClient';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
@@ -349,7 +349,14 @@ export default function Sidebar({ user }) {
             <Link href="/profile" className="flex items-center gap-2.5 p-2.5 rounded-xl transition-all hover:bg-purple-50/50 group">
               <div className="w-9 h-9 rounded-full p-[1.5px] bg-gradient-to-tr from-purple-600 to-indigo-500 flex-shrink-0">
                 <div className="w-full h-full rounded-full overflow-hidden relative border border-white">
-                  <Image src={avatarSrc} alt="me" fill sizes="36px" style={{ objectFit: 'cover' }} />
+                  <img 
+                    src={avatarSrc} 
+                    alt="me" 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      e.target.src = getCartoonAvatar(user?.full_name || user?.id || 'user');
+                    }}
+                  />
                 </div>
               </div>
               <div className="min-w-0">

@@ -9,6 +9,7 @@ import GoogleAuthProviderWrapper from '../components/GoogleAuthProviderWrapper';
 import { headers } from 'next/headers';
 import { UserProvider } from '../components/providers/UserProvider';
 import FCMInitializer from '../components/FCMInitializer';
+import MainContentWrapper from '../components/MainContentWrapper';
 
 export const metadata = {
   title: 'Meetify — Your Campus Life',
@@ -88,23 +89,9 @@ export default async function RootLayout({ children }) {
               <div className="flex min-h-screen">
                 <Sidebar user={user} />
 
-              {isAdminPath ? (
-                <div className="flex-1 md:pl-[220px] min-w-0 bg-[#f8fafc]">
-                  <main className="p-4 md:p-8 pt-20 md:pt-8 pb-24 md:pb-8 w-full max-w-7xl mx-auto pb-safe">
-                    {children}
-                  </main>
-                </div>
-              ) : (
-                <div className={`flex-1 md:pl-[220px] ${isMessagesPath ? '' : 'xl:pr-[320px]'} min-w-0`}>
-                  <main style={{ maxWidth: isMessagesPath ? 1200 : 640, margin: '0 auto', padding: '16px 16px 88px', paddingTop: 68 }}
-                    className="md:!pt-8 md:!pb-8 md:px-6 pb-safe">
-                    {children}
-                  </main>
-                </div>
-              )}
-
-              {!isAdminPath && !isMessagesPath && <RightPanel people={people} upcomingEvents={events} />}
-            </div>
+                <MainContentWrapper>{children}</MainContentWrapper>
+                <RightPanel people={people} upcomingEvents={events} />
+              </div>
             </UserProvider>
           </GoogleAuthProviderWrapper>
 
