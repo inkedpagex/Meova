@@ -55,10 +55,10 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
       });
       const json = await res.json();
       if (!res.ok) { setError(json.error || 'Something went wrong. Please try again.'); setLoading(false); return; }
-      // Show success screen while Firestore propagates profileComplete:true.
-      // Without this delay, slower devices get a redirect loop (/ → onboarding → /) = ERR_FAILED.
+      // Show success animation while Firestore propagates profileComplete:true (800ms).
+      // Without this pause, slower devices hit a redirect loop causing ERR_FAILED.
       setDone(true);
-      await new Promise(resolve => setTimeout(resolve, 1800));
+      await new Promise(resolve => setTimeout(resolve, 800));
       window.location.href = '/';
     } catch (err) {
       setError('Network error. Please try again.');
@@ -67,20 +67,102 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
     }
   };
 
+  // ── Success / launch screen ──────────────────────────────────────────────────
   if (done) {
     return (
-      <div className="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center gap-4">
-        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px #7c3aed44' }}>
-          <svg width={36} height={36} viewBox="0 0 24 24" fill="none">
-            <path d="M5 13l4 4L19 7" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 300,
+        background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <style>{`
+          @keyframes ob-pulse {
+            0%   { transform: scale(0.85); opacity: 0.5; }
+            50%  { transform: scale(1.18); opacity: 0.12; }
+            100% { transform: scale(0.85); opacity: 0.5; }
+          }
+          @keyframes ob-pop {
+            0%   { transform: scale(0); opacity: 0; }
+            65%  { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          @keyframes ob-check {
+            from { stroke-dashoffset: 50; opacity: 0; }
+            10%  { opacity: 1; }
+            to   { stroke-dashoffset: 0; opacity: 1; }
+          }
+          @keyframes ob-bar {
+            from { width: 0%; }
+            to   { width: 100%; }
+          }
+          @keyframes ob-up {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+
+        {/* Pulse ring */}
+        <div style={{
+          position: 'absolute',
+          width: 140, height: 140, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.18)',
+          animation: 'ob-pulse 1.4s ease-in-out infinite',
+        }} />
+
+        {/* Checkmark circle */}
+        <div style={{
+          width: 84, height: 84, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.22)',
+          backdropFilter: 'blur(10px)',
+          border: '2px solid rgba(255,255,255,0.45)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          animation: 'ob-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.22)',
+          position: 'relative', zIndex: 1,
+        }}>
+          <svg width={40} height={40} viewBox="0 0 24 24" fill="none">
+            <path
+              d="M5 13l4 4L19 7"
+              stroke="white"
+              strokeWidth="2.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray="50"
+              style={{ animation: 'ob-check 0.45s ease 0.35s both' }}
+            />
           </svg>
         </div>
-        <p style={{ fontWeight: 800, fontSize: 20, color: '#18181b' }}>Profile created! 🎉</p>
-        <p style={{ fontSize: 14, color: '#71717a' }}>Taking you to Meetify…</p>
+
+        {/* Text */}
+        <div style={{
+          marginTop: 28, textAlign: 'center', position: 'relative', zIndex: 1,
+          animation: 'ob-up 0.45s ease 0.2s both',
+        }}>
+          <p style={{ fontWeight: 900, fontSize: 22, color: '#fff', margin: 0, letterSpacing: '-0.3px' }}>
+            You&apos;re all set! 🎉
+          </p>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)', marginTop: 6, margin: '6px 0 0' }}>
+            Opening Meetify for you…
+          </p>
+        </div>
+
+        {/* Progress bar — fills in 0.75s matching the 800ms delay */}
+        <div style={{
+          marginTop: 36, width: 190, height: 4, position: 'relative', zIndex: 1,
+          background: 'rgba(255,255,255,0.22)', borderRadius: 99, overflow: 'hidden',
+          animation: 'ob-up 0.45s ease 0.3s both',
+        }}>
+          <div style={{
+            height: '100%', borderRadius: 99,
+            background: 'rgba(255,255,255,0.92)',
+            animation: 'ob-bar 0.72s cubic-bezier(0.4,0,0.2,1) 0.08s both',
+          }} />
+        </div>
       </div>
     );
   }
 
+  // ── Onboarding steps ──────────────────────────────────────────────────────────
   return (
     <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-hidden">
       {/* Header */}
