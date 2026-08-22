@@ -1,5 +1,5 @@
 /**
- * PATCH /api/chats/[chatId]  — Mark chat as read for current user
+ * PATCH /api/chats/[id]  — Mark chat as read for current user
  */
 import { NextResponse } from 'next/server';
 import { getUserWithRole } from '../../../../lib/getAdminUser';
@@ -11,7 +11,7 @@ export async function PATCH(request, { params }) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (!adminDb) return NextResponse.json({ ok: false });
 
-    const { chatId } = await params;
+    const { id: chatId } = await params;
     const chatRef = adminDb.collection('chats').doc(chatId);
     const snap = await chatRef.get();
 
@@ -29,7 +29,7 @@ export async function PATCH(request, { params }) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error('[PATCH /api/chats/[chatId]]', err.message);
+    console.error('[PATCH /api/chats/[id]]', err.message);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
