@@ -130,13 +130,30 @@ export default function Sidebar({ user }) {
       Notification.requestPermission();
     }
 
+    // Fallback: poll /api/chats every 10s when Firestore real-time fails
+    let pollInterval = null;
+    const pollUnread = async () => {
+      try {
+        const res = await fetch('/api/chats');
+        if (!res.ok) return;
+        const data = await res.json();
+        let total = 0;
+        (data.chats || []).forEach(c => {
+          total += (c.unreadCount?.[user.id] || 0);
+        });
+        setUnreadMsgCount(isOnMessagesPage ? 0 : total);
+        prevMsgCountRef.current = total;
+      } catch { /* silent */ }
+    };
+
+    let unsub = null;
     try {
       const q = query(
         collection(db, 'chats'),
         where('participants', 'array-contains', user.id)
       );
 
-      const unsub = onSnapshot(q, (snap) => {
+      unsub = onSnapshot(q, (snap) => {
         let totalUnread = 0;
         
         snap.forEach(d => {
@@ -159,11 +176,22 @@ export default function Sidebar({ user }) {
         }
         
         prevMsgCountRef.current = totalUnread;
-      }, () => {});
-      
-      return () => unsub();
-    } catch { /* graceful fail */ }
+      }, () => {
+        // Firestore listener failed (auth not ready) — fall back to polling
+        pollUnread();
+        pollInterval = setInterval(pollUnread, 10000);
+      });
+    } catch { /* graceful fail — start polling */ }
+
+    // Always poll once immediately as a fast initial load
+    pollUnread();
+    
+    return () => {
+      if (unsub) unsub();
+      if (pollInterval) clearInterval(pollInterval);
+    };
   }, [user?.id, pathname]);
+
 
   // ── Wallet sync ────────────────────────────────────────────────────────────
   useEffect(() => {

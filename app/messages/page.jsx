@@ -218,10 +218,39 @@ function MessagesContent() {
   const { data: usersData } = useSWR('/api/users', fetcher);
   const suggestedStudents = usersData?.users || [];
 
+  // API Fallback Data
+  const { data: initialChatsData, mutate: mutateChats } = useSWR('/api/chats', fetcher);
+  
+  // Update state from API immediately if real-time not ready
+  useEffect(() => {
+    if (initialChatsData?.chats && !firebaseUid) {
+      setChats(initialChatsData.chats);
+      setLoadingChats(false);
+    }
+  }, [initialChatsData, firebaseUid]);
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const unsubChatsRef = useRef(null);
   const unsubMsgsRef = useRef(null);
+  const chatContainerRef = useRef(null);
+
+  // ── Fix: keyboard hides messages on mobile ──────────────────────────────────
+  // When the virtual keyboard opens, visualViewport shrinks. We set the chat
+  // container height explicitly so messages aren't hidden behind the keyboard.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.style.height = `${vv.height}px`;
+      }
+      // Scroll to bottom so latest messages stay visible above keyboard
+      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 80);
+    };
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, []);
 
   // ── Wait for Firebase Client Auth ──────────────────────────────────────────
   // Firestore rules require request.auth.uid. We MUST wait for Firebase Auth to initialize on the client
@@ -232,12 +261,14 @@ function MessagesContent() {
       clearTimeout(timeoutId);
       if (fbUser) {
         setFirebaseUid(fbUser.uid);
+        setLoadingChats(true); // trigger chat subscription
       } else {
         setFirebaseUid(null);
-        // Give Firebase Auth 3 seconds to restore from IndexedDB. If it fails, give up.
+        // Give Firebase Auth up to 8s to restore from IndexedDB before giving up.
+        // On slower devices this can take 4-6 seconds.
         timeoutId = setTimeout(() => {
           setLoadingChats(false);
-        }, 3000);
+        }, 8000);
       }
     });
     return () => {
@@ -284,36 +315,53 @@ function MessagesContent() {
   }, [currentUid, firebaseUid]);
 
   // ── Open Chat ──────────────────────────────────────────────────────────────
-  const openChat = useCallback((chat) => {
+  const openChat = useCallback(async (chat) => {
     setActiveChatId(chat.id);
     setActiveChat(chat);
     setShowList(false);
-    setMessages([]);
+    
+    // Clear old messages and unsubscribe immediately
+    if (unsubMsgsRef.current) {
+      unsubMsgsRef.current();
+      unsubMsgsRef.current = null;
+    }
 
-    if (unsubMsgsRef.current) unsubMsgsRef.current();
+    // Load from API first
+    fetch(`/api/chats/${chat.id}/messages`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.messages && !unsubMsgsRef.current) { // Only set if real-time hasn't taken over
+          setMessages(data.messages);
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 50);
+        }
+      })
+      .catch(console.error);
 
-    const msgsQ = query(
-      collection(db, 'chats', chat.id, 'messages'),
-      orderBy('timestamp', 'asc'),
-      limit(100)
-    );
+    // Upgrade to real-time if firebase auth is ready
+    if (firebaseUid && db) {
+      const msgsQ = query(
+        collection(db, 'chats', chat.id, 'messages'),
+        orderBy('timestamp', 'asc'),
+        limit(100)
+      );
 
-    unsubMsgsRef.current = onSnapshot(msgsQ, (snap) => {
-      const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setMessages(msgs);
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+      unsubMsgsRef.current = onSnapshot(msgsQ, (snap) => {
+        const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setMessages(msgs);
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
 
-      // Clear unread count on live message arrival if active
-      if (currentUid && db) {
-        updateDoc(doc(db, 'chats', chat.id), {
-          [`unreadCount.${currentUid}`]: 0,
-        }).catch(() => {});
-      }
-    }, (err) => console.error('Messages subscription error:', err.message));
+        // Clear unread count on live message arrival if active
+        if (currentUid && db) {
+          updateDoc(doc(db, 'chats', chat.id), {
+            [`unreadCount.${currentUid}`]: 0,
+          }).catch(() => {});
+        }
+      }, (err) => console.error('Messages subscription error:', err.message));
+    }
 
     // Mark as read via server
     fetch(`/api/chats/${chat.id}`, { method: 'PATCH' }).catch(() => {});
-  }, [currentUid]);
+  }, [currentUid, firebaseUid]);
 
   const openChatWithUser = useCallback((targetUid) => {
     if (!currentUid) return;
@@ -341,10 +389,10 @@ function MessagesContent() {
   }, [currentUid, chats, openChat, router]);
 
   useEffect(() => {
-    if (!openUserId || !currentUid || loadingChats || !firebaseUid) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!openUserId || !currentUid || loadingChats) return;
     openChatWithUser(openUserId);
-  }, [openUserId, currentUid, loadingChats, firebaseUid, openChatWithUser]);
+  }, [openUserId, currentUid, loadingChats, openChatWithUser]);
+
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -358,29 +406,43 @@ function MessagesContent() {
     setInputText('');
     setSendingMsg(true);
     inputRef.current?.focus();
+    
+    // Optimistic UI Update
+    const tempId = `temp-${Date.now()}`;
+    const newMsg = {
+      id: tempId,
+      senderId: currentUid,
+      text,
+      timestamp: Date.now(),
+      status: 'sending'
+    };
+    
+    setMessages(prev => [...prev, newMsg]);
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
 
     try {
-      const chatRef = doc(db, 'chats', activeChatId);
-      const msgRef = collection(db, 'chats', activeChatId, 'messages');
-      const ts = serverTimestamp();
-
-      await addDoc(msgRef, {
-        senderId: currentUid,
-        text,
-        timestamp: ts,
-        status: 'sent',
+      const res = await fetch(`/api/chats/${activeChatId}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
       });
-
-      const otherId = activeChat?.participants?.find(p => p !== currentUid);
-      await updateDoc(chatRef, {
-        lastMessage: text,
-        lastMessageAt: ts,
-        lastSenderId: currentUid,
-        ...(otherId ? { [`unreadCount.${otherId}`]: increment(1) } : {}),
-        [`unreadCount.${currentUid}`]: 0,
-      });
+      
+      if (!res.ok) throw new Error('Failed to send message via API');
+      
+      // If we don't have real-time active, trigger mutate/fetch to update list
+      if (!firebaseUid) {
+        mutateChats();
+        const msgsRes = await fetch(`/api/chats/${activeChatId}/messages`);
+        if (msgsRes.ok) {
+          const data = await msgsRes.json();
+          if (data.messages) setMessages(data.messages);
+        }
+      }
+      // If real-time is active, the snapshot will update the list and messages automatically!
     } catch (err) {
       console.error('Failed to send message:', err.message);
+      // Remove optimistic message
+      setMessages(prev => prev.filter(m => m.id !== tempId));
       setInputText(text);
     } finally {
       setSendingMsg(false);
@@ -429,19 +491,16 @@ function MessagesContent() {
   const otherName = directoryUser?.full_name || activeChat?.participantNames?.[otherId] || 'Campus Student';
   const otherPhoto = directoryUser?.photo_url || activeChat?.participantPhotos?.[otherId] || '';
 
-  if (!loadingChats && (!currentUid || !firebaseUid)) {
+  // User not logged in
+  if (!loadingChats && !currentUid) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
         <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mb-4 text-zinc-800">
           <MessageSquare className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-black text-zinc-900 mb-1">
-          {currentUid && !firebaseUid ? 'Session Sync Error' : 'Sign in to Message'}
-        </h2>
+        <h2 className="text-xl font-black text-zinc-900 mb-1">Sign in to Message</h2>
         <p className="text-xs text-zinc-500 max-w-xs mb-6">
-          {currentUid && !firebaseUid 
-            ? 'Your secure chat session could not be verified. Please log out and log in again to fix this.'
-            : 'Connect with GLA campus students directly.'}
+          Connect with GLA campus students directly.
         </p>
         <Link href="/" className="px-6 py-2.5 rounded-full bg-purple-600 text-white font-black text-xs hover:bg-purple-700 transition-all">
           Go Home
@@ -450,12 +509,17 @@ function MessagesContent() {
     );
   }
 
+
   return (
-    <div className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs transition-all duration-300 ${
-      !showList
-        ? 'fixed inset-0 z-[60] h-[100dvh] pt-[env(safe-area-inset-top)] flex-row md:relative md:h-[calc(100vh-64px)] md:pt-0 md:z-0 md:rounded-3xl rounded-none border-0'
-        : 'h-[calc(100dvh-156px)] md:h-[calc(100vh-64px)] rounded-2xl border flex-row relative'
-    }`}>
+    <div
+      ref={chatContainerRef}
+      className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs transition-all duration-300 ${
+        !showList
+          ? 'fixed inset-x-0 bottom-0 z-[60] flex-row md:relative md:h-[calc(100vh-64px)] md:top-auto md:z-0 md:rounded-3xl rounded-none border-0'
+          : 'h-[calc(100dvh-156px)] md:h-[calc(100vh-64px)] rounded-2xl border flex-row relative'
+      }`}
+      style={!showList ? { top: 58, height: `calc(100dvh - 58px)` } : {}}
+    >
 
       {/* ── LEFT SIDEBAR: Chat List ───────────────────────────────────────────── */}
       <div className={`
