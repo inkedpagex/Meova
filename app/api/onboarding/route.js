@@ -105,6 +105,16 @@ export async function POST(request) {
       { maxAge: 60 * 60 * 24 * 30, path: '/' }
     );
 
+    // ── Critical: set profileComplete cookie so layout gate skips the Firestore
+    // check on the very next request (prevents ERR_FAILED redirect loop on slow
+    // connections where Firestore write hasn't propagated yet).
+    cookieStore.set('__meetify_pc', '1', {
+      maxAge: 60 * 60 * 24 * 365,
+      path: '/',
+      httpOnly: true,
+      sameSite: 'lax',
+    });
+
     return NextResponse.json({ success: true });
   } catch (err) {
     if (err.message === 'USERNAME_TAKEN') {

@@ -35,37 +35,46 @@ export default async function RootLayout({ children }) {
     isAdminPath = pathname.startsWith('/admin');
     isMessagesPath = pathname.startsWith('/messages');
 
-      const fetchedUser = await getUserWithRole();
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
 
-      // ── Onboarding gate ────────────────────────────────────────────────────────
-      // If user is logged in but hasn't completed their profile, redirect to /onboarding
-      const EXEMPT_PATHS = ['/onboarding', '/login', '/signup', '/api', '/terms', '/privacy'];
-      const isExempt = EXEMPT_PATHS.some(p => pathname.startsWith(p));
-      if (fetchedUser && fetchedUser.profileComplete === false && !isExempt) {
+    const fetchedUser = await getUserWithRole();
+
+    // ── Onboarding gate ──────────────────────────────────────────────────────
+    // Check __meetify_pc cookie FIRST (written by /api/onboarding immediately
+    // after the Firestore transaction). This avoids ERR_FAILED redirect loops
+    // on slow connections where Firestore writes haven't propagated yet.
+    const EXEMPT_PATHS = ['/onboarding', '/login', '/signup', '/api', '/terms', '/privacy'];
+    const isExempt = EXEMPT_PATHS.some(p => pathname.startsWith(p));
+    if (fetchedUser && !isExempt) {
+      const pcCookie = cookieStore.get('__meetify_pc')?.value;
+      const isComplete = pcCookie === '1' || fetchedUser.profileComplete !== false;
+      if (!isComplete) {
         const { redirect } = await import('next/navigation');
         redirect('/onboarding');
       }
-      // ─────────────────────────────────────────────────────────────────────────
-
-      if (fetchedUser) {
-        const [wallet, fetchedPeople, fetchedEvents] = await Promise.all([
-          getOrCreateWallet(fetchedUser.uid, fetchedUser.email).catch(() => null),
-          fetchUsersAdmin(10).catch(() => []),
-          fetchUpcomingEventsAdmin(5).catch(() => []),
-        ]);
-
-        user = JSON.parse(JSON.stringify({ ...fetchedUser, ...(wallet ? { wallet } : {}) }));
-        people = (fetchedPeople || []).filter(p => p.id !== user?.id);
-        events = fetchedEvents || [];
-      }
-    } catch (err) {
-      if (err?.message?.includes('Dynamic server usage') || err?.digest?.startsWith('NEXT_')) {
-        throw err;
-      }
-      console.error('[RootLayout] Firebase Admin init error:', err?.message);
     }
+    // ─────────────────────────────────────────────────────────────────────────
 
-    return (
+    if (fetchedUser) {
+      const [wallet, fetchedPeople, fetchedEvents] = await Promise.all([
+        getOrCreateWallet(fetchedUser.uid, fetchedUser.email).catch(() => null),
+        fetchUsersAdmin(10).catch(() => []),
+        fetchUpcomingEventsAdmin(5).catch(() => []),
+      ]);
+
+      user = JSON.parse(JSON.stringify({ ...fetchedUser, ...(wallet ? { wallet } : {}) }));
+      people = (fetchedPeople || []).filter(p => p.id !== user?.id);
+      events = fetchedEvents || [];
+    }
+  } catch (err) {
+    if (err?.message?.includes('Dynamic server usage') || err?.digest?.startsWith('NEXT_')) {
+      throw err;
+    }
+    console.error('[RootLayout] Firebase Admin init error:', err?.message);
+  }
+
+  return (
       <html lang="en" data-theme="light" style={{ colorScheme: 'light' }}>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
