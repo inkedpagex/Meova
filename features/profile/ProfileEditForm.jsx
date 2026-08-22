@@ -20,6 +20,18 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [showYearDropdown, setShowYearDropdown] = useState(false);
+  const yearDropdownRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (yearDropdownRef.current && !yearDropdownRef.current.contains(e.target)) {
+        setShowYearDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const [fullName, setFullName] = useState(initialProfile?.full_name || '');
   const [year, setYear] = useState(initialProfile?.year || '1st');
@@ -162,10 +174,10 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
     }
   };
 
-  // Premium UI Classes mapping to globals.css variables
-  const inputClass = "w-full rounded-xl py-3.5 pl-11 pr-4 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-white/20";
-  const labelClass = "block text-[10px] font-black uppercase tracking-widest mb-2 flex items-center gap-1.5";
-  const iconWrapperClass = "absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none";
+  // Premium UI Classes
+  const inputClass = "w-full rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold text-zinc-900 bg-white border border-zinc-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] transition-all placeholder:text-zinc-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 hover:border-zinc-300";
+  const labelClass = "block text-[10px] font-black text-zinc-800 uppercase tracking-widest mb-2 flex items-center gap-1.5 ml-1";
+  const iconWrapperClass = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none";
 
   return (
     <form onSubmit={handleSave} className="space-y-8 relative">
@@ -189,16 +201,15 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Full Name */}
         <div>
-          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Full Name</label>
+          <label className={labelClass}>Full Name</label>
           <div className="relative group">
-            <span className={iconWrapperClass} style={{ color: 'var(--text-muted)' }}><User size={16} className="group-focus-within:text-white transition-colors" /></span>
+            <span className={iconWrapperClass}><User size={16} className="text-zinc-400 group-focus-within:text-indigo-500 transition-colors" /></span>
             <input 
               type="text" 
               value={fullName} 
               onChange={(e) => setFullName(e.target.value)} 
               placeholder="e.g. Alex Johnson" 
               className={inputClass} 
-              style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
               required 
             />
           </div>
@@ -206,16 +217,15 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
 
         {/* Branch / Course */}
         <div>
-          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Branch / Course</label>
+          <label className={labelClass}>Branch / Course</label>
           <div className="relative group">
-            <span className={iconWrapperClass} style={{ color: 'var(--text-muted)' }}><BookOpen size={16} className="group-focus-within:text-white transition-colors" /></span>
+            <span className={iconWrapperClass}><BookOpen size={16} className="text-zinc-400 group-focus-within:text-indigo-500 transition-colors" /></span>
             <input 
               type="text" 
               value={branch} 
               onChange={(e) => setBranch(e.target.value)} 
               placeholder="e.g. B.Tech CSE" 
               className={inputClass} 
-              style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
               required 
             />
           </div>
@@ -225,34 +235,47 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Year */}
         <div>
-          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Year of Study</label>
-          <div className="relative group">
-            <span className={iconWrapperClass} style={{ color: 'var(--text-muted)' }}><GraduationCap size={16} className="group-focus-within:text-white transition-colors" /></span>
-            <select 
-              value={year} 
-              onChange={(e) => setYear(e.target.value)} 
-              className={`${inputClass} appearance-none cursor-pointer`}
-              style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
+          <label className={labelClass}>Year of Study</label>
+          <div className="relative group" ref={yearDropdownRef}>
+            <span className={iconWrapperClass}><GraduationCap size={16} className="text-zinc-400 group-focus-within:text-indigo-500 transition-colors" /></span>
+            <button 
+              type="button"
+              onClick={() => setShowYearDropdown(!showYearDropdown)}
+              className={`${inputClass} flex items-center justify-between cursor-pointer`}
             >
-              <option value="1st">1st Year</option>
-              <option value="2nd">2nd Year</option>
-              <option value="3rd">3rd Year</option>
-              <option value="4th">4th Year</option>
-            </select>
+              <span>{year === '1st' ? '1st Year' : year === '2nd' ? '2nd Year' : year === '3rd' ? '3rd Year' : year === '4th' ? '4th Year' : 'Select Year'}</span>
+              <svg className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${showYearDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            
+            {showYearDropdown && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-zinc-100 shadow-[0_12px_40px_rgba(0,0,0,0.08)] rounded-2xl overflow-hidden z-50 p-1">
+                {['1st', '2nd', '3rd', '4th'].map((y) => (
+                  <button
+                    key={y}
+                    type="button"
+                    onClick={() => { setYear(y); setShowYearDropdown(false); }}
+                    className={`w-full text-left px-4 py-3 text-sm font-bold transition-all rounded-xl cursor-pointer ${
+                      year === y ? 'bg-indigo-50 text-indigo-700' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                    }`}
+                  >
+                    {y} Year
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Bio */}
         <div>
-          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Short Bio <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 'normal' }}>(Optional)</span></label>
+          <label className={labelClass}>Short Bio <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
           <div className="relative group">
-            <span className={`${iconWrapperClass} top-3`} style={{ color: 'var(--text-muted)' }}><PenLine size={16} className="group-focus-within:text-white transition-colors" /></span>
+            <span className={`${iconWrapperClass} top-4`}><PenLine size={16} className="text-zinc-400 group-focus-within:text-indigo-500 transition-colors" /></span>
             <textarea 
               value={bio} 
               onChange={(e) => setBio(e.target.value)} 
               placeholder="What are you currently working on?" 
               className={`${inputClass} resize-none min-h-[50px] pt-3.5`} 
-              style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
               rows={1}
             />
           </div>
@@ -262,26 +285,25 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Instagram Handle */}
         <div>
-          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Instagram Username / Link <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 'normal' }}>(Optional)</span></label>
+          <label className={labelClass}>Instagram Username / Link <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
           <div className="relative group">
-            <span className={iconWrapperClass} style={{ color: 'var(--text-muted)' }}><Camera size={16} className="group-focus-within:text-white transition-colors" /></span>
+            <span className={iconWrapperClass}><Camera size={16} className="text-zinc-400 group-focus-within:text-indigo-500 transition-colors" /></span>
             <input 
               type="text" 
               value={instagram} 
               onChange={(e) => setInstagram(e.target.value)} 
               placeholder="e.g. chir_ag897" 
               className={inputClass} 
-              style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
             />
           </div>
-          <p className="text-[9px] text-[var(--text-muted)] mt-1.5 font-bold uppercase tracking-wider">
+          <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
             Used to show your Instagram profile embed on your public profile page.
           </p>
         </div>
 
         {/* Profile Image Upload */}
         <div>
-          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Profile Photo <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 'normal' }}>(Optional)</span></label>
+          <label className={labelClass}>Profile Photo <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
           
           <input 
             type="file" 
@@ -291,26 +313,26 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             className="hidden" 
           />
 
-          <div className="flex items-center gap-4 p-3 rounded-2xl bg-[var(--bg-overlay)] border border-[var(--border-subtle)]">
+          <div className="flex items-center gap-4 p-3 rounded-2xl bg-white border border-zinc-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] h-[52px]">
             {photoUrl ? (
               <div className="flex items-center gap-3 w-full">
-                <div className="w-14 h-14 rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface)] flex-shrink-0">
+                <div className="w-9 h-9 rounded-xl overflow-hidden border border-zinc-200 bg-zinc-50 flex-shrink-0">
                   <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
                 </div>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between flex-1 gap-2">
                   <button 
                     type="button" 
                     onClick={() => fileInputRef.current?.click()}
-                    className="text-[10px] font-black uppercase tracking-wider text-[#818cf8] hover:text-[#a5b4fc] text-left transition-colors cursor-pointer"
+                    className="text-[10px] font-black uppercase tracking-wider text-indigo-600 hover:text-indigo-500 transition-colors cursor-pointer"
                   >
-                    Change Photo
+                    Change
                   </button>
                   <button 
                     type="button" 
                     onClick={handleRemovePhoto}
-                    className="text-[10px] font-black uppercase tracking-wider text-rose-400 hover:text-rose-300 text-left transition-colors cursor-pointer"
+                    className="text-[10px] font-black uppercase tracking-wider text-rose-500 hover:text-rose-400 transition-colors cursor-pointer"
                   >
-                    Remove Photo
+                    Remove
                   </button>
                 </div>
               </div>
@@ -318,14 +340,14 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
               <button 
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 py-4 border border-dashed border-[var(--border-subtle)] hover:border-neutral-500 rounded-xl transition-all text-xs font-bold text-[var(--text-secondary)] hover:text-white cursor-pointer active:scale-95"
+                className="w-full flex items-center justify-center gap-2 h-full text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50/50 rounded-xl transition-all cursor-pointer active:scale-95"
               >
-                <Camera size={16} />
-                <span>Upload Profile Photo</span>
+                <Camera size={14} />
+                <span>Upload Photo</span>
               </button>
             )}
           </div>
-          <p className="text-[9px] text-[var(--text-muted)] mt-1.5 font-bold uppercase tracking-wider">
+          <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
             Upload a photo to use as your custom avatar. Keep it under 2MB.
           </p>
         </div>
@@ -335,22 +357,19 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       <div className="pt-2">
         <div className="flex justify-between items-end mb-3">
           <div>
-            <label className={labelClass} style={{ color: 'var(--text-secondary)' }}><Tag size={12} /> Top 3 Interests</label>
-            <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Select exactly 3 tags that describe your campus vibe.</p>
+            <label className={labelClass}><Tag size={12} className="text-indigo-500" /> Top 3 Interests</label>
+            <p className="text-[11px] font-semibold text-zinc-500 ml-1">Select exactly 3 tags that describe your campus vibe.</p>
           </div>
-          <span 
-            className="text-[10px] font-black px-3 py-1.5 rounded-full transition-all" 
-            style={
-              selectedInterests.length === 3 
-                ? { background: 'var(--text-primary)', color: 'var(--bg-base)' } 
-                : { background: 'var(--bg-overlay)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }
-            }
-          >
+          <span className={`text-[10px] font-black px-3 py-1.5 rounded-full transition-all ${
+            selectedInterests.length === 3
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+              : 'bg-zinc-100 text-zinc-500'
+          }`}>
             {selectedInterests.length}/3
           </span>
         </div>
         
-        <div className="flex flex-wrap gap-2.5 p-4 rounded-2xl" style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)' }}>
+        <div className="flex flex-wrap gap-2.5 p-5 rounded-3xl bg-white border border-zinc-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
           {INTEREST_TAGS.map((tag) => {
             const sel = selectedInterests.includes(tag);
             return (
@@ -358,12 +377,11 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 key={tag} 
                 type="button" 
                 onClick={() => handleInterestToggle(tag)}
-                className="text-[11px] uppercase tracking-widest py-2 px-4 rounded-full transition-all duration-300 font-bold active:scale-95"
-                style={
+                className={`text-[11px] uppercase tracking-widest py-2 px-4 rounded-full transition-all duration-300 font-black active:scale-95 border cursor-pointer ${
                   sel 
-                    ? { background: 'var(--text-primary)', color: 'var(--bg-base)', transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(255,255,255,0.1)' }
-                    : { background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }
-                }
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-[0_4px_12px_rgba(79,70,229,0.25)] -translate-y-0.5'
+                    : 'bg-zinc-50 border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 hover:border-zinc-300'
+                }`}
               >
                 {tag}
               </button>

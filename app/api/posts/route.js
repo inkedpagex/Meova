@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { getUserWithRole } from '@/lib/getAdminUser';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   try {
     if (!adminDb) return NextResponse.json({ posts: [] });

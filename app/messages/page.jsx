@@ -243,7 +243,10 @@ function MessagesContent() {
     if (!vv) return;
     const onResize = () => {
       if (chatContainerRef.current) {
-        chatContainerRef.current.style.height = `${vv.height}px`;
+        // If the chat container has a top offset (like 58px on mobile), we MUST subtract it from vv.height
+        // otherwise the container will extend beyond the visible viewport and hide the input box!
+        const topOffset = parseInt(chatContainerRef.current.style.top || '0', 10);
+        chatContainerRef.current.style.height = `${vv.height - topOffset}px`;
       }
       // Scroll to bottom so latest messages stay visible above keyboard
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 80);

@@ -162,9 +162,9 @@ export default function FeedClient() {
   const initialSparks = currentWallet ? (currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0) : 0;
   
   // SWR Hooks for data fetching (cached & instantly available)
-  const { data: expData, mutate: mutateExp } = useSWR('/api/experiences', fetcher);
+  const { data: expData, error: expError, mutate: mutateExp } = useSWR('/api/experiences', fetcher);
   const { data: bkData, mutate: mutateBk } = useSWR(currentUser ? '/api/bookings' : null, fetcher);
-  const { data: postsData, mutate: mutatePosts } = useSWR('/api/posts', fetcher);
+  const { data: postsData, error: postsError, mutate: mutatePosts } = useSWR('/api/posts', fetcher);
   
   const experiences = expData?.experiences || [];
   const bookings = bkData?.bookings || [];
@@ -172,7 +172,7 @@ export default function FeedClient() {
   
   // Use real backend posts exclusively
   const displayPosts = campusPosts;
-  const dbHydrated = expData !== undefined; // True once SWR has data
+  const dbHydrated = expData !== undefined || expError !== undefined; // True once SWR has data or fails
   
   const [likedPosts, setLikedPosts] = useState({});
   const [userData, setUserData] = useState(currentUser);
@@ -705,16 +705,6 @@ export default function FeedClient() {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Sparks Balance Badge */}
-            <Link 
-              href="/wallet"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 hover:bg-amber-500/20 transition-all cursor-pointer shadow-xs active:scale-95"
-              title="View Spark Wallet"
-            >
-              <Zap size={14} className="fill-current text-amber-500 animate-pulse" />
-              <span className="text-xs font-black tracking-tight">{sparksBalance}</span>
-            </Link>
-
             {/* Live Free Now Toggle Button */}
             <button 
               onClick={handleFreeNowToggle}
@@ -996,7 +986,13 @@ export default function FeedClient() {
 
         {/* Stacked Vertical Post Feed - Signature Meetify Campus Design */}
         <div className="space-y-6 max-w-xl mx-auto pt-2">
-          {displayPosts.map((post) => {
+          {displayPosts.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-[2rem] border border-zinc-200 border-dashed">
+              <Camera className="mx-auto h-12 w-12 text-zinc-300 mb-4" />
+              <h3 className="text-sm font-black text-zinc-700">No posts yet</h3>
+              <p className="text-xs font-bold text-zinc-500 mt-1">Be the first to share a campus moment!</p>
+            </div>
+          ) : displayPosts.map((post) => {
             const isLiked = likedPosts[post.id];
             const currentLikes = (post.likes || 0) + (isLiked ? 1 : 0);
             return (

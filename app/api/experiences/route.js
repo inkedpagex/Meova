@@ -7,7 +7,7 @@ import { getUserWithRole } from '../../../lib/getAdminUser';
 import { adminDb } from '../../../lib/firebaseAdmin';
 import { fetchExperiencesAdmin } from '../../../lib/firebaseAdminQueries';
 
-export const revalidate = 30;
+export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   try {

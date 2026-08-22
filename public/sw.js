@@ -4,7 +4,6 @@
 
 const CACHE_NAME = 'meetify-v2';
 const STATIC_ASSETS = [
-  '/',
   '/manifest.json',
   '/icon-512.png',
 ];
@@ -94,7 +93,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// ── Fetch: Network first for API, cache-first for assets ─────────────────────
+// ── Fetch: Network first for API/HTML, cache-first for static assets ─────────
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -102,8 +101,18 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET and cross-origin requests
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  // API routes: always network-first, never cache
-  if (url.pathname.startsWith('/api/')) return;
+  // Always network-first for API routes and Next.js data fetching
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/data/')) return;
+
+  // For HTML navigations (like `/`, `/onboarding`, `/login`), bypass cache to prevent redirect loops.
+  if (request.mode === 'navigate' || request.headers.get('accept').includes('text/html')) {
+    event.respondWith(
+      fetch(request).catch(() => {
+        return new Response('Offline', { status: 503 });
+      })
+    );
+    return;
+  }
 
   // Static assets (fonts, images, JS, CSS): cache-first
   event.respondWith(
@@ -112,15 +121,15 @@ self.addEventListener('fetch', (event) => {
       return fetch(request).then((response) => {
         // Only cache successful responses for static-looking paths
         if (response.ok && (
-          url.pathname.match(/\.(png|jpg|jpeg|svg|ico|woff2?|css|js)$/)
+          url.pathname.match(/\.(png|jpg|jpeg|svg|ico|woff2?|css|js)$/) ||
+          url.pathname.startsWith('/_next/static/')
         )) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
         return response;
       }).catch(() => {
-        // Offline fallback — return cached home page if available
-        return caches.match('/') || new Response('Offline', { status: 503 });
+        return new Response('Offline', { status: 503 });
       });
     })
   );
