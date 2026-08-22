@@ -8,7 +8,7 @@ export async function GET() {
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const users = await fetchUsersAdmin(50);
+    const users = await fetchUsersAdmin(100);
     
     // Fetch blocks
     const blocksSnap = await adminDb.collection('blocks')

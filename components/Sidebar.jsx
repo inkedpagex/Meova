@@ -390,7 +390,7 @@ export default function Sidebar({ user }) {
               <div className="min-w-0">
                 <p className="text-xs font-black truncate text-zinc-900 group-hover:text-purple-600 transition-colors">{user.full_name || (user.email || 'user').split('@')[0]}</p>
                 <p className="text-[10px] truncate text-zinc-400 font-semibold">
-                  {isAdminRoute ? 'Super Admin' : `${user.year || '1st'} · ${user.branch || 'General'}`}
+                  {isAdminRoute ? 'Super Admin' : `${user?.year ? (user.year.includes('Year') ? user.year : `${user.year} Year`) : '1st Year'} · ${user.branch || 'General'}`}
                 </p>
               </div>
             </Link>
@@ -403,13 +403,14 @@ export default function Sidebar({ user }) {
       </aside>
 
       {/* ── Mobile bottom tab bar ───────────── */}
-      <nav 
-        className="md:hidden fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-white/90 backdrop-blur-2xl border-t border-zinc-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]"
-        style={{
-          height: 'calc(62px + env(safe-area-inset-bottom))',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-        }}
-      >
+      {!(AUTH_PATHS.includes(pathname) || pathname?.startsWith('/messages') || pathname?.startsWith('/admin')) && (
+        <nav 
+          className="md:hidden fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-white/90 backdrop-blur-2xl border-t border-zinc-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]"
+          style={{
+            height: 'calc(62px + env(safe-area-inset-bottom))',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+          }}
+        >
         {MOBILE_NAV.map(({ href, label, Icon, isCenter }) => {
           if ((href === '/profile') && !user) {
             return (
@@ -457,6 +458,7 @@ export default function Sidebar({ user }) {
           );
         })}
       </nav>
+      )}
     </>
   );
 }

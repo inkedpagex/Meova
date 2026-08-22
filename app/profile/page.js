@@ -26,20 +26,31 @@ export default async function ProfilePage() {
     if (ovStr) overrides = JSON.parse(ovStr);
   } catch (err) {}
 
-  const profile = fetchedProfile || {
-    id: user.id,
-    uid: user.uid || user.id,
-    full_name: overrides.full_name || user.full_name || user.email?.split('@')[0] || 'User',
-    email: user.email,
-    branch: overrides.branch || user.branch || '',
-    year: overrides.year || user.year || '',
-    bio: overrides.bio || user.bio || '',
-    interests: overrides.interests || user.interests || [],
-    university: overrides.university || user.university || '',
-    role: user.role || 'user',
-    isHost: user.role === 'host',
-    photo_url: overrides.photo_url || user.photo_url || user.photoURL || user.picture || '',
-  };
+  const profile = fetchedProfile
+    ? {
+        ...fetchedProfile,
+        full_name: overrides.full_name || fetchedProfile.full_name,
+        branch: overrides.branch || fetchedProfile.branch,
+        year: overrides.year || fetchedProfile.year,
+        bio: overrides.bio || fetchedProfile.bio,
+        interests: overrides.interests || fetchedProfile.interests,
+        university: overrides.university || fetchedProfile.university,
+        photo_url: overrides.photo_url || fetchedProfile.photo_url,
+      }
+    : {
+        id: user.id,
+        uid: user.uid || user.id,
+        full_name: overrides.full_name || user.full_name || user.email?.split('@')[0] || 'User',
+        email: user.email,
+        branch: overrides.branch || user.branch || '',
+        year: overrides.year || user.year || '',
+        bio: overrides.bio || user.bio || '',
+        interests: overrides.interests || user.interests || [],
+        university: overrides.university || user.university || '',
+        role: user.role || 'user',
+        isHost: user.role === 'host',
+        photo_url: overrides.photo_url || user.photo_url || user.photoURL || user.picture || '',
+      };
 
   const initialSparks =
     wallet ? (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0) : 0;

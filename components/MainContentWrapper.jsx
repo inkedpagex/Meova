@@ -22,12 +22,12 @@ export default function MainContentWrapper({ children }) {
     <div className={`flex-1 md:pl-[220px] ${isMessagesPath ? '' : 'xl:pr-[320px]'} min-w-0`}>
       <main
         style={{
-          maxWidth: isMessagesPath ? 1200 : 640,
+          maxWidth: isMessagesPath ? '100%' : 640,
           margin: '0 auto',
-          padding: '16px 16px 88px',
-          paddingTop: 68
+          padding: isMessagesPath ? 0 : '16px 16px 88px',
+          paddingTop: isMessagesPath ? 0 : 68
         }}
-        className="md:!pt-8 md:!pb-8 md:px-6 pb-safe"
+        className={isMessagesPath ? 'p-0 md:p-6 md:!pt-8 md:!pb-8' : 'md:!pt-8 md:!pb-8 md:px-6 pb-safe'}
       >
         {children}
       </main>

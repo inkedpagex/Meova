@@ -148,162 +148,45 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
   const avatarSrc = getUserAvatarUrl(profile);
 
   const hasInterests = profile?.interests?.length > 0;
-  const yearLabel = profile?.year ? `${profile.year} Year` : null;
+  const yearLabel = profile?.year ? (profile.year.includes('Year') ? profile.year : `${profile.year} Year`) : null;
   const branchLabel = profile?.branch || null;
   const universityLabel = profile?.university || null;
 
   return (
-    <div className="min-h-screen px-4 py-4 max-w-[500px] mx-auto pb-24 anim-fade-in" style={{ background: 'var(--bg-base)' }}>
+    <>
+      <div className="min-h-screen px-4 py-4 max-w-[500px] mx-auto pb-24 anim-fade-in" style={{ background: 'var(--bg-base)' }}>
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5 relative">
-        <div className="flex items-center gap-3">
-          {isEditing && (
-            <button onClick={() => setIsEditing(false)}
-              className="p-2 rounded-xl border cursor-pointer transition-all active:scale-95"
-              style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
-              <ArrowLeft size={16} strokeWidth={2.5} />
-            </button>
-          )}
-          <h1 className="text-[13px] font-black uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>
-            {isEditing ? 'Edit Profile' : 'My Profile'}
-          </h1>
-        </div>
-        {!isEditing && (
-          <div>
-            <button onClick={() => setShowSettingsModal(true)}
-              className="p-2 rounded-xl border cursor-pointer transition-all hover:scale-105 active:scale-95"
-              style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
-              <Settings size={16} strokeWidth={2.5} />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* ── Settings Modal ──────────────────────────── */}
-      {showSettingsModal && (
-        <div className="fixed inset-0 z-[200] flex flex-col anim-fade-in" style={{ background: 'var(--bg-base)' }}>
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-elevated)' }}>
-            <h2 className="text-sm font-black uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>Settings</h2>
-            <button onClick={() => setShowSettingsModal(false)} className="p-2 rounded-full cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-              <X size={20} style={{ color: 'var(--text-primary)' }} />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
-            
-            {/* Account Settings */}
-            <div className="space-y-3">
-              <span className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>Account</span>
-              <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                <button onClick={() => { setIsEditing(true); setShowSettingsModal(false); }}
-                  className="w-full text-left p-4 text-xs font-bold transition-colors cursor-pointer flex items-center justify-between"
-                  style={{ color: 'var(--text-primary)' }}>
-                  <div className="flex items-center gap-3"><Edit3 size={16} className="text-zinc-400" /> Edit Profile</div>
-                  <ChevronRight size={14} className="text-zinc-400" />
-                </button>
-              </div>
-            </div>
-
-            {/* App Permissions */}
-            <div className="space-y-3">
-              <span className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>App Permissions</span>
-              <div className="rounded-2xl p-4 space-y-5" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                {/* Location */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                      <MapPin size={14} />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-zinc-900">Location Access</p>
-                      <p className="text-[10px] text-zinc-500 font-medium">Required for "Free Now" proximity</p>
-                    </div>
-                  </div>
-                  {locStatus === 'granted' ? (
-                    <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Enabled</span>
-                  ) : locStatus === 'denied' ? (
-                    <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
-                  ) : (
-                    <button onClick={requestLocation} className="text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
-                  )}
-                </div>
-
-                {/* Notifications */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-pink-50 border border-pink-100 flex items-center justify-center text-pink-600">
-                      <Bell size={14} />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-zinc-900">Push Notifications</p>
-                      <p className="text-[10px] text-zinc-500 font-medium">Get chat and booking alerts</p>
-                    </div>
-                  </div>
-                  {notifStatus === 'granted' ? (
-                    <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Enabled</span>
-                  ) : notifStatus === 'denied' ? (
-                    <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
-                  ) : (
-                    <button onClick={requestNotifications} className="text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
-                  )}
-                </div>
-
-                {/* Camera */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-600">
-                      <Camera size={14} />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-zinc-900">Camera Access</p>
-                      <p className="text-[10px] text-zinc-500 font-medium">To scan booking QR codes</p>
-                    </div>
-                  </div>
-                  {camStatus === 'granted' ? (
-                    <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Enabled</span>
-                  ) : camStatus === 'denied' ? (
-                    <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
-                  ) : (
-                    <button onClick={requestCamera} className="text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Admin (if applicable) */}
-            {profile?.role === 'admin' && (
-              <div className="space-y-3">
-                <span className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>Admin</span>
-                <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                  <button onClick={() => { router.push('/admin'); setShowSettingsModal(false); }}
-                    className="w-full text-left p-4 text-xs font-black transition-colors cursor-pointer flex items-center justify-between text-[#7c3aed]">
-                    <div className="flex items-center gap-3"><ShieldCheck size={16} /> Admin Dashboard</div>
-                    <ChevronRight size={14} className="text-[#7c3aed]" />
-                  </button>
-                </div>
-              </div>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5 relative">
+          <div className="flex items-center gap-3">
+            {isEditing && (
+              <button onClick={() => setIsEditing(false)}
+                className="p-2 rounded-xl border cursor-pointer transition-all active:scale-95"
+                style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
+                <ArrowLeft size={16} strokeWidth={2.5} />
+              </button>
             )}
-
-            {/* Danger Zone */}
-            <div className="space-y-3">
-              <span className="text-[10px] font-black uppercase tracking-widest ml-1 text-rose-500">Danger Zone</span>
-              <div className="rounded-2xl overflow-hidden p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                <LogoutButton />
-              </div>
-            </div>
-
+            <h1 className="text-[13px] font-black uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>
+              {isEditing ? 'Edit Profile' : 'My Profile'}
+            </h1>
           </div>
+          {!isEditing && (
+            <div>
+              <button onClick={() => setShowSettingsModal(true)}
+                className="p-2 rounded-xl border cursor-pointer transition-all hover:scale-105 active:scale-95"
+                style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
+                <Settings size={16} strokeWidth={2.5} />
+              </button>
+            </div>
+          )}
         </div>
-      )}
 
-      {isEditing ? (
-        <div className="rounded-3xl p-5" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-          <ProfileEditForm initialProfile={profile} onSaveSuccess={handleSaveSuccess} />
-        </div>
-      ) : (
-        <div className="space-y-4">
+        {isEditing ? (
+          <div className="rounded-3xl p-5" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+            <ProfileEditForm initialProfile={profile} onSaveSuccess={handleSaveSuccess} />
+          </div>
+        ) : (
+          <div className="space-y-4">
 
           {/* ── ADMIN ACCESS CARD (Mobile Admin Button) ────────────────── */}
           {profile?.role === 'admin' && (
@@ -502,5 +385,125 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
         </div>
       )}
     </div>
+
+      {/* ── Settings Modal (Outside Stacking Context) ──────────────────────── */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 anim-fade-in" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-full max-w-md max-h-[90vh] sm:rounded-3xl rounded-t-3xl flex flex-col overflow-hidden anim-scale-in shadow-2xl" style={{ background: 'var(--bg-base)' }}>
+            
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-elevated)' }}>
+              <h2 className="text-sm font-black uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>Settings</h2>
+              <button onClick={() => setShowSettingsModal(false)} className="p-2 rounded-full cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                <X size={20} style={{ color: 'var(--text-primary)' }} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+              {/* Account Settings */}
+              <div className="space-y-3">
+                <span className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>Account</span>
+                <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                  <button onClick={() => { setIsEditing(true); setShowSettingsModal(false); }}
+                    className="w-full text-left p-4 text-xs font-bold transition-colors cursor-pointer flex items-center justify-between"
+                    style={{ color: 'var(--text-primary)' }}>
+                    <div className="flex items-center gap-3"><Edit3 size={16} className="text-zinc-400" /> Edit Profile</div>
+                    <ChevronRight size={14} className="text-zinc-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* App Permissions */}
+              <div className="space-y-3">
+                <span className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>App Permissions</span>
+                <div className="rounded-2xl p-4 space-y-5" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                  {/* Location */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                        <MapPin size={14} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-zinc-900">Location Access</p>
+                        <p className="text-[10px] text-zinc-500 font-medium">Required for "Free Now" proximity</p>
+                      </div>
+                    </div>
+                    {locStatus === 'granted' ? (
+                      <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Enabled</span>
+                    ) : locStatus === 'denied' ? (
+                      <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
+                    ) : (
+                      <button onClick={requestLocation} className="text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                    )}
+                  </div>
+
+                  {/* Notifications */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-pink-50 border border-pink-100 flex items-center justify-center text-pink-600">
+                        <Bell size={14} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-zinc-900">Push Notifications</p>
+                        <p className="text-[10px] text-zinc-500 font-medium">Get chat and booking alerts</p>
+                      </div>
+                    </div>
+                    {notifStatus === 'granted' ? (
+                      <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Enabled</span>
+                    ) : notifStatus === 'denied' ? (
+                      <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
+                    ) : (
+                      <button onClick={requestNotifications} className="text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                    )}
+                  </div>
+
+                  {/* Camera */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-600">
+                        <Camera size={14} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-zinc-900">Camera Access</p>
+                        <p className="text-[10px] text-zinc-500 font-medium">To scan booking QR codes</p>
+                      </div>
+                    </div>
+                    {camStatus === 'granted' ? (
+                      <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Enabled</span>
+                    ) : camStatus === 'denied' ? (
+                      <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
+                    ) : (
+                      <button onClick={requestCamera} className="text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Admin (if applicable) */}
+              {profile?.role === 'admin' && (
+                <div className="space-y-3">
+                  <span className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>Admin</span>
+                  <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                    <button onClick={() => { router.push('/admin'); setShowSettingsModal(false); }}
+                      className="w-full text-left p-4 text-xs font-black transition-colors cursor-pointer flex items-center justify-between text-[#7c3aed]">
+                      <div className="flex items-center gap-3"><ShieldCheck size={16} /> Admin Dashboard</div>
+                      <ChevronRight size={14} className="text-[#7c3aed]" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Danger Zone */}
+              <div className="space-y-3">
+                <span className="text-[10px] font-black uppercase tracking-widest ml-1 text-rose-500">Danger Zone</span>
+                <div className="rounded-2xl overflow-hidden p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                  <LogoutButton />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

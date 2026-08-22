@@ -118,6 +118,25 @@ export default function DiscoverClient() {
   }, [interestParam]);
   
   const [people, setPeople] = useState(contextPeople || []);
+  const [visiblePeopleLimit, setVisiblePeopleLimit] = useState(12);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadMoreRef = useRef(null);
+
+  // Reset pagination limit on search or filter change
+  useEffect(() => {
+    setVisiblePeopleLimit(12);
+  }, [search, activeFilter]);
+
+  // Infinite Scroll listener
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300) {
+        setVisiblePeopleLimit(prev => prev + 12);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   // SWR Hooks for caching and instant data fetching
   const { data: expData } = useSWR('/api/experiences', fetcher);
@@ -195,18 +214,18 @@ export default function DiscoverClient() {
       return bLive - aLive;
     });
 
-    const list = sorted
-      .filter(p => {
-        if (!search || search.length < 2 || isAlgoliaSearch) return true;
-        const q = search.toLowerCase();
-        const nameMatch = p.full_name?.toLowerCase().includes(q);
-        const branchMatch = p.branch?.toLowerCase().includes(q);
-        const interestMatch = (p.interests || []).some(i => i.toLowerCase().includes(q) || q.includes(i.toLowerCase()));
-        return nameMatch || branchMatch || interestMatch;
-      })
-      .slice(0, 12);
+    const fullList = sorted.filter(p => {
+      if (!search || search.length < 2 || isAlgoliaSearch) return true;
+      const q = search.toLowerCase();
+      const nameMatch = p.full_name?.toLowerCase().includes(q);
+      const branchMatch = p.branch?.toLowerCase().includes(q);
+      const interestMatch = (p.interests || []).some(i => i.toLowerCase().includes(q) || q.includes(i.toLowerCase()));
+      return nameMatch || branchMatch || interestMatch;
+    });
 
-    const liveCount = list.filter(p => p.isLiveOnCampus).length;
+    const list = fullList.slice(0, visiblePeopleLimit);
+    const hasMore = fullList.length > visiblePeopleLimit;
+    const liveCount = fullList.filter(p => p.isLiveOnCampus).length;
 
     return (
       <div className="space-y-4">
@@ -221,7 +240,7 @@ export default function DiscoverClient() {
                 {liveCount} Live on Campus
               </span>
             )}
-            <span className="text-[11px] font-bold" style={{ color: '#7c3aed' }}>{list.length} online</span>
+            <span className="text-[11px] font-bold" style={{ color: '#7c3aed' }}>{fullList.length} online</span>
           </div>
         </div>
 
@@ -242,54 +261,75 @@ export default function DiscoverClient() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {list.map(person => (
-              <div key={person.id}
-                onClick={() => router.push(`/users/${person.id}`)}
-                className="rounded-3xl p-4 flex flex-col items-center text-center cursor-pointer transition-all hover:border-purple-300 hover:shadow-md group"
-                style={{ background: '#ffffff', border: person.isLiveOnCampus ? '1.5px solid #bbf7d0' : '1px solid #f0f0f0', boxShadow: person.isLiveOnCampus ? '0 0 0 3px rgba(16,185,129,0.06)' : '0 2px 8px rgba(0,0,0,0.03)' }}>
-                <div className="relative mb-3">
-                  <div className="w-16 h-16 rounded-full overflow-hidden group-hover:scale-105 transition-transform"
-                    style={{ border: person.isLiveOnCampus ? '3px solid #6ee7b7' : '3px solid #ede9fe' }}>
-                    <img src={getAvatar(person)} alt={person.full_name} className="w-full h-full object-cover" />
-                  </div>
-                  {/* Live on Campus indicator */}
-                  {person.isLiveOnCampus ? (
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-emerald-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full whitespace-nowrap shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                      Live Near You
-                    </span>
-                  ) : (
-                    person.online !== false && <span className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
-                  )}
-                </div>
-                <div className="flex-1 w-full flex flex-col items-center" style={{ marginTop: person.isLiveOnCampus ? 8 : 0 }}>
-                  <span className="text-[13px] font-black truncate max-w-full group-hover:text-purple-600 transition-colors" style={{ color: '#09090b' }}>{person.full_name}</span>
-                  <span className="text-[10px] font-semibold mt-0.5" style={{ color: '#a1a1aa' }}>
-                    {person.year ? `${person.year} Yr` : ''} {person.branch ? `· ${person.branch}` : ''}
-                  </span>
-                  <div className="flex flex-wrap gap-1 mt-2 justify-center" style={{ minHeight: 24 }}>
-                    {(person.interests || []).slice(0, 2).map((tag, idx) => (
-                      <span key={`${tag}-${idx}`} className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase"
-                        style={{ background: `${INTEREST_COLORS[tag] || INTEREST_COLORS.default}18`, color: INTEREST_COLORS[tag] || INTEREST_COLORS.default }}>
-                        {tag}
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              {list.map(person => (
+                <div key={person.id}
+                  onClick={() => router.push(`/users/${person.id}`)}
+                  className="rounded-3xl p-4 flex flex-col items-center text-center cursor-pointer transition-all hover:border-purple-300 hover:shadow-md group"
+                  style={{ background: '#ffffff', border: person.isLiveOnCampus ? '1.5px solid #bbf7d0' : '1px solid #f0f0f0', boxShadow: person.isLiveOnCampus ? '0 0 0 3px rgba(16,185,129,0.06)' : '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div className="relative mb-3">
+                    <div className="w-16 h-16 rounded-full overflow-hidden group-hover:scale-105 transition-transform"
+                      style={{ border: person.isLiveOnCampus ? '3px solid #6ee7b7' : '3px solid #ede9fe' }}>
+                      <img src={getAvatar(person)} alt={person.full_name} className="w-full h-full object-cover" />
+                    </div>
+                    {/* Live on Campus indicator */}
+                    {person.isLiveOnCampus ? (
+                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-emerald-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full whitespace-nowrap shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                        Live Near You
                       </span>
-                    ))}
+                    ) : (
+                      person.online !== false && <span className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                    )}
                   </div>
+                  <div className="flex-1 w-full flex flex-col items-center" style={{ marginTop: person.isLiveOnCampus ? 8 : 0 }}>
+                    <span className="text-[13px] font-black truncate max-w-full group-hover:text-purple-600 transition-colors" style={{ color: '#09090b' }}>{person.full_name}</span>
+                    <span className="text-[10px] font-semibold mt-0.5" style={{ color: '#a1a1aa' }}>
+                      {person.year ? `${person.year} Yr` : ''} {person.branch ? `· ${person.branch}` : ''}
+                    </span>
+                    <div className="flex flex-wrap gap-1 mt-2 justify-center" style={{ minHeight: 24 }}>
+                      {(person.interests || []).slice(0, 2).map((tag, idx) => (
+                        <span key={`${tag}-${idx}`} className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase"
+                          style={{ background: `${INTEREST_COLORS[tag] || INTEREST_COLORS.default}18`, color: INTEREST_COLORS[tag] || INTEREST_COLORS.default }}>
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <button onClick={(e) => {
+                    e.stopPropagation();
+                    connectedIds.has(person.id) ? router.push(`/messages?user=${encodeURIComponent(person.full_name)}`) : handleConnect(person);
+                  }}
+                    className="mt-3 w-full py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
+                    style={connectedIds.has(person.id)
+                      ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
+                      : { background: '#7c3aed', color: '#ffffff' }}>
+                    {connectedIds.has(person.id) ? 'Message' : 'Connect'}
+                  </button>
                 </div>
-                <button onClick={(e) => {
-                  e.stopPropagation();
-                  connectedIds.has(person.id) ? router.push(`/messages?user=${encodeURIComponent(person.full_name)}`) : handleConnect(person);
-                }}
-                  className="mt-3 w-full py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
-                  style={connectedIds.has(person.id)
-                    ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
-                    : { background: '#7c3aed', color: '#ffffff' }}>
-                  {connectedIds.has(person.id) ? 'Message' : 'Connect'}
+              ))}
+            </div>
+
+            {/* Load More trigger / Sentinel */}
+            {hasMore && (
+              <div className="flex flex-col items-center justify-center pt-4 pb-2">
+                <button
+                  onClick={() => setVisiblePeopleLimit(prev => prev + 12)}
+                  className="px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider text-purple-600 bg-purple-50 border border-purple-100 hover:bg-purple-100 transition-all active:scale-95 cursor-pointer shadow-xs flex items-center gap-2"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                      Loading Classmates...
+                    </>
+                  ) : (
+                    `Load More Classmates (${fullList.length - list.length} remaining)`
+                  )}
                 </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
         {/* Algolia attribution */}
         {isAlgoliaSearch && ALGOLIA_APP_ID && (
