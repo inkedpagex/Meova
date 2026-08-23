@@ -57,7 +57,7 @@ function useAlgoliaSearch(query) {
               'X-Algolia-API-Key': ALGOLIA_SEARCH_KEY,
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ query: q, hitsPerPage: 12, attributesToRetrieve: ['objectID', 'full_name', 'year', 'branch', 'interests', 'photo_url', 'isLiveOnCampus'] }),
+            body: JSON.stringify({ query: q, hitsPerPage: 12, attributesToRetrieve: ['objectID', 'full_name', 'year', 'branch', 'interests', 'photo_url', 'isLiveOnCampus', 'isIdOn'] }),
           }),
           fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/meetuply_experiences/query`, {
             method: 'POST',
@@ -72,7 +72,9 @@ function useAlgoliaSearch(query) {
 
         if (usersRes.ok) {
           const ud = await usersRes.json();
-          setPeopleResults((ud.hits || []).map(h => ({ ...h, id: h.objectID })));
+          // Hide users who have Signal Live turned off (isIdOn = false)
+          const validUsers = (ud.hits || []).filter(h => h.isIdOn !== false).map(h => ({ ...h, id: h.objectID }));
+          setPeopleResults(validUsers);
         }
         if (expRes.ok) {
           const ed = await expRes.json();

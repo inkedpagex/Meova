@@ -55,7 +55,33 @@ export default async function ProfilePage() {
   const initialSparks =
     wallet ? (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0) : 0;
 
-  return <ProfileClient initialProfile={profile} initialSparks={initialSparks} />;
+  let userGigs = [];
+  try {
+    const { adminDb } = await import('../../lib/firebaseAdmin');
+    if (adminDb) {
+      const [hostedSnap, appliedSnap] = await Promise.all([
+        adminDb.collection('gigs').where('hostId', '==', user.id).limit(5).get(),
+        adminDb.collection('gigs').where('selectedApplicant.id', '==', user.id).limit(5).get()
+      ]);
+      const allGigs = [...hostedSnap.docs, ...appliedSnap.docs].map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          title: data.title || '',
+          status: data.status || 'open',
+          role: data.hostId === user.id ? 'host' : 'applicant',
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString()
+        };
+      });
+      userGigs = Array.from(new Map(allGigs.map(g => [g.id, g])).values())
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
+    }
+  } catch (err) {
+    console.error('Error fetching gigs for profile:', err);
+  }
+
+  return <ProfileClient initialProfile={profile} initialSparks={initialSparks} initialGigs={userGigs} />;
 }
 
 export const dynamic = 'force-dynamic';

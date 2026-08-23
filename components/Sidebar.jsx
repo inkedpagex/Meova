@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import { db } from '../lib/firebaseClient';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
+import CreateMenuModal from './CreateMenuModal';
 
 const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy'];
 
@@ -52,6 +53,8 @@ export default function Sidebar({ user }) {
   // ── Notification state ─────────────────────────────────────────────────────
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadMsgCount, setUnreadMsgCount] = useState(0); // Unread messages badge
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [logoAnimating, setLogoAnimating] = useState(false);
   const prevCountRef = useRef(0);
   const prevMsgCountRef = useRef(0);
@@ -424,16 +427,16 @@ export default function Sidebar({ user }) {
 
           if (isCenter) {
             return (
-              <Link 
+              <button 
                 key={href} 
-                href={href}
-                className="flex-1 flex flex-col items-center justify-center relative -top-3 h-full select-none"
+                onClick={(e) => { e.preventDefault(); setShowCreateModal(true); }}
+                className="flex-1 flex flex-col items-center justify-center relative -top-3 h-full select-none outline-none"
                 style={{ zIndex: 60 }}
               >
                 <div className="w-13 h-13 rounded-full flex items-center justify-center bg-gradient-to-tr from-[#8C3573] via-[#8C3573] to-pink-500 text-white shadow-[0_8px_20px_rgba(140,53,115,0.4)] active:scale-90 transition-all ring-4 ring-white">
                   <Plus size={24} strokeWidth={2.8} />
                 </div>
-              </Link>
+              </button>
             );
           }
 
@@ -459,6 +462,8 @@ export default function Sidebar({ user }) {
         })}
       </nav>
       )}
+      
+      <CreateMenuModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} />
     </>
   );
 }

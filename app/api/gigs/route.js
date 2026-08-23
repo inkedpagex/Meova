@@ -33,11 +33,28 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Title and description are required' }, { status: 400 });
     }
 
+    const budgetNum = parseInt(budget, 10) || 0;
+    if (budgetNum < 0 || budgetNum > 2000) {
+      return NextResponse.json({ error: 'Reward must be between 0 and 2000 Sparks' }, { status: 400 });
+    }
+
+    // Verify wallet has enough Sparks
+    const walletRef = adminDb.collection('wallets').doc(user.uid);
+    const walletDoc = await walletRef.get();
+    let currentSparks = 0;
+    if (walletDoc.exists) {
+      const wData = walletDoc.data();
+      currentSparks = (wData.purchased || 0) + (wData.bonus || 0) + (wData.creator || 0);
+    }
+    if (budgetNum > currentSparks) {
+      return NextResponse.json({ error: 'Insufficient Sparks in wallet' }, { status: 400 });
+    }
+
     const newGig = {
       title,
       company: company || user.full_name || 'Campus Host',
       category: category || 'General',
-      budget: budget || '0',
+      budget: String(budgetNum),
       duration: duration || 'Flexible',
       type: type || 'CAMPUS GIG',
       desc,

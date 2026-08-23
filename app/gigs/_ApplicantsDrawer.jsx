@@ -71,10 +71,10 @@ function ApplicantCard({ app, gigId, onUpdate }) {
             </button>
           </div>
         )}
-        {app.status === 'ACCEPTED' && app.meetingCode && (
+        {app.status === 'ACCEPTED' && (
           <div className="mt-3 p-3 rounded-xl bg-[#fcf6fa] border border-[#f5ebf4]">
-            <p className="text-[10px] font-black uppercase text-[#9e4685] mb-1">Share this code with freelancer to complete</p>
-            <p className="text-2xl font-black tracking-[6px] text-[#60234d]">{app.meetingCode}</p>
+            <p className="text-[10px] font-black uppercase text-[#9e4685] mb-1">Gig in Progress</p>
+            <p className="text-[11px] font-bold text-[#60234d]">Sparks are held in Escrow. Ask the freelancer for their 6-digit completion code when the work is delivered.</p>
           </div>
         )}
       </div>
@@ -159,7 +159,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
                   Mark as Completed & Release Sparks ⚡
                 </button>
               ) : (
-                <form onSubmit={handleComplete} className="space-y-3">
+                <form noValidate onSubmit={handleComplete} className="space-y-3">
                   <p className="text-[11px] font-bold text-zinc-500">Enter the 6-digit code the freelancer gives you:</p>
                   <input
                     type="text"

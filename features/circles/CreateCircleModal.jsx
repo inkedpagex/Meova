@@ -3,16 +3,18 @@
 import React, { useState } from 'react';
 import { X, Sparkles, ShieldCheck, CheckCircle2, MessageSquare, Image as ImageIcon, Link as LinkIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useUserContext } from '../../components/providers/UserProvider';
 
 const CATEGORIES = [
-  'Tech & Coding',
-  'Design & Creative',
-  'Anime & Gaming',
-  'Music & Jam',
-  'Literature & Poetry',
-  'Fitness & Sports',
-  'Business & Startup',
-  'General Discussion',
+  'Tech',
+  'Design',
+  'Gaming',
+  'Music',
+  'Sports',
+  'Startup',
+  'Creators',
+  'Entertainment',
+  'General',
 ];
 
 const PLATFORMS = [
@@ -23,10 +25,11 @@ const PLATFORMS = [
 ];
 
 export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
+  const { user, wallet } = useUserContext();
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('Tech & Coding');
+  const [category, setCategory] = useState('Tech');
   const [platform, setPlatform] = useState('WhatsApp');
-  const [price, setPrice] = useState('0');
+  const [price, setPrice] = useState('50');
   const [link, setLink] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
@@ -34,10 +37,33 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
 
   if (!isOpen) return null;
 
+  const isAdmin = user?.role === 'admin';
+  const totalSparks = wallet ? (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0) : 0;
+  const creationFee = isAdmin ? 0 : 100;
+  const hasEnoughSparks = totalSparks >= creationFee;
+
+  const handlePriceChange = (e) => {
+    let val = e.target.value;
+    // Allow empty string to let user clear the input
+    if (val === '') {
+      setPrice('');
+      return;
+    }
+    // Parse as integer and prevent negatives
+    const num = parseInt(val, 10);
+    if (isNaN(num)) return;
+    if (num < 0) {
+      setPrice('0');
+    } else {
+      setPrice(num.toString());
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) { toast.error('Please enter a community name'); return; }
     if (!link.trim()) { toast.error('Please enter your channel/group invite link'); return; }
+    if (!hasEnoughSparks) { toast.error('Insufficient Sparks to create a channel.'); return; }
 
     setSubmitting(true);
     try {
@@ -95,7 +121,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
         </div>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 text-xs font-semibold">
+        <form noValidate onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 text-xs font-semibold">
           
           {/* Channel Name */}
           <div>
@@ -112,36 +138,41 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
             />
           </div>
 
-          {/* Category & Platform */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider mb-1">
-                Category
-              </label>
-              <select
-                value={category}
-                onChange={e => setCategory(e.target.value)}
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#8C3573] font-bold"
-              >
-                {CATEGORIES.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
+          {/* Category */}
+          <div>
+            <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider mb-2">
+              Category
+            </label>
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setCategory(cat)}
+                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-black transition-all ${category === cat ? 'bg-[#8C3573] text-white shadow-md' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
+          </div>
 
-            <div>
-              <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider mb-1">
-                Platform Type
-              </label>
-              <select
-                value={platform}
-                onChange={e => setPlatform(e.target.value)}
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#8C3573] font-bold"
-              >
-                {PLATFORMS.map(p => (
-                  <option key={p.id} value={p.id}>{p.label}</option>
-                ))}
-              </select>
+          {/* Platform */}
+          <div>
+            <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider mb-2">
+              Platform Type
+            </label>
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+              {PLATFORMS.map(p => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setPlatform(p.id)}
+                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-black transition-all border ${platform === p.id ? p.color : 'bg-zinc-100 text-zinc-600 border-transparent hover:bg-zinc-200'}`}
+                >
+                  {p.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -157,11 +188,11 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
             </div>
             <div className="relative">
               <input
-                type="number"
-                min="0"
-                step="5"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={price}
-                onChange={e => setPrice(e.target.value)}
+                onChange={handlePriceChange}
                 placeholder="0 for Free, or 50 Sparks"
                 className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#8C3573] font-bold pl-9"
               />
@@ -227,12 +258,31 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
 
           {/* Submit Action */}
           <div className="pt-2">
+            {!isAdmin && (
+              <div className="flex items-center justify-between mb-3 bg-zinc-50 border border-zinc-100 p-3 rounded-2xl">
+                <div>
+                  <p className="text-[11px] font-black text-zinc-800">Creation Fee</p>
+                  <p className="text-[10px] font-bold text-zinc-500">One-time payment</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[12px] font-black text-[#8C3573] flex items-center justify-end gap-1">
+                    100 <Sparkles size={12} className="fill-[#8C3573]" />
+                  </p>
+                  <p className={`text-[10px] font-bold ${hasEnoughSparks ? 'text-emerald-600' : 'text-rose-500'}`}>
+                    Balance: {totalSparks}
+                  </p>
+                </div>
+              </div>
+            )}
+            
             <button
               type="submit"
-              disabled={submitting}
-              className="w-full py-3 rounded-2xl bg-[#8C3573] hover:bg-[#74295d] text-white font-black text-xs transition-all shadow-md shadow-[#8C3573]/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              disabled={submitting || !hasEnoughSparks}
+              className="w-full py-3 rounded-2xl bg-[#8C3573] hover:bg-[#74295d] text-white font-black text-xs transition-all shadow-md shadow-[#8C3573]/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
             >
-              {submitting ? 'Submitting Request...' : 'Submit Channel for Admin Approval'}
+              {submitting ? 'Submitting Request...' : (
+                isAdmin ? 'Create Official Channel' : (hasEnoughSparks ? 'Pay 100 Sparks & Submit' : 'Insufficient Sparks')
+              )}
             </button>
           </div>
         </form>

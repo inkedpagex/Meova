@@ -111,7 +111,7 @@ export default function WithdrawPage() {
       </Link>
 
       {step === 'form' && (
-        <form onSubmit={handleSubmit}>
+        <form noValidate onSubmit={handleSubmit}>
           <div style={{ marginBottom: 24 }}>
             <h1 style={{ fontSize: 24, fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-primary)' }}>
               Withdraw Earnings

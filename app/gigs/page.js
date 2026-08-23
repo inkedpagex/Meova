@@ -17,7 +17,7 @@ const CATEGORIES = ['All', 'Design', 'Development', 'Writing', 'Marketing', 'Pho
 
 export default function CampusGigsPage() {
   const searchParams = useSearchParams();
-  const { user } = useUserContext();
+  const { user, wallet } = useUserContext();
 
   const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'mine'
   const [search, setSearch] = useState('');
@@ -66,9 +66,28 @@ export default function CampusGigsPage() {
     finally { setApplyLoading(false); }
   };
 
+  const handleBudgetChange = (e) => {
+    let val = e.target.value;
+    if (val === '') { setGigBudget(''); return; }
+    const num = parseInt(val, 10);
+    if (isNaN(num)) return;
+    if (num < 0) setGigBudget('0');
+    else if (num > 2000) setGigBudget('2000');
+    else setGigBudget(num.toString());
+  };
+
   const handleCreateGig = async (e) => {
     e.preventDefault();
     if (!gigTitle.trim() || !gigDesc.trim()) { toast.error('Title and description required.'); return; }
+    
+    const budgetNum = parseInt(gigBudget, 10) || 0;
+    const totalSparks = wallet ? (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0) : 0;
+    
+    if (budgetNum > totalSparks) {
+      toast.error(`You only have ${totalSparks}⚡ in your wallet. Buy more to post this gig.`);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await fetch('/api/gigs', {
@@ -115,16 +134,24 @@ export default function CampusGigsPage() {
       </div>
 
       {/* Main tabs: Browse / My Gigs */}
-      <div className="flex gap-1 p-1 bg-zinc-100 rounded-2xl">
-        {[['browse', '🔍 Browse Gigs'], ['mine', '👤 My Activity']].map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setActiveTab(key)}
-            className={`flex-1 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer ${activeTab === key ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="flex gap-6 border-b border-zinc-200/80">
+        {[['browse', 'Browse Gigs'], ['mine', 'My Activity']].map(([key, label]) => {
+          const active = activeTab === key;
+          return (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`relative py-3 text-[11px] font-black tracking-wide uppercase transition-all cursor-pointer ${
+                active ? 'text-[#8C3573]' : 'text-zinc-400 hover:text-zinc-600'
+              }`}
+            >
+              {label}
+              {active && (
+                <div className="absolute bottom-[-1px] inset-x-0 h-0.5 bg-[#8C3573] rounded-t-full shadow-[0_-2px_8px_rgba(140,53,115,0.4)]" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* ── BROWSE TAB ── */}
@@ -142,12 +169,16 @@ export default function CampusGigsPage() {
                 className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold focus:outline-none focus:border-[#9e4685] focus:bg-white text-zinc-900 placeholder-zinc-400 transition-all"
               />
             </div>
-            <div className="flex gap-1.5 overflow-x-auto w-full md:w-auto no-scrollbar pb-1">
+            <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
               {CATEGORIES.map(cat => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCat(cat)}
-                  className={`text-[10px] font-black py-2.5 px-3 rounded-xl border transition-all active:scale-95 whitespace-nowrap uppercase tracking-wider cursor-pointer ${selectedCat === cat ? 'bg-[#8C3573] border-[#8C3573] text-white' : 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100'}`}
+                  className={`flex-shrink-0 text-[10px] font-black py-2 px-4 rounded-full transition-all active:scale-[0.98] uppercase tracking-wider cursor-pointer ${
+                    selectedCat === cat 
+                    ? 'bg-[#8C3573] text-white shadow-md border border-transparent' 
+                    : 'bg-zinc-100 border border-zinc-200 text-zinc-600 hover:bg-zinc-200'
+                  }`}
                 >
                   {cat}
                 </button>
@@ -173,7 +204,8 @@ export default function CampusGigsPage() {
                 const statusLabel = gig.status === 'in_progress' ? '🔄 In Progress' : null;
 
                 return (
-                  <div key={gig.id} className="bg-white border border-zinc-200/80 rounded-3xl p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 hover:border-purple-300 hover:shadow-md transition-all group">
+                  <div key={gig.id} className="bg-white border border-zinc-200/80 rounded-[24px] p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 hover:border-purple-300 hover:shadow-[0_8px_30px_rgba(140,53,115,0.06)] hover:-translate-y-0.5 transition-all group relative overflow-hidden">
+                    <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#8C3573]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[9px] font-black uppercase tracking-wider bg-[#fcf6fa] text-[#74295d] px-2.5 py-0.5 rounded-full border border-[#f5ebf4]">{gig.type || 'CAMPUS GIG'}</span>
@@ -273,7 +305,7 @@ export default function CampusGigsPage() {
               </div>
               <button onClick={() => setShowModal(false)} className="p-1 rounded-full text-zinc-400 hover:bg-zinc-100"><X size={16} /></button>
             </div>
-            <form onSubmit={handleCreateGig} className="space-y-3.5">
+            <form noValidate onSubmit={handleCreateGig} className="space-y-3.5">
               <div>
                 <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Gig Title</label>
                 <input type="text" required value={gigTitle} onChange={e => setGigTitle(e.target.value)} placeholder="e.g. Figma Designer for Campus Startup App" className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-extrabold text-zinc-900 focus:outline-none focus:border-[#8C3573] bg-zinc-50" />
@@ -295,7 +327,7 @@ export default function CampusGigsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Reward (Sparks ⚡)</label>
-                  <input type="number" value={gigBudget} onChange={e => setGigBudget(e.target.value)} placeholder="300" className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-black text-zinc-900 focus:outline-none focus:border-[#8C3573] bg-zinc-50" />
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={gigBudget} onChange={handleBudgetChange} placeholder="300" className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-black text-zinc-900 focus:outline-none focus:border-[#8C3573] bg-zinc-50" />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Duration</label>

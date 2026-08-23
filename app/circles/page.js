@@ -22,14 +22,7 @@ export default async function CirclesPage() {
 
   return (
     <div className="w-full max-w-[640px] mx-auto pb-24 anim-fade-in px-0">
-      {circles.length === 0 ? (
-        <div className="rounded-3xl p-14 text-center font-bold mt-4"
-          style={{ background: '#ffffff', border: '1px solid #f0f0f0', color: '#71717a' }}>
-          No communities yet. Check back soon!
-        </div>
-      ) : (
-        <CirclesList circles={circles} joinedCircleIds={joinedCircleIds} userId={user?.id} />
-      )}
+      <CirclesList circles={circles} joinedCircleIds={joinedCircleIds} userId={user?.id} />
     </div>
   );
 }

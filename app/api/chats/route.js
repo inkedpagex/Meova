@@ -64,6 +64,51 @@ export async function POST(request) {
     const existing = await chatRef.get();
 
     if (!existing.exists) {
+      // PREMIUM CHAT LOGIC: Check wallet for 5 sparks
+      const walletRef = adminDb.collection('wallets').doc(user.uid);
+      const walletSnap = await walletRef.get();
+      if (!walletSnap.exists) {
+        return NextResponse.json({ error: 'Wallet not found.' }, { status: 402 });
+      }
+      
+      const wData = walletSnap.data();
+      const currentSparks = (wData.purchased || 0) + (wData.bonus || 0) + (wData.creator || 0);
+      
+      if (currentSparks < 5) {
+        return NextResponse.json({ error: 'Insufficient Sparks. 5 Sparks required to start a new chat.' }, { status: 402 });
+      }
+
+      // Deduct 5 sparks (Burn)
+      let remainingToDeduct = 5;
+      let newPurchased = wData.purchased || 0;
+      let newBonus = wData.bonus || 0;
+      let newCreator = wData.creator || 0;
+
+      if (newPurchased >= remainingToDeduct) { newPurchased -= remainingToDeduct; remainingToDeduct = 0; }
+      else { remainingToDeduct -= newPurchased; newPurchased = 0; }
+
+      if (remainingToDeduct > 0 && newBonus >= remainingToDeduct) { newBonus -= remainingToDeduct; remainingToDeduct = 0; }
+      else if (remainingToDeduct > 0) { remainingToDeduct -= newBonus; newBonus = 0; }
+
+      if (remainingToDeduct > 0 && newCreator >= remainingToDeduct) { newCreator -= remainingToDeduct; remainingToDeduct = 0; }
+
+      await walletRef.update({
+        purchased: newPurchased,
+        bonus: newBonus,
+        creator: newCreator,
+        updated_at: new Date().toISOString()
+      });
+
+      // Log burn transaction
+      await adminDb.collection('transactions').add({
+        userId: user.uid,
+        type: 'spend',
+        amount: 5,
+        description: 'Started a new chat (Burn) ⚡',
+        status: 'COMPLETED',
+        created_at: new Date().toISOString(),
+      });
+
       await chatRef.set({
         participants: [user.uid, otherUserId],
         participantNames: {

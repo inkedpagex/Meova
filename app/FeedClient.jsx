@@ -1452,6 +1452,7 @@ export default function FeedClient() {
           style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
         >
           <form
+            noValidate
             onSubmit={handleSubmitReview}
             className="relative w-full max-w-sm rounded-3xl p-6 space-y-4 anim-scale-in max-h-[80vh] overflow-y-auto"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}

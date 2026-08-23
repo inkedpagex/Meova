@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
 import BlockUserButton from '../../../features/users/BlockUserButton';
+import MessageButton from '../../../features/users/MessageButton';
 import ProfileHighlightsSection from '../../../components/ProfileHighlightsSection';
 import InstagramEmbed from '../../../components/InstagramEmbed';
 
@@ -136,19 +137,19 @@ export default async function UserProfilePage({ params }) {
           <div className="flex-1 flex items-center justify-around text-center">
             <div>
               <span className="block text-base sm:text-lg font-black text-zinc-900 leading-tight">
-                {reviews.length || '1'}
+                {reviews.length}
               </span>
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Meets</span>
             </div>
             <div>
               <span className="block text-base sm:text-lg font-black text-zinc-900 leading-tight flex items-center justify-center gap-0.5">
-                {avgRating || '5.0'} <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 inline" />
+                {avgRating || 'New'} <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 inline" />
               </span>
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Rating</span>
             </div>
             <div>
               <span className="block text-base sm:text-lg font-black text-[#8C3573] leading-tight flex items-center justify-center gap-0.5">
-                50 <Zap className="w-3.5 h-3.5 fill-current text-[#8C3573] inline" />
+                {profile.rate || 100} <Zap className="w-3.5 h-3.5 fill-current text-[#8C3573] inline" />
               </span>
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Rate</span>
             </div>
@@ -208,13 +209,7 @@ export default async function UserProfilePage({ params }) {
               </div>
             )}
 
-            <Link
-              href={`/messages?uid=${id}`}
-              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-black text-zinc-800 bg-zinc-100 hover:bg-zinc-200 transition-all active:scale-95 shadow-sm whitespace-nowrap"
-            >
-              <MessageCircle className="w-4 h-4 text-[#8C3573] flex-shrink-0" />
-              Message
-            </Link>
+            <MessageButton targetUid={id} />
           </div>
         )}
 

@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { updateProfileAdmin } from './profile.actions';
-import { User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine, CheckCircle2, AlertCircle, Camera } from 'lucide-react';
+import { User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine, CheckCircle2, AlertCircle, Camera, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
 
@@ -39,6 +39,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   const [instagram, setInstagram] = useState(initialProfile?.instagram || '');
   const [photoUrl, setPhotoUrl] = useState(initialProfile?.photo_url || '');
   const [bio, setBio] = useState(initialProfile?.bio || '');
+  const [rate, setRate] = useState(initialProfile?.rate || '100');
   const [selectedInterests, setSelectedInterests] = useState(initialProfile?.interests || []);
 
   const fileInputRef = React.useRef(null);
@@ -87,7 +88,8 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             bio,
             interests: selectedInterests,
             instagram: instagram,
-            photo_url: data.secure_url
+            photo_url: data.secure_url,
+            rate: parseInt(rate, 10) || 100
           });
           
           setSuccessMsg('Photo uploaded and saved successfully!');
@@ -131,6 +133,12 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
     setSuccessMsg('');
 
     if (!fullName || !branch) return setErrorMsg('Name and course/branch are required.');
+    
+    const rateNum = parseInt(rate, 10);
+    if (isNaN(rateNum) || rateNum < 50 || rateNum > 1000) {
+      return setErrorMsg('Meeting rate must be between 50 and 1000 Sparks.');
+    }
+
     if (selectedInterests.length !== 3) return setErrorMsg('Please select exactly 3 interests.');
 
     setLoading(true);
@@ -142,7 +150,8 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         bio,
         interests: selectedInterests,
         instagram: instagram,
-        photo_url: photoUrl
+        photo_url: photoUrl,
+        rate: parseInt(rate, 10) || 100
       });
       
       if (!res.success) {
@@ -160,7 +169,8 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
           bio,
           interests: selectedInterests,
           instagram: instagram,
-          photo_url: photoUrl
+          photo_url: photoUrl,
+          rate: parseInt(rate, 10) || 100
         });
       }
       
@@ -175,12 +185,12 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   };
 
   // Premium UI Classes
-  const inputClass = "w-full rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold text-zinc-900 bg-white border border-zinc-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] transition-all placeholder:text-zinc-400 focus:outline-none focus:border-[#9e4685] focus:ring-4 focus:ring-[#9e4685]/10 hover:border-zinc-300";
-  const labelClass = "block text-[10px] font-black text-zinc-800 uppercase tracking-widest mb-2 flex items-center gap-1.5 ml-1";
+  const inputClass = "w-full rounded-2xl py-4 pl-12 pr-5 text-[13px] font-black text-zinc-900 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] transition-all duration-300 placeholder:text-zinc-400/80 focus:outline-none focus:bg-white focus:border-[#8C3573] focus:ring-4 focus:ring-[#8C3573]/15 hover:border-[#cbd5e1]";
+  const labelClass = "block text-[11px] font-black text-zinc-700 uppercase tracking-[0.15em] mb-2.5 flex items-center gap-2 ml-1";
   const iconWrapperClass = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none";
 
   return (
-    <form onSubmit={handleSave} className="space-y-8 relative">
+    <form noValidate onSubmit={handleSave} className="space-y-10 relative">
       
       {/* Toast Notifications */}
       <div className="absolute -top-16 left-0 right-0 z-50 flex justify-center pointer-events-none">
@@ -268,15 +278,15 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
 
         {/* Bio */}
         <div>
-          <label className={labelClass}>Short Bio <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
+          <label className={labelClass}>Short Bio <span className="text-zinc-400 text-[10px] font-bold ml-1">(Optional)</span></label>
           <div className="relative group">
-            <span className={`${iconWrapperClass} top-4`}><PenLine size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
+            <span className={`${iconWrapperClass} top-[18px]`}><PenLine size={16} className="text-zinc-400 group-focus-within:text-[#8C3573] transition-colors" /></span>
             <textarea 
               value={bio} 
               onChange={(e) => setBio(e.target.value)} 
               placeholder="What are you currently working on?" 
-              className={`${inputClass} resize-none min-h-[50px] pt-3.5`} 
-              rows={1}
+              className={`${inputClass} resize-none min-h-[60px] pt-4 leading-relaxed`} 
+              rows={2}
             />
           </div>
         </div>
@@ -301,6 +311,32 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
           </p>
         </div>
 
+        {/* Meeting Rate */}
+        <div>
+          <label className={labelClass}>Meeting Rate (Sparks)</label>
+          <div className="relative group">
+            <span className={iconWrapperClass}><Zap size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
+            <input 
+              type="text" 
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={rate} 
+              onChange={(e) => {
+                const val = e.target.value.replace(/[^0-9]/g, '');
+                setRate(val);
+              }} 
+              placeholder="100" 
+              className={inputClass} 
+              required 
+            />
+          </div>
+          <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
+            Set between 50 and 1000 Sparks. This is what users pay to book a coffee session with you.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Profile Image Upload */}
         <div>
           <label className={labelClass}>Profile Photo <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
@@ -313,24 +349,24 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             className="hidden" 
           />
 
-          <div className="flex items-center gap-4 p-3 rounded-2xl bg-white border border-zinc-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] h-[52px]">
+          <div className="flex items-center gap-4 p-3 rounded-2xl bg-[#f8fafc] border-[1.5px] border-dashed border-[#cbd5e1] hover:border-[#8C3573]/40 hover:bg-[#8C3573]/5 transition-all h-[64px]">
             {photoUrl ? (
               <div className="flex items-center gap-3 w-full">
-                <div className="w-9 h-9 rounded-xl overflow-hidden border border-zinc-200 bg-zinc-50 flex-shrink-0">
+                <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
                   <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
                 </div>
-                <div className="flex items-center justify-between flex-1 gap-2">
+                <div className="flex items-center justify-between flex-1 gap-2 pr-2">
                   <button 
                     type="button" 
                     onClick={() => fileInputRef.current?.click()}
-                    className="text-[10px] font-black uppercase tracking-wider text-[#8C3573] hover:text-[#9e4685] transition-colors cursor-pointer"
+                    className="text-[11px] font-black uppercase tracking-wider text-[#8C3573] hover:text-[#74295d] transition-colors cursor-pointer"
                   >
                     Change
                   </button>
                   <button 
                     type="button" 
                     onClick={handleRemovePhoto}
-                    className="text-[10px] font-black uppercase tracking-wider text-rose-500 hover:text-rose-400 transition-colors cursor-pointer"
+                    className="text-[11px] font-black uppercase tracking-wider text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
                   >
                     Remove
                   </button>
@@ -340,36 +376,35 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
               <button 
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 h-full text-xs font-bold text-[#8C3573] hover:text-[#74295d] hover:bg-[#fcf6fa]/50 rounded-xl transition-all cursor-pointer active:scale-95"
+                className="w-full flex items-center justify-center gap-2 h-full text-[13px] font-black text-[#8C3573] hover:text-[#74295d] transition-colors cursor-pointer active:scale-95"
               >
-                <Camera size={14} />
-                <span>Upload Photo</span>
+                <Camera size={16} />
+                <span>Upload a sleek avatar</span>
               </button>
             )}
           </div>
-          <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
-            Upload a photo to use as your custom avatar. Keep it under 2MB.
+          <p className="text-[10px] text-zinc-400 mt-2.5 font-bold uppercase tracking-widest ml-1">
+            Keep it under 2MB. Square images look best.
           </p>
         </div>
       </div>
 
-      {/* Interactive Chip Cloud */}
       <div className="pt-2">
-        <div className="flex justify-between items-end mb-3">
+        <div className="flex justify-between items-end mb-4">
           <div>
-            <label className={labelClass}><Tag size={12} className="text-[#9e4685]" /> Top 3 Interests</label>
-            <p className="text-[11px] font-semibold text-zinc-500 ml-1">Select exactly 3 tags that describe your campus vibe.</p>
+            <label className={labelClass}><Tag size={14} className="text-[#8C3573]" /> Top 3 Interests</label>
+            <p className="text-[11px] font-bold text-zinc-400 ml-1">Select exactly 3 tags that describe your campus vibe.</p>
           </div>
-          <span className={`text-[10px] font-black px-3 py-1.5 rounded-full transition-all ${
+          <span className={`text-[11px] font-black px-3.5 py-1.5 rounded-full transition-all ${
             selectedInterests.length === 3
-              ? 'bg-[#8C3573] text-white shadow-md shadow-[#9e4685]/20'
-              : 'bg-zinc-100 text-zinc-500'
+              ? 'bg-[#8C3573] text-white shadow-lg shadow-[#8C3573]/30'
+              : 'bg-zinc-100 text-zinc-400'
           }`}>
             {selectedInterests.length}/3
           </span>
         </div>
         
-        <div className="flex flex-wrap gap-2.5 p-5 rounded-3xl bg-white border border-zinc-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        <div className="flex flex-wrap gap-2.5 p-6 rounded-[24px] bg-[#f8fafc] border-[1.5px] border-[#e2e8f0]">
           {INTEREST_TAGS.map((tag) => {
             const sel = selectedInterests.includes(tag);
             return (
@@ -377,10 +412,10 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 key={tag} 
                 type="button" 
                 onClick={() => handleInterestToggle(tag)}
-                className={`text-[11px] uppercase tracking-widest py-2 px-4 rounded-full transition-all duration-300 font-black active:scale-95 border cursor-pointer ${
+                className={`text-[11px] uppercase tracking-widest py-2.5 px-4 rounded-full transition-all duration-300 font-black active:scale-95 border-[1.5px] cursor-pointer ${
                   sel 
-                    ? 'bg-[#8C3573] text-white border-[#8C3573] shadow-[0_4px_12px_rgba(140,53,115,0.25)] -translate-y-0.5'
-                    : 'bg-zinc-50 border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 hover:border-zinc-300'
+                    ? 'bg-white text-[#8C3573] border-[#8C3573] shadow-[0_4px_16px_rgba(140,53,115,0.2)] -translate-y-0.5'
+                    : 'bg-white border-transparent text-zinc-500 shadow-sm hover:border-[#cbd5e1] hover:text-zinc-700 hover:-translate-y-0.5'
                 }`}
               >
                 {tag}
@@ -394,7 +429,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         <button 
           type="submit" 
           disabled={loading}
-          className="btn btn-primary text-xs px-8 py-3.5 shadow-xl hover:-translate-y-0.5"
+          className="flex items-center gap-2 bg-gradient-to-r from-[#8C3573] to-[#b5609d] text-white text-[13px] font-black uppercase tracking-widest px-8 py-4 rounded-2xl shadow-[0_8px_20px_rgba(140,53,115,0.3)] hover:shadow-[0_10px_25px_rgba(140,53,115,0.4)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:hover:translate-y-0"
         >
           {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
           Save Profile

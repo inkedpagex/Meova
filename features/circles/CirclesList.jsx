@@ -7,6 +7,8 @@ import {
   Gamepad2, Music2, Code2, Palette, Trophy, Star, MessageSquare
 } from 'lucide-react';
 import { getCartoonAvatar } from '../../utils/avatar';
+import CreateCircleModal from './CreateCircleModal';
+import HostCircleDashboardModal from './HostCircleDashboardModal';
 
 const CATEGORY_ICONS = {
   Tech: Code2, Gaming: Gamepad2, Music: Music2, Design: Palette,
@@ -104,7 +106,7 @@ const MOCK_COMMUNITIES = [
   },
 ];
 
-const FILTERS = ['All', 'Tech', 'Gaming', 'Music', 'Design', 'Startup', 'Creators'];
+const FILTERS = ['All', 'My Channels', 'Tech', 'Gaming', 'Music', 'Design', 'Startup', 'Creators'];
 
 export default function CirclesList({ circles = [], joinedCircleIds = new Set(), userId = null }) {
   const router = useRouter();
@@ -152,6 +154,8 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
     isPaid: c.isPaid || false, 
     price: c.price || 0,
     host_id: c.host_id,
+    host_name: c.host_name,
+    host_photo: c.host_photo,
     whatsapp_link: c.whatsapp_link || 'https://chat.whatsapp.com/',
   }));
   const allCircles = [...MOCK_COMMUNITIES];
@@ -162,7 +166,14 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
 
   const displayed = normalCircles.filter(c => {
     const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.category.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = activeFilter === 'All' || c.category === activeFilter;
+    
+    let matchFilter = true;
+    if (activeFilter === 'My Channels') {
+      matchFilter = c.host_id === userId;
+    } else if (activeFilter !== 'All') {
+      matchFilter = c.category === activeFilter;
+    }
+    
     return matchSearch && matchFilter;
   });
 
@@ -366,6 +377,25 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                   </div>
 
                   <p className="text-[11px] text-zinc-400 font-medium truncate">{circle.desc || 'Campus Community'}</p>
+
+                  <div className="flex items-center gap-1.5 pt-0.5 pb-1">
+                    {circle.host_name ? (
+                      <div className="flex items-center gap-1.5">
+                        {circle.host_photo ? (
+                          <img src={circle.host_photo} alt={circle.host_name} className="w-3.5 h-3.5 rounded-full object-cover border border-zinc-200" />
+                        ) : (
+                          <div className="w-3.5 h-3.5 rounded-full bg-zinc-200" />
+                        )}
+                        <span className="text-[9.5px] font-black text-zinc-500 uppercase tracking-wide">by {circle.host_name.split(' ')[0]}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <span className="text-[9.5px] font-black text-[#8C3573] uppercase tracking-wide bg-[#fcf6fa] px-1.5 py-0.5 rounded-md border border-[#eac5e0]">
+                          by Meetuply
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="flex items-center gap-2 pt-0.5">
                     <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-500">

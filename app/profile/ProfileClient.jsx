@@ -4,8 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert, ShieldCheck,
-  Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X
+  Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink
 } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import ProfileEditForm from '../../features/profile/ProfileEditForm';
 import LogoutButton from '../../features/auth/LogoutButton';
 import { getUserAvatarUrl } from '../../utils/avatar';
@@ -43,11 +44,12 @@ function EmptyState({ icon: Icon, title, subtitle, action, onAction }) {
   );
 }
 
-export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
+export default function ProfileClient({ initialProfile, initialSparks = 0, initialGigs = [] }) {
   const router = useRouter();
   const [profile, setProfile] = useState(initialProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
   const [isIdOn, setIsIdOn] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -138,10 +140,18 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.origin + `/users/${profile.id}`).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
+      const url = window.location.origin + `/users/${profile.id}`;
+      if (navigator.share) {
+        navigator.share({
+          title: 'Meetuply Profile',
+          url: url
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(url).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        });
+      }
     }
   };
 
@@ -209,66 +219,74 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
           )}
 
           {/* ── Avatar Card ─────────────────────────────── */}
-          <div className="rounded-3xl p-5 flex flex-col items-center text-center"
-            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-            <div className="w-24 h-24 rounded-full overflow-hidden mb-3"
-              style={{ border: '3px solid var(--accent-dim)', background: 'var(--bg-surface)' }}>
+          <div className="rounded-[32px] p-6 flex flex-col items-center text-center relative overflow-hidden bg-white border border-zinc-100 shadow-sm">
+            {/* Background Accent */}
+            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#8C3573]/5 to-transparent pointer-events-none" />
+            
+            <div className="relative z-10 w-28 h-28 rounded-full overflow-hidden mb-4 shadow-xl shadow-[#8C3573]/10 ring-4 ring-white bg-zinc-50">
               <img src={avatarSrc} alt={profile?.full_name} className="w-full h-full object-cover" />
             </div>
 
             {/* Name */}
-            <div className="flex items-center gap-1.5">
-              <h2 className="text-base font-black" style={{ color: 'var(--text-primary)' }}>
-                {profile?.full_name || 'Your Name'}
-              </h2>
-            </div>
+            <h2 className="relative z-10 text-[22px] font-black text-zinc-900 tracking-tight">
+              {profile?.full_name || 'Your Name'}
+            </h2>
 
             {/* Username badge */}
             {profile?.username && (
-              <span className="inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold"
-                style={{ background: '#f3f0ff', color: '#8C3573' }}>
+              <span className="relative z-10 inline-flex items-center gap-1 mt-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-[#fcf6fa] text-[#8C3573]">
                 @{profile.username}
               </span>
             )}
 
-            {/* Year · Branch (only if filled) */}
+            {/* Year · Branch */}
             {(yearLabel || branchLabel) && (
-              <p className="text-[10px] font-bold mt-1" style={{ color: 'var(--text-secondary)' }}>
+              <p className="relative z-10 text-[11px] font-bold text-zinc-400 mt-2.5 uppercase tracking-widest">
                 {[yearLabel, branchLabel].filter(Boolean).join(' · ')}
               </p>
             )}
 
-            {/* University (only if filled) */}
+            {/* University */}
             {universityLabel && (
-              <p className="text-[9px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{universityLabel}</p>
+              <p className="relative z-10 text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-widest">{universityLabel}</p>
             )}
 
             {/* Bio */}
-            <p className="text-[11px] font-medium leading-relaxed mt-3 max-w-xs" style={{ color: 'var(--text-muted)' }}>
+            <p className="relative z-10 text-[12px] font-medium leading-relaxed mt-4 text-zinc-500 max-w-[280px]">
               {profile?.bio || 'No bio yet — tap Edit Profile to add one.'}
             </p>
 
             {/* Instagram */}
             {profile?.instagram && (
               <a href={`https://instagram.com/${profile.instagram}`} target="_blank" rel="noreferrer"
-                className="mt-3 flex items-center gap-1 text-[10px] font-bold text-pink-500 hover:underline">
-                <InstagramIcon size={12} />
+                className="relative z-10 mt-4 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-pink-50 text-[11px] font-black text-pink-500 hover:bg-pink-100 transition-colors">
+                <InstagramIcon size={14} />
                 <span>@{profile.instagram}</span>
               </a>
             )}
 
             {/* Action buttons */}
-            <div className="w-full flex gap-2 mt-4">
+            <div className="relative z-10 w-full flex flex-col gap-3 mt-6">
               <button onClick={() => setIsEditing(true)}
-                className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95"
-                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-mid)', color: 'var(--text-primary)' }}>
+                className="w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] bg-zinc-900 text-white hover:bg-zinc-800 cursor-pointer transition-all active:scale-95 shadow-md">
                 Edit Profile
               </button>
-              <button onClick={handleCopyLink}
-                className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 cursor-pointer transition-all active:scale-95"
-                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-mid)', color: copied ? '#10b981' : 'var(--text-secondary)' }}>
-                {copied ? <Check size={15} strokeWidth={3} /> : <Share2 size={15} />}
-              </button>
+              
+              <div className="flex gap-2">
+                <button onClick={() => router.push(`/users/${profile.id}`)}
+                  className="flex-1 h-12 sm:h-14 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] text-zinc-700 hover:bg-zinc-100 cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-2">
+                  <ExternalLink size={16} /> Public View
+                </button>
+                <button onClick={() => setShowQrModal(true)}
+                  className="w-12 sm:w-14 h-12 sm:h-14 shrink-0 rounded-2xl flex items-center justify-center cursor-pointer transition-all active:scale-95 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] text-[#8C3573] hover:bg-zinc-100 hover:border-[#cbd5e1]">
+                  <QrCode size={18} />
+                </button>
+                <button onClick={handleCopyLink}
+                  className="w-12 sm:w-14 h-12 sm:h-14 shrink-0 rounded-2xl flex items-center justify-center cursor-pointer transition-all active:scale-95 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] text-zinc-600 hover:bg-zinc-100 hover:border-[#cbd5e1]"
+                  style={{ color: copied ? '#10b981' : undefined }}>
+                  {copied ? <Check size={18} strokeWidth={3} /> : <Share2 size={18} />}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -310,76 +328,84 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
           {/* Permissions moved to settings modal */}
 
           {/* ── Interests ──────────────────────────────── */}
-          <div className="rounded-2xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Interests</span>
-              <button onClick={() => setIsEditing(true)} className="text-[10px] font-bold text-[#8C3573] cursor-pointer">Edit</button>
+          <div className="rounded-[24px] p-5 bg-white border border-zinc-100 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400">Interests</span>
+              <button onClick={() => setIsEditing(true)} className="text-[10px] font-black uppercase tracking-wider text-[#8C3573] cursor-pointer hover:underline">Edit</button>
             </div>
             {hasInterests ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2.5">
                 {profile.interests.map(tag => (
-                  <span key={tag} className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider"
-                    style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-mid)', color: 'var(--text-secondary)' }}>
+                  <span key={tag} className="px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest bg-zinc-50 border-[1.5px] border-zinc-200 text-zinc-600 shadow-sm">
                     {tag}
                   </span>
                 ))}
               </div>
             ) : (
               <button onClick={() => setIsEditing(true)}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95"
-                style={{ background: '#f3f0ff', color: '#8C3573', border: '1px dashed #c4b5fd' }}>
-                <Tag size={13} /> Add your interests
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.1em] cursor-pointer transition-all active:scale-95 bg-[#fcf6fa] text-[#8C3573] border-[1.5px] border-dashed border-[#eac5e0] hover:bg-[#8C3573]/10">
+                <Tag size={14} /> Add your interests
               </button>
             )}
           </div>
 
           {/* ── Sparks Wallet Card ─────────────────────── */}
           <button onClick={() => router.push('/wallet')}
-            className="w-full bg-gradient-to-tr from-[#8C3573] to-[#8C3573] text-white p-5 rounded-3xl flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all shadow-lg">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-3xl font-black">{sparksBalance.toLocaleString()}</span>
-                <Zap size={20} className="fill-current text-orange-400" />
+            className="w-full relative overflow-hidden p-6 rounded-[24px] flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all shadow-xl shadow-[#8C3573]/20 group"
+            style={{ background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 100%)' }}>
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700 pointer-events-none" />
+            
+            <div className="relative z-10 text-left">
+              <div className="flex items-center gap-2">
+                <span className="text-4xl font-black text-white tracking-tight">{sparksBalance.toLocaleString()}</span>
+                <Zap size={24} className="fill-current text-amber-400 drop-shadow-md" />
               </div>
-              <span className="text-[9px] font-bold text-white/70 uppercase tracking-wider block mt-1">Sparks Balance</span>
+              <span className="text-[10px] font-black text-white/80 uppercase tracking-[0.15em] block mt-1">Total Sparks</span>
             </div>
-            <span className="px-4 py-2.5 bg-white text-zinc-900 font-black text-[10px] uppercase tracking-wider rounded-xl">
-              View Wallet
-            </span>
+            <div className="relative z-10 px-5 py-3 bg-white text-[#8C3573] font-black text-[11px] uppercase tracking-wider rounded-xl shadow-md group-hover:shadow-lg transition-shadow">
+              Wallet
+            </div>
           </button>
 
-          {/* ── Communities ────────────────────────────── */}
-          <div>
-            <div className="flex items-center justify-between mb-2.5">
-              <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Your Communities</span>
-              <button onClick={() => router.push('/circles')} className="text-[10px] font-bold text-[#8C3573] cursor-pointer">
-                Browse
-              </button>
+          {/* ── My Recent Gigs ────────────────────────── */}
+          <div className="rounded-[24px] p-5 bg-white border border-zinc-100 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 flex items-center gap-2">
+                <Briefcase size={14} className="text-[#8C3573]" /> My Gigs
+              </span>
+              <button onClick={() => router.push('/gigs')} className="text-[10px] font-black uppercase tracking-wider text-[#8C3573] cursor-pointer hover:underline">View All</button>
             </div>
-            <EmptyState
-              icon={Users}
-              title="No communities yet"
-              subtitle="Join a circle to collaborate with students around your interests."
-              action="Explore Communities"
-              onAction={() => router.push('/circles')}
-            />
-          </div>
-
-          {/* ── Upcoming Experiences ───────────────────── */}
-          <div>
-            <div className="flex items-center justify-between mb-2.5">
-              <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Upcoming</span>
-              <button onClick={() => router.push('/experiences')} className="text-[10px] font-bold text-[#8C3573] cursor-pointer">
-                Browse
-              </button>
-            </div>
-            <EmptyState
-              icon={Calendar}
-              title="Nothing upcoming"
-              subtitle="Book an experience — coffee chats, study sessions, campus walks and more."
-              action="Explore Experiences"
-              onAction={() => router.push('/experiences')}
-            />
+            
+            {initialGigs?.length > 0 ? (
+              <div className="space-y-3">
+                {initialGigs.map(gig => (
+                  <div key={gig.id} onClick={() => router.push(`/gigs/${gig.id}`)} className="flex items-center justify-between p-3 rounded-2xl border border-zinc-100 hover:border-zinc-200 hover:bg-zinc-50 cursor-pointer transition-all group">
+                    <div className="max-w-[70%]">
+                      <p className="text-[12px] font-black text-zinc-900 group-hover:text-[#8C3573] transition-colors truncate">{gig.title || 'Untitled Gig'}</p>
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                        {gig.role === 'host' ? 'Posted by you' : 'Accepted job'}
+                      </p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider ${
+                      gig.status === 'open' ? 'bg-emerald-50 text-emerald-600' :
+                      gig.status === 'in_progress' ? 'bg-amber-50 text-amber-600' :
+                      gig.status === 'completed' ? 'bg-indigo-50 text-indigo-600' :
+                      'bg-zinc-100 text-zinc-500'
+                    }`}>
+                      {gig.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={Briefcase}
+                title="No active gigs"
+                subtitle="Post a gig to get things done, or accept one to earn sparks."
+                action="Explore Gigs"
+                onAction={() => router.push('/gigs')}
+              />
+            )}
           </div>
 
         </div>
@@ -501,6 +527,39 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── QR Code Modal ──────────────────────── */}
+      {showQrModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 anim-fade-in" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm rounded-[32px] p-8 flex flex-col items-center text-center relative overflow-hidden bg-white shadow-2xl anim-scale-in">
+            <button onClick={() => setShowQrModal(false)} className="absolute top-4 right-4 p-2 rounded-full cursor-pointer hover:bg-zinc-100 transition-colors text-zinc-400">
+              <X size={20} />
+            </button>
+            <div className="w-16 h-16 rounded-full bg-[#fcf6fa] text-[#8C3573] flex items-center justify-center mb-4">
+              <QrCode size={28} />
+            </div>
+            <h2 className="text-xl font-black text-zinc-900 tracking-tight mb-2">Share Profile</h2>
+            <p className="text-[12px] font-bold text-zinc-500 mb-6 max-w-[220px]">
+              Classmates can scan this to view your public profile and book you.
+            </p>
+            <div className="w-full aspect-square bg-[#f8fafc] rounded-3xl flex items-center justify-center border-2 border-dashed border-[#e2e8f0] p-6 relative">
+              <QRCodeCanvas 
+                value={typeof window !== 'undefined' ? window.location.origin + `/users/${profile.id}` : `https://meetuply.com/users/${profile.id}`}
+                size={220}
+                bgColor={"#f8fafc"}
+                fgColor={"#18181b"}
+                level={"H"}
+                includeMargin={false}
+                style={{ borderRadius: '8px' }}
+              />
+              <span className="px-4 py-2 bg-white rounded-xl shadow-md text-[10px] font-black uppercase tracking-widest text-[#8C3573] absolute bottom-4">meetuply.com</span>
+            </div>
+            <button onClick={handleCopyLink} className="w-full py-4 mt-6 rounded-2xl text-[12px] font-black uppercase tracking-[0.1em] bg-zinc-900 text-white cursor-pointer transition-all active:scale-95 shadow-md flex justify-center gap-2">
+              <Share2 size={16} /> Send Link
+            </button>
           </div>
         </div>
       )}
