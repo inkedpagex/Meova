@@ -351,7 +351,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
 
           {/* ── Sparks Wallet Card ─────────────────────── */}
           <button onClick={() => router.push('/wallet')}
-            className="w-full relative overflow-hidden p-6 rounded-[24px] flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all shadow-xl shadow-[#8C3573]/20 group"
+            className="w-full relative overflow-hidden p-6 rounded-[24px] flex items-center justify-between cursor-pointer active:scale-95 transition-all shadow-xl shadow-[#8C3573]/20 group"
             style={{ background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 100%)' }}>
             <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700 pointer-events-none" />
             

@@ -1,0 +1,605 @@
+﻿
+> app\admin\communities\PendingCommunitiesClient.jsx:120:                <button
+  app\admin\communities\PendingCommunitiesClient.jsx:121:                  onClick={() => handleAction(c.id, 
+'approve')}
+  app\admin\communities\PendingCommunitiesClient.jsx:122:                  disabled={actionId === c.id}
+> app\admin\communities\PendingCommunitiesClient.jsx:127:                <button
+  app\admin\communities\PendingCommunitiesClient.jsx:128:                  onClick={() => handleAction(c.id, 'reject')}
+  app\admin\communities\PendingCommunitiesClient.jsx:129:                  disabled={actionId === c.id}
+> app\admin\AdminClient.jsx:191:        <button
+  app\admin\AdminClient.jsx:192:          onClick={loadData}
+  app\admin\AdminClient.jsx:193:          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 
+rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 transition-all 
+shadow-xs cursor-pointer"
+> app\admin\AdminClient.jsx:319:                <button
+  app\admin\AdminClient.jsx:320:                  key={f}
+  app\admin\AdminClient.jsx:321:                  onClick={() => setPaymentFilter(f)}
+> app\admin\AdminClient.jsx:387:                      <button
+  app\admin\AdminClient.jsx:388:                        onClick={() => handleVerifyPayment(p.id, 'approve')}
+  app\admin\AdminClient.jsx:389:                        className="flex items-center justify-center gap-1.5 
+bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[11px] px-3.5 py-2 rounded-xl transition-all 
+cursor-pointer shadow-xs flex-1 sm:flex-none"
+> app\admin\AdminClient.jsx:393:                      <button
+  app\admin\AdminClient.jsx:394:                        onClick={() => handleVerifyPayment(p.id, 'reject')}
+  app\admin\AdminClient.jsx:395:                        className="flex items-center justify-center gap-1.5 bg-rose-50 
+hover:bg-rose-100 text-rose-700 border border-rose-200 font-black uppercase text-[11px] px-3.5 py-2 rounded-xl 
+transition-all cursor-pointer flex-1 sm:flex-none"
+> app\admin\AdminClient.jsx:426:              <button
+  app\admin\AdminClient.jsx:427:                key={f}
+  app\admin\AdminClient.jsx:428:                onClick={() => setBookingFilter(f)}
+> app\admin\AdminClient.jsx:496:                      <button
+  app\admin\AdminClient.jsx:497:                        onClick={() => handleResolveDispute(b.id, 'refund')}
+  app\admin\AdminClient.jsx:498:                        className="bg-rose-600 text-white font-bold text-[11px] px-3 
+py-1.5 rounded-lg hover:bg-rose-700 transition-all cursor-pointer"
+> app\admin\AdminClient.jsx:502:                      <button
+  app\admin\AdminClient.jsx:503:                        onClick={() => handleResolveDispute(b.id, 'pay')}
+  app\admin\AdminClient.jsx:504:                        className="bg-emerald-600 text-white font-bold text-[11px] 
+px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition-all cursor-pointer"
+> app\admin\AdminClient.jsx:580:                      <button
+  app\admin\AdminClient.jsx:581:                        onClick={() => handleProcessWithdrawal(wd.id, true)}
+  app\admin\AdminClient.jsx:582:                        className="bg-emerald-600 text-white font-bold text-[11px] 
+px-3.5 py-1.5 rounded-lg hover:bg-emerald-700 transition-all cursor-pointer shadow-xs"
+> app\admin\AdminClient.jsx:586:                      <button
+  app\admin\AdminClient.jsx:587:                        onClick={() => handleProcessWithdrawal(wd.id, false)}
+  app\admin\AdminClient.jsx:588:                        className="bg-white border border-slate-200 text-slate-600 
+font-bold text-[11px] px-3.5 py-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
+> app\discover\DiscoverClient.jsx:197:    <button key={label} onClick={() => setActiveFilter(label)}
+  app\discover\DiscoverClient.jsx:198:      className="flex-shrink-0 px-4 py-2 rounded-xl text-[11px] font-black 
+uppercase tracking-wide cursor-pointer transition-all active:scale-95"
+  app\discover\DiscoverClient.jsx:199:      style={activeFilter === label
+> app\discover\DiscoverClient.jsx:259:              <button onClick={() => setSearch('')} className="px-4 py-2 mt-2 
+bg-zinc-100 text-zinc-900 text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 
+transition-colors cursor-pointer">
+  app\discover\DiscoverClient.jsx:260:                Clear Search
+  app\discover\DiscoverClient.jsx:261:              </button>
+> app\discover\DiscoverClient.jsx:309:                  <button onClick={(e) => {
+  app\discover\DiscoverClient.jsx:310:                    e.stopPropagation();
+  app\discover\DiscoverClient.jsx:311:                    connectedIds.has(person.id) ? 
+router.push(`/messages?user=${encodeURIComponent(person.full_name)}`) : handleConnect(person);
+> app\discover\DiscoverClient.jsx:360:              <button onClick={() => setSearch('')} className="mt-2 px-4 py-2 
+bg-zinc-100 text-zinc-900 text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 
+transition-colors cursor-pointer">
+  app\discover\DiscoverClient.jsx:361:                Clear Search
+  app\discover\DiscoverClient.jsx:362:              </button>
+> app\discover\DiscoverClient.jsx:364:              <button onClick={() => router.push('/create/experience')} 
+className="mt-2 px-4 py-2 bg-[#8C3573] text-white text-[10px] font-black uppercase tracking-wider rounded-xl 
+cursor-pointer">
+  app\discover\DiscoverClient.jsx:365:                Host first experience
+  app\discover\DiscoverClient.jsx:366:              </button>
+> app\discover\DiscoverClient.jsx:403:                    <button className="text-[10px] font-black uppercase px-3 
+py-1.5 rounded-xl transition-all active:scale-95"
+  app\discover\DiscoverClient.jsx:404:                      style={{ background: '#8C3573', color: '#ffffff' }}>
+  app\discover\DiscoverClient.jsx:405:                      Book
+> app\discover\DiscoverClient.jsx:432:            <button onClick={() => router.push('/circles')} className="mt-2 px-4 
+py-2 bg-[#8C3573] text-white text-[10px] font-black uppercase tracking-wider rounded-xl">
+  app\discover\DiscoverClient.jsx:433:              Browse Communities
+  app\discover\DiscoverClient.jsx:434:            </button>
+> app\discover\DiscoverClient.jsx:454:                  <button className="mt-3 w-full py-2 rounded-xl text-[10px] 
+font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
+  app\discover\DiscoverClient.jsx:455:                    style={isJoined ? { background: '#f0fdf4', color: '#16a34a', 
+border: '1px solid #bbf7d0' } : { background: '#8C3573', color: '#ffffff' }}>
+  app\discover\DiscoverClient.jsx:456:                    {isJoined ? 'Open' : 'Join'}
+> app\experiences\[id]\ExperienceDetailClient.jsx:155:        <button 
+  app\experiences\[id]\ExperienceDetailClient.jsx:156:          onClick={handleReport}
+  app\experiences\[id]\ExperienceDetailClient.jsx:157:          disabled={reported}
+> app\experiences\[id]\ExperienceDetailClient.jsx:375:        <button
+  app\experiences\[id]\ExperienceDetailClient.jsx:376:          onClick={handleBook}
+  app\experiences\[id]\ExperienceDetailClient.jsx:377:          className="bg-[var(--accent)] 
+hover:bg-[var(--accent-hover)] text-white text-xs font-black uppercase tracking-wider px-6 py-3 rounded-xl 
+transition-all cursor-pointer active:scale-95 shadow-md"
+> app\experiences\[id]\ExperienceDetailClient.jsx:397:              <button 
+  app\experiences\[id]\ExperienceDetailClient.jsx:398:                onClick={() => setShowModal(false)}
+  app\experiences\[id]\ExperienceDetailClient.jsx:399:                className="absolute top-4 right-4 p-1.5 
+rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors bg-[var(--bg-surface)] 
+hover:bg-[var(--bg-hover)]"
+> app\experiences\[id]\ExperienceDetailClient.jsx:416:                <button
+  app\experiences\[id]\ExperienceDetailClient.jsx:417:                  onClick={() => { setShowModal(false); 
+setBookingSuccess(false); }}
+  app\experiences\[id]\ExperienceDetailClient.jsx:418:                  className="w-full py-3.5 rounded-xl text-xs 
+font-black text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all shadow-md cursor-pointer 
+uppercase tracking-wider"
+> app\experiences\[id]\ExperienceDetailClient.jsx:465:                              <button
+  app\experiences\[id]\ExperienceDetailClient.jsx:466:                                key={i}
+  app\experiences\[id]\ExperienceDetailClient.jsx:467:                                type="button"
+> app\experiences\[id]\ExperienceDetailClient.jsx:537:                <button
+  app\experiences\[id]\ExperienceDetailClient.jsx:538:                  onClick={handleConfirmBooking}
+  app\experiences\[id]\ExperienceDetailClient.jsx:539:                  disabled={bookingLoading || !agreedSafety}
+> app\experiences\ExperiencesClient.jsx:188:            <button
+  app\experiences\ExperiencesClient.jsx:189:              key={cat.value}
+  app\experiences\ExperiencesClient.jsx:190:              onClick={() => setSelectedCategory(cat.value)}
+> app\experiences\ExperiencesClient.jsx:219:          <button
+  app\experiences\ExperiencesClient.jsx:220:            onClick={() => setSortOpen(!sortOpen)}
+  app\experiences\ExperiencesClient.jsx:221:            className="flex items-center gap-1.5 bg-[var(--bg-surface)] 
+hover:bg-[var(--bg-hover)] border border-[var(--border-subtle)] px-3.5 py-2 rounded-xl transition-all cursor-pointer 
+select-none text-[9.5px] font-black uppercase tracking-wider text-[var(--text-secondary)]"
+> app\experiences\ExperiencesClient.jsx:250:                    <button
+  app\experiences\ExperiencesClient.jsx:251:                      key={opt.value}
+  app\experiences\ExperiencesClient.jsx:252:                      onClick={() => {
+> app\experiences\ExperiencesClient.jsx:353:                    <button
+  app\experiences\ExperiencesClient.jsx:354:                      onClick={(e) => {
+  app\experiences\ExperiencesClient.jsx:355:                        e.stopPropagation();
+> app\experiences\ExperiencesClient.jsx:386:              <button
+  app\experiences\ExperiencesClient.jsx:387:                onClick={() => setSelectedExp(null)}
+  app\experiences\ExperiencesClient.jsx:388:                className="absolute top-5 right-5 p-1.5 rounded-xl 
+text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors bg-[var(--bg-surface)] 
+hover:bg-[var(--bg-hover)]"
+> app\experiences\ExperiencesClient.jsx:405:                <button
+  app\experiences\ExperiencesClient.jsx:406:                  onClick={() => { setSelectedExp(null); 
+setBookingSuccess(false); }}
+  app\experiences\ExperiencesClient.jsx:407:                  className="w-full py-3.5 rounded-xl text-xs font-black 
+text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all shadow-md cursor-pointer uppercase 
+tracking-wider"
+> app\experiences\ExperiencesClient.jsx:481:                <button
+  app\experiences\ExperiencesClient.jsx:482:                  onClick={handleConfirmBooking}
+  app\experiences\ExperiencesClient.jsx:483:                  disabled={bookingLoading}
+> app\experiences\ExperiencesClient.jsx:537:                  <button
+  app\experiences\ExperiencesClient.jsx:538:                    onClick={() => setActiveInstagramUser(null)}
+  app\experiences\ExperiencesClient.jsx:539:                    className="p-2 rounded-xl text-[var(--text-muted)] 
+hover:text-[var(--text-primary)] transition-colors bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)] cursor-pointer"
+> app\gigs\_ApplicantsDrawer.jsx:56:            <button
+  app\gigs\_ApplicantsDrawer.jsx:57:              onClick={() => handle('accept')}
+  app\gigs\_ApplicantsDrawer.jsx:58:              disabled={!!loading}
+> app\gigs\_ApplicantsDrawer.jsx:64:            <button
+  app\gigs\_ApplicantsDrawer.jsx:65:              onClick={() => handle('reject')}
+  app\gigs\_ApplicantsDrawer.jsx:66:              disabled={!!loading}
+> app\gigs\_ApplicantsDrawer.jsx:131:          <button onClick={onClose} className="p-1.5 rounded-full 
+hover:bg-zinc-100 text-zinc-400">
+  app\gigs\_ApplicantsDrawer.jsx:132:            <X size={16} />
+  app\gigs\_ApplicantsDrawer.jsx:133:          </button>
+> app\gigs\_ApplicantsDrawer.jsx:155:                <button
+  app\gigs\_ApplicantsDrawer.jsx:156:                  onClick={() => setCompleting(true)}
+  app\gigs\_ApplicantsDrawer.jsx:157:                  className="w-full py-3 rounded-2xl bg-gradient-to-r 
+from-[#8C3573] to-[#8C3573] text-white text-xs font-black hover:opacity-90 active:scale-95 transition-all 
+cursor-pointer"
+> app\gigs\_ApplicantsDrawer.jsx:172:                    <button type="button" onClick={() => setCompleting(false)} 
+className="flex-1 py-3 rounded-2xl bg-zinc-100 text-zinc-600 text-xs font-black cursor-pointer">Cancel</button>
+> app\gigs\_ApplicantsDrawer.jsx:173:                    <button type="submit" disabled={code.length !== 6 || 
+codeLoading} className="flex-2 px-6 py-3 rounded-2xl bg-emerald-500 text-white text-xs font-black disabled:opacity-50 
+cursor-pointer">
+  app\gigs\_ApplicantsDrawer.jsx:174:                      {codeLoading ? 'Verifying…' : 'Confirm & Pay'}
+  app\gigs\_ApplicantsDrawer.jsx:175:                    </button>
+> app\gigs\_MyGigsActivity.jsx:32:          <button
+  app\gigs\_MyGigsActivity.jsx:33:            key={key}
+  app\gigs\_MyGigsActivity.jsx:34:            onClick={() => setTab(key)}
+> app\gigs\_MyGigsActivity.jsx:70:                  <button
+  app\gigs\_MyGigsActivity.jsx:71:                    onClick={() => onManage(gig)}
+  app\gigs\_MyGigsActivity.jsx:72:                    className="px-3 py-1.5 rounded-xl bg-[#fcf6fa] text-[#74295d] 
+border border-[#f5ebf4] text-xs font-black hover:bg-[#f5ebf4] cursor-pointer transition-all"
+> app\messages\page.jsx:63:    <button
+  app\messages\page.jsx:64:      type="button"
+  app\messages\page.jsx:65:      onClick={onClick}
+> app\messages\page.jsx:139:      <button 
+  app\messages\page.jsx:140:        type="button"
+  app\messages\page.jsx:141:        className="px-4 py-1.5 rounded-xl bg-[#8C3573] text-white text-xs font-black 
+hover:bg-[#74295d] active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs"
+> app\messages\page.jsx:592:          <button
+  app\messages\page.jsx:593:            type="button"
+  app\messages\page.jsx:594:            onClick={() => setShowNewMessageModal(true)}
+> app\messages\page.jsx:614:              <button
+  app\messages\page.jsx:615:                type="button"
+  app\messages\page.jsx:616:                onClick={() => setSearchQuery('')}
+> app\messages\page.jsx:678:                  <button
+  app\messages\page.jsx:679:                    type="button"
+  app\messages\page.jsx:680:                    onClick={() => setSearchQuery('')}
+> app\messages\page.jsx:707:            <button
+  app\messages\page.jsx:708:              type="button"
+  app\messages\page.jsx:709:              onClick={() => setShowNewMessageModal(true)}
+> app\messages\page.jsx:723:                    <button
+  app\messages\page.jsx:724:                      type="button"
+  app\messages\page.jsx:725:                      onClick={() => { setShowList(true); setActiveChatId(null); 
+setActiveChat(null); }}
+> app\messages\page.jsx:884:                    <button
+  app\messages\page.jsx:885:                      type="button"
+  app\messages\page.jsx:886:                      onClick={sendMessage}
+> app\messages\page.jsx:906:              <button 
+  app\messages\page.jsx:907:                type="button"
+  app\messages\page.jsx:908:                onClick={() => setShowNewMessageModal(false)}
+> app\onboarding\_parts.jsx:186:      <button
+  app\onboarding\_parts.jsx:187:        onClick={onNext} disabled={!canNext}
+  app\onboarding\_parts.jsx:188:        className="w-full py-4 rounded-2xl font-black text-sm text-white 
+transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center 
+gap-2"
+> app\onboarding\_steps.jsx:62:            <button
+  app\onboarding\_steps.jsx:63:              key={y} type="button"
+  app\onboarding\_steps.jsx:64:              onClick={() => onChange('year', y)}
+> app\onboarding\_steps.jsx:83:          <button
+  app\onboarding\_steps.jsx:84:            type="button"
+  app\onboarding\_steps.jsx:85:            onClick={() => setShowBranchDropdown(!showBranchDropdown)}
+> app\onboarding\_steps.jsx:97:                <button
+  app\onboarding\_steps.jsx:98:                  key={b}
+  app\onboarding\_steps.jsx:99:                  type="button"
+> app\onboarding\_steps.jsx:150:        <button
+  app\onboarding\_steps.jsx:151:          onClick={onBack}
+  app\onboarding\_steps.jsx:152:          className="flex items-center gap-1.5 px-5 py-4 rounded-2xl font-bold text-sm 
+border-2 border-zinc-100 text-zinc-500 hover:border-zinc-200 transition-all active:scale-95"
+> app\onboarding\_steps.jsx:156:        <button
+  app\onboarding\_steps.jsx:157:          onClick={onNext} disabled={!canNext}
+  app\onboarding\_steps.jsx:158:          className="flex-1 py-4 rounded-2xl font-black text-sm text-white 
+transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2"
+> app\onboarding\_steps.jsx:213:              <button
+  app\onboarding\_steps.jsx:214:                key={tag} type="button"
+  app\onboarding\_steps.jsx:215:                onClick={() => !maxed && toggleInterest(tag)}
+> app\onboarding\_steps.jsx:242:        <button
+  app\onboarding\_steps.jsx:243:          onClick={onBack} disabled={loading}
+  app\onboarding\_steps.jsx:244:          className="flex items-center gap-1.5 px-5 py-4 rounded-2xl font-bold text-sm 
+border-2 border-zinc-100 text-zinc-500 hover:border-zinc-200 transition-all active:scale-95"
+> app\onboarding\_steps.jsx:248:        <button
+  app\onboarding\_steps.jsx:249:          onClick={onSubmit} disabled={!canSubmit}
+  app\onboarding\_steps.jsx:250:          className="flex-1 py-4 rounded-2xl font-black text-sm text-white 
+transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2"
+> app\profile\ProfileClient.jsx:37:        <button onClick={onAction}
+  app\profile\ProfileClient.jsx:38:          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[10px] 
+font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95"
+  app\profile\ProfileClient.jsx:39:          style={{ background: '#8C3573', color: '#fff' }}>
+> app\profile\ProfileClient.jsx:173:              <button onClick={() => setIsEditing(false)}
+  app\profile\ProfileClient.jsx:174:                className="p-2 rounded-xl border cursor-pointer transition-all 
+active:scale-95"
+  app\profile\ProfileClient.jsx:175:                style={{ background: 'var(--bg-elevated)', borderColor: 
+'var(--border-subtle)', color: 'var(--text-primary)' }}>
+> app\profile\ProfileClient.jsx:185:              <button onClick={() => setShowSettingsModal(true)}
+  app\profile\ProfileClient.jsx:186:                className="p-2 rounded-xl border cursor-pointer transition-all 
+hover:scale-105 active:scale-95"
+  app\profile\ProfileClient.jsx:187:                style={{ background: 'var(--bg-elevated)', borderColor: 
+'var(--border-subtle)', color: 'var(--text-primary)' }}>
+> app\profile\ProfileClient.jsx:203:            <button
+  app\profile\ProfileClient.jsx:204:              onClick={() => router.push('/admin')}
+  app\profile\ProfileClient.jsx:205:              className="w-full rounded-2xl p-4 flex items-center justify-between 
+cursor-pointer transition-all active:scale-95 shadow-md"
+> app\profile\ProfileClient.jsx:270:              <button onClick={() => setIsEditing(true)}
+  app\profile\ProfileClient.jsx:271:                className="w-full py-4 rounded-2xl text-[11px] font-black 
+uppercase tracking-[0.15em] bg-zinc-900 text-white hover:bg-zinc-800 cursor-pointer transition-all active:scale-95 
+shadow-md">
+  app\profile\ProfileClient.jsx:272:                Edit Profile
+> app\profile\ProfileClient.jsx:276:                <button onClick={() => router.push(`/users/${profile.id}`)}
+  app\profile\ProfileClient.jsx:277:                  className="flex-1 h-12 sm:h-14 rounded-2xl text-[11px] 
+font-black uppercase tracking-[0.15em] bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] text-zinc-700 hover:bg-zinc-100 
+cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-2">
+  app\profile\ProfileClient.jsx:278:                  <ExternalLink size={16} /> Public View
+> app\profile\ProfileClient.jsx:280:                <button onClick={() => setShowQrModal(true)}
+  app\profile\ProfileClient.jsx:281:                  className="w-12 sm:w-14 h-12 sm:h-14 shrink-0 rounded-2xl flex 
+items-center justify-center cursor-pointer transition-all active:scale-95 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] 
+text-[#8C3573] hover:bg-zinc-100 hover:border-[#cbd5e1]">
+  app\profile\ProfileClient.jsx:282:                  <QrCode size={18} />
+> app\profile\ProfileClient.jsx:284:                <button onClick={handleCopyLink}
+  app\profile\ProfileClient.jsx:285:                  className="w-12 sm:w-14 h-12 sm:h-14 shrink-0 rounded-2xl flex 
+items-center justify-center cursor-pointer transition-all active:scale-95 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] 
+text-zinc-600 hover:bg-zinc-100 hover:border-[#cbd5e1]"
+  app\profile\ProfileClient.jsx:286:                  style={{ color: copied ? '#10b981' : undefined }}>
+> app\profile\ProfileClient.jsx:320:            <button type="button" onClick={handleToggleId}
+  app\profile\ProfileClient.jsx:321:              className={`w-11 h-6 rounded-full p-0.5 transition-all duration-300 
+cursor-pointer outline-none ${isIdOn ? 'bg-emerald-500' : 'bg-zinc-300'}`}>
+  app\profile\ProfileClient.jsx:322:              <div className={`w-5 h-5 rounded-full bg-white shadow-md 
+transition-all duration-300 flex items-center justify-center ${isIdOn ? 'translate-x-5' : 'translate-x-0'}`}>
+> app\profile\ProfileClient.jsx:334:              <button onClick={() => setIsEditing(true)} className="text-[10px] 
+font-black uppercase tracking-wider text-[#8C3573] cursor-pointer hover:underline">Edit</button>
+  app\profile\ProfileClient.jsx:335:            </div>
+  app\profile\ProfileClient.jsx:336:            {hasInterests ? (
+> app\profile\ProfileClient.jsx:345:              <button onClick={() => setIsEditing(true)}
+  app\profile\ProfileClient.jsx:346:                className="w-full flex items-center justify-center gap-2 py-4 
+rounded-2xl text-[11px] font-black uppercase tracking-[0.1em] cursor-pointer transition-all active:scale-95 
+bg-[#fcf6fa] text-[#8C3573] border-[1.5px] border-dashed border-[#eac5e0] hover:bg-[#8C3573]/10">
+  app\profile\ProfileClient.jsx:347:                <Tag size={14} /> Add your interests
+> app\profile\ProfileClient.jsx:353:          <button onClick={() => router.push('/wallet')}
+  app\profile\ProfileClient.jsx:354:            className="w-full relative overflow-hidden p-6 rounded-[24px] flex 
+items-center justify-between cursor-pointer active:scale-[0.98] transition-all shadow-xl shadow-[#8C3573]/20 group"
+  app\profile\ProfileClient.jsx:355:            style={{ background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 
+100%)' }}>
+> app\profile\ProfileClient.jsx:376:              <button onClick={() => router.push('/gigs')} className="text-[10px] 
+font-black uppercase tracking-wider text-[#8C3573] cursor-pointer hover:underline">View All</button>
+  app\profile\ProfileClient.jsx:377:            </div>
+  app\profile\ProfileClient.jsx:378:            
+> app\profile\ProfileClient.jsx:423:              <button onClick={() => setShowSettingsModal(false)} className="p-2 
+rounded-full cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+  app\profile\ProfileClient.jsx:424:                <X size={20} style={{ color: 'var(--text-primary)' }} />
+  app\profile\ProfileClient.jsx:425:              </button>
+> app\profile\ProfileClient.jsx:433:                  <button onClick={() => { setIsEditing(true); 
+setShowSettingsModal(false); }}
+  app\profile\ProfileClient.jsx:434:                    className="w-full text-left p-4 text-xs font-bold 
+transition-colors cursor-pointer flex items-center justify-between"
+  app\profile\ProfileClient.jsx:435:                    style={{ color: 'var(--text-primary)' }}>
+> app\profile\ProfileClient.jsx:462:                      <button onClick={requestLocation} className="text-[10px] 
+font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase tracking-wider 
+transition-colors active:scale-95">Enable</button>
+  app\profile\ProfileClient.jsx:463:                    )}
+  app\profile\ProfileClient.jsx:464:                  </div>
+> app\profile\ProfileClient.jsx:482:                      <button onClick={requestNotifications} 
+className="text-[10px] font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase 
+tracking-wider transition-colors active:scale-95">Enable</button>
+  app\profile\ProfileClient.jsx:483:                    )}
+  app\profile\ProfileClient.jsx:484:                  </div>
+> app\profile\ProfileClient.jsx:502:                      <button onClick={requestCamera} className="text-[10px] 
+font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase tracking-wider 
+transition-colors active:scale-95">Enable</button>
+  app\profile\ProfileClient.jsx:503:                    )}
+  app\profile\ProfileClient.jsx:504:                  </div>
+> app\profile\ProfileClient.jsx:513:                    <button onClick={() => { router.push('/admin'); 
+setShowSettingsModal(false); }}
+  app\profile\ProfileClient.jsx:514:                      className="w-full text-left p-4 text-xs font-black 
+transition-colors cursor-pointer flex items-center justify-between text-[#8C3573]">
+  app\profile\ProfileClient.jsx:515:                      <div className="flex items-center gap-3"><ShieldCheck 
+size={16} /> Admin Dashboard</div>
+> app\profile\ProfileClient.jsx:538:            <button onClick={() => setShowQrModal(false)} className="absolute 
+top-4 right-4 p-2 rounded-full cursor-pointer hover:bg-zinc-100 transition-colors text-zinc-400">
+  app\profile\ProfileClient.jsx:539:              <X size={20} />
+  app\profile\ProfileClient.jsx:540:            </button>
+> app\profile\ProfileClient.jsx:560:            <button onClick={handleCopyLink} className="w-full py-4 mt-6 
+rounded-2xl text-[12px] font-black uppercase tracking-[0.1em] bg-zinc-900 text-white cursor-pointer transition-all 
+active:scale-95 shadow-md flex justify-center gap-2">
+  app\profile\ProfileClient.jsx:561:              <Share2 size={16} /> Send Link
+  app\profile\ProfileClient.jsx:562:            </button>
+> app\FeedClient.jsx:719:            <button 
+  app\FeedClient.jsx:720:              onClick={handleFreeNowToggle}
+  app\FeedClient.jsx:721:              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border 
+text-[10.5px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95 ${
+> app\FeedClient.jsx:755:            <button 
+  app\FeedClient.jsx:756:              onClick={() => setSearchQuery('')}
+  app\FeedClient.jsx:757:              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 
+hover:text-zinc-700 p-1"
+> app\FeedClient.jsx:839:                    <button
+  app\FeedClient.jsx:840:                      type="button"
+  app\FeedClient.jsx:841:                      onClick={(e) => {
+> app\FeedClient.jsx:857:                        <button
+  app\FeedClient.jsx:858:                          type="button"
+  app\FeedClient.jsx:859:                          onClick={(e) => {
+> app\FeedClient.jsx:988:          <button
+  app\FeedClient.jsx:989:            onClick={() => setShowPostModal(true)}
+  app\FeedClient.jsx:990:            className="text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r 
+from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] text-white px-4 py-2 rounded-2xl transition-all 
+flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+> app\FeedClient.jsx:1046:                  <button
+  app\FeedClient.jsx:1047:                    onClick={() => {
+  app\FeedClient.jsx:1048:                      if (post.authorId) router.push(`/chats?userId=${post.authorId}`);
+> app\FeedClient.jsx:1096:                    <button
+  app\FeedClient.jsx:1097:                      onClick={() => {
+  app\FeedClient.jsx:1098:                        const nextLiked = !isLiked;
+> app\FeedClient.jsx:1134:                    <button 
+  app\FeedClient.jsx:1135:                      onClick={() => {
+  app\FeedClient.jsx:1136:                        if (typeof window !== 'undefined' && navigator.share) {
+> app\FeedClient.jsx:1150:                  <button 
+  app\FeedClient.jsx:1151:                    onClick={() => toast.success('Saved to bookmarks!')}
+  app\FeedClient.jsx:1152:                    className="text-zinc-400 hover:text-[#8C3573] p-2 rounded-full 
+hover:bg-[#fcf6fa] transition-colors cursor-pointer"
+> app\FeedClient.jsx:1177:              <button
+  app\FeedClient.jsx:1178:                key={filter}
+  app\FeedClient.jsx:1179:                onClick={() => setGroupFilter(filter)}
+> app\FeedClient.jsx:1255:                <button
+  app\FeedClient.jsx:1256:                  onClick={(e) => { e.stopPropagation(); handleJoinGroup(group); }}
+  app\FeedClient.jsx:1257:                  className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[11px] font-black 
+uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-xs ${
+> app\FeedClient.jsx:1287:              <button
+  app\FeedClient.jsx:1288:                onClick={() => setSelectedExp(null)}
+  app\FeedClient.jsx:1289:                className="absolute top-4 right-4 p-1.5 rounded-lg text-[var(--text-muted)] 
+hover:text-[var(--text-primary)] transition-colors bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)]"
+> app\FeedClient.jsx:1306:                <button
+  app\FeedClient.jsx:1307:                  onClick={() => { setSelectedExp(null); setBookingSuccess(false); }}
+  app\FeedClient.jsx:1308:                  className="w-full py-3.5 rounded-xl text-xs font-black text-white 
+bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all shadow-md cursor-pointer uppercase tracking-wider"
+> app\FeedClient.jsx:1413:                      <button
+  app\FeedClient.jsx:1414:                        onClick={() => setBookingConfirmStep(false)}
+  app\FeedClient.jsx:1415:                        className="flex-1 py-3 rounded-xl border 
+border-[var(--border-subtle)] text-xs font-black text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] 
+transition-all"
+> app\FeedClient.jsx:1419:                      <button
+  app\FeedClient.jsx:1420:                        onClick={handleConfirmBooking}
+  app\FeedClient.jsx:1421:                        disabled={bookingLoading}
+> app\FeedClient.jsx:1433:                  <button
+  app\FeedClient.jsx:1434:                    onClick={() => setBookingConfirmStep(true)}
+  app\FeedClient.jsx:1435:                    disabled={bookingLoading}
+> app\FeedClient.jsx:1470:                <button
+  app\FeedClient.jsx:1471:                  type="button"
+  app\FeedClient.jsx:1472:                  key={star}
+> app\FeedClient.jsx:1491:                    <button
+  app\FeedClient.jsx:1492:                      type="button"
+  app\FeedClient.jsx:1493:                      key={cat}
+> app\FeedClient.jsx:1518:            <button
+  app\FeedClient.jsx:1519:              type="submit"
+  app\FeedClient.jsx:1520:              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white 
+text-xs font-black uppercase py-3 rounded-xl transition-all cursor-pointer shadow-md text-center"
+> app\FeedClient.jsx:1541:              <button
+  app\FeedClient.jsx:1542:                onClick={() => setSelectedActiveBooking(null)}
+  app\FeedClient.jsx:1543:                className="absolute top-4 right-4 p-1.5 rounded-lg text-[var(--text-muted)] 
+hover:text-white transition-colors bg-[var(--bg-surface)]"
+> app\FeedClient.jsx:1623:                        <button 
+  app\FeedClient.jsx:1624:                          onClick={() => setIsScanningMock(false)}
+  app\FeedClient.jsx:1625:                          className="absolute top-2 right-2 bg-black/60 text-white 
+rounded-full p-1.5"
+> app\FeedClient.jsx:1631:                      <button
+  app\FeedClient.jsx:1632:                        type="button"
+  app\FeedClient.jsx:1633:                        onClick={() => setIsScanningMock(true)}
+> app\FeedClient.jsx:1653:                        <button
+  app\FeedClient.jsx:1654:                          onClick={async () => {
+  app\FeedClient.jsx:1655:                            const code = verificationCodes[selectedActiveBooking.id];
+> app\FeedClient.jsx:1750:              <button
+  app\FeedClient.jsx:1751:                onClick={() => setShowCreateModal(false)}
+  app\FeedClient.jsx:1752:                className="absolute top-4 right-4 p-1.5 rounded-lg text-[var(--text-muted)] 
+hover:text-white transition-colors bg-[var(--bg-surface)]"
+> app\FeedClient.jsx:1855:            <button
+  app\FeedClient.jsx:1856:              onClick={handleCreateExperience}
+  app\FeedClient.jsx:1857:              disabled={createLoading}
+> app\FeedClient.jsx:1889:            <button
+  app\FeedClient.jsx:1890:              onClick={() => setShowBookingsModal(false)}
+  app\FeedClient.jsx:1891:              className="absolute top-4 right-4 p-1.5 rounded-lg text-[var(--text-muted)] 
+hover:text-white transition-colors bg-[var(--bg-surface)]"
+> app\FeedClient.jsx:1970:                            <button
+  app\FeedClient.jsx:1971:                              onClick={() => handleAcceptRequest(b.id)}
+  app\FeedClient.jsx:1972:                              disabled={!!actionLoadingId}
+> app\FeedClient.jsx:1978:                            <button
+  app\FeedClient.jsx:1979:                              onClick={() => handleDeclineRequest(b.id)}
+  app\FeedClient.jsx:1980:                              disabled={!!actionLoadingId}
+> app\FeedClient.jsx:1990:                          <button
+  app\FeedClient.jsx:1991:                            onClick={() => {
+  app\FeedClient.jsx:1992:                              setSelectedActiveBooking(b);
+> app\FeedClient.jsx:2039:              <button
+  app\FeedClient.jsx:2040:                onClick={() => setShowLowBalanceModal(false)}
+  app\FeedClient.jsx:2041:                className="flex-1 py-3 rounded-2xl text-xs font-black text-zinc-600 
+bg-zinc-100 hover:bg-zinc-200 transition-colors"
+> app\FeedClient.jsx:2077:              <button
+  app\FeedClient.jsx:2078:                onClick={() => setShowPostModal(false)}
+  app\FeedClient.jsx:2079:                className="w-7 h-7 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 
+flex items-center justify-center transition-colors cursor-pointer"
+> app\FeedClient.jsx:2095:                  <button
+  app\FeedClient.jsx:2096:                    key={sample.label}
+  app\FeedClient.jsx:2097:                    type="button"
+> app\FeedClient.jsx:2164:            <button
+  app\FeedClient.jsx:2165:              onClick={handlePublishPost}
+  app\FeedClient.jsx:2166:              disabled={postUploading}
+> app\FeedClient.jsx:2208:              <button 
+  app\FeedClient.jsx:2209:                onClick={() => setSelectedPostPhoto(null)}
+  app\FeedClient.jsx:2210:                className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 
+flex items-center justify-center transition-colors cursor-pointer"
+> app\FeedClient.jsx:2236:                <button
+  app\FeedClient.jsx:2237:                  onClick={() => {
+  app\FeedClient.jsx:2238:                    const authorId = selectedPostPhoto.authorId;
+> components\ui\slide-button.tsx:172:              <Button
+  components\ui\slide-button.tsx:173:                ref={ref}
+  components\ui\slide-button.tsx:174:                disabled={status === "loading"}
+> components\ui\slide-button.tsx:197:              <Button
+  components\ui\slide-button.tsx:198:                ref={ref}
+  components\ui\slide-button.tsx:199:                disabled={status === "loading"}
+> components\CreateMenuModal.jsx:57:                <button
+  components\CreateMenuModal.jsx:58:                  onClick={onClose}
+  components\CreateMenuModal.jsx:59:                  className="w-8 h-8 rounded-full bg-zinc-100 flex items-center 
+justify-center text-zinc-500 hover:text-zinc-900 transition-colors"
+> components\ProfileHighlightsSection.jsx:60:          <button 
+  components\ProfileHighlightsSection.jsx:61:            onClick={() => setSelectedInterest(null)}
+  components\ProfileHighlightsSection.jsx:62:            className="text-[10px] font-bold text-[#8C3573] 
+hover:text-[#74295d] flex items-center gap-1 cursor-pointer"
+> components\ProfileHighlightsSection.jsx:77:            <button
+  components\ProfileHighlightsSection.jsx:78:              key={interest}
+  components\ProfileHighlightsSection.jsx:79:              type="button"
+> components\ProfileHighlightsSection.jsx:167:                      <button
+  components\ProfileHighlightsSection.jsx:168:                        type="button"
+  components\ProfileHighlightsSection.jsx:169:                        onClick={(e) => {
+> components\Sidebar.jsx:430:              <button 
+  components\Sidebar.jsx:431:                key={href} 
+  components\Sidebar.jsx:432:                onClick={(e) => { e.preventDefault(); setShowCreateModal(true); }}
+> features\auth\AuthForm.jsx:158:          <button
+  features\auth\AuthForm.jsx:159:            onClick={() => loginWithGoogleGIS()}
+  features\auth\AuthForm.jsx:160:            disabled={loading}
+> features\auth\LogoutButton.jsx:22:    <button
+  features\auth\LogoutButton.jsx:23:      onClick={handleLogOut}
+  features\auth\LogoutButton.jsx:24:      disabled={loading}
+> features\circles\CircleJoinButton.jsx:42:    <button
+  features\circles\CircleJoinButton.jsx:43:      onClick={handleToggleJoin}
+  features\circles\CircleJoinButton.jsx:44:      disabled={loading}
+> features\circles\CirclesList.jsx:263:        <button
+  features\circles\CirclesList.jsx:264:          onClick={() => setShowCreateModal(true)}
+  features\circles\CirclesList.jsx:265:          className="px-4 py-3 rounded-2xl bg-white hover:bg-[#fcf6fa] 
+text-[#512142] font-black text-xs transition-all shadow-lg active:scale-95 flex-shrink-0 cursor-pointer"
+> features\circles\CirclesList.jsx:281:        <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 
+rounded-xl flex items-center justify-center"
+  features\circles\CirclesList.jsx:282:          style={{ background: '#ebebed', color: '#71717a' }}>
+  features\circles\CirclesList.jsx:283:          <SlidersHorizontal size={14} />
+> features\circles\CirclesList.jsx:290:          <button key={f} onClick={() => setActiveFilter(f)}
+  features\circles\CirclesList.jsx:291:            className="flex-shrink-0 px-4 py-2 rounded-xl text-[11px] 
+font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
+  features\circles\CirclesList.jsx:292:            style={activeFilter === f
+> features\circles\CirclesList.jsx:319:              <button onClick={() => handleJoinClick(featured)}
+  features\circles\CirclesList.jsx:320:                disabled={joiningId === featured.id}
+  features\circles\CirclesList.jsx:321:                className="px-4 py-2.5 rounded-xl text-[11px] font-black 
+uppercase tracking-wide cursor-pointer active:scale-95 transition-all flex-shrink-0"
+> features\circles\CirclesList.jsx:423:                  <button
+  features\circles\CirclesList.jsx:424:                    onClick={(e) => { e.stopPropagation(); 
+setManageCircle(circle); }}
+  features\circles\CirclesList.jsx:425:                    className="px-3 py-2 rounded-xl text-[10px] font-black 
+uppercase tracking-wider bg-[#fcf6fa] text-[#74295d] border border-[#eac5e0] hover:bg-[#f5ebf4] transition-colors"
+> features\circles\CirclesList.jsx:431:                <button
+  features\circles\CirclesList.jsx:432:                  onClick={(e) => { e.stopPropagation(); 
+handleJoinClick(circle); }}
+  features\circles\CirclesList.jsx:433:                  disabled={joiningId === circle.id}
+> features\circles\CirclesList.jsx:450:          <button onClick={() => { setSearch(''); setActiveFilter('All'); }}
+  features\circles\CirclesList.jsx:451:            className="mt-3 text-[11px] font-black text-[#8C3573] 
+cursor-pointer">Clear filters</button>
+  features\circles\CirclesList.jsx:452:        </div>
+> features\circles\CirclesList.jsx:514:              <button
+  features\circles\CirclesList.jsx:515:                onClick={() => setRulesCircle(null)}
+  features\circles\CirclesList.jsx:516:                className="flex-1 py-3 rounded-2xl text-xs font-black 
+text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-colors"
+> features\circles\CirclesList.jsx:520:              <button
+  features\circles\CirclesList.jsx:521:                onClick={confirmJoinCircle}
+  features\circles\CirclesList.jsx:522:                className="flex-1 py-3 rounded-2xl text-xs font-black 
+text-white bg-[#8C3573] hover:bg-[#74295d] transition-all shadow-sm flex items-center justify-center gap-1.5"
+> features\circles\CreateCircleModal.jsx:115:          <button
+  features\circles\CreateCircleModal.jsx:116:            onClick={onClose}
+  features\circles\CreateCircleModal.jsx:117:            className="p-1.5 rounded-full hover:bg-zinc-200 text-zinc-500 
+hover:text-zinc-900 transition-colors"
+> features\circles\CreateCircleModal.jsx:148:                <button
+  features\circles\CreateCircleModal.jsx:149:                  key={cat}
+  features\circles\CreateCircleModal.jsx:150:                  type="button"
+> features\circles\CreateCircleModal.jsx:167:                <button
+  features\circles\CreateCircleModal.jsx:168:                  key={p.id}
+  features\circles\CreateCircleModal.jsx:169:                  type="button"
+> features\circles\CreateCircleModal.jsx:278:            <button
+  features\circles\CreateCircleModal.jsx:279:              type="submit"
+  features\circles\CreateCircleModal.jsx:280:              disabled={submitting || !hasEnoughSparks}
+> features\circles\HostCircleDashboardModal.jsx:56:          <button
+  features\circles\HostCircleDashboardModal.jsx:57:            onClick={onClose}
+  features\circles\HostCircleDashboardModal.jsx:58:            className="p-1.5 rounded-full hover:bg-zinc-200 
+text-zinc-500 hover:text-zinc-900 transition-colors"
+> features\events\RsvpButton.jsx:36:    <button
+  features\events\RsvpButton.jsx:37:      onClick={handleRsvp}
+  features\events\RsvpButton.jsx:38:      disabled={loading}
+> features\profile\ProfileEditForm.jsx:251:            <button 
+  features\profile\ProfileEditForm.jsx:252:              type="button"
+  features\profile\ProfileEditForm.jsx:253:              onClick={() => setShowYearDropdown(!showYearDropdown)}
+> features\profile\ProfileEditForm.jsx:263:                  <button
+  features\profile\ProfileEditForm.jsx:264:                    key={y}
+  features\profile\ProfileEditForm.jsx:265:                    type="button"
+> features\profile\ProfileEditForm.jsx:359:                  <button 
+  features\profile\ProfileEditForm.jsx:360:                    type="button" 
+  features\profile\ProfileEditForm.jsx:361:                    onClick={() => fileInputRef.current?.click()}
+> features\profile\ProfileEditForm.jsx:366:                  <button 
+  features\profile\ProfileEditForm.jsx:367:                    type="button" 
+  features\profile\ProfileEditForm.jsx:368:                    onClick={handleRemovePhoto}
+> features\profile\ProfileEditForm.jsx:376:              <button 
+  features\profile\ProfileEditForm.jsx:377:                type="button"
+  features\profile\ProfileEditForm.jsx:378:                onClick={() => fileInputRef.current?.click()}
+> features\profile\ProfileEditForm.jsx:411:              <button 
+  features\profile\ProfileEditForm.jsx:412:                key={tag} 
+  features\profile\ProfileEditForm.jsx:413:                type="button" 
+> features\profile\ProfileEditForm.jsx:429:        <button 
+  features\profile\ProfileEditForm.jsx:430:          type="submit" 
+  features\profile\ProfileEditForm.jsx:431:          disabled={loading}
+> features\users\BlockUserButton.jsx:46:        <button
+  features\users\BlockUserButton.jsx:47:          onClick={handleOpenBlockModal}
+  features\users\BlockUserButton.jsx:48:          disabled={loading}
+> features\users\BlockUserButton.jsx:55:        <button
+  features\users\BlockUserButton.jsx:56:          onClick={handleOpenBlockModal}
+  features\users\BlockUserButton.jsx:57:          disabled={loading}
+> features\users\BlockUserButton.jsx:80:              <button 
+  features\users\BlockUserButton.jsx:81:                onClick={() => !loading && setShowModal(false)}
+  features\users\BlockUserButton.jsx:82:                className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 
+text-zinc-500 flex items-center justify-center transition-all cursor-pointer"
+> features\users\BlockUserButton.jsx:100:              <button
+  features\users\BlockUserButton.jsx:101:                type="button"
+  features\users\BlockUserButton.jsx:102:                onClick={() => setShowModal(false)}
+> features\users\BlockUserButton.jsx:109:              <button
+  features\users\BlockUserButton.jsx:110:                type="button"
+  features\users\BlockUserButton.jsx:111:                onClick={handleConfirmBlock}
+> features\users\BookCoffeeButton.jsx:100:        <button
+  features\users\BookCoffeeButton.jsx:101:          onClick={handleClick}
+  features\users\BookCoffeeButton.jsx:102:          className="w-full flex items-center justify-center gap-1.5 px-3 
+py-3 rounded-2xl text-[11px] sm:text-xs font-black transition-all active:scale-95 hover:opacity-90 uppercase 
+tracking-wide cursor-pointer shadow-md whitespace-nowrap"
+> features\users\BookCoffeeButton.jsx:125:              <button
+  features\users\BookCoffeeButton.jsx:126:                onClick={() => setOpen(false)}
+  features\users\BookCoffeeButton.jsx:127:                className="absolute top-4 right-4 p-1.5 rounded-lg 
+text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors bg-[var(--bg-surface)] 
+hover:bg-[var(--bg-hover)]"
+> features\users\BookCoffeeButton.jsx:143:                <button
+  features\users\BookCoffeeButton.jsx:144:                  onClick={() => {
+  features\users\BookCoffeeButton.jsx:145:                    setOpen(false);
+> features\users\BookCoffeeButton.jsx:183:                        <button
+  features\users\BookCoffeeButton.jsx:184:                          key={loc}
+  features\users\BookCoffeeButton.jsx:185:                          onClick={() => setSelectedLocation(loc)}
+> features\users\BookCoffeeButton.jsx:207:                        <button
+  features\users\BookCoffeeButton.jsx:208:                          key={time.value}
+  features\users\BookCoffeeButton.jsx:209:                          onClick={() => setSelectedTime(time.value)}
+> features\users\BookCoffeeButton.jsx:276:                  <button
+  features\users\BookCoffeeButton.jsx:277:                    onClick={handleConfirm}
+  features\users\BookCoffeeButton.jsx:278:                    disabled={loading || loadingWallet || !wallet}
+> features\users\MessageButton.jsx:46:    <button
+  features\users\MessageButton.jsx:47:      onClick={handleMessage}
+  features\users\MessageButton.jsx:48:      disabled={loading}
+
+

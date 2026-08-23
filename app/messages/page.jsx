@@ -866,7 +866,7 @@ function MessagesContent() {
 
               return (
                 <div className="p-3 border-t border-zinc-100 bg-white flex-shrink-0">
-                  <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-full px-4 py-2 focus-within:border-zinc-400 transition-all">
+                  <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[#8C3573] focus-within:border-transparent transition-all">
                     <textarea
                       ref={inputRef}
                       value={inputText}
@@ -885,7 +885,7 @@ function MessagesContent() {
                       type="button"
                       onClick={sendMessage}
                       disabled={!inputText.trim() || sendingMsg}
-                      className="text-[#8C3573] hover:text-[#74295d] disabled:opacity-30 font-black text-xs transition-colors flex-shrink-0 cursor-pointer"
+                      className="text-[#8C3573] hover:text-[#74295d] disabled:opacity-30 font-black text-xs transition-all active:scale-95 flex-shrink-0 cursor-pointer"
                     >
                       {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin text-[#8C3573]" /> : 'Send'}
                     </button>

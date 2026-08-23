@@ -170,7 +170,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
                   />
                   <div className="flex gap-2">
                     <button type="button" onClick={() => setCompleting(false)} className="flex-1 py-3 rounded-2xl bg-zinc-100 text-zinc-600 text-xs font-black cursor-pointer">Cancel</button>
-                    <button type="submit" disabled={code.length !== 6 || codeLoading} className="flex-2 px-6 py-3 rounded-2xl bg-emerald-500 text-white text-xs font-black disabled:opacity-50 cursor-pointer">
+                    <button type="submit" disabled={code.length !== 6 || codeLoading} className="flex-2 px-6 py-3 rounded-2xl bg-emerald-500 text-white text-xs font-black disabled:opacity-50 cursor-pointer active:scale-95 transition-all">
                       {codeLoading ? 'Verifying…' : 'Confirm & Pay'}
                     </button>
                   </div>

@@ -155,7 +155,7 @@ export function Step2({ data, onChange, onNext, onBack }) {
         </button>
         <button
           onClick={onNext} disabled={!canNext}
-          className="flex-1 py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2"
+          className="flex-1 py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
           style={{ background: canNext ? 'linear-gradient(135deg,#8C3573,#b5609d)' : '#e5e7eb', color: canNext ? '#fff' : '#9ca3af', boxShadow: canNext ? '0 8px 24px rgba(140,53,115,0.3)' : 'none' }}
         >
           Continue <ArrowRight size={16}/>
@@ -247,7 +247,7 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
         </button>
         <button
           onClick={onSubmit} disabled={!canSubmit}
-          className="flex-1 py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2"
+          className="flex-1 py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
           style={{ background: canSubmit ? 'linear-gradient(135deg,#8C3573,#b5609d)' : '#e5e7eb', color: canSubmit ? '#fff' : '#9ca3af', boxShadow: canSubmit ? '0 8px 24px rgba(140,53,115,0.3)' : 'none' }}
         >
           {loading ? (

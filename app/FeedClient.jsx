@@ -2117,7 +2117,7 @@ export default function FeedClient() {
                 placeholder="Paste image link or select preset above..."
                 value={postFilePreview}
                 onChange={(e) => setPostFilePreview(e.target.value)}
-                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:border-[#9e4685] focus:bg-white transition-all"
+                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-[#8C3573] focus:border-transparent focus:bg-white transition-all"
               />
             </div>
 
@@ -2129,7 +2129,7 @@ export default function FeedClient() {
                 placeholder="What are you working on or showcasing today?"
                 value={postCaption}
                 onChange={(e) => setPostCaption(e.target.value)}
-                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:border-[#9e4685] focus:bg-white transition-all resize-none"
+                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-[#8C3573] focus:border-transparent focus:bg-white transition-all resize-none"
               />
             </div>
 
@@ -2155,7 +2155,7 @@ export default function FeedClient() {
                   placeholder="e.g. Innovation Lab"
                   value={postLocation}
                   onChange={(e) => setPostLocation(e.target.value)}
-                  className="w-full bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-800 rounded-xl p-2.5 outline-none focus:border-[#9e4685]"
+                  className="w-full bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-800 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-[#8C3573] focus:border-transparent transition-all"
                 />
               </div>
             </div>

@@ -386,13 +386,13 @@ export default function AdminClient() {
                     <div className="flex gap-2 flex-shrink-0 mt-3 sm:mt-0">
                       <button
                         onClick={() => handleVerifyPayment(p.id, 'approve')}
-                        className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[11px] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs flex-1 sm:flex-none"
+                        className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[11px] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs flex-1 sm:flex-none active:scale-95"
                       >
                         <Check size={14} /> Approve
                       </button>
                       <button
                         onClick={() => handleVerifyPayment(p.id, 'reject')}
-                        className="flex items-center justify-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-black uppercase text-[11px] px-3.5 py-2 rounded-xl transition-all cursor-pointer flex-1 sm:flex-none"
+                        className="flex items-center justify-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-black uppercase text-[11px] px-3.5 py-2 rounded-xl transition-all cursor-pointer flex-1 sm:flex-none active:scale-95"
                       >
                         <X size={14} /> Reject
                       </button>
@@ -495,13 +495,13 @@ export default function AdminClient() {
                     <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => handleResolveDispute(b.id, 'refund')}
-                        className="bg-rose-600 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg hover:bg-rose-700 transition-all cursor-pointer"
+                        className="bg-rose-600 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg hover:bg-rose-700 transition-all cursor-pointer active:scale-95"
                       >
                         Refund Guest
                       </button>
                       <button
                         onClick={() => handleResolveDispute(b.id, 'pay')}
-                        className="bg-emerald-600 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition-all cursor-pointer"
+                        className="bg-emerald-600 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition-all cursor-pointer active:scale-95"
                       >
                         Pay Host
                       </button>
@@ -579,13 +579,13 @@ export default function AdminClient() {
                     <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => handleProcessWithdrawal(wd.id, true)}
-                        className="bg-emerald-600 text-white font-bold text-[11px] px-3.5 py-1.5 rounded-lg hover:bg-emerald-700 transition-all cursor-pointer shadow-xs"
+                        className="bg-emerald-600 text-white font-bold text-[11px] px-3.5 py-1.5 rounded-lg hover:bg-emerald-700 transition-all cursor-pointer shadow-xs active:scale-95"
                       >
                         Approve & Pay
                       </button>
                       <button
                         onClick={() => handleProcessWithdrawal(wd.id, false)}
-                        className="bg-white border border-slate-200 text-slate-600 font-bold text-[11px] px-3.5 py-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer"
+                        className="bg-white border border-slate-200 text-slate-600 font-bold text-[11px] px-3.5 py-1.5 rounded-lg hover:bg-slate-100 transition-all cursor-pointer active:scale-95"
                       >
                         Reject
                       </button>

@@ -361,7 +361,7 @@ export default function DiscoverClient() {
                 Clear Search
               </button>
             ) : (
-              <button onClick={() => router.push('/create/experience')} className="mt-2 px-4 py-2 bg-[#8C3573] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer">
+              <button onClick={() => router.push('/create/experience')} className="mt-2 px-4 py-2 bg-[#8C3573] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition-all">
                 Host first experience
               </button>
             )}
@@ -429,7 +429,7 @@ export default function DiscoverClient() {
           <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-[#f0f0f0] flex flex-col items-center gap-2">
             <Users size={24} className="text-[#8C3573]" />
             <span>No communities created yet.</span>
-            <button onClick={() => router.push('/circles')} className="mt-2 px-4 py-2 bg-[#8C3573] text-white text-[10px] font-black uppercase tracking-wider rounded-xl">
+            <button onClick={() => router.push('/circles')} className="mt-2 px-4 py-2 bg-[#8C3573] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition-all">
               Browse Communities
             </button>
           </div>
