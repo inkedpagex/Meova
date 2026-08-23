@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Clock, CheckCircle, XCircle, Search, DollarSign, CreditCard } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Search, ArrowUpRight, Loader2 } from 'lucide-react';
 
 export default function AdminWithdrawalsPage() {
   const [withdrawals, setWithdrawals] = useState([]);
@@ -21,7 +21,6 @@ export default function AdminWithdrawalsPage() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchWithdrawals();
   }, [fetchWithdrawals]);
 
@@ -29,7 +28,6 @@ export default function AdminWithdrawalsPage() {
     setActionLoading(id);
     const originalWithdrawals = [...withdrawals];
 
-    // Optimistically update
     setWithdrawals(prev =>
       prev.map(w => w.id === id ? { ...w, status: action === 'approve' ? 'approved' : 'rejected' } : w)
     );
@@ -50,11 +48,11 @@ export default function AdminWithdrawalsPage() {
         fetchWithdrawals();
       } else {
         alert(data.error || 'Failed to update withdrawal');
-        setWithdrawals(originalWithdrawals); // Rollback
+        setWithdrawals(originalWithdrawals);
       }
-    } catch (e) {
+    } catch {
       alert('Network error');
-      setWithdrawals(originalWithdrawals); // Rollback
+      setWithdrawals(originalWithdrawals);
     } finally {
       setActionLoading(null);
     }
@@ -64,87 +62,99 @@ export default function AdminWithdrawalsPage() {
   const completed = withdrawals.filter(w => w.status !== 'pending');
 
   return (
-    <div className="anim-fade-in">
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>Withdrawal Requests</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-          Review and approve Creator Earnings withdrawal requests. Payments must be processed manually to the user&apos;s details shown below.
+    <div className="anim-fade-in space-y-6">
+      
+      {/* Title Header */}
+      <div className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/80 shadow-xs">
+        <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+          Withdrawal Requests
+        </h1>
+        <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">
+          Review and approve Creator Earnings withdrawal requests. Payouts must be sent to the student&apos;s UPI ID or bank details below.
         </p>
       </div>
 
       {loading ? (
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Loading withdrawals...</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
+          <Loader2 size={24} className="animate-spin text-[#8C3573]" />
+          <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Loading payout requests...</p>
+        </div>
       ) : (
         <>
           {/* Pending Section */}
-          <div style={{ marginBottom: 32 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 14 }}>
-              Pending Approvals ({pending.length})
+          <div className="space-y-4">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Pending Approvals ({pending.length})</span>
             </h2>
+
             {pending.length === 0 ? (
-              <div className="glass rounded-2xl p-10 text-center" style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-                No pending withdrawals 🎉
+              <div className="bg-white border border-slate-200 rounded-2xl p-10 text-center shadow-xs">
+                <p className="text-sm font-black text-slate-800">No pending payout requests</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
+              <div className="space-y-3">
                 {pending.map(w => (
-                  <div key={w.id} className="card"
-                    style={{ background: 'var(--bg-surface)', borderRadius: 16, padding: 20, border: '1px solid var(--border-subtle)' }}>
-                    <div className="flex justify-between items-start gap-4 flex-wrap" style={{ marginBottom: 16 }}>
-                      <div>
-                        <p style={{ fontSize: 18, fontWeight: 800, color: '#4ade80' }}>
-                          {w.amount.toLocaleString()} ⚡
+                  <div
+                    key={w.id}
+                    className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-xs"
+                  >
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                      <div className="space-y-1">
+                        <p className="text-lg font-black text-emerald-600">
+                          ₹{w.amount_inr || w.amount} <span className="text-xs font-bold text-slate-400">({w.amount} Sparks)</span>
                         </p>
-                        <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                          Requested by: <strong style={{ color: 'var(--text-primary)' }}>{w.email}</strong>
+                        <p className="text-xs font-extrabold text-slate-900">
+                          Requested by: <span className="text-[#8C3573]">{w.email}</span>
                         </p>
-                        <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                          Date: {new Date(w.requested_at).toLocaleString('en-IN')}
+                        <p className="text-[11px] font-bold text-slate-400">
+                          Date: {new Date(w.requested_at || w.created_at || Date.now()).toLocaleString('en-IN')}
                         </p>
                       </div>
 
                       {/* Payment Destination Details */}
-                      <div className="glass" style={{ padding: '10px 14px', borderRadius: 10, minWidth: 200 }}>
-                        <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>
-                          Payment Details ({w.method})
+                      <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl min-w-[220px]">
+                        <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                          Payout Target ({w.method || 'UPI'})
                         </p>
-                        {w.method === 'upi' ? (
-                          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'monospace' }}>
-                            {w.upi_id}
-                          </p>
-                        ) : (
-                          <div style={{ fontSize: 11, color: 'var(--text-primary)' }}>
-                            <p>Bank: {w.bank_details?.bank_name}</p>
-                            <p>A/C: {w.bank_details?.account_number}</p>
-                            <p>IFSC: {w.bank_details?.ifsc_code}</p>
+                        {w.method === 'bank' ? (
+                          <div className="text-xs font-bold text-slate-800 space-y-0.5">
+                            <p>Bank: {w.bank_details?.bank_name || 'N/A'}</p>
+                            <p>A/C: {w.bank_details?.account_number || 'N/A'}</p>
+                            <p>IFSC: {w.bank_details?.ifsc_code || 'N/A'}</p>
                           </div>
+                        ) : (
+                          <p className="text-xs font-mono font-black text-slate-900 bg-white border border-slate-200 px-2 py-1 rounded-md">
+                            {w.upi_id || 'Not provided'}
+                          </p>
                         )}
                       </div>
                     </div>
 
                     {/* Action Block */}
-                    <div className="flex gap-3 flex-wrap items-center">
+                    <div className="flex flex-col sm:flex-row gap-3 items-center pt-2 border-t border-slate-100">
                       <input
-                        placeholder="Remarks / transaction reference ID (optional)"
+                        placeholder="Remarks / transaction ref code (optional)..."
                         value={remarks[w.id] || ''}
                         onChange={e => setRemarks({ ...remarks, [w.id]: e.target.value })}
-                        style={{
-                          flex: 1, minWidth: 200, background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)',
-                          borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'white', outline: 'none',
-                        }}
+                        className="w-full sm:flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#8C3573]"
                       />
-                      <button
-                        onClick={() => handleWithdrawal(w.id, 'approve')}
-                        disabled={actionLoading !== null}
-                        className="btn btn-primary" style={{ fontSize: 12, padding: '8px 16px' }}>
-                        Approve & Deduct
-                      </button>
-                      <button
-                        onClick={() => handleWithdrawal(w.id, 'reject')}
-                        disabled={actionLoading !== null}
-                        className="btn btn-outline" style={{ fontSize: 12, padding: '8px 16px', color: '#f87171', borderColor: '#f8717140' }}>
-                        Reject
-                      </button>
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={() => handleWithdrawal(w.id, 'approve')}
+                          disabled={actionLoading === w.id}
+                          className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black uppercase text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+                        >
+                          Approve & Pay
+                        </button>
+                        <button
+                          onClick={() => handleWithdrawal(w.id, 'reject')}
+                          disabled={actionLoading === w.id}
+                          className="flex-1 sm:flex-none bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 disabled:opacity-50 font-black uppercase text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
+                        >
+                          Reject
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -153,32 +163,37 @@ export default function AdminWithdrawalsPage() {
           </div>
 
           {/* History Section */}
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 14 }}>
-              Processed Requests ({completed.length})
+          <div className="space-y-4 pt-4">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800">
+              Processed History ({completed.length})
             </h2>
+
             {completed.length === 0 ? (
-              <div className="glass rounded-2xl p-8 text-center" style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-                No past withdrawals recorded.
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-xs">
+                <p className="text-xs font-bold text-slate-400">No past withdrawal requests recorded.</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="space-y-2">
                 {completed.map(w => {
                   const isApp = w.status === 'approved' || w.status === 'paid';
                   return (
-                    <div key={w.id} className="card flex justify-between items-center gap-4"
-                      style={{ background: 'var(--bg-surface)', borderRadius: 12, padding: '12px 16px', border: '1px solid var(--border-subtle)' }}>
+                    <div
+                      key={w.id}
+                      className="bg-white border border-slate-200 p-4 rounded-xl flex items-center justify-between gap-4 shadow-xs"
+                    >
                       <div>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>
-                          {w.amount.toLocaleString()} ⚡ — {w.email}
+                        <p className="text-xs font-black text-slate-900">
+                          {w.amount} Sparks — {w.email}
                         </p>
-                        <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                          Method: {w.method?.toUpperCase()} · Remarks: {w.remarks || 'None'}
+                        <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+                          Remarks: {w.remarks || 'None'}
                         </p>
                       </div>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: isApp ? '#4ade80' : '#f87171', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${
+                        isApp ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'
+                      }`}>
                         {isApp ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                        {w.status.toUpperCase()}
+                        {w.status}
                       </span>
                     </div>
                   );

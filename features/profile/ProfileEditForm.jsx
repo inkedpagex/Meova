@@ -175,7 +175,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   };
 
   // Premium UI Classes
-  const inputClass = "w-full rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold text-zinc-900 bg-white border border-zinc-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] transition-all placeholder:text-zinc-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 hover:border-zinc-300";
+  const inputClass = "w-full rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold text-zinc-900 bg-white border border-zinc-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] transition-all placeholder:text-zinc-400 focus:outline-none focus:border-[#9e4685] focus:ring-4 focus:ring-[#9e4685]/10 hover:border-zinc-300";
   const labelClass = "block text-[10px] font-black text-zinc-800 uppercase tracking-widest mb-2 flex items-center gap-1.5 ml-1";
   const iconWrapperClass = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none";
 
@@ -203,7 +203,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         <div>
           <label className={labelClass}>Full Name</label>
           <div className="relative group">
-            <span className={iconWrapperClass}><User size={16} className="text-zinc-400 group-focus-within:text-indigo-500 transition-colors" /></span>
+            <span className={iconWrapperClass}><User size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
             <input 
               type="text" 
               value={fullName} 
@@ -219,7 +219,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         <div>
           <label className={labelClass}>Branch / Course</label>
           <div className="relative group">
-            <span className={iconWrapperClass}><BookOpen size={16} className="text-zinc-400 group-focus-within:text-indigo-500 transition-colors" /></span>
+            <span className={iconWrapperClass}><BookOpen size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
             <input 
               type="text" 
               value={branch} 
@@ -237,7 +237,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         <div>
           <label className={labelClass}>Year of Study</label>
           <div className="relative group" ref={yearDropdownRef}>
-            <span className={iconWrapperClass}><GraduationCap size={16} className="text-zinc-400 group-focus-within:text-indigo-500 transition-colors" /></span>
+            <span className={iconWrapperClass}><GraduationCap size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
             <button 
               type="button"
               onClick={() => setShowYearDropdown(!showYearDropdown)}
@@ -255,7 +255,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                     type="button"
                     onClick={() => { setYear(y); setShowYearDropdown(false); }}
                     className={`w-full text-left px-4 py-3 text-sm font-bold transition-all rounded-xl cursor-pointer ${
-                      year === y ? 'bg-indigo-50 text-indigo-700' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                      year === y ? 'bg-[#fcf6fa] text-[#74295d]' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                     }`}
                   >
                     {y} Year
@@ -270,7 +270,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         <div>
           <label className={labelClass}>Short Bio <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
           <div className="relative group">
-            <span className={`${iconWrapperClass} top-4`}><PenLine size={16} className="text-zinc-400 group-focus-within:text-indigo-500 transition-colors" /></span>
+            <span className={`${iconWrapperClass} top-4`}><PenLine size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
             <textarea 
               value={bio} 
               onChange={(e) => setBio(e.target.value)} 
@@ -287,7 +287,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         <div>
           <label className={labelClass}>Instagram Username / Link <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
           <div className="relative group">
-            <span className={iconWrapperClass}><Camera size={16} className="text-zinc-400 group-focus-within:text-indigo-500 transition-colors" /></span>
+            <span className={iconWrapperClass}><Camera size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
             <input 
               type="text" 
               value={instagram} 
@@ -323,7 +323,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                   <button 
                     type="button" 
                     onClick={() => fileInputRef.current?.click()}
-                    className="text-[10px] font-black uppercase tracking-wider text-indigo-600 hover:text-indigo-500 transition-colors cursor-pointer"
+                    className="text-[10px] font-black uppercase tracking-wider text-[#8C3573] hover:text-[#9e4685] transition-colors cursor-pointer"
                   >
                     Change
                   </button>
@@ -340,7 +340,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
               <button 
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 h-full text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50/50 rounded-xl transition-all cursor-pointer active:scale-95"
+                className="w-full flex items-center justify-center gap-2 h-full text-xs font-bold text-[#8C3573] hover:text-[#74295d] hover:bg-[#fcf6fa]/50 rounded-xl transition-all cursor-pointer active:scale-95"
               >
                 <Camera size={14} />
                 <span>Upload Photo</span>
@@ -357,12 +357,12 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       <div className="pt-2">
         <div className="flex justify-between items-end mb-3">
           <div>
-            <label className={labelClass}><Tag size={12} className="text-indigo-500" /> Top 3 Interests</label>
+            <label className={labelClass}><Tag size={12} className="text-[#9e4685]" /> Top 3 Interests</label>
             <p className="text-[11px] font-semibold text-zinc-500 ml-1">Select exactly 3 tags that describe your campus vibe.</p>
           </div>
           <span className={`text-[10px] font-black px-3 py-1.5 rounded-full transition-all ${
             selectedInterests.length === 3
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+              ? 'bg-[#8C3573] text-white shadow-md shadow-[#9e4685]/20'
               : 'bg-zinc-100 text-zinc-500'
           }`}>
             {selectedInterests.length}/3
@@ -379,7 +379,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 onClick={() => handleInterestToggle(tag)}
                 className={`text-[11px] uppercase tracking-widest py-2 px-4 rounded-full transition-all duration-300 font-black active:scale-95 border cursor-pointer ${
                   sel 
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-[0_4px_12px_rgba(79,70,229,0.25)] -translate-y-0.5'
+                    ? 'bg-[#8C3573] text-white border-[#8C3573] shadow-[0_4px_12px_rgba(140,53,115,0.25)] -translate-y-0.5'
                     : 'bg-zinc-50 border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 hover:border-zinc-300'
                 }`}
               >

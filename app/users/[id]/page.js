@@ -23,7 +23,7 @@ function avatarUrl(userOrSeed) {
 
 const INTEREST_META = {
   'Coding & Tech':        { Icon: Code,        color: '#3b82f6', label: 'Dev' },
-  'Music & Bands':        { Icon: Music,        color: '#a855f7', label: 'Music' },
+  'Music & Bands':        { Icon: Music,        color: '#b5609d', label: 'Music' },
   'Sports & Fitness':     { Icon: Dumbbell,     color: '#22c55e', label: 'Sports' },
   'Photography & Film':   { Icon: Camera,       color: '#06b6d4', label: 'Photo' },
   'Entrepreneurship':     { Icon: Rocket,       color: '#f97316', label: 'Startup' },
@@ -117,7 +117,7 @@ export default async function UserProfilePage({ params }) {
         <div className="flex items-center justify-between gap-6 mb-4">
           {/* Left: Instagram Avatar with Gradient Ring */}
           <div className="relative flex-shrink-0">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full p-[3px]" style={{ background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 50%, #4f46e5 100%)' }}>
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full p-[3px]" style={{ background: 'linear-gradient(135deg, #b5609d 0%, #8C3573 50%, #8C3573 100%)' }}>
               <div className="w-full h-full rounded-full overflow-hidden border-2 border-white bg-zinc-100">
                 <img
                   src={avatarUrl(profile)}
@@ -147,8 +147,8 @@ export default async function UserProfilePage({ params }) {
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Rating</span>
             </div>
             <div>
-              <span className="block text-base sm:text-lg font-black text-purple-600 leading-tight flex items-center justify-center gap-0.5">
-                50 <Zap className="w-3.5 h-3.5 fill-current text-purple-600 inline" />
+              <span className="block text-base sm:text-lg font-black text-[#8C3573] leading-tight flex items-center justify-center gap-0.5">
+                50 <Zap className="w-3.5 h-3.5 fill-current text-[#8C3573] inline" />
               </span>
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Rate</span>
             </div>
@@ -161,13 +161,13 @@ export default async function UserProfilePage({ params }) {
             <h1 className="text-sm sm:text-base font-black text-zinc-900">
               {profile.full_name || 'Student'}
             </h1>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-50 text-purple-700 border border-purple-200 shadow-2xs">
-              <CheckCircle className="w-3 h-3 text-purple-600 fill-purple-100" />
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#fcf6fa] text-[#74295d] border border-[#eac5e0] shadow-2xs">
+              <CheckCircle className="w-3 h-3 text-[#8C3573] fill-[#f5ebf4]" />
               <span>{reviews.length || 1} Meets Completed</span>
             </span>
           </div>
 
-          <p className="text-xs font-bold text-purple-700 flex items-center gap-1">
+          <p className="text-xs font-bold text-[#74295d] flex items-center gap-1">
             <GraduationCap className="w-3.5 h-3.5" />
             {profile.year || '1st'} Year · {profile.branch || 'General'}
           </p>
@@ -212,7 +212,7 @@ export default async function UserProfilePage({ params }) {
               href={`/messages?uid=${id}`}
               className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-black text-zinc-800 bg-zinc-100 hover:bg-zinc-200 transition-all active:scale-95 shadow-sm whitespace-nowrap"
             >
-              <MessageCircle className="w-4 h-4 text-purple-600 flex-shrink-0" />
+              <MessageCircle className="w-4 h-4 text-[#8C3573] flex-shrink-0" />
               Message
             </Link>
           </div>

@@ -225,12 +225,12 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)] mt-2">
               <span className="flex items-center gap-1">
-                <MapPin size={12} className="text-[#6366f1]" />
+                <MapPin size={12} className="text-[#b5609d]" />
                 <span className="text-[var(--text-primary)]">{exp.location}</span>
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Clock size={12} className="text-[#6366f1]" />
+                <Clock size={12} className="text-[#b5609d]" />
                 <span>{exp.duration} Mins duration</span>
               </span>
             </div>
@@ -279,7 +279,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
               <h4 className="text-sm font-black text-[var(--text-primary)] truncate">{host?.full_name}</h4>
               <div className="flex flex-wrap gap-1">
                 {host?.badges?.map((badge) => (
-                  <span key={badge} className="text-[7.5px] font-black uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 text-[#818cf8] px-1.5 py-0.5 rounded">
+                  <span key={badge} className="text-[7.5px] font-black uppercase tracking-wider bg-[#9e4685]/10 border border-[#9e4685]/20 text-[#818cf8] px-1.5 py-0.5 rounded">
                     {badge}
                   </span>
                 ))}
@@ -516,7 +516,7 @@ export default function ExperienceDetailClient({ experienceId, currentUser, init
                       type="checkbox"
                       checked={agreedSafety}
                       onChange={(e) => setAgreedSafety(e.target.checked)}
-                      className="w-4.5 h-4.5 rounded border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[#6366f1] focus:ring-0 mt-0.5 cursor-pointer"
+                      className="w-4.5 h-4.5 rounded border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[#b5609d] focus:ring-0 mt-0.5 cursor-pointer"
                     />
                     <div className="text-[9.5px] font-bold uppercase tracking-wide leading-relaxed text-amber-500">
                       I agree to meet only in public university locations (e.g. {exp.location}). No private meetups.

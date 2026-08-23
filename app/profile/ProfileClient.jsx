@@ -25,7 +25,7 @@ function EmptyState({ icon: Icon, title, subtitle, action, onAction }) {
     <div className="rounded-2xl p-6 flex flex-col items-center text-center gap-3"
       style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-mid)' }}>
       <div className="w-10 h-10 rounded-full flex items-center justify-center"
-        style={{ background: '#f3f0ff', color: '#7c3aed' }}>
+        style={{ background: '#f3f0ff', color: '#8C3573' }}>
         <Icon size={18} strokeWidth={2} />
       </div>
       <div>
@@ -35,7 +35,7 @@ function EmptyState({ icon: Icon, title, subtitle, action, onAction }) {
       {action && (
         <button onClick={onAction}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95"
-          style={{ background: '#7c3aed', color: '#fff' }}>
+          style={{ background: '#8C3573', color: '#fff' }}>
           {action} <ChevronRight size={12} />
         </button>
       )}
@@ -193,7 +193,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
             <button
               onClick={() => router.push('/admin')}
               className="w-full rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all active:scale-95 shadow-md"
-              style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)', color: '#ffffff' }}
+              style={{ background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 100%)', color: '#ffffff' }}
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm">
@@ -201,10 +201,10 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-black tracking-wide">Admin Dashboard</p>
-                  <p className="text-[10px] text-purple-100 font-medium">Manage users, payments & host approvals</p>
+                  <p className="text-[10px] text-[#f5ebf4] font-medium">Manage users, payments & host approvals</p>
                 </div>
               </div>
-              <ChevronRight size={18} className="text-purple-200" />
+              <ChevronRight size={18} className="text-[#eac5e0]" />
             </button>
           )}
 
@@ -226,7 +226,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
             {/* Username badge */}
             {profile?.username && (
               <span className="inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold"
-                style={{ background: '#f3f0ff', color: '#7c3aed' }}>
+                style={{ background: '#f3f0ff', color: '#8C3573' }}>
                 @{profile.username}
               </span>
             )}
@@ -313,7 +313,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
           <div className="rounded-2xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Interests</span>
-              <button onClick={() => setIsEditing(true)} className="text-[10px] font-bold text-[#7c3aed] cursor-pointer">Edit</button>
+              <button onClick={() => setIsEditing(true)} className="text-[10px] font-bold text-[#8C3573] cursor-pointer">Edit</button>
             </div>
             {hasInterests ? (
               <div className="flex flex-wrap gap-2">
@@ -327,7 +327,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
             ) : (
               <button onClick={() => setIsEditing(true)}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95"
-                style={{ background: '#f3f0ff', color: '#7c3aed', border: '1px dashed #c4b5fd' }}>
+                style={{ background: '#f3f0ff', color: '#8C3573', border: '1px dashed #c4b5fd' }}>
                 <Tag size={13} /> Add your interests
               </button>
             )}
@@ -335,7 +335,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
 
           {/* ── Sparks Wallet Card ─────────────────────── */}
           <button onClick={() => router.push('/wallet')}
-            className="w-full bg-gradient-to-tr from-[#7c3aed] to-[#4f46e5] text-white p-5 rounded-3xl flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all shadow-lg">
+            className="w-full bg-gradient-to-tr from-[#8C3573] to-[#8C3573] text-white p-5 rounded-3xl flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all shadow-lg">
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-3xl font-black">{sparksBalance.toLocaleString()}</span>
@@ -352,7 +352,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Your Communities</span>
-              <button onClick={() => router.push('/circles')} className="text-[10px] font-bold text-[#7c3aed] cursor-pointer">
+              <button onClick={() => router.push('/circles')} className="text-[10px] font-bold text-[#8C3573] cursor-pointer">
                 Browse
               </button>
             </div>
@@ -369,7 +369,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Upcoming</span>
-              <button onClick={() => router.push('/experiences')} className="text-[10px] font-bold text-[#7c3aed] cursor-pointer">
+              <button onClick={() => router.push('/experiences')} className="text-[10px] font-bold text-[#8C3573] cursor-pointer">
                 Browse
               </button>
             </div>
@@ -420,7 +420,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
                   {/* Location */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                      <div className="w-8 h-8 rounded-full bg-[#fcf6fa] border border-[#f5ebf4] flex items-center justify-center text-[#8C3573]">
                         <MapPin size={14} />
                       </div>
                       <div>
@@ -433,7 +433,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
                     ) : locStatus === 'denied' ? (
                       <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
-                      <button onClick={requestLocation} className="text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                      <button onClick={requestLocation} className="text-[10px] font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
                     )}
                   </div>
 
@@ -453,7 +453,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
                     ) : notifStatus === 'denied' ? (
                       <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
-                      <button onClick={requestNotifications} className="text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                      <button onClick={requestNotifications} className="text-[10px] font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
                     )}
                   </div>
 
@@ -473,7 +473,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
                     ) : camStatus === 'denied' ? (
                       <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
-                      <button onClick={requestCamera} className="text-[10px] font-black text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                      <button onClick={requestCamera} className="text-[10px] font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
                     )}
                   </div>
                 </div>
@@ -485,9 +485,9 @@ export default function ProfileClient({ initialProfile, initialSparks = 0 }) {
                   <span className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>Admin</span>
                   <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                     <button onClick={() => { router.push('/admin'); setShowSettingsModal(false); }}
-                      className="w-full text-left p-4 text-xs font-black transition-colors cursor-pointer flex items-center justify-between text-[#7c3aed]">
+                      className="w-full text-left p-4 text-xs font-black transition-colors cursor-pointer flex items-center justify-between text-[#8C3573]">
                       <div className="flex items-center gap-3"><ShieldCheck size={16} /> Admin Dashboard</div>
-                      <ChevronRight size={14} className="text-[#7c3aed]" />
+                      <ChevronRight size={14} className="text-[#8C3573]" />
                     </button>
                   </div>
                 </div>

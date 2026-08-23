@@ -7,13 +7,13 @@ export const metadata = { title: 'Events — meetifyy' };
 
 // Category → premium gradient + icon
 const CATEGORY_THEMES = {
-  tech:        { from: '#4f46e5', to: '#7c3aed', icon: Code,    label: 'Tech' },
+  tech:        { from: '#8C3573', to: '#8C3573', icon: Code,    label: 'Tech' },
   music:       { from: '#db2777', to: '#ec4899', icon: Music,   label: 'Music' },
-  gaming:      { from: '#0ea5e9', to: '#6366f1', icon: Trophy,  label: 'Gaming' },
+  gaming:      { from: '#0ea5e9', to: '#b5609d', icon: Trophy,  label: 'Gaming' },
   study:       { from: '#10b981', to: '#059669', icon: BookOpen, label: 'Study' },
   art:         { from: '#f97316', to: '#ef4444', icon: Palette, label: 'Art' },
-  talk:        { from: '#8b5cf6', to: '#a855f7', icon: Mic,     label: 'Talk' },
-  default:     { from: '#7c3aed', to: '#6366f1', icon: Zap,     label: 'Event' },
+  talk:        { from: '#8b5cf6', to: '#b5609d', icon: Mic,     label: 'Talk' },
+  default:     { from: '#8C3573', to: '#b5609d', icon: Zap,     label: 'Event' },
 };
 
 function getTheme(event) {
@@ -90,7 +90,7 @@ function EventCard({ event, userId }) {
           {weekday}
         </span>
 
-        <h3 className="text-[15px] font-black text-zinc-950 leading-snug mb-3 group-hover:text-indigo-700 transition-colors line-clamp-2">
+        <h3 className="text-[15px] font-black text-zinc-950 leading-snug mb-3 group-hover:text-[#74295d] transition-colors line-clamp-2">
           {event.title}
         </h3>
 
@@ -171,8 +171,8 @@ export default async function EventsPage() {
       {/* ── Grid ── */}
       {events.length === 0 ? (
         <div className="rounded-[2rem] bg-white border border-zinc-100 p-16 text-center shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-5">
-            <Calendar size={28} className="text-indigo-500" />
+          <div className="w-16 h-16 rounded-2xl bg-[#fcf6fa] flex items-center justify-center mx-auto mb-5">
+            <Calendar size={28} className="text-[#9e4685]" />
           </div>
           <p className="text-zinc-900 font-black text-[16px]">No upcoming events</p>
           <p className="text-zinc-400 text-[13px] font-medium mt-2">Check back later or host your own.</p>

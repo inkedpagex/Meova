@@ -29,7 +29,7 @@ function ApplicantCard({ app, gigId, onUpdate }) {
     PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
     ACCEPTED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     REJECTED: 'bg-red-50 text-red-500 border-red-200',
-    COMPLETED: 'bg-purple-50 text-purple-700 border-purple-200',
+    COMPLETED: 'bg-[#fcf6fa] text-[#74295d] border-[#eac5e0]',
   };
 
   return (
@@ -37,8 +37,8 @@ function ApplicantCard({ app, gigId, onUpdate }) {
       {app.applicantPhoto ? (
         <img src={app.applicantPhoto} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-zinc-200" />
       ) : (
-        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-          <User size={18} className="text-purple-500" />
+        <div className="w-10 h-10 rounded-full bg-[#f5ebf4] flex items-center justify-center flex-shrink-0">
+          <User size={18} className="text-[#9e4685]" />
         </div>
       )}
       <div className="flex-1 min-w-0">
@@ -72,9 +72,9 @@ function ApplicantCard({ app, gigId, onUpdate }) {
           </div>
         )}
         {app.status === 'ACCEPTED' && app.meetingCode && (
-          <div className="mt-3 p-3 rounded-xl bg-purple-50 border border-purple-100">
-            <p className="text-[10px] font-black uppercase text-purple-500 mb-1">Share this code with freelancer to complete</p>
-            <p className="text-2xl font-black tracking-[6px] text-purple-800">{app.meetingCode}</p>
+          <div className="mt-3 p-3 rounded-xl bg-[#fcf6fa] border border-[#f5ebf4]">
+            <p className="text-[10px] font-black uppercase text-[#9e4685] mb-1">Share this code with freelancer to complete</p>
+            <p className="text-2xl font-black tracking-[6px] text-[#60234d]">{app.meetingCode}</p>
           </div>
         )}
       </div>
@@ -119,7 +119,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-purple-100 max-h-[85vh] flex flex-col"
+        className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-[#f5ebf4] max-h-[85vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -154,7 +154,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
               {!completing ? (
                 <button
                   onClick={() => setCompleting(true)}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-black hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#8C3573] to-[#8C3573] text-white text-xs font-black hover:opacity-90 active:scale-95 transition-all cursor-pointer"
                 >
                   Mark as Completed & Release Sparks ⚡
                 </button>
@@ -166,7 +166,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
                     value={code}
                     onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
-                    className="w-full p-3 rounded-xl border border-zinc-200 text-center text-2xl font-black tracking-[8px] focus:outline-none focus:border-purple-500"
+                    className="w-full p-3 rounded-xl border border-zinc-200 text-center text-2xl font-black tracking-[8px] focus:outline-none focus:border-[#9e4685]"
                   />
                   <div className="flex gap-2">
                     <button type="button" onClick={() => setCompleting(false)} className="flex-1 py-3 rounded-2xl bg-zinc-100 text-zinc-600 text-xs font-black cursor-pointer">Cancel</button>

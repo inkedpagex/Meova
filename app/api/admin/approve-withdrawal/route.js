@@ -38,7 +38,26 @@ export async function POST(request) {
   const now = new Date().toISOString();
 
   if (action === 'reject') {
-    await wdRef.update({ status: 'rejected', admin_id: admin.uid, remarks, reviewed_at: now });
+    const walletRef = adminDb.collection('wallets').doc(wd.userId);
+    try {
+      await adminDb.runTransaction(async (tx) => {
+        const freshWd = await tx.get(wdRef);
+        if (!freshWd.exists || freshWd.data().status !== 'pending') {
+          throw new Error(`Already ${freshWd.data()?.status || 'processed'}`);
+        }
+        // Refund escrowed sparks back to creator wallet
+        tx.update(walletRef, {
+          creator: FieldValue.increment(wd.amount),
+          updated_at: now,
+        });
+        tx.update(wdRef, { status: 'rejected', admin_id: admin.uid, remarks, reviewed_at: now });
+      });
+    } catch (err) {
+      if (err.message?.startsWith('Already ')) {
+        return NextResponse.json({ error: err.message }, { status: 409 });
+      }
+      return NextResponse.json({ error: err.message }, { status: 500 });
+    }
     logger.audit('WITHDRAWAL_REJECTED', admin.uid, { withdrawalId, targetUid: wd.userId });
     return NextResponse.json({ ok: true });
   }
@@ -56,12 +75,9 @@ export async function POST(request) {
 
         const walletSnap = await tx.get(walletRef);
         if (!walletSnap.exists) throw new Error('Wallet not found');
-        const w = walletSnap.data();
-        if ((w.creator || 0) < wd.amount) throw new Error('Insufficient Creator Sparks');
 
-        // Decrement creator sparks using FieldValue.increment
+        // Sparks were already deducted during the request (Escrow)
         tx.update(walletRef, {
-          creator: FieldValue.increment(-wd.amount),
           lifetime_withdrawn: FieldValue.increment(wd.amount),
           updated_at: now,
         });

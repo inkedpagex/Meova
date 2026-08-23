@@ -16,12 +16,12 @@ function MeetifyLogo({ size = 28 }) {
         width: size,
         height: size,
         borderRadius: Math.round(size * 0.28),
-        background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+        background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
-        boxShadow: '0 2px 8px rgba(124,58,237,0.3)',
+        boxShadow: '0 2px 8px rgba(140,53,115,0.3)',
       }}
     >
       <svg width={size * 0.6} height={size * 0.6} viewBox="0 0 24 24" fill="none">
@@ -94,7 +94,7 @@ export default function AdminShell({ admin, children }) {
                   href={href}
                   className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-bold transition-all ${
                     active
-                      ? 'bg-purple-50 text-[#7c3aed]'
+                      ? 'bg-[#fcf6fa] text-[#8C3573]'
                       : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
@@ -140,7 +140,7 @@ export default function AdminShell({ admin, children }) {
         <div className="flex items-center gap-2">
           <Link href="/notifications" className="relative p-2 rounded-full border border-slate-200 bg-slate-50">
             <Bell size={16} className="text-slate-600" />
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#7c3aed] text-white text-[9px] font-black flex items-center justify-center">
+            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#8C3573] text-white text-[9px] font-black flex items-center justify-center">
               3
             </span>
           </Link>
@@ -162,7 +162,7 @@ export default function AdminShell({ admin, children }) {
                 key={label}
                 href={href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-[#7c3aed]"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-[#fcf6fa] hover:text-[#8C3573]"
               >
                 <Icon size={16} />
                 <span>{label}</span>
@@ -187,7 +187,7 @@ export default function AdminShell({ admin, children }) {
           <div className="flex items-center gap-3">
             <Link href="/notifications" className="relative p-2.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-all">
               <Bell size={16} className="text-slate-600" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#7c3aed] text-white text-[9px] font-black flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#8C3573] text-white text-[9px] font-black flex items-center justify-center">
                 3
               </span>
             </Link>
@@ -216,7 +216,7 @@ export default function AdminShell({ admin, children }) {
               key={label}
               href={href}
               className={`flex-1 flex flex-col items-center justify-center h-full transition-all ${
-                active ? 'text-[#7c3aed]' : 'text-slate-400'
+                active ? 'text-[#8C3573]' : 'text-slate-400'
               }`}
             >
               <Icon size={18} strokeWidth={active ? 2.5 : 1.8} />

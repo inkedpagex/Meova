@@ -20,7 +20,7 @@ function typeLabel(type) {
 
 function NotifIcon({ type }) {
   const base = "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border";
-  if (type === 'booking') return <div className={`${base} bg-purple-500/10 text-purple-500 border-purple-500/20`}><BookOpen size={16} /></div>;
+  if (type === 'booking') return <div className={`${base} bg-[#9e4685]/10 text-[#9e4685] border-[#9e4685]/20`}><BookOpen size={16} /></div>;
   if (type === 'sparks')  return <div className={`${base} bg-orange-500/10 text-orange-500 border-orange-500/20`}><Zap size={16} className="fill-current" /></div>;
   if (type === 'message') return <div className={`${base} bg-blue-500/10 text-blue-500 border-blue-500/20`}><MessageSquare size={16} /></div>;
   return <div className={`${base} bg-zinc-100 border-zinc-200`}><Bell size={16} className="text-zinc-400" /></div>;
@@ -68,7 +68,7 @@ export default function NotificationsPage() {
   const read = filtered.filter(n => n.read);
 
   const NotifRow = ({ n }) => (
-    <div className={`p-4 rounded-2xl flex items-center gap-3 transition-all ${!n.read ? 'ring-1 ring-purple-100' : ''}`}
+    <div className={`p-4 rounded-2xl flex items-center gap-3 transition-all ${!n.read ? 'ring-1 ring-[#f5ebf4]' : ''}`}
       style={{ background: n.read ? 'var(--bg-elevated)' : '#faf5ff', border: n.read ? '1px solid var(--border-subtle)' : '1px solid #e9d5ff' }}>
       <NotifIcon type={n.type} />
       <div className="min-w-0 flex-1">
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
         <p className="text-[11px] mt-0.5 leading-snug" style={{ color: 'var(--text-secondary)' }}>{n.body}</p>
         <span className="text-[10px] mt-1 block" style={{ color: 'var(--text-muted)' }}>{timeAgo(n.created_at)}</span>
       </div>
-      {!n.read && <span className="w-2 h-2 rounded-full bg-[#7c3aed] flex-shrink-0" />}
+      {!n.read && <span className="w-2 h-2 rounded-full bg-[#8C3573] flex-shrink-0" />}
     </div>
   );
 
@@ -126,7 +126,7 @@ export default function NotificationsPage() {
           <button key={f} onClick={() => setFilter(f)}
             className="flex-shrink-0 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95"
             style={filter === f
-              ? { background: '#7c3aed', color: 'white', border: '1px solid transparent' }
+              ? { background: '#8C3573', color: 'white', border: '1px solid transparent' }
               : { background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
             {f}
           </button>

@@ -44,7 +44,7 @@ function formatTime(ts) {
 }
 
 function avatarUrl(uid, name, photo) {
-  if (photo) return photo;
+  if (photo) return getUserAvatarUrl({ photo_url: photo });
   return getCartoonAvatar(name || uid || 'user');
 }
 
@@ -52,7 +52,9 @@ function avatarUrl(uid, name, photo) {
 
 function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
   const otherId = chat.participants?.find(p => p !== currentUid) || '';
-  const otherName = directoryUser?.full_name || chat.participantNames?.[otherId] || 'Campus Student';
+  const otherName = chat.isGroup
+    ? (chat.name || chat.participantNames?.group || 'Group Chat')
+    : (directoryUser?.full_name || chat.participantNames?.[otherId] || 'Campus Student');
   const otherPhoto = directoryUser?.photo_url || chat.participantPhotos?.[otherId] || '';
   const unread = chat.unreadCount?.[currentUid] || 0;
   const isMe = chat.lastSenderId === currentUid;
@@ -61,39 +63,43 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
     <button
       type="button"
       onClick={onClick}
-      className={`w-full flex items-center gap-3.5 px-4 py-3.5 text-left transition-all cursor-pointer ${
+      className={`w-full flex items-center gap-3 px-3 py-3 text-left transition-all cursor-pointer rounded-2xl ${
         isActive 
-          ? 'bg-purple-50/80 font-medium' 
-          : 'hover:bg-zinc-50'
+          ? 'bg-[#fcf6fa]/90 font-medium border border-[#f5ebf4] shadow-2xs' 
+          : 'hover:bg-zinc-50 border border-transparent'
       }`}
     >
       <div className="relative flex-shrink-0">
-        <div className={`w-14 h-14 rounded-full p-[2px] ${unread > 0 ? 'bg-gradient-to-tr from-purple-600 via-pink-500 to-amber-400' : 'bg-transparent'}`}>
+        <div className={`w-12 h-12 rounded-full p-[2px] ${unread > 0 ? 'bg-gradient-to-tr from-[#8C3573] via-pink-500 to-amber-400' : 'bg-transparent'}`}>
           <img
             src={avatarUrl(otherId, otherName, otherPhoto)}
-            alt={otherName}
+            alt=""
             className="w-full h-full rounded-full object-cover border border-zinc-200 bg-zinc-100"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
+            }}
           />
         </div>
-        <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white" />
+        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <span className={`text-sm sm:text-base truncate ${unread > 0 ? 'font-black text-zinc-900' : 'font-extrabold text-zinc-800'}`}>
+        <div className="flex items-center justify-between mb-0.5">
+          <span className={`text-xs sm:text-sm truncate ${unread > 0 ? 'font-black text-zinc-900' : 'font-extrabold text-zinc-800'}`}>
             {otherName}
           </span>
-          <span className="text-xs text-zinc-400 font-bold flex-shrink-0 ml-2">
+          <span className="text-[10px] text-zinc-400 font-bold flex-shrink-0 ml-2">
             {timeAgo(chat.lastMessageAt)}
           </span>
         </div>
         <div className="flex items-center justify-between gap-1">
-          <p className={`text-xs sm:text-sm truncate ${unread > 0 ? 'text-zinc-900 font-black' : 'text-zinc-500 font-medium'}`}>
+          <p className={`text-xs truncate ${unread > 0 ? 'text-zinc-900 font-black' : 'text-zinc-500 font-medium'}`}>
             {isMe && <span className="text-zinc-400 font-semibold">You: </span>}
             {chat.lastMessage || 'Sent a message'}
           </p>
           {unread > 0 && (
-            <span className="w-3 h-3 rounded-full bg-purple-600 flex-shrink-0 shadow-xs" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8C3573] flex-shrink-0 shadow-xs" />
           )}
         </div>
       </div>
@@ -113,12 +119,16 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
         <div className="w-12 h-12 rounded-full overflow-hidden border border-zinc-200 flex-shrink-0 bg-zinc-100 shadow-xs">
           <img 
             src={avatarUrl(student.id, student.full_name, student.photo_url)} 
-            alt={student.full_name} 
+            alt="" 
             className="w-full h-full object-cover" 
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = getCartoonAvatar(student.full_name || student.id || 'user');
+            }}
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs sm:text-sm font-black text-zinc-900 truncate group-hover:text-purple-600 transition-colors">
+          <p className="text-xs sm:text-sm font-black text-zinc-900 truncate group-hover:text-[#8C3573] transition-colors">
             {student.full_name || 'Student'}
           </p>
           <p className="text-xs font-semibold text-zinc-400 truncate mt-0.5">
@@ -128,7 +138,7 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
       </div>
       <button 
         type="button"
-        className="px-4 py-1.5 rounded-xl bg-purple-600 text-white text-xs font-black hover:bg-purple-700 active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs"
+        className="px-4 py-1.5 rounded-xl bg-[#8C3573] text-white text-xs font-black hover:bg-[#74295d] active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs"
       >
         Chat
       </button>
@@ -145,7 +155,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
     return (
       <div className="flex justify-center my-4">
         <div className="flex items-center gap-2 bg-zinc-100 text-zinc-700 rounded-full px-4 py-1.5">
-          <Zap className="w-3.5 h-3.5 text-purple-600 fill-current" />
+          <Zap className="w-3.5 h-3.5 text-[#8C3573] fill-current" />
           <span className="text-[11px] font-bold">{msg.text}</span>
         </div>
       </div>
@@ -176,7 +186,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
         <div
           className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
             isMe
-              ? 'bg-purple-600 text-white rounded-br-xs font-medium'
+              ? 'bg-[#8C3573] text-white rounded-br-xs font-medium'
               : 'bg-zinc-100 text-zinc-900 rounded-bl-xs font-medium'
           }`}
         >
@@ -184,7 +194,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
         </div>
         <div className={`flex items-center gap-1 mt-1 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
           <span className="text-[9px] text-zinc-400 font-semibold">{formatTime(msg.timestamp)}</span>
-          {isMe && <CheckCheck className="w-3 h-3 text-purple-600 opacity-80" />}
+          {isMe && <CheckCheck className="w-3 h-3 text-[#8C3573] opacity-80" />}
         </div>
       </div>
     </motion.div>
@@ -196,7 +206,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
 function MessagesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const openUserId = searchParams.get('uid');
+  const targetParam = searchParams.get('uid') || searchParams.get('user') || searchParams.get('group');
 
   const { user: globalUser } = useUserContext();
   const currentUid = globalUser?.id || globalUser?.uid || null;
@@ -236,19 +246,14 @@ function MessagesContent() {
   const chatContainerRef = useRef(null);
 
   // ── Fix: keyboard hides messages on mobile ──────────────────────────────────
-  // When the virtual keyboard opens, visualViewport shrinks. We set the chat
-  // container height explicitly so messages aren't hidden behind the keyboard.
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
     const onResize = () => {
       if (chatContainerRef.current) {
-        // If the chat container has a top offset (like 58px on mobile), we MUST subtract it from vv.height
-        // otherwise the container will extend beyond the visible viewport and hide the input box!
         const topOffset = parseInt(chatContainerRef.current.style.top || '0', 10);
         chatContainerRef.current.style.height = `${vv.height - topOffset}px`;
       }
-      // Scroll to bottom so latest messages stay visible above keyboard
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 80);
     };
     vv.addEventListener('resize', onResize);
@@ -256,19 +261,15 @@ function MessagesContent() {
   }, []);
 
   // ── Wait for Firebase Client Auth ──────────────────────────────────────────
-  // Firestore rules require request.auth.uid. We MUST wait for Firebase Auth to initialize on the client
-  // before sending queries, otherwise we get "Missing or insufficient permissions".
   useEffect(() => {
     let timeoutId;
     const unsub = onAuthStateChanged(auth, (fbUser) => {
       clearTimeout(timeoutId);
       if (fbUser) {
         setFirebaseUid(fbUser.uid);
-        setLoadingChats(true); // trigger chat subscription
+        setLoadingChats(true);
       } else {
         setFirebaseUid(null);
-        // Give Firebase Auth up to 8s to restore from IndexedDB before giving up.
-        // On slower devices this can take 4-6 seconds.
         timeoutId = setTimeout(() => {
           setLoadingChats(false);
         }, 8000);
@@ -282,7 +283,6 @@ function MessagesContent() {
 
   // ── Subscribe to chat list ──────────────────────────────────────────────────
   useEffect(() => {
-    // We strictly wait for firebaseUid so Firestore doesn't reject us!
     if (!firebaseUid || !db) return;
 
     const q2 = query(
@@ -323,24 +323,21 @@ function MessagesContent() {
     setActiveChat(chat);
     setShowList(false);
     
-    // Clear old messages and unsubscribe immediately
     if (unsubMsgsRef.current) {
       unsubMsgsRef.current();
       unsubMsgsRef.current = null;
     }
 
-    // Load from API first
     fetch(`/api/chats/${chat.id}/messages`)
       .then(res => res.json())
       .then(data => {
-        if (data.messages && !unsubMsgsRef.current) { // Only set if real-time hasn't taken over
+        if (data.messages && !unsubMsgsRef.current) {
           setMessages(data.messages);
           setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 50);
         }
       })
       .catch(console.error);
 
-    // Upgrade to real-time if firebase auth is ready
     if (firebaseUid && db) {
       const msgsQ = query(
         collection(db, 'chats', chat.id, 'messages'),
@@ -353,7 +350,6 @@ function MessagesContent() {
         setMessages(msgs);
         setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
 
-        // Clear unread count on live message arrival if active
         if (currentUid && db) {
           updateDoc(doc(db, 'chats', chat.id), {
             [`unreadCount.${currentUid}`]: 0,
@@ -362,7 +358,6 @@ function MessagesContent() {
       }, (err) => console.error('Messages subscription error:', err.message));
     }
 
-    // Mark as read via server
     fetch(`/api/chats/${chat.id}`, { method: 'PATCH' }).catch(() => {});
   }, [currentUid, firebaseUid]);
 
@@ -391,10 +386,68 @@ function MessagesContent() {
     }
   }, [currentUid, chats, openChat, router]);
 
+  const processedParamRef = useRef(null);
+
+  // ── Auto-Open Chat based on Query Param (?uid=, ?user=, or ?group=) ──────
   useEffect(() => {
-    if (!openUserId || !currentUid || loadingChats) return;
-    openChatWithUser(openUserId);
-  }, [openUserId, currentUid, loadingChats, openChatWithUser]);
+    if (!targetParam || !currentUid || loadingChats) return;
+    if (processedParamRef.current === targetParam && activeChatId) return;
+
+    // 1. Try finding by chat ID
+    const existingById = chats.find(c => c.id === targetParam);
+    if (existingById) {
+      processedParamRef.current = targetParam;
+      openChat(existingById);
+      return;
+    }
+
+    // 2. Try finding by student ID
+    const studentById = suggestedStudents.find(s => s.id === targetParam);
+    if (studentById) {
+      processedParamRef.current = targetParam;
+      openChatWithUser(studentById.id);
+      return;
+    }
+
+    // 3. Try finding student by name / username
+    const paramLower = targetParam.toLowerCase();
+    const studentByName = suggestedStudents.find(s => 
+      s.full_name?.toLowerCase() === paramLower || 
+      s.username?.toLowerCase() === paramLower
+    );
+    if (studentByName) {
+      processedParamRef.current = targetParam;
+      openChatWithUser(studentByName.id);
+      return;
+    }
+
+    // 4. Try finding by group or chat title in existing chats
+    const chatByName = chats.find(c => {
+      const pNames = Object.values(c.participantNames || {}).map(n => String(n).toLowerCase());
+      return pNames.includes(paramLower) || c.groupName?.toLowerCase() === paramLower || c.id?.toLowerCase() === paramLower;
+    });
+    if (chatByName) {
+      processedParamRef.current = targetParam;
+      openChat(chatByName);
+      return;
+    }
+
+    // 5. Fallback for group chat (e.g., "Google Developer Student Club")
+    const groupChatObj = {
+      id: `group_${encodeURIComponent(targetParam)}`,
+      participantNames: { group: targetParam },
+      participantPhotos: {},
+      participants: [currentUid, 'group'],
+      isGroup: true,
+      name: targetParam,
+      lastMessage: 'Welcome to the group chat!',
+      lastMessageAt: Date.now(),
+    };
+    processedParamRef.current = targetParam;
+    setActiveChatId(groupChatObj.id);
+    setActiveChat(groupChatObj);
+    setShowList(false);
+  }, [targetParam, currentUid, loadingChats, chats, suggestedStudents, openChat, openChatWithUser, activeChatId]);
 
 
   useEffect(() => {
@@ -505,7 +558,7 @@ function MessagesContent() {
         <p className="text-xs text-zinc-500 max-w-xs mb-6">
           Connect with GLA campus students directly.
         </p>
-        <Link href="/" className="px-6 py-2.5 rounded-full bg-purple-600 text-white font-black text-xs hover:bg-purple-700 transition-all">
+        <Link href="/" className="px-6 py-2.5 rounded-full bg-[#8C3573] text-white font-black text-xs hover:bg-[#74295d] transition-all">
           Go Home
         </Link>
       </div>
@@ -572,7 +625,7 @@ function MessagesContent() {
 
 
         {/* List Content */}
-        <div className="flex-1 overflow-y-auto no-scrollbar py-1">
+        <div suppressHydrationWarning className="flex-1 overflow-y-auto no-scrollbar py-2 px-2 space-y-0.5">
           {loadingChats ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
@@ -603,7 +656,7 @@ function MessagesContent() {
                     <span className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">
                       {q ? 'Campus Directory' : 'Suggested for you'}
                     </span>
-                    {!q && <Link href="/discover" className="text-[11px] font-bold text-purple-600 hover:underline">See all</Link>}
+                    {!q && <Link href="/discover" className="text-[11px] font-bold text-[#8C3573] hover:underline">See all</Link>}
                   </div>
                   <div>
                     {filteredSuggested.slice(0, q ? 12 : 6).map(student => (
@@ -625,7 +678,7 @@ function MessagesContent() {
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="text-xs font-bold text-purple-600 hover:underline cursor-pointer"
+                    className="text-xs font-bold text-[#8C3573] hover:underline cursor-pointer"
                   >
                     Clear search
                   </button>
@@ -654,7 +707,7 @@ function MessagesContent() {
             <button
               type="button"
               onClick={() => setShowNewMessageModal(true)}
-              className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs transition-all active:scale-95 cursor-pointer shadow-xs"
+              className="px-5 py-2.5 rounded-xl bg-[#8C3573] hover:bg-[#74295d] text-white font-black text-xs transition-all active:scale-95 cursor-pointer shadow-xs"
             >
               Send Message
             </button>
@@ -662,66 +715,111 @@ function MessagesContent() {
         ) : (
           <>
             {/* Header Bar */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 bg-white flex-shrink-0">
-              <div className="flex items-center gap-3 min-w-0">
-                <button
-                  type="button"
-                  onClick={() => { setShowList(true); setActiveChatId(null); setActiveChat(null); }}
-                  className="md:hidden p-1.5 -ml-1 rounded-full hover:bg-zinc-100 transition-colors text-zinc-900"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
+            {(() => {
+              const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
+              return (
+                <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 bg-white flex-shrink-0">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => { setShowList(true); setActiveChatId(null); setActiveChat(null); }}
+                      className="md:hidden p-1.5 -ml-1 rounded-full hover:bg-zinc-100 transition-colors text-zinc-900"
+                    >
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
 
-                <div className="relative">
-                  <img
-                    src={avatarUrl(otherId, otherName, otherPhoto)}
-                    alt={otherName}
-                    className="w-10 h-10 rounded-full object-cover border border-zinc-200"
-                  />
-                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                    <div className="relative">
+                      <img
+                        src={avatarUrl(otherId, otherName, otherPhoto)}
+                        alt=""
+                        className="w-10 h-10 rounded-full object-cover border border-zinc-200"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
+                        }}
+                      />
+                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-zinc-900 truncate">
+                        {otherName}
+                      </p>
+                      {isGroup ? (
+                        <p className="text-[11px] font-bold text-[#8C3573] flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#9e4685] animate-pulse" />
+                          Verified Campus Channel
+                        </p>
+                      ) : (
+                        <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Active on Campus
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {isGroup ? (
+                    <a
+                      href="https://chat.whatsapp.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-black transition-colors"
+                      title="WhatsApp Channel"
+                    >
+                      Channel
+                    </a>
+                  ) : (
+                    <Link
+                      href={`/users/${otherId}`}
+                      className="p-2.5 rounded-full hover:bg-zinc-100 text-zinc-800 transition-colors"
+                      title="View Profile"
+                    >
+                      <Info className="w-5 h-5" />
+                    </Link>
+                  )}
                 </div>
-
-                <div className="min-w-0">
-                  <p className="text-sm font-black text-zinc-900 truncate">
-                    {otherName}
-                  </p>
-                  <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Active on Campus
-                  </p>
-                </div>
-              </div>
-
-              <Link
-                href={`/users/${otherId}`}
-                className="p-2.5 rounded-full hover:bg-zinc-100 text-zinc-800 transition-colors"
-                title="View Profile"
-              >
-                <Info className="w-5 h-5" />
-              </Link>
-            </div>
+              );
+            })()}
 
             {/* Messages Scroll Area */}
             <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-1 no-scrollbar bg-white">
-              {messages.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                  <div className="w-20 h-20 rounded-full bg-zinc-100 overflow-hidden mb-3 border border-zinc-200">
-                    <img 
-                      src={avatarUrl(otherId, otherName, otherPhoto)} 
-                      alt={otherName} 
-                      className="w-full h-full object-cover" 
-                    />
+              {messages.length === 0 && (() => {
+                const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
+                return (
+                  <div className="flex flex-col items-center justify-center h-full text-center py-10">
+                    <div className="w-20 h-20 rounded-full bg-[#fcf6fa] flex items-center justify-center overflow-hidden mb-3 border border-[#f5ebf4]">
+                      <img 
+                        src={avatarUrl(otherId, otherName, otherPhoto)} 
+                        alt={otherName} 
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                    <h3 className="text-base font-black text-zinc-900">{otherName}</h3>
+                    <p className="text-xs text-zinc-500 mb-4 font-semibold">
+                      {isGroup ? 'Verified Campus Community · Official Channel' : 'GLA Student · Meetify'}
+                    </p>
+
+                    {isGroup ? (
+                      <a 
+                        href="https://chat.whatsapp.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition-all flex items-center gap-2 shadow-xs cursor-pointer active:scale-95"
+                      >
+                        Join Official WhatsApp Channel
+                      </a>
+                    ) : (
+                      <Link 
+                        href={`/users/${otherId}`}
+                        className="px-4 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-xs font-bold transition-colors"
+                      >
+                        View profile
+                      </Link>
+                    )}
                   </div>
-                  <h3 className="text-base font-black text-zinc-900">{otherName}</h3>
-                  <p className="text-xs text-zinc-400 mb-4">GLA Student · Meetify</p>
-                  <Link 
-                    href={`/users/${otherId}`}
-                    className="px-4 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-xs font-bold transition-colors"
-                  >
-                    View profile
-                  </Link>
-                </div>
-              )}
+                );
+              })()}
 
               <AnimatePresence initial={false}>
                 {messages.map((msg, idx) => {
@@ -745,33 +843,56 @@ function MessagesContent() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Bar pinned to bottom */}
-            <div className="p-3 border-t border-zinc-100 bg-white flex-shrink-0">
-              <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-full px-4 py-2 focus-within:border-zinc-400 transition-all">
-                <textarea
-                  ref={inputRef}
-                  value={inputText}
-                  onChange={e => setInputText(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Message..."
-                  rows={1}
-                  className="flex-1 resize-none bg-transparent text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none max-h-28 font-medium"
-                  style={{ lineHeight: '1.4' }}
-                  onInput={e => {
-                    e.target.style.height = 'auto';
-                    e.target.style.height = Math.min(e.target.scrollHeight, 112) + 'px';
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={sendMessage}
-                  disabled={!inputText.trim() || sendingMsg}
-                  className="text-purple-600 hover:text-purple-700 disabled:opacity-30 font-black text-xs transition-colors flex-shrink-0 cursor-pointer"
-                >
-                  {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin text-purple-600" /> : 'Send'}
-                </button>
-              </div>
-            </div>
+            {/* Input Bar pinned to bottom (Only for 1-on-1 chats, hidden for official broadcast channels) */}
+            {(() => {
+              const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
+              if (isGroup) {
+                return (
+                  <div className="p-3 border-t border-zinc-100 bg-zinc-50 flex-shrink-0 text-center">
+                    <p className="text-xs font-bold text-zinc-500">
+                      📢 Broadcast Channel · Only admins can post updates here.
+                    </p>
+                    <a
+                      href="https://chat.whatsapp.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-1 text-[11px] font-black text-emerald-600 hover:underline"
+                    >
+                      Join Official WhatsApp Channel for discussions →
+                    </a>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="p-3 border-t border-zinc-100 bg-white flex-shrink-0">
+                  <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-full px-4 py-2 focus-within:border-zinc-400 transition-all">
+                    <textarea
+                      ref={inputRef}
+                      value={inputText}
+                      onChange={e => setInputText(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Message..."
+                      rows={1}
+                      className="flex-1 resize-none bg-transparent text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none max-h-28 font-medium"
+                      style={{ lineHeight: '1.4' }}
+                      onInput={e => {
+                        e.target.style.height = 'auto';
+                        e.target.style.height = Math.min(e.target.scrollHeight, 112) + 'px';
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={sendMessage}
+                      disabled={!inputText.trim() || sendingMsg}
+                      className="text-[#8C3573] hover:text-[#74295d] disabled:opacity-30 font-black text-xs transition-colors flex-shrink-0 cursor-pointer"
+                    >
+                      {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin text-[#8C3573]" /> : 'Send'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </>
         )}
       </div>

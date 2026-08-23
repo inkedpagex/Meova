@@ -73,9 +73,9 @@ const defaultCharacters: Character[] = [
     emoji: "🎨",
     name: "Neha (Design)",
     online: true,
-    backgroundColor: "bg-purple-500/10 border border-purple-500/20 text-purple-400",
-    gradientFrom: "from-purple-900/50",
-    gradientTo: "to-purple-700/30",
+    backgroundColor: "bg-[#9e4685]/10 border border-[#9e4685]/20 text-[#b5609d]",
+    gradientFrom: "from-[#512142]/50",
+    gradientTo: "to-[#74295d]/30",
     gradientColors: "#581c87, #7c3aed",
   },
   {

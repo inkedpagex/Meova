@@ -167,7 +167,7 @@ export default function CreatePhotoClient({ currentUser }) {
                     onClick={() => setCategory(cat.id)}
                     className={`flex items-center gap-2.5 p-3 rounded-2xl border text-xs font-extrabold transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent shadow-md scale-[1.02]'
+                        ? 'bg-gradient-to-r from-pink-500 to-[#8C3573] text-white border-transparent shadow-md scale-[1.02]'
                         : 'bg-zinc-50 border-zinc-200/90 text-zinc-700 hover:bg-zinc-100'
                     }`}
                   >
@@ -196,7 +196,7 @@ export default function CreatePhotoClient({ currentUser }) {
           <button
             type="submit"
             disabled={uploading || !file}
-            className="w-full py-4 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer uppercase tracking-wider"
+            className="w-full py-4 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-pink-500 to-[#8C3573] hover:opacity-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer uppercase tracking-wider"
           >
             {uploading ? (
               <>

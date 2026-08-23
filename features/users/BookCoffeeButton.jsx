@@ -100,7 +100,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
         <button
           onClick={handleClick}
           className="w-full flex items-center justify-center gap-1.5 px-3 py-3 rounded-2xl text-[11px] sm:text-xs font-black transition-all active:scale-95 hover:opacity-90 uppercase tracking-wide cursor-pointer shadow-md whitespace-nowrap"
-          style={{ background: `linear-gradient(135deg, ${color}, #9333ea)`, color: '#ffffff', border: 'none' }}
+          style={{ background: `linear-gradient(135deg, ${color}, #8C3573)`, color: '#ffffff', border: 'none' }}
         >
           <Layers className="w-3.5 h-3.5 text-white flex-shrink-0" />
           <span>Reserve {COFFEE_COST}</span>
@@ -185,7 +185,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                           onClick={() => setSelectedLocation(loc)}
                           className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border transition-all ${
                             selectedLocation === loc
-                              ? 'bg-[#7c3aed] text-white border-[#7c3aed] shadow-sm'
+                              ? 'bg-[#8C3573] text-white border-[#8C3573] shadow-sm'
                               : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-purple-300'
                           }`}
                         >
@@ -209,7 +209,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                           onClick={() => setSelectedTime(time.value)}
                           className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border transition-all ${
                             selectedTime === time.value
-                              ? 'bg-[#7c3aed] text-white border-[#7c3aed] shadow-sm'
+                              ? 'bg-[#8C3573] text-white border-[#8C3573] shadow-sm'
                               : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-purple-300'
                           }`}
                         >

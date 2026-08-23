@@ -9,7 +9,7 @@ const STATUS_STYLE = {
   PENDING:   { icon: <Hourglass size={12}/>,     label: 'Pending',   cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   ACCEPTED:  { icon: <CheckCircle2 size={12}/>,  label: 'Accepted',  cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   REJECTED:  { icon: <XCircle size={12}/>,       label: 'Rejected',  cls: 'bg-red-50 text-red-500 border-red-200' },
-  COMPLETED: { icon: <CheckCircle2 size={12}/>,  label: 'Completed', cls: 'bg-purple-50 text-purple-700 border-purple-200' },
+  COMPLETED: { icon: <CheckCircle2 size={12}/>,  label: 'Completed', cls: 'bg-[#fcf6fa] text-[#74295d] border-[#eac5e0]' },
 };
 
 export default function MyGigsActivity({ userId, onManage }) {
@@ -57,7 +57,7 @@ export default function MyGigsActivity({ userId, onManage }) {
               : gig.status === 'expired' ? '⏱ Expired'
               : '🟢 Open';
             return (
-              <div key={gig.id} className="p-4 rounded-2xl border border-zinc-200 bg-white space-y-2 hover:border-purple-200 transition-all">
+              <div key={gig.id} className="p-4 rounded-2xl border border-zinc-200 bg-white space-y-2 hover:border-[#eac5e0] transition-all">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="text-sm font-black text-zinc-900">{gig.title}</p>
@@ -69,7 +69,7 @@ export default function MyGigsActivity({ userId, onManage }) {
                   <span className="text-xs font-black text-amber-600">{gig.budget}⚡</span>
                   <button
                     onClick={() => onManage(gig)}
-                    className="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-100 text-xs font-black hover:bg-purple-100 cursor-pointer transition-all"
+                    className="px-3 py-1.5 rounded-xl bg-[#fcf6fa] text-[#74295d] border border-[#f5ebf4] text-xs font-black hover:bg-[#f5ebf4] cursor-pointer transition-all"
                   >
                     {(gig.applicationsCount || 0) > 0
                       ? `👥 ${gig.applicationsCount} Applied`
@@ -115,7 +115,7 @@ export default function MyGigsActivity({ userId, onManage }) {
                   </div>
                 )}
                 {app.status === 'COMPLETED' && (
-                  <p className="text-xs text-purple-600 font-bold">⚡ Sparks credited to your wallet</p>
+                  <p className="text-xs text-[#8C3573] font-bold">⚡ Sparks credited to your wallet</p>
                 )}
               </div>
             );

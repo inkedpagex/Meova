@@ -72,7 +72,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
     return (
       <div style={{
         position: 'fixed', inset: 0, zIndex: 300,
-        background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%)',
+        background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 50%, #ec4899 100%)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       }}>
         <style>{`
@@ -169,7 +169,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
       <div className="flex-shrink-0 px-6 pt-8 pb-4">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-6">
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg,#7c3aed,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg,#8C3573,#b5609d)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width={16} height={16} viewBox="0 0 24 24" fill="none">
               <path d="M3 18V9l9 6 9-6v9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M3 9l9-6 9 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -180,7 +180,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
 
         {/* Tagline */}
         <div className="mb-6">
-          <p className="text-xs font-black uppercase tracking-widest text-[#7c3aed] mb-1">Complete your profile</p>
+          <p className="text-xs font-black uppercase tracking-widest text-[#8C3573] mb-1">Complete your profile</p>
           <p className="text-[11px] text-zinc-400">Step {step} of 3 — takes less than 2 minutes</p>
         </div>
 

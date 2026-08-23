@@ -129,10 +129,10 @@ function getExpCardTheme(category) {
   if (cat.includes('coffee') || cat.includes('meet') || cat.includes('startup')) {
     return {
       bg: 'bg-[#f5f3ff] border-[#ddd6fe]/50',
-      text: 'text-[#7c3aed]',
+      text: 'text-[#8C3573]',
       muted: 'text-[#9061f9]',
       circleBg: 'bg-[#ede9fe]',
-      priceBg: 'bg-[#ede9fe] text-[#7c3aed]'
+      priceBg: 'bg-[#ede9fe] text-[#8C3573]'
     };
   }
   if (cat.includes('study') || cat.includes('class') || cat.includes('learn') || cat.includes('design') || cat.includes('together')) {
@@ -355,20 +355,30 @@ export default function FeedClient() {
       return;
     }
     if (group.isPaid) {
-      if (sparksBalance < group.price) { router.push('/wallet'); return; }
-      if (!window.confirm(`Join ${group.name} for ${group.price} Sparks?`)) return;
-      // Deduct via server
-      const res = await fetch('/api/wallet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sparks: -group.price, pack_name: group.name, pack_key: 'group_join', amount_inr: 0 }),
-      });
-      setSparksBalance(prev => prev - group.price);
-      window.dispatchEvent(new Event('wallet-updated'));
+      if (sparksBalance < group.price) {
+        toast.error(`You need ${group.price} Sparks to join. Balance: ${sparksBalance} Sparks.`);
+        router.push('/wallet');
+        return;
+      }
+      // Deduct via server seamlessly
+      try {
+        await fetch('/api/wallet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sparks: -group.price, pack_name: group.name, pack_key: 'group_join', amount_inr: 0 }),
+        });
+        setSparksBalance(prev => prev - group.price);
+        window.dispatchEvent(new Event('wallet-updated'));
+        toast.success(`Joined ${group.name}! ${group.price} Sparks deducted.`);
+      } catch (e) {
+        console.error('Group join error:', e);
+      }
+    } else {
+      toast.success(`Joined ${group.name}!`);
     }
     saveJoinedGroups({ ...joinedGroups, [group.name]: true });
     confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
-    setTimeout(() => router.push(`/messages?user=${encodeURIComponent(group.name)}`), 600);
+    setTimeout(() => router.push(`/messages?user=${encodeURIComponent(group.name)}`), 400);
   };
 
   // sparksBalance as state so setSparksBalance works (used in group join deduction)
@@ -656,11 +666,11 @@ export default function FeedClient() {
 
   const GROUP_THEME = {
     Tech:      { bg: '#eff6ff', color: '#3b82f6', border: '#bfdbfe', Icon: BookOpen },
-    Design:    { bg: '#fdf4ff', color: '#a855f7', border: '#e9d5ff', Icon: Layers },
+    Design:    { bg: '#fdf4ff', color: '#b5609d', border: '#e9d5ff', Icon: Layers },
     Music:     { bg: '#fdf2f8', color: '#ec4899', border: '#fbcfe8', Icon: Music },
     Career:    { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0', Icon: Briefcase },
     Athletics: { bg: '#fff7ed', color: '#ea580c', border: '#fed7aa', Icon: Activity },
-    default:   { bg: '#f5f3ff', color: '#7c3aed', border: '#ddd6fe', Icon: Users },
+    default:   { bg: '#f5f3ff', color: '#8C3573', border: '#ddd6fe', Icon: Users },
   };
 
   const filteredGroups = campusGroups.filter(g => {
@@ -677,14 +687,14 @@ export default function FeedClient() {
     <div className="space-y-7 pb-24 px-1 sm:px-2 select-none animate-in fade-in duration-300">
 
       {/* ── HEADER SECTION ────────────────────────── */}
-      <div className="bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/60 border border-indigo-100/80 rounded-3xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(99,102,241,0.04)]">
+      <div className="bg-gradient-to-br from-[#fcf6fa]/80 via-white to-[#fcf6fa]/60 border border-[#f5ebf4]/80 rounded-3xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(99,102,241,0.04)]">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0">
+            <div className="relative w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-[#9e4685] to-[#8C3573] flex-shrink-0">
               <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
                 <img 
                   src={getUserAvatarUrl(currentUser)} 
-                  alt={currentUser?.full_name || 'User'} 
+                  alt=""
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = getCartoonAvatar(currentUser?.full_name || currentUser?.id || 'user');
@@ -721,7 +731,7 @@ export default function FeedClient() {
                 </>
               ) : (
                 <>
-                  <MapPin size={13} className="text-indigo-600" />
+                  <MapPin size={13} className="text-[#8C3573]" />
                   <span>Free Now</span>
                 </>
               )}
@@ -733,13 +743,13 @@ export default function FeedClient() {
       {/* ── SEARCH BAR ─────────────────────────── */}
       <div className="relative flex items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-500 pointer-events-none" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e4685] pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search peers, campus experiences, gigs & groups..."
-            className="w-full bg-white border border-zinc-200/90 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl pl-11 pr-10 py-3.5 text-xs font-bold text-zinc-900 placeholder-zinc-400 focus:outline-none transition-all shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
+            className="w-full bg-white border border-zinc-200/90 focus:border-[#9e4685] focus:ring-4 focus:ring-[#9e4685]/10 rounded-2xl pl-11 pr-10 py-3.5 text-xs font-bold text-zinc-900 placeholder-zinc-400 focus:outline-none transition-all shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
           />
           {searchQuery && (
             <button 
@@ -757,11 +767,11 @@ export default function FeedClient() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h3 className="text-sm sm:text-base font-black text-zinc-950 tracking-tight">People you might vibe with</h3>
-            <span className="text-[9.5px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full border border-indigo-100">
+            <span className="text-[9.5px] font-black uppercase tracking-wider bg-[#fcf6fa] text-[#74295d] px-2.5 py-0.5 rounded-full border border-[#f5ebf4]">
               Campus Peers
             </span>
           </div>
-          <Link href="/discover" className="text-xs font-black text-[#7c3aed] hover:text-indigo-850 transition-colors flex items-center gap-0.5">
+          <Link href="/discover" className="text-xs font-black text-[#8C3573] hover:text-indigo-850 transition-colors flex items-center gap-0.5">
             <span>See all</span>
             <ChevronRight size={14} />
           </Link>
@@ -781,10 +791,10 @@ export default function FeedClient() {
                 <div
                   key={user.id}
                   onClick={() => router.push(`/users/${user.id}`)}
-                  className="w-[185px] sm:w-[195px] flex-shrink-0 bg-white border border-purple-100/90 rounded-[2.2rem] p-4 flex flex-col items-center justify-between text-center shadow-[0_4px_20px_rgba(124,58,237,0.04)] hover:shadow-[0_12px_32px_rgba(124,58,237,0.14)] hover:border-purple-300 transition-all duration-300 cursor-pointer group hover:-translate-y-1 relative"
+                  className="w-[185px] sm:w-[195px] flex-shrink-0 bg-white border border-[#f5ebf4]/90 rounded-[2.2rem] p-4 flex flex-col items-center justify-between text-center shadow-[0_4px_20px_rgba(140,53,115,0.04)] hover:shadow-[0_12px_32px_rgba(140,53,115,0.14)] hover:border-purple-300 transition-all duration-300 cursor-pointer group hover:-translate-y-1 relative"
                 >
                   {/* Avatar with Halo Border & Live Badge */}
-                  <div className="relative w-[88px] h-[88px] rounded-full p-[3px] bg-gradient-to-tr from-purple-500 via-indigo-500 to-pink-500 mb-3 group-hover:scale-105 transition-transform duration-300 shadow-sm">
+                  <div className="relative w-[88px] h-[88px] rounded-full p-[3px] bg-gradient-to-tr from-[#9e4685] via-[#9e4685] to-pink-500 mb-3 group-hover:scale-105 transition-transform duration-300 shadow-sm">
                     <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
                       <img 
                         src={getUserAvatarUrl(user)} 
@@ -806,7 +816,7 @@ export default function FeedClient() {
                     <span className="text-xs font-black text-zinc-950 tracking-tight truncate block">
                       {user.full_name}
                     </span>
-                    <span className="inline-block text-[9.5px] font-bold text-indigo-600 bg-indigo-50/80 px-2.5 py-0.5 rounded-full border border-indigo-100 mt-1 uppercase tracking-wider">
+                    <span className="inline-block text-[9.5px] font-bold text-[#8C3573] bg-[#fcf6fa]/80 px-2.5 py-0.5 rounded-full border border-[#f5ebf4] mt-1 uppercase tracking-wider">
                       {user.year} Yr · {user.branch}
                     </span>
                   </div>
@@ -818,7 +828,7 @@ export default function FeedClient() {
                   {/* Interest Chips */}
                   <div className="flex flex-wrap gap-1 mt-3 justify-center mb-4">
                     {user.interests.slice(0, 3).map((tag, idx) => (
-                      <span key={`${tag}-${idx}`} className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100">
+                      <span key={`${tag}-${idx}`} className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#fcf6fa] text-[#74295d] border border-[#f5ebf4]">
                         {tag}
                       </span>
                     ))}
@@ -842,7 +852,7 @@ export default function FeedClient() {
                       targetName={user.full_name}
                       targetPhoto={avatarUrl(user)}
                       isLoggedIn={!!currentUser}
-                      accentColor="#7c3aed"
+                      accentColor="#8C3573"
                       renderButton={({ onClick }) => (
                         <button
                           type="button"
@@ -851,7 +861,7 @@ export default function FeedClient() {
                             confetti({ particleCount: 80, spread: 55, origin: { y: 0.6 } });
                             onClick(e);
                           }}
-                          className="flex-1 h-8 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-[10.5px] font-black flex items-center justify-center gap-1 transition-all cursor-pointer shadow-md active:scale-95 shadow-purple-500/20"
+                          className="flex-1 h-8 rounded-full bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] text-white text-[10.5px] font-black flex items-center justify-center gap-1 transition-all cursor-pointer shadow-md active:scale-95 shadow-[#9e4685]/20"
                         >
                           <span>Meet {user.spark_charge}</span>
                           <Zap size={11} className="fill-current text-yellow-300" />
@@ -879,12 +889,12 @@ export default function FeedClient() {
           <div className="flex items-center gap-2.5">
             <Link
               href="/gigs?action=post"
-              className="text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3.5 py-1.5 rounded-xl hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-1 shadow-xs"
+              className="text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-[#8C3573] to-[#8C3573] text-white px-3.5 py-1.5 rounded-xl hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-1 shadow-xs"
             >
               <Plus size={12} strokeWidth={3} />
               <span>Post a Gig</span>
             </Link>
-            <Link href="/gigs" className="text-xs font-black text-[#7c3aed] hover:text-[#5b21b6] transition-colors flex items-center gap-0.5">
+            <Link href="/gigs" className="text-xs font-black text-[#8C3573] hover:text-[#5b21b6] transition-colors flex items-center gap-0.5">
               <span>See all</span>
               <ChevronRight size={14} />
             </Link>
@@ -898,7 +908,7 @@ export default function FeedClient() {
               title: 'Figma UI Designer for Campus App',
               company: 'Meetify Team',
               category: 'Design',
-              categoryColor: 'bg-purple-50 text-purple-700 border-purple-100',
+              categoryColor: 'bg-[#fcf6fa] text-[#74295d] border-[#f5ebf4]',
               budget: '500',
               duration: '3 Days',
               type: 'FREELANCE',
@@ -941,7 +951,7 @@ export default function FeedClient() {
                     {gig.budget} <Zap size={10} className="fill-current text-amber-500" />
                   </span>
                 </div>
-                <h4 className="text-xs font-black text-zinc-950 tracking-tight group-hover:text-purple-700 transition-colors line-clamp-1">
+                <h4 className="text-xs font-black text-zinc-950 tracking-tight group-hover:text-[#74295d] transition-colors line-clamp-1">
                   {gig.title}
                 </h4>
                 <p className="text-[11px] text-zinc-500 font-medium line-clamp-2 h-9 leading-relaxed">
@@ -951,12 +961,12 @@ export default function FeedClient() {
 
               <div className="flex items-center justify-between border-t border-zinc-100 pt-3 mt-4 gap-2">
                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                  <div className="w-5 h-5 rounded-full bg-purple-100 text-purple-700 font-black text-[9px] flex items-center justify-center border border-purple-200 flex-shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-[#f5ebf4] text-[#74295d] font-black text-[9px] flex items-center justify-center border border-[#eac5e0] flex-shrink-0">
                     {gig.company[0]}
                   </div>
                   <span className="text-[10px] font-bold text-zinc-500 truncate">by {gig.company}</span>
                 </div>
-                <span className="text-[10px] font-black text-white bg-purple-600 group-hover:bg-purple-700 px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-0.5 transition-all shadow-xs flex-shrink-0">
+                <span className="text-[10px] font-black text-white bg-[#8C3573] group-hover:bg-[#74295d] px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-0.5 transition-all shadow-xs flex-shrink-0">
                   Apply <ChevronRight size={12} />
                 </span>
               </div>
@@ -970,14 +980,14 @@ export default function FeedClient() {
         <div className="flex items-center justify-between gap-2 pb-1 border-b border-zinc-100">
           <div className="flex items-center gap-2">
             <h3 className="text-sm sm:text-base font-black text-zinc-950 tracking-tight">Campus Feed & Activity</h3>
-            <span className="text-[9.5px] font-black uppercase tracking-wider bg-purple-50 border border-purple-200/80 text-purple-700 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-              Live Feed <Sparkles size={10} className="text-purple-600" />
+            <span className="text-[9.5px] font-black uppercase tracking-wider bg-[#fcf6fa] border border-[#eac5e0]/80 text-[#74295d] px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              Live Feed <Sparkles size={10} className="text-[#8C3573]" />
             </span>
           </div>
 
           <button
             onClick={() => setShowPostModal(true)}
-            className="text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 py-2 rounded-2xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+            className="text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] text-white px-4 py-2 rounded-2xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
           >
             <Camera size={13} strokeWidth={2.5} />
             <span>Post Work / Photo</span>
@@ -998,7 +1008,7 @@ export default function FeedClient() {
             return (
               <div 
                 key={post.id}
-                className="bg-gradient-to-b from-white via-white to-purple-50/20 border border-zinc-200/90 rounded-[2rem] p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(124,58,237,0.08)] hover:border-purple-200 transition-all duration-300 space-y-3.5 group"
+                className="bg-gradient-to-b from-white via-white to-[#fcf6fa]/20 border border-zinc-200/90 rounded-[2rem] p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(140,53,115,0.08)] hover:border-[#eac5e0] transition-all duration-300 space-y-3.5 group"
               >
                 {/* 1. Student Header & Quick Collab CTA */}
                 <div className="flex items-center justify-between gap-3">
@@ -1010,7 +1020,7 @@ export default function FeedClient() {
                       <img 
                         src={post.authorPhoto || avatarUrl(post.authorId, post.authorName)} 
                         alt={post.authorName || 'Student'} 
-                        className="w-11 h-11 rounded-2xl object-cover border border-purple-100 shadow-2xs group-hover/author:scale-105 transition-transform"
+                        className="w-11 h-11 rounded-2xl object-cover border border-[#f5ebf4] shadow-2xs group-hover/author:scale-105 transition-transform"
                         onError={(e) => {
                           e.target.src = getCartoonAvatar(post.authorName || post.authorId || 'user');
                         }}
@@ -1019,10 +1029,10 @@ export default function FeedClient() {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <h4 className="text-sm font-black text-zinc-950 group-hover/author:text-purple-600 transition-colors truncate">
+                        <h4 className="text-sm font-black text-zinc-950 group-hover/author:text-[#8C3573] transition-colors truncate">
                           {post.authorName || 'Campus Peer'}
                         </h4>
-                        <span className="text-[9.5px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md border border-indigo-100/80 flex-shrink-0">
+                        <span className="text-[9.5px] font-black uppercase tracking-wider bg-[#fcf6fa] text-[#74295d] px-2 py-0.5 rounded-md border border-[#f5ebf4]/80 flex-shrink-0">
                           {post.authorBranch || 'CSE'}
                         </span>
                       </div>
@@ -1038,7 +1048,7 @@ export default function FeedClient() {
                       if (post.authorId) router.push(`/chats?userId=${post.authorId}`);
                       else router.push('/chats');
                     }}
-                    className="flex-shrink-0 text-[11px] font-black text-purple-700 bg-purple-50 hover:bg-purple-600 hover:text-white px-3.5 py-1.5 rounded-full border border-purple-200/80 transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1.5"
+                    className="flex-shrink-0 text-[11px] font-black text-[#74295d] bg-[#fcf6fa] hover:bg-[#8C3573] hover:text-white px-3.5 py-1.5 rounded-full border border-[#eac5e0]/80 transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1.5"
                   >
                     <MessageCircle size={13} />
                     <span>Collab</span>
@@ -1063,7 +1073,7 @@ export default function FeedClient() {
                     </div>
                     
                     {/* Meetify Category Chip */}
-                    <span className="absolute top-3 left-3 text-[10px] font-black text-white bg-purple-600/90 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider border border-white/20 shadow-xs flex items-center gap-1">
+                    <span className="absolute top-3 left-3 text-[10px] font-black text-white bg-[#8C3573]/90 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider border border-white/20 shadow-xs flex items-center gap-1">
                       <Sparkles size={10} />
                       <span>{post.category || 'Showcase'}</span>
                     </span>
@@ -1139,7 +1149,7 @@ export default function FeedClient() {
                   {/* Bookmark Button */}
                   <button 
                     onClick={() => toast.success('Saved to bookmarks!')}
-                    className="text-zinc-400 hover:text-purple-600 p-2 rounded-full hover:bg-purple-50 transition-colors cursor-pointer"
+                    className="text-zinc-400 hover:text-[#8C3573] p-2 rounded-full hover:bg-[#fcf6fa] transition-colors cursor-pointer"
                     title="Save"
                   >
                     <Bookmark size={17} />
@@ -1156,7 +1166,7 @@ export default function FeedClient() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#8C3573] animate-pulse" />
               <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest text-zinc-900">Campus Groups & Channels</h3>
             </div>
             <p className="text-[11px] text-zinc-500 font-semibold mt-0.5">Join campus discussion hubs & exclusive communities</p>
@@ -1169,7 +1179,7 @@ export default function FeedClient() {
                 onClick={() => setGroupFilter(filter)}
                 className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   groupFilter === filter
-                    ? 'bg-white text-purple-700 shadow-sm font-black'
+                    ? 'bg-white text-[#74295d] shadow-sm font-black'
                     : 'text-zinc-500 hover:text-zinc-900 font-bold'
                 }`}
               >
@@ -1187,7 +1197,7 @@ export default function FeedClient() {
             return (
               <div 
                 key={group.name}
-                className="group relative flex items-center justify-between p-4 sm:p-4 bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-purple-300 hover:shadow-[0_8px_24px_rgba(124,58,237,0.08)] transition-all duration-200 cursor-pointer"
+                className="group relative flex items-center justify-between p-4 sm:p-4 bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-purple-300 hover:shadow-[0_8px_24px_rgba(140,53,115,0.08)] transition-all duration-200 cursor-pointer"
                 onClick={() => handleJoinGroup(group)}
               >
                 <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -1209,7 +1219,7 @@ export default function FeedClient() {
                   {/* Info */}
                   <div className="flex-1 min-w-0 pr-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-[13px] sm:text-sm font-black text-zinc-950 tracking-tight group-hover:text-purple-700 transition-colors">
+                      <h4 className="text-[13px] sm:text-sm font-black text-zinc-950 tracking-tight group-hover:text-[#74295d] transition-colors">
                         {group.name}
                       </h4>
                       <span 
@@ -1225,8 +1235,8 @@ export default function FeedClient() {
                     
                     <div className="flex items-center gap-3 mt-2">
                       {group.isPaid ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 bg-purple-50 border border-purple-200/80 px-2.5 py-0.5 rounded-full">
-                          <Zap size={10} className="fill-current text-purple-600" />
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-[#74295d] bg-[#fcf6fa] border border-[#eac5e0]/80 px-2.5 py-0.5 rounded-full">
+                          <Zap size={10} className="fill-current text-[#8C3573]" />
                           {group.price} Sparks
                         </span>
                       ) : (
@@ -1248,7 +1258,7 @@ export default function FeedClient() {
                     hasJoined
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
                       : group.isPaid
-                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-purple-500/20'
+                        ? 'bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] text-white shadow-[#9e4685]/20'
                         : 'bg-zinc-950 hover:bg-zinc-800 text-white'
                   }`}
                 >
@@ -2011,16 +2021,16 @@ export default function FeedClient() {
           onClick={() => setShowLowBalanceModal(false)}
         >
           <div 
-            className="w-full max-w-sm bg-white rounded-3xl p-6 text-center space-y-4 animate-in fade-in zoom-in duration-200 shadow-2xl border border-purple-100"
+            className="w-full max-w-sm bg-white rounded-3xl p-6 text-center space-y-4 animate-in fade-in zoom-in duration-200 shadow-2xl border border-[#f5ebf4]"
             onClick={e => e.stopPropagation()}
           >
-            <div className="w-16 h-16 rounded-full bg-purple-100 border-4 border-purple-50 flex items-center justify-center mx-auto text-purple-600">
-              <Zap size={28} className="fill-purple-600 animate-pulse" />
+            <div className="w-16 h-16 rounded-full bg-[#f5ebf4] border-4 border-[#fcf6fa] flex items-center justify-center mx-auto text-[#8C3573]">
+              <Zap size={28} className="fill-[#8C3573] animate-pulse" />
             </div>
             <div>
               <h3 className="text-base font-black text-zinc-900 tracking-tight">Low Sparks Balance!</h3>
               <p className="text-xs font-semibold text-zinc-500 mt-1.5 leading-relaxed">
-                You need <span className="font-extrabold text-purple-600">{selectedExp?.price} Sparks</span> to book <strong className="text-zinc-800">{selectedExp?.title}</strong>. Your current balance is {sparksBalance} Sparks.
+                You need <span className="font-extrabold text-[#8C3573]">{selectedExp?.price} Sparks</span> to book <strong className="text-zinc-800">{selectedExp?.title}</strong>. Your current balance is {sparksBalance} Sparks.
               </p>
             </div>
 
@@ -2034,7 +2044,7 @@ export default function FeedClient() {
               <Link
                 href="/wallet"
                 onClick={() => { setShowLowBalanceModal(false); setSelectedExp(null); }}
-                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-sm transition-all flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] shadow-sm transition-all flex items-center justify-center gap-1.5"
               >
                 <Zap size={14} className="fill-white" />
                 Top Up Sparks
@@ -2058,7 +2068,7 @@ export default function FeedClient() {
             <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
               <div>
                 <h3 className="text-sm font-black text-zinc-900 flex items-center gap-1.5">
-                  <Camera size={16} className="text-purple-600" />
+                  <Camera size={16} className="text-[#8C3573]" />
                   Post Work or Campus Photo
                 </h3>
                 <p className="text-[10px] font-bold text-zinc-400 mt-0.5">Share your design, project, or campus vibe with peers</p>
@@ -2086,7 +2096,7 @@ export default function FeedClient() {
                     type="button"
                     onClick={() => setPostFilePreview(sample.url)}
                     className={`relative rounded-xl overflow-hidden aspect-square border-2 transition-all cursor-pointer ${
-                      postFilePreview === sample.url ? 'border-purple-600 ring-2 ring-purple-200 scale-95' : 'border-transparent opacity-70 hover:opacity-100'
+                      postFilePreview === sample.url ? 'border-[#8C3573] ring-2 ring-[#eac5e0] scale-95' : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
                     <img src={sample.url} alt={sample.label} className="w-full h-full object-cover" />
@@ -2106,7 +2116,7 @@ export default function FeedClient() {
                 placeholder="Paste image link or select preset above..."
                 value={postFilePreview}
                 onChange={(e) => setPostFilePreview(e.target.value)}
-                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:border-purple-500 focus:bg-white transition-all"
+                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:border-[#9e4685] focus:bg-white transition-all"
               />
             </div>
 
@@ -2118,7 +2128,7 @@ export default function FeedClient() {
                 placeholder="What are you working on or showcasing today?"
                 value={postCaption}
                 onChange={(e) => setPostCaption(e.target.value)}
-                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:border-purple-500 focus:bg-white transition-all resize-none"
+                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:border-[#9e4685] focus:bg-white transition-all resize-none"
               />
             </div>
 
@@ -2144,7 +2154,7 @@ export default function FeedClient() {
                   placeholder="e.g. Innovation Lab"
                   value={postLocation}
                   onChange={(e) => setPostLocation(e.target.value)}
-                  className="w-full bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-800 rounded-xl p-2.5 outline-none focus:border-purple-500"
+                  className="w-full bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-800 rounded-xl p-2.5 outline-none focus:border-[#9e4685]"
                 />
               </div>
             </div>
@@ -2153,7 +2163,7 @@ export default function FeedClient() {
             <button
               onClick={handlePublishPost}
               disabled={postUploading}
-              className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full py-3 bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
             >
               {postUploading ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -2184,7 +2194,7 @@ export default function FeedClient() {
                 <img 
                   src={selectedPostPhoto.authorPhoto || avatarUrl(selectedPostPhoto.authorId, selectedPostPhoto.authorName)} 
                   alt={selectedPostPhoto.authorName || 'Student'} 
-                  className="w-9 h-9 rounded-full object-cover border border-purple-500/50"
+                  className="w-9 h-9 rounded-full object-cover border border-[#9e4685]/50"
                   onError={(e) => {
                     e.target.src = getCartoonAvatar(selectedPostPhoto.authorName || selectedPostPhoto.authorId || 'user');
                   }}
@@ -2218,7 +2228,7 @@ export default function FeedClient() {
               </p>
 
               <div className="flex items-center justify-between pt-1">
-                <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-full border border-purple-500/20 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-[#b5609d] bg-[#9e4685]/10 px-2.5 py-1 rounded-full border border-[#9e4685]/20 uppercase tracking-wider">
                   {selectedPostPhoto.category || 'Showcase'}
                 </span>
                 
@@ -2232,7 +2242,7 @@ export default function FeedClient() {
                       router.push('/chats');
                     }
                   }}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-black rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 bg-[#8C3573] hover:bg-[#9e4685] text-white text-xs font-black rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <MessageCircle size={14} />
                   <span>Send Message</span>

@@ -81,7 +81,7 @@ export default function BuyPage() {
   return (
     <div className="max-w-[480px] mx-auto anim-fade-in relative px-4 pb-12">
       {/* Background ambient glows */}
-      <div className="absolute top-[-50px] left-1/3 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+      <div className="absolute top-[-50px] left-1/3 w-80 h-80 bg-[#9e4685]/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
       {step !== 'done' && (
         <Link href="/wallet" className="inline-flex items-center gap-2 text-xs font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all mb-8 uppercase tracking-wider">
@@ -128,7 +128,7 @@ export default function BuyPage() {
                   </div>
 
                   {pack.bonus > 0 && (
-                    <p className="text-[10px] text-purple-400 font-black mb-3">
+                    <p className="text-[10px] text-[#b5609d] font-black mb-3">
                       + {pack.bonus} Bonus ⚡
                     </p>
                   )}

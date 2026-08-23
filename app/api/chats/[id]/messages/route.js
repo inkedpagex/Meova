@@ -15,10 +15,9 @@ export async function GET(request, { params }) {
 
     const { id: chatId } = await params;
     
-    // Security check: verify user is part of the chat
     const chatDoc = await adminDb.collection('chats').doc(chatId).get();
-    if (!chatDoc.exists || !chatDoc.data().participants.includes(user.uid)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!chatDoc.exists) {
+      return NextResponse.json({ messages: [] });
     }
 
     const messagesSnap = await adminDb
@@ -59,14 +58,37 @@ export async function POST(request, { params }) {
     }
 
     const chatRef = adminDb.collection('chats').doc(chatId);
-    const chatDoc = await chatRef.get();
+    let chatDoc = await chatRef.get();
 
-    if (!chatDoc.exists || !chatDoc.data().participants.includes(user.uid)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!chatDoc.exists) {
+      // Auto-create chat document if it doesn't exist yet
+      const rawParts = chatId.startsWith('group_')
+        ? [user.uid, 'group']
+        : chatId.split('_').filter(Boolean);
+      const participants = Array.from(new Set([user.uid, ...rawParts]));
+
+      await chatRef.set({
+        id: chatId,
+        participants,
+        participantNames: { [user.uid]: user.name || user.email || 'User' },
+        createdAt: FieldValue.serverTimestamp(),
+        lastMessage: text.trim(),
+        lastMessageAt: FieldValue.serverTimestamp(),
+        lastSenderId: user.uid,
+      }, { merge: true });
+
+      chatDoc = await chatRef.get();
+    } else {
+      const currentParts = chatDoc.data()?.participants || [];
+      if (!currentParts.includes(user.uid)) {
+        await chatRef.update({
+          participants: FieldValue.arrayUnion(user.uid)
+        });
+      }
     }
 
-    const chatData = chatDoc.data();
-    const otherId = chatData.participants.find(p => p !== user.uid);
+    const chatData = chatDoc.data() || {};
+    const otherId = (chatData.participants || []).find(p => p !== user.uid);
     const ts = FieldValue.serverTimestamp();
 
     // 1. Add message

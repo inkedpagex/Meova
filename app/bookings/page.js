@@ -56,7 +56,7 @@ function MeetingCountdownTimer({ booking }) {
 
   return (
     <div className={`mt-2 flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-extrabold border ${
-      isLive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse' : 'bg-purple-50 text-purple-700 border-purple-100'
+      isLive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse' : 'bg-[#fcf6fa] text-[#74295d] border-[#f5ebf4]'
     }`}>
       <span>{timeLeft}</span>
     </div>
@@ -227,7 +227,7 @@ export default function BookingsPage() {
     if (status === "AutoRefunded") return "text-amber-600 bg-amber-50 border-amber-100";
     if (status === "Disputed") return "text-orange-600 bg-orange-50 border-orange-100";
     if (status === "Booking Closed") return "text-zinc-500 bg-zinc-50 border-zinc-200";
-    return "text-purple-600 bg-purple-50 border-purple-100";
+    return "text-[#8C3573] bg-[#fcf6fa] border-[#f5ebf4]";
   };
 
   const statusLabel = (status) => {
@@ -243,13 +243,13 @@ export default function BookingsPage() {
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-zinc-100 px-4 py-4 shadow-sm flex items-center justify-between">
         <div>
           <h1 className="text-xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
-            <Calendar size={20} className="text-[#7c3aed]" />
+            <Calendar size={20} className="text-[#8C3573]" />
             My Meetings
           </h1>
         </div>
         {/* Sparks balance — helps user know how many Sparks they have before booking */}
         {sparksBalance !== null && (
-          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black" style={{ background: '#f3f0ff', color: '#7c3aed' }}>
+          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black" style={{ background: '#f3f0ff', color: '#8C3573' }}>
             <span>⚡</span>
             <span>{sparksBalance.toLocaleString()}</span>
           </div>
@@ -271,7 +271,7 @@ export default function BookingsPage() {
             >
               {tab}
               {tab === "Active" && activeBookings.length > 0 && (
-                <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 bg-[#7c3aed] text-white text-[9px] font-black rounded-full">
+                <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 bg-[#8C3573] text-white text-[9px] font-black rounded-full">
                   {activeBookings.length}
                 </span>
               )}
@@ -291,7 +291,7 @@ export default function BookingsPage() {
 
         {!isLoading && displayList.length === 0 && (
           <div className="flex flex-col items-center text-center justify-center py-16 px-6 bg-white rounded-2xl border border-dashed border-zinc-200">
-            <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center text-purple-600 mb-3">
+            <div className="w-12 h-12 bg-[#fcf6fa] rounded-full flex items-center justify-center text-[#8C3573] mb-3">
               <Calendar size={20} strokeWidth={2.5} />
             </div>
             <h3 className="text-sm font-black text-zinc-900 mb-1">No {activeTab.toLowerCase()} meetings</h3>
@@ -319,7 +319,7 @@ export default function BookingsPage() {
             ["Requested", "Confirmed", "Accepted"].includes(booking.status);
 
           return (
-            <div key={booking.id} className="bg-white rounded-2xl p-4 border border-zinc-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all hover:shadow-[0_8px_30px_rgba(124,58,237,0.08)]">
+            <div key={booking.id} className="bg-white rounded-2xl p-4 border border-zinc-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all hover:shadow-[0_8px_30px_rgba(140,53,115,0.08)]">
               {/* Card Header */}
               <div className="flex justify-between items-start mb-3">
                 <div>
@@ -334,7 +334,7 @@ export default function BookingsPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-black text-[#7c3aed] flex items-center gap-1 justify-end">
+                  <span className="text-xs font-black text-[#8C3573] flex items-center gap-1 justify-end">
                     ⚡ {booking.price}
                   </span>
                 </div>
@@ -418,7 +418,7 @@ export default function BookingsPage() {
                   ) : (
                     <button 
                       onClick={() => { setSelectedBooking(booking); setShowScanModal(true); setScanStatus("idle"); }}
-                      className="flex-1 bg-[#7c3aed] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#6d28d9] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(124,58,237,0.3)]"
+                      className="flex-1 bg-[#8C3573] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#74295d] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(140,53,115,0.3)]"
                     >
                       <ScanLine size={16} /> Scan Guest QR
                     </button>
@@ -446,7 +446,7 @@ export default function BookingsPage() {
                 Show this QR code to <strong className="text-zinc-900">{selectedBooking.hostName}</strong> when you meet.
               </p>
               
-              <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_rgba(124,58,237,0.15)] border-2 border-purple-100">
+              <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_rgba(140,53,115,0.15)] border-2 border-[#f5ebf4]">
                 <QRCode value={selectedBooking.meetingCode} size={180} fgColor="#000" />
               </div>
               
@@ -520,7 +520,7 @@ export default function BookingsPage() {
                 </div>
               ) : scanStatus === "processing" ? (
                 <div className="absolute inset-0 bg-black/80 rounded-3xl flex flex-col items-center justify-center text-white anim-fade-in z-10 backdrop-blur-sm">
-                  <Loader2 size={32} className="animate-spin mb-3 text-[#7c3aed]" />
+                  <Loader2 size={32} className="animate-spin mb-3 text-[#8C3573]" />
                   <p className="font-bold text-xs">Verifying...</p>
                 </div>
               ) : (
@@ -531,12 +531,12 @@ export default function BookingsPage() {
                     value={manualCode}
                     onChange={(e) => setManualCode(e.target.value.toUpperCase())}
                     placeholder="Enter 6-digit code"
-                    className="w-full bg-black/50 border border-white/20 rounded-xl px-4 py-4 text-center text-2xl font-black text-white tracking-[0.3em] uppercase outline-none focus:border-[#7c3aed] transition-colors"
+                    className="w-full bg-black/50 border border-white/20 rounded-xl px-4 py-4 text-center text-2xl font-black text-white tracking-[0.3em] uppercase outline-none focus:border-[#8C3573] transition-colors"
                   />
                   <button
                     onClick={handleVerifyCode}
                     disabled={manualCode.length !== 6}
-                    className="w-full bg-[#7c3aed] disabled:bg-zinc-800 disabled:text-zinc-500 hover:bg-[#6d28d9] text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all"
+                    className="w-full bg-[#8C3573] disabled:bg-zinc-800 disabled:text-zinc-500 hover:bg-[#74295d] text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all"
                   >
                     Verify & Claim Sparks
                   </button>

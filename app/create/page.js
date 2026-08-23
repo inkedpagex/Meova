@@ -24,9 +24,9 @@ export default function CreateSelectorPage() {
       title: 'Create Experience',
       desc: 'Host a coffee connect, study session, or casual meet-up.',
       icon: Coffee,
-      color: '#7c3aed',
-      badgeBg: 'bg-purple-50 border-purple-100 text-purple-600',
-      gradient: 'from-purple-500/10 via-purple-500/5 to-transparent',
+      color: '#8C3573',
+      badgeBg: 'bg-[#fcf6fa] border-[#f5ebf4] text-[#8C3573]',
+      gradient: 'from-[#9e4685]/10 via-[#9e4685]/5 to-transparent',
       href: '/create/experience'
     },
     {
@@ -72,7 +72,7 @@ export default function CreateSelectorPage() {
       {/* Header */}
       <div className="pt-2 px-2 flex items-center justify-between">
         <div>
-          <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest bg-purple-50 border border-purple-100 px-3 py-1 rounded-full">
+          <span className="text-[10px] font-black text-[#8C3573] uppercase tracking-widest bg-[#fcf6fa] border border-[#f5ebf4] px-3 py-1 rounded-full">
             Campus Hub
           </span>
           <h1 className="text-2xl md:text-3xl font-black text-zinc-950 tracking-tight mt-2">
@@ -97,7 +97,7 @@ export default function CreateSelectorPage() {
           <Link
             key={opt.title}
             href={opt.href}
-            className="group relative flex items-center justify-between p-4 bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-purple-300 hover:shadow-[0_8px_25px_rgba(124,58,237,0.08)] hover:-translate-y-0.5 active:scale-[0.99] transition-all duration-200 overflow-hidden"
+            className="group relative flex items-center justify-between p-4 bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-purple-300 hover:shadow-[0_8px_25px_rgba(140,53,115,0.08)] hover:-translate-y-0.5 active:scale-[0.99] transition-all duration-200 overflow-hidden"
           >
             {/* Subtle color highlight on hover */}
             <div className={`absolute inset-0 bg-gradient-to-r ${opt.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
@@ -107,7 +107,7 @@ export default function CreateSelectorPage() {
                 <opt.icon size={22} strokeWidth={2.2} />
               </div>
               <div className="text-left min-w-0">
-                <h3 className="text-[14px] font-black text-zinc-900 tracking-tight mb-0.5 group-hover:text-purple-700 transition-colors">
+                <h3 className="text-[14px] font-black text-zinc-900 tracking-tight mb-0.5 group-hover:text-[#74295d] transition-colors">
                   {opt.title}
                 </h3>
                 <p className="text-[11px] text-zinc-500 font-medium leading-normal truncate max-w-[300px]">
@@ -116,7 +116,7 @@ export default function CreateSelectorPage() {
               </div>
             </div>
 
-            <div className="relative z-10 w-8 h-8 rounded-full bg-zinc-50 group-hover:bg-purple-50 flex items-center justify-center text-zinc-400 group-hover:text-purple-600 transition-all flex-shrink-0">
+            <div className="relative z-10 w-8 h-8 rounded-full bg-zinc-50 group-hover:bg-[#fcf6fa] flex items-center justify-center text-zinc-400 group-hover:text-[#8C3573] transition-all flex-shrink-0">
               <ChevronRight size={16} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
             </div>
           </Link>

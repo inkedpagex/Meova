@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../../lib/getAdminUser';
 import { adminDb } from '../../../../lib/firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
 import { getWallet, getWithdrawals } from '../../../../lib/wallet';
 import { rateLimit, getClientIp } from '../../../../lib/rateLimit';
 
@@ -42,11 +43,6 @@ export async function POST(request) {
     return NextResponse.json({ error: 'UPI ID required' }, { status: 400 });
   }
 
-  const wallet = await getWallet(user.uid);
-  if (!wallet || (wallet.creator || 0) < amount) {
-    return NextResponse.json({ error: 'Insufficient Creator Sparks' }, { status: 400 });
-  }
-
   // Block if user has reached the limit of 3 pending requests
   const pendingCount = await adminDb.collection('withdrawals')
     .where('userId', '==', user.uid)
@@ -58,16 +54,37 @@ export async function POST(request) {
     return NextResponse.json({ error: 'You have reached the limit of 3 pending withdrawal requests' }, { status: 400 });
   }
 
-  await adminDb.collection('withdrawals').add({
-    userId:       user.uid,
-    email:        user.email,
-    amount,
-    method,
-    upi_id:       upi_id || null,
-    bank_details: bank_details || null,
-    status:       'pending',
-    requested_at: new Date().toISOString(),
-  });
+  try {
+    await adminDb.runTransaction(async (tx) => {
+      const walletRef = adminDb.collection('wallets').doc(user.uid);
+      const walletSnap = await tx.get(walletRef);
+      if (!walletSnap.exists) throw new Error('Wallet not found');
+      const w = walletSnap.data();
 
-  return NextResponse.json({ ok: true, message: 'Withdrawal request submitted' });
+      if ((w.creator || 0) < amount) throw new Error('Insufficient Creator Sparks');
+
+      // Deduct immediately (Escrow)
+      tx.update(walletRef, {
+        creator: FieldValue.increment(-amount),
+        updated_at: new Date().toISOString()
+      });
+
+      // Create withdrawal request
+      const wdRef = adminDb.collection('withdrawals').doc();
+      tx.set(wdRef, {
+        userId:       user.uid,
+        email:        user.email,
+        amount,
+        method,
+        upi_id:       upi_id || null,
+        bank_details: bank_details || null,
+        status:       'pending',
+        requested_at: new Date().toISOString(),
+      });
+    });
+
+    return NextResponse.json({ ok: true, message: 'Withdrawal request submitted' });
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 400 });
+  }
 }

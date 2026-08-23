@@ -155,7 +155,7 @@ export default function CreateExperienceClient({ currentUser }) {
         <form onSubmit={handlePublish} className="space-y-6">
 
           {/* Hero Banner */}
-          <div className="w-full h-44 rounded-[2rem] bg-gradient-to-tr from-[#6366f1] via-[#a855f7] to-[#ec4899] flex flex-col items-center justify-center relative overflow-hidden shadow-md">
+          <div className="w-full h-44 rounded-[2rem] bg-gradient-to-tr from-[#b5609d] via-[#b5609d] to-[#ec4899] flex flex-col items-center justify-center relative overflow-hidden shadow-md">
             <div className="absolute top-2 left-6 w-16 h-16 rounded-full bg-white/10 blur-xl pointer-events-none" />
             <div className="absolute -bottom-4 right-10 w-24 h-24 rounded-full bg-white/10 blur-2xl pointer-events-none" />
             <div className="relative z-10 flex flex-col items-center space-y-2">
@@ -182,7 +182,7 @@ export default function CreateExperienceClient({ currentUser }) {
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="e.g. Coffee & DSA Session ☕"
-              className="w-full bg-white border border-zinc-200 focus:border-[#7c3aed] focus:ring-4 focus:ring-[#7c3aed]/10 rounded-2xl p-3.5 text-xs text-zinc-950 placeholder-zinc-400 focus:outline-none transition-all font-semibold shadow-sm"
+              className="w-full bg-white border border-zinc-200 focus:border-[#8C3573] focus:ring-4 focus:ring-[#8C3573]/10 rounded-2xl p-3.5 text-xs text-zinc-950 placeholder-zinc-400 focus:outline-none transition-all font-semibold shadow-sm"
             />
           </div>
 
@@ -196,7 +196,7 @@ export default function CreateExperienceClient({ currentUser }) {
               onChange={e => setDescription(e.target.value)}
               rows={3}
               placeholder="e.g. We'll work through DSA problems, I'll share tips for placements and we can grab a coffee while doing it..."
-              className="w-full bg-white border border-zinc-200 focus:border-[#7c3aed] focus:ring-4 focus:ring-[#7c3aed]/10 rounded-2xl p-3.5 text-xs text-zinc-950 placeholder-zinc-400 focus:outline-none transition-all font-semibold shadow-sm resize-none"
+              className="w-full bg-white border border-zinc-200 focus:border-[#8C3573] focus:ring-4 focus:ring-[#8C3573]/10 rounded-2xl p-3.5 text-xs text-zinc-950 placeholder-zinc-400 focus:outline-none transition-all font-semibold shadow-sm resize-none"
             />
           </div>
 
@@ -213,7 +213,7 @@ export default function CreateExperienceClient({ currentUser }) {
                   onClick={() => setCategory(cat)}
                   className={`px-4 py-2.5 border rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                     category === cat
-                      ? 'bg-[#7c3aed] border-transparent text-white shadow-sm'
+                      ? 'bg-[#8C3573] border-transparent text-white shadow-sm'
                       : 'bg-white border-zinc-200 text-zinc-600 hover:text-zinc-950 hover:border-zinc-300'
                   }`}
                 >
@@ -229,7 +229,7 @@ export default function CreateExperienceClient({ currentUser }) {
               Location (Approved Campus Spots)
             </label>
             <div className="relative flex items-center">
-              <MapPin size={13} className="absolute left-3.5 text-[#7c3aed] pointer-events-none z-10" />
+              <MapPin size={13} className="absolute left-3.5 text-[#8C3573] pointer-events-none z-10" />
               <select
                 value={location}
                 onChange={e => setLocation(e.target.value)}
@@ -255,7 +255,7 @@ export default function CreateExperienceClient({ currentUser }) {
                   onClick={() => setDuration(d)}
                   className={`py-3 border rounded-2xl text-xs font-black transition-all cursor-pointer ${
                     duration === d
-                      ? 'bg-[#7c3aed] border-transparent text-white shadow-sm'
+                      ? 'bg-[#8C3573] border-transparent text-white shadow-sm'
                       : 'bg-white border-zinc-200 text-zinc-900 hover:border-zinc-300'
                   }`}
                 >
@@ -278,7 +278,7 @@ export default function CreateExperienceClient({ currentUser }) {
                   onClick={() => setPrice(p)}
                   className={`py-3.5 border rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-0.5 ${
                     price === p
-                      ? 'bg-[#7c3aed] border-transparent text-white shadow-sm'
+                      ? 'bg-[#8C3573] border-transparent text-white shadow-sm'
                       : 'bg-white border-zinc-200 text-zinc-900 hover:border-zinc-300'
                   }`}
                 >
@@ -315,7 +315,7 @@ export default function CreateExperienceClient({ currentUser }) {
               type="button"
               onClick={addSlot}
               disabled={slots.length >= 10}
-              className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-zinc-200 rounded-2xl text-xs font-black text-zinc-400 hover:border-[#7c3aed] hover:text-[#7c3aed] transition-all disabled:opacity-40 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-zinc-200 rounded-2xl text-xs font-black text-zinc-400 hover:border-[#8C3573] hover:text-[#8C3573] transition-all disabled:opacity-40 cursor-pointer"
             >
               <Plus size={14} />
               Add Time Slot
@@ -330,7 +330,7 @@ export default function CreateExperienceClient({ currentUser }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-xs font-black uppercase tracking-wider py-4 rounded-2xl shadow-md transition-all active:scale-[0.98] disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
+            className="w-full bg-[#8C3573] hover:bg-[#74295d] text-white text-xs font-black uppercase tracking-wider py-4 rounded-2xl shadow-md transition-all active:scale-[0.98] disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
           >
             {loading ? (
               <>

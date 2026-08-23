@@ -76,11 +76,11 @@ export default function AuthForm({ defaultMode = 'login' }) {
       {/* ── LEFT: Branding Panel ─────────────────────────────── */}
       <div className="hidden lg:flex flex-col justify-between w-[52%] bg-[#f3f0ff] p-14 relative overflow-hidden select-none">
         {/* Subtle bg blob */}
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#7c3aed]/10 rounded-full blur-[120px] pointer-events-none -translate-x-1/4 translate-y-1/4" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#8C3573]/10 rounded-full blur-[120px] pointer-events-none -translate-x-1/4 translate-y-1/4" />
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 relative z-10">
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#7c3aed,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(124,58,237,0.3)' }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#8C3573,#b5609d)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(140,53,115,0.3)' }}>
             <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
               <path d="M3 18V9l9 6 9-6v9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M3 9l9-6 9 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -94,7 +94,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
           <h1 className="text-[42px] font-black leading-[1.1] tracking-tight text-zinc-900">
             Meet people.<br />
             Join experiences.<br />
-            <span style={{ color: '#7c3aed' }}>Make college count.</span>
+            <span style={{ color: '#8C3573' }}>Make college count.</span>
           </h1>
           <p className="text-[15px] text-zinc-500 font-medium mt-4 leading-relaxed max-w-[340px]">
             The social discovery platform<br />built for your campus.
@@ -105,7 +105,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
             {features.map(({ Icon, title, desc }) => (
               <div key={title} className="flex items-start gap-4">
                 <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-sm border border-[#ede9fe]">
-                  <Icon size={16} style={{ color: '#7c3aed' }} strokeWidth={2} />
+                  <Icon size={16} style={{ color: '#8C3573' }} strokeWidth={2} />
                 </div>
                 <div>
                   <p className="text-[13px] font-black text-zinc-800">{title}</p>
@@ -122,7 +122,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
             src="/login-hero.png"
             alt="Campus students"
             className="w-full max-w-[420px] object-contain drop-shadow-xl"
-            style={{ filter: 'drop-shadow(0 20px 40px rgba(124,58,237,0.15))' }}
+            style={{ filter: 'drop-shadow(0 20px 40px rgba(140,53,115,0.15))' }}
           />
         </div>
       </div>
@@ -135,14 +135,14 @@ export default function AuthForm({ defaultMode = 'login' }) {
           <span className="text-[13px] text-zinc-400 font-medium">New here?</span>
           <Link href="/signup"
             className="px-5 py-2 rounded-full text-[12px] font-black text-white transition-all hover:opacity-90 active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', boxShadow: '0 4px 14px rgba(124,58,237,0.3)' }}>
+            style={{ background: 'linear-gradient(135deg, #8C3573, #b5609d)', boxShadow: '0 4px 14px rgba(140,53,115,0.3)' }}>
             Create Account
           </Link>
         </div>
 
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-2 mb-8">
-          <div style={{ width: 32, height: 32, borderRadius: 9, background: 'linear-gradient(135deg,#7c3aed,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 32, height: 32, borderRadius: 9, background: 'linear-gradient(135deg,#8C3573,#b5609d)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width={18} height={18} viewBox="0 0 24 24" fill="none">
               <path d="M3 18V9l9 6 9-6v9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M3 9l9-6 9 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -174,7 +174,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
           <button
             onClick={() => loginWithGoogleGIS()}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl border-2 border-zinc-100 bg-white hover:bg-zinc-50 hover:border-[#7c3aed]/20 transition-all font-semibold text-[14px] text-zinc-700 cursor-pointer active:scale-[0.98] disabled:opacity-60 shadow-sm"
+            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl border-2 border-zinc-100 bg-white hover:bg-zinc-50 hover:border-[#8C3573]/20 transition-all font-semibold text-[14px] text-zinc-700 cursor-pointer active:scale-[0.98] disabled:opacity-60 shadow-sm"
           >
             {loading ? (
               <Loader2 size={18} className="animate-spin text-zinc-400" />
@@ -192,14 +192,14 @@ export default function AuthForm({ defaultMode = 'login' }) {
           {/* Terms */}
           <p className="text-center text-[11px] text-zinc-400 mt-6 leading-relaxed">
             By continuing, you agree to our{' '}
-            <a href="/terms" target="_blank" className="text-[#7c3aed] font-semibold hover:underline">Terms of Service</a>
+            <a href="/terms" target="_blank" className="text-[#8C3573] font-semibold hover:underline">Terms of Service</a>
             {' '}·{' '}
-            <a href="/privacy" target="_blank" className="text-[#7c3aed] font-semibold hover:underline">Privacy Policy</a>
+            <a href="/privacy" target="_blank" className="text-[#8C3573] font-semibold hover:underline">Privacy Policy</a>
           </p>
 
           {/* Secure badge */}
           <div className="mt-8 flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-zinc-50 border border-zinc-100">
-            <ShieldCheck size={16} className="text-[#7c3aed]" strokeWidth={2} />
+            <ShieldCheck size={16} className="text-[#8C3573]" strokeWidth={2} />
             <div className="text-left">
               <p className="text-[12px] font-black text-zinc-700">Secure login</p>
               <p className="text-[10px] text-zinc-400">Your data is encrypted and safe with us.</p>

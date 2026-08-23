@@ -16,13 +16,13 @@ const CATEGORY_ICONS = {
 const CATEGORY_COLORS = {
   Tech: { bg: '#eff6ff', color: '#3b82f6', border: '#bfdbfe' },
   Gaming: { bg: '#f0f9ff', color: '#0ea5e9', border: '#bae6fd' },
-  Music: { bg: '#fdf4ff', color: '#a855f7', border: '#e9d5ff' },
+  Music: { bg: '#fdf4ff', color: '#b5609d', border: '#e9d5ff' },
   Design: { bg: '#fff7ed', color: '#f97316', border: '#fed7aa' },
-  Startup: { bg: '#f5f3ff', color: '#7c3aed', border: '#ddd6fe' },
+  Startup: { bg: '#f5f3ff', color: '#8C3573', border: '#ddd6fe' },
   Sports: { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
   Creators: { bg: '#fff1f2', color: '#e11d48', border: '#fecdd3' },
   Entertainment: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },
-  default: { bg: '#f5f3ff', color: '#7c3aed', border: '#ddd6fe' },
+  default: { bg: '#f5f3ff', color: '#8C3573', border: '#ddd6fe' },
 };
 
 const MOCK_COMMUNITIES = [
@@ -38,6 +38,7 @@ const MOCK_COMMUNITIES = [
     price: 0,
     isVerified: true,
     featured: true,
+    whatsapp_link: 'https://chat.whatsapp.com/',
   },
   {
     id: 'gdsc',
@@ -48,66 +49,75 @@ const MOCK_COMMUNITIES = [
     isPaid: false,
     price: 0,
     isVerified: true,
+    whatsapp_link: 'https://chat.whatsapp.com/',
   },
   {
     id: 'creators_club',
-    name: 'Creators Club',
+    name: 'Creators Club VIP',
     category: 'Creators',
     member_count: 92,
     desc: 'Create. Share. Inspire.',
     isPaid: true,
     price: 50,
+    whatsapp_link: 'https://chat.whatsapp.com/',
   },
   {
     id: 'anime_circle',
-    name: 'Anime Circle',
+    name: 'Anime & Manga Society',
     category: 'Entertainment',
     member_count: 240,
-    desc: 'Anime talks & more!',
+    desc: 'Anime talks, watch parties & cosplay meets!',
     isPaid: false,
     price: 0,
+    whatsapp_link: 'https://chat.whatsapp.com/',
   },
   {
     id: 'music_circle',
-    name: 'Music Circle',
+    name: 'Campus Jam & Music',
     category: 'Music',
     member_count: 157,
-    desc: 'Make. Jam. Vibe.',
+    desc: 'Make jams, vibe, share playlist links.',
     isPaid: true,
     price: 50,
     isVerified: true,
+    whatsapp_link: 'https://chat.whatsapp.com/',
   },
   {
     id: 'gaming_arena',
-    name: 'Gaming Arena',
+    name: 'Campus Esports & Gaming',
     category: 'Gaming',
     member_count: 320,
-    desc: 'Play. Compete. Win.',
+    desc: 'BGMI, Valorant, FIFA tournaments & rooms.',
     isPaid: true,
     price: 100,
+    whatsapp_link: 'https://chat.whatsapp.com/',
   },
   {
     id: 'design_lab',
-    name: 'Design Lab',
+    name: 'UI/UX & Design Lab',
     category: 'Design',
     member_count: 74,
-    desc: 'UI · UX · Figma · Branding',
+    desc: 'UI · UX · Figma · Portfolio Reviews',
     isPaid: false,
     price: 0,
+    whatsapp_link: 'https://chat.whatsapp.com/',
   },
 ];
 
 const FILTERS = ['All', 'Tech', 'Gaming', 'Music', 'Design', 'Startup', 'Creators'];
 
-export default function CirclesList({ circles, joinedCircleIds, userId }) {
+export default function CirclesList({ circles = [], joinedCircleIds = new Set(), userId = null }) {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [joinedMap, setJoinedMap] = useState({});
   const [sparks, setSparks] = useState(0);
 
-  // Group Rules Modal state
+  // Modal states
   const [rulesCircle, setRulesCircle] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [manageCircle, setManageCircle] = useState(null);
+  const [joiningId, setJoiningId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -115,7 +125,6 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
     if (joinedCircleIds) joinedCircleIds.forEach(id => { initial[id] = true; });
     const ls = typeof window !== 'undefined' ? localStorage.getItem('meetify_joined_circles') : null;
     if (ls) try { Object.assign(initial, JSON.parse(ls)); } catch {}
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!cancelled) setJoinedMap(initial);
 
     if (userId && typeof window !== 'undefined') {
@@ -135,9 +144,15 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
 
   // Merge DB circles
   const dbMapped = (circles || []).map(c => ({
-    id: c.id, name: c.name, category: c.category || 'General',
-    member_count: c.member_count || 0, desc: c.desc || '',
-    isPaid: false, price: 0,
+    id: c.id, 
+    name: c.name, 
+    category: c.category || 'General',
+    member_count: c.member_count || 0, 
+    desc: c.desc || c.description || '',
+    isPaid: c.isPaid || false, 
+    price: c.price || 0,
+    host_id: c.host_id,
+    whatsapp_link: c.whatsapp_link || 'https://chat.whatsapp.com/',
   }));
   const allCircles = [...MOCK_COMMUNITIES];
   dbMapped.forEach(c => { if (!allCircles.some(a => a.id === c.id)) allCircles.push(c); });
@@ -154,7 +169,8 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
   const handleJoinClick = (circle) => {
     const isJoined = joinedMap[circle.id];
     if (isJoined) {
-      router.push(`/messages?user=${encodeURIComponent(circle.name)}`);
+      // Call secure join to retrieve unlocked link
+      executeSecureJoin(circle);
       return;
     }
     // Show Group Rules & Agenda Modal before completing join
@@ -163,27 +179,50 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
 
   const confirmJoinCircle = () => {
     if (!rulesCircle) return;
-    const circle = rulesCircle;
+    executeSecureJoin(rulesCircle);
+    setRulesCircle(null);
+  };
 
-    if (circle.isPaid) {
-      if (sparks < circle.price) {
-        alert(`You need ${circle.price} Sparks to join. Your balance: ${sparks} Sparks.\n\nVisit Wallet to add more Sparks.`);
-        setRulesCircle(null);
+  const executeSecureJoin = async (circle) => {
+    setJoiningId(circle.id);
+    try {
+      const res = await fetch(`/api/circles/${circle.id}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      setJoiningId(null);
+
+      if (res.status === 402) {
+        toast.error(data.error || 'Insufficient Sparks!');
         router.push('/wallet');
         return;
       }
-      if (userId) {
-        setSparks(prev => prev - circle.price);
-        window.dispatchEvent(new Event('wallet-updated'));
+
+      if (res.ok && data.success) {
+        if (data.sparksDeducted > 0) {
+          toast.success(`Joined ${circle.name}! ${data.sparksDeducted} Sparks deducted.`);
+          setSparks(prev => Math.max(0, prev - data.sparksDeducted));
+          window.dispatchEvent(new Event('wallet-updated'));
+        }
+
+        const next = { ...joinedMap, [circle.id]: true };
+        setJoinedMap(next);
+        if (typeof window !== 'undefined') localStorage.setItem('meetify_joined_circles', JSON.stringify(next));
+
+        if (data.invite_link) {
+          window.open(data.invite_link, '_blank');
+        } else {
+          router.push(`/messages?user=${encodeURIComponent(circle.name)}`);
+        }
+      } else {
+        toast.error(data.error || 'Failed to join community');
       }
+    } catch (err) {
+      setJoiningId(null);
+      console.error(err);
+      toast.error('Network error, please try again');
     }
-
-    const next = { ...joinedMap, [circle.id]: true };
-    setJoinedMap(next);
-    if (typeof window !== 'undefined') localStorage.setItem('meetify_joined_circles', JSON.stringify(next));
-
-    setRulesCircle(null);
-    setTimeout(() => router.push(`/messages?user=${encodeURIComponent(circle.name)}`), 400);
   };
 
   // Helper to get avatar mock stack
@@ -195,6 +234,28 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
 
   return (
     <div className="space-y-5 pb-24 pt-2">
+
+      {/* Host a Community CTA Banner */}
+      <div className="bg-gradient-to-r from-[#512142] via-indigo-900 to-purple-950 rounded-3xl p-5 text-white shadow-xl shadow-purple-950/20 border border-[#60234d]/40 flex items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5">
+            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-[#9e4685]/30 text-[#eac5e0] border border-[#b5609d]/30">
+              Host Monetization
+            </span>
+            <span className="text-[10px] font-bold text-amber-300 flex items-center gap-1">
+              <Zap size={12} className="fill-current text-amber-300" /> 100% Sparks Earnings
+            </span>
+          </div>
+          <h3 className="text-sm sm:text-base font-black tracking-tight text-white">Create Your Campus Channel</h3>
+          <p className="text-[11px] text-[#eac5e0]/80 font-medium">Monetize your WhatsApp, Telegram or Insta community and track joined students.</p>
+        </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="px-4 py-3 rounded-2xl bg-white hover:bg-[#fcf6fa] text-[#512142] font-black text-xs transition-all shadow-lg active:scale-95 flex-shrink-0 cursor-pointer"
+        >
+          + Host Channel
+        </button>
+      </div>
 
       {/* Search */}
       <div className="relative">
@@ -218,7 +279,7 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
           <button key={f} onClick={() => setActiveFilter(f)}
             className="flex-shrink-0 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
             style={activeFilter === f
-              ? { background: '#7c3aed', color: 'white', border: '1px solid transparent' }
+              ? { background: '#8C3573', color: 'white', border: '1px solid transparent' }
               : { background: '#f4f4f6', color: '#71717a', border: '1px solid #ebebed' }}>
             {f}
           </button>
@@ -228,7 +289,7 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
       {/* Featured community banner */}
       {featured && !search && activeFilter === 'All' && (
         <div className="relative rounded-3xl p-5 overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', boxShadow: '0 8px 32px rgba(124,58,237,0.25)' }}>
+          style={{ background: 'linear-gradient(135deg, #8C3573, #8C3573)', boxShadow: '0 8px 32px rgba(140,53,115,0.25)' }}>
           <div className="absolute top-0 right-0 w-36 h-36 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2 bg-white" />
           <div className="relative z-10">
             <div className="flex items-start justify-between gap-3">
@@ -245,11 +306,12 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
                 </div>
               </div>
               <button onClick={() => handleJoinClick(featured)}
+                disabled={joiningId === featured.id}
                 className="px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer active:scale-95 transition-all flex-shrink-0"
                 style={joinedMap[featured.id]
                   ? { background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }
-                  : { background: 'white', color: '#7c3aed' }}>
-                {joinedMap[featured.id] ? 'Open' : 'Join'}
+                  : { background: 'white', color: '#8C3573' }}>
+                {joiningId === featured.id ? 'Joining...' : (joinedMap[featured.id] ? 'Open' : 'Join')}
               </button>
             </div>
 
@@ -264,98 +326,88 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
                   Next meetup: {featured.nextMeetup}
                 </div>
               )}
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-white/80">
-                <span className="text-white/50">·</span>
-                {(featured.member_count || 0).toLocaleString()} members
-              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Section header */}
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400">All Communities</span>
-        <span className="text-[11px] font-bold text-[#7c3aed]">{displayed.length} groups</span>
-      </div>
-
-      {/* Communities list */}
-      <div className="space-y-2.5">
+      {/* Community cards list */}
+      <div className="space-y-3">
         {displayed.map(circle => {
           const isJoined = joinedMap[circle.id];
-          const theme = CATEGORY_COLORS[circle.category] || CATEGORY_COLORS.default;
-          const Icon = CATEGORY_ICONS[circle.category] || Users;
-          const avatarStack = getAvatarStack(circle.id);
+          const isHost = circle.host_id && circle.host_id === userId;
+          const CategoryIcon = CATEGORY_ICONS[circle.category] || CATEGORY_ICONS.default;
+          const categoryStyle = CATEGORY_COLORS[circle.category] || CATEGORY_COLORS.default;
 
           return (
-            <div key={circle.id}
+            <div
+              key={circle.id}
               onClick={() => handleJoinClick(circle)}
-              className="p-4 rounded-2xl flex items-center gap-3 cursor-pointer transition-all hover:shadow-sm active:scale-[0.99]"
-              style={{ background: '#ffffff', border: '1px solid #f0f0f0', boxShadow: '0 1px 4px rgba(0,0,0,0.02)' }}>
-
-              {/* Avatar */}
-              <div className="rounded-2xl flex items-center justify-center flex-shrink-0"
-                style={{ width: 48, height: 48, background: theme.bg, border: `1px solid ${theme.border}`, color: theme.color }}>
-                <Icon size={20} strokeWidth={2} />
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-black text-zinc-900 truncate">{circle.name}</span>
-                  {circle.isVerified && (
-                    <span className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                      <Check size={9} className="text-white" strokeWidth={3.5} />
-                    </span>
-                  )}
+              className="rounded-3xl p-4 sm:p-4.5 flex items-center justify-between gap-3 transition-all cursor-pointer group"
+              style={{
+                background: '#ffffff',
+                border: '1px solid #f0f0f0',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+              }}>
+              <div className="flex items-center gap-3.5 min-w-0">
+                {/* Category Icon */}
+                <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105"
+                  style={{ background: categoryStyle.bg, border: `1px solid ${categoryStyle.border}` }}>
+                  <CategoryIcon size={20} style={{ color: categoryStyle.color }} />
                 </div>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[9.5px] font-bold uppercase tracking-wider" style={{ color: theme.color }}>{circle.category}</span>
-                  <span className="text-[9.5px] text-zinc-400">·</span>
-                  <span className="text-[9.5px] text-zinc-400 font-medium">{(circle.member_count || 0).toLocaleString()} members</span>
-                </div>
-                <p className="text-[11px] text-zinc-400 mt-0.5 font-medium truncate">{circle.desc}</p>
 
-                {/* Overlapping Member Avatar Stack + Tag Row */}
-                <div className="flex items-center justify-between mt-2.5 pt-1 border-t border-zinc-100/60">
-                  <div className="flex items-center">
-                    <div className="flex -space-x-2 overflow-hidden">
-                      {avatarStack.map((src, i) => (
-                        <img 
-                          key={i} 
-                          src={src} 
-                          alt="member" 
-                          className="inline-block h-5 w-5 rounded-full ring-2 ring-white object-cover bg-zinc-100" 
-                        />
-                      ))}
-                    </div>
-                    <span className="text-[9px] font-extrabold text-zinc-500 ml-1.5">
-                      +{Math.max(1, (circle.member_count || 12) - 3)} members
+                <div className="min-w-0 space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-[13px] font-black text-zinc-900 truncate">{circle.name}</h4>
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider flex-shrink-0"
+                      style={{ background: categoryStyle.bg, color: categoryStyle.color, border: `1px solid ${categoryStyle.border}` }}>
+                      {circle.category}
                     </span>
                   </div>
 
-                  {circle.isPaid ? (
-                    <span className="flex items-center gap-1 text-[9.5px] font-black text-orange-600 px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200">
-                      <Zap size={9} className="fill-current" />
-                      {circle.price} Sparks
-                    </span>
-                  ) : (
-                    <span className="text-[9.5px] font-black text-emerald-600 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
-                      Free
-                    </span>
-                  )}
+                  <p className="text-[11px] text-zinc-400 font-medium truncate">{circle.desc || 'Campus Community'}</p>
+
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-500">
+                      <Users size={11} className="text-zinc-400" />
+                      <span>{circle.member_count} members</span>
+                    </div>
+
+                    {circle.isPaid ? (
+                      <span className="text-[9.5px] font-black text-[#74295d] px-2 py-0.5 rounded-full bg-[#fcf6fa] border border-[#eac5e0] flex items-center gap-0.5">
+                        <Zap size={9} className="fill-[#8C3573] text-[#8C3573]" />
+                        {circle.price} Sparks
+                      </span>
+                    ) : (
+                      <span className="text-[9.5px] font-black text-emerald-600 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                        Free
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Join button */}
-              <button
-                onClick={(e) => { e.stopPropagation(); handleJoinClick(circle); }}
-                className="px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95 flex-shrink-0"
-                style={isJoined
-                  ? { background: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe' }
-                  : { background: '#7c3aed', color: 'white' }}>
-                {isJoined ? 'Open' : 'Join'}
-              </button>
+              {/* Actions */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {isHost && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setManageCircle(circle); }}
+                    className="px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-[#fcf6fa] text-[#74295d] border border-[#eac5e0] hover:bg-[#f5ebf4] transition-colors"
+                  >
+                    Manage
+                  </button>
+                )}
+
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleJoinClick(circle); }}
+                  disabled={joiningId === circle.id}
+                  className="px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95 flex-shrink-0 flex items-center gap-1.5"
+                  style={isJoined
+                    ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
+                    : { background: '#8C3573', color: 'white' }}>
+                  {joiningId === circle.id ? 'Joining...' : (isJoined ? 'JOINED' : (circle.isPaid ? `${circle.price} ⚡ JOIN` : 'JOIN'))}
+                </button>
+              </div>
             </div>
           );
         })}
@@ -366,8 +418,27 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
           <Users size={28} className="mx-auto mb-3 text-zinc-300" />
           <p className="text-sm font-bold text-zinc-400">No communities found</p>
           <button onClick={() => { setSearch(''); setActiveFilter('All'); }}
-            className="mt-3 text-[11px] font-black text-[#7c3aed] cursor-pointer">Clear filters</button>
+            className="mt-3 text-[11px] font-black text-[#8C3573] cursor-pointer">Clear filters</button>
         </div>
+      )}
+
+      {/* ── CREATE COMMUNITY MODAL ────────────────────────── */}
+      <CreateCircleModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={() => {
+          router.refresh();
+        }}
+      />
+
+      {/* ── HOST COMMUNITY DASHBOARD MODAL ────────────────── */}
+      {manageCircle && (
+        <HostCircleDashboardModal
+          isOpen={Boolean(manageCircle)}
+          circleId={manageCircle.id}
+          circleName={manageCircle.name}
+          onClose={() => setManageCircle(null)}
+        />
       )}
 
       {/* ── GROUP RULES & MEETING AGENDA PRE-JOIN MODAL ───────── */}
@@ -378,16 +449,16 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
           onClick={() => setRulesCircle(null)}
         >
           <div 
-            className="w-full max-w-sm bg-white rounded-3xl p-6 space-y-4 animate-in fade-in zoom-in duration-200 shadow-2xl border border-purple-100"
+            className="w-full max-w-sm bg-white rounded-3xl p-6 space-y-4 animate-in fade-in zoom-in duration-200 shadow-2xl border border-[#f5ebf4]"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 border-b border-zinc-100 pb-3">
-              <div className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600 font-black text-sm">
+              <div className="w-10 h-10 rounded-2xl bg-[#f5ebf4] flex items-center justify-center text-[#8C3573] font-black text-sm">
                 👥
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-black text-zinc-900 truncate">{rulesCircle.name}</h3>
-                <p className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">{rulesCircle.category} Community</p>
+                <p className="text-[10px] font-bold text-[#8C3573] uppercase tracking-wider">{rulesCircle.category} Community</p>
               </div>
             </div>
 
@@ -395,15 +466,15 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
               <h4 className="text-xs font-black text-zinc-800 uppercase tracking-wider">Community Guidelines & Rules:</h4>
               <ul className="space-y-2 text-xs font-medium text-zinc-600">
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">1</span>
+                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#74295d] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">1</span>
                   <span><strong>Respect & Kindness:</strong> Maintain constructive, friendly discussions with campus peers.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">2</span>
+                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#74295d] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">2</span>
                   <span><strong>No Spam or Promo:</strong> Share relevant projects, meets, or notes only.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">3</span>
+                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#74295d] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">3</span>
                   <span><strong>Campus Safety:</strong> Keep meetups in verified public campus spots.</span>
                 </li>
               </ul>
@@ -418,7 +489,7 @@ export default function CirclesList({ circles, joinedCircleIds, userId }) {
               </button>
               <button
                 onClick={confirmJoinCircle}
-                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-purple-600 hover:bg-purple-700 transition-all shadow-sm flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-[#8C3573] hover:bg-[#74295d] transition-all shadow-sm flex items-center justify-center gap-1.5"
               >
                 {rulesCircle.isPaid ? `Agree & Join (${rulesCircle.price} ⚡)` : 'Agree & Join Group'}
               </button>

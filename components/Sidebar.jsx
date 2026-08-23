@@ -21,14 +21,14 @@ function MeetifyLogo({ size = 32, animate = false }) {
         width: size,
         height: size,
         borderRadius: Math.round(size * 0.3),
-        background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+        background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
         boxShadow: animate
-          ? '0 0 0 4px rgba(124,58,237,0.25), 0 2px 8px rgba(124,58,237,0.3)'
-          : '0 2px 8px rgba(124,58,237,0.3)',
+          ? '0 0 0 4px rgba(140,53,115,0.25), 0 2px 8px rgba(140,53,115,0.3)'
+          : '0 2px 8px rgba(140,53,115,0.3)',
         transition: 'box-shadow 0.3s ease',
       }}
     >
@@ -276,9 +276,9 @@ export default function Sidebar({ user }) {
               {!isAdminRoute && (
                 <Link 
                   href="/wallet" 
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-purple-50 text-purple-700 border border-purple-100/80 hover:bg-purple-100/70 transition-all active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-[#fcf6fa] text-[#74295d] border border-[#f5ebf4]/80 hover:bg-[#f5ebf4]/70 transition-all active:scale-95"
                 >
-                  <Zap size={13} className="fill-purple-600 text-purple-600" />
+                  <Zap size={13} className="fill-[#8C3573] text-[#8C3573]" />
                   <span>{sparks.toLocaleString()}</span>
                 </Link>
               )}
@@ -288,14 +288,14 @@ export default function Sidebar({ user }) {
                 href="/notifications" 
                 className={`relative p-2 rounded-full transition-all ${
                   pathname === '/notifications' 
-                    ? 'text-purple-600 bg-purple-50' 
+                    ? 'text-[#8C3573] bg-[#fcf6fa]' 
                     : 'text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100/80'
                 }`}
                 title="Notifications"
               >
-                <Bell size={20} className={unreadCount > 0 ? 'text-purple-600 fill-purple-100' : ''} strokeWidth={2.2} />
+                <Bell size={20} className={unreadCount > 0 ? 'text-[#8C3573] fill-[#f5ebf4]' : ''} strokeWidth={2.2} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-purple-600 ring-2 ring-white" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#8C3573] ring-2 ring-white" />
                 )}
               </Link>
 
@@ -304,21 +304,21 @@ export default function Sidebar({ user }) {
                 href="/messages" 
                 className={`relative p-2 rounded-full transition-all ${
                   pathname === '/messages' 
-                    ? 'text-purple-600 bg-purple-50' 
+                    ? 'text-[#8C3573] bg-[#fcf6fa]' 
                     : 'text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100/80'
                 }`}
                 title="Messages"
               >
-                <MessageSquare size={20} className={unreadMsgCount > 0 ? 'text-purple-600 fill-purple-100' : ''} strokeWidth={2.2} />
+                <MessageSquare size={20} className={unreadMsgCount > 0 ? 'text-[#8C3573] fill-[#f5ebf4]' : ''} strokeWidth={2.2} />
                 {unreadMsgCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-purple-600 ring-2 ring-white" />
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#8C3573] ring-2 ring-white" />
                 )}
               </Link>
             </>
           ) : (
             <Link 
               href="/login"
-              className="px-4 py-1.5 rounded-full text-xs font-black text-white bg-purple-600 hover:bg-purple-700 active:scale-95 transition-all shadow-2xs"
+              className="px-4 py-1.5 rounded-full text-xs font-black text-white bg-[#8C3573] hover:bg-[#74295d] active:scale-95 transition-all shadow-2xs"
             >
               Log in
             </Link>
@@ -332,7 +332,7 @@ export default function Sidebar({ user }) {
 
         <Link href="/" className="flex items-center gap-2.5 px-2 mb-10">
           <MeetifyLogo size={32} animate={logoAnimating} />
-          <span className="font-black text-[18px] tracking-tight bg-gradient-to-r from-purple-700 via-indigo-600 to-pink-600 bg-clip-text text-transparent">meetifyy</span>
+          <span className="font-black text-[18px] tracking-tight bg-gradient-to-r from-[#74295d] via-[#8C3573] to-pink-600 bg-clip-text text-transparent">meetifyy</span>
         </Link>
 
         <nav className="flex-1 space-y-0.5">
@@ -347,23 +347,23 @@ export default function Sidebar({ user }) {
             return (
               <Link key={href} href={href}
                 className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all"
-                style={{ background: active ? '#f3f0ff' : 'transparent', color: active ? '#7c3aed' : '#71717a' }}>
+                style={{ background: active ? '#f3f0ff' : 'transparent', color: active ? '#8C3573' : '#71717a' }}>
                 <div className="flex items-center gap-3 relative">
                   <Icon size={18} strokeWidth={active ? 2.5 : 1.75} />
                   <span style={{ fontWeight: active ? 800 : 500 }}>{label}</span>
                 </div>
                 {hasUnread && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white text-[10px] font-black flex items-center justify-center px-1 shadow-2xs">
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-gradient-to-tr from-[#8C3573] to-pink-500 text-white text-[10px] font-black flex items-center justify-center px-1 shadow-2xs">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
                 {hasUnreadMsgs && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white text-[10px] font-black flex items-center justify-center px-1 shadow-2xs">
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-gradient-to-tr from-[#8C3573] to-pink-500 text-white text-[10px] font-black flex items-center justify-center px-1 shadow-2xs">
                     {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
                   </span>
                 )}
                 {label === 'Wallet' && sparks > 0 && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#f5ebf4] text-[#74295d]">
                     {sparks.toLocaleString()}
                   </span>
                 )}
@@ -374,8 +374,8 @@ export default function Sidebar({ user }) {
 
         <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 16, marginTop: 16 }}>
           {user ? (
-            <Link href="/profile" className="flex items-center gap-2.5 p-2.5 rounded-xl transition-all hover:bg-purple-50/50 group">
-              <div className="w-9 h-9 rounded-full p-[1.5px] bg-gradient-to-tr from-purple-600 to-indigo-500 flex-shrink-0">
+            <Link href="/profile" className="flex items-center gap-2.5 p-2.5 rounded-xl transition-all hover:bg-[#fcf6fa]/50 group">
+              <div className="w-9 h-9 rounded-full p-[1.5px] bg-gradient-to-tr from-[#8C3573] to-[#9e4685] flex-shrink-0">
                 <div className="w-full h-full rounded-full overflow-hidden relative border border-white">
                   <img 
                     src={avatarSrc} 
@@ -388,14 +388,14 @@ export default function Sidebar({ user }) {
                 </div>
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-black truncate text-zinc-900 group-hover:text-purple-600 transition-colors">{user.full_name || (user.email || 'user').split('@')[0]}</p>
+                <p className="text-xs font-black truncate text-zinc-900 group-hover:text-[#8C3573] transition-colors">{user.full_name || (user.email || 'user').split('@')[0]}</p>
                 <p className="text-[10px] truncate text-zinc-400 font-semibold">
                   {isAdminRoute ? 'Super Admin' : `${user?.year ? (user.year.includes('Year') ? user.year : `${user.year} Year`) : '1st Year'} · ${user.branch || 'General'}`}
                 </p>
               </div>
             </Link>
           ) : (
-            <Link href="/login" className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all shadow-xs">
+            <Link href="/login" className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black text-white bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] transition-all shadow-xs">
               <LogIn size={14} /> Log in
             </Link>
           )}
@@ -414,7 +414,7 @@ export default function Sidebar({ user }) {
         {MOBILE_NAV.map(({ href, label, Icon, isCenter }) => {
           if ((href === '/profile') && !user) {
             return (
-              <Link key={href} href="/login" className="flex-1 flex flex-col items-center justify-center h-full text-zinc-400 hover:text-purple-600 transition-colors">
+              <Link key={href} href="/login" className="flex-1 flex flex-col items-center justify-center h-full text-zinc-400 hover:text-[#8C3573] transition-colors">
                 <LogIn size={20} strokeWidth={2} />
                 <span className="text-[10px] font-black mt-0.5">Login</span>
               </Link>
@@ -430,7 +430,7 @@ export default function Sidebar({ user }) {
                 className="flex-1 flex flex-col items-center justify-center relative -top-3 h-full select-none"
                 style={{ zIndex: 60 }}
               >
-                <div className="w-13 h-13 rounded-full flex items-center justify-center bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 text-white shadow-[0_8px_20px_rgba(124,58,237,0.4)] active:scale-90 transition-all ring-4 ring-white">
+                <div className="w-13 h-13 rounded-full flex items-center justify-center bg-gradient-to-tr from-[#8C3573] via-[#8C3573] to-pink-500 text-white shadow-[0_8px_20px_rgba(140,53,115,0.4)] active:scale-90 transition-all ring-4 ring-white">
                   <Plus size={24} strokeWidth={2.8} />
                 </div>
               </Link>
@@ -442,17 +442,17 @@ export default function Sidebar({ user }) {
               key={href} 
               href={href}
               className={`flex-1 flex flex-col items-center justify-center h-full relative select-none transition-all ${
-                active ? 'text-purple-600' : 'text-zinc-400 hover:text-zinc-600'
+                active ? 'text-[#8C3573]' : 'text-zinc-400 hover:text-zinc-600'
               }`}
             >
-              <div className={`p-1.5 rounded-full transition-all ${active ? 'bg-purple-50/90 text-purple-600' : ''}`}>
+              <div className={`p-1.5 rounded-full transition-all ${active ? 'bg-[#fcf6fa]/90 text-[#8C3573]' : ''}`}>
                 <Icon size={20} strokeWidth={active ? 2.6 : 1.9} />
               </div>
-              <span className={`text-[10px] font-black -mt-0.5 tracking-tight ${active ? 'text-purple-600' : 'text-zinc-400'}`}>
+              <span className={`text-[10px] font-black -mt-0.5 tracking-tight ${active ? 'text-[#8C3573]' : 'text-zinc-400'}`}>
                 {label}
               </span>
               {active && (
-                <span className="absolute top-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600" />
+                <span className="absolute top-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-gradient-to-r from-[#8C3573] to-[#8C3573]" />
               )}
             </Link>
           );
