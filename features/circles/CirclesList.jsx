@@ -123,7 +123,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
     let cancelled = false;
     const initial = {};
     if (joinedCircleIds) joinedCircleIds.forEach(id => { initial[id] = true; });
-    const ls = typeof window !== 'undefined' ? localStorage.getItem('meetify_joined_circles') : null;
+    const ls = typeof window !== 'undefined' ? localStorage.getItem('meetuply_joined_circles') : null;
     if (ls) try { Object.assign(initial, JSON.parse(ls)); } catch {}
     if (!cancelled) setJoinedMap(initial);
 
@@ -208,7 +208,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
 
         const next = { ...joinedMap, [circle.id]: true };
         setJoinedMap(next);
-        if (typeof window !== 'undefined') localStorage.setItem('meetify_joined_circles', JSON.stringify(next));
+        if (typeof window !== 'undefined') localStorage.setItem('meetuply_joined_circles', JSON.stringify(next));
 
         if (data.invite_link) {
           window.open(data.invite_link, '_blank');

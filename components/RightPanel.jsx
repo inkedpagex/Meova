@@ -8,7 +8,7 @@ import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 
 export default function RightPanel({ people = [], upcomingEvents = [] }) {
   const pathname = usePathname();
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/messages')) return null;
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/messages') || pathname === '/terms' || pathname === '/privacy') return null;
 
   const topPeople = people.slice(0, 3);
 

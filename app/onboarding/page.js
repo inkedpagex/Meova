@@ -4,8 +4,8 @@ import { getUserWithRole } from '@/lib/getAdminUser';
 import OnboardingClient from './OnboardingClient';
 
 export const metadata = {
-  title: 'Complete Your Profile — meetifyy',
-  description: 'Set up your campus identity on Meetify.',
+  title: 'Complete Your Profile — meetuply',
+  description: 'Set up your campus identity on Meetuply.',
 };
 
 export default async function OnboardingPage() {

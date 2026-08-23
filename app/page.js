@@ -9,7 +9,7 @@ import FeedClient from './FeedClient';
 import { getCartoonAvatar } from '../utils/avatar';
 import HomeSparksBadge from '../components/HomeSparksBadge';
 
-export const metadata = { title: 'meetifyy — Home' };
+export const metadata = { title: 'meetuply — Home' };
 
 export default function HomePage() {
   return (

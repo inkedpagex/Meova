@@ -1,6 +1,6 @@
 {
-  "name": "Meetify",
-  "short_name": "Meetify",
+  "name": "Meetuply",
+  "short_name": "Meetuply",
   "description": "Your campus life, all in one place.",
   "start_url": "/",
   "display": "standalone",

@@ -18,6 +18,18 @@ export default function MainContentWrapper({ children }) {
     );
   }
 
+  const isStandalonePath = pathname === '/terms' || pathname === '/privacy';
+
+  if (isStandalonePath) {
+    return (
+      <div className="flex-1 min-w-0 bg-white">
+        <main className="w-full h-full">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className={`flex-1 md:pl-[220px] ${isMessagesPath ? '' : 'xl:pr-[320px]'} min-w-0`}>
       <main

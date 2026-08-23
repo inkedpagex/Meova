@@ -44,7 +44,7 @@ export default function CreatePhotoClient({ currentUser }) {
 
       // 2. Upload to Cloudinary using unsigned preset
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'meetify_unsigned';
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'meetuply_unsigned';
 
       const formData = new FormData();
       formData.append('file', compressedFile);

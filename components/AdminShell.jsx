@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { getUserAvatarUrl } from '../utils/avatar';
 
-function MeetifyLogo({ size = 28 }) {
+function MeetuplyLogo({ size = 28 }) {
   return (
     <div
       style={{
@@ -63,7 +63,7 @@ export default function AdminShell({ admin, children }) {
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/session', { method: 'DELETE' });
-      document.cookie = '__meetify_session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      document.cookie = '__meetuply_session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       router.push('/login');
     } catch {
       router.push('/login');
@@ -80,8 +80,8 @@ export default function AdminShell({ admin, children }) {
         <div className="space-y-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 px-2">
-            <MeetifyLogo size={32} />
-            <span className="font-black text-xl tracking-tight text-slate-900">meetifyy</span>
+            <MeetuplyLogo size={32} />
+            <span className="font-black text-xl tracking-tight text-slate-900">meetuply</span>
           </Link>
 
           {/* Nav Items */}

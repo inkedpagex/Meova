@@ -50,7 +50,7 @@ function useAlgoliaSearch(query) {
       try {
         // Use Algolia's search API directly (no heavy SDK needed)
         const [usersRes, expRes] = await Promise.all([
-          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/meetify_users/query`, {
+          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/meetuply_users/query`, {
             method: 'POST',
             headers: {
               'X-Algolia-Application-Id': ALGOLIA_APP_ID,
@@ -59,7 +59,7 @@ function useAlgoliaSearch(query) {
             },
             body: JSON.stringify({ query: q, hitsPerPage: 12, attributesToRetrieve: ['objectID', 'full_name', 'year', 'branch', 'interests', 'photo_url', 'isLiveOnCampus'] }),
           }),
-          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/meetify_experiences/query`, {
+          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/meetuply_experiences/query`, {
             method: 'POST',
             headers: {
               'X-Algolia-Application-Id': ALGOLIA_APP_ID,
@@ -162,7 +162,7 @@ export default function DiscoverClient() {
 
       setPeople(filteredUsers);
 
-      const savedJoined = localStorage.getItem('meetify_disc_joined');
+      const savedJoined = localStorage.getItem('meetuply_disc_joined');
       if (savedJoined) {
         try {
           setJoinedIds(new Set(JSON.parse(savedJoined)));
@@ -182,7 +182,7 @@ export default function DiscoverClient() {
     setJoinedIds(prev => {
       const next = new Set([...prev, c.id]);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('meetify_disc_joined', JSON.stringify([...next]));
+        localStorage.setItem('meetuply_disc_joined', JSON.stringify([...next]));
       }
       return next;
     });

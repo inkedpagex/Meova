@@ -47,7 +47,7 @@ export default function PremiumPage() {
 
         <div className="space-y-2">
           <h1 className="text-3xl md:text-5xl font-black text-[var(--text-primary)] tracking-tight">
-            Meetify Premium
+            Meetuply Premium
           </h1>
           <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest mt-1">
             Unlock exclusive features and supercharge your campus experience

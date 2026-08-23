@@ -2,7 +2,7 @@ import { getUserAdmin } from '../../lib/getUserAdmin';
 import { getOrCreateWallet } from '../../lib/wallet';
 import ExperiencesClient from './ExperiencesClient';
 
-export const metadata = { title: 'Discover Experiences — meetifyy.in' };
+export const metadata = { title: 'Discover Experiences — meetuply.in' };
 
 export default async function ExperiencesPage() {
   const currentUser = await getUserAdmin();

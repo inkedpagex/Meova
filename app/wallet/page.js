@@ -151,19 +151,19 @@ export default function WalletPage() {
 
   const downloadQRCode = async () => {
     try {
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetifyy&am=${exactAmountInr}&cu=INR`)}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetuply&am=${exactAmountInr}&cu=INR`)}`;
       const response = await fetch(qrUrl);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = `meetify-payment-₹${exactAmountInr}.png`;
+      link.download = `meetuply-payment-₹${exactAmountInr}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetifyy&am=${exactAmountInr}&cu=INR`)}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetuply&am=${exactAmountInr}&cu=INR`)}`;
       window.open(qrUrl, '_blank');
     }
   };
@@ -455,7 +455,7 @@ export default function WalletPage() {
               
               <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center justify-center mb-6">
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetifyy&am=${exactAmountInr}&cu=INR`)}`} 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetuply&am=${exactAmountInr}&cu=INR`)}`} 
                   alt="UPI QR Code" 
                   className="w-[180px] h-[180px] rounded-lg mb-3"
                 />

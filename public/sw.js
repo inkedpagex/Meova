@@ -1,8 +1,8 @@
-// Meetify Service Worker
+// Meetuply Service Worker
 // Strategy: Network-first for API routes, Cache-first for static assets
 // FCM: Background push notifications support
 
-const CACHE_NAME = 'meetify-v2';
+const CACHE_NAME = 'meetuply-v2';
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icon-512.png',
@@ -38,12 +38,12 @@ try {
       body: body || '',
       icon: '/icon-512.png',
       badge: '/icon-512.png',
-      tag: 'meetify-push',
+      tag: 'meetuply-push',
       renotify: true,
       vibrate: [200, 100, 200],
       data: { url: link },
       actions: [
-        { action: 'open', title: 'Open Meetify' },
+        { action: 'open', title: 'Open Meetuply' },
         { action: 'dismiss', title: 'Dismiss' },
       ],
     });

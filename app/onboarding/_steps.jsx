@@ -253,7 +253,7 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
           {loading ? (
             <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"/> Saving...</>
           ) : (
-            <>🚀 Enter Meetify</>
+            <>🚀 Enter Meetuply</>
           )}
         </button>
       </div>

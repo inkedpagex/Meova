@@ -797,7 +797,7 @@ function MessagesContent() {
                     </div>
                     <h3 className="text-base font-black text-zinc-900">{otherName}</h3>
                     <p className="text-xs text-zinc-500 mb-4 font-semibold">
-                      {isGroup ? 'Verified Campus Community · Official Channel' : 'GLA Student · Meetify'}
+                      {isGroup ? 'Verified Campus Community · Official Channel' : 'GLA Student · Meetuply'}
                     </p>
 
                     {isGroup ? (

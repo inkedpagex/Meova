@@ -19,7 +19,7 @@ export async function updateProfileAdmin(updates) {
     }
 
     const cookieStore = await cookies();
-    cookieStore.set('__meetify_profile_overrides', JSON.stringify(cookieUpdates), {
+    cookieStore.set('__meetuply_profile_overrides', JSON.stringify(cookieUpdates), {
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/'
     });

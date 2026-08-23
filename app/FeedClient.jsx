@@ -276,7 +276,7 @@ export default function FeedClient() {
 
       // 2. Upload to Cloudinary using unsigned preset
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'meetify_unsigned';
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'meetuply_unsigned';
 
       const formData = new FormData();
       formData.append('file', compressedFile);
@@ -906,7 +906,7 @@ export default function FeedClient() {
             {
               id: 'gig-1',
               title: 'Figma UI Designer for Campus App',
-              company: 'Meetify Team',
+              company: 'Meetuply Team',
               category: 'Design',
               categoryColor: 'bg-[#fcf6fa] text-[#74295d] border-[#f5ebf4]',
               budget: '500',
@@ -994,7 +994,7 @@ export default function FeedClient() {
           </button>
         </div>
 
-        {/* Stacked Vertical Post Feed - Signature Meetify Campus Design */}
+        {/* Stacked Vertical Post Feed - Signature Meetuply Campus Design */}
         <div className="space-y-6 max-w-xl mx-auto pt-2">
           {displayPosts.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-[2rem] border border-zinc-200 border-dashed">
@@ -1072,7 +1072,7 @@ export default function FeedClient() {
                       </span>
                     </div>
                     
-                    {/* Meetify Category Chip */}
+                    {/* Meetuply Category Chip */}
                     <span className="absolute top-3 left-3 text-[10px] font-black text-white bg-[#8C3573]/90 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider border border-white/20 shadow-xs flex items-center gap-1">
                       <Sparkles size={10} />
                       <span>{post.category || 'Showcase'}</span>

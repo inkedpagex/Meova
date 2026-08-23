@@ -3,7 +3,7 @@ import { fetchUpcomingEventsAdmin } from '../../lib/firebaseAdminQueries';
 import Link from 'next/link';
 import { Calendar, MapPin, Users, Clock, Zap, Music, Code, Trophy, BookOpen, Palette, Mic } from 'lucide-react';
 
-export const metadata = { title: 'Events — meetifyy' };
+export const metadata = { title: 'Events — meetuply' };
 
 // Category → premium gradient + icon
 const CATEGORY_THEMES = {

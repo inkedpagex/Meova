@@ -31,7 +31,7 @@ const DEFAULT_MOCK_POSTS = [
     authorPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Rohan',
     authorBranch: 'B.Tech ECE · 2nd Year',
     photoUrl: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&auto=format&fit=crop&q=80',
-    caption: 'Building real-time peer matching algorithms for Meetify! Exciting updates coming soon 💻🔥',
+    caption: 'Building real-time peer matching algorithms for Meetuply! Exciting updates coming soon 💻🔥',
     category: 'Project Showcase',
     location: 'Library Quiet Zone',
     likes: 38,

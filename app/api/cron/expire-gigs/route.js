@@ -8,7 +8,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 
-const CRON_SECRET = process.env.CRON_SECRET || 'meetify-cron-secret-2024';
+const CRON_SECRET = process.env.CRON_SECRET || 'meetuply-cron-secret-2024';
 const EXPIRY_DAYS = 14;
 
 export async function GET(request) {

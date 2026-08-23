@@ -142,7 +142,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
             You&apos;re all set! 🎉
           </p>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)', marginTop: 6, margin: '6px 0 0' }}>
-            Opening Meetify for you…
+            Opening Meetuply for you…
           </p>
         </div>
 
@@ -175,7 +175,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
               <path d="M3 9l9-6 9 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="font-black text-[16px] text-zinc-900">meetifyy</span>
+          <span className="font-black text-[16px] text-zinc-900">meetuply</span>
         </div>
 
         {/* Tagline */}

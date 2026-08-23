@@ -173,7 +173,7 @@ export default async function UserProfilePage({ params }) {
           </p>
 
           <p className="text-xs text-zinc-700 font-medium leading-relaxed pt-1 whitespace-pre-line">
-            {profile.bio || '🎓 GLA Student · Connecting on Meetify! 🚀'}
+            {profile.bio || '🎓 GLA Student · Connecting on Meetuply! 🚀'}
           </p>
         </div>
 

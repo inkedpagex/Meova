@@ -15,7 +15,7 @@ import { adminDb } from '../../../../lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { sendPush } from '../../../../lib/sendPushNotification';
 
-const CRON_SECRET = process.env.CRON_SECRET || 'meetify-cron-secret-2024';
+const CRON_SECRET = process.env.CRON_SECRET || 'meetuply-cron-secret-2024';
 
 export async function GET(request) {
   // Security check

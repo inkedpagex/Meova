@@ -1,5 +1,5 @@
 /**
- * Avatar resolution for Meetify
+ * Avatar resolution for Meetuply
  *
  * Priority order:
  *  1. User's custom/uploaded photo_url

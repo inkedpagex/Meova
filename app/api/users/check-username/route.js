@@ -20,7 +20,7 @@ export async function GET(request) {
   }
 
   // Reserved usernames
-  const RESERVED = ['admin', 'meetify', 'meetifyy', 'support', 'help', 'api', 'root', 'system', 'user', 'mod', 'moderator'];
+  const RESERVED = ['admin', 'meetuply', 'meetuply', 'support', 'help', 'api', 'root', 'system', 'user', 'mod', 'moderator'];
   if (RESERVED.includes(username)) {
     return NextResponse.json({ available: false, error: 'This username is reserved.' });
   }

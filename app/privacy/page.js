@@ -1,17 +1,21 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Privacy Policy — Meetify',
-  description: 'How Meetify collects, uses, and protects your personal information.',
+  title: 'Privacy Policy — Meetuply',
+  description: 'How Meetuply collects, uses, and protects your personal information.',
 };
 
 export default function PrivacyPage() {
   return (
     <div className="max-w-[680px] mx-auto py-8 px-4">
-      <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all mb-8 uppercase tracking-wider">
-        ← Back
-      </Link>
-
+      <div className="flex items-center justify-between mb-8">
+        <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all uppercase tracking-wider">
+          ← Back
+        </Link>
+        <Link href="/login" className="px-5 py-2 rounded-full text-[12px] font-black text-white transition-all hover:opacity-90 active:scale-95 shadow-md" style={{ background: 'linear-gradient(135deg, #8C3573, #b5609d)' }}>
+          Log In
+        </Link>
+      </div>
       <div className="rounded-3xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] p-8 shadow-lg">
         <div className="mb-8">
           <h1 className="text-2xl font-black text-[var(--text-primary)] mb-2">Privacy Policy</h1>
@@ -21,7 +25,7 @@ export default function PrivacyPage() {
         <div className="space-y-8 text-sm text-[var(--text-secondary)] leading-relaxed">
           <section>
             <h2 className="text-sm font-black text-[var(--text-primary)] mb-3">1. Information We Collect</h2>
-            <p className="mb-2">We collect the following information when you use Meetify:</p>
+            <p className="mb-2">We collect the following information when you use Meetuply:</p>
             <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
               <li><strong>Account Information:</strong> Name, email address, profile photo, year, branch, and interests</li>
               <li><strong>Transaction Data:</strong> Sparks purchases, booking history, and wallet activity</li>
@@ -33,7 +37,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-sm font-black text-[var(--text-primary)] mb-3">2. How We Use Your Information</h2>
             <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
-              <li>To provide and improve the Meetify Platform</li>
+              <li>To provide and improve the Meetuply Platform</li>
               <li>To facilitate bookings and Sparks transactions</li>
               <li>To send you notifications about your bookings and account activity</li>
               <li>To ensure platform safety and prevent fraud</li>
@@ -70,22 +74,22 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-sm font-black text-[var(--text-primary)] mb-3">6. Cookies</h2>
-            <p>We use a single HTTP-only session cookie (<code className="text-xs bg-[var(--bg-surface)] px-1 rounded">__meetify_session</code>) to keep you logged in. This cookie expires after 5 days and is deleted when you log out. We do not use third-party tracking cookies.</p>
+            <p>We use a single HTTP-only session cookie (<code className="text-xs bg-[var(--bg-surface)] px-1 rounded">__meetuply_session</code>) to keep you logged in. This cookie expires after 5 days and is deleted when you log out. We do not use third-party tracking cookies.</p>
           </section>
 
           <section>
             <h2 className="text-sm font-black text-[var(--text-primary)] mb-3">7. Children&apos;s Privacy</h2>
-            <p>Meetify is not intended for users under 18 years of age. We do not knowingly collect personal information from minors. If we become aware that a minor has provided us with personal information, we will delete it immediately.</p>
+            <p>Meetuply is not intended for users under 18 years of age. We do not knowingly collect personal information from minors. If we become aware that a minor has provided us with personal information, we will delete it immediately.</p>
           </section>
 
           <section>
             <h2 className="text-sm font-black text-[var(--text-primary)] mb-3">8. Changes to This Policy</h2>
-            <p>We may update this Privacy Policy periodically. We will notify you of significant changes via the Platform. Your continued use of Meetify after changes constitutes your acceptance of the updated policy.</p>
+            <p>We may update this Privacy Policy periodically. We will notify you of significant changes via the Platform. Your continued use of Meetuply after changes constitutes your acceptance of the updated policy.</p>
           </section>
 
           <section>
             <h2 className="text-sm font-black text-[var(--text-primary)] mb-3">9. Contact Us</h2>
-            <p>For privacy-related questions or data deletion requests, contact us at <span className="font-bold text-[var(--primary)]">privacy@meetify.app</span></p>
+            <p>For privacy-related questions or data deletion requests, contact us at <span className="font-bold text-[var(--primary)]">privacy@meetuply.app</span></p>
           </section>
         </div>
       </div>

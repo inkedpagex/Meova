@@ -11,9 +11,9 @@ import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import { db } from '../lib/firebaseClient';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
-const AUTH_PATHS = ['/login', '/signup', '/onboarding'];
+const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy'];
 
-function MeetifyLogo({ size = 32, animate = false }) {
+function MeetuplyLogo({ size = 32, animate = false }) {
   return (
     <div
       className={animate ? 'logo-ring-animation' : ''}
@@ -167,7 +167,7 @@ export default function Sidebar({ user }) {
         // Trigger PWA notification if count goes up (new message received)
         if (totalUnread > prevMsgCountRef.current && prevMsgCountRef.current !== 0 && !isOnMessagesPage) {
           if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-            new Notification('New Message on Meetify', {
+            new Notification('New Message on Meetuply', {
               body: 'You received a new message from a campus student.',
               icon: '/icon-192.png',
               badge: '/icon-192.png',
@@ -264,9 +264,9 @@ export default function Sidebar({ user }) {
       <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[58px] flex items-center justify-between px-4 bg-white/90 backdrop-blur-xl border-b border-zinc-100 shadow-2xs">
         
         <Link href="/" className="flex items-center gap-2 group">
-          <MeetifyLogo size={28} animate={logoAnimating} />
+          <MeetuplyLogo size={28} animate={logoAnimating} />
           <span className="font-black text-lg tracking-tight text-zinc-900">
-            meetifyy
+            meetuply
           </span>
         </Link>
 
@@ -331,8 +331,8 @@ export default function Sidebar({ user }) {
         style={{ width: 220, background: '#ffffff', borderRight: '1px solid #f0f0f0', padding: '28px 16px' }}>
 
         <Link href="/" className="flex items-center gap-2.5 px-2 mb-10">
-          <MeetifyLogo size={32} animate={logoAnimating} />
-          <span className="font-black text-[18px] tracking-tight bg-gradient-to-r from-[#74295d] via-[#8C3573] to-pink-600 bg-clip-text text-transparent">meetifyy</span>
+          <MeetuplyLogo size={32} animate={logoAnimating} />
+          <span className="font-black text-[18px] tracking-tight bg-gradient-to-r from-[#74295d] via-[#8C3573] to-pink-600 bg-clip-text text-transparent">meetuply</span>
         </Link>
 
         <nav className="flex-1 space-y-0.5">

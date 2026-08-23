@@ -2,7 +2,7 @@ import { getUserAdmin } from '../../../lib/getUserAdmin';
 import { getOrCreateWallet } from '../../../lib/wallet';
 import ExperienceDetailClient from './ExperienceDetailClient';
 
-export const metadata = { title: 'Experience Details — meetifyy.in' };
+export const metadata = { title: 'Experience Details — meetuply.in' };
 
 export default async function ExperienceDetailPage({ params }) {
   // Extract id from params

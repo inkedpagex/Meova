@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // Routes that do NOT require authentication
-const PUBLIC_ROUTES = ['/login', '/signup', '/api'];
+const PUBLIC_ROUTES = ['/login', '/signup', '/api', '/terms', '/privacy'];
 
 export function proxy(request) {
   const { pathname } = request.nextUrl;
@@ -21,7 +21,7 @@ export function proxy(request) {
   }
 
   // Check for session cookie
-  const session = request.cookies.get('__meetify_session')?.value;
+  const session = request.cookies.get('__meetuply_session')?.value;
 
   if (!session) {
     // Not logged in — redirect to login

@@ -3,7 +3,7 @@ import { getUserWithRole } from '../../lib/getAdminUser';
 import AuthForm from '../../features/auth/AuthForm';
 import { Suspense } from 'react';
 
-export const metadata = { title: 'Sign Up — meetifyy' };
+export const metadata = { title: 'Sign Up — meetuply' };
 
 export default async function SignupPage() {
   let serverError = null;

@@ -9,7 +9,7 @@
  *   ALGOLIA_ADMIN_KEY=YOUR_ADMIN_KEY                       (private, never expose)
  *
  * Get keys from: algolia.com → Your App → API Keys
- * Indices to create: meetify_users, meetify_experiences
+ * Indices to create: meetuply_users, meetuply_experiences
  */
 import { NextResponse } from 'next/server';
 
@@ -49,7 +49,7 @@ export async function POST(request) {
     }
 
     if (type === 'user') {
-      await upsertAlgoliaRecord('meetify_users', {
+      await upsertAlgoliaRecord('meetuply_users', {
         objectID: data.id,
         full_name: data.full_name || '',
         year: data.year || '',
@@ -60,7 +60,7 @@ export async function POST(request) {
         isLiveOnCampus: data.isLiveOnCampus || false,
       });
     } else if (type === 'experience') {
-      await upsertAlgoliaRecord('meetify_experiences', {
+      await upsertAlgoliaRecord('meetuply_experiences', {
         objectID: data.id,
         title: data.title || '',
         category: data.category || '',

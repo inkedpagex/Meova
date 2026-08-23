@@ -86,7 +86,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
               <path d="M3 9l9-6 9 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="font-black text-[20px] tracking-tight text-zinc-900">meetifyy</span>
+          <span className="font-black text-[20px] tracking-tight text-zinc-900">meetuply</span>
         </div>
 
         {/* Hero Text */}
@@ -116,29 +116,13 @@ export default function AuthForm({ defaultMode = 'login' }) {
           </div>
         </div>
 
-        {/* Hero Illustration */}
-        <div className="relative z-10 flex justify-center mt-8">
-          <img
-            src="/login-hero.png"
-            alt="Campus students"
-            className="w-full max-w-[420px] object-contain drop-shadow-xl"
-            style={{ filter: 'drop-shadow(0 20px 40px rgba(140,53,115,0.15))' }}
-          />
-        </div>
+
       </div>
 
       {/* ── RIGHT: Login Panel ───────────────────────────────── */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 md:px-12 relative bg-white">
 
-        {/* Top-right: Already have account? */}
-        <div className="absolute top-6 right-6 flex items-center gap-3">
-          <span className="text-[13px] text-zinc-400 font-medium">New here?</span>
-          <Link href="/signup"
-            className="px-5 py-2 rounded-full text-[12px] font-black text-white transition-all hover:opacity-90 active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #8C3573, #b5609d)', boxShadow: '0 4px 14px rgba(140,53,115,0.3)' }}>
-            Create Account
-          </Link>
-        </div>
+
 
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-2 mb-8">
@@ -148,7 +132,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
               <path d="M3 9l9-6 9 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="font-black text-[18px] text-zinc-900">meetifyy</span>
+          <span className="font-black text-[18px] text-zinc-900">meetuply</span>
         </div>
 
         {/* Card */}

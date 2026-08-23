@@ -4,7 +4,7 @@ import { adminDb } from '@/lib/firebaseAdmin';
 const DEFAULT_GIGS = [
   {
     title: 'Figma UI Designer for Campus App',
-    company: 'Meetify Team',
+    company: 'Meetuply Team',
     category: 'Design',
     budget: '500',
     duration: '3 Days',

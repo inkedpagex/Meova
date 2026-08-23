@@ -25,10 +25,10 @@ export default function TopNav({ user }) {
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-              <img src="/logo.png" alt="meetifyy logo" className="w-full h-full object-cover" />
+              <img src="/logo.png" alt="meetuply logo" className="w-full h-full object-cover" />
             </div>
             <Link href="/" className="font-extrabold text-xl text-white tracking-tight">
-              meetifyy
+              meetuply
             </Link>
           </div>
 

@@ -6,7 +6,7 @@ import ProfileClient from './ProfileClient';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
-export const metadata = { title: 'Profile — meetifyy' };
+export const metadata = { title: 'Profile — meetuply' };
 
 export default async function ProfilePage() {
   const user = await getUserAdmin();
@@ -22,7 +22,7 @@ export default async function ProfilePage() {
   let overrides = {};
   try {
     const cookieStore = await cookies();
-    const ovStr = cookieStore.get('__meetify_profile_overrides')?.value;
+    const ovStr = cookieStore.get('__meetuply_profile_overrides')?.value;
     if (ovStr) overrides = JSON.parse(ovStr);
   } catch (err) {}
 

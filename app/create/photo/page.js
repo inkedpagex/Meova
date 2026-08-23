@@ -1,7 +1,7 @@
 import { getUserAdmin } from '../../../lib/getUserAdmin';
 import CreatePhotoClient from './CreatePhotoClient';
 
-export const metadata = { title: 'Post Campus Photo — meetifyy.in' };
+export const metadata = { title: 'Post Campus Photo — meetuply.in' };
 
 export default async function CreatePhotoPage() {
   const currentUser = await getUserAdmin();

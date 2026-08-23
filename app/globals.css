@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════
-   DESIGN TOKENS — Meetifyy Premium (Light-first)
+   DESIGN TOKENS — Meetuply Premium (Light-first)
    ═══════════════════════════════════════════════ */
 :root {
   /* Backgrounds — Light (default) */
@@ -29,7 +29,7 @@
   --text-muted:     #71717a;
   --text-faint:     #d4d4d8;
 
-  /* Accent — Meetifyy Purple */
+  /* Accent — Meetuply Purple */
   --accent:         #8C3573;
   --accent-hover:   #74295d;
   --accent-dim:     rgba(140, 53, 115, 0.08);

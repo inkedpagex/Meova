@@ -7,7 +7,7 @@ const USERNAME_REGEX = /^[a-z0-9_]{3,20}$/;
 export async function POST(request) {
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('__meetify_session')?.value;
+    const sessionCookie = cookieStore.get('__meetuply_session')?.value;
     if (!sessionCookie) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -100,7 +100,7 @@ export async function POST(request) {
 
     // Update profile override cookie so server components pick up the changes instantly
     cookieStore.set(
-      '__meetify_profile_overrides',
+      '__meetuply_profile_overrides',
       JSON.stringify({ full_name: full_name.trim(), username: cleanUsername, photo_url: photo_url || '' }),
       { maxAge: 60 * 60 * 24 * 30, path: '/' }
     );
@@ -108,7 +108,7 @@ export async function POST(request) {
     // ── Critical: set profileComplete cookie so layout gate skips the Firestore
     // check on the very next request (prevents ERR_FAILED redirect loop on slow
     // connections where Firestore write hasn't propagated yet).
-    cookieStore.set('__meetify_pc', '1', {
+    cookieStore.set('__meetuply_pc', '1', {
       maxAge: 60 * 60 * 24 * 365,
       path: '/',
       httpOnly: true,
