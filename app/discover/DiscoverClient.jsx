@@ -23,7 +23,7 @@ const INTEREST_COLORS = {
   'default': '#b5609d',
 };
 
-const FILTERS = ['All', 'People', 'Experiences', 'Communities', 'Tournaments'];
+const FILTERS = ['All', 'People', 'Communities', 'Tournaments'];
 
 // ── Algolia Search Hook ───────────────────────────────────────────────────────
 // Gracefully falls back to local data if Algolia is not configured
@@ -141,13 +141,12 @@ export default function DiscoverClient() {
   }, []);
   
   // SWR Hooks for caching and instant data fetching
-  const { data: expData } = useSWR('/api/experiences', fetcher);
   const { data: circlesData } = useSWR('/api/circles', fetcher);
   const { data: usersData } = useSWR('/api/users', fetcher);
+  const isPeopleLoading = usersData === undefined;
   
-  const experiences = expData?.experiences || [];
   const circles = circlesData?.circles || [];
-
+  const isCirclesLoading = circlesData === undefined;
   // Algolia search
   const { peopleResults, experienceResults, isSearching } = useAlgoliaSearch(search);
   const isAlgoliaSearch = search.length >= 2 && !!ALGOLIA_APP_ID;
@@ -252,8 +251,21 @@ export default function DiscoverClient() {
           </div>
         )}
 
-        {list.length === 0 ? (
-          <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-[#f0f0f0] flex flex-col items-center gap-2">
+        {isPeopleLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="bg-white rounded-3xl overflow-hidden border border-zinc-100 flex flex-col relative">
+                <Skeleton variant="rectangular" className="w-full h-[180px]" />
+                <div className="p-3">
+                  <Skeleton variant="text" className="w-24 h-4 mb-1" />
+                  <Skeleton variant="text" className="w-16 h-3 mb-3" />
+                  <Skeleton variant="rectangular" className="w-full h-9 rounded-2xl" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : list.length === 0 ? (
+          <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
             <span>No classmates found matching your query.</span>
             {search && (
               <button onClick={() => setSearch('')} className="px-4 py-2 mt-2 bg-zinc-100 text-zinc-900 text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer">
@@ -339,81 +351,6 @@ export default function DiscoverClient() {
     );
   };
 
-  /* ─── Experiences ─── */
-  const renderExperiencesSection = () => {
-    const list = isAlgoliaSearch && experienceResults !== null
-      ? experienceResults
-      : experiences.filter(e => !search || e.title.toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase()));
-
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-[15px] font-black" style={{ color: '#09090b' }}>Experiences for you</h2>
-          <span className="text-[11px] font-bold" style={{ color: '#8C3573' }}>{list.length} available</span>
-        </div>
-
-        {list.length === 0 ? (
-          <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-[#f0f0f0] flex flex-col items-center gap-2">
-            <Coffee size={24} className="text-[#8C3573]" />
-            <span>No campus experiences found.</span>
-            {search ? (
-              <button onClick={() => setSearch('')} className="mt-2 px-4 py-2 bg-zinc-100 text-zinc-900 text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer">
-                Clear Search
-              </button>
-            ) : (
-              <button onClick={() => router.push('/create/experience')} className="mt-2 px-4 py-2 bg-[#8C3573] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition-all">
-                Host first experience
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {list.map(exp => {
-              const cat = (exp.category || '').toLowerCase();
-              let ExpIcon = Coffee;
-              if (cat.includes('study') || cat.includes('learn') || cat.includes('together')) ExpIcon = BookOpen;
-              else if (cat.includes('sport') || cat.includes('match') || cat.includes('fitness') || cat.includes('badminton')) ExpIcon = Activity;
-              else if (cat.includes('music') || cat.includes('jam')) ExpIcon = Music;
-              else if (cat.includes('design') || cat.includes('figma') || cat.includes('art')) ExpIcon = Layers;
-              else if (cat.includes('camera') || cat.includes('photo')) ExpIcon = Camera;
-
-              return (
-                <div key={exp.id}
-                  className="p-4 rounded-3xl flex items-center gap-4 cursor-pointer transition-all hover:shadow-sm active:scale-[0.99]"
-                  style={{ background: '#ffffff', border: '1px solid #f0f0f0' }}
-                  onClick={() => router.push(`/experiences/${exp.id}`)}>
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: '#f5f3ff', color: '#8C3573' }}>
-                    <ExpIcon size={20} strokeWidth={2} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-[13px] font-black truncate" style={{ color: '#09090b' }}>{exp.title}</h3>
-                    <p className="text-[10px] font-semibold mt-0.5 uppercase tracking-wide" style={{ color: '#71717a' }}>
-                      {exp.days ? exp.days[0] : 'Today'} · {exp.slots ? exp.slots[0] : '5:00 PM'}
-                    </p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <MapPin size={9} style={{ color: '#a1a1aa' }} />
-                      <span className="text-[10px] text-zinc-400">{exp.location}</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                    <span className="flex items-center gap-1 text-[11px] font-black" style={{ color: '#8C3573' }}>
-                      {exp.price > 0 ? <><span>{exp.price}</span><Zap size={9} className="fill-current" /></> : <span className="text-emerald-600">Free</span>}
-                    </span>
-                    <button className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl transition-all active:scale-95"
-                      style={{ background: '#8C3573', color: '#ffffff' }}>
-                      Book
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   /* ─── Communities ─── */
   const renderCommunitiesSection = () => {
     const list = circles.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || (c.category || '').toLowerCase().includes(search.toLowerCase()));
@@ -425,8 +362,19 @@ export default function DiscoverClient() {
           <span className="text-[11px] font-bold" style={{ color: '#8C3573' }}>{list.length} groups</span>
         </div>
 
-        {list.length === 0 ? (
-          <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-[#f0f0f0] flex flex-col items-center gap-2">
+        {isCirclesLoading ? (
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="p-4 rounded-3xl flex flex-col items-center bg-white border border-zinc-100">
+                <Skeleton variant="rectangular" className="w-14 h-14 rounded-2xl mb-3" />
+                <Skeleton variant="text" className="w-20 h-4 mb-1" />
+                <Skeleton variant="text" className="w-16 h-3 mb-3" />
+                <Skeleton variant="rectangular" className="w-full h-8 rounded-xl" />
+              </div>
+            ))}
+          </div>
+        ) : list.length === 0 ? (
+          <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
             <Users size={24} className="text-[#8C3573]" />
             <span>No communities created yet.</span>
             <button onClick={() => router.push('/circles')} className="mt-2 px-4 py-2 bg-[#8C3573] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition-all">
@@ -479,7 +427,6 @@ export default function DiscoverClient() {
   );
 
   const showPeople = activeFilter === 'All' || activeFilter === 'People';
-  const showExp = activeFilter === 'All' || activeFilter === 'Experiences';
   const showComm = activeFilter === 'All' || activeFilter === 'Communities';
   const showTourn = activeFilter === 'All' || activeFilter === 'Tournaments';
 
@@ -514,7 +461,6 @@ export default function DiscoverClient() {
 
       {/* Sections */}
       {showPeople && renderPeopleSection()}
-      {showExp && renderExperiencesSection()}
       {showComm && renderCommunitiesSection()}
       {showTourn && renderTournamentsSection()}
     </div>

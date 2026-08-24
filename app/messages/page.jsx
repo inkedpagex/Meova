@@ -700,9 +700,9 @@ function MessagesContent() {
             <div className="w-24 h-24 rounded-full border-2 border-zinc-900 flex items-center justify-center mb-4">
               <MessageSquare className="w-12 h-12 text-zinc-900 stroke-[1.5]" />
             </div>
-            <h2 className="text-xl font-black text-zinc-900 mb-1">Your Messages</h2>
+            <h2 className="text-xl font-black text-zinc-900 mb-1">Your Inbox</h2>
             <p className="text-xs text-zinc-500 max-w-xs leading-relaxed mb-6 font-medium">
-              Send private messages and photos to campus friends or coordinate meetups.
+              No messages yet. Start networking and building your campus circle.
             </p>
             <button
               type="button"

@@ -298,7 +298,9 @@ export default function Sidebar({ user }) {
               >
                 <Bell size={20} className={unreadCount > 0 ? 'text-[#8C3573] fill-[#f5ebf4]' : ''} strokeWidth={2.2} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#8C3573] ring-2 ring-white" />
+                  <span className="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[#8C3573] text-white text-[8px] font-black border border-white px-0.5">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
                 )}
               </Link>
 
@@ -314,7 +316,9 @@ export default function Sidebar({ user }) {
               >
                 <MessageSquare size={20} className={unreadMsgCount > 0 ? 'text-[#8C3573] fill-[#f5ebf4]' : ''} strokeWidth={2.2} />
                 {unreadMsgCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#8C3573] ring-2 ring-white" />
+                  <span className="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[#8C3573] text-white text-[8px] font-black border border-white px-0.5">
+                    {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
+                  </span>
                 )}
               </Link>
             </>

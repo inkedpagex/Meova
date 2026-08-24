@@ -3,12 +3,33 @@
  *
  * Host enters the 6-digit meetingCode to mark gig as complete.
  * Releases escrowed Sparks to freelancer (90% payout, 10% platform fee).
+ *
+ * Anti-fraud:
+ *  - Detects "circular pair" abuse: same host+freelancer completing 3+ gigs together
+ *  - Flags suspicious payouts for admin review instead of auto-releasing
  */
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { getUserWithRole } from '@/lib/getAdminUser';
 import { FieldValue } from 'firebase-admin/firestore';
 import { sendPush } from '@/lib/sendPushNotification';
+
+// ── Circular pair detection ────────────────────────────────────────────────────
+// If the same two UIDs have completed Gigs together 3+ times, it's suspicious.
+async function isCircularPair(hostId, freelancerId) {
+  try {
+    const snap = await adminDb
+      .collection('gigs')
+      .where('authorId', '==', hostId)
+      .where('acceptedApplicantId', '==', freelancerId)
+      .where('status', '==', 'completed')
+      .limit(3)
+      .get();
+    return snap.size >= 3;
+  } catch {
+    return false; // fail open — don't block on detection error
+  }
+}
 
 export async function POST(request, { params }) {
   try {
@@ -56,10 +77,41 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Incorrect completion code. Ask the freelancer for their code.' }, { status: 400 });
     }
 
+    // ── Anti-fraud: Circular pair check ────────────────────────────────────────
+    const suspicious = await isCircularPair(user.uid, freelancerId);
     const escrowAmount = app.escrowAmount || parseInt(gig.budget) || 0;
     const freelancerPayout = Math.floor(escrowAmount * 0.9); // 90% to freelancer
     const now = new Date().toISOString();
 
+    if (suspicious) {
+      // Flag for admin review — DO NOT auto-release. Hold funds.
+      await adminDb.runTransaction(async (tx) => {
+        tx.update(appRef, { status: 'FLAGGED_REVIEW', completedAt: now });
+        tx.update(gigRef, { status: 'flagged_review', completedAt: now });
+
+        // Admin alert
+        const alertRef = adminDb.collection('admin_alerts').doc();
+        tx.set(alertRef, {
+          type: 'circular_pair_fraud',
+          hostId: user.uid,
+          freelancerId,
+          gigId: id,
+          gigTitle: gig.title,
+          amount: freelancerPayout,
+          message: `Suspicious circular pair detected: same 2 users have completed 3+ gigs together. Funds held.`,
+          resolved: false,
+          created_at: now,
+        });
+      });
+
+      return NextResponse.json({
+        ok: false,
+        flagged: true,
+        message: 'This payout has been flagged for review due to unusual activity. Admin will process within 24 hours.',
+      });
+    }
+
+    // ── Normal flow: release payout ────────────────────────────────────────────
     await adminDb.runTransaction(async (tx) => {
       // Mark application as completed
       tx.update(appRef, { status: 'COMPLETED', completedAt: now });
@@ -67,7 +119,7 @@ export async function POST(request, { params }) {
       // Mark gig as completed
       tx.update(gigRef, { status: 'completed', completedAt: now });
 
-      // Credit Sparks to freelancer (creator wallet bucket)
+      // Credit Sparks to freelancer (creator wallet — only withdrawable bucket)
       const freelancerWalletRef = adminDb.collection('wallets').doc(freelancerId);
       tx.update(freelancerWalletRef, {
         creator: FieldValue.increment(freelancerPayout),
@@ -75,7 +127,7 @@ export async function POST(request, { params }) {
         updated_at: now,
       });
 
-      // Transaction log for freelancer
+      // Transaction log
       const txRef = adminDb.collection('transactions').doc();
       tx.set(txRef, {
         userId: freelancerId,
@@ -111,3 +163,4 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }
 }
+

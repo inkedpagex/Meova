@@ -98,8 +98,8 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-zinc-100 anim-fade-in flex flex-col max-h-[90vh]">
+    <div className="fixed inset-x-0 bottom-0 md:inset-0 z-[101] bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center anim-fade-in">
+      <div className="bg-white rounded-t-[32px] md:rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-zinc-100 anim-slide-up md:anim-scale-in flex flex-col max-h-[90vh] pb-safe">
         
         {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">

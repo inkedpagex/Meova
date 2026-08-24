@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert, ShieldCheck,
-  Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink
+  Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink, Phone, CheckCircle2, Loader2
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import ProfileEditForm from '../../features/profile/ProfileEditForm';
@@ -59,6 +59,15 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
   const [locStatus, setLocStatus] = useState('prompt');
   const [notifStatus, setNotifStatus] = useState('prompt');
   const [camStatus, setCamStatus] = useState('prompt');
+
+  // Phone verification
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [phoneInput, setPhoneInput] = useState('');
+  const [phoneOtp, setPhoneOtp] = useState('');
+  const [phoneStep, setPhoneStep] = useState('input'); // 'input' | 'otp'
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [phoneMsg, setPhoneMsg] = useState({ type: '', text: '' });
+  const [phoneVerified, setPhoneVerified] = useState(!!initialProfile?.phone_verified);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && navigator.permissions) {
@@ -131,6 +140,40 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
       await updateProfileAdmin({ isIdOn: next });
       window.dispatchEvent(new Event('profile-updated'));
     }
+  };
+
+  const handleSendOtp = async () => {
+    setPhoneLoading(true); setPhoneMsg({ type: '', text: '' });
+    try {
+      const res = await fetch('/api/users/verify-phone/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phoneInput }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setPhoneMsg({ type: 'error', text: data.error }); return; }
+      setPhoneStep('otp');
+      setPhoneMsg({ type: 'success', text: data.message });
+      if (data._dev_otp) setPhoneMsg({ type: 'success', text: `[DEV] OTP: ${data._dev_otp}` });
+    } catch { setPhoneMsg({ type: 'error', text: 'Network error. Try again.' }); }
+    finally { setPhoneLoading(false); }
+  };
+
+  const handleVerifyOtp = async () => {
+    setPhoneLoading(true); setPhoneMsg({ type: '', text: '' });
+    try {
+      const res = await fetch('/api/users/verify-phone/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp: phoneOtp }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setPhoneMsg({ type: 'error', text: data.error }); return; }
+      setPhoneVerified(true);
+      setShowPhoneModal(false);
+      setPhoneMsg({ type: '', text: '' });
+    } catch { setPhoneMsg({ type: 'error', text: 'Network error. Try again.' }); }
+    finally { setPhoneLoading(false); }
   };
 
   const handleSaveSuccess = (updatedData) => {
@@ -400,8 +443,8 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             ) : (
               <EmptyState
                 icon={Briefcase}
-                title="No active gigs"
-                subtitle="Post a gig to get things done, or accept one to earn sparks."
+                title="Wow, such empty!"
+                subtitle="Time to host your first campus gig or accept one to earn sparks."
                 action="Explore Gigs"
                 onAction={() => router.push('/gigs')}
               />
@@ -505,6 +548,34 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                 </div>
               </div>
 
+              {/* Security & Verification */}
+              <div className="space-y-3">
+                <span className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>Security</span>
+                <div className="rounded-2xl p-4 space-y-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                  
+                  {/* Phone Verification */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                        <Phone size={14} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-zinc-900">Phone Number</p>
+                        <p className="text-[10px] text-zinc-500 font-medium">
+                          {phoneVerified ? 'Verified for withdrawals' : 'Required for withdrawals'}
+                        </p>
+                      </div>
+                    </div>
+                    {phoneVerified ? (
+                      <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Verified</span>
+                    ) : (
+                      <button onClick={() => { setShowSettingsModal(false); setShowPhoneModal(true); }} className="text-[10px] font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Verify</button>
+                    )}
+                  </div>
+
+                </div>
+              </div>
+
               {/* Admin (if applicable) */}
               {profile?.role === 'admin' && (
                 <div className="space-y-3">
@@ -533,8 +604,8 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
 
       {/* ── QR Code Modal ──────────────────────── */}
       {showQrModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 anim-fade-in" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}>
-          <div className="w-full max-w-sm rounded-[32px] p-8 flex flex-col items-center text-center relative overflow-hidden bg-white shadow-2xl anim-scale-in">
+        <div className="fixed inset-x-0 bottom-0 md:inset-0 z-[9999] flex items-end md:items-center justify-center anim-fade-in" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm rounded-t-[32px] md:rounded-[32px] p-8 pb-safe flex flex-col items-center text-center relative overflow-hidden bg-white shadow-2xl anim-slide-up md:anim-scale-in">
             <button onClick={() => setShowQrModal(false)} className="absolute top-4 right-4 p-2 rounded-full cursor-pointer hover:bg-zinc-100 transition-colors text-zinc-400">
               <X size={20} />
             </button>
@@ -563,6 +634,95 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
           </div>
         </div>
       )}
+
+      {/* ── Phone Verify Modal ─────────────────── */}
+      {showPhoneModal && (
+        <div className="fixed inset-x-0 bottom-0 md:inset-0 z-[9999] flex items-end md:items-center justify-center anim-fade-in" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm bg-white rounded-t-[32px] md:rounded-3xl overflow-hidden p-6 pb-safe shadow-2xl anim-slide-up md:anim-scale-in flex flex-col relative">
+            <style>{`@keyframes slideUpModal { from { opacity:0; transform:translateY(24px) } to { opacity:1; transform:translateY(0) } }`}</style>
+
+            {/* Header */}
+            <div className="p-5 pb-0 flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#fcf6fa] flex items-center justify-center text-[#8C3573]">
+                  <Phone size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-zinc-900">Verify Phone Number</h3>
+                  <p className="text-[11px] text-zinc-500 font-medium">Required for withdrawals</p>
+                </div>
+              </div>
+              <button onClick={() => { setShowPhoneModal(false); setPhoneStep('input'); setPhoneMsg({ type: '', text: '' }); }} className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {phoneStep === 'input' ? (
+                <>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-2">Mobile Number</label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-black text-zinc-700 bg-zinc-100 px-3 py-3 rounded-xl">🇮🇳 +91</span>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        value={phoneInput}
+                        onChange={e => setPhoneInput(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        placeholder="98765 43210"
+                        className="flex-1 text-sm font-medium text-zinc-900 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#8C3573] focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+                  {phoneMsg.text && (
+                    <p className={`text-[11px] font-semibold px-3 py-2 rounded-xl ${phoneMsg.type === 'error' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-700'}`}>
+                      {phoneMsg.text}
+                    </p>
+                  )}
+                  <button
+                    onClick={handleSendOtp}
+                    disabled={phoneInput.length !== 10 || phoneLoading}
+                    className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
+                    style={{ background: 'linear-gradient(135deg,#8C3573,#b5609d)' }}
+                  >
+                    {phoneLoading ? <Loader2 size={16} className="animate-spin" /> : <><Phone size={14} /> Send OTP</>}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-[12px] font-semibold text-zinc-500">{phoneMsg.text}</p>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-2">Enter 6-Digit OTP</label>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={phoneOtp}
+                      onChange={e => setPhoneOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="• • • • • •"
+                      className="w-full text-center text-xl font-black tracking-[0.5em] text-zinc-900 bg-zinc-50 border-2 border-zinc-200 rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-[#8C3573] focus:border-transparent transition-all"
+                    />
+                  </div>
+                  {phoneMsg.type === 'error' && (
+                    <p className="text-[11px] font-semibold px-3 py-2 rounded-xl bg-rose-50 text-rose-600">{phoneMsg.text}</p>
+                  )}
+                  <button
+                    onClick={handleVerifyOtp}
+                    disabled={phoneOtp.length !== 6 || phoneLoading}
+                    className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
+                    style={{ background: 'linear-gradient(135deg,#8C3573,#b5609d)' }}
+                  >
+                    {phoneLoading ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={14} /> Verify & Continue</>}
+                  </button>
+                  <button onClick={() => setPhoneStep('input')} className="w-full text-center text-[11px] font-bold text-zinc-400 hover:text-zinc-600 transition-colors py-1">
+                    ← Change number
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
+

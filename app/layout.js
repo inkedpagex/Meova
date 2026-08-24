@@ -9,7 +9,10 @@ import GoogleAuthProviderWrapper from '../components/GoogleAuthProviderWrapper';
 import { headers } from 'next/headers';
 import { UserProvider } from '../components/providers/UserProvider';
 import FCMInitializer from '../components/FCMInitializer';
+import PWAInstallBanner from '../components/PWAInstallBanner';
+import NotificationPermissionPrompt from '../components/NotificationPermissionPrompt';
 import MainContentWrapper from '../components/MainContentWrapper';
+import NetworkWrapper from '../components/NetworkWrapper';
 
 export const metadata = {
   title: 'Meetuply — Your Campus Life',
@@ -95,10 +98,20 @@ export default async function RootLayout({ children }) {
             <UserProvider initialUser={user} initialWallet={user?.wallet} initialPeople={people}>
               {/* FCM Push Notification initializer — client-only, non-rendering */}
               <FCMInitializer />
+              {/* PWA Install Banner — shows when browser supports it */}
+              <PWAInstallBanner />
+              {/* Notification permission — friendly prompt shown once after login */}
+              <NotificationPermissionPrompt user={user} />
               <div className="flex min-h-screen">
                 <Sidebar user={user} />
 
-                <MainContentWrapper>{children}</MainContentWrapper>
+                {/* Network wrapper shows Offline screen if connection lost */}
+                <NetworkWrapper>
+                  <MainContentWrapper user={user}>
+                    {children}
+                  </MainContentWrapper>
+                </NetworkWrapper>
+                
                 <RightPanel people={people} upcomingEvents={events} />
               </div>
             </UserProvider>

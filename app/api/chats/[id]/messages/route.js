@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server';
 import { getUserWithRole } from '../../../../../lib/getAdminUser';
 import { adminDb } from '../../../../../lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { sendPush } from '../../../../../lib/sendPushNotification';
 
 export async function GET(request, { params }) {
   try {
@@ -118,9 +119,22 @@ export async function POST(request, { params }) {
     batch.update(chatRef, chatUpdate);
     await batch.commit();
 
+    // 3. Push notification to the recipient (fire-and-forget, non-blocking)
+    if (otherId) {
+      const senderName = user.name || user.email?.split('@')[0] || 'Someone';
+      const preview = text.trim().length > 60 ? text.trim().slice(0, 60) + '…' : text.trim();
+      sendPush(otherId, {
+        title: `💬 ${senderName}`,
+        body: preview,
+        url: `/messages`,
+      }).catch(() => {}); // never block the response
+    }
+
     return NextResponse.json({ ok: true, messageId: msgRef.id });
   } catch (err) {
     console.error('[POST /api/chats/[id]/messages]', err.message);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+
+

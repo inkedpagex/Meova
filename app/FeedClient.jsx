@@ -27,67 +27,88 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 
 function FeedSkeleton() {
   return (
-    <div className="space-y-6 pb-24 pt-4 px-2 select-none animate-in fade-in duration-300">
-      {/* HEADER SECTION SKELETON */}
-      <div className="flex items-center justify-between">
-        <div>
-          <Skeleton variant="text" className="h-8 w-32 mb-2" />
-          <Skeleton variant="text" className="h-4 w-48" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Skeleton variant="rectangular" className="h-8 w-16 rounded-full" />
-          <Skeleton variant="circular" className="h-10 w-10" />
-        </div>
-      </div>
-
-      {/* MATCH THE VIBE SKELETON */}
-      <div>
-        <Skeleton variant="text" className="h-5 w-32 mb-4" />
-        <div className="flex gap-4 overflow-hidden">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="w-[185px] h-[220px] flex-shrink-0 bg-white border border-zinc-100 rounded-[2rem] p-5 flex flex-col items-center">
-              <Skeleton variant="circular" className="w-[84px] h-[84px] mb-4" />
-              <Skeleton variant="text" className="h-4 w-24 mb-2" />
-              <Skeleton variant="text" className="h-3 w-16 mb-4" />
-              <Skeleton variant="rectangular" className="h-8 w-20 rounded-full" />
+    <div className="space-y-6 pb-24 px-1 sm:px-2 select-none animate-in fade-in duration-300">
+      
+      {/* ── HEADER SECTION SKELETON ────────────────────────── */}
+      <div className="bg-white border border-zinc-100 rounded-[2rem] p-4 sm:p-5 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Skeleton variant="circular" className="h-14 w-14 border-2 border-[#8C3573]/20" />
+            <div>
+              <Skeleton variant="text" className="h-6 w-32 mb-1.5" />
+              <Skeleton variant="text" className="h-3 w-48" />
             </div>
-          ))}
+          </div>
+          <Skeleton variant="rectangular" className="h-8 w-24 rounded-full border border-zinc-200" />
         </div>
       </div>
 
-      {/* CAMPUS EXPERIENCES SKELETON */}
-      <div>
-        <Skeleton variant="text" className="h-5 w-48 mb-4" />
-        <div className="flex gap-4 overflow-hidden">
-          {[1, 2].map(i => (
-            <div key={i} className="w-[280px] h-[340px] flex-shrink-0 bg-white border border-zinc-100 rounded-3xl p-4 flex flex-col">
-              <Skeleton variant="rectangular" className="w-full h-[180px] rounded-2xl mb-4" />
-              <Skeleton variant="text" className="h-5 w-40 mb-2" />
-              <Skeleton variant="text" className="h-4 w-full mb-2" />
-              <div className="mt-auto flex justify-between items-end">
-                <Skeleton variant="circular" className="w-8 h-8" />
-                <Skeleton variant="rectangular" className="h-8 w-24 rounded-full" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* ── SEARCH BAR SKELETON ────────────────────────────── */}
+      <Skeleton variant="rectangular" className="w-full h-[52px] rounded-2xl border border-zinc-100" />
 
-      {/* CAMPUS GROUPS SKELETON */}
-      <div>
-        <Skeleton variant="text" className="h-5 w-40 mb-4" />
-        <div className="space-y-3">
+      {/* ── PEOPLE YOU MIGHT VIBE WITH SKELETON ────────────── */}
+      <div className="space-y-4 pt-1">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <Skeleton variant="text" className="h-5 w-48" />
+            <Skeleton variant="rectangular" className="h-5 w-24 rounded-full" />
+          </div>
+          <Skeleton variant="text" className="h-4 w-12" />
+        </div>
+
+        <div className="flex gap-4 overflow-hidden px-1">
           {[1, 2, 3].map(i => (
-            <div key={i} className="flex items-center p-4 bg-white border border-zinc-200/80 rounded-2xl">
-              <Skeleton variant="rectangular" className="w-12 h-12 rounded-xl flex-shrink-0 mr-4" />
-              <div className="flex-1">
-                <Skeleton variant="text" className="h-4 w-32 mb-2" />
-                <Skeleton variant="text" className="h-3 w-48" />
+            <div key={i} className="w-[185px] sm:w-[195px] flex-shrink-0 bg-white border border-zinc-100/80 rounded-[2.2rem] p-4 flex flex-col items-center justify-between shadow-xs">
+              <Skeleton variant="circular" className="w-[88px] h-[88px] mb-3" />
+              <Skeleton variant="text" className="h-4 w-24 mb-2" />
+              <Skeleton variant="rectangular" className="h-4 w-32 rounded-full mb-3" />
+              
+              <div className="flex gap-1 mb-4">
+                <Skeleton variant="rectangular" className="h-3 w-12 rounded-full" />
+                <Skeleton variant="rectangular" className="h-3 w-16 rounded-full" />
+                <Skeleton variant="rectangular" className="h-3 w-14 rounded-full" />
+              </div>
+              
+              <div className="w-full flex items-center gap-2 mt-auto">
+                <Skeleton variant="circular" className="w-8 h-8 flex-shrink-0" />
+                <Skeleton variant="rectangular" className="flex-1 h-8 rounded-full" />
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* ── RECENT CAMPUS GIGS SKELETON ────────────────────── */}
+      <div className="space-y-4 pt-4">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <Skeleton variant="text" className="h-5 w-40" />
+            <Skeleton variant="rectangular" className="h-5 w-24 rounded-full" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Skeleton variant="rectangular" className="h-7 w-24 rounded-full" />
+            <Skeleton variant="text" className="h-4 w-12" />
+          </div>
+        </div>
+
+        <div className="flex gap-4 overflow-hidden px-1">
+          {[1, 2].map(i => (
+            <div key={i} className="w-[280px] sm:w-[320px] flex-shrink-0 bg-white border border-zinc-100 rounded-3xl p-5 flex flex-col shadow-xs">
+              <div className="flex items-center justify-between mb-3">
+                <Skeleton variant="rectangular" className="h-6 w-20 rounded-full" />
+                <Skeleton variant="rectangular" className="h-6 w-16 rounded-full" />
+              </div>
+              <Skeleton variant="text" className="h-5 w-full mb-2" />
+              <Skeleton variant="text" className="h-5 w-2/3 mb-4" />
+              <div className="flex items-center gap-2 mt-auto">
+                <Skeleton variant="circular" className="w-8 h-8" />
+                <Skeleton variant="text" className="h-4 w-24" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 }
@@ -162,17 +183,15 @@ export default function FeedClient() {
   const initialSparks = currentWallet ? (currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0) : 0;
   
   // SWR Hooks for data fetching (cached & instantly available)
-  const { data: expData, error: expError, mutate: mutateExp } = useSWR('/api/experiences', fetcher);
   const { data: bkData, mutate: mutateBk } = useSWR(currentUser ? '/api/bookings' : null, fetcher);
   const { data: postsData, error: postsError, mutate: mutatePosts } = useSWR('/api/posts', fetcher);
   
-  const experiences = expData?.experiences || [];
   const bookings = bkData?.bookings || [];
   const campusPosts = postsData?.posts || [];
   
   // Use real backend posts exclusively
   const displayPosts = campusPosts;
-  const dbHydrated = expData !== undefined || expError !== undefined; // True once SWR has data or fails
+  const dbHydrated = postsData !== undefined || postsError !== undefined; // True once SWR has data or fails
   
   const [likedPosts, setLikedPosts] = useState({});
   const [userData, setUserData] = useState(currentUser);
@@ -587,20 +606,6 @@ export default function FeedClient() {
 
   // Filter & Search queries
   const query = searchQuery.toLowerCase().trim();
-  const filteredExperiences = experiences.filter(exp => {
-    const matchesSearch =
-      (exp.title || '').toLowerCase().includes(query) ||
-      (exp.description || '').toLowerCase().includes(query) ||
-      (exp.category || '').toLowerCase().includes(query) ||
-      (exp.location || '').toLowerCase().includes(query) ||
-      (exp.hostName || '').toLowerCase().includes(query) ||
-      (exp.tags || []).some(t => t.toLowerCase().includes(query));
-
-    const matchesCategory = activeCategory === 'All' || (exp.category || '').toLowerCase() === activeCategory.toLowerCase();
-
-    return matchesSearch && matchesCategory;
-  });
-
   // Extract popular hosts is now managed as state to prevent SSR hydration mismatches
 
   // Active bookings involving the current user
@@ -646,13 +651,6 @@ export default function FeedClient() {
       }))
     : defaultVibeUsers;
 
-  const defaultExperiences = [
-    { id: 'exp_1', title: 'Coffee Connect', category: 'Coffee', price: 250, days: ['Today'], slots: ['5:00 PM'], location: 'Campus Cafe', hostId: 'ananya' },
-    { id: 'exp_2', title: 'Study Together', category: 'Study', price: 150, days: ['Tomorrow'], slots: ['11:00 AM'], location: 'Library Central', hostId: 'aarav' },
-    { id: 'exp_3', title: 'Badminton Match', category: 'Sports', price: 200, days: ['Fri'], slots: ['4:00 PM'], location: 'Sports Complex', hostId: 'neha' }
-  ];
-
-  const topExps = filteredExperiences.length > 0 ? filteredExperiences.slice(0, 4) : defaultExperiences;
 
   const GROUP_ICON_MAP = { Tech: 'code', Design: 'palette', Music: 'music', Career: 'briefcase', Athletics: 'trophy', default: 'users' };
 

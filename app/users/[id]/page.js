@@ -12,6 +12,7 @@ import {
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
 import BlockUserButton from '../../../features/users/BlockUserButton';
 import MessageButton from '../../../features/users/MessageButton';
+import TipUserButton from '../../../features/users/TipUserButton';
 import ProfileHighlightsSection from '../../../components/ProfileHighlightsSection';
 import InstagramEmbed from '../../../components/InstagramEmbed';
 
@@ -192,24 +193,30 @@ export default async function UserProfilePage({ params }) {
 
         {/* Action Buttons (Instagram 2-Column Style) */}
         {!isSelf && (
-          <div className="flex items-center gap-2.5 pt-3 border-t border-zinc-100">
-            {profile.isIdOn !== false ? (
-              <div className="flex-1">
-                <BookCoffeeButton
-                  targetUserId={id}
-                  targetName={profile.full_name}
-                  targetPhoto={avatarUrl(profile)}
-                  isLoggedIn={isLoggedIn}
-                  accentColor={primaryMeta.color}
-                />
-              </div>
-            ) : (
-              <div className="flex-1 py-2.5 rounded-xl text-xs font-bold text-center text-rose-500 bg-rose-50 border border-rose-100">
-                Offline
-              </div>
-            )}
+          <div className="flex flex-col gap-2.5 pt-3 border-t border-zinc-100">
+            <div className="flex items-center gap-2.5">
+              {profile.isIdOn !== false ? (
+                <div className="flex-1">
+                  <BookCoffeeButton
+                    targetUserId={id}
+                    targetName={profile.full_name}
+                    targetPhoto={avatarUrl(profile)}
+                    isLoggedIn={isLoggedIn}
+                    accentColor={primaryMeta.color}
+                  />
+                </div>
+              ) : (
+                <div className="flex-1 py-2.5 rounded-xl text-xs font-bold text-center text-rose-500 bg-rose-50 border border-rose-100">
+                  Offline
+                </div>
+              )}
 
-            <MessageButton targetUid={id} />
+              <MessageButton targetUid={id} />
+            </div>
+            
+            <div className="flex items-center gap-2.5">
+              <TipUserButton targetUid={id} targetName={profile.full_name || 'Student'} />
+            </div>
           </div>
         )}
 
