@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Zap, Clock, RefreshCw, Loader2 } from 'lucide-react';
 
@@ -97,7 +97,7 @@ export default function AdminPaymentsPage() {
           onClick={loadPayments}
           className="self-start sm:self-auto flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 transition-all shadow-xs cursor-pointer"
         >
-          <RefreshCw size={14} className={fetching ? 'animate-spin text-[#8C3573]' : 'text-slate-500'} />
+          <RefreshCw size={14} className={fetching ? 'animate-spin text-[#F05A00]' : 'text-slate-500'} />
           <span>Refresh</span>
         </button>
       </div>
@@ -110,7 +110,7 @@ export default function AdminPaymentsPage() {
             onClick={() => setFilter(f)}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
               filter === f
-                ? 'bg-[#8C3573] text-white shadow-xs border border-[#8C3573]'
+                ? 'bg-[#F05A00] text-white shadow-xs border border-[#F05A00]'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
             }`}
           >
@@ -134,7 +134,7 @@ export default function AdminPaymentsPage() {
       {/* Payments list */}
       {fetching ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
-          <Loader2 size={24} className="animate-spin text-[#8C3573]" />
+          <Loader2 size={24} className="animate-spin text-[#F05A00]" />
           <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Fetching payment records...</p>
         </div>
       ) : shown.length === 0 ? (

@@ -1,5 +1,5 @@
 'use client';
-// Force compile: 2026-07-16
+// Force compile: 2026-08-25T20:45:00
 import React, { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { Scanner } from '@yudiel/react-qr-scanner';
@@ -33,7 +33,7 @@ function FeedSkeleton() {
       <div className="bg-white border border-zinc-100 rounded-[2rem] p-4 sm:p-5 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Skeleton variant="circular" className="h-14 w-14 border-2 border-[#8C3573]/20" />
+            <Skeleton variant="circular" className="h-14 w-14 border-2 border-[#F05A00]/20" />
             <div>
               <Skeleton variant="text" className="h-6 w-32 mb-1.5" />
               <Skeleton variant="text" className="h-3 w-48" />
@@ -46,40 +46,8 @@ function FeedSkeleton() {
       {/* ── SEARCH BAR SKELETON ────────────────────────────── */}
       <Skeleton variant="rectangular" className="w-full h-[52px] rounded-2xl border border-zinc-100" />
 
-      {/* ── PEOPLE YOU MIGHT VIBE WITH SKELETON ────────────── */}
-      <div className="space-y-4 pt-1">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <Skeleton variant="text" className="h-5 w-48" />
-            <Skeleton variant="rectangular" className="h-5 w-24 rounded-full" />
-          </div>
-          <Skeleton variant="text" className="h-4 w-12" />
-        </div>
-
-        <div className="flex gap-4 overflow-hidden px-1">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="w-[185px] sm:w-[195px] flex-shrink-0 bg-white border border-zinc-100/80 rounded-[2.2rem] p-4 flex flex-col items-center justify-between shadow-xs">
-              <Skeleton variant="circular" className="w-[88px] h-[88px] mb-3" />
-              <Skeleton variant="text" className="h-4 w-24 mb-2" />
-              <Skeleton variant="rectangular" className="h-4 w-32 rounded-full mb-3" />
-              
-              <div className="flex gap-1 mb-4">
-                <Skeleton variant="rectangular" className="h-3 w-12 rounded-full" />
-                <Skeleton variant="rectangular" className="h-3 w-16 rounded-full" />
-                <Skeleton variant="rectangular" className="h-3 w-14 rounded-full" />
-              </div>
-              
-              <div className="w-full flex items-center gap-2 mt-auto">
-                <Skeleton variant="circular" className="w-8 h-8 flex-shrink-0" />
-                <Skeleton variant="rectangular" className="flex-1 h-8 rounded-full" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ── RECENT CAMPUS GIGS SKELETON ────────────────────── */}
-      <div className="space-y-4 pt-4">
+      <div className="space-y-4 pt-1">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <Skeleton variant="text" className="h-5 w-40" />
@@ -91,18 +59,52 @@ function FeedSkeleton() {
           </div>
         </div>
 
-        <div className="flex gap-4 overflow-hidden px-1">
-          {[1, 2].map(i => (
-            <div key={i} className="w-[280px] sm:w-[320px] flex-shrink-0 bg-white border border-zinc-100 rounded-3xl p-5 flex flex-col shadow-xs">
-              <div className="flex items-center justify-between mb-3">
-                <Skeleton variant="rectangular" className="h-6 w-20 rounded-full" />
-                <Skeleton variant="rectangular" className="h-6 w-16 rounded-full" />
+        <div className="flex gap-3.5 overflow-hidden px-1">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="w-[260px] sm:w-[280px] flex-shrink-0 bg-white border border-zinc-100 rounded-2xl p-4 flex flex-col justify-between shadow-xs min-h-[148px]">
+              <div className="flex items-center justify-between mb-2">
+                <Skeleton variant="rectangular" className="h-6 w-20 rounded-lg" />
+                <Skeleton variant="rectangular" className="h-6 w-16 rounded-lg" />
               </div>
-              <Skeleton variant="text" className="h-5 w-full mb-2" />
-              <Skeleton variant="text" className="h-5 w-2/3 mb-4" />
-              <div className="flex items-center gap-2 mt-auto">
-                <Skeleton variant="circular" className="w-8 h-8" />
-                <Skeleton variant="text" className="h-4 w-24" />
+              <Skeleton variant="text" className="h-4 w-full mb-1" />
+              <Skeleton variant="text" className="h-3 w-4/5 mb-3" />
+              <div className="flex items-center justify-between pt-2 border-t border-zinc-50">
+                <div className="flex items-center gap-2">
+                  <Skeleton variant="circular" className="w-5 h-5" />
+                  <Skeleton variant="text" className="h-3 w-20" />
+                </div>
+                <Skeleton variant="rectangular" className="h-7 w-16 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── PEOPLE YOU MIGHT VIBE WITH SKELETON ────────────── */}
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <Skeleton variant="text" className="h-5 w-48" />
+            <Skeleton variant="rectangular" className="h-5 w-24 rounded-full" />
+          </div>
+          <Skeleton variant="text" className="h-4 w-12" />
+        </div>
+
+        <div className="flex gap-3.5 overflow-hidden px-1">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="w-[175px] sm:w-[185px] flex-shrink-0 bg-white border border-zinc-100 rounded-2xl p-4 flex flex-col items-center justify-between shadow-xs">
+              <Skeleton variant="circular" className="w-16 h-16 mb-2.5" />
+              <Skeleton variant="text" className="h-4 w-24 mb-1" />
+              <Skeleton variant="rectangular" className="h-4 w-28 rounded-lg mb-2" />
+              
+              <div className="flex gap-1 mb-3">
+                <Skeleton variant="rectangular" className="h-3 w-12 rounded-md" />
+                <Skeleton variant="rectangular" className="h-3 w-14 rounded-md" />
+              </div>
+              
+              <div className="w-full flex items-center gap-1.5 mt-auto pt-1">
+                <Skeleton variant="rectangular" className="w-8 h-8 rounded-xl flex-shrink-0" />
+                <Skeleton variant="rectangular" className="flex-1 h-8 rounded-xl" />
               </div>
             </div>
           ))}
@@ -150,10 +152,10 @@ function getExpCardTheme(category) {
   if (cat.includes('coffee') || cat.includes('meet') || cat.includes('startup')) {
     return {
       bg: 'bg-[#f5f3ff] border-[#ddd6fe]/50',
-      text: 'text-[#8C3573]',
+      text: 'text-[#F05A00]',
       muted: 'text-[#9061f9]',
       circleBg: 'bg-[#ede9fe]',
-      priceBg: 'bg-[#ede9fe] text-[#8C3573]'
+      priceBg: 'bg-[#ede9fe] text-[#F05A00]'
     };
   }
   if (cat.includes('study') || cat.includes('class') || cat.includes('learn') || cat.includes('design') || cat.includes('together')) {
@@ -295,7 +297,7 @@ export default function FeedClient() {
 
       // 2. Upload to Cloudinary using unsigned preset
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'meetuply_unsigned';
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'Meova_unsigned';
 
       const formData = new FormData();
       formData.append('file', compressedFile);
@@ -664,11 +666,11 @@ export default function FeedClient() {
 
   const GROUP_THEME = {
     Tech:      { bg: '#eff6ff', color: '#3b82f6', border: '#bfdbfe', Icon: BookOpen },
-    Design:    { bg: '#fdf4ff', color: '#b5609d', border: '#e9d5ff', Icon: Layers },
+    Design:    { bg: '#fdf4ff', color: '#D94F00', border: '#e9d5ff', Icon: Layers },
     Music:     { bg: '#fdf2f8', color: '#ec4899', border: '#fbcfe8', Icon: Music },
     Career:    { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0', Icon: Briefcase },
     Athletics: { bg: '#fff7ed', color: '#ea580c', border: '#fed7aa', Icon: Activity },
-    default:   { bg: '#f5f3ff', color: '#8C3573', border: '#ddd6fe', Icon: Users },
+    default:   { bg: '#f5f3ff', color: '#F05A00', border: '#ddd6fe', Icon: Users },
   };
 
   const filteredGroups = campusGroups.filter(g => {
@@ -682,13 +684,13 @@ export default function FeedClient() {
   }
 
   return (
-    <div className="space-y-7 pb-24 px-1 sm:px-2 select-none animate-in fade-in duration-300">
+    <div className="space-y-7 pb-24 px-0.5 sm:px-2 select-none animate-in fade-in duration-300">
 
       {/* ── HEADER SECTION ────────────────────────── */}
-      <div className="bg-gradient-to-br from-[#fcf6fa]/80 via-white to-[#fcf6fa]/60 border border-[#f5ebf4]/80 rounded-3xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(99,102,241,0.04)]">
+      <div className="bg-gradient-to-br from-orange-50/60 via-white to-orange-50/40 border border-orange-100/80 rounded-2xl p-4 sm:p-5 shadow-xs">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-[#9e4685] to-[#8C3573] flex-shrink-0">
+            <div className="relative w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-[#F05A00] to-[#F05A00] flex-shrink-0">
               <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
                 <img 
                   src={getUserAvatarUrl(currentUser)} 
@@ -703,11 +705,11 @@ export default function FeedClient() {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black text-zinc-950 tracking-tight truncate">
-                  Hi, {userData?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'Chirag'} 👋
+                  Hi, {userData?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'Chirag'}
                 </h1>
               </div>
-              <p className="text-xs text-zinc-500 font-bold mt-0.5 truncate">
-                Who are you meeting on campus today?
+              <p className="text-xs text-zinc-500 font-bold mt-0.5 truncate whitespace-nowrap">
+                Connect on campus today
               </p>
             </div>
           </div>
@@ -716,7 +718,7 @@ export default function FeedClient() {
             {/* Live Free Now Toggle Button */}
             <button 
               onClick={handleFreeNowToggle}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-[10.5px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95 ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-[10.5px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95 whitespace-nowrap ${
                 userData?.isLiveOnCampus 
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-emerald-600 shadow-emerald-500/20' 
                   : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300'
@@ -729,7 +731,7 @@ export default function FeedClient() {
                 </>
               ) : (
                 <>
-                  <MapPin size={13} className="text-[#8C3573]" />
+                  <MapPin size={13} className="text-[#F05A00]" />
                   <span>Free Now</span>
                 </>
               )}
@@ -741,13 +743,13 @@ export default function FeedClient() {
       {/* ── SEARCH BAR ─────────────────────────── */}
       <div className="relative flex items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9e4685] pointer-events-none" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F05A00] pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search peers, campus experiences, gigs & groups..."
-            className="w-full bg-white border border-zinc-200/90 focus:border-[#9e4685] focus:ring-4 focus:ring-[#9e4685]/10 rounded-2xl pl-11 pr-10 py-3.5 text-xs font-bold text-zinc-900 placeholder-zinc-400 focus:outline-none transition-all shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
+            placeholder="Search peers, experiences, gigs..."
+            className="w-full bg-white border border-zinc-200/90 focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 rounded-2xl pl-11 pr-10 py-3.5 text-xs font-bold text-zinc-900 placeholder-zinc-400 focus:outline-none transition-all shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
           />
           {searchQuery && (
             <button 
@@ -760,16 +762,117 @@ export default function FeedClient() {
         </div>
       </div>
 
-      {/* ── PEOPLE YOU MIGHT VIBE WITH ─────────────────────────── */}
+      {/* ── RECENT CAMPUS GIGS & FREELANCE ───────────────────── */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <h3 className="text-xs sm:text-sm font-black text-zinc-950 tracking-tight whitespace-nowrap">
+              Recent Gigs
+            </h3>
+            <span className="text-[9px] font-black uppercase tracking-wider bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 rounded-md flex items-center gap-1 whitespace-nowrap flex-shrink-0">
+              Earn Sparks <Zap size={9} className="fill-current" />
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Link
+              href="/gigs?action=post"
+              className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-[#F05A00] to-[#F05A00] text-white px-3 py-1.5 rounded-xl hover:opacity-95 active:scale-95 transition-all flex items-center gap-1 shadow-2xs whitespace-nowrap"
+            >
+              <Plus size={12} strokeWidth={3} />
+              <span>Post Gig</span>
+            </Link>
+            <Link href="/gigs" className="text-xs font-black text-[#F05A00] hover:text-orange-700 transition-colors flex items-center gap-0.5 whitespace-nowrap">
+              <span>See all</span>
+              <ChevronRight size={14} />
+            </Link>
+          </div>
+        </div>
+
+        <div className="flex gap-3.5 overflow-x-auto no-scrollbar pt-1 pb-3 -mx-4 px-4 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          {[
+            {
+              id: 'gig-1',
+              title: 'Figma UI Designer for Campus App',
+              company: 'Meetuply Team',
+              category: 'Design',
+              categoryColor: 'bg-orange-50 text-[#F05A00]',
+              budget: '500',
+              duration: '3 Days',
+              type: 'FREELANCE',
+              desc: 'Looking for a student designer to create sleek dark-mode UI mockups for campus app.'
+            },
+            {
+              id: 'gig-2',
+              title: 'Next.js Frontend Bug Fixes',
+              company: 'Coding Club',
+              category: 'Development',
+              categoryColor: 'bg-blue-50 text-blue-700',
+              budget: '750',
+              duration: '1 Week',
+              type: 'PROJECT',
+              desc: 'Help integrate Tailwind CSS components and optimize client page load speed.'
+            },
+            {
+              id: 'gig-3',
+              title: 'Campus Fest Poster & Reel Creation',
+              company: 'Media Circle',
+              category: 'Marketing',
+              categoryColor: 'bg-pink-50 text-pink-700',
+              budget: '400',
+              duration: '2 Days',
+              type: 'CREATIVE',
+              desc: 'Create 3 Instagram reels and event posters for the upcoming cultural fest.'
+            }
+          ].map((gig) => (
+            <div 
+              key={gig.id}
+              onClick={() => router.push('/gigs')}
+              className="w-[275px] sm:w-[290px] flex-shrink-0 bg-white border border-zinc-200/70 rounded-2xl p-4 flex flex-col justify-between min-h-[152px] cursor-pointer shadow-[0_6px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_rgba(240,90,0,0.12)] hover:border-[#F05A00]/40 hover:-translate-y-1 transition-all duration-300 group relative"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg ${gig.categoryColor}`}>
+                    {gig.category}
+                  </span>
+                  <span className="text-[10px] font-black text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs">
+                    {gig.budget} <Zap size={10} className="fill-current text-amber-500" />
+                  </span>
+                </div>
+                <h4 className="text-xs sm:text-[13px] font-black text-zinc-950 tracking-tight group-hover:text-[#F05A00] transition-colors truncate mt-1">
+                  {gig.title}
+                </h4>
+                <p className="text-[10.5px] text-zinc-500 font-medium line-clamp-2 leading-relaxed">
+                  {gig.desc}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between border-t border-zinc-100 pt-2.5 mt-3 gap-2">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <div className="w-5 h-5 rounded-md bg-orange-50 text-[#F05A00] font-black text-[9px] flex items-center justify-center border border-orange-100 flex-shrink-0">
+                    {gig.company[0]}
+                  </div>
+                  <span className="text-[10px] font-bold text-zinc-600 truncate">by {gig.company}</span>
+                </div>
+                <span className="text-[9.5px] font-black text-white bg-[#F05A00] hover:bg-[#D94F00] px-3.5 py-1.5 rounded-xl uppercase tracking-wider flex items-center gap-0.5 transition-all shadow-[0_4px_12px_rgba(240,90,0,0.25)] flex-shrink-0">
+                  Apply <ChevronRight size={11} />
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── PEOPLE TO VIBE WITH ─────────────────────────── */}
       <div className="space-y-4 pt-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm sm:text-base font-black text-zinc-950 tracking-tight">People you might vibe with</h3>
-            <span className="text-[9.5px] font-black uppercase tracking-wider bg-[#fcf6fa] text-[#74295d] px-2.5 py-0.5 rounded-full border border-[#f5ebf4]">
+            <h3 className="text-sm sm:text-base font-black text-zinc-950 tracking-tight whitespace-nowrap">People to Vibe With</h3>
+            <span className="text-[9.5px] font-black uppercase tracking-wider bg-orange-50 text-[#F05A00] px-2.5 py-0.5 rounded-full border border-orange-100 whitespace-nowrap">
               Campus Peers
             </span>
           </div>
-          <Link href="/discover" className="text-xs font-black text-[#8C3573] hover:text-indigo-850 transition-colors flex items-center gap-0.5">
+          <Link href="/discover" className="text-xs font-black text-[#F05A00] hover:text-orange-700 transition-colors flex items-center gap-0.5 whitespace-nowrap">
             <span>See all</span>
             <ChevronRight size={14} />
           </Link>
@@ -778,21 +881,26 @@ export default function FeedClient() {
         {vibeUsers.filter(u => !dismissedVibes[u.id]).length === 0 ? (
           <div className="text-center py-9 bg-white border border-zinc-200/80 rounded-3xl p-6 shadow-xs">
             <Users className="w-9 h-9 text-indigo-300 mx-auto mb-2.5" />
-            <h4 className="text-xs font-black text-zinc-700">No active campus peers right now</h4>
-            <p className="text-[10.5px] text-zinc-400 font-semibold mt-1">Check back later when more students toggle &quot;Free Now&quot;.</p>
+            <h4 className="text-xs font-black text-zinc-700 whitespace-nowrap">No active campus peers right now</h4>
+            <p className="text-[10.5px] text-zinc-400 font-semibold mt-1 whitespace-nowrap truncate">Check back later when more students toggle Free Now.</p>
           </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pt-1 pb-4 px-4 -mx-4 scroll-smooth">
+          <div className="flex gap-3.5 overflow-x-auto no-scrollbar pt-1 pb-3 -mx-4 px-4 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {vibeUsers.map((user) => {
               if (dismissedVibes[user.id]) return null;
+              const cleanYr = (user.year || '1st').toString().replace(/\s*year\s*/i, '').trim();
+              const cleanBranch = (user.branch || 'General')
+                .replace(/COMPUTER SCIENCE(\s*&\s*ENGINEERING)?/i, 'CSE')
+                .replace(/Computer Science.*/i, 'CSE')
+                .replace(/BUSINESS ADMIN/i, 'BBA');
               return (
                 <div
                   key={user.id}
                   onClick={() => router.push(`/users/${user.id}`)}
-                  className="w-[185px] sm:w-[195px] flex-shrink-0 bg-white border border-[#f5ebf4]/90 rounded-[2.2rem] p-4 flex flex-col items-center justify-between text-center shadow-[0_4px_20px_rgba(140,53,115,0.04)] hover:shadow-[0_12px_32px_rgba(140,53,115,0.14)] hover:border-purple-300 transition-all duration-300 cursor-pointer group hover:-translate-y-1 relative"
+                  className="w-[175px] sm:w-[185px] flex-shrink-0 bg-white border border-zinc-200/60 rounded-2xl p-4 flex flex-col items-center justify-between text-center shadow-[0_6px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_rgba(240,90,0,0.12)] hover:border-[#F05A00]/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative"
                 >
                   {/* Avatar with Halo Border & Live Badge */}
-                  <div className="relative w-[88px] h-[88px] rounded-full p-[3px] bg-gradient-to-tr from-[#9e4685] via-[#9e4685] to-pink-500 mb-3 group-hover:scale-105 transition-transform duration-300 shadow-sm">
+                  <div className="relative w-16 h-16 rounded-full p-[2.5px] bg-gradient-to-tr from-[#F05A00] to-[#F05A00] mb-2.5 group-hover:scale-105 transition-transform duration-300">
                     <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
                       <img 
                         src={getUserAvatarUrl(user)} 
@@ -804,43 +912,42 @@ export default function FeedClient() {
                       />
                     </div>
                     {/* Live Online Badge */}
-                    <span className="absolute bottom-0.5 right-0.5 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full shadow-xs flex items-center justify-center">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center shadow-xs">
+                      <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
                     </span>
                   </div>
 
-                  {/* Name */}
-                  <div className="w-full mb-1">
-                    <span className="text-xs font-black text-zinc-950 tracking-tight truncate block">
+                  {/* Name & Academic Meta */}
+                  <div className="w-full space-y-1 min-w-0">
+                    <h4 className="text-xs font-black text-zinc-900 tracking-tight truncate block">
                       {user.full_name}
+                    </h4>
+                    <span className="inline-block text-[9.5px] font-black text-[#F05A00] bg-orange-50 px-2 py-0.5 rounded-lg truncate max-w-full">
+                      {cleanYr} Yr · {cleanBranch}
                     </span>
-                    <span className="inline-block text-[9.5px] font-bold text-[#8C3573] bg-[#fcf6fa]/80 px-2.5 py-0.5 rounded-full border border-[#f5ebf4] mt-1 uppercase tracking-wider">
-                      {user.year} Yr · {user.branch}
-                    </span>
+                    <p className="text-[9.5px] font-bold text-zinc-500 truncate max-w-full mt-0.5">
+                      {user.college}
+                    </p>
                   </div>
 
-                  <p className="text-[9.5px] font-bold text-zinc-400 uppercase tracking-wider leading-none mt-1">
-                    {user.college}
-                  </p>
-
-                  {/* Interest Chips */}
-                  <div className="flex flex-wrap gap-1 mt-3 justify-center mb-4">
-                    {user.interests.slice(0, 3).map((tag, idx) => (
-                      <span key={`${tag}-${idx}`} className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#fcf6fa] text-[#74295d] border border-[#f5ebf4]">
+                  {/* Interest Chips (Horizontal, max 2 tags) */}
+                  <div className="flex items-center justify-center gap-1 my-2.5 w-full overflow-hidden">
+                    {user.interests.slice(0, 2).map((tag, idx) => (
+                      <span key={`${tag}-${idx}`} className="text-[8.5px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-md bg-zinc-100/80 text-zinc-700 truncate max-w-[80px]">
                         {tag}
                       </span>
                     ))}
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="w-full flex items-center gap-2 mt-auto">
+                  <div className="w-full flex items-center gap-1.5 mt-auto pt-1">
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setDismissedVibes(prev => ({ ...prev, [user.id]: true }));
                       }}
-                      className="flex-shrink-0 w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 flex items-center justify-center transition-all cursor-pointer active:scale-90"
+                      className="flex-shrink-0 w-8 h-8 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-800 flex items-center justify-center transition-all cursor-pointer active:scale-90"
                       title="Dismiss"
                     >
                       <X size={13} strokeWidth={2.5} />
@@ -850,7 +957,7 @@ export default function FeedClient() {
                       targetName={user.full_name}
                       targetPhoto={avatarUrl(user)}
                       isLoggedIn={!!currentUser}
-                      accentColor="#8C3573"
+                      accentColor="#F05A00"
                       renderButton={({ onClick }) => (
                         <button
                           type="button"
@@ -859,10 +966,10 @@ export default function FeedClient() {
                             confetti({ particleCount: 80, spread: 55, origin: { y: 0.6 } });
                             onClick(e);
                           }}
-                          className="flex-1 h-8 rounded-full bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] text-white text-[10.5px] font-black flex items-center justify-center gap-1 transition-all cursor-pointer shadow-md active:scale-95 shadow-[#9e4685]/20"
+                          className="flex-1 h-8 rounded-xl bg-[#F05A00] hover:bg-[#D94F00] text-white text-[10.5px] font-black flex items-center justify-center gap-1 transition-all cursor-pointer shadow-[0_4px_12px_rgba(240,90,0,0.25)] active:scale-95"
                         >
                           <span>Meet {user.spark_charge}</span>
-                          <Zap size={11} className="fill-current text-yellow-300" />
+                          <Zap size={11} className="fill-white text-white flex-shrink-0" />
                         </button>
                       )}
                     />
@@ -874,131 +981,34 @@ export default function FeedClient() {
         )}
       </div>
 
-      {/* ── RECENT CAMPUS GIGS & FREELANCE ───────────────────── */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-black text-zinc-950 tracking-tight">Recent Campus Gigs</h3>
-            <span className="text-[9px] font-black uppercase tracking-wider bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-              Earn Sparks <Zap size={9} className="fill-current" />
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <Link
-              href="/gigs?action=post"
-              className="text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-[#8C3573] to-[#8C3573] text-white px-3.5 py-1.5 rounded-xl hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-1 shadow-xs"
-            >
-              <Plus size={12} strokeWidth={3} />
-              <span>Post a Gig</span>
-            </Link>
-            <Link href="/gigs" className="text-xs font-black text-[#8C3573] hover:text-[#5b21b6] transition-colors flex items-center gap-0.5">
-              <span>See all</span>
-              <ChevronRight size={14} />
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            {
-              id: 'gig-1',
-              title: 'Figma UI Designer for Campus App',
-              company: 'Meetuply Team',
-              category: 'Design',
-              categoryColor: 'bg-[#fcf6fa] text-[#74295d] border-[#f5ebf4]',
-              budget: '500',
-              duration: '3 Days',
-              type: 'FREELANCE',
-              desc: 'Looking for a student designer to create sleek dark-mode UI mockups for campus app.'
-            },
-            {
-              id: 'gig-2',
-              title: 'Next.js Frontend Bug Fixes',
-              company: 'Coding Club',
-              category: 'Development',
-              categoryColor: 'bg-blue-50 text-blue-700 border-blue-100',
-              budget: '750',
-              duration: '1 Week',
-              type: 'PROJECT',
-              desc: 'Help integrate Tailwind CSS components and optimize client page load speed.'
-            },
-            {
-              id: 'gig-3',
-              title: 'Campus Fest Poster & Reel Creation',
-              company: 'Media Circle',
-              category: 'Marketing',
-              categoryColor: 'bg-pink-50 text-pink-700 border-pink-100',
-              budget: '400',
-              duration: '2 Days',
-              type: 'CREATIVE',
-              desc: 'Create 3 Instagram reels and event posters for the upcoming cultural fest.'
-            }
-          ].map((gig) => (
-            <div 
-              key={gig.id}
-              onClick={() => router.push('/gigs')}
-              className="bg-white border border-zinc-200/80 rounded-3xl p-4.5 flex flex-col justify-between h-full cursor-pointer hover:border-purple-300 hover:shadow-lg transition-all duration-300 group hover:-translate-y-1 relative overflow-hidden"
-            >
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${gig.categoryColor}`}>
-                    {gig.category}
-                  </span>
-                  <span className="text-[11px] font-black text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/60 flex items-center gap-1 shadow-2xs">
-                    {gig.budget} <Zap size={10} className="fill-current text-amber-500" />
-                  </span>
-                </div>
-                <h4 className="text-xs font-black text-zinc-950 tracking-tight group-hover:text-[#74295d] transition-colors line-clamp-1">
-                  {gig.title}
-                </h4>
-                <p className="text-[11px] text-zinc-500 font-medium line-clamp-2 h-9 leading-relaxed">
-                  {gig.desc}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between border-t border-zinc-100 pt-3 mt-4 gap-2">
-                <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                  <div className="w-5 h-5 rounded-full bg-[#f5ebf4] text-[#74295d] font-black text-[9px] flex items-center justify-center border border-[#eac5e0] flex-shrink-0">
-                    {gig.company[0]}
-                  </div>
-                  <span className="text-[10px] font-bold text-zinc-500 truncate">by {gig.company}</span>
-                </div>
-                <span className="text-[10px] font-black text-white bg-[#8C3573] group-hover:bg-[#74295d] px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-0.5 transition-all shadow-xs flex-shrink-0">
-                  Apply <ChevronRight size={12} />
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ── CAMPUS SHOWCASE & WORK FEED (INSTA / TWITTER X STYLE) ───────────────────── */}
       <div className="space-y-4 pt-3">
-        <div className="flex items-center justify-between gap-2 pb-1 border-b border-zinc-100">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm sm:text-base font-black text-zinc-950 tracking-tight">Campus Feed & Activity</h3>
-            <span className="text-[9.5px] font-black uppercase tracking-wider bg-[#fcf6fa] border border-[#eac5e0]/80 text-[#74295d] px-2.5 py-0.5 rounded-full flex items-center gap-1">
-              Live Feed <Sparkles size={10} className="text-[#8C3573]" />
+        <div className="flex items-center justify-between gap-2 pb-1 border-b border-zinc-100 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <h3 className="text-xs sm:text-base font-black text-zinc-950 tracking-tight whitespace-nowrap">
+              Campus Feed <span className="hidden sm:inline">& Activity</span>
+            </h3>
+            <span className="text-[9px] sm:text-[9.5px] font-black uppercase tracking-wider bg-orange-50 border border-orange-100 text-[#F05A00] px-2 py-0.5 rounded-md flex items-center gap-1 whitespace-nowrap flex-shrink-0">
+              Live <Sparkles size={9} className="text-[#F05A00]" />
             </span>
           </div>
 
           <button
             onClick={() => setShowPostModal(true)}
-            className="text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] text-white px-4 py-2 rounded-2xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+            className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wider bg-gradient-to-r from-[#F05A00] to-[#F05A00] hover:opacity-95 text-white px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0"
           >
             <Camera size={13} strokeWidth={2.5} />
-            <span>Post Work / Photo</span>
+            <span>Post <span className="hidden sm:inline">Photo</span></span>
           </button>
         </div>
 
         {/* Stacked Vertical Post Feed - Signature Meetuply Campus Design */}
-        <div className="space-y-6 max-w-xl mx-auto pt-2">
+        <div className="space-y-5 max-w-xl mx-auto pt-1">
           {displayPosts.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-[2rem] border border-zinc-200 border-dashed">
-              <Camera className="mx-auto h-12 w-12 text-zinc-300 mb-4" />
-              <h3 className="text-sm font-black text-zinc-700">No posts yet</h3>
-              <p className="text-xs font-bold text-zinc-500 mt-1">Be the first to share a campus moment!</p>
+            <div className="text-center py-10 bg-white rounded-2xl border border-zinc-200/80 border-dashed p-6 shadow-2xs">
+              <Camera className="mx-auto h-10 w-10 text-zinc-300 mb-3" />
+              <h3 className="text-xs font-black text-zinc-800">No posts yet</h3>
+              <p className="text-[11px] font-medium text-zinc-500 mt-0.5">Be the first to share a campus moment!</p>
             </div>
           ) : displayPosts.map((post) => {
             const isLiked = likedPosts[post.id];
@@ -1006,7 +1016,7 @@ export default function FeedClient() {
             return (
               <div 
                 key={post.id}
-                className="bg-gradient-to-b from-white via-white to-[#fcf6fa]/20 border border-zinc-200/90 rounded-[2rem] p-4 sm:p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(140,53,115,0.08)] hover:border-[#eac5e0] transition-all duration-300 space-y-3.5 group"
+                className="bg-white border border-zinc-200/90 rounded-2xl p-4 sm:p-5 shadow-xs hover:border-orange-200 transition-all duration-200 space-y-3.5 group"
               >
                 {/* 1. Student Header & Quick Collab CTA */}
                 <div className="flex items-center justify-between gap-3">
@@ -1018,23 +1028,23 @@ export default function FeedClient() {
                       <img 
                         src={post.authorPhoto || avatarUrl(post.authorId, post.authorName)} 
                         alt={post.authorName || 'Student'} 
-                        className="w-11 h-11 rounded-2xl object-cover border border-[#f5ebf4] shadow-2xs group-hover/author:scale-105 transition-transform"
+                        className="w-10 h-10 rounded-xl object-cover border border-orange-100 shadow-2xs group-hover/author:scale-105 transition-transform"
                         onError={(e) => {
                           e.target.src = getCartoonAvatar(post.authorName || post.authorId || 'user');
                         }}
                       />
-                      <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full" />
+                      <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <h4 className="text-sm font-black text-zinc-950 group-hover/author:text-[#8C3573] transition-colors truncate">
+                        <h4 className="text-xs sm:text-sm font-black text-zinc-950 group-hover:text-[#F05A00] transition-colors truncate">
                           {post.authorName || 'Campus Peer'}
                         </h4>
-                        <span className="text-[9.5px] font-black uppercase tracking-wider bg-[#fcf6fa] text-[#74295d] px-2 py-0.5 rounded-md border border-[#f5ebf4]/80 flex-shrink-0">
+                        <span className="text-[9px] font-black uppercase tracking-wider bg-orange-50 text-[#F05A00] px-2 py-0.5 rounded-md border border-orange-100 flex-shrink-0">
                           {post.authorBranch || 'CSE'}
                         </span>
                       </div>
-                      <p className="text-[11px] font-bold text-zinc-400 truncate mt-0.5">
+                      <p className="text-[10.5px] font-semibold text-zinc-400 truncate mt-0.5">
                         {post.location || 'Campus'} · {post.timeAgo || 'Recently'}
                       </p>
                     </div>
@@ -1046,7 +1056,7 @@ export default function FeedClient() {
                       if (post.authorId) router.push(`/chats?userId=${post.authorId}`);
                       else router.push('/chats');
                     }}
-                    className="flex-shrink-0 text-[11px] font-black text-[#74295d] bg-[#fcf6fa] hover:bg-[#8C3573] hover:text-white px-3.5 py-1.5 rounded-full border border-[#eac5e0]/80 transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1.5"
+                    className="flex-shrink-0 text-[10.5px] font-black text-[#F05A00] bg-orange-50 hover:bg-gradient-to-r hover:from-[#F05A00] hover:to-[#F05A00] hover:text-white px-3 py-1.5 rounded-xl border border-orange-100 transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1.5"
                   >
                     <MessageCircle size={13} />
                     <span>Collab</span>
@@ -1057,7 +1067,7 @@ export default function FeedClient() {
                 {post.photoUrl && (
                   <div 
                     onClick={() => setSelectedPostPhoto(post)}
-                    className="relative w-full aspect-[4/3] sm:aspect-[16/10] rounded-2xl overflow-hidden bg-zinc-950 cursor-pointer group/img shadow-2xs"
+                    className="relative w-full aspect-[4/3] sm:aspect-[16/10] rounded-xl overflow-hidden bg-zinc-950 cursor-pointer group/img shadow-2xs"
                   >
                     <img 
                       src={post.photoUrl} 
@@ -1065,13 +1075,13 @@ export default function FeedClient() {
                       className="w-full h-full object-cover group-hover/img:scale-103 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="text-xs font-black text-white bg-black/60 backdrop-blur-md px-4 py-2 rounded-full uppercase tracking-wider flex items-center gap-2 border border-white/20">
+                      <span className="text-xs font-black text-white bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-xl uppercase tracking-wider flex items-center gap-2 border border-white/20">
                         <Search size={14} /> Full View
                       </span>
                     </div>
                     
-                    {/* Meetuply Category Chip */}
-                    <span className="absolute top-3 left-3 text-[10px] font-black text-white bg-[#8C3573]/90 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider border border-white/20 shadow-xs flex items-center gap-1">
+                    {/* Category Chip */}
+                    <span className="absolute top-3 left-3 text-[9.5px] font-black text-white bg-gradient-to-r from-[#F05A00] to-[#F05A00] backdrop-blur-md px-2.5 py-1 rounded-md uppercase tracking-wider border border-white/20 shadow-xs flex items-center gap-1">
                       <Sparkles size={10} />
                       <span>{post.category || 'Showcase'}</span>
                     </span>
@@ -1147,7 +1157,7 @@ export default function FeedClient() {
                   {/* Bookmark Button */}
                   <button 
                     onClick={() => toast.success('Saved to bookmarks!')}
-                    className="text-zinc-400 hover:text-[#8C3573] p-2 rounded-full hover:bg-[#fcf6fa] transition-colors cursor-pointer"
+                    className="text-zinc-400 hover:text-[#F05A00] p-2 rounded-full hover:bg-orange-50 transition-colors cursor-pointer"
                     title="Save"
                   >
                     <Bookmark size={17} />
@@ -1164,10 +1174,10 @@ export default function FeedClient() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#8C3573] animate-pulse" />
-              <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest text-zinc-900">Campus Groups & Channels</h3>
+              <span className="w-2 h-2 rounded-full bg-[#F05A00] animate-pulse" />
+              <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest text-zinc-900 whitespace-nowrap">Campus Groups</h3>
             </div>
-            <p className="text-[11px] text-zinc-500 font-semibold mt-0.5">Join campus discussion hubs & exclusive communities</p>
+            <p className="text-[11px] text-zinc-500 font-semibold mt-0.5 whitespace-nowrap truncate">Join campus discussion hubs</p>
           </div>
           
           <div className="flex items-center gap-1 bg-zinc-100/90 p-1 rounded-xl self-start sm:self-auto border border-zinc-200/60">
@@ -1177,7 +1187,7 @@ export default function FeedClient() {
                 onClick={() => setGroupFilter(filter)}
                 className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   groupFilter === filter
-                    ? 'bg-white text-[#74295d] shadow-sm font-black'
+                    ? 'bg-white text-[#F05A00] shadow-sm font-black'
                     : 'text-zinc-500 hover:text-zinc-900 font-bold'
                 }`}
               >
@@ -1195,54 +1205,54 @@ export default function FeedClient() {
             return (
               <div 
                 key={group.name}
-                className="group relative flex items-center justify-between p-4 sm:p-4 bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-purple-300 hover:shadow-[0_8px_24px_rgba(140,53,115,0.08)] transition-all duration-200 cursor-pointer"
+                className="group relative flex items-center justify-between p-3 sm:p-3.5 bg-white border border-zinc-200/80 rounded-2xl shadow-xs hover:border-orange-300 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[82px]"
                 onClick={() => handleJoinGroup(group)}
               >
-                <div className="flex items-center gap-4 min-w-0 flex-1">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   {/* Category Icon Avatar */}
                   <div className="relative flex-shrink-0">
                     <div 
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform"
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform"
                       style={{ background: groupTheme.bg, border: `1px solid ${groupTheme.border}`, color: groupTheme.color }}
                     >
-                      <GroupIcon size={21} strokeWidth={2.2} />
+                      <GroupIcon size={18} strokeWidth={2.2} />
                     </div>
                     {group.isOfficial && (
-                      <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white shadow-xs">
-                        <Check size={10} className="text-white" strokeWidth={3.5} />
+                      <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white shadow-xs">
+                        <Check size={8} className="text-white" strokeWidth={3.5} />
                       </span>
                     )}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0 pr-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-[13px] sm:text-sm font-black text-zinc-950 tracking-tight group-hover:text-[#74295d] transition-colors">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <h4 className="text-xs sm:text-[13px] font-black text-zinc-950 tracking-tight group-hover:text-[#F05A00] transition-colors truncate">
                         {group.name}
                       </h4>
                       <span 
-                        className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+                        className="text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md flex-shrink-0"
                         style={{ background: groupTheme.bg, color: groupTheme.color, border: `1px solid ${groupTheme.border}` }}
                       >
                         {group.category}
                       </span>
                     </div>
-                    <p className="text-[11px] font-medium text-zinc-500 mt-1 leading-snug truncate max-w-[420px]">
+                    <p className="text-[10.5px] font-medium text-zinc-500 mt-0.5 leading-tight truncate">
                       {group.desc}
                     </p>
                     
-                    <div className="flex items-center gap-3 mt-2">
+                    <div className="flex items-center gap-2.5 mt-1.5">
                       {group.isPaid ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-[#74295d] bg-[#fcf6fa] border border-[#eac5e0]/80 px-2.5 py-0.5 rounded-full">
-                          <Zap size={10} className="fill-current text-[#8C3573]" />
+                        <span className="inline-flex items-center gap-1 text-[9.5px] font-black text-[#F05A00] bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-md flex-shrink-0">
+                          <Zap size={9} className="fill-current text-[#F05A00]" />
                           {group.price} Sparks
                         </span>
                       ) : (
-                        <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
+                        <span className="text-[9.5px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md flex-shrink-0">
                           Free Group
                         </span>
                       )}
-                      <span className="text-[11px] text-zinc-400 font-semibold">
+                      <span className="text-[10px] text-zinc-400 font-semibold truncate">
                         {group.members + (hasJoined ? 1 : 0)} members
                       </span>
                     </div>
@@ -1252,12 +1262,12 @@ export default function FeedClient() {
                 {/* Action CTA Button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); handleJoinGroup(group); }}
-                  className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-xs ${
+                  className={`flex-shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 ${
                     hasJoined
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
                       : group.isPaid
-                        ? 'bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] text-white shadow-[#9e4685]/20'
-                        : 'bg-zinc-950 hover:bg-zinc-800 text-white'
+                        ? 'bg-[#F05A00] hover:bg-[#D94F00] text-white shadow-[0_4px_12px_rgba(240,90,0,0.25)]'
+                        : 'bg-orange-50 text-[#F05A00] hover:bg-orange-100 border border-orange-200/80'
                   }`}
                 >
                   {hasJoined ? 'Open Chat' : group.isPaid ? 'Subscribe' : 'Join'}
@@ -2023,13 +2033,13 @@ export default function FeedClient() {
             className="w-full max-w-sm bg-white rounded-3xl p-6 text-center space-y-4 animate-in fade-in zoom-in duration-200 shadow-2xl border border-[#f5ebf4]"
             onClick={e => e.stopPropagation()}
           >
-            <div className="w-16 h-16 rounded-full bg-[#f5ebf4] border-4 border-[#fcf6fa] flex items-center justify-center mx-auto text-[#8C3573]">
-              <Zap size={28} className="fill-[#8C3573] animate-pulse" />
+            <div className="w-16 h-16 rounded-full bg-[#f5ebf4] border-4 border-[#fcf6fa] flex items-center justify-center mx-auto text-[#F05A00]">
+              <Zap size={28} className="fill-[#F05A00] animate-pulse" />
             </div>
             <div>
               <h3 className="text-base font-black text-zinc-900 tracking-tight">Low Sparks Balance!</h3>
               <p className="text-xs font-semibold text-zinc-500 mt-1.5 leading-relaxed">
-                You need <span className="font-extrabold text-[#8C3573]">{selectedExp?.price} Sparks</span> to book <strong className="text-zinc-800">{selectedExp?.title}</strong>. Your current balance is {sparksBalance} Sparks.
+                You need <span className="font-extrabold text-[#F05A00]">{selectedExp?.price} Sparks</span> to book <strong className="text-zinc-800">{selectedExp?.title}</strong>. Your current balance is {sparksBalance} Sparks.
               </p>
             </div>
 
@@ -2043,7 +2053,7 @@ export default function FeedClient() {
               <Link
                 href="/wallet"
                 onClick={() => { setShowLowBalanceModal(false); setSelectedExp(null); }}
-                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] shadow-sm transition-all flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-[#F05A00] to-[#F05A00] hover:from-[#D94F00] hover:to-[#D94F00] shadow-sm transition-all flex items-center justify-center gap-1.5"
               >
                 <Zap size={14} className="fill-white" />
                 Top Up Sparks
@@ -2067,7 +2077,7 @@ export default function FeedClient() {
             <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
               <div>
                 <h3 className="text-sm font-black text-zinc-900 flex items-center gap-1.5">
-                  <Camera size={16} className="text-[#8C3573]" />
+                  <Camera size={16} className="text-[#F05A00]" />
                   Post Work or Campus Photo
                 </h3>
                 <p className="text-[10px] font-bold text-zinc-400 mt-0.5">Share your design, project, or campus vibe with peers</p>
@@ -2095,7 +2105,7 @@ export default function FeedClient() {
                     type="button"
                     onClick={() => setPostFilePreview(sample.url)}
                     className={`relative rounded-xl overflow-hidden aspect-square border-2 transition-all cursor-pointer ${
-                      postFilePreview === sample.url ? 'border-[#8C3573] ring-2 ring-[#eac5e0] scale-95' : 'border-transparent opacity-70 hover:opacity-100'
+                      postFilePreview === sample.url ? 'border-[#F05A00] ring-2 ring-[#eac5e0] scale-95' : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
                     <img src={sample.url} alt={sample.label} className="w-full h-full object-cover" />
@@ -2115,7 +2125,7 @@ export default function FeedClient() {
                 placeholder="Paste image link or select preset above..."
                 value={postFilePreview}
                 onChange={(e) => setPostFilePreview(e.target.value)}
-                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-[#8C3573] focus:border-transparent focus:bg-white transition-all"
+                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-[#F05A00] focus:border-transparent focus:bg-white transition-all"
               />
             </div>
 
@@ -2127,7 +2137,7 @@ export default function FeedClient() {
                 placeholder="What are you working on or showcasing today?"
                 value={postCaption}
                 onChange={(e) => setPostCaption(e.target.value)}
-                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-[#8C3573] focus:border-transparent focus:bg-white transition-all resize-none"
+                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-[#F05A00] focus:border-transparent focus:bg-white transition-all resize-none"
               />
             </div>
 
@@ -2153,7 +2163,7 @@ export default function FeedClient() {
                   placeholder="e.g. Innovation Lab"
                   value={postLocation}
                   onChange={(e) => setPostLocation(e.target.value)}
-                  className="w-full bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-800 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-[#8C3573] focus:border-transparent transition-all"
+                  className="w-full bg-zinc-50 border border-zinc-200 text-xs font-semibold text-zinc-800 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-[#F05A00] focus:border-transparent transition-all"
                 />
               </div>
             </div>
@@ -2162,7 +2172,7 @@ export default function FeedClient() {
             <button
               onClick={handlePublishPost}
               disabled={postUploading}
-              className="w-full py-3 bg-gradient-to-r from-[#8C3573] to-[#8C3573] hover:from-[#74295d] hover:to-[#74295d] text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full py-3 bg-gradient-to-r from-[#F05A00] to-[#F05A00] hover:from-[#D94F00] hover:to-[#D94F00] text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
             >
               {postUploading ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -2227,7 +2237,7 @@ export default function FeedClient() {
               </p>
 
               <div className="flex items-center justify-between pt-1">
-                <span className="text-[10px] font-bold text-[#b5609d] bg-[#9e4685]/10 px-2.5 py-1 rounded-full border border-[#9e4685]/20 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-[#D94F00] bg-[#9e4685]/10 px-2.5 py-1 rounded-full border border-[#9e4685]/20 uppercase tracking-wider">
                   {selectedPostPhoto.category || 'Showcase'}
                 </span>
                 
@@ -2241,7 +2251,7 @@ export default function FeedClient() {
                       router.push('/chats');
                     }
                   }}
-                  className="px-4 py-2 bg-[#8C3573] hover:bg-[#9e4685] text-white text-xs font-black rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 bg-[#F05A00] hover:bg-[#9e4685] text-white text-xs font-black rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <MessageCircle size={14} />
                   <span>Send Message</span>

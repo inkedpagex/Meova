@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -18,13 +18,13 @@ const CATEGORY_ICONS = {
 const CATEGORY_COLORS = {
   Tech: { bg: '#eff6ff', color: '#3b82f6', border: '#bfdbfe' },
   Gaming: { bg: '#f0f9ff', color: '#0ea5e9', border: '#bae6fd' },
-  Music: { bg: '#fdf4ff', color: '#b5609d', border: '#e9d5ff' },
+  Music: { bg: '#fdf4ff', color: '#D94F00', border: '#e9d5ff' },
   Design: { bg: '#fff7ed', color: '#f97316', border: '#fed7aa' },
-  Startup: { bg: '#f5f3ff', color: '#8C3573', border: '#ddd6fe' },
+  Startup: { bg: '#fff3ec', color: '#F05A00', border: '#ffe0cc' },
   Sports: { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
   Creators: { bg: '#fff1f2', color: '#e11d48', border: '#fecdd3' },
   Entertainment: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },
-  default: { bg: '#f5f3ff', color: '#8C3573', border: '#ddd6fe' },
+  default: { bg: '#fff3ec', color: '#F05A00', border: '#ffe0cc' },
 };
 
 const MOCK_COMMUNITIES = [
@@ -125,7 +125,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
     let cancelled = false;
     const initial = {};
     if (joinedCircleIds) joinedCircleIds.forEach(id => { initial[id] = true; });
-    const ls = typeof window !== 'undefined' ? localStorage.getItem('meetuply_joined_circles') : null;
+    const ls = typeof window !== 'undefined' ? localStorage.getItem('Meova_joined_circles') : null;
     if (ls) try { Object.assign(initial, JSON.parse(ls)); } catch {}
     if (!cancelled) setJoinedMap(initial);
 
@@ -219,7 +219,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
 
         const next = { ...joinedMap, [circle.id]: true };
         setJoinedMap(next);
-        if (typeof window !== 'undefined') localStorage.setItem('meetuply_joined_circles', JSON.stringify(next));
+        if (typeof window !== 'undefined') localStorage.setItem('Meova_joined_circles', JSON.stringify(next));
 
         if (data.invite_link) {
           window.open(data.invite_link, '_blank');
@@ -247,10 +247,10 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
     <div className="space-y-5 pb-24 pt-2">
 
       {/* Host a Community CTA Banner */}
-      <div className="bg-gradient-to-r from-[#512142] via-indigo-900 to-purple-950 rounded-3xl p-5 text-white shadow-xl shadow-purple-950/20 border border-[#60234d]/40 flex items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-[#4a1d00] via-[#7c2f00] to-[#a03b00] rounded-3xl p-5 text-white shadow-xl shadow-orange-950/20 border border-[#F05A00]/30 flex items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-[#9e4685]/30 text-[#eac5e0] border border-[#b5609d]/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-white/10 text-orange-200 border border-white/20">
               Host Monetization
             </span>
             <span className="text-[10px] font-bold text-amber-300 flex items-center gap-1">
@@ -258,11 +258,11 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
             </span>
           </div>
           <h3 className="text-sm sm:text-base font-black tracking-tight text-white">Create Your Campus Channel</h3>
-          <p className="text-[11px] text-[#eac5e0]/80 font-medium">Monetize your WhatsApp, Telegram or Insta community and track joined students.</p>
+          <p className="text-[11px] text-white/70 font-medium">Monetize your WhatsApp, Telegram or Insta community.</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-3 rounded-2xl bg-white hover:bg-[#fcf6fa] text-[#512142] font-black text-xs transition-all shadow-lg active:scale-95 flex-shrink-0 cursor-pointer"
+          className="px-4 py-3 rounded-2xl bg-white hover:bg-orange-50 text-[#F05A00] font-black text-xs transition-all shadow-lg active:scale-95 flex-shrink-0 cursor-pointer"
         >
           + Host Channel
         </button>
@@ -290,7 +290,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
           <button key={f} onClick={() => setActiveFilter(f)}
             className="flex-shrink-0 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
             style={activeFilter === f
-              ? { background: '#8C3573', color: 'white', border: '1px solid transparent' }
+              ? { background: '#F05A00', color: 'white', border: '1px solid transparent' }
               : { background: '#f4f4f6', color: '#71717a', border: '1px solid #ebebed' }}>
             {f}
           </button>
@@ -300,7 +300,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
       {/* Featured community banner */}
       {featured && !search && activeFilter === 'All' && (
         <div className="relative rounded-3xl p-5 overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #8C3573, #8C3573)', boxShadow: '0 8px 32px rgba(140,53,115,0.25)' }}>
+          style={{ background: '#F05A00', boxShadow: '0 8px 32px rgba(240,90,0,0.25)' }}>
           <div className="absolute top-0 right-0 w-36 h-36 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2 bg-white" />
           <div className="relative z-10">
             <div className="flex items-start justify-between gap-3">
@@ -321,7 +321,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                 className="px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer active:scale-95 transition-all flex-shrink-0"
                 style={joinedMap[featured.id]
                   ? { background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }
-                  : { background: 'white', color: '#8C3573' }}>
+                  : { background: 'white', color: '#F05A00' }}>
                 {joiningId === featured.id ? 'Joining...' : (joinedMap[featured.id] ? 'Open' : 'Join')}
               </button>
             </div>
@@ -390,7 +390,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                       </div>
                     ) : (
                       <div className="flex items-center gap-1">
-                        <span className="text-[9.5px] font-black text-[#8C3573] uppercase tracking-wide bg-[#fcf6fa] px-1.5 py-0.5 rounded-md border border-[#eac5e0]">
+                        <span className="text-[9.5px] font-black text-[#F05A00] uppercase tracking-wide bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-100">
                           by Meetuply
                         </span>
                       </div>
@@ -404,8 +404,8 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                     </div>
 
                     {circle.isPaid ? (
-                      <span className="text-[9.5px] font-black text-[#74295d] px-2 py-0.5 rounded-full bg-[#fcf6fa] border border-[#eac5e0] flex items-center gap-0.5">
-                        <Zap size={9} className="fill-[#8C3573] text-[#8C3573]" />
+                      <span className="text-[9.5px] font-black text-[#F05A00] px-2 py-0.5 rounded-full bg-orange-50 border border-orange-100 flex items-center gap-0.5">
+                        <Zap size={9} className="fill-[#F05A00] text-[#F05A00]" />
                         {circle.price} Sparks
                       </span>
                     ) : (
@@ -422,7 +422,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                 {isHost && (
                   <button
                     onClick={(e) => { e.stopPropagation(); setManageCircle(circle); }}
-                    className="px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-[#fcf6fa] text-[#74295d] border border-[#eac5e0] hover:bg-[#f5ebf4] transition-colors"
+                    className="px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-[#fcf6fa] text-[#D94F00] border border-[#eac5e0] hover:bg-[#f5ebf4] transition-colors"
                   >
                     Manage
                   </button>
@@ -434,8 +434,8 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                   className="px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95 flex-shrink-0 flex items-center gap-1.5"
                   style={isJoined
                     ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
-                    : { background: '#8C3573', color: 'white' }}>
-                  {joiningId === circle.id ? 'Joining...' : (isJoined ? 'JOINED' : (circle.isPaid ? `${circle.price} ⚡ JOIN` : 'JOIN'))}
+                    : { background: '#F05A00', color: 'white' }}>
+                  {joiningId === circle.id ? 'Joining...' : (isJoined ? 'JOINED' : (circle.isPaid ? `${circle.price} JOIN` : 'JOIN'))}
                 </button>
               </div>
             </div>
@@ -448,7 +448,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
           <Users size={28} className="mx-auto mb-3 text-zinc-300" />
           <p className="text-sm font-bold text-zinc-400">No communities found</p>
           <button onClick={() => { setSearch(''); setActiveFilter('All'); }}
-            className="mt-3 text-[11px] font-black text-[#8C3573] cursor-pointer">Clear filters</button>
+            className="mt-3 text-[11px] font-black text-[#F05A00] cursor-pointer">Clear filters</button>
         </div>
       )}
 
@@ -483,12 +483,12 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 border-b border-zinc-100 pb-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#f5ebf4] flex items-center justify-center text-[#8C3573] font-black text-sm">
-                👥
+              <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                <Users size={18} className="text-[#F05A00]" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-black text-zinc-900 truncate">{rulesCircle.name}</h3>
-                <p className="text-[10px] font-bold text-[#8C3573] uppercase tracking-wider">{rulesCircle.category} Community</p>
+                <p className="text-[10px] font-bold text-[#F05A00] uppercase tracking-wider">{rulesCircle.category} Community</p>
               </div>
             </div>
 
@@ -496,15 +496,15 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
               <h4 className="text-xs font-black text-zinc-800 uppercase tracking-wider">Community Guidelines & Rules:</h4>
               <ul className="space-y-2 text-xs font-medium text-zinc-600">
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#74295d] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">1</span>
+                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#D94F00] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">1</span>
                   <span><strong>Respect & Kindness:</strong> Maintain constructive, friendly discussions with campus peers.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#74295d] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">2</span>
+                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#D94F00] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">2</span>
                   <span><strong>No Spam or Promo:</strong> Share relevant projects, meets, or notes only.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#74295d] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">3</span>
+                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#D94F00] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">3</span>
                   <span><strong>Campus Safety:</strong> Keep meetups in verified public campus spots.</span>
                 </li>
               </ul>
@@ -519,9 +519,9 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
               </button>
               <button
                 onClick={confirmJoinCircle}
-                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-[#8C3573] hover:bg-[#74295d] transition-all shadow-sm flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] transition-all shadow-sm flex items-center justify-center gap-1.5"
               >
-                {rulesCircle.isPaid ? `Agree & Join (${rulesCircle.price} ⚡)` : 'Agree & Join Group'}
+                {rulesCircle.isPaid ? `Agree & Join (${rulesCircle.price} Sparks)` : 'Agree & Join Group'}
               </button>
             </div>
           </div>

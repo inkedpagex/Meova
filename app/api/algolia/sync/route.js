@@ -1,4 +1,4 @@
-/**
+﻿/**
  * POST /api/algolia/sync
  * Syncs a user or experience record into Algolia for instant search.
  * Protected: only called from server-side API routes (not exposed to clients directly).
@@ -9,7 +9,7 @@
  *   ALGOLIA_ADMIN_KEY=YOUR_ADMIN_KEY                       (private, never expose)
  *
  * Get keys from: algolia.com → Your App → API Keys
- * Indices to create: meetuply_users, meetuply_experiences
+ * Indices to create: Meova_users, Meova_experiences
  */
 import { NextResponse } from 'next/server';
 
@@ -49,7 +49,7 @@ export async function POST(request) {
     }
 
     if (type === 'user') {
-      await upsertAlgoliaRecord('meetuply_users', {
+      await upsertAlgoliaRecord('Meova_users', {
         objectID: data.id,
         full_name: data.full_name || '',
         year: data.year || '',
@@ -60,7 +60,7 @@ export async function POST(request) {
         isLiveOnCampus: data.isLiveOnCampus || false,
       });
     } else if (type === 'experience') {
-      await upsertAlgoliaRecord('meetuply_experiences', {
+      await upsertAlgoliaRecord('Meova_experiences', {
         objectID: data.id,
         title: data.title || '',
         category: data.category || '',

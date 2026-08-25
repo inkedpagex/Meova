@@ -49,9 +49,9 @@ export default function MessageButton({ targetUid }) {
       className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-black text-zinc-800 bg-zinc-100 hover:bg-zinc-200 transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer disabled:opacity-50"
     >
       {loading ? (
-        <Loader2 className="w-4 h-4 text-[#8C3573] flex-shrink-0 animate-spin" />
+        <Loader2 className="w-4 h-4 text-[#F05A00] flex-shrink-0 animate-spin" />
       ) : (
-        <MessageCircle className="w-4 h-4 text-[#8C3573] flex-shrink-0" />
+        <MessageCircle className="w-4 h-4 text-[#F05A00] flex-shrink-0" />
       )}
       {loading ? 'Connecting...' : 'Message'}
     </button>

@@ -1,6 +1,6 @@
 {
-  "name": "Meetuply",
-  "short_name": "Meetuply",
+  "name": "Meova",
+  "short_name": "Meova",
   "description": "Connect with campus students for gigs, meets, and real networking.",
   "start_url": "/",
   "display": "standalone",
@@ -12,25 +12,25 @@
   "categories": ["social", "productivity", "lifestyle"],
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-192.png",
+      "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

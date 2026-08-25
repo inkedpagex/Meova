@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { Search, ShieldAlert, GraduationCap, Sparkles, UserCheck, Loader2, Ban, CheckCircle2 } from 'lucide-react';
 
@@ -105,7 +105,7 @@ export default function AdminUsersPage() {
         <div>
           <h1 className="text-lg md:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
             <span>User & Access Control</span>
-            <span className="text-xs font-black bg-[#fcf6fa] text-[#8C3573] border border-[#eac5e0] px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-black bg-[#fcf6fa] text-[#F05A00] border border-[#eac5e0] px-2.5 py-0.5 rounded-full">
               {users.length} Total
             </span>
           </h1>
@@ -130,7 +130,7 @@ export default function AdminUsersPage() {
                 onClick={() => setRoleFilter(tab.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#8C3573] text-white shadow-xs border border-[#8C3573]'
+                    ? 'bg-[#F05A00] text-white shadow-xs border border-[#F05A00]'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
                 }`}
               >
@@ -149,7 +149,7 @@ export default function AdminUsersPage() {
           placeholder="Quick search by name, email, or branch..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#8C3573] transition-all shadow-xs"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#F05A00] transition-all shadow-xs"
         />
         {search && (
           <button
@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
       {/* Compact High-Density Users List */}
       {loading ? (
         <div className="bg-white border border-slate-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-xs">
-          <Loader2 size={20} className="animate-spin text-[#8C3573]" />
+          <Loader2 size={20} className="animate-spin text-[#F05A00]" />
           <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Loading campus users...</p>
         </div>
       ) : filtered.length === 0 ? (
@@ -183,7 +183,7 @@ export default function AdminUsersPage() {
             let roleLabel = 'Student';
 
             if (isUserAdmin) {
-              roleBadgeBg = 'bg-[#f5ebf4] text-[#8C3573] border-[#eac5e0] font-bold';
+              roleBadgeBg = 'bg-[#f5ebf4] text-[#F05A00] border-[#eac5e0] font-bold';
               roleLabel = 'Admin';
             } else if (isHost) {
               roleBadgeBg = 'bg-amber-50 text-amber-700 border-amber-200 font-bold';
@@ -207,7 +207,7 @@ export default function AdminUsersPage() {
                 <div className="flex items-center gap-3 min-w-0">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black border ${
                     isBlocked ? 'bg-rose-100 text-rose-600 border-rose-200' :
-                    isUserAdmin ? 'bg-[#fcf6fa] text-[#8C3573] border-[#eac5e0]' :
+                    isUserAdmin ? 'bg-[#fcf6fa] text-[#F05A00] border-[#eac5e0]' :
                     isHost ? 'bg-amber-50 text-amber-600 border-amber-200' :
                     isLead ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
                     'bg-slate-100 text-slate-600 border-slate-200'
@@ -255,7 +255,7 @@ export default function AdminUsersPage() {
                       value={u.role || 'user'}
                       disabled={updatingId === u.id}
                       onChange={e => handleRoleChange(u.id, e.target.value)}
-                      className="appearance-none bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-[11px] px-2.5 py-1.5 pr-6 rounded-lg outline-none focus:border-[#8C3573] cursor-pointer transition-all disabled:opacity-50"
+                      className="appearance-none bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-[11px] px-2.5 py-1.5 pr-6 rounded-lg outline-none focus:border-[#F05A00] cursor-pointer transition-all disabled:opacity-50"
                     >
                       {ROLES.map(r => (
                         <option key={r.value} value={r.value} className="bg-white text-slate-900 font-medium">
@@ -270,7 +270,7 @@ export default function AdminUsersPage() {
 
                   {/* Block / Unblock Button or Protected Badge */}
                   {isUserAdmin || (u.email || '').toLowerCase() === 'chirag2006chak@gmail.com' ? (
-                    <span className="text-[10.5px] font-extrabold text-[#74295d] bg-[#fcf6fa] px-2.5 py-1.5 rounded-lg border border-[#eac5e0] flex items-center gap-1 select-none">
+                    <span className="text-[10.5px] font-extrabold text-[#D94F00] bg-[#fcf6fa] px-2.5 py-1.5 rounded-lg border border-[#eac5e0] flex items-center gap-1 select-none">
                       <ShieldAlert size={12} /> Protected Admin
                     </span>
                   ) : (

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect } from 'react';
 import { WifiOff, RefreshCw } from 'lucide-react';
 
@@ -38,9 +38,9 @@ export default function NetworkWrapper({ children }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-[#f8fafc] px-6 text-center animate-in fade-in zoom-in-95 duration-300">
         <div className="relative mb-6 group">
-          <div className="absolute inset-0 bg-[#8C3573]/20 blur-xl rounded-full scale-110 group-hover:scale-125 transition-transform duration-700" />
+          <div className="absolute inset-0 bg-[#F05A00]/20 blur-xl rounded-full scale-110 group-hover:scale-125 transition-transform duration-700" />
           <div className="w-24 h-24 bg-white rounded-[2rem] shadow-xl flex items-center justify-center relative border border-zinc-100 rotate-[-5deg] group-hover:rotate-0 transition-all duration-300">
-            <WifiOff size={40} className="text-[#8C3573] stroke-[2.5]" />
+            <WifiOff size={40} className="text-[#F05A00] stroke-[2.5]" />
           </div>
         </div>
         
@@ -54,7 +54,7 @@ export default function NetworkWrapper({ children }) {
         <button 
           onClick={handleRetry}
           disabled={isRetrying}
-          className="flex items-center gap-2 px-6 py-3.5 bg-[#8C3573] hover:bg-[#74295d] text-white rounded-2xl font-black text-sm uppercase tracking-wider transition-all active:scale-95 disabled:opacity-70 shadow-lg shadow-[#8C3573]/30"
+          className="flex items-center gap-2 px-6 py-3.5 bg-[#F05A00] hover:bg-[#D94F00] text-white rounded-2xl font-black text-sm uppercase tracking-wider transition-all active:scale-95 disabled:opacity-70 shadow-lg shadow-[#F05A00]/30"
         >
           <RefreshCw size={18} className={isRetrying ? "animate-spin" : ""} strokeWidth={2.5} />
           {isRetrying ? 'Checking...' : 'Try Again'}

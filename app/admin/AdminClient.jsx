@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
@@ -192,7 +192,7 @@ export default function AdminClient() {
           onClick={loadData}
           className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 transition-all shadow-xs cursor-pointer"
         >
-          <RefreshCw size={14} className={fetching ? 'animate-spin text-[#8C3573]' : 'text-slate-500'} />
+          <RefreshCw size={14} className={fetching ? 'animate-spin text-[#F05A00]' : 'text-slate-500'} />
           <span>Refresh Data</span>
         </button>
       </div>
@@ -207,11 +207,11 @@ export default function AdminClient() {
               <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">
                 Total Students
               </span>
-              <span className="text-2xl font-black text-[#8C3573] mt-1 block">
+              <span className="text-2xl font-black text-[#F05A00] mt-1 block">
                 {stats.totalUsers}
               </span>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-[#fcf6fa] flex items-center justify-center text-[#8C3573]">
+            <div className="w-8 h-8 rounded-xl bg-[#fcf6fa] flex items-center justify-center text-[#F05A00]">
               <Users size={16} />
             </div>
           </div>
@@ -321,7 +321,7 @@ export default function AdminClient() {
                   onClick={() => setPaymentFilter(f)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
                     paymentFilter === f
-                      ? 'bg-[#8C3573] text-white shadow-xs border border-[#8C3573]'
+                      ? 'bg-[#F05A00] text-white shadow-xs border border-[#F05A00]'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
                   }`}
                 >
@@ -428,7 +428,7 @@ export default function AdminClient() {
                 onClick={() => setBookingFilter(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
                   bookingFilter === f
-                    ? 'bg-[#8C3573] text-white shadow-xs border border-[#8C3573]'
+                    ? 'bg-[#F05A00] text-white shadow-xs border border-[#F05A00]'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
                 }`}
               >
@@ -456,7 +456,7 @@ export default function AdminClient() {
               if (statusLower === 'confirmed') badgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
               if (statusLower === 'requested') badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
               if (statusLower === 'disputed') badgeStyle = 'bg-rose-50 text-rose-700 border-rose-200';
-              if (statusLower === 'completed') badgeStyle = 'bg-[#fcf6fa] text-[#74295d] border-[#eac5e0]';
+              if (statusLower === 'completed') badgeStyle = 'bg-[#fcf6fa] text-[#D94F00] border-[#eac5e0]';
 
               return (
                 <div
@@ -476,7 +476,7 @@ export default function AdminClient() {
                     <div className="flex items-center gap-3 text-[11px] font-bold text-slate-500 flex-wrap">
                       {b.location && (
                         <span className="flex items-center gap-1 text-slate-700">
-                          <MapPin size={12} className="text-[#8C3573]" />
+                          <MapPin size={12} className="text-[#F05A00]" />
                           {b.location}
                         </span>
                       )}

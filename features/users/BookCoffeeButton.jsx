@@ -100,7 +100,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
         <button
           onClick={handleClick}
           className="w-full flex items-center justify-center gap-1.5 px-3 py-3 rounded-2xl text-[11px] sm:text-xs font-black transition-all active:scale-95 hover:opacity-90 uppercase tracking-wide cursor-pointer shadow-md whitespace-nowrap"
-          style={{ background: `linear-gradient(135deg, ${color}, #8C3573)`, color: '#ffffff', border: 'none' }}
+          style={{ background: '#F05A00', color: '#ffffff', border: 'none' }}
         >
           <Layers className="w-3.5 h-3.5 text-white flex-shrink-0" />
           <span>Reserve {COFFEE_COST}</span>
@@ -111,7 +111,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
       {/* Modal overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4"
           style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
           onClick={() => !loading && setOpen(false)}
         >
@@ -185,8 +185,8 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                           onClick={() => setSelectedLocation(loc)}
                           className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border transition-all ${
                             selectedLocation === loc
-                              ? 'bg-[#8C3573] text-white border-[#8C3573] shadow-sm'
-                              : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-purple-300'
+                              ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-sm'
+                              : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-300'
                           }`}
                         >
                           {loc}
@@ -209,8 +209,8 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                           onClick={() => setSelectedTime(time.value)}
                           className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border transition-all ${
                             selectedTime === time.value
-                              ? 'bg-[#8C3573] text-white border-[#8C3573] shadow-sm'
-                              : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-purple-300'
+                              ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-sm'
+                              : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-300'
                           }`}
                         >
                           {time.label}
@@ -269,7 +269,8 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                       href="/wallet/buy"
                       className="w-full py-3.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md bg-rose-500 hover:bg-rose-600 text-white"
                     >
-                      Buy Sparks Now ⚡
+                      <span>Buy Sparks Now</span>
+                      <Zap className="w-3.5 h-3.5 fill-current" />
                     </Link>
                   </div>
                 ) : (
@@ -282,7 +283,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                     {loading ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Confirming...</>
                     ) : (
-                      <><Layers className="w-4 h-4" /> Confirm &amp; Spend {COFFEE_COST} ⚡</>
+                      <><Layers className="w-4 h-4" /> Confirm &amp; Spend {COFFEE_COST} <Zap className="w-3.5 h-3.5 fill-current" /></>
                     )}
                   </button>
                 )}

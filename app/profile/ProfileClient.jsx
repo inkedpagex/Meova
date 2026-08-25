@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -26,7 +26,7 @@ function EmptyState({ icon: Icon, title, subtitle, action, onAction }) {
     <div className="rounded-2xl p-6 flex flex-col items-center text-center gap-3"
       style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-mid)' }}>
       <div className="w-10 h-10 rounded-full flex items-center justify-center"
-        style={{ background: '#f3f0ff', color: '#8C3573' }}>
+        style={{ background: '#f3f0ff', color: '#F05A00' }}>
         <Icon size={18} strokeWidth={2} />
       </div>
       <div>
@@ -36,7 +36,7 @@ function EmptyState({ icon: Icon, title, subtitle, action, onAction }) {
       {action && (
         <button onClick={onAction}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95"
-          style={{ background: '#8C3573', color: '#fff' }}>
+          style={{ background: '#F05A00', color: '#fff' }}>
           {action} <ChevronRight size={12} />
         </button>
       )}
@@ -246,7 +246,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             <button
               onClick={() => router.push('/admin')}
               className="w-full rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all active:scale-95 shadow-md"
-              style={{ background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 100%)', color: '#ffffff' }}
+              style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)', color: '#ffffff' }}
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm">
@@ -264,9 +264,9 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
           {/* ── Avatar Card ─────────────────────────────── */}
           <div className="rounded-[32px] p-6 flex flex-col items-center text-center relative overflow-hidden bg-white border border-zinc-100 shadow-sm">
             {/* Background Accent */}
-            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#8C3573]/5 to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#F05A00]/5 to-transparent pointer-events-none" />
             
-            <div className="relative z-10 w-28 h-28 rounded-full overflow-hidden mb-4 shadow-xl shadow-[#8C3573]/10 ring-4 ring-white bg-zinc-50">
+            <div className="relative z-10 w-28 h-28 rounded-full overflow-hidden mb-4 shadow-xl shadow-[#F05A00]/10 ring-4 ring-white bg-zinc-50">
               <img src={avatarSrc} alt={profile?.full_name} className="w-full h-full object-cover" />
             </div>
 
@@ -277,7 +277,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
 
             {/* Username badge */}
             {profile?.username && (
-              <span className="relative z-10 inline-flex items-center gap-1 mt-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-[#fcf6fa] text-[#8C3573]">
+              <span className="relative z-10 inline-flex items-center gap-1 mt-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-[#fcf6fa] text-[#F05A00]">
                 @{profile.username}
               </span>
             )}
@@ -302,7 +302,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             {/* Instagram */}
             {profile?.instagram && (
               <a href={`https://instagram.com/${profile.instagram}`} target="_blank" rel="noreferrer"
-                className="relative z-10 mt-4 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-pink-50 text-[11px] font-black text-pink-500 hover:bg-pink-100 transition-colors">
+                className="relative z-10 mt-4 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-50 text-[11px] font-black text-orange-500 hover:bg-orange-100 transition-colors">
                 <InstagramIcon size={14} />
                 <span>@{profile.instagram}</span>
               </a>
@@ -321,7 +321,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                   <ExternalLink size={16} /> Public View
                 </button>
                 <button onClick={() => setShowQrModal(true)}
-                  className="w-12 sm:w-14 h-12 sm:h-14 shrink-0 rounded-2xl flex items-center justify-center cursor-pointer transition-all active:scale-95 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] text-[#8C3573] hover:bg-zinc-100 hover:border-[#cbd5e1]">
+                  className="w-12 sm:w-14 h-12 sm:h-14 shrink-0 rounded-2xl flex items-center justify-center cursor-pointer transition-all active:scale-95 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] text-[#F05A00] hover:bg-zinc-100 hover:border-[#cbd5e1]">
                   <QrCode size={18} />
                 </button>
                 <button onClick={handleCopyLink}
@@ -374,7 +374,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
           <div className="rounded-[24px] p-5 bg-white border border-zinc-100 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400">Interests</span>
-              <button onClick={() => setIsEditing(true)} className="text-[10px] font-black uppercase tracking-wider text-[#8C3573] cursor-pointer hover:underline">Edit</button>
+              <button onClick={() => setIsEditing(true)} className="text-[10px] font-black uppercase tracking-wider text-[#F05A00] cursor-pointer hover:underline">Edit</button>
             </div>
             {hasInterests ? (
               <div className="flex flex-wrap gap-2.5">
@@ -386,7 +386,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
               </div>
             ) : (
               <button onClick={() => setIsEditing(true)}
-                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.1em] cursor-pointer transition-all active:scale-95 bg-[#fcf6fa] text-[#8C3573] border-[1.5px] border-dashed border-[#eac5e0] hover:bg-[#8C3573]/10">
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.1em] cursor-pointer transition-all active:scale-95 bg-[#fcf6fa] text-[#F05A00] border-[1.5px] border-dashed border-[#eac5e0] hover:bg-[#F05A00]/10">
                 <Tag size={14} /> Add your interests
               </button>
             )}
@@ -394,8 +394,8 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
 
           {/* ── Sparks Wallet Card ─────────────────────── */}
           <button onClick={() => router.push('/wallet')}
-            className="w-full relative overflow-hidden p-6 rounded-[24px] flex items-center justify-between cursor-pointer active:scale-95 transition-all shadow-xl shadow-[#8C3573]/20 group"
-            style={{ background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 100%)' }}>
+            className="w-full relative overflow-hidden p-6 rounded-[24px] flex items-center justify-between cursor-pointer active:scale-95 transition-all shadow-xl shadow-[#F05A00]/20 group"
+            style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}>
             <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700 pointer-events-none" />
             
             <div className="relative z-10 text-left">
@@ -405,7 +405,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
               </div>
               <span className="text-[10px] font-black text-white/80 uppercase tracking-[0.15em] block mt-1">Total Sparks</span>
             </div>
-            <div className="relative z-10 px-5 py-3 bg-white text-[#8C3573] font-black text-[11px] uppercase tracking-wider rounded-xl shadow-md group-hover:shadow-lg transition-shadow">
+            <div className="relative z-10 px-5 py-3 bg-white text-[#F05A00] font-black text-[11px] uppercase tracking-wider rounded-xl shadow-md group-hover:shadow-lg transition-shadow">
               Wallet
             </div>
           </button>
@@ -414,9 +414,9 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
           <div className="rounded-[24px] p-5 bg-white border border-zinc-100 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 flex items-center gap-2">
-                <Briefcase size={14} className="text-[#8C3573]" /> My Gigs
+                <Briefcase size={14} className="text-[#F05A00]" /> My Gigs
               </span>
-              <button onClick={() => router.push('/gigs')} className="text-[10px] font-black uppercase tracking-wider text-[#8C3573] cursor-pointer hover:underline">View All</button>
+              <button onClick={() => router.push('/gigs')} className="text-[10px] font-black uppercase tracking-wider text-[#F05A00] cursor-pointer hover:underline">View All</button>
             </div>
             
             {initialGigs?.length > 0 ? (
@@ -424,7 +424,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                 {initialGigs.map(gig => (
                   <div key={gig.id} onClick={() => router.push(`/gigs/${gig.id}`)} className="flex items-center justify-between p-3 rounded-2xl border border-zinc-100 hover:border-zinc-200 hover:bg-zinc-50 cursor-pointer transition-all group">
                     <div className="max-w-[70%]">
-                      <p className="text-[12px] font-black text-zinc-900 group-hover:text-[#8C3573] transition-colors truncate">{gig.title || 'Untitled Gig'}</p>
+                      <p className="text-[12px] font-black text-zinc-900 group-hover:text-[#F05A00] transition-colors truncate">{gig.title || 'Untitled Gig'}</p>
                       <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
                         {gig.role === 'host' ? 'Posted by you' : 'Accepted job'}
                       </p>
@@ -489,7 +489,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                   {/* Location */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#fcf6fa] border border-[#f5ebf4] flex items-center justify-center text-[#8C3573]">
+                      <div className="w-8 h-8 rounded-full bg-[#fcf6fa] border border-[#f5ebf4] flex items-center justify-center text-[#F05A00]">
                         <MapPin size={14} />
                       </div>
                       <div>
@@ -502,14 +502,14 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     ) : locStatus === 'denied' ? (
                       <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
-                      <button onClick={requestLocation} className="text-[10px] font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                      <button onClick={requestLocation} className="text-[10px] font-black text-white bg-[#F05A00] hover:bg-[#D94F00] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
                     )}
                   </div>
 
                   {/* Notifications */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-pink-50 border border-pink-100 flex items-center justify-center text-pink-600">
+                      <div className="w-8 h-8 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-pink-600">
                         <Bell size={14} />
                       </div>
                       <div>
@@ -522,7 +522,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     ) : notifStatus === 'denied' ? (
                       <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
-                      <button onClick={requestNotifications} className="text-[10px] font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                      <button onClick={requestNotifications} className="text-[10px] font-black text-white bg-[#F05A00] hover:bg-[#D94F00] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
                     )}
                   </div>
 
@@ -542,7 +542,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     ) : camStatus === 'denied' ? (
                       <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
-                      <button onClick={requestCamera} className="text-[10px] font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                      <button onClick={requestCamera} className="text-[10px] font-black text-white bg-[#F05A00] hover:bg-[#D94F00] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
                     )}
                   </div>
                 </div>
@@ -569,7 +569,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     {phoneVerified ? (
                       <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Verified</span>
                     ) : (
-                      <button onClick={() => { setShowSettingsModal(false); setShowPhoneModal(true); }} className="text-[10px] font-black text-white bg-[#8C3573] hover:bg-[#74295d] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Verify</button>
+                      <button onClick={() => { setShowSettingsModal(false); setShowPhoneModal(true); }} className="text-[10px] font-black text-white bg-[#F05A00] hover:bg-[#D94F00] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Verify</button>
                     )}
                   </div>
 
@@ -582,9 +582,9 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                   <span className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>Admin</span>
                   <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                     <button onClick={() => { router.push('/admin'); setShowSettingsModal(false); }}
-                      className="w-full text-left p-4 text-xs font-black transition-colors cursor-pointer flex items-center justify-between text-[#8C3573]">
+                      className="w-full text-left p-4 text-xs font-black transition-colors cursor-pointer flex items-center justify-between text-[#F05A00]">
                       <div className="flex items-center gap-3"><ShieldCheck size={16} /> Admin Dashboard</div>
-                      <ChevronRight size={14} className="text-[#8C3573]" />
+                      <ChevronRight size={14} className="text-[#F05A00]" />
                     </button>
                   </div>
                 </div>
@@ -609,7 +609,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             <button onClick={() => setShowQrModal(false)} className="absolute top-4 right-4 p-2 rounded-full cursor-pointer hover:bg-zinc-100 transition-colors text-zinc-400">
               <X size={20} />
             </button>
-            <div className="w-16 h-16 rounded-full bg-[#fcf6fa] text-[#8C3573] flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-[#fcf6fa] text-[#F05A00] flex items-center justify-center mb-4">
               <QrCode size={28} />
             </div>
             <h2 className="text-xl font-black text-zinc-900 tracking-tight mb-2">Share Profile</h2>
@@ -618,7 +618,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             </p>
             <div className="w-full aspect-square bg-[#f8fafc] rounded-3xl flex items-center justify-center border-2 border-dashed border-[#e2e8f0] p-6 relative">
               <QRCodeCanvas 
-                value={typeof window !== 'undefined' ? window.location.origin + `/users/${profile.id}` : `https://meetuply.com/users/${profile.id}`}
+                value={typeof window !== 'undefined' ? window.location.origin + `/users/${profile.id}` : `https://Meova.com/users/${profile.id}`}
                 size={220}
                 bgColor={"#f8fafc"}
                 fgColor={"#18181b"}
@@ -626,7 +626,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                 includeMargin={false}
                 style={{ borderRadius: '8px' }}
               />
-              <span className="px-4 py-2 bg-white rounded-xl shadow-md text-[10px] font-black uppercase tracking-widest text-[#8C3573] absolute bottom-4">meetuply.com</span>
+              <span className="px-4 py-2 bg-white rounded-xl shadow-md text-[10px] font-black uppercase tracking-widest text-[#F05A00] absolute bottom-4">Meova.com</span>
             </div>
             <button onClick={handleCopyLink} className="w-full py-4 mt-6 rounded-2xl text-[12px] font-black uppercase tracking-[0.1em] bg-zinc-900 text-white cursor-pointer transition-all active:scale-95 shadow-md flex justify-center gap-2">
               <Share2 size={16} /> Send Link
@@ -644,7 +644,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             {/* Header */}
             <div className="p-5 pb-0 flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#fcf6fa] flex items-center justify-center text-[#8C3573]">
+                <div className="w-10 h-10 rounded-2xl bg-[#fcf6fa] flex items-center justify-center text-[#F05A00]">
                   <Phone size={18} />
                 </div>
                 <div>
@@ -670,7 +670,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                         value={phoneInput}
                         onChange={e => setPhoneInput(e.target.value.replace(/\D/g, '').slice(0, 10))}
                         placeholder="98765 43210"
-                        className="flex-1 text-sm font-medium text-zinc-900 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#8C3573] focus:border-transparent transition-all"
+                        className="flex-1 text-sm font-medium text-zinc-900 bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#F05A00] focus:border-transparent transition-all"
                       />
                     </div>
                   </div>
@@ -683,7 +683,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     onClick={handleSendOtp}
                     disabled={phoneInput.length !== 10 || phoneLoading}
                     className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg,#8C3573,#b5609d)' }}
+                    style={{ background: 'linear-gradient(135deg,#F05A00,#D94F00)' }}
                   >
                     {phoneLoading ? <Loader2 size={16} className="animate-spin" /> : <><Phone size={14} /> Send OTP</>}
                   </button>
@@ -699,7 +699,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                       value={phoneOtp}
                       onChange={e => setPhoneOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       placeholder="• • • • • •"
-                      className="w-full text-center text-xl font-black tracking-[0.5em] text-zinc-900 bg-zinc-50 border-2 border-zinc-200 rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-[#8C3573] focus:border-transparent transition-all"
+                      className="w-full text-center text-xl font-black tracking-[0.5em] text-zinc-900 bg-zinc-50 border-2 border-zinc-200 rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-[#F05A00] focus:border-transparent transition-all"
                     />
                   </div>
                   {phoneMsg.type === 'error' && (
@@ -709,7 +709,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     onClick={handleVerifyOtp}
                     disabled={phoneOtp.length !== 6 || phoneLoading}
                     className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg,#8C3573,#b5609d)' }}
+                    style={{ background: 'linear-gradient(135deg,#F05A00,#D94F00)' }}
                   >
                     {phoneLoading ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={14} /> Verify & Continue</>}
                   </button>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { Clock, CheckCircle, XCircle, Search, ArrowUpRight, Loader2 } from 'lucide-react';
 
@@ -76,7 +76,7 @@ export default function AdminWithdrawalsPage() {
 
       {loading ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
-          <Loader2 size={24} className="animate-spin text-[#8C3573]" />
+          <Loader2 size={24} className="animate-spin text-[#F05A00]" />
           <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Loading payout requests...</p>
         </div>
       ) : (
@@ -105,7 +105,7 @@ export default function AdminWithdrawalsPage() {
                           ₹{w.amount_inr || w.amount} <span className="text-xs font-bold text-slate-400">({w.amount} Sparks)</span>
                         </p>
                         <p className="text-xs font-extrabold text-slate-900">
-                          Requested by: <span className="text-[#8C3573]">{w.email}</span>
+                          Requested by: <span className="text-[#F05A00]">{w.email}</span>
                         </p>
                         <p className="text-[11px] font-bold text-slate-400">
                           Date: {new Date(w.requested_at || w.created_at || Date.now()).toLocaleString('en-IN')}
@@ -137,7 +137,7 @@ export default function AdminWithdrawalsPage() {
                         placeholder="Remarks / transaction ref code (optional)..."
                         value={remarks[w.id] || ''}
                         onChange={e => setRemarks({ ...remarks, [w.id]: e.target.value })}
-                        className="w-full sm:flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#8C3573]"
+                        className="w-full sm:flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#F05A00]"
                       />
                       <div className="flex gap-2 w-full sm:w-auto">
                         <button

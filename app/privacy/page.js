@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 export const metadata = {
   title: 'Privacy Policy — Meetuply',
@@ -12,7 +12,7 @@ export default function PrivacyPage() {
         <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all uppercase tracking-wider">
           ← Back
         </Link>
-        <Link href="/login" className="px-5 py-2 rounded-full text-[12px] font-black text-white transition-all hover:opacity-90 active:scale-95 shadow-md" style={{ background: 'linear-gradient(135deg, #8C3573, #b5609d)' }}>
+        <Link href="/login" className="px-5 py-2 rounded-full text-[12px] font-black text-white transition-all hover:opacity-90 active:scale-95 shadow-md" style={{ background: 'linear-gradient(135deg, #F05A00, #D94F00)' }}>
           Log In
         </Link>
       </div>
@@ -74,7 +74,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-sm font-black text-[var(--text-primary)] mb-3">6. Cookies</h2>
-            <p>We use a single HTTP-only session cookie (<code className="text-xs bg-[var(--bg-surface)] px-1 rounded">__meetuply_session</code>) to keep you logged in. This cookie expires after 5 days and is deleted when you log out. We do not use third-party tracking cookies.</p>
+            <p>We use a single HTTP-only session cookie (<code className="text-xs bg-[var(--bg-surface)] px-1 rounded">__Meova_session</code>) to keep you logged in. This cookie expires after 5 days and is deleted when you log out. We do not use third-party tracking cookies.</p>
           </section>
 
           <section>
@@ -89,7 +89,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-sm font-black text-[var(--text-primary)] mb-3">9. Contact Us</h2>
-            <p>For privacy-related questions or data deletion requests, contact us at <span className="font-bold text-[var(--primary)]">privacy@meetuply.app</span></p>
+            <p>For privacy-related questions or data deletion requests, contact us at <span className="font-bold text-[var(--primary)]">privacy@Meova.app</span></p>
           </section>
         </div>
       </div>

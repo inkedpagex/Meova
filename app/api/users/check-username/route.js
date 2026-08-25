@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 
 // Allowed: lowercase letters, numbers, underscores, 3-20 chars
@@ -20,7 +20,7 @@ export async function GET(request) {
   }
 
   // Reserved usernames
-  const RESERVED = ['admin', 'meetuply', 'meetuply', 'support', 'help', 'api', 'root', 'system', 'user', 'mod', 'moderator'];
+  const RESERVED = ['admin', 'Meova', 'Meova', 'support', 'help', 'api', 'root', 'system', 'user', 'mod', 'moderator'];
   if (RESERVED.includes(username)) {
     return NextResponse.json({ available: false, error: 'This username is reserved.' });
   }

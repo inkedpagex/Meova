@@ -29,7 +29,7 @@ function ApplicantCard({ app, gigId, onUpdate }) {
     PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
     ACCEPTED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     REJECTED: 'bg-red-50 text-red-500 border-red-200',
-    COMPLETED: 'bg-[#fcf6fa] text-[#74295d] border-[#eac5e0]',
+    COMPLETED: 'bg-[#fcf6fa] text-[#D94F00] border-[#eac5e0]',
   };
 
   return (
@@ -114,7 +114,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4"
       style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}
     >
@@ -154,7 +154,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
               {!completing ? (
                 <button
                   onClick={() => setCompleting(true)}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#8C3573] to-[#8C3573] text-white text-xs font-black hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#F05A00] to-[#F05A00] text-white text-xs font-black hover:opacity-90 active:scale-95 transition-all cursor-pointer"
                 >
                   Mark as Completed & Release Sparks ⚡
                 </button>

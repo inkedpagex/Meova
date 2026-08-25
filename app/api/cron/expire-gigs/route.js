@@ -1,4 +1,4 @@
-/**
+﻿/**
  * GET /api/cron/expire-gigs
  *
  * Called daily by Vercel Cron.
@@ -8,7 +8,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 
-const CRON_SECRET = process.env.CRON_SECRET || 'meetuply-cron-secret-2024';
+const CRON_SECRET = process.env.CRON_SECRET || 'Meova-cron-secret-2024';
 const EXPIRY_DAYS = 14;
 
 export async function GET(request) {

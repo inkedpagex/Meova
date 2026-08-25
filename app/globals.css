@@ -2,16 +2,16 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════
-   DESIGN TOKENS — Meetuply Premium (Light-first)
+   DESIGN TOKENS — Meova (Light-first)
    ═══════════════════════════════════════════════ */
 :root {
-  /* Backgrounds — Light (default) */
-  --bg-base:       #f8f8fa;
+  /* Backgrounds — Warm Ivory Alabaster (Light-first) */
+  --bg-base:       #faf9f6;
   --bg-elevated:   #ffffff;
-  --bg-surface:    #f1f1f4;
-  --bg-overlay:    #e8e8eb;
-  --bg-hover:      rgba(0, 0, 0, 0.03);
-  --bg-active:     rgba(140, 53, 115, 0.06);
+  --bg-surface:    #f4f3ee;
+  --bg-overlay:    #eeebe4;
+  --bg-hover:      rgba(240, 90, 0, 0.04);
+  --bg-active:     rgba(240, 90, 0, 0.08);
 
   /* Glass */
   --glass-bg:      rgba(255, 255, 255, 0.85);
@@ -29,23 +29,23 @@
   --text-muted:     #71717a;
   --text-faint:     #d4d4d8;
 
-  /* Accent — Meetuply Purple */
-  --accent:         #8C3573;
-  --accent-hover:   #74295d;
-  --accent-dim:     rgba(140, 53, 115, 0.08);
-  --accent-glow:    rgba(140, 53, 115, 0.04);
+  /* Accent — Meova Orange */
+  --accent:         #F05A00;
+  --accent-hover:   #D94F00;
+  --accent-dim:     rgba(240, 90, 0, 0.08);
+  --accent-glow:    rgba(240, 90, 0, 0.04);
 
   /* Gradients */
-  --banner-bg-from:  #f8f7ff;
+  --banner-bg-from:  #fff3ec;
   --banner-bg-to:    #ffffff;
-  --banner-border:   rgba(0, 0, 0, 0.06);
-  --banner-glow-1:   rgba(140, 53, 115, 0.04);
-  --banner-glow-2:   rgba(236, 72, 153, 0.02);
+  --banner-border:   rgba(240, 90, 0, 0.1);
+  --banner-glow-1:   rgba(240, 90, 0, 0.04);
+  --banner-glow-2:   rgba(240, 90, 0, 0.02);
 
-  --accent-gradient-from: #8C3573;
-  --accent-gradient-to:   #b5609d;
-  --accent-gradient-hover-from: #74295d;
-  --accent-gradient-hover-to:   #8C3573;
+  --accent-gradient-from: #F05A00;
+  --accent-gradient-to:   #D94F00;
+  --accent-gradient-hover-from: #D94F00;
+  --accent-gradient-hover-to:   #C04500;
 
   --ring-gradient-from: #e4e4e7;
   --ring-gradient-to:   #a1a1aa;
@@ -63,7 +63,7 @@
   /* Shadows */
   --shadow-card:   0 2px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
   --shadow-popup:  0 16px 40px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-glow:   0 0 24px rgba(140, 53, 115, 0.12);
+  --shadow-glow:   0 0 24px rgba(240, 90, 0, 0.12);
 }
 
 /* ═══════════════════════════════════════════════
@@ -71,12 +71,12 @@
    ═══════════════════════════════════════════════ */
 [data-theme="light"] {
   /* Backgrounds */
-  --bg-base:       #f8f8fa; /* Clean light gray/off-white */
-  --bg-elevated:   #ffffff; /* Pure white */
-  --bg-surface:    #f1f1f4; /* Subtle gray */
-  --bg-overlay:    #e4e4e7; /* Zinc-200 */
-  --bg-hover:      rgba(0, 0, 0, 0.03);
-  --bg-active:     rgba(0, 0, 0, 0.06);
+  --bg-base:       #faf9f6;
+  --bg-elevated:   #ffffff;
+  --bg-surface:    #f4f3ee;
+  --bg-overlay:    #eeebe4;
+  --bg-hover:      rgba(240, 90, 0, 0.04);
+  --bg-active:     rgba(240, 90, 0, 0.08);
 
   /* Glass */
   --glass-bg:      rgba(255, 255, 255, 0.8);
@@ -89,36 +89,36 @@
   --border-strong:  rgba(0, 0, 0, 0.18);
 
   /* Text */
-  --text-primary:   #09090b; /* Zinc-950 */
-  --text-secondary: #52525b; /* Zinc-600 */
-  --text-muted:     #71717a; /* Zinc-500 */
-  --text-faint:     #d4d4d8; /* Zinc-300 */
+  --text-primary:   #09090b;
+  --text-secondary: #52525b;
+  --text-muted:     #71717a;
+  --text-faint:     #d4d4d8;
 
-  /* Accent */
-  --accent:         #8C3573; /* Indigo 600 */
-  --accent-hover:   #3730a3; /* Indigo 800 */
-  --accent-dim:     rgba(140, 53, 115, 0.1);
-  --accent-glow:    rgba(140, 53, 115, 0.03);
+  /* Accent — Meova Orange */
+  --accent:         #F05A00;
+  --accent-hover:   #D94F00;
+  --accent-dim:     rgba(240, 90, 0, 0.1);
+  --accent-glow:    rgba(240, 90, 0, 0.03);
 
   /* Gradients & Cards */
-  --banner-bg-from:  #f4f4f5;
+  --banner-bg-from:  #fff3ec;
   --banner-bg-to:    #ffffff;
-  --banner-border:   rgba(0, 0, 0, 0.08);
-  --banner-glow-1:   rgba(140, 53, 115, 0.04);
-  --banner-glow-2:   rgba(236, 72, 153, 0.02);
-  
-  --accent-gradient-from: #8C3573;
-  --accent-gradient-to:   #8C3573;
-  --accent-gradient-hover-from: #3730a3;
-  --accent-gradient-hover-to:   #74295d;
-  
+  --banner-border:   rgba(240, 90, 0, 0.08);
+  --banner-glow-1:   rgba(240, 90, 0, 0.04);
+  --banner-glow-2:   rgba(240, 90, 0, 0.02);
+
+  --accent-gradient-from: #F05A00;
+  --accent-gradient-to:   #D94F00;
+  --accent-gradient-hover-from: #D94F00;
+  --accent-gradient-hover-to:   #C04500;
+
   --ring-gradient-from: #e4e4e7;
   --ring-gradient-to:   #a1a1aa;
 
   /* Shadows */
   --shadow-card:   0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
   --shadow-popup:  0 20px 40px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-glow:   0 0 24px rgba(140, 53, 115, 0.05);
+  --shadow-glow:   0 0 24px rgba(240, 90, 0, 0.1);
 }
 
 [data-theme="light"] body {
@@ -136,7 +136,7 @@
 [data-theme="light"] .btn-primary {
   background: var(--accent);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(140, 53, 115, 0.2);
+  box-shadow: 0 4px 14px rgba(240, 90, 0, 0.2);
 }
 [data-theme="light"] .btn-primary:hover { background: var(--accent-hover); }
 
@@ -173,6 +173,13 @@ html {
 @media (prefers-color-scheme: dark) {
   html { color-scheme: light !important; }
   html, body { background: var(--bg-base) !important; color: var(--text-primary) !important; }
+}
+
+/* Hide elements when virtual keyboard is open (viewport height shrinks) */
+@media screen and (max-height: 480px) and (max-width: 768px) {
+  .hide-on-keyboard {
+    display: none !important;
+  }
 }
 
 body {
@@ -391,6 +398,20 @@ body {
   .pb-safe {
     padding-bottom: calc(env(safe-area-inset-bottom) + 80px) !important;
   }
+}
+
+/* ═══════════════════════════════════════════════
+   HIDE SCROLLBAR UTILITY
+   ═══════════════════════════════════════════════ */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
 }
 
 

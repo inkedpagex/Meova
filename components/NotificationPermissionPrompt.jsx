@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 /**
  * NotificationPermissionPrompt.jsx
  * User-friendly notification permission request.
@@ -10,7 +10,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, X, Zap, MessageSquare, Briefcase } from 'lucide-react';
 
-const PROMPT_KEY = 'meetuply_notif_prompted';
+const PROMPT_KEY = 'Meova_notif_prompted';
 
 export default function NotificationPermissionPrompt({ user }) {
   const [show, setShow] = useState(false);
@@ -36,7 +36,7 @@ export default function NotificationPermissionPrompt({ user }) {
       if (permission === 'granted') {
         // Trigger FCM registration now that we have permission
         // The useFCM hook will pick this up on next render
-        window.dispatchEvent(new Event('meetuply_notif_granted'));
+        window.dispatchEvent(new Event('Meova_notif_granted'));
       }
     } catch {
       // Permission API not available on this browser
@@ -85,7 +85,7 @@ export default function NotificationPermissionPrompt({ user }) {
           {/* Purple header bar */}
           <div
             className="px-6 pt-6 pb-5"
-            style={{ background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
           >
             <button
               onClick={handleDismiss}
@@ -134,7 +134,7 @@ export default function NotificationPermissionPrompt({ user }) {
             <button
               onClick={handleAllow}
               className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-95 shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #8C3573 0%, #b5609d 100%)', boxShadow: '0 8px 24px rgba(140,53,115,0.35)' }}
+              style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)', boxShadow: '0 8px 24px rgba(140,53,115,0.35)' }}
             >
               🔔 Enable Notifications
             </button>

@@ -46,7 +46,7 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
         {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/60">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#8C3573] bg-[#fcf6fa] px-2.5 py-0.5 rounded-full border border-[#f5ebf4]">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#F05A00] bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-100">
               Host Analytics & Roster
             </span>
             <h3 className="text-lg font-black text-zinc-900 tracking-tight mt-0.5">
@@ -62,9 +62,9 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
         </div>
 
         {/* Overview Stat Cards */}
-        <div className="grid grid-cols-2 gap-4 p-5 bg-gradient-to-r from-[#fcf6fa]/50 via-[#fcf6fa]/30 to-white border-b border-zinc-100">
-          <div className="bg-white border border-[#f5ebf4] rounded-2xl p-4 shadow-2xs flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#f5ebf4] text-[#74295d] flex items-center justify-center flex-shrink-0">
+        <div className="grid grid-cols-2 gap-4 p-5 bg-orange-50/30 border-b border-zinc-100">
+          <div className="bg-white border border-orange-100 rounded-2xl p-4 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-orange-50 text-[#F05A00] flex items-center justify-center flex-shrink-0">
               <Users size={20} />
             </div>
             <div>
@@ -93,7 +93,7 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search members by name or branch..."
-              className="w-full bg-zinc-50 border border-zinc-200/80 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#8C3573]"
+              className="w-full bg-zinc-50 border border-zinc-200/80 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#F05A00]"
             />
           </div>
           <span className="text-xs font-bold text-zinc-500">
@@ -105,7 +105,7 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
         <div className="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
-              <Loader2 className="w-8 h-8 animate-spin text-[#8C3573] mb-2" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#F05A00] mb-2" />
               <p className="text-xs font-bold">Loading member directory...</p>
             </div>
           ) : filteredRoster.length === 0 ? (
@@ -120,7 +120,7 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
               return (
                 <div
                   key={m.user_id || idx}
-                  className="flex items-center justify-between p-3.5 rounded-2xl border border-zinc-100 hover:border-[#eac5e0] hover:bg-[#fcf6fa]/20 transition-all"
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-zinc-100 hover:border-orange-200 hover:bg-orange-50/20 transition-all"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-full overflow-hidden border border-zinc-200 flex-shrink-0">
@@ -139,7 +139,7 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
                           {student.full_name}
                         </h4>
                         {isHost && (
-                          <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#f5ebf4] text-[#74295d]">
+                          <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-50 text-[#F05A00]">
                             Host
                           </span>
                         )}
@@ -151,7 +151,7 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
                   </div>
 
                   <div className="text-right flex-shrink-0">
-                    <span className="text-[11px] font-black text-[#8C3573] block">
+                    <span className="text-[11px] font-black text-[#F05A00] block">
                       {isHost ? 'Owner' : `+${m.sparks_paid || 0} Sparks`}
                     </span>
                     <span className="text-[9.5px] font-semibold text-zinc-400 block mt-0.5">

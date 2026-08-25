@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -157,7 +157,7 @@ export default function WalletPage() {
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = `meetuply-payment-₹${exactAmountInr}.png`;
+      link.download = `Meova-payment-₹${exactAmountInr}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -240,7 +240,7 @@ export default function WalletPage() {
       )}
 
       {/* Hero Balance Card */}
-      <div className="relative rounded-3xl p-6 mb-5 overflow-hidden" style={{ background: 'linear-gradient(135deg, #8C3573, #8C3573)' }}>
+      <div className="relative rounded-3xl p-6 mb-5 overflow-hidden" style={{ background: 'linear-gradient(135deg, #F05A00, #F05A00)' }}>
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2" style={{ background: 'white' }} />
         <div className="relative z-10">
           <span className="text-[10px] font-black uppercase tracking-widest text-white/60 block mb-1">Your Balance</span>
@@ -283,7 +283,7 @@ export default function WalletPage() {
       {wallet && (
         <div className="mb-5 grid grid-cols-2 gap-3">
           <div className="bg-[#fcf6fa] border border-[#eac5e0] rounded-2xl p-4 flex flex-col justify-center">
-            <span className="text-[9px] font-black uppercase tracking-wider text-[#8C3573] mb-1">Lifetime Earned</span>
+            <span className="text-[9px] font-black uppercase tracking-wider text-[#F05A00] mb-1">Lifetime Earned</span>
             <span className="text-xl font-black text-[#5e214d]">{wallet.lifetime_earned || 0} <span className="text-sm">⚡</span></span>
           </div>
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-center">
@@ -302,8 +302,8 @@ export default function WalletPage() {
               className="py-3.5 rounded-2xl flex flex-col items-center cursor-pointer transition-all active:scale-95"
               style={{
                 background: selectedPack.key === p.key ? 'rgba(140,53,115,0.08)' : 'var(--bg-elevated)',
-                border: selectedPack.key === p.key ? '2px solid #8C3573' : '1px solid var(--border-subtle)',
-                color: selectedPack.key === p.key ? '#8C3573' : 'var(--text-primary)',
+                border: selectedPack.key === p.key ? '2px solid #F05A00' : '1px solid var(--border-subtle)',
+                color: selectedPack.key === p.key ? '#F05A00' : 'var(--text-primary)',
               }}>
               <span className="text-sm font-black">{p.sparks}</span>
               <span className="text-[8px] font-semibold mt-0.5" style={{ color: 'var(--text-muted)' }}>₹{p.inr}</span>
@@ -312,7 +312,7 @@ export default function WalletPage() {
         </div>
         <button onClick={() => openPaymentModal(selectedPack)} disabled={intentLoading}
           className="w-full py-4 rounded-2xl text-white font-black text-[12px] uppercase tracking-wider cursor-pointer active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-80"
-          style={{ background: '#8C3573' }}>
+          style={{ background: '#F05A00' }}>
           {intentLoading ? <Loader2 size={16} className="animate-spin" /> : `Add ${selectedPack.sparks} Sparks · ₹${selectedPack.inr}`}
         </button>
       </div>
@@ -426,7 +426,7 @@ export default function WalletPage() {
 
       {/* How Sparks Work */}
       <div className="rounded-3xl p-5" style={{ background: 'rgba(140,53,115,0.05)', border: '1px solid rgba(140,53,115,0.12)' }}>
-        <h4 className="text-xs font-black uppercase tracking-wider text-[#8C3573] flex items-center gap-1.5 mb-3">
+        <h4 className="text-xs font-black uppercase tracking-wider text-[#F05A00] flex items-center gap-1.5 mb-3">
           <HelpCircle size={14} /> How Sparks work?
         </h4>
         <ul className="space-y-2.5">
@@ -437,7 +437,7 @@ export default function WalletPage() {
             'Sparks never expire.',
           ].map((t, i) => (
             <li key={i} className="flex items-start gap-2 text-[11px] font-medium leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#8C3573] mt-1.5 flex-shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#F05A00] mt-1.5 flex-shrink-0" />
               {t}
             </li>
           ))}
@@ -450,7 +450,7 @@ export default function WalletPage() {
           <div className="bg-white rounded-3xl w-full max-w-[360px] overflow-hidden shadow-2xl relative">
             <div className="p-6 text-center">
               <h2 className="text-lg font-black text-zinc-900 mb-1">Pay with UPI</h2>
-              <p className="text-[13px] text-zinc-600 font-medium mb-1">Please pay the <b className="text-[#74295d]">exact amount</b> below</p>
+              <p className="text-[13px] text-zinc-600 font-medium mb-1">Please pay the <b className="text-[#D94F00]">exact amount</b> below</p>
               <p className="text-[26px] font-black text-zinc-900 tracking-tight mb-6">₹{exactAmountInr}</p>
               
               <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center justify-center mb-6">
@@ -461,7 +461,7 @@ export default function WalletPage() {
                 />
                 <button 
                   onClick={downloadQRCode}
-                  className="flex items-center gap-1.5 text-[11px] font-black text-[#74295d] bg-[#fcf6fa] hover:bg-[#f5ebf4] px-3.5 py-1.5 rounded-full transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 text-[11px] font-black text-[#D94F00] bg-[#fcf6fa] hover:bg-[#f5ebf4] px-3.5 py-1.5 rounded-full transition-all cursor-pointer"
                 >
                   <Download size={12} />
                   Download QR Image
@@ -469,7 +469,7 @@ export default function WalletPage() {
               </div>
 
               <div className="bg-[#fcf6fa] border border-[#f5ebf4] rounded-2xl p-4 mb-6 text-left">
-                <p className="text-[11px] text-[#74295d] font-bold leading-relaxed">
+                <p className="text-[11px] text-[#D94F00] font-bold leading-relaxed">
                   Please pay the exact amount shown above to verify your payment automatically.
                 </p>
               </div>
@@ -480,7 +480,7 @@ export default function WalletPage() {
                   Cancel
                 </button>
                 <button onClick={submitPaymentRequest} disabled={requestLoading}
-                  className="flex-1 py-3.5 rounded-xl font-black text-xs text-white bg-[#8C3573] hover:bg-[#74295d] transition-all flex items-center justify-center gap-2">
+                  className="flex-1 py-3.5 rounded-xl font-black text-xs text-white bg-[#F05A00] hover:bg-[#D94F00] transition-all flex items-center justify-center gap-2">
                   {requestLoading ? <Loader2 size={14} className="animate-spin" /> : 'I have paid'}
                 </button>
               </div>

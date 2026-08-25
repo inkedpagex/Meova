@@ -9,6 +9,7 @@ import {
   CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight
 } from "lucide-react";
 import QRCode from "react-qr-code";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import { toast } from "../../lib/toast";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -56,7 +57,7 @@ function MeetingCountdownTimer({ booking }) {
 
   return (
     <div className={`mt-2 flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-extrabold border ${
-      isLive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse' : 'bg-[#fcf6fa] text-[#74295d] border-[#f5ebf4]'
+      isLive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse' : 'bg-[#fcf6fa] text-[#D94F00] border-[#f5ebf4]'
     }`}>
       <span>{timeLeft}</span>
     </div>
@@ -80,6 +81,7 @@ export default function BookingsPage() {
   const [scanStatus, setScanStatus] = useState("idle"); // idle, processing, success, error
   const [scanMessage, setScanMessage] = useState("");
   const [manualCode, setManualCode] = useState("");
+  const [isScanning, setIsScanning] = useState(true);
 
   // Dispute state
   const [disputeLoading, setDisputeLoading] = useState(false);
@@ -122,16 +124,17 @@ export default function BookingsPage() {
   };
 
   // Handle Manual Code Verification
-  const handleVerifyCode = async () => {
+  const handleVerifyCode = async (codeToVerify) => {
+    const code = typeof codeToVerify === 'string' ? codeToVerify : manualCode;
     if (scanStatus === "processing" || scanStatus === "success" || !selectedBooking) return;
     
-    if (manualCode.trim() === selectedBooking.meetingCode) {
+    if (code.trim() === selectedBooking.meetingCode) {
       setScanStatus("processing");
       try {
         const res = await fetch("/api/bookings", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bookingId: selectedBooking.id, action: "complete", meetingCode: manualCode.trim() })
+          body: JSON.stringify({ bookingId: selectedBooking.id, action: "complete", meetingCode: code.trim() })
         });
         
         const data = await res.json();
@@ -144,6 +147,7 @@ export default function BookingsPage() {
             setManualCode("");
             setSelectedBooking(null);
             mutate();
+            setIsScanning(true);
           }, 2000);
         } else {
           setScanStatus("error");
@@ -227,7 +231,7 @@ export default function BookingsPage() {
     if (status === "AutoRefunded") return "text-amber-600 bg-amber-50 border-amber-100";
     if (status === "Disputed") return "text-orange-600 bg-orange-50 border-orange-100";
     if (status === "Booking Closed") return "text-zinc-500 bg-zinc-50 border-zinc-200";
-    return "text-[#8C3573] bg-[#fcf6fa] border-[#f5ebf4]";
+    return "text-[#F05A00] bg-[#fcf6fa] border-[#f5ebf4]";
   };
 
   const statusLabel = (status) => {
@@ -238,18 +242,18 @@ export default function BookingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pb-24 anim-fade-in">
+    <div className="min-h-screen bg-[var(--bg-base)] pt-[58px] md:pt-0 pb-24 anim-fade-in">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-zinc-100 px-4 py-4 shadow-sm flex items-center justify-between">
         <div>
           <h1 className="text-xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
-            <Calendar size={20} className="text-[#8C3573]" />
+            <Calendar size={20} className="text-[#F05A00]" />
             My Meetings
           </h1>
         </div>
         {/* Sparks balance — helps user know how many Sparks they have before booking */}
         {sparksBalance !== null && (
-          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black" style={{ background: '#f3f0ff', color: '#8C3573' }}>
+          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black" style={{ background: '#f3f0ff', color: '#F05A00' }}>
             <span>⚡</span>
             <span>{sparksBalance.toLocaleString()}</span>
           </div>
@@ -271,7 +275,7 @@ export default function BookingsPage() {
             >
               {tab}
               {tab === "Active" && activeBookings.length > 0 && (
-                <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 bg-[#8C3573] text-white text-[9px] font-black rounded-full">
+                <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 bg-[#F05A00] text-white text-[9px] font-black rounded-full">
                   {activeBookings.length}
                 </span>
               )}
@@ -291,7 +295,7 @@ export default function BookingsPage() {
 
         {!isLoading && displayList.length === 0 && (
           <div className="flex flex-col items-center text-center justify-center py-16 px-6 bg-white rounded-2xl border border-dashed border-zinc-200">
-            <div className="w-12 h-12 bg-[#fcf6fa] rounded-full flex items-center justify-center text-[#8C3573] mb-3">
+            <div className="w-12 h-12 bg-[#fcf6fa] rounded-full flex items-center justify-center text-[#F05A00] mb-3">
               <Calendar size={20} strokeWidth={2.5} />
             </div>
             <h3 className="text-sm font-black text-zinc-900 mb-1">No {activeTab.toLowerCase()} meetings</h3>
@@ -334,7 +338,7 @@ export default function BookingsPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-black text-[#8C3573] flex items-center gap-1 justify-end">
+                  <span className="text-xs font-black text-[#F05A00] flex items-center gap-1 justify-end">
                     ⚡ {booking.price}
                   </span>
                 </div>
@@ -417,8 +421,14 @@ export default function BookingsPage() {
                     </>
                   ) : (
                     <button 
-                      onClick={() => { setSelectedBooking(booking); setShowScanModal(true); setScanStatus("idle"); }}
-                      className="flex-1 bg-[#8C3573] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#74295d] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(140,53,115,0.3)]"
+                      onClick={() => { 
+                        setSelectedBooking(booking); 
+                        setShowScanModal(true); 
+                        setScanStatus("idle");
+                        setIsScanning(true);
+                        setManualCode("");
+                      }}
+                      className="flex-1 bg-[#F05A00] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#D94F00] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(240,90,0,0.3)]"
                     >
                       <ScanLine size={16} /> Scan Guest QR
                     </button>
@@ -501,7 +511,7 @@ export default function BookingsPage() {
       {showScanModal && selectedBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md anim-fade-in">
           <div className="absolute top-4 right-4 z-50">
-             <button onClick={() => { setShowScanModal(false); setManualCode(""); }} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
+             <button onClick={() => { setShowScanModal(false); setManualCode(""); setIsScanning(true); setScanStatus("idle"); }} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
                <X size={20} strokeWidth={2.5} />
              </button>
           </div>
@@ -520,26 +530,79 @@ export default function BookingsPage() {
                 </div>
               ) : scanStatus === "processing" ? (
                 <div className="absolute inset-0 bg-black/80 rounded-3xl flex flex-col items-center justify-center text-white anim-fade-in z-10 backdrop-blur-sm">
-                  <Loader2 size={32} className="animate-spin mb-3 text-[#8C3573]" />
+                  <Loader2 size={32} className="animate-spin mb-3 text-[#F05A00]" />
                   <p className="font-bold text-xs">Verifying...</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={manualCode}
-                    onChange={(e) => setManualCode(e.target.value.toUpperCase())}
-                    placeholder="Enter 6-digit code"
-                    className="w-full bg-black/50 border border-white/20 rounded-xl px-4 py-4 text-center text-2xl font-black text-white tracking-[0.3em] uppercase outline-none focus:border-[#8C3573] transition-colors"
-                  />
-                  <button
-                    onClick={handleVerifyCode}
-                    disabled={manualCode.length !== 6}
-                    className="w-full bg-[#8C3573] disabled:bg-zinc-800 disabled:text-zinc-500 hover:bg-[#74295d] text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all"
-                  >
-                    Verify & Claim Sparks
-                  </button>
+                  {/* Toggle between Scan & Manual */}
+                  <div className="flex bg-black/40 p-1 rounded-xl mb-2">
+                    <button
+                      onClick={() => setIsScanning(true)}
+                      className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${
+                        isScanning ? 'bg-[#F05A00] text-white' : 'text-white/50 hover:text-white'
+                      }`}
+                    >
+                      Scan QR
+                    </button>
+                    <button
+                      onClick={() => setIsScanning(false)}
+                      className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${
+                        !isScanning ? 'bg-white/20 text-white' : 'text-white/50 hover:text-white'
+                      }`}
+                    >
+                      Type Code
+                    </button>
+                  </div>
+
+                  {isScanning ? (
+                    <div className="bg-black rounded-2xl overflow-hidden border border-white/10 relative" style={{ aspectRatio: '1/1' }}>
+                      <Scanner
+                        onScan={(result) => {
+                          if (result && result[0]?.rawValue) {
+                            const code = result[0].rawValue;
+                            setManualCode(code);
+                            if (code.length === 6) {
+                              handleVerifyCode(code);
+                            }
+                          }
+                        }}
+                        formats={['qr_code']}
+                        components={{
+                          audio: false,
+                          onOff: false,
+                          torch: false,
+                          zoom: false,
+                          tracker: true,
+                        }}
+                        styles={{
+                          container: { width: '100%', height: '100%' },
+                        }}
+                      />
+                      <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                        <div className="w-48 h-48 border-2 border-white/50 rounded-2xl border-dashed" />
+                      </div>
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={manualCode}
+                      onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+                      placeholder="Enter 6-digit code"
+                      className="w-full bg-black/50 border border-white/20 rounded-xl px-4 py-4 text-center text-2xl font-black text-white tracking-[0.3em] uppercase outline-none focus:border-[#F05A00] transition-colors"
+                    />
+                  )}
+
+                  {!isScanning && (
+                    <button
+                      onClick={() => handleVerifyCode(manualCode)}
+                      disabled={manualCode.length !== 6}
+                      className="w-full bg-[#F05A00] disabled:bg-zinc-800 disabled:text-zinc-500 hover:bg-[#D94F00] text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all"
+                    >
+                      Verify & Claim Sparks
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -555,7 +618,7 @@ export default function BookingsPage() {
 
       {/* ─── MODAL: REPORT ISSUE ─── */}
       {showDisputeModal && selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm anim-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4 bg-black/50 backdrop-blur-sm anim-fade-in">
           <div className="bg-white rounded-3xl w-full max-w-[380px] overflow-hidden shadow-2xl anim-scale-in">
             <div className="p-5 border-b border-zinc-100 flex items-center justify-between">
               <div className="flex items-center gap-2">

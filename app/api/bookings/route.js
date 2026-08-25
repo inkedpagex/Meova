@@ -209,10 +209,10 @@ export async function PATCH(request) {
         t.update(ref, { status: 'Rejected' });
         // Refund
         const guestWalletRef = adminDb.collection('wallets').doc(booking.guestId);
-        t.update(guestWalletRef, {
+        t.set(guestWalletRef, {
           purchased: FieldValue.increment(booking.price || 0),
           updated_at: new Date().toISOString(),
-        });
+        }, { merge: true });
         const txRef = adminDb.collection('transactions').doc();
         t.set(txRef, {
           userId: booking.guestId, type: 'refund',
@@ -247,11 +247,11 @@ export async function PATCH(request) {
         t.update(ref, { status: 'Meeting Completed' });
         
         const hostWalletRef = adminDb.collection('wallets').doc(booking.hostId);
-        t.update(hostWalletRef, {
+        t.set(hostWalletRef, {
           creator: FieldValue.increment(hostShare),
           lifetime_earned: FieldValue.increment(hostShare),
           updated_at: new Date().toISOString(),
-        });
+        }, { merge: true });
         
         const txRef = adminDb.collection('transactions').doc();
         t.set(txRef, {
@@ -269,10 +269,10 @@ export async function PATCH(request) {
         t.update(ref, { status: 'Canceled' });
         
         const guestWalletRef = adminDb.collection('wallets').doc(booking.guestId);
-        t.update(guestWalletRef, {
+        t.set(guestWalletRef, {
           purchased: FieldValue.increment(booking.price || 0),
           updated_at: new Date().toISOString(),
-        });
+        }, { merge: true });
         
         const txRef = adminDb.collection('transactions').doc();
         t.set(txRef, {
@@ -294,6 +294,15 @@ export async function PATCH(request) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('[PATCH /api/bookings]', err.message);
+    const knownErrors = [
+      'Incorrect meeting code', 'Already completed', 'Booking not found', 
+      'Unauthorized', 'Booking cannot be rejected at this stage', 
+      'Cannot dispute this booking at this stage', 'Cannot cancel this booking anymore', 
+      'Invalid action or unauthorized'
+    ];
+    if (knownErrors.includes(err.message)) {
+      return NextResponse.json({ error: err.message }, { status: 400 });
+    }
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

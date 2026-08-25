@@ -1,4 +1,4 @@
-// Profile page — Server Component. Requires login (protected by proxy).
+﻿// Profile page — Server Component. Requires login (protected by proxy).
 import { getUserAdmin } from '../../lib/getUserAdmin';
 import { fetchProfileAdmin } from '../../lib/firebaseAdminQueries';
 import { getOrCreateWallet } from '../../lib/wallet';
@@ -6,7 +6,7 @@ import ProfileClient from './ProfileClient';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
-export const metadata = { title: 'Profile — meetuply' };
+export const metadata = { title: 'Profile — Meova' };
 
 export default async function ProfilePage() {
   const user = await getUserAdmin();
@@ -22,7 +22,7 @@ export default async function ProfilePage() {
   let overrides = {};
   try {
     const cookieStore = await cookies();
-    const ovStr = cookieStore.get('__meetuply_profile_overrides')?.value;
+    const ovStr = cookieStore.get('__Meova_profile_overrides')?.value;
     if (ovStr) overrides = JSON.parse(ovStr);
   } catch (err) {}
 

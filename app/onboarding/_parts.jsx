@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useRef, useCallback } from 'react';
 import { Camera, User, AtSign, CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
@@ -26,17 +26,17 @@ function StepBar({ step }) {
             <div className="flex flex-col items-center gap-1">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300 ${
                 done ? 'bg-emerald-500 text-white' :
-                active ? 'bg-[#8C3573] text-white shadow-lg shadow-[#eac5e0]' :
+                active ? 'bg-[#F05A00] text-white shadow-lg shadow-[#eac5e0]' :
                 'bg-zinc-100 text-zinc-400'
               }`}>
                 {done ? <CheckCircle2 size={16}/> : idx}
               </div>
-              <span className={`text-[9px] font-bold uppercase tracking-wider ${active ? 'text-[#8C3573]' : 'text-zinc-400'}`}>
+              <span className={`text-[9px] font-bold uppercase tracking-wider ${active ? 'text-[#F05A00]' : 'text-zinc-400'}`}>
                 {label}
               </span>
             </div>
             {i < steps.length - 1 && (
-              <div className={`flex-1 h-0.5 mb-4 rounded-full transition-all duration-500 ${step > idx ? 'bg-emerald-400' : step > i ? 'bg-[#8C3573]' : 'bg-zinc-100'}`}/>
+              <div className={`flex-1 h-0.5 mb-4 rounded-full transition-all duration-500 ${step > idx ? 'bg-emerald-400' : step > i ? 'bg-[#F05A00]' : 'bg-zinc-100'}`}/>
             )}
           </React.Fragment>
         );
@@ -112,7 +112,7 @@ function Step1({ data, onChange, onNext }) {
         <div
           onClick={() => !uploading && fileRef.current?.click()}
           className="relative w-24 h-24 rounded-3xl overflow-hidden cursor-pointer group transition-all hover:scale-105 active:scale-95 bg-[#f3f0ff]"
-          style={{ border: data.photo_url ? '3px solid #8C3573' : '2px dashed #c4b5fd' }}
+          style={{ border: data.photo_url ? '3px solid #F05A00' : '2px dashed #c4b5fd' }}
         >
           {data.photo_url ? (
             <img 
@@ -124,7 +124,7 @@ function Step1({ data, onChange, onNext }) {
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-              {uploading ? <Loader2 size={24} className="text-[#8C3573] animate-spin"/> : <Camera size={24} className="text-[#8C3573]"/>}
+              {uploading ? <Loader2 size={24} className="text-[#F05A00] animate-spin"/> : <Camera size={24} className="text-[#F05A00]"/>}
             </div>
           )}
           <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -149,7 +149,7 @@ function Step1({ data, onChange, onNext }) {
             onChange={e => onChange('full_name', e.target.value)}
             placeholder="e.g. Chirag Sharma"
             className="w-full pl-10 pr-4 py-3.5 rounded-2xl border-2 text-sm font-medium outline-none transition-all"
-            style={{ borderColor: data.full_name ? '#8C3573' : '#e5e7eb', background: '#fafafa', color: '#111' }}
+            style={{ borderColor: data.full_name ? '#F05A00' : '#e5e7eb', background: '#fafafa', color: '#111' }}
           />
         </div>
       </div>
@@ -165,7 +165,7 @@ function Step1({ data, onChange, onNext }) {
             placeholder="chirag_04"
             className="w-full pl-10 pr-10 py-3.5 rounded-2xl border-2 text-sm font-medium outline-none transition-all"
             style={{
-              borderColor: usernameStatus === 'ok' ? '#10b981' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#f43f5e' : data.username ? '#8C3573' : '#e5e7eb',
+              borderColor: usernameStatus === 'ok' ? '#10b981' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#f43f5e' : data.username ? '#F05A00' : '#e5e7eb',
               background: '#fafafa', color: '#111'
             }}
           />
@@ -186,7 +186,7 @@ function Step1({ data, onChange, onNext }) {
       <button
         onClick={onNext} disabled={!canNext}
         className="w-full py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        style={{ background: canNext ? 'linear-gradient(135deg,#8C3573,#b5609d)' : '#e5e7eb', color: canNext ? '#fff' : '#9ca3af', boxShadow: canNext ? '0 8px 24px rgba(140,53,115,0.3)' : 'none' }}
+        style={{ background: canNext ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canNext ? '#fff' : '#9ca3af', boxShadow: canNext ? '0 8px 24px rgba(140,53,115,0.3)' : 'none' }}
       >
         Continue <ArrowRight size={16}/>
       </button>

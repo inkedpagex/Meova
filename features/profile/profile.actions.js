@@ -1,4 +1,4 @@
-'use server';
+﻿'use server';
 
 import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
@@ -19,7 +19,7 @@ export async function updateProfileAdmin(updates) {
     }
 
     const cookieStore = await cookies();
-    cookieStore.set('__meetuply_profile_overrides', JSON.stringify(cookieUpdates), {
+    cookieStore.set('__Meova_profile_overrides', JSON.stringify(cookieUpdates), {
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/'
     });

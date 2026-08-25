@@ -3,17 +3,17 @@ import { fetchUpcomingEventsAdmin } from '../../lib/firebaseAdminQueries';
 import Link from 'next/link';
 import { Calendar, MapPin, Users, Clock, Zap, Music, Code, Trophy, BookOpen, Palette, Mic } from 'lucide-react';
 
-export const metadata = { title: 'Events — meetuply' };
+export const metadata = { title: 'Events — Meova' };
 
 // Category → premium gradient + icon
 const CATEGORY_THEMES = {
-  tech:        { from: '#8C3573', to: '#8C3573', icon: Code,    label: 'Tech' },
+  tech:        { from: '#F05A00', to: '#F05A00', icon: Code,    label: 'Tech' },
   music:       { from: '#db2777', to: '#ec4899', icon: Music,   label: 'Music' },
-  gaming:      { from: '#0ea5e9', to: '#b5609d', icon: Trophy,  label: 'Gaming' },
+  gaming:      { from: '#0ea5e9', to: '#D94F00', icon: Trophy,  label: 'Gaming' },
   study:       { from: '#10b981', to: '#059669', icon: BookOpen, label: 'Study' },
   art:         { from: '#f97316', to: '#ef4444', icon: Palette, label: 'Art' },
-  talk:        { from: '#8b5cf6', to: '#b5609d', icon: Mic,     label: 'Talk' },
-  default:     { from: '#8C3573', to: '#b5609d', icon: Zap,     label: 'Event' },
+  talk:        { from: '#8b5cf6', to: '#D94F00', icon: Mic,     label: 'Talk' },
+  default:     { from: '#F05A00', to: '#D94F00', icon: Zap,     label: 'Event' },
 };
 
 function getTheme(event) {
@@ -90,7 +90,7 @@ function EventCard({ event, userId }) {
           {weekday}
         </span>
 
-        <h3 className="text-[15px] font-black text-zinc-950 leading-snug mb-3 group-hover:text-[#74295d] transition-colors line-clamp-2">
+        <h3 className="text-[15px] font-black text-zinc-950 leading-snug mb-3 group-hover:text-[#D94F00] transition-colors line-clamp-2">
           {event.title}
         </h3>
 
@@ -139,7 +139,7 @@ export default async function EventsPage() {
   const events = await fetchUpcomingEventsAdmin(30);
 
   return (
-    <div className="w-full max-w-[900px] mx-auto pb-24 anim-fade-in px-4">
+    <div className="w-full max-w-[900px] mx-auto pt-[68px] md:pt-6 pb-24 anim-fade-in px-4">
 
       {/* ── Header ── */}
       <div className="pt-6 pb-5 mb-6 border-b border-zinc-100">

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -70,7 +70,7 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
       }`}
     >
       <div className="relative flex-shrink-0">
-        <div className={`w-12 h-12 rounded-full p-[2px] ${unread > 0 ? 'bg-gradient-to-tr from-[#8C3573] via-pink-500 to-amber-400' : 'bg-transparent'}`}>
+        <div className={`w-12 h-12 rounded-full p-[2px] ${unread > 0 ? 'bg-gradient-to-tr from-[#F05A00] via-orange-500 to-amber-400' : 'bg-transparent'}`}>
           <img
             src={avatarUrl(otherId, otherName, otherPhoto)}
             alt=""
@@ -99,7 +99,7 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
             {chat.lastMessage || 'Sent a message'}
           </p>
           {unread > 0 && (
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8C3573] flex-shrink-0 shadow-xs" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#F05A00] flex-shrink-0 shadow-xs" />
           )}
         </div>
       </div>
@@ -128,7 +128,7 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs sm:text-sm font-black text-zinc-900 truncate group-hover:text-[#8C3573] transition-colors">
+          <p className="text-xs sm:text-sm font-black text-zinc-900 truncate group-hover:text-[#F05A00] transition-colors">
             {student.full_name || 'Student'}
           </p>
           <p className="text-xs font-semibold text-zinc-400 truncate mt-0.5">
@@ -138,7 +138,7 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
       </div>
       <button 
         type="button"
-        className="px-4 py-1.5 rounded-xl bg-[#8C3573] text-white text-xs font-black hover:bg-[#74295d] active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs"
+        className="px-4 py-1.5 rounded-xl bg-[#F05A00] text-white text-xs font-black hover:bg-[#D94F00] active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs"
       >
         Chat
       </button>
@@ -155,7 +155,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
     return (
       <div className="flex justify-center my-4">
         <div className="flex items-center gap-2 bg-zinc-100 text-zinc-700 rounded-full px-4 py-1.5">
-          <Zap className="w-3.5 h-3.5 text-[#8C3573] fill-current" />
+          <Zap className="w-3.5 h-3.5 text-[#F05A00] fill-current" />
           <span className="text-[11px] font-bold">{msg.text}</span>
         </div>
       </div>
@@ -186,7 +186,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
         <div
           className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
             isMe
-              ? 'bg-[#8C3573] text-white rounded-br-xs font-medium'
+              ? 'bg-[#F05A00] text-white rounded-br-xs font-medium'
               : 'bg-zinc-100 text-zinc-900 rounded-bl-xs font-medium'
           }`}
         >
@@ -194,7 +194,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
         </div>
         <div className={`flex items-center gap-1 mt-1 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
           <span className="text-[9px] text-zinc-400 font-semibold">{formatTime(msg.timestamp)}</span>
-          {isMe && <CheckCheck className="w-3 h-3 text-[#8C3573] opacity-80" />}
+          {isMe && <CheckCheck className="w-3 h-3 text-[#F05A00] opacity-80" />}
         </div>
       </div>
     </motion.div>
@@ -558,7 +558,7 @@ function MessagesContent() {
         <p className="text-xs text-zinc-500 max-w-xs mb-6">
           Connect with GLA campus students directly.
         </p>
-        <Link href="/" className="px-6 py-2.5 rounded-full bg-[#8C3573] text-white font-black text-xs hover:bg-[#74295d] transition-all">
+        <Link href="/" className="px-6 py-2.5 rounded-full bg-[#F05A00] text-white font-black text-xs hover:bg-[#D94F00] transition-all">
           Go Home
         </Link>
       </div>
@@ -656,7 +656,7 @@ function MessagesContent() {
                     <span className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">
                       {q ? 'Campus Directory' : 'Suggested for you'}
                     </span>
-                    {!q && <Link href="/discover" className="text-[11px] font-bold text-[#8C3573] hover:underline">See all</Link>}
+                    {!q && <Link href="/discover" className="text-[11px] font-bold text-[#F05A00] hover:underline">See all</Link>}
                   </div>
                   <div>
                     {filteredSuggested.slice(0, q ? 12 : 6).map(student => (
@@ -678,7 +678,7 @@ function MessagesContent() {
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="text-xs font-bold text-[#8C3573] hover:underline cursor-pointer"
+                    className="text-xs font-bold text-[#F05A00] hover:underline cursor-pointer"
                   >
                     Clear search
                   </button>
@@ -707,7 +707,7 @@ function MessagesContent() {
             <button
               type="button"
               onClick={() => setShowNewMessageModal(true)}
-              className="px-5 py-2.5 rounded-xl bg-[#8C3573] hover:bg-[#74295d] text-white font-black text-xs transition-all active:scale-95 cursor-pointer shadow-xs"
+              className="px-5 py-2.5 rounded-xl bg-[#F05A00] hover:bg-[#D94F00] text-white font-black text-xs transition-all active:scale-95 cursor-pointer shadow-xs"
             >
               Send Message
             </button>
@@ -746,7 +746,7 @@ function MessagesContent() {
                         {otherName}
                       </p>
                       {isGroup ? (
-                        <p className="text-[11px] font-bold text-[#8C3573] flex items-center gap-1">
+                        <p className="text-[11px] font-bold text-[#F05A00] flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#9e4685] animate-pulse" />
                           Verified Campus Channel
                         </p>
@@ -866,7 +866,7 @@ function MessagesContent() {
 
               return (
                 <div className="p-3 border-t border-zinc-100 bg-white flex-shrink-0">
-                  <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[#8C3573] focus-within:border-transparent transition-all">
+                  <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[#F05A00] focus-within:border-transparent transition-all">
                     <textarea
                       ref={inputRef}
                       value={inputText}
@@ -885,9 +885,9 @@ function MessagesContent() {
                       type="button"
                       onClick={sendMessage}
                       disabled={!inputText.trim() || sendingMsg}
-                      className="text-[#8C3573] hover:text-[#74295d] disabled:opacity-30 font-black text-xs transition-all active:scale-95 flex-shrink-0 cursor-pointer"
+                      className="text-[#F05A00] hover:text-[#D94F00] disabled:opacity-30 font-black text-xs transition-all active:scale-95 flex-shrink-0 cursor-pointer"
                     >
-                      {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin text-[#8C3573]" /> : 'Send'}
+                      {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin text-[#F05A00]" /> : 'Send'}
                     </button>
                   </div>
                 </div>

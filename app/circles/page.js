@@ -3,7 +3,7 @@ import { getUserAdmin } from '../../lib/getAdminUser';
 import { fetchCirclesAdmin } from '../../lib/firebaseAdminQueries';
 import CirclesList from '../../features/circles/CirclesList';
 
-export const metadata = { title: 'Communities — meetuply.in' };
+export const metadata = { title: 'Communities — Meova.in' };
 
 export default async function CirclesPage() {
   const [user, circles] = await Promise.all([
@@ -21,7 +21,7 @@ export default async function CirclesPage() {
   }
 
   return (
-    <div className="w-full max-w-[640px] mx-auto pb-24 anim-fade-in px-0">
+    <div className="w-full max-w-[640px] mx-auto pt-[68px] md:pt-6 pb-24 anim-fade-in px-0">
       <CirclesList circles={circles} joinedCircleIds={joinedCircleIds} userId={user?.id} />
     </div>
   );

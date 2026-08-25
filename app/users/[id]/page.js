@@ -119,7 +119,7 @@ export default async function UserProfilePage({ params }) {
         <div className="flex items-center justify-between gap-6 mb-4">
           {/* Left: Instagram Avatar with Gradient Ring */}
           <div className="relative flex-shrink-0">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full p-[3px]" style={{ background: 'linear-gradient(135deg, #b5609d 0%, #8C3573 50%, #8C3573 100%)' }}>
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full p-[3px]" style={{ background: '#F05A00' }}>
               <div className="w-full h-full rounded-full overflow-hidden border-2 border-white bg-zinc-100">
                 <img
                   src={avatarUrl(profile)}
@@ -149,8 +149,8 @@ export default async function UserProfilePage({ params }) {
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Rating</span>
             </div>
             <div>
-              <span className="block text-base sm:text-lg font-black text-[#8C3573] leading-tight flex items-center justify-center gap-0.5">
-                {profile.rate || 100} <Zap className="w-3.5 h-3.5 fill-current text-[#8C3573] inline" />
+              <span className="block text-base sm:text-lg font-black text-[#F05A00] leading-tight flex items-center justify-center gap-0.5">
+                {profile.rate || 100} <Zap className="w-3.5 h-3.5 fill-current text-[#F05A00] inline" />
               </span>
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Rate</span>
             </div>
@@ -163,13 +163,13 @@ export default async function UserProfilePage({ params }) {
             <h1 className="text-sm sm:text-base font-black text-zinc-900">
               {profile.full_name || 'Student'}
             </h1>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#fcf6fa] text-[#74295d] border border-[#eac5e0] shadow-2xs">
-              <CheckCircle className="w-3 h-3 text-[#8C3573] fill-[#f5ebf4]" />
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-orange-50 text-[#F05A00] border border-orange-100 shadow-2xs">
+              <CheckCircle className="w-3 h-3 text-[#F05A00] fill-orange-50" />
               <span>{reviews.length || 1} Meets Completed</span>
             </span>
           </div>
 
-          <p className="text-xs font-bold text-[#74295d] flex items-center gap-1">
+          <p className="text-xs font-bold text-[#F05A00] flex items-center gap-1">
             <GraduationCap className="w-3.5 h-3.5" />
             {profile.year || '1st'} Year · {profile.branch || 'General'}
           </p>

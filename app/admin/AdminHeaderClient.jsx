@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -33,7 +33,7 @@ export default function AdminHeaderClient() {
               title={label}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 sm:px-3.5 rounded-lg transition-all ${
                 active
-                  ? 'bg-white text-[#8C3573] shadow-xs border border-[#f5ebf4] font-black'
+                  ? 'bg-white text-[#F05A00] shadow-xs border border-[#f5ebf4] font-black'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/50 font-bold'
               }`}
             >

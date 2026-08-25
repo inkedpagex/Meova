@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
         <p className="text-[11px] mt-0.5 leading-snug" style={{ color: 'var(--text-secondary)' }}>{n.body}</p>
         <span className="text-[10px] mt-1 block" style={{ color: 'var(--text-muted)' }}>{timeAgo(n.created_at)}</span>
       </div>
-      {!n.read && <span className="w-2 h-2 rounded-full bg-[#8C3573] flex-shrink-0" />}
+      {!n.read && <span className="w-2 h-2 rounded-full bg-[#F05A00] flex-shrink-0" />}
     </div>
   );
 
@@ -126,7 +126,7 @@ export default function NotificationsPage() {
           <button key={f} onClick={() => setFilter(f)}
             className="flex-shrink-0 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95"
             style={filter === f
-              ? { background: '#8C3573', color: 'white', border: '1px solid transparent' }
+              ? { background: '#F05A00', color: 'white', border: '1px solid transparent' }
               : { background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
             {f}
           </button>

@@ -74,19 +74,12 @@ export default function AuthForm({ defaultMode = 'login' }) {
     <div className="fixed inset-0 z-[100] flex bg-white overflow-hidden">
 
       {/* ── LEFT: Branding Panel ─────────────────────────────── */}
-      <div className="hidden lg:flex flex-col justify-between w-[52%] bg-[#f3f0ff] p-14 relative overflow-hidden select-none">
-        {/* Subtle bg blob */}
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#8C3573]/10 rounded-full blur-[120px] pointer-events-none -translate-x-1/4 translate-y-1/4" />
+      <div className="hidden lg:flex flex-col justify-between w-[52%] bg-[#fff3ec] p-14 relative overflow-hidden select-none">
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 relative z-10">
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#8C3573,#b5609d)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(140,53,115,0.3)' }}>
-            <svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-              <path d="M3 18V9l9 6 9-6v9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M3 9l9-6 9 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <span className="font-black text-[20px] tracking-tight text-zinc-900">meetuply</span>
+          <img src="/logo.png" alt="Meova" className="h-10 w-10 object-contain rounded-xl shadow-sm" />
+          <span className="font-black text-[22px] tracking-tight text-zinc-900">Meova</span>
         </div>
 
         {/* Hero Text */}
@@ -94,7 +87,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
           <h1 className="text-[42px] font-black leading-[1.1] tracking-tight text-zinc-900">
             Meet people.<br />
             Join experiences.<br />
-            <span style={{ color: '#8C3573' }}>Make college count.</span>
+            <span style={{ color: '#F05A00' }}>Make college count.</span>
           </h1>
           <p className="text-[15px] text-zinc-500 font-medium mt-4 leading-relaxed max-w-[340px]">
             The social discovery platform<br />built for your campus.
@@ -104,8 +97,8 @@ export default function AuthForm({ defaultMode = 'login' }) {
           <div className="mt-10 space-y-5">
             {features.map(({ Icon, title, desc }) => (
               <div key={title} className="flex items-start gap-4">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-sm border border-[#ede9fe]">
-                  <Icon size={16} style={{ color: '#8C3573' }} strokeWidth={2} />
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-sm border border-orange-100">
+                  <Icon size={16} style={{ color: '#F05A00' }} strokeWidth={2} />
                 </div>
                 <div>
                   <p className="text-[13px] font-black text-zinc-800">{title}</p>
@@ -125,14 +118,9 @@ export default function AuthForm({ defaultMode = 'login' }) {
 
 
         {/* Mobile logo */}
-        <div className="lg:hidden flex items-center gap-2 mb-8">
-          <div style={{ width: 32, height: 32, borderRadius: 9, background: 'linear-gradient(135deg,#8C3573,#b5609d)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-              <path d="M3 18V9l9 6 9-6v9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M3 9l9-6 9 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <span className="font-black text-[18px] text-zinc-900">meetuply</span>
+        <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
+          <img src="/logo.png" alt="Meova" className="h-9 w-9 object-contain rounded-lg shadow-sm" />
+          <span className="font-black text-[20px] tracking-tight text-zinc-900">Meova</span>
         </div>
 
         {/* Card */}
@@ -140,7 +128,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
           {/* Header */}
           <div className="text-center mb-8">
             <h2 className="text-[28px] font-black text-zinc-900 tracking-tight">
-              Welcome back! 👋
+              Welcome back!
             </h2>
             <p className="text-[14px] text-zinc-400 font-medium mt-2">
               Login to continue your campus journey
@@ -158,7 +146,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
           <button
             onClick={() => loginWithGoogleGIS()}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl border-2 border-zinc-100 bg-white hover:bg-zinc-50 hover:border-[#8C3573]/20 transition-all font-semibold text-[14px] text-zinc-700 cursor-pointer active:scale-[0.98] disabled:opacity-60 shadow-sm"
+            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl border-2 border-zinc-100 bg-white hover:bg-zinc-50 hover:border-orange-200 transition-all font-semibold text-[14px] text-zinc-700 cursor-pointer active:scale-[0.98] disabled:opacity-60 shadow-sm"
           >
             {loading ? (
               <Loader2 size={18} className="animate-spin text-zinc-400" />
@@ -176,14 +164,14 @@ export default function AuthForm({ defaultMode = 'login' }) {
           {/* Terms */}
           <p className="text-center text-[11px] text-zinc-400 mt-6 leading-relaxed">
             By continuing, you agree to our{' '}
-            <a href="/terms" target="_blank" className="text-[#8C3573] font-semibold hover:underline">Terms of Service</a>
+            <a href="/terms" target="_blank" className="text-[#F05A00] font-semibold hover:underline">Terms of Service</a>
             {' '}·{' '}
-            <a href="/privacy" target="_blank" className="text-[#8C3573] font-semibold hover:underline">Privacy Policy</a>
+            <a href="/privacy" target="_blank" className="text-[#F05A00] font-semibold hover:underline">Privacy Policy</a>
           </p>
 
           {/* Secure badge */}
           <div className="mt-8 flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-zinc-50 border border-zinc-100">
-            <ShieldCheck size={16} className="text-[#8C3573]" strokeWidth={2} />
+            <ShieldCheck size={16} className="text-[#F05A00]" strokeWidth={2} />
             <div className="text-left">
               <p className="text-[12px] font-black text-zinc-700">Secure login</p>
               <p className="text-[10px] text-zinc-400">Your data is encrypted and safe with us.</p>

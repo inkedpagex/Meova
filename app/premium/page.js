@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState } from 'react';
 import { Crown, CheckCircle2, ShieldCheck, Zap, ArrowRight, Star, Sparkles, MessageSquare, Award } from 'lucide-react';
 
@@ -39,7 +39,7 @@ export default function PremiumPage() {
       {/* Header Banner */}
       <div className="relative overflow-hidden rounded-[2.5rem] border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-elevated)] to-[var(--bg-base)] p-8 md:p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-xl">
         {/* Floating gradient glow behind banner */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-[#b5609d]/10 blur-[80px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-[#D94F00]/10 blur-[80px] pointer-events-none" />
 
         <div className="w-16 h-16 rounded-3xl bg-[#fb923c]/10 border border-[#fb923c]/35 flex items-center justify-center text-[#fb923c] shadow-[0_8px_32px_rgba(251,146,60,0.15)] animate-pulse">
           <Crown size={32} className="fill-current" />
@@ -68,7 +68,7 @@ export default function PremiumPage() {
               const Icon = feat.icon;
               return (
                 <div key={idx} className="flex gap-4 items-start">
-                  <div className="w-9 h-9 rounded-xl bg-[#b5609d]/10 border border-[#b5609d]/20 flex items-center justify-center text-[#818cf8] flex-shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-[#D94F00]/10 border border-[#D94F00]/20 flex items-center justify-center text-[#818cf8] flex-shrink-0">
                     <Icon size={16} />
                   </div>
                   <div>

@@ -12,15 +12,16 @@ import { useUserContext } from '../../components/providers/UserProvider';
 import { getCartoonAvatar, getUserAvatarUrl } from '../../utils/avatar';
 import confetti from 'canvas-confetti';
 import { useCampusPresence } from '../../lib/useCampusPresence';
+import Skeleton from '../../components/Skeleton';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 const INTEREST_COLORS = {
-  'Coding': '#8C3573', 'Tech': '#8C3573', 'AI': '#8C3573', 'AI/ML': '#8C3573',
+  'Coding': '#F05A00', 'Tech': '#F05A00', 'AI': '#F05A00', 'AI/ML': '#F05A00',
   'Gaming': '#3b82f6', 'Music': '#ec4899', 'Art': '#f97316',
   'Startups': '#10b981', 'Design': '#06b6d4', 'Sports': '#f59e0b',
   'Travel': '#8b5cf6', 'Photography': '#ef4444', 'Dance': '#f43f5e',
-  'default': '#b5609d',
+  'default': '#F05A00',
 };
 
 const FILTERS = ['All', 'People', 'Communities', 'Tournaments'];
@@ -50,7 +51,7 @@ function useAlgoliaSearch(query) {
       try {
         // Use Algolia's search API directly (no heavy SDK needed)
         const [usersRes, expRes] = await Promise.all([
-          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/meetuply_users/query`, {
+          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/Meova_users/query`, {
             method: 'POST',
             headers: {
               'X-Algolia-Application-Id': ALGOLIA_APP_ID,
@@ -59,7 +60,7 @@ function useAlgoliaSearch(query) {
             },
             body: JSON.stringify({ query: q, hitsPerPage: 12, attributesToRetrieve: ['objectID', 'full_name', 'year', 'branch', 'interests', 'photo_url', 'isLiveOnCampus', 'isIdOn'] }),
           }),
-          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/meetuply_experiences/query`, {
+          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/Meova_experiences/query`, {
             method: 'POST',
             headers: {
               'X-Algolia-Application-Id': ALGOLIA_APP_ID,
@@ -163,7 +164,7 @@ export default function DiscoverClient() {
 
       setPeople(filteredUsers);
 
-      const savedJoined = localStorage.getItem('meetuply_disc_joined');
+      const savedJoined = localStorage.getItem('Meova_disc_joined');
       if (savedJoined) {
         try {
           setJoinedIds(new Set(JSON.parse(savedJoined)));
@@ -183,7 +184,7 @@ export default function DiscoverClient() {
     setJoinedIds(prev => {
       const next = new Set([...prev, c.id]);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('meetuply_disc_joined', JSON.stringify([...next]));
+        localStorage.setItem('Meova_disc_joined', JSON.stringify([...next]));
       }
       return next;
     });
@@ -196,7 +197,7 @@ export default function DiscoverClient() {
     <button key={label} onClick={() => setActiveFilter(label)}
       className="flex-shrink-0 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
       style={activeFilter === label
-        ? { background: '#8C3573', color: '#ffffff', border: '1px solid transparent' }
+        ? { background: 'linear-gradient(to right, #F05A00, #F05A00)', color: '#ffffff', border: '1px solid transparent' }
         : { background: '#f0f0f3', color: '#71717a', border: '1px solid #e4e4e7' }}>
       {label}
     </button>
@@ -240,13 +241,13 @@ export default function DiscoverClient() {
                 {liveCount} Live on Campus
               </span>
             )}
-            <span className="text-[11px] font-bold" style={{ color: '#8C3573' }}>{fullList.length} online</span>
+            <span className="text-[11px] font-bold" style={{ color: '#F05A00' }}>{fullList.length} online</span>
           </div>
         </div>
 
         {isSearching && (
           <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-medium px-1">
-            <div className="w-3 h-3 border-2 border-[#8C3573] border-t-transparent rounded-full animate-spin" />
+            <div className="w-3 h-3 border-2 border-[#F05A00] border-t-transparent rounded-full animate-spin" />
             Searching...
           </div>
         )}
@@ -279,11 +280,11 @@ export default function DiscoverClient() {
               {list.map(person => (
                 <div key={person.id}
                   onClick={() => router.push(`/users/${person.id}`)}
-                  className="rounded-3xl p-4 flex flex-col items-center text-center cursor-pointer transition-all hover:border-purple-300 hover:shadow-md group"
+                  className="rounded-3xl p-4 flex flex-col items-center text-center cursor-pointer transition-all hover:border-orange-300 hover:shadow-md group"
                   style={{ background: '#ffffff', border: person.isLiveOnCampus ? '1.5px solid #bbf7d0' : '1px solid #f0f0f0', boxShadow: person.isLiveOnCampus ? '0 0 0 3px rgba(16,185,129,0.06)' : '0 2px 8px rgba(0,0,0,0.03)' }}>
                   <div className="relative mb-3">
                     <div className="w-16 h-16 rounded-full overflow-hidden group-hover:scale-105 transition-transform"
-                      style={{ border: person.isLiveOnCampus ? '3px solid #6ee7b7' : '3px solid #ede9fe' }}>
+                      style={{ border: person.isLiveOnCampus ? '3px solid #6ee7b7' : '3px solid #e0f2fe' }}>
                       <img
                         src={getAvatar(person)}
                         alt=""
@@ -305,7 +306,7 @@ export default function DiscoverClient() {
                     )}
                   </div>
                   <div className="flex-1 w-full flex flex-col items-center" style={{ marginTop: person.isLiveOnCampus ? 8 : 0 }}>
-                    <span className="text-[13px] font-black truncate max-w-full group-hover:text-[#8C3573] transition-colors" style={{ color: '#09090b' }}>{person.full_name}</span>
+                    <span className="text-[13px] font-black truncate max-w-full group-hover:text-[#F05A00] transition-colors" style={{ color: '#09090b' }}>{person.full_name}</span>
                     <span className="text-[10px] font-semibold mt-0.5" style={{ color: '#a1a1aa' }}>
                       {person.year ? `${person.year} Yr` : ''} {person.branch ? `· ${person.branch}` : ''}
                     </span>
@@ -325,7 +326,7 @@ export default function DiscoverClient() {
                     className="mt-3 w-full py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
                     style={connectedIds.has(person.id)
                       ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
-                      : { background: '#8C3573', color: '#ffffff' }}>
+                      : { background: 'linear-gradient(to right, #F05A00, #F05A00)', color: '#ffffff' }}>
                     {connectedIds.has(person.id) ? 'Message' : 'Connect'}
                   </button>
                 </div>
@@ -335,8 +336,8 @@ export default function DiscoverClient() {
             {/* Automatic Infinite Scroll Indicator */}
             {hasMore && (
               <div className="flex items-center justify-center py-6">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#8C3573] bg-[#fcf6fa]/80 px-4 py-2 rounded-full border border-[#f5ebf4]/80 shadow-xs">
-                  <div className="w-3.5 h-3.5 border-2 border-[#8C3573] border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center gap-2 text-xs font-bold text-[#F05A00] bg-orange-50 px-4 py-2 rounded-full border border-orange-100 shadow-xs">
+                  <div className="w-3.5 h-3.5 border-2 border-[#F05A00] border-t-transparent rounded-full animate-spin" />
                   <span>Loading more classmates...</span>
                 </div>
               </div>
@@ -358,8 +359,8 @@ export default function DiscoverClient() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-[15px] font-black" style={{ color: '#09090b' }}>Communities</h2>
-          <span className="text-[11px] font-bold" style={{ color: '#8C3573' }}>{list.length} groups</span>
+          <h2 className="text-[15px] font-black text-zinc-950">Communities</h2>
+          <span className="text-[11px] font-bold text-[#F05A00]">{list.length} groups</span>
         </div>
 
         {isCirclesLoading ? (
@@ -375,9 +376,9 @@ export default function DiscoverClient() {
           </div>
         ) : list.length === 0 ? (
           <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
-            <Users size={24} className="text-[#8C3573]" />
+            <Users size={24} className="text-[#F05A00]" />
             <span>No communities created yet.</span>
-            <button onClick={() => router.push('/circles')} className="mt-2 px-4 py-2 bg-[#8C3573] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition-all">
+            <button onClick={() => router.push('/circles')} className="mt-2 px-4 py-2 bg-gradient-to-r from-[#F05A00] to-[#F05A00] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition-all">
               Browse Communities
             </button>
           </div>
@@ -387,20 +388,19 @@ export default function DiscoverClient() {
               const isJoined = joinedIds.has(c.id);
               return (
                 <div key={c.id}
-                  className="p-4 rounded-3xl flex flex-col items-center text-center cursor-pointer transition-all hover:shadow-sm active:scale-[0.98]"
-                  style={{ background: '#ffffff', border: '1px solid #f0f0f0' }}
+                  className="p-4 rounded-3xl flex flex-col items-center text-center cursor-pointer transition-all hover:shadow-sm active:scale-[0.98] bg-white border border-zinc-100"
                   onClick={() => isJoined ? router.push('/circles') : handleJoinCommunity(c)}>
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3"
-                    style={{ background: '#f5f3ff', border: `1px solid #ddd6fe`, color: '#8C3573' }}>
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 bg-orange-50 border border-orange-100 text-[#F05A00]">
                     <Users size={24} strokeWidth={2} />
                   </div>
-                  <span className="text-[12px] font-black" style={{ color: '#09090b' }}>{c.name}</span>
-                  <span className="text-[9px] font-semibold mt-0.5" style={{ color: '#a1a1aa' }}>{(c.member_count || 0).toLocaleString()} members</span>
+                  <span className="text-[12px] font-black text-zinc-950">{c.name}</span>
+                  <span className="text-[9px] font-semibold text-zinc-400 mt-0.5">{(c.member_count || 0).toLocaleString()} members</span>
                   <div className="mt-2">
-                    <span className="text-[9px] font-black text-emerald-600 px-2 py-0.5 rounded-full" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>Free</span>
+                    <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">Free</span>
                   </div>
-                  <button className="mt-3 w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
-                    style={isJoined ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' } : { background: '#8C3573', color: '#ffffff' }}>
+                  <button className={`mt-3 w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95 ${
+                    isJoined ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-gradient-to-r from-[#F05A00] to-[#F05A00] text-white'
+                  }`}>
                     {isJoined ? 'Open' : 'Join'}
                   </button>
                 </div>
@@ -416,11 +416,11 @@ export default function DiscoverClient() {
   const renderTournamentsSection = () => (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-[15px] font-black" style={{ color: '#09090b' }}>Live Tournaments</h2>
-        <span className="text-[11px] font-bold" style={{ color: '#8C3573' }}>0 events</span>
+        <h2 className="text-[15px] font-black text-zinc-950">Live Tournaments</h2>
+        <span className="text-[11px] font-bold text-[#F05A00]">0 events</span>
       </div>
-      <div className="rounded-3xl p-12 text-center font-bold text-zinc-400 bg-white border border-[#f0f0f0] flex flex-col items-center gap-2">
-        <Trophy size={28} className="text-[#8C3573]" />
+      <div className="rounded-3xl p-12 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
+        <Trophy size={28} className="text-[#F05A00]" />
         <span>No campus tournaments scheduled yet.</span>
       </div>
     </div>
@@ -431,17 +431,16 @@ export default function DiscoverClient() {
   const showTourn = activeFilter === 'All' || activeFilter === 'Tournaments';
 
   return (
-    <div className="space-y-5 pb-24 pt-2">
+    <div className="space-y-5 pt-[68px] md:pt-4 px-4 max-w-[640px] mx-auto pb-24">
       {/* Search */}
       <div className="relative">
-        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#a1a1aa' }} />
+        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400" />
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Search people, experiences, communities..."
-          className="w-full pl-11 pr-4 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all"
-          style={{ background: '#f0f0f3', border: '1px solid #e4e4e7', color: '#09090b' }} />
+          className="w-full pl-11 pr-4 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all bg-zinc-100 border border-zinc-200 text-zinc-900" />
         {isSearching && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            <div className="w-4 h-4 border-2 border-[#8C3573] border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-[#F05A00] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </div>

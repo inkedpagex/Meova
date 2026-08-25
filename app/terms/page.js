@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 export const metadata = {
   title: 'Terms of Service — Meetuply',
@@ -12,7 +12,7 @@ export default function TermsPage() {
         <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all uppercase tracking-wider">
           ← Back
         </Link>
-        <Link href="/login" className="px-5 py-2 rounded-full text-[12px] font-black text-white transition-all hover:opacity-90 active:scale-95 shadow-md" style={{ background: 'linear-gradient(135deg, #8C3573, #b5609d)' }}>
+        <Link href="/login" className="px-5 py-2 rounded-full text-[12px] font-black text-white transition-all hover:opacity-90 active:scale-95 shadow-md" style={{ background: 'linear-gradient(135deg, #F05A00, #D94F00)' }}>
           Log In
         </Link>
       </div>
@@ -72,7 +72,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-sm font-black text-[var(--text-primary)] mb-3">9. Contact</h2>
-            <p>For questions about these Terms, please contact us at <span className="font-bold text-[var(--primary)]">support@meetuply.app</span></p>
+            <p>For questions about these Terms, please contact us at <span className="font-bold text-[var(--primary)]">support@Meova.app</span></p>
           </section>
         </div>
       </div>

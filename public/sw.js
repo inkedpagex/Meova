@@ -1,8 +1,8 @@
-// Meetuply Service Worker
+﻿// Meetuply Service Worker
 // Strategy: Network-first for API routes, Cache-first for static assets
 // FCM: Background push notifications support
 
-const CACHE_NAME = 'meetuply-v2';
+const CACHE_NAME = 'Meova-v2';
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icon-512.png',
@@ -17,9 +17,9 @@ try {
 
   const firebaseConfig = {
     apiKey: 'AIzaSyAWKHPIr_QZq0KYw-3SkDCRe_zACdkkd4o',
-    authDomain: 'meetuply-ae3bc.firebaseapp.com',
-    projectId: 'meetuply-ae3bc',
-    storageBucket: 'meetuply-ae3bc.firebasestorage.app',
+    authDomain: 'Meova-ae3bc.firebaseapp.com',
+    projectId: 'Meova-ae3bc',
+    storageBucket: 'Meova-ae3bc.firebasestorage.app',
     messagingSenderId: '752250926726',
     appId: '1:752250926726:web:98d2d7122acecf6a648307',
   };
@@ -38,7 +38,7 @@ try {
       body: body || '',
       icon: '/icon-512.png',
       badge: '/icon-512.png',
-      tag: 'meetuply-push',
+      tag: 'Meova-push',
       renotify: true,
       vibrate: [200, 100, 200],
       data: { url: link },

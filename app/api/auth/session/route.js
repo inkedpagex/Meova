@@ -1,10 +1,10 @@
-// Route Handler: stores the Firebase ID token in a cookie since firebase-admin is removed.
+﻿// Route Handler: stores the Firebase ID token in a cookie since firebase-admin is removed.
 // Called from AuthForm after successful Firebase Auth sign-in.
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { getUserWithRole } from '../../../../lib/getAdminUser';
 
-const SESSION_COOKIE_NAME = '__meetuply_session';
+const SESSION_COOKIE_NAME = '__Meova_session';
 const SESSION_DURATION_MS = 60 * 60 * 24 * 5 * 1000; // 5 days
 
 const loginAttempts = new Map(); // ip -> { count, lastAttempt }
@@ -71,7 +71,7 @@ export async function POST(request) {
     });
 
     if (profileOverrides) {
-      cookieStore.set('__meetuply_profile_overrides', JSON.stringify(profileOverrides), {
+      cookieStore.set('__Meova_profile_overrides', JSON.stringify(profileOverrides), {
         maxAge: SESSION_DURATION_MS / 1000,
         path: '/',
         sameSite: 'lax',

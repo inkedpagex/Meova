@@ -1,10 +1,10 @@
-// app/onboarding/page.js — Server Component, auth-guarded
+﻿// app/onboarding/page.js — Server Component, auth-guarded
 import { redirect } from 'next/navigation';
 import { getUserWithRole } from '@/lib/getAdminUser';
 import OnboardingClient from './OnboardingClient';
 
 export const metadata = {
-  title: 'Complete Your Profile — meetuply',
+  title: 'Complete Your Profile — Meova',
   description: 'Set up your campus identity on Meetuply.',
 };
 

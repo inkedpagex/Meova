@@ -11,21 +11,21 @@ export default function CreateMenuModal({ isOpen, onClose }) {
       title: 'Post Photo / Moment',
       desc: 'Share campus food photos, coffee meets, or vibes.',
       icon: Camera,
-      badgeBg: 'bg-pink-50 border-pink-100 text-pink-600',
+      badgeBg: 'bg-orange-50 border-orange-100/60 text-[#F05A00]',
       href: '/create/photo'
     },
     {
       title: 'Host a Channel',
       desc: 'Start an exclusive interest circle for campus peers.',
       icon: Users,
-      badgeBg: 'bg-emerald-50 border-emerald-100 text-emerald-600',
+      badgeBg: 'bg-[#fff5f0] border-orange-100/60 text-[#d94f00]',
       href: '/circles'
     },
     {
       title: 'Post a Gig',
       desc: 'Hire talent or offer paid freelance tasks for students.',
       icon: Briefcase,
-      badgeBg: 'bg-amber-50 border-amber-100 text-amber-600',
+      badgeBg: 'bg-amber-50/80 border-amber-100/60 text-[#c04500]',
       href: '/gigs?action=post-gig'
     },
   ];
@@ -46,7 +46,7 @@ export default function CreateMenuModal({ isOpen, onClose }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 inset-x-0 z-[101] bg-white rounded-t-[32px] overflow-hidden max-w-[560px] mx-auto shadow-2xl md:hidden"
+            className="fixed bottom-0 inset-x-0 z-[101] bg-[#faf9f6] rounded-t-[32px] overflow-hidden max-w-[560px] mx-auto shadow-2xl md:hidden border-x border-t border-zinc-200/50"
           >
             <div className="p-6 pb-8">
               <div className="flex items-center justify-between mb-6">
@@ -56,7 +56,7 @@ export default function CreateMenuModal({ isOpen, onClose }) {
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-colors"
+                  className="w-8 h-8 rounded-full bg-white border border-zinc-200 shadow-sm flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -68,7 +68,7 @@ export default function CreateMenuModal({ isOpen, onClose }) {
                     key={opt.title}
                     href={opt.href}
                     onClick={onClose}
-                    className="group flex items-center justify-between p-3.5 bg-white border border-zinc-200/80 rounded-2xl shadow-sm hover:border-purple-300 hover:shadow-md active:scale-[0.98] transition-all duration-200"
+                    className="group flex items-center justify-between p-3.5 bg-white border border-zinc-200/70 rounded-2xl shadow-sm hover:border-orange-200 hover:shadow-md active:scale-[0.98] transition-all duration-200"
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       <div className={`w-11 h-11 rounded-xl border flex items-center justify-center flex-shrink-0 ${opt.badgeBg}`}>
@@ -83,7 +83,7 @@ export default function CreateMenuModal({ isOpen, onClose }) {
                         </p>
                       </div>
                     </div>
-                    <div className="w-7 h-7 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-[#fcf6fa] group-hover:text-[#8C3573] flex-shrink-0 transition-colors">
+                    <div className="w-7 h-7 rounded-full bg-[#f4f3ee] flex items-center justify-center text-zinc-400 group-hover:bg-orange-50 group-hover:text-[#F05A00] flex-shrink-0 transition-colors">
                       <ChevronRight size={14} strokeWidth={2.5} />
                     </div>
                   </Link>

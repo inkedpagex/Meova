@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { Zap, CheckCircle, Copy, ArrowLeft, Loader2, ArrowRight } from 'lucide-react';
@@ -128,7 +128,7 @@ export default function BuyPage() {
                   </div>
 
                   {pack.bonus > 0 && (
-                    <p className="text-[10px] text-[#b5609d] font-black mb-3">
+                    <p className="text-[10px] text-[#D94F00] font-black mb-3">
                       + {pack.bonus} Bonus ⚡
                     </p>
                   )}

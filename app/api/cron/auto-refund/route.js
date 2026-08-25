@@ -1,4 +1,4 @@
-/**
+﻿/**
  * GET /api/cron/auto-refund
  *
  * Called every hour by Vercel Cron (vercel.json) or an external cron service.
@@ -15,7 +15,7 @@ import { adminDb } from '../../../../lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { sendPush } from '../../../../lib/sendPushNotification';
 
-const CRON_SECRET = process.env.CRON_SECRET || 'meetuply-cron-secret-2024';
+const CRON_SECRET = process.env.CRON_SECRET || 'Meova-cron-secret-2024';
 
 export async function GET(request) {
   // Security check

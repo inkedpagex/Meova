@@ -1,4 +1,4 @@
-import './globals.css';
+﻿import './globals.css';
 import Sidebar from '../components/Sidebar';
 import RightPanel from '../components/RightPanel';
 import { getUserWithRole } from '../lib/getAdminUser';
@@ -15,13 +15,13 @@ import MainContentWrapper from '../components/MainContentWrapper';
 import NetworkWrapper from '../components/NetworkWrapper';
 
 export const metadata = {
-  title: 'Meetuply — Your Campus Life',
-  description: 'Join experiences, meet people, and grow your campus social circle with Meetuply.',
+  title: 'Meova — Your Campus Life',
+  description: 'Join experiences, meet people, and grow your campus social circle with Meova.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Meetuply',
+    title: 'Meova',
   },
 };
 
@@ -44,13 +44,13 @@ export default async function RootLayout({ children }) {
     const fetchedUser = await getUserWithRole();
 
     // ── Onboarding gate ──────────────────────────────────────────────────────
-    // Check __meetuply_pc cookie FIRST (written by /api/onboarding immediately
+    // Check __Meova_pc cookie FIRST (written by /api/onboarding immediately
     // after the Firestore transaction). This avoids ERR_FAILED redirect loops
     // on slow connections where Firestore writes haven't propagated yet.
     const EXEMPT_PATHS = ['/onboarding', '/login', '/signup', '/api', '/terms', '/privacy'];
     const isExempt = EXEMPT_PATHS.some(p => pathname.startsWith(p));
     if (fetchedUser && !isExempt) {
-      const pcCookie = cookieStore.get('__meetuply_pc')?.value;
+      const pcCookie = cookieStore.get('__Meova_pc')?.value;
       const isComplete = pcCookie === '1' || fetchedUser.profileComplete !== false;
       if (!isComplete) {
         const { redirect } = await import('next/navigation');
@@ -81,14 +81,14 @@ export default async function RootLayout({ children }) {
       <html lang="en" data-theme="light" style={{ colorScheme: 'light' }}>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-          <meta name="theme-color" content="#8C3573" />
+          <meta name="theme-color" content="#F05A00" />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-          <meta name="apple-mobile-web-app-title" content="Meetuply" />
+          <meta name="apple-mobile-web-app-title" content="Meova" />
           <link rel="manifest" href="/manifest.json" />
-          <link rel="apple-touch-icon" href="/icon-512.png?v=2" />
-          <link rel="icon" type="image/png" href="/icon-512.png?v=2" />
+          <link rel="apple-touch-icon" href="/logo.png" />
+          <link rel="icon" type="image/png" href="/logo.png" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800" rel="stylesheet" />

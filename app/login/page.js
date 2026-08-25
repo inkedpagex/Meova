@@ -1,9 +1,9 @@
-import { redirect } from 'next/navigation';
+﻿import { redirect } from 'next/navigation';
 import { getUserWithRole } from '../../lib/getAdminUser';
 import AuthForm from '../../features/auth/AuthForm';
 import { Suspense } from 'react';
 
-export const metadata = { title: 'Log In — meetuply.in' };
+export const metadata = { title: 'Log In — Meova.in' };
 
 export default async function LoginPage() {
   let serverError = null;

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { X, Sparkles, ShieldCheck, CheckCircle2, MessageSquare, Image as ImageIcon, Link as LinkIcon } from 'lucide-react';
@@ -19,9 +19,9 @@ const CATEGORIES = [
 
 const PLATFORMS = [
   { id: 'WhatsApp', label: 'WhatsApp Group / Channel', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { id: 'Telegram', label: 'Telegram Channel', color: 'bg-sky-50 text-sky-700 border-sky-200' },
-  { id: 'Instagram', label: 'Instagram Broadcast', color: 'bg-pink-50 text-pink-700 border-pink-200' },
-  { id: 'Discord', label: 'Discord Server', color: 'bg-[#fcf6fa] text-[#74295d] border-[#eac5e0]' },
+  { id: 'Telegram', label: 'Telegram Channel', color: 'bg-orange-50 text-orange-700 border-orange-200' },
+  { id: 'Instagram', label: 'Instagram Broadcast', color: 'bg-orange-50 text-pink-700 border-pink-200' },
+  { id: 'Discord', label: 'Discord Server', color: 'bg-[#fcf6fa] text-[#D94F00] border-[#eac5e0]' },
 ];
 
 export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
@@ -104,7 +104,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
         {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#f5ebf4] text-[#74295d] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-orange-50 text-[#F05A00] flex items-center justify-center">
               <Sparkles size={16} />
             </div>
             <div>
@@ -134,7 +134,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. GLA UI/UX Designers Club"
-              className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#8C3573] focus:ring-2 focus:ring-[#8C3573]/10 font-bold"
+              className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 font-bold"
             />
           </div>
 
@@ -149,7 +149,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat)}
-                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-black transition-all ${category === cat ? 'bg-[#8C3573] text-white shadow-md' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}
+                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-black transition-all ${category === cat ? 'bg-[#F05A00] text-white shadow-md' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}
                 >
                   {cat}
                 </button>
@@ -182,7 +182,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
               <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider">
                 Entry Fee (Sparks)
               </label>
-              <span className="text-[10px] text-[#8C3573] font-black">
+              <span className="text-[10px] text-[#F05A00] font-black">
                 {price === '0' ? 'FREE Group' : `Paid Community (${price} Sparks/join)`}
               </span>
             </div>
@@ -194,9 +194,9 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                 value={price}
                 onChange={handlePriceChange}
                 placeholder="0 for Free, or 50 Sparks"
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#8C3573] font-bold pl-9"
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#F05A00] font-bold pl-9"
               />
-              <Sparkles size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8C3573] fill-[#8C3573]" />
+              <Sparkles size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#F05A00] fill-[#F05A00]" />
             </div>
             <p className="text-[10px] text-zinc-400 mt-1">
               You receive 100% of these Sparks instantly whenever a student joins your community.
@@ -215,7 +215,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                 value={link}
                 onChange={e => setLink(e.target.value)}
                 placeholder="https://chat.whatsapp.com/... or https://t.me/..."
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#8C3573] font-bold pl-9"
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#F05A00] font-bold pl-9"
               />
               <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             </div>
@@ -235,7 +235,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="What will members get in this channel? (e.g. Daily hackathon updates, study notes, portfolio feedback...)"
-              className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-[#8C3573] font-medium"
+              className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-[#F05A00] font-medium"
             />
           </div>
 
@@ -250,7 +250,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                 value={image}
                 onChange={e => setImage(e.target.value)}
                 placeholder="https://images.unsplash.com/..."
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-[#8C3573] font-medium pl-9"
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-[#F05A00] font-medium pl-9"
               />
               <ImageIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             </div>
@@ -265,8 +265,8 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                   <p className="text-[10px] font-bold text-zinc-500">One-time payment</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[12px] font-black text-[#8C3573] flex items-center justify-end gap-1">
-                    100 <Sparkles size={12} className="fill-[#8C3573]" />
+                  <p className="text-[12px] font-black text-[#F05A00] flex items-center justify-end gap-1">
+                    100 <Sparkles size={12} className="fill-[#F05A00]" />
                   </p>
                   <p className={`text-[10px] font-bold ${hasEnoughSparks ? 'text-emerald-600' : 'text-rose-500'}`}>
                     Balance: {totalSparks}
@@ -278,7 +278,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
             <button
               type="submit"
               disabled={submitting || !hasEnoughSparks}
-              className="w-full py-3 rounded-2xl bg-[#8C3573] hover:bg-[#74295d] text-white font-black text-xs transition-all shadow-md shadow-[#8C3573]/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white font-black text-xs transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
             >
               {submitting ? 'Submitting Request...' : (
                 isAdmin ? 'Create Official Channel' : (hasEnoughSparks ? 'Pay 100 Sparks & Submit' : 'Insufficient Sparks')

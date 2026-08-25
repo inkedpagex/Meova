@@ -15,54 +15,58 @@ export default function RightPanel({ people = [], upcomingEvents = [] }) {
   return (
     <aside className="hidden xl:block w-[320px] fixed right-0 top-0 h-screen overflow-y-auto border-l border-zinc-100 bg-white p-6 space-y-6 select-none z-30">
       
-      {/* Header Widget / Search or Greeting */}
-      <div className="bg-gradient-to-br from-[#8C3573] to-[#8C3573] rounded-3xl p-5 text-white shadow-lg shadow-[#9e4685]/20">
+      {/* Header Widget */}
+      <div className="bg-[#F05A00] rounded-2xl p-4 text-white">
         <div className="flex items-center gap-2 mb-2">
-          <Sparkles size={16} className="text-yellow-300 fill-current" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-[#eac5e0]">Campus Spotlight</span>
+          <Sparkles size={16} className="text-white/80 fill-current" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-white/80 whitespace-nowrap">Campus Spotlight</span>
         </div>
-        <h3 className="text-sm font-black tracking-tight leading-snug">Connect & Explore Campus Events Today</h3>
-        <p className="text-[11px] text-[#f5ebf4] mt-1 font-medium leading-relaxed">Book 1-on-1 meets or join group circles with fellow students.</p>
+        <h3 className="text-sm font-black tracking-tight leading-snug whitespace-nowrap truncate">Explore Campus Events</h3>
+        <p className="text-[11px] text-white/70 mt-1 font-medium whitespace-nowrap truncate">Book meets or join circles.</p>
       </div>
 
-      {/* People you might vibe with */}
+      {/* People to Vibe With */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-black uppercase tracking-wider text-zinc-900">People You Might Vibe With</h4>
-          <Link href="/discover" className="text-[10px] font-black text-[#8C3573] hover:text-[#74295d]">See all</Link>
+          <h4 className="text-xs font-black uppercase tracking-wider text-zinc-900 whitespace-nowrap">Classmates</h4>
+          <Link href="/discover" className="text-[10px] font-black text-[#F05A00] hover:text-[#D94F00] whitespace-nowrap">See all</Link>
         </div>
 
         <div className="space-y-2.5">
           {topPeople.length === 0 ? (
-            <p className="text-[11px] text-zinc-400 font-semibold italic">No users found</p>
+            <p className="text-[11px] text-zinc-400 font-semibold italic whitespace-nowrap">No users found</p>
           ) : (
-            topPeople.map((person) => (
-              <Link
-                key={person.id || person.uid}
-                href={`/users/${person.id || person.uid}`}
-                className="flex items-center justify-between p-3 rounded-2xl border border-zinc-100 hover:border-[#eac5e0] hover:bg-[#fcf6fa]/30 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border border-[#f5ebf4] flex-shrink-0 relative group-hover:scale-105 transition-transform">
-                    <img 
-                      src={getUserAvatarUrl(person)} 
-                      alt={person.full_name || 'User'} 
-                      className="w-full h-full object-cover" 
-                      onError={(e) => {
-                        e.target.src = getCartoonAvatar(person.full_name || person.id || 'user');
-                      }}
-                    />
+            topPeople.map((person) => {
+              const yr = (person.year || '1st').toString().replace(/\s*year\s*/i, '').trim();
+              const br = (person.branch || 'General').replace('COMPUTER SCIENCE', 'CSE').replace('BUSINESS ADMIN', 'BBA');
+              return (
+                <Link
+                  key={person.id || person.uid}
+                  href={`/users/${person.id || person.uid}`}
+                  className="flex items-center justify-between p-3 rounded-2xl border border-zinc-100 hover:border-orange-200 hover:bg-orange-50/30 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border border-orange-100 flex-shrink-0 relative group-hover:scale-105 transition-transform">
+                      <img 
+                        src={getUserAvatarUrl(person)} 
+                        alt={person.full_name || 'User'} 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => {
+                          e.target.src = getCartoonAvatar(person.full_name || person.id || 'user');
+                        }}
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <h5 className="text-xs font-black text-zinc-900 truncate group-hover:text-[#F05A00] transition-colors">{person.full_name || 'Student'}</h5>
+                      <p className="text-[10px] font-bold text-zinc-400 truncate whitespace-nowrap">{yr} Yr · {br}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <h5 className="text-xs font-black text-zinc-900 truncate group-hover:text-[#8C3573] transition-colors">{person.full_name || 'Student'}</h5>
-                    <p className="text-[10px] font-bold text-zinc-400 truncate">{person.year || '1st'} Year · {person.branch || 'General'}</p>
+                  <div className="text-[10px] font-black px-3 py-1.5 rounded-xl bg-[#F05A00] text-white hover:bg-[#D94F00] transition-all flex-shrink-0 flex items-center gap-1 whitespace-nowrap">
+                    Meet {person.spark_charge || 50} <Sparkles size={10} className="fill-current text-white/80" />
                   </div>
-                </div>
-                <div className="text-[10px] font-black px-3 py-1.5 rounded-full bg-[#8C3573] text-white hover:bg-[#74295d] transition-all flex-shrink-0 flex items-center gap-1">
-                  Meet {person.spark_charge || 50} <Sparkles size={10} className="fill-current text-yellow-300" />
-                </div>
-              </Link>
-            ))
+                </Link>
+              );
+            })
           )}
         </div>
       </div>
@@ -70,22 +74,22 @@ export default function RightPanel({ people = [], upcomingEvents = [] }) {
       {/* Upcoming Events */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-black uppercase tracking-wider text-zinc-900">Upcoming Events</h4>
-          <Link href="/circles" className="text-[10px] font-black text-[#8C3573] hover:text-[#74295d]">Explore</Link>
+          <h4 className="text-xs font-black uppercase tracking-wider text-zinc-900 whitespace-nowrap">Upcoming Events</h4>
+          <Link href="/circles" className="text-[10px] font-black text-[#F05A00] hover:text-[#D94F00] whitespace-nowrap">Explore</Link>
         </div>
 
         <div className="space-y-2.5">
           {upcomingEvents.length === 0 ? (
             <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-100 text-center">
               <Calendar size={20} className="text-zinc-400 mx-auto mb-1" />
-              <p className="text-[11px] text-zinc-500 font-bold">No upcoming events yet</p>
-              <p className="text-[9.5px] text-zinc-400">Host your own event to get started!</p>
+              <p className="text-[11px] text-zinc-500 font-bold whitespace-nowrap truncate">No upcoming events</p>
+              <p className="text-[10px] text-zinc-400 whitespace-nowrap truncate">Host an event to start.</p>
             </div>
           ) : (
             upcomingEvents.slice(0, 3).map((evt) => (
               <div key={evt.id} className="p-3 rounded-2xl border border-zinc-100 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-[#fcf6fa] text-[#74295d]">{evt.category || 'Event'}</span>
+                  <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-orange-50 text-[#F05A00]">{evt.category || 'Event'}</span>
                   <span className="text-[10px] font-bold text-zinc-400">{evt.date || 'Soon'}</span>
                 </div>
                 <h5 className="text-xs font-black text-zinc-900 leading-snug">{evt.title}</h5>

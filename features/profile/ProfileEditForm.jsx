@@ -1,4 +1,4 @@
-// Client Component for editing user profile
+﻿// Client Component for editing user profile
 'use client';
 
 import React, { useState } from 'react';
@@ -185,7 +185,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   };
 
   // Premium UI Classes
-  const inputClass = "w-full rounded-2xl py-4 pl-12 pr-5 text-[13px] font-black text-zinc-900 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] transition-all duration-300 placeholder:text-zinc-400/80 focus:outline-none focus:bg-white focus:border-[#8C3573] focus:ring-4 focus:ring-[#8C3573]/15 hover:border-[#cbd5e1]";
+  const inputClass = "w-full rounded-2xl py-4 pl-12 pr-5 text-[13px] font-black text-zinc-900 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] transition-all duration-300 placeholder:text-zinc-400/80 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/15 hover:border-[#cbd5e1]";
   const labelClass = "block text-[11px] font-black text-zinc-700 uppercase tracking-[0.15em] mb-2.5 flex items-center gap-2 ml-1";
   const iconWrapperClass = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none";
 
@@ -265,7 +265,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                     type="button"
                     onClick={() => { setYear(y); setShowYearDropdown(false); }}
                     className={`w-full text-left px-4 py-3 text-sm font-bold transition-all rounded-xl cursor-pointer ${
-                      year === y ? 'bg-[#fcf6fa] text-[#74295d]' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                      year === y ? 'bg-[#fcf6fa] text-[#D94F00]' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                     }`}
                   >
                     {y} Year
@@ -280,7 +280,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         <div>
           <label className={labelClass}>Short Bio <span className="text-zinc-400 text-[10px] font-bold ml-1">(Optional)</span></label>
           <div className="relative group">
-            <span className={`${iconWrapperClass} top-[18px]`}><PenLine size={16} className="text-zinc-400 group-focus-within:text-[#8C3573] transition-colors" /></span>
+            <span className={`${iconWrapperClass} top-[18px]`}><PenLine size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
             <textarea 
               value={bio} 
               onChange={(e) => setBio(e.target.value)} 
@@ -349,7 +349,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             className="hidden" 
           />
 
-          <div className="flex items-center gap-4 p-3 rounded-2xl bg-[#f8fafc] border-[1.5px] border-dashed border-[#cbd5e1] hover:border-[#8C3573]/40 hover:bg-[#8C3573]/5 transition-all h-[64px]">
+          <div className="flex items-center gap-4 p-3 rounded-2xl bg-[#f8fafc] border-[1.5px] border-dashed border-[#cbd5e1] hover:border-[#F05A00]/40 hover:bg-[#F05A00]/5 transition-all h-[64px]">
             {photoUrl ? (
               <div className="flex items-center gap-3 w-full">
                 <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
@@ -359,7 +359,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                   <button 
                     type="button" 
                     onClick={() => fileInputRef.current?.click()}
-                    className="text-[11px] font-black uppercase tracking-wider text-[#8C3573] hover:text-[#74295d] transition-colors cursor-pointer"
+                    className="text-[11px] font-black uppercase tracking-wider text-[#F05A00] hover:text-[#D94F00] transition-colors cursor-pointer"
                   >
                     Change
                   </button>
@@ -376,7 +376,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
               <button 
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 h-full text-[13px] font-black text-[#8C3573] hover:text-[#74295d] transition-colors cursor-pointer active:scale-95"
+                className="w-full flex items-center justify-center gap-2 h-full text-[13px] font-black text-[#F05A00] hover:text-[#D94F00] transition-colors cursor-pointer active:scale-95"
               >
                 <Camera size={16} />
                 <span>Upload a sleek avatar</span>
@@ -392,12 +392,12 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       <div className="pt-2">
         <div className="flex justify-between items-end mb-4">
           <div>
-            <label className={labelClass}><Tag size={14} className="text-[#8C3573]" /> Top 3 Interests</label>
+            <label className={labelClass}><Tag size={14} className="text-[#F05A00]" /> Top 3 Interests</label>
             <p className="text-[11px] font-bold text-zinc-400 ml-1">Select exactly 3 tags that describe your campus vibe.</p>
           </div>
           <span className={`text-[11px] font-black px-3.5 py-1.5 rounded-full transition-all ${
             selectedInterests.length === 3
-              ? 'bg-[#8C3573] text-white shadow-lg shadow-[#8C3573]/30'
+              ? 'bg-[#F05A00] text-white shadow-lg shadow-[#F05A00]/30'
               : 'bg-zinc-100 text-zinc-400'
           }`}>
             {selectedInterests.length}/3
@@ -414,7 +414,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 onClick={() => handleInterestToggle(tag)}
                 className={`text-[11px] uppercase tracking-widest py-2.5 px-4 rounded-full transition-all duration-300 font-black active:scale-95 border-[1.5px] cursor-pointer ${
                   sel 
-                    ? 'bg-white text-[#8C3573] border-[#8C3573] shadow-[0_4px_16px_rgba(140,53,115,0.2)] -translate-y-0.5'
+                    ? 'bg-white text-[#F05A00] border-[#F05A00] shadow-[0_4px_16px_rgba(140,53,115,0.2)] -translate-y-0.5'
                     : 'bg-white border-transparent text-zinc-500 shadow-sm hover:border-[#cbd5e1] hover:text-zinc-700 hover:-translate-y-0.5'
                 }`}
               >
@@ -429,7 +429,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         <button 
           type="submit" 
           disabled={loading}
-          className="flex items-center gap-2 bg-gradient-to-r from-[#8C3573] to-[#b5609d] text-white text-[13px] font-black uppercase tracking-widest px-8 py-4 rounded-2xl shadow-[0_8px_20px_rgba(140,53,115,0.3)] hover:shadow-[0_10px_25px_rgba(140,53,115,0.4)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:hover:translate-y-0"
+          className="flex items-center gap-2 bg-gradient-to-r from-[#F05A00] to-[#D94F00] text-white text-[13px] font-black uppercase tracking-widest px-8 py-4 rounded-2xl shadow-[0_8px_20px_rgba(140,53,115,0.3)] hover:shadow-[0_10px_25px_rgba(140,53,115,0.4)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:hover:translate-y-0"
         >
           {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
           Save Profile

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Users, Loader2, ArrowLeft, ShieldCheck } from 'lucide-react';
@@ -110,7 +110,7 @@ export default function PendingCommunitiesClient() {
                       <span>Host: {c.host_name}</span>
                     </div>
                     <div>Platform: <span className="text-zinc-800">{c.platform}</span></div>
-                    <div>Price: <span className={c.isPaid ? 'text-[#8C3573]' : 'text-emerald-600'}>{c.isPaid ? `${c.price} Sparks` : 'Free'}</span></div>
+                    <div>Price: <span className={c.isPaid ? 'text-[#F05A00]' : 'text-emerald-600'}>{c.isPaid ? `${c.price} Sparks` : 'Free'}</span></div>
                     <div>Date: {new Date(c.created_at).toLocaleDateString()}</div>
                   </div>
                 </div>
