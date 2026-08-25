@@ -11,21 +11,21 @@ export default function CreateMenuModal({ isOpen, onClose }) {
       title: 'Post Photo / Moment',
       desc: 'Share campus food photos, coffee meets, or vibes.',
       icon: Camera,
-      badgeBg: 'bg-orange-50 border-orange-100/60 text-[#F05A00]',
+      badgeBg: 'bg-orange-50 border-orange-200 text-orange-600',
       href: '/create/photo'
     },
     {
       title: 'Host a Channel',
       desc: 'Start an exclusive interest circle for campus peers.',
       icon: Users,
-      badgeBg: 'bg-[#fff5f0] border-orange-100/60 text-[#d94f00]',
+      badgeBg: 'bg-red-50 border-red-200 text-red-500',
       href: '/circles'
     },
     {
       title: 'Post a Gig',
       desc: 'Hire talent or offer paid freelance tasks for students.',
       icon: Briefcase,
-      badgeBg: 'bg-amber-50/80 border-amber-100/60 text-[#c04500]',
+      badgeBg: 'bg-amber-50 border-amber-200 text-amber-600',
       href: '/gigs?action=post-gig'
     },
   ];
@@ -46,7 +46,7 @@ export default function CreateMenuModal({ isOpen, onClose }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 inset-x-0 z-[101] bg-[#faf9f6] rounded-t-[32px] overflow-hidden max-w-[560px] mx-auto shadow-2xl md:hidden border-x border-t border-zinc-200/50"
+            className="fixed bottom-0 inset-x-0 z-[101] bg-white rounded-t-[32px] overflow-hidden max-w-[560px] mx-auto shadow-2xl md:hidden"
           >
             <div className="p-6 pb-8">
               <div className="flex items-center justify-between mb-6">
