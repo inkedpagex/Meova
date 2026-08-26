@@ -246,72 +246,18 @@ function MessagesContent() {
   const chatContainerRef = useRef(null);
 
   // ── Keyboard height fix ────────────────────────────────────────────────────
-  // Root cause: container has `position:fixed; top:58; bottom:0` which pins
-  // the bottom to the LAYOUT viewport (doesn't shrink when keyboard opens).
-  // Fix: listen to textarea focus/blur + visualViewport resize to sync height.
-  const [keyboardH, setKeyboardH] = useState(0);
-
+  // We now rely on native CSS `interactive-widget=resizes-content` in layout.js
+  // which makes the layout viewport shrink automatically when keyboard opens.
   useEffect(() => {
-    const HEADER_H = 58;
-
-    const computeAndApply = () => {
-      if (!chatContainerRef.current) return;
-      const vv = window.visualViewport;
-      const visibleH = vv ? vv.height : window.innerHeight;
-      chatContainerRef.current.style.height = `${visibleH - HEADER_H}px`;
-      chatContainerRef.current.style.bottom = 'auto'; // remove CSS bottom:0
-      chatContainerRef.current.style.top    = `${HEADER_H}px`;
-      requestAnimationFrame(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
-      });
+    // Keep the latest message in view if keyboard opens
+    const handleResize = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
     };
-
-    // Primary: visualViewport resize (fires on Chrome Android when keyboard opens)
-    const vv = window.visualViewport;
-    if (vv) {
-      vv.addEventListener('resize', computeAndApply);
-      vv.addEventListener('scroll', computeAndApply);
-    }
-    // Secondary: window resize fallback
-    window.addEventListener('resize', computeAndApply);
-    computeAndApply(); // run once on mount
-
-    return () => {
-      if (vv) {
-        vv.removeEventListener('resize', computeAndApply);
-        vv.removeEventListener('scroll', computeAndApply);
-      }
-      window.removeEventListener('resize', computeAndApply);
-    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Also re-sync when textarea is focused (keyboard open) or blurred (keyboard close)
-  // This is the most reliable trigger across all Android browsers
-  const handleInputFocus = () => {
-    const HEADER_H = 58;
-    // Delay to let keyboard fully animate open before measuring
-    setTimeout(() => {
-      if (!chatContainerRef.current) return;
-      const vv = window.visualViewport;
-      const visibleH = vv ? vv.height : window.innerHeight;
-      chatContainerRef.current.style.height = `${visibleH - HEADER_H}px`;
-      chatContainerRef.current.style.bottom = 'auto';
-      chatContainerRef.current.style.top    = `${HEADER_H}px`;
-      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
-    }, 350);
-  };
 
-  const handleInputBlur = () => {
-    const HEADER_H = 58;
-    setTimeout(() => {
-      if (!chatContainerRef.current) return;
-      const vv = window.visualViewport;
-      const visibleH = vv ? vv.height : window.innerHeight;
-      chatContainerRef.current.style.height = `${visibleH - HEADER_H}px`;
-      chatContainerRef.current.style.bottom = 'auto';
-      chatContainerRef.current.style.top    = `${HEADER_H}px`;
-    }, 100);
-  };
 
   // ── Wait for Firebase Client Auth ──────────────────────────────────────────
   useEffect(() => {
@@ -635,7 +581,7 @@ function MessagesContent() {
       ref={chatContainerRef}
       className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs transition-all duration-300 ${
         !showList
-          ? 'fixed inset-x-0 z-[60] flex-row md:relative md:h-[calc(100vh-64px)] md:top-auto md:z-0 md:rounded-3xl rounded-none border-0'
+          ? 'fixed inset-x-0 bottom-0 z-[60] flex-row md:relative md:h-[calc(100vh-64px)] md:top-auto md:z-0 md:rounded-3xl rounded-none border-0'
           : 'h-[calc(100dvh-156px)] md:h-[calc(100vh-64px)] rounded-2xl border flex-row relative'
       }`}
       style={!showList ? { top: 58 } : {}}
@@ -936,8 +882,9 @@ function MessagesContent() {
                       value={inputText}
                       onChange={e => setInputText(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      onFocus={handleInputFocus}
-                      onBlur={handleInputBlur}
+                      onFocus={() => {
+                        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 300);
+                      }}
                       placeholder="Message..."
                       rows={1}
                       className="flex-1 resize-none bg-transparent text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none max-h-28 font-medium"

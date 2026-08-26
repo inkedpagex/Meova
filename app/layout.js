@@ -52,7 +52,7 @@ export default async function RootLayout({ children }) {
           <html lang="en">
             <head>
               <link rel="manifest" href="/manifest.json" />
-              <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-visual-viewport" />
+              <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-content" />
               <meta name="theme-color" content="#ffffff" />
             </head>
             <body style={{ background: '#f8fafc', minHeight: '100dvh', margin: 0, padding: 0 }}>
@@ -97,7 +97,7 @@ export default async function RootLayout({ children }) {
   return (
       <html lang="en" data-theme="light" style={{ colorScheme: 'light' }}>
         <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual-viewport" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
           <meta name="theme-color" content="#F05A00" />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
