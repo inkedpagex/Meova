@@ -245,38 +245,73 @@ function MessagesContent() {
   const unsubMsgsRef = useRef(null);
   const chatContainerRef = useRef(null);
 
-  // ── Keyboard / VisualViewport fix ──────────────────────────────────────────
-  // When Android keyboard opens, it resizes visualViewport but NOT 100dvh.
-  // We sync the container height so it fills exactly the space between the
-  // app header (58px) and the top of the keyboard.
+  // ── Keyboard height fix ────────────────────────────────────────────────────
+  // Root cause: container has `position:fixed; top:58; bottom:0` which pins
+  // the bottom to the LAYOUT viewport (doesn't shrink when keyboard opens).
+  // Fix: listen to textarea focus/blur + visualViewport resize to sync height.
+  const [keyboardH, setKeyboardH] = useState(0);
+
   useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
+    const HEADER_H = 58;
 
-    const HEADER_H = 58; // fixed top header height in px
-
-    const syncHeight = () => {
-      if (chatContainerRef.current) {
-        // vv.height = visible area above the keyboard
-        // subtract the header so the panel never slides under it
-        const panelHeight = vv.height - HEADER_H;
-        chatContainerRef.current.style.height = `${panelHeight}px`;
-        chatContainerRef.current.style.top    = `${HEADER_H}px`;
-      }
-      // Keep the latest message in view
+    const computeAndApply = () => {
+      if (!chatContainerRef.current) return;
+      const vv = window.visualViewport;
+      const visibleH = vv ? vv.height : window.innerHeight;
+      chatContainerRef.current.style.height = `${visibleH - HEADER_H}px`;
+      chatContainerRef.current.style.bottom = 'auto'; // remove CSS bottom:0
+      chatContainerRef.current.style.top    = `${HEADER_H}px`;
       requestAnimationFrame(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
       });
     };
 
-    vv.addEventListener('resize', syncHeight);
-    vv.addEventListener('scroll', syncHeight);
-    syncHeight(); // run once on mount
+    // Primary: visualViewport resize (fires on Chrome Android when keyboard opens)
+    const vv = window.visualViewport;
+    if (vv) {
+      vv.addEventListener('resize', computeAndApply);
+      vv.addEventListener('scroll', computeAndApply);
+    }
+    // Secondary: window resize fallback
+    window.addEventListener('resize', computeAndApply);
+    computeAndApply(); // run once on mount
+
     return () => {
-      vv.removeEventListener('resize', syncHeight);
-      vv.removeEventListener('scroll', syncHeight);
+      if (vv) {
+        vv.removeEventListener('resize', computeAndApply);
+        vv.removeEventListener('scroll', computeAndApply);
+      }
+      window.removeEventListener('resize', computeAndApply);
     };
   }, []);
+
+  // Also re-sync when textarea is focused (keyboard open) or blurred (keyboard close)
+  // This is the most reliable trigger across all Android browsers
+  const handleInputFocus = () => {
+    const HEADER_H = 58;
+    // Delay to let keyboard fully animate open before measuring
+    setTimeout(() => {
+      if (!chatContainerRef.current) return;
+      const vv = window.visualViewport;
+      const visibleH = vv ? vv.height : window.innerHeight;
+      chatContainerRef.current.style.height = `${visibleH - HEADER_H}px`;
+      chatContainerRef.current.style.bottom = 'auto';
+      chatContainerRef.current.style.top    = `${HEADER_H}px`;
+      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+    }, 350);
+  };
+
+  const handleInputBlur = () => {
+    const HEADER_H = 58;
+    setTimeout(() => {
+      if (!chatContainerRef.current) return;
+      const vv = window.visualViewport;
+      const visibleH = vv ? vv.height : window.innerHeight;
+      chatContainerRef.current.style.height = `${visibleH - HEADER_H}px`;
+      chatContainerRef.current.style.bottom = 'auto';
+      chatContainerRef.current.style.top    = `${HEADER_H}px`;
+    }, 100);
+  };
 
   // ── Wait for Firebase Client Auth ──────────────────────────────────────────
   useEffect(() => {
@@ -603,7 +638,7 @@ function MessagesContent() {
           ? 'fixed inset-x-0 z-[60] flex-row md:relative md:h-[calc(100vh-64px)] md:top-auto md:z-0 md:rounded-3xl rounded-none border-0'
           : 'h-[calc(100dvh-156px)] md:h-[calc(100vh-64px)] rounded-2xl border flex-row relative'
       }`}
-      style={!showList ? { top: 58, bottom: 0 } : {}}
+      style={!showList ? { top: 58 } : {}}
     >
 
       {/* ── LEFT SIDEBAR: Chat List ───────────────────────────────────────────── */}
@@ -901,6 +936,8 @@ function MessagesContent() {
                       value={inputText}
                       onChange={e => setInputText(e.target.value)}
                       onKeyDown={handleKeyDown}
+                      onFocus={handleInputFocus}
+                      onBlur={handleInputBlur}
                       placeholder="Message..."
                       rows={1}
                       className="flex-1 resize-none bg-transparent text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none max-h-28 font-medium"

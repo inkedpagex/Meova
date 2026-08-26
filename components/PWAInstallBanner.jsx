@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 /**
  * PWAInstallBanner.jsx
  * Smart, mobile-first "Install App" banner.
@@ -41,6 +41,7 @@ export default function PWAInstallBanner() {
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      window.deferredPWAInstallPrompt = e; // Expose globally for manual trigger
       setVisible(true);
     };
     window.addEventListener('beforeinstallprompt', handler);
@@ -55,6 +56,7 @@ export default function PWAInstallBanner() {
       setVisible(false);
     }
     setDeferredPrompt(null);
+    window.deferredPWAInstallPrompt = null;
   };
 
   const handleDismiss = () => {

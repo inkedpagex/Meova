@@ -96,14 +96,32 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
     }
   }, []);
 
-  const handleManualInstall = () => {
+  const handleManualInstall = async () => {
     if (typeof window === 'undefined') return;
     localStorage.removeItem('Meova_pwa_dismissed');
+    
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     if (isIOS) {
       alert('To install on iPhone:\n1. Tap the Share button in Safari\n2. Scroll down and tap "Add to Home Screen".');
+      return;
+    } 
+
+    // For Android/Chrome: Try to trigger the native prompt directly if we caught it earlier
+    if (window.deferredPWAInstallPrompt) {
+      try {
+        window.deferredPWAInstallPrompt.prompt();
+        const { outcome } = await window.deferredPWAInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+          window.deferredPWAInstallPrompt = null;
+          setIsStandalone(true);
+        }
+      } catch (err) {
+        console.error('PWA prompt error:', err);
+      }
     } else {
-      window.location.reload();
+      // If the browser didn't give us the prompt (e.g. user dismissed native prompt previously, 
+      // so Chrome is blocking it via heuristics), we must fallback to manual instructions.
+      alert('To install on Android:\n1. Tap the 3-dot menu (⋮) in Chrome (top right)\n2. Tap "Install App" or "Add to Home screen".');
     }
   };
 
