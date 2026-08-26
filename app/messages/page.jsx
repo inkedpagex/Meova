@@ -581,10 +581,10 @@ function MessagesContent() {
       ref={chatContainerRef}
       className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs transition-all duration-300 ${
         !showList
-          ? 'fixed inset-x-0 bottom-0 z-[60] flex-row md:relative md:h-[calc(100vh-64px)] md:top-auto md:z-0 md:rounded-3xl rounded-none border-0'
+          ? 'fixed inset-x-0 bottom-0 flex-row md:relative md:h-[calc(100vh-64px)] md:top-auto md:z-0 md:rounded-3xl rounded-none border-0'
           : 'h-[calc(100dvh-156px)] md:h-[calc(100vh-64px)] rounded-2xl border flex-row relative'
       }`}
-      style={!showList ? { top: 58 } : {}}
+      style={!showList ? { top: 58, zIndex: 999 } : {}}
     >
 
       {/* ── LEFT SIDEBAR: Chat List ───────────────────────────────────────────── */}
@@ -732,7 +732,15 @@ function MessagesContent() {
                   <div className="flex items-center gap-3 min-w-0">
                     <button
                       type="button"
-                      onClick={() => { setShowList(true); setActiveChatId(null); setActiveChat(null); }}
+                      onClick={() => { 
+                        setShowList(true); 
+                        setActiveChatId(null); 
+                        setActiveChat(null); 
+                        // Clear the URL param so it doesn't auto-reopen immediately
+                        if (searchParams.has('uid') || searchParams.has('user') || searchParams.has('group')) {
+                          router.replace('/messages');
+                        }
+                      }}
                       className="md:hidden p-1.5 -ml-1 rounded-full hover:bg-zinc-100 transition-colors text-zinc-900"
                     >
                       <ArrowLeft className="w-5 h-5" />
@@ -883,7 +891,10 @@ function MessagesContent() {
                       onChange={e => setInputText(e.target.value)}
                       onKeyDown={handleKeyDown}
                       onFocus={() => {
-                        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 300);
+                        setTimeout(() => {
+                          window.scrollTo(0, 0); // Force layout viewport back to top if browser scrolled it
+                          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                        }, 300);
                       }}
                       placeholder="Message..."
                       rows={1}
