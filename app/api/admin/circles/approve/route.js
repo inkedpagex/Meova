@@ -2,12 +2,12 @@
  * POST /api/admin/circles/approve - Admin endpoint to approve or reject host community requests
  */
 import { NextResponse } from 'next/server';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 import { adminDb } from '@/lib/firebaseAdmin';
 
 export async function POST(request) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user || user.role !== 'admin') {
       return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
@@ -46,3 +46,4 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Failed to process admin approval' }, { status: 500 });
   }
 }
+

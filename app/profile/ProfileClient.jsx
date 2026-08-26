@@ -1,10 +1,10 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert, ShieldCheck,
-  Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink, Phone, CheckCircle2, Loader2
+  Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink, Phone, CheckCircle2, Loader2, Download
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import ProfileEditForm from '../../features/profile/ProfileEditForm';
@@ -59,6 +59,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
   const [locStatus, setLocStatus] = useState('prompt');
   const [notifStatus, setNotifStatus] = useState('prompt');
   const [camStatus, setCamStatus] = useState('prompt');
+  const [isStandalone, setIsStandalone] = useState(true);
 
   // Phone verification
   const [showPhoneModal, setShowPhoneModal] = useState(false);
@@ -88,7 +89,23 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setNotifStatus(Notification.permission);
     }
+
+    if (typeof window !== 'undefined') {
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      setIsStandalone(standalone);
+    }
   }, []);
+
+  const handleManualInstall = () => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('Meova_pwa_dismissed');
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIOS) {
+      alert('To install on iPhone:\n1. Tap the Share button in Safari\n2. Scroll down and tap "Add to Home Screen".');
+    } else {
+      window.location.reload();
+    }
+  };
 
   const requestLocation = () => {
     navigator.geolocation.getCurrentPosition(
@@ -543,6 +560,24 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                       <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
                       <button onClick={requestCamera} className="text-[10px] font-black text-white bg-[#F05A00] hover:bg-[#D94F00] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                    )}
+                  </div>
+
+                  {/* Install App */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                        <Download size={14} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-zinc-900">Install App</p>
+                        <p className="text-[10px] text-zinc-500 font-medium">Faster & works offline</p>
+                      </div>
+                    </div>
+                    {isStandalone ? (
+                      <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Installed</span>
+                    ) : (
+                      <button onClick={handleManualInstall} className="text-[10px] font-black text-white bg-[#F05A00] hover:bg-[#D94F00] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Install</button>
                     )}
                   </div>
                 </div>

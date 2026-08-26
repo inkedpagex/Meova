@@ -27,7 +27,7 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 
 function FeedSkeleton() {
   return (
-    <div className="space-y-6 pb-24 px-1 sm:px-2 select-none animate-in fade-in duration-300">
+    <div className="space-y-6 pb-4 md:pb-6 px-1 sm:px-2 select-none animate-in fade-in duration-300">
       
       {/* ── HEADER SECTION SKELETON ────────────────────────── */}
       <div className="bg-white border border-zinc-100 rounded-[2rem] p-4 sm:p-5 shadow-sm">
@@ -684,7 +684,7 @@ export default function FeedClient() {
   }
 
   return (
-    <div className="space-y-7 pb-24 px-0.5 sm:px-2 select-none animate-in fade-in duration-300">
+    <div className="space-y-7 pb-4 md:pb-6 px-0.5 sm:px-2 select-none animate-in fade-in duration-300">
 
       {/* ── HEADER SECTION ────────────────────────── */}
       <div className="bg-gradient-to-br from-orange-50/60 via-white to-orange-50/40 border border-orange-100/80 rounded-2xl p-4 sm:p-5 shadow-xs">
@@ -1276,6 +1276,19 @@ export default function FeedClient() {
             );
           })}
         </div>
+      </div>
+
+      {/* ── YOU'RE ALL CAUGHT UP SECTION ────────────────────── */}
+      <div className="py-8 text-center space-y-2">
+        <div className="w-10 h-10 rounded-2xl bg-orange-50/80 border border-orange-100 text-[#F05A00] flex items-center justify-center mx-auto">
+          <CheckCircle size={20} className="text-[#F05A00]" />
+        </div>
+        <h3 className="text-sm font-black text-zinc-900 tracking-tight">
+          You&apos;re All Caught Up!
+        </h3>
+        <p className="text-[11px] font-semibold text-zinc-500 max-w-xs mx-auto leading-relaxed">
+          Check back later for more updates and exciting opportunities.
+        </p>
       </div>
 
 

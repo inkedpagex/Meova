@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +8,9 @@ export async function GET(request) {
   try {
     if (!adminDb) return NextResponse.json({ posts: [] });
     const snap = await adminDb.collection('posts').orderBy('createdAt', 'desc').limit(20).get();
-    const posts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const posts = snap.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(p => !p.isHidden);
     return NextResponse.json({ posts });
   } catch (err) {
     console.error('[GET /api/posts]', err.message);
@@ -18,7 +20,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
@@ -45,3 +47,4 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Failed to create post' }, { status: 500 });
   }
 }
+

@@ -11,6 +11,8 @@ import {
 import QRCode from "react-qr-code";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { toast } from "../../lib/toast";
+import Link from "next/link";
+import { getCartoonAvatar } from "../../utils/avatar";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -134,7 +136,7 @@ export default function BookingsPage() {
         const res = await fetch("/api/bookings", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bookingId: selectedBooking.id, action: "complete", meetingCode: code.trim() })
+          body: JSON.stringify({ bookingId: selectedBooking.id, action: "complete", code: code.trim() })
         });
         
         const data = await res.json();
@@ -242,7 +244,7 @@ export default function BookingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] pt-[58px] md:pt-0 pb-24 anim-fade-in">
+    <div className="min-h-screen bg-[var(--bg-base)] pt-[58px] md:pt-0 pb-20 anim-fade-in">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-zinc-100 px-4 py-4 shadow-sm flex items-center justify-between">
         <div>
@@ -318,12 +320,20 @@ export default function BookingsPage() {
         {displayList.map(booking => {
           const isGuest = booking.guestId === user.uid;
           const otherPerson = isGuest ? booking.hostName : booking.guestName;
+          const otherPersonId = isGuest ? booking.hostId : booking.guestId;
+          const otherPersonPhoto = isGuest ? booking.hostPhoto : booking.guestPhoto;
           const roleLabel = isGuest ? "You are joining" : "You are hosting";
           const canReport = isGuest && isMeetingTimePassed(booking) && 
             ["Requested", "Confirmed", "Accepted"].includes(booking.status);
 
+          const finalAvatar = otherPersonPhoto || getCartoonAvatar(otherPersonId || otherPerson);
+
           return (
-            <div key={booking.id} className="bg-white rounded-2xl p-4 border border-zinc-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all hover:shadow-[0_8px_30px_rgba(140,53,115,0.08)]">
+            <div 
+              key={booking.id} 
+              onClick={() => router.push(`/users/${otherPersonId}`)}
+              className="bg-white rounded-2xl p-4 border border-zinc-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all hover:shadow-[0_8px_30px_rgba(140,53,115,0.08)] cursor-pointer"
+            >
               {/* Card Header */}
               <div className="flex justify-between items-start mb-3">
                 <div>
@@ -333,9 +343,19 @@ export default function BookingsPage() {
                   <h3 className="text-[15px] font-black text-zinc-900 leading-tight">
                     {booking.title}
                   </h3>
-                  <p className="text-[11px] text-zinc-500 font-bold flex items-center gap-1.5 mt-1">
-                    <User size={12} /> {roleLabel} <span className="text-zinc-800">{otherPerson}</span>
-                  </p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <img src={finalAvatar} alt={otherPerson} className="w-4 h-4 rounded-full border border-zinc-200 object-cover" />
+                    <p className="text-[11px] text-zinc-500 font-bold flex items-center">
+                      {roleLabel} 
+                      <Link 
+                        href={`/users/${otherPersonId}`} 
+                        className="text-zinc-800 hover:text-[#F05A00] hover:underline transition-colors ml-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {otherPerson}
+                      </Link>
+                    </p>
+                  </div>
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-black text-[#F05A00] flex items-center gap-1 justify-end">
@@ -393,7 +413,7 @@ export default function BookingsPage() {
                       {/* Cancel button: only for Requested (before host accepts), with instant refund */}
                       {booking.status === "Requested" && (
                         <button
-                          onClick={() => initiateCancel(booking)}
+                          onClick={(e) => { e.stopPropagation(); initiateCancel(booking); }}
                           disabled={cancelLoading === booking.id}
                           className="w-12 h-[46px] bg-zinc-50 text-zinc-500 border border-zinc-200 rounded-xl flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 active:scale-[0.98] transition-all disabled:opacity-50"
                           title="Cancel Request (full refund)"
@@ -404,14 +424,14 @@ export default function BookingsPage() {
                         </button>
                       )}
                       <button 
-                        onClick={() => { setSelectedBooking(booking); setShowQrModal(true); }}
+                        onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); setShowQrModal(true); }}
                         className="flex-1 bg-zinc-900 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-800 active:scale-[0.98] transition-all"
                       >
                         <QrCode size={16} /> View Ticket
                       </button>
                       {canReport && (
                         <button
-                          onClick={() => { setSelectedBooking(booking); setShowDisputeModal(true); }}
+                          onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); setShowDisputeModal(true); }}
                           className="w-12 h-[46px] bg-rose-50 text-rose-500 border border-rose-100 rounded-xl flex items-center justify-center hover:bg-rose-100 active:scale-[0.98] transition-all"
                           title="Report Issue"
                         >
@@ -421,7 +441,8 @@ export default function BookingsPage() {
                     </>
                   ) : (
                     <button 
-                      onClick={() => { 
+                      onClick={(e) => { 
+                        e.stopPropagation();
                         setSelectedBooking(booking); 
                         setShowScanModal(true); 
                         setScanStatus("idle");

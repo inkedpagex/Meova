@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { adminDb, adminAuth } from '@/lib/firebaseAdmin';
 import { cookies } from 'next/headers';
 
@@ -25,6 +25,7 @@ export async function POST(request) {
     const {
       username,
       full_name,
+      gender,
       year,
       branch,
       university,
@@ -39,6 +40,8 @@ export async function POST(request) {
     if (!username || !USERNAME_REGEX.test(username.toLowerCase().trim()))
       errors.push('Username is invalid (3-20 chars, lowercase, letters/numbers/underscores).');
     if (!full_name?.trim()) errors.push('Full name is required.');
+    if (!gender || !['male', 'female', 'other'].includes(gender))
+      errors.push('Gender selection is required.');
     if (!year) errors.push('Year of study is required.');
     if (!branch?.trim()) errors.push('Branch / Course is required.');
     if (!photo_url) errors.push('Profile photo is required.');
@@ -80,6 +83,7 @@ export async function POST(request) {
       const profileData = {
         username: cleanUsername,
         full_name: full_name.trim(),
+        gender,
         year,
         branch: branch.trim(),
         university: university?.trim() || '',

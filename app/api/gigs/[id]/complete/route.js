@@ -10,7 +10,7 @@
  */
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 import { FieldValue } from 'firebase-admin/firestore';
 import { sendPush } from '@/lib/sendPushNotification';
 
@@ -33,7 +33,7 @@ async function isCircularPair(hostId, freelancerId) {
 
 export async function POST(request, { params }) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
@@ -163,4 +163,5 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }
 }
+
 

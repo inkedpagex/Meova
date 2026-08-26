@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 
 export async function GET(request) {
   try {
@@ -9,10 +9,12 @@ export async function GET(request) {
     // Fetch gigs from newest to oldest
     const snap = await adminDb.collection('gigs').orderBy('createdAt', 'desc').get();
     
-    const gigs = snap.docs.map(doc => ({ 
-      id: doc.id, 
-      ...doc.data() 
-    }));
+    const gigs = snap.docs
+      .map(doc => ({ 
+        id: doc.id, 
+        ...doc.data() 
+      }))
+      .filter(g => !g.isHidden);
     
     return NextResponse.json({ gigs });
   } catch (err) {
@@ -23,7 +25,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
@@ -72,3 +74,4 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Failed to create gig' }, { status: 500 });
   }
 }
+

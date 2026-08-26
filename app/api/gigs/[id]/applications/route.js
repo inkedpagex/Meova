@@ -14,7 +14,7 @@
  */
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 import { spendSparks } from '@/lib/wallet';
 import { FieldValue } from 'firebase-admin/firestore';
 import { sendPush } from '@/lib/sendPushNotification';
@@ -22,7 +22,7 @@ import { sendPush } from '@/lib/sendPushNotification';
 // ── GET — list all applicants ───────────────────────────────────────────────
 export async function GET(request, { params }) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (!adminDb) return NextResponse.json({ applications: [] });
 
@@ -52,7 +52,7 @@ export async function GET(request, { params }) {
 // ── PATCH — accept or reject an applicant ──────────────────────────────────
 export async function PATCH(request, { params }) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
@@ -175,3 +175,4 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }
 }
+

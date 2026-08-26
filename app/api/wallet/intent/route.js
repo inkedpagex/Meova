@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUserWithRole } from '../../../../lib/getAdminUser';
+import { requireAuth } from '../../../../lib/getAdminUser';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 import { rateLimit, getClientIp } from '../../../../lib/rateLimit';
 
@@ -14,7 +14,7 @@ export async function POST(request) {
       });
     }
 
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { sparks, amount_inr, pack_name, pack_key } = await request.json();
@@ -103,7 +103,7 @@ export async function POST(request) {
 
 export async function PATCH(request) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { intentId } = await request.json();
@@ -130,7 +130,7 @@ export async function PATCH(request) {
 
 export async function DELETE(request) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { intentId } = await request.json();
@@ -154,3 +154,4 @@ export async function DELETE(request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+

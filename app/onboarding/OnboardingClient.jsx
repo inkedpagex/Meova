@@ -7,6 +7,7 @@ import { Step2, Step3 } from './_steps';
 const INITIAL = {
   full_name: '',
   username: '',
+  gender: '',
   photo_url: '',
   year: '',
   branch: '',
@@ -44,6 +45,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
         body: JSON.stringify({
           username: data.username,
           full_name: data.full_name,
+          gender: data.gender,
           year: data.year,
           branch: data.branch,
           university: data.university,

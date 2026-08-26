@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -245,19 +245,37 @@ function MessagesContent() {
   const unsubMsgsRef = useRef(null);
   const chatContainerRef = useRef(null);
 
-  // ── Fix: keyboard hides messages on mobile ──────────────────────────────────
+  // ── Keyboard / VisualViewport fix ──────────────────────────────────────────
+  // When Android keyboard opens, it resizes visualViewport but NOT 100dvh.
+  // We sync the container height so it fills exactly the space between the
+  // app header (58px) and the top of the keyboard.
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const onResize = () => {
+
+    const HEADER_H = 58; // fixed top header height in px
+
+    const syncHeight = () => {
       if (chatContainerRef.current) {
-        const topOffset = parseInt(chatContainerRef.current.style.top || '0', 10);
-        chatContainerRef.current.style.height = `${vv.height - topOffset}px`;
+        // vv.height = visible area above the keyboard
+        // subtract the header so the panel never slides under it
+        const panelHeight = vv.height - HEADER_H;
+        chatContainerRef.current.style.height = `${panelHeight}px`;
+        chatContainerRef.current.style.top    = `${HEADER_H}px`;
       }
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 80);
+      // Keep the latest message in view
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+      });
     };
-    vv.addEventListener('resize', onResize);
-    return () => vv.removeEventListener('resize', onResize);
+
+    vv.addEventListener('resize', syncHeight);
+    vv.addEventListener('scroll', syncHeight);
+    syncHeight(); // run once on mount
+    return () => {
+      vv.removeEventListener('resize', syncHeight);
+      vv.removeEventListener('scroll', syncHeight);
+    };
   }, []);
 
   // ── Wait for Firebase Client Auth ──────────────────────────────────────────
@@ -432,7 +450,18 @@ function MessagesContent() {
       return;
     }
 
-    // 5. Fallback for group chat (e.g., "Google Developer Student Club")
+    // 5. If the URL param looks like a Firestore UID (from ?uid= or ?user=),
+    //    fetch that user directly from the API — don't fall through to group chat.
+    //    This handles users not included in the initial 50-user directory fetch.
+    const isUidParam = searchParams.has('uid') || searchParams.has('user');
+    if (isUidParam) {
+      processedParamRef.current = targetParam;
+      // Attempt to open/create a 1-on-1 chat with this UID directly
+      openChatWithUser(targetParam);
+      return;
+    }
+
+    // 6. Only use group chat fallback when explicitly navigated to via ?group= param
     const groupChatObj = {
       id: `group_${encodeURIComponent(targetParam)}`,
       participantNames: { group: targetParam },
@@ -571,10 +600,10 @@ function MessagesContent() {
       ref={chatContainerRef}
       className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs transition-all duration-300 ${
         !showList
-          ? 'fixed inset-x-0 bottom-0 z-[60] flex-row md:relative md:h-[calc(100vh-64px)] md:top-auto md:z-0 md:rounded-3xl rounded-none border-0'
+          ? 'fixed inset-x-0 z-[60] flex-row md:relative md:h-[calc(100vh-64px)] md:top-auto md:z-0 md:rounded-3xl rounded-none border-0'
           : 'h-[calc(100dvh-156px)] md:h-[calc(100vh-64px)] rounded-2xl border flex-row relative'
       }`}
-      style={!showList ? { top: 58, height: `calc(100dvh - 58px)` } : {}}
+      style={!showList ? { top: 58, bottom: 0 } : {}}
     >
 
       {/* ── LEFT SIDEBAR: Chat List ───────────────────────────────────────────── */}

@@ -8,7 +8,7 @@
  * For now: OTP stored in Firestore with 10-min TTL (admin can see it for testing).
  */
 import { NextResponse } from 'next/server';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
@@ -20,7 +20,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Too many OTP requests. Try again in an hour.' }, { status: 429 });
   }
 
-  const user = await getUserWithRole();
+  const user = await requireAuth();
   if (!user) return NextResponse.json({ error: 'Login required' }, { status: 401 });
 
   const { phone } = await request.json();
@@ -72,3 +72,4 @@ export async function POST(request) {
     ...(process.env.NODE_ENV === 'development' ? { _dev_otp: otp } : {}),
   });
 }
+

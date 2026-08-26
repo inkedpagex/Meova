@@ -3,13 +3,13 @@
  * POST /api/wallet      — Submit a payment request (buy sparks)
  */
 import { NextResponse } from 'next/server';
-import { getUserWithRole } from '../../../lib/getAdminUser';
+import { requireAuth } from '../../../lib/getAdminUser';
 import { getOrCreateWallet, getTransactions, getUserPendingPayments } from '../../../lib/wallet';
 import { adminDb } from '../../../lib/firebaseAdmin';
 
 export async function GET() {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const [wallet, transactions, pendingRequests] = await Promise.all([
@@ -27,7 +27,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { sparks, amount_inr, pack_name, pack_key, reference_code } = await request.json();
@@ -85,3 +85,4 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+

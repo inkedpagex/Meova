@@ -10,7 +10,7 @@
  * - Cannot tip accounts < 3 days old (anti-abuse)
  */
 import { NextResponse } from 'next/server';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { sendPush } from '@/lib/sendPushNotification';
@@ -19,7 +19,7 @@ const TIP_AMOUNT = 5;
 
 export async function POST(request, { params }) {
   try {
-    const sender = await getUserWithRole();
+    const sender = await requireAuth();
     if (!sender) return NextResponse.json({ error: 'Login required' }, { status: 401 });
     if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
@@ -162,3 +162,4 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }
 }
+

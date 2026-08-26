@@ -1,4 +1,4 @@
-﻿import './globals.css';
+import './globals.css';
 import Sidebar from '../components/Sidebar';
 import RightPanel from '../components/RightPanel';
 import { getUserWithRole } from '../lib/getAdminUser';
@@ -13,6 +13,7 @@ import PWAInstallBanner from '../components/PWAInstallBanner';
 import NotificationPermissionPrompt from '../components/NotificationPermissionPrompt';
 import MainContentWrapper from '../components/MainContentWrapper';
 import NetworkWrapper from '../components/NetworkWrapper';
+import BlockedPage from './blocked/page';
 
 export const metadata = {
   title: 'Meova — Your Campus Life',
@@ -43,18 +44,34 @@ export default async function RootLayout({ children }) {
 
     const fetchedUser = await getUserWithRole();
 
-    // ── Onboarding gate ──────────────────────────────────────────────────────
-    // Check __Meova_pc cookie FIRST (written by /api/onboarding immediately
-    // after the Firestore transaction). This avoids ERR_FAILED redirect loops
-    // on slow connections where Firestore writes haven't propagated yet.
-    const EXEMPT_PATHS = ['/onboarding', '/login', '/signup', '/api', '/terms', '/privacy'];
-    const isExempt = EXEMPT_PATHS.some(p => pathname.startsWith(p));
-    if (fetchedUser && !isExempt) {
-      const pcCookie = cookieStore.get('__Meova_pc')?.value;
-      const isComplete = pcCookie === '1' || fetchedUser.profileComplete !== false;
-      if (!isComplete) {
-        const { redirect } = await import('next/navigation');
-        redirect('/onboarding');
+    // ── Global Block & Onboarding gate ───────────────────────────────────────
+    if (fetchedUser) {
+      if (fetchedUser.isBlocked) {
+        // Render blocked UI entirely, overriding the rest of the layout below
+        return (
+          <html lang="en">
+            <head>
+              <link rel="manifest" href="/manifest.json" />
+              <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-visual-viewport" />
+              <meta name="theme-color" content="#ffffff" />
+            </head>
+            <body style={{ background: '#f8fafc', minHeight: '100dvh', margin: 0, padding: 0 }}>
+              <BlockedPage />
+            </body>
+          </html>
+        );
+      }
+
+      const EXEMPT_PATHS = ['/onboarding', '/login', '/signup', '/api', '/terms', '/privacy', '/blocked'];
+      const isExempt = EXEMPT_PATHS.some(p => pathname.startsWith(p));
+      
+      if (!isExempt) {
+        const pcCookie = cookieStore.get('__Meova_pc')?.value;
+        const isComplete = pcCookie === '1' || fetchedUser.profileComplete !== false;
+        if (!isComplete) {
+          const { redirect } = await import('next/navigation');
+          redirect('/onboarding');
+        }
       }
     }
     // ─────────────────────────────────────────────────────────────────────────
@@ -80,15 +97,16 @@ export default async function RootLayout({ children }) {
   return (
       <html lang="en" data-theme="light" style={{ colorScheme: 'light' }}>
         <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual-viewport" />
           <meta name="theme-color" content="#F05A00" />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
           <meta name="apple-mobile-web-app-title" content="Meova" />
           <link rel="manifest" href="/manifest.json" />
-          <link rel="apple-touch-icon" href="/logo.png" />
-          <link rel="icon" type="image/png" href="/logo.png" />
+          <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+          <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+          <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800" rel="stylesheet" />

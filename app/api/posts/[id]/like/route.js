@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 import { FieldValue } from 'firebase-admin/firestore';
 
 export async function POST(request, { params }) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
@@ -31,3 +31,4 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Failed to like post' }, { status: 500 });
   }
 }
+

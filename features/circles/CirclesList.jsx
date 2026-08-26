@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,6 +7,7 @@ import {
   Gamepad2, Music2, Code2, Palette, Trophy, Star, MessageSquare
 } from 'lucide-react';
 import { getCartoonAvatar } from '../../utils/avatar';
+import { toast } from 'react-hot-toast';
 import CreateCircleModal from './CreateCircleModal';
 import HostCircleDashboardModal from './HostCircleDashboardModal';
 

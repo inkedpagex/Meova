@@ -1,8 +1,14 @@
-﻿// Meetuply Service Worker
+// Meetuply Service Worker
 // Strategy: Network-first for API routes, Cache-first for static assets
 // FCM: Background push notifications support
+//
+// ⚡ CACHE VERSIONING — This timestamp is updated on every deploy.
+// Old users' service workers will detect the new version, activate immediately,
+// and purge the old cache — no manual "Clear Cache" needed by anyone.
+// Just update this timestamp whenever you deploy a major change.
 
-const CACHE_NAME = 'Meova-v2';
+const CACHE_VERSION = '2026-08-26T15:54'; // ← update this on deploy
+const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icon-512.png',

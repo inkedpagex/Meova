@@ -4,14 +4,14 @@
  * On success: marks user.phone_verified = true in Firestore.
  */
 import { NextResponse } from 'next/server';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 
 const MAX_ATTEMPTS = 5;
 
 export async function POST(request) {
-  const user = await getUserWithRole();
+  const user = await requireAuth();
   if (!user) return NextResponse.json({ error: 'Login required' }, { status: 401 });
 
   const { otp } = await request.json();
@@ -66,3 +66,4 @@ export async function POST(request) {
 
   return NextResponse.json({ ok: true, message: 'Phone number verified successfully! ✅' });
 }
+

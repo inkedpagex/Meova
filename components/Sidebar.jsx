@@ -9,8 +9,9 @@ import {
   PanelLeftClose, PanelLeftOpen
 } from 'lucide-react';
 import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
-import { db } from '../lib/firebaseClient';
-import { collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
+import { db, auth } from '../lib/firebaseClient';
+import { collection, query, where, onSnapshot, getDocs, doc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import CreateMenuModal from './CreateMenuModal';
 
 const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy'];
@@ -27,7 +28,10 @@ export default function Sidebar({ user }) {
   // ── Sidebar collapse state ──────────────────────────────────────────────────
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('sidebar_collapsed');
       if (saved === 'true') setIsCollapsed(true);
@@ -43,9 +47,24 @@ export default function Sidebar({ user }) {
     }
   };
 
+  // ── Firebase Auth UID (separate from SSR user.id) ──────────────────────────
+  // We must wait for client-side Firebase Auth to be ready before attaching
+  // any Firestore listeners that have isOwner() rules, otherwise we get
+  // permission-denied errors because request.auth is null during hydration.
+  const [firebaseUid, setFirebaseUid] = useState(null);
+
+  useEffect(() => {
+    if (!auth) return;
+    const unsub = onAuthStateChanged(auth, (fbUser) => {
+      setFirebaseUid(fbUser ? fbUser.uid : null);
+    });
+    return () => unsub();
+  }, []);
+
   // ── Notification state ─────────────────────────────────────────────────────
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadMsgCount, setUnreadMsgCount] = useState(0); // Unread messages badge
+  const [pendingBookingsCount, setPendingBookingsCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const prevCountRef = useRef(0);
@@ -193,25 +212,54 @@ export default function Sidebar({ user }) {
     };
   }, [user?.id, pathname]);
 
-
-  // ── Wallet sync ────────────────────────────────────────────────────────────
+  // ── Pending Bookings listener ───────────────────────────────────────────────
   useEffect(() => {
-    const sync = async () => {
-      try {
-        const res = await fetch('/api/wallet');
-        if (!res.ok) return;
-        const data = await res.json();
-        const w = data.wallet;
-        if (w) setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
-      } catch { /* silent */ }
-    };
+    if (!user?.id || !db) return;
+    let unsub = null;
+    try {
+      const q = query(
+        collection(db, 'bookings'),
+        where('hostId', '==', user.id),
+        where('status', '==', 'Requested')
+      );
+      unsub = onSnapshot(q, (snap) => {
+        setPendingBookingsCount(snap.size);
+      });
+    } catch { /* graceful fail */ }
+    return () => { if (unsub) unsub(); };
+  }, [user?.id]);
 
-    if (user && typeof window !== 'undefined') {
-      sync();
-      window.addEventListener('wallet-updated', sync);
-      return () => window.removeEventListener('wallet-updated', sync);
-    }
-  }, [user]);
+
+  // ── Wallet real-time listener ───────────────────────────────────────────────
+  // Subscribe to Firestore wallets/{uid} so navbar sparks update instantly.
+  // We gate on `firebaseUid` (not user.id) to ensure Firebase client Auth is
+  // fully initialized — avoids permission-denied during SSR hydration.
+  useEffect(() => {
+    if (!firebaseUid || !db) return;
+
+    let unsub = null;
+    try {
+      const walletRef = doc(db, 'wallets', firebaseUid);
+      unsub = onSnapshot(walletRef, (snap) => {
+        if (snap.exists()) {
+          const w = snap.data();
+          setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
+        }
+      }, (err) => {
+        // Firestore error — fall back to API fetch once
+        console.warn('[Sidebar] Wallet listener error, falling back to API:', err.code);
+        fetch('/api/wallet')
+          .then(r => r.json())
+          .then(data => {
+            const w = data.wallet;
+            if (w) setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
+          })
+          .catch(() => {});
+      });
+    } catch { /* graceful fail */ }
+
+    return () => { if (unsub) unsub(); };
+  }, [firebaseUid]);
 
   const isActive = (href) => {
     if (href === '/') return pathname === '/';
@@ -223,7 +271,7 @@ export default function Sidebar({ user }) {
     { href: '/',              label: 'Home',          Icon: Home },
     { href: '/discover',      label: 'Discover',      Icon: Search },
     { href: '/messages',      label: 'Messages',      Icon: MessageSquare },
-    { href: '/bookings',      label: 'My Bookings',   Icon: Calendar },
+    { href: '/bookings',      label: 'My Bookings',   Icon: Calendar, badge: pendingBookingsCount },
     { href: '/notifications', label: 'Notifications', Icon: Bell },
     { href: '/circles',       label: 'Communities',   Icon: Users },
     ...(user ? [{ href: '/wallet', label: 'Wallet', Icon: Wallet }] : []),
@@ -235,7 +283,7 @@ export default function Sidebar({ user }) {
     { href: '/',         label: 'Home',     Icon: Home },
     { href: '/discover', label: 'Discover', Icon: Search },
     { href: '/create',   label: 'Plus',     Icon: Plus, isCenter: true },
-    { href: '/bookings', label: 'Bookings', Icon: Calendar },
+    { href: '/bookings', label: 'Bookings', Icon: Calendar, badge: pendingBookingsCount },
     { href: '/profile',  label: 'Profile',  Icon: User },
   ];
 
@@ -354,13 +402,14 @@ export default function Sidebar({ user }) {
 
         {/* Navigation Items */}
         <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar">
-          {NAV.map(({ href, label, Icon }) => {
+          {NAV.map(({ href, label, Icon, badge }) => {
             if (href === '/profile' && !user) return null;
             const active = isActive(href);
             const isNotif = label === 'Notifications';
             const hasUnread = isNotif && unreadCount > 0;
             const isMessages = label === 'Messages';
             const hasUnreadMsgs = isMessages && unreadMsgCount > 0;
+            const hasBadge = badge && badge > 0;
 
             if (isCollapsed) {
               return (
@@ -375,7 +424,7 @@ export default function Sidebar({ user }) {
                   }`}
                 >
                   <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-                  {(hasUnread || hasUnreadMsgs) && (
+                  {(hasUnread || hasUnreadMsgs || hasBadge) && (
                     <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-[#F05A00] ring-2 ring-white" />
                   )}
                 </Link>
@@ -404,6 +453,11 @@ export default function Sidebar({ user }) {
                 {hasUnreadMsgs && (
                   <span className="min-w-[20px] h-[20px] rounded-full bg-[#F05A00] text-white text-[10px] font-black flex items-center justify-center px-1">
                     {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
+                  </span>
+                )}
+                {hasBadge && (
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#F05A00] text-white text-[10px] font-black flex items-center justify-center px-1">
+                    {badge > 99 ? '99+' : badge}
                   </span>
                 )}
                 {label === 'Wallet' && sparks > 0 && (
@@ -466,6 +520,7 @@ export default function Sidebar({ user }) {
       {/* ── Mobile bottom tab bar ───────────── */}
       {!(AUTH_PATHS.includes(pathname) || (pathname?.startsWith('/messages/') && pathname !== '/messages') || pathname?.startsWith('/admin') || isKeyboardOpen) && (
         <nav 
+          suppressHydrationWarning
           className="md:hidden hide-on-keyboard fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-white/95 backdrop-blur-xl border-t border-zinc-200/60 shadow-[0_-4px_25px_rgba(0,0,0,0.05)]"
           style={{
             height: 'calc(62px + env(safe-area-inset-bottom))',
@@ -492,6 +547,7 @@ export default function Sidebar({ user }) {
                 style={{ zIndex: 60 }}
               >
                 <div 
+                  suppressHydrationWarning
                   className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-[0_8px_22px_rgba(240,90,0,0.5)] hover:shadow-[0_12px_28px_rgba(240,90,0,0.6)] active:scale-90 transition-all ring-[3.5px] ring-white"
                   style={{ background: 'linear-gradient(135deg, #FF6B1A 0%, #D94F00 100%)' }}
                 >

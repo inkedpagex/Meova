@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUserWithRole } from '../../../lib/getAdminUser';
+import { requireAuth } from '../../../lib/getAdminUser';
 import { adminDb } from '../../../lib/firebaseAdmin';
 
 export async function GET(request) {
@@ -26,7 +26,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
@@ -66,3 +66,4 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+

@@ -1,5 +1,6 @@
 // Public student profile page — /users/[id]
 import { fetchProfileAdmin, fetchJoinedCirclesAdmin, fetchReviewsAdmin, fetchUsersAdmin } from '../../../lib/firebaseAdminQueries';
+import { adminDb } from '../../../lib/firebaseAdmin';
 import { getUserAdmin } from '../../../lib/getUserAdmin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -10,6 +11,7 @@ import {
   CheckCircle, Layers
 } from 'lucide-react';
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
+import AcceptBookingButton from '../../../features/users/AcceptBookingButton';
 import BlockUserButton from '../../../features/users/BlockUserButton';
 import MessageButton from '../../../features/users/MessageButton';
 import TipUserButton from '../../../features/users/TipUserButton';
@@ -66,6 +68,19 @@ export default async function UserProfilePage({ params }) {
     fetchUsersAdmin(50),
   ]);
 
+  let pendingBooking = null;
+  if (currentUser && currentUser.id !== id) {
+    const snap = await adminDb.collection('bookings')
+      .where('hostId', '==', currentUser.id)
+      .where('guestId', '==', id)
+      .where('status', '==', 'Requested')
+      .limit(1)
+      .get();
+    if (!snap.empty) {
+      pendingBooking = { id: snap.docs[0].id, ...snap.docs[0].data() };
+    }
+  }
+
   if (!profile) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
@@ -77,6 +92,22 @@ export default async function UserProfilePage({ params }) {
 
   const isSelf = currentUser?.id === id;
   const isLoggedIn = !!currentUser;
+  const isAdmin = currentUser?.role === 'admin';
+
+  if (profile.isBlocked && !isAdmin && !isSelf) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+        <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+          <CheckCircle className="w-8 h-8" /> 
+        </div>
+        <div>
+          <h2 className="text-lg font-black text-zinc-900">User Unavailable</h2>
+          <p className="text-sm text-zinc-500 font-medium">This profile is no longer available on the platform.</p>
+        </div>
+        <Link href="/" className="px-5 py-2.5 rounded-xl bg-zinc-900 text-white font-bold text-xs mt-2">Go Home</Link>
+      </div>
+    );
+  }
   const interests = profile.interests || [];
   const primaryInterest = interests[0];
   const primaryMeta = INTEREST_META[primaryInterest] || { Icon: Star, color: '#6b7280', label: primaryInterest };
@@ -163,6 +194,11 @@ export default async function UserProfilePage({ params }) {
             <h1 className="text-sm sm:text-base font-black text-zinc-900">
               {profile.full_name || 'Student'}
             </h1>
+            {profile.isBlocked && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black bg-red-100 text-red-600 border border-red-200">
+                BLOCKED
+              </span>
+            )}
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-orange-50 text-[#F05A00] border border-orange-100 shadow-2xs">
               <CheckCircle className="w-3 h-3 text-[#F05A00] fill-orange-50" />
               <span>{reviews.length || 1} Meets Completed</span>
@@ -195,7 +231,11 @@ export default async function UserProfilePage({ params }) {
         {!isSelf && (
           <div className="flex flex-col gap-2.5 pt-3 border-t border-zinc-100">
             <div className="flex items-center gap-2.5">
-              {profile.isIdOn !== false ? (
+              {pendingBooking ? (
+                <div className="flex-1">
+                  <AcceptBookingButton booking={pendingBooking} className="w-full text-xs" />
+                </div>
+              ) : profile.isIdOn !== false ? (
                 <div className="flex-1">
                   <BookCoffeeButton
                     targetUserId={id}

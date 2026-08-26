@@ -1,4 +1,4 @@
-﻿// Client Component for editing user profile
+// Client Component for editing user profile
 'use client';
 
 import React, { useState } from 'react';
@@ -41,6 +41,8 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   const [bio, setBio] = useState(initialProfile?.bio || '');
   const [rate, setRate] = useState(initialProfile?.rate || '100');
   const [selectedInterests, setSelectedInterests] = useState(initialProfile?.interests || []);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoUploadStage, setPhotoUploadStage] = useState('');
 
   const fileInputRef = React.useRef(null);
 
@@ -52,13 +54,15 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         return;
       }
       
-      setLoading(true);
+      setPhotoUploading(true);
+      setPhotoUploadStage('Compressing image...');
       setErrorMsg('');
       setSuccessMsg('');
       
       try {
         const options = { maxSizeMB: 0.2, maxWidthOrHeight: 1024, useWebWorker: true };
         const compressedFile = await imageCompression(file, options);
+        setPhotoUploadStage('Uploading to cloud...');
 
         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
         const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'unsigned_preset';
@@ -79,6 +83,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         const data = await res.json();
         if (data.secure_url) {
           setPhotoUrl(data.secure_url);
+          setPhotoUploadStage('Photo saved!');
           
           // Auto-save to prevent data loss trap
           await updateProfileAdmin({
@@ -101,7 +106,8 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         console.error('Cloudinary upload error:', err);
         setErrorMsg(err.message || 'Failed to upload photo to Cloudinary.');
       } finally {
-        setLoading(false);
+        setPhotoUploading(false);
+        setTimeout(() => setPhotoUploadStage(''), 2000);
       }
     }
   };
@@ -349,7 +355,15 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             className="hidden" 
           />
 
-          <div className="flex items-center gap-4 p-3 rounded-2xl bg-[#f8fafc] border-[1.5px] border-dashed border-[#cbd5e1] hover:border-[#F05A00]/40 hover:bg-[#F05A00]/5 transition-all h-[64px]">
+          <div className="relative flex items-center gap-4 p-3 rounded-2xl bg-[#f8fafc] border-[1.5px] border-dashed border-[#cbd5e1] hover:border-[#F05A00]/40 hover:bg-[#F05A00]/5 transition-all h-[64px] overflow-hidden">
+            {photoUploading && (
+              <div className="absolute inset-0 bg-black/65 backdrop-blur-xs flex items-center justify-center gap-2 z-20 text-white rounded-2xl animate-in fade-in duration-200">
+                <Loader2 size={18} className="text-[#F05A00] animate-spin" />
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-white/90">
+                  {photoUploadStage || 'Uploading...'}
+                </span>
+              </div>
+            )}
             {photoUrl ? (
               <div className="flex items-center gap-3 w-full">
                 <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
@@ -358,15 +372,17 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 <div className="flex items-center justify-between flex-1 gap-2 pr-2">
                   <button 
                     type="button" 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="text-[11px] font-black uppercase tracking-wider text-[#F05A00] hover:text-[#D94F00] transition-colors cursor-pointer"
+                    disabled={photoUploading}
+                    onClick={() => !photoUploading && fileInputRef.current?.click()}
+                    className="text-[11px] font-black uppercase tracking-wider text-[#F05A00] hover:text-[#D94F00] transition-colors cursor-pointer disabled:opacity-50"
                   >
                     Change
                   </button>
                   <button 
                     type="button" 
+                    disabled={photoUploading}
                     onClick={handleRemovePhoto}
-                    className="text-[11px] font-black uppercase tracking-wider text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
+                    className="text-[11px] font-black uppercase tracking-wider text-rose-500 hover:text-rose-600 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     Remove
                   </button>
@@ -375,8 +391,9 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             ) : (
               <button 
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 h-full text-[13px] font-black text-[#F05A00] hover:text-[#D94F00] transition-colors cursor-pointer active:scale-95"
+                disabled={photoUploading}
+                onClick={() => !photoUploading && fileInputRef.current?.click()}
+                className="w-full flex items-center justify-center gap-2 h-full text-[13px] font-black text-[#F05A00] hover:text-[#D94F00] transition-colors cursor-pointer active:scale-95 disabled:opacity-50"
               >
                 <Camera size={16} />
                 <span>Upload a sleek avatar</span>

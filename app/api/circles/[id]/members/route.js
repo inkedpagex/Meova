@@ -2,12 +2,12 @@
  * GET /api/circles/[id]/members - Host & Admin endpoint to fetch joined student roster & revenue metrics
  */
 import { NextResponse } from 'next/server';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 import { adminDb } from '@/lib/firebaseAdmin';
 
 export async function GET(request, { params }) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
@@ -99,3 +99,4 @@ export async function GET(request, { params }) {
     return NextResponse.json({ error: 'Failed to fetch member details' }, { status: 500 });
   }
 }
+

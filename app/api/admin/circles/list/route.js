@@ -2,12 +2,12 @@
  * GET /api/admin/circles/list - Returns all community creation requests for admin review
  */
 import { NextResponse } from 'next/server';
-import { getUserWithRole } from '@/lib/getAdminUser';
+import { requireAuth } from '@/lib/getAdminUser';
 import { adminDb } from '@/lib/firebaseAdmin';
 
 export async function GET() {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user || user.role !== 'admin') {
       return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
@@ -44,3 +44,4 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to list circles for admin' }, { status: 500 });
   }
 }
+

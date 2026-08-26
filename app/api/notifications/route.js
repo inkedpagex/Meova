@@ -10,11 +10,11 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '../../../lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { rateLimit } from '../../../lib/rateLimit';
-import { getUserWithRole } from '../../../lib/getAdminUser';
+import { requireAuth } from '../../../lib/getAdminUser';
 
 export async function GET(req) {
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const snap = await adminDb
@@ -48,7 +48,7 @@ export async function GET(req) {
 export async function PATCH(req) {
   // Mark all as read
   try {
-    const user = await getUserWithRole();
+    const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const snap = await adminDb
@@ -100,3 +100,4 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+

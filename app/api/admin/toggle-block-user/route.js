@@ -38,6 +38,20 @@ export async function POST(request) {
       updatedAt: new Date().toISOString(),
     });
 
+    // ── Cascade Block to Posts and Gigs ────────────────────────
+    const batch = adminDb.batch();
+    const postsSnap = await adminDb.collection('posts').where('authorId', '==', targetUid).get();
+    postsSnap.forEach(doc => {
+      batch.update(doc.ref, { isHidden: isBlocked });
+    });
+
+    const gigsSnap = await adminDb.collection('gigs').where('authorId', '==', targetUid).get();
+    gigsSnap.forEach(doc => {
+      batch.update(doc.ref, { isHidden: isBlocked });
+    });
+    await batch.commit();
+    // ───────────────────────────────────────────────────────────
+
     // Write audit log
     await adminDb.collection('audit_logs').add({
       admin_id:   admin.uid,
