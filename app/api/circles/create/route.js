@@ -3,14 +3,12 @@
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function POST(request) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Database service unavailable' }, { status: 503 });
 
     const body = await request.json();
     const { name, category, platform, price, description, link, image } = body;
@@ -23,41 +21,41 @@ export async function POST(request) {
     }
 
     const priceNum = Math.max(0, parseInt(price, 10) || 0);
-
     const isAdmin = user.role === 'admin';
     const creationFee = isAdmin ? 0 : 100;
-    
+
     // SPAM PREVENTION: Limit max pending requests per user
     if (!isAdmin) {
-      const pendingSnap = await adminDb.collection('circles')
-        .where('host_id', '==', user.uid)
-        .where('status', '==', 'pending_approval')
-        .get();
-      
-      if (pendingSnap.size >= 3) {
-        return NextResponse.json({ error: 'You already have 3 pending requests. Please wait for admin approval to prevent spam.' }, { status: 400 });
+      const { count } = await supabaseAdmin
+        .from('circles')
+        .select('id', { count: 'exact', head: true })
+        .eq('creator_id', user.uid)
+        .eq('status', 'pending_approval');
+
+      if ((count || 0) >= 3) {
+        return NextResponse.json({
+          error: 'You already have 3 pending requests. Please wait for admin approval to prevent spam.'
+        }, { status: 400 });
       }
     }
-    
+
     // Check wallet balance
-    const walletRef = adminDb.collection('wallets').doc(user.uid);
-    const walletDoc = await walletRef.get();
-    let currentSparks = 0;
-    let walletData = {};
-    if (walletDoc.exists) {
-      walletData = walletDoc.data();
-      currentSparks = (walletData.purchased || 0) + (walletData.bonus || 0) + (walletData.creator || 0);
-    }
+    const { data: walletData } = await supabaseAdmin
+      .from('wallets')
+      .select('purchased, bonus, creator')
+      .eq('user_id', user.uid)
+      .maybeSingle();
+
+    const currentSparks = walletData
+      ? (walletData.purchased || 0) + (walletData.bonus || 0) + (walletData.creator || 0)
+      : 0;
 
     if (currentSparks < creationFee) {
       return NextResponse.json({ error: 'Insufficient Sparks to create a community' }, { status: 400 });
     }
 
-    const batch = adminDb.batch();
-
-    // Create a new document in `circles` collection
-    const circleRef = adminDb.collection('circles').doc();
-    const circleId = circleRef.id;
+    const circleId = crypto.randomUUID();
+    const now = new Date().toISOString();
 
     const newCircleData = {
       id: circleId,
@@ -65,44 +63,36 @@ export async function POST(request) {
       category: category || 'General',
       platform: platform || 'WhatsApp',
       price: priceNum,
-      isPaid: priceNum > 0,
+      is_paid: priceNum > 0,
       description: (description || '').trim(),
       image: image || 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&q=80',
-      host_id: user.uid,
-      host_name: user.name || user.email || 'Campus Host',
-      host_photo: user.picture || '',
+      invite_link: link.trim(),
+      creator_id: user.uid,
+      host_name: user.full_name || user.email || 'Campus Host',
+      host_photo: user.photo_url || '',
       status: 'pending_approval',
       member_count: 1,
       total_sparks_earned: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      created_at: now,
+      updated_at: now,
     };
 
-    // Store public metadata in `circles`
-    batch.set(circleRef, newCircleData);
-
-    // Store private invite link in secure collection `circle_links` (never exposed in public listings)
-    const linkRef = adminDb.collection('circle_links').doc(circleId);
-    batch.set(linkRef, {
-      circle_id: circleId,
-      invite_link: link.trim(),
-      host_id: user.uid,
-      updated_at: new Date().toISOString(),
-    });
+    // Insert circle
+    const { error: circleErr } = await supabaseAdmin.from('circles').insert(newCircleData);
+    if (circleErr) throw new Error(circleErr.message);
 
     // Auto-add Host as the initial member
-    const memberRef = adminDb.collection('circle_members').doc(`${circleId}_${user.uid}`);
-    batch.set(memberRef, {
+    const { error: memberErr } = await supabaseAdmin.from('circle_members').insert({
       circle_id: circleId,
       user_id: user.uid,
       role: 'host',
       sparks_paid: 0,
-      joined_at: new Date().toISOString(),
+      joined_at: now,
     });
+    if (memberErr) console.error('[circles/create] member insert error:', memberErr.message);
 
     // Deduct Sparks if applicable
-    if (creationFee > 0) {
-      // Deduct primarily from purchased, then bonus, then creator
+    if (creationFee > 0 && walletData) {
       let remainingToDeduct = creationFee;
       let newPurchased = walletData.purchased || 0;
       let newBonus = walletData.bonus || 0;
@@ -124,26 +114,19 @@ export async function POST(request) {
         }
       }
 
-      batch.update(walletRef, {
-        purchased: newPurchased,
-        bonus: newBonus,
-        creator: newCreator,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
+      await supabaseAdmin
+        .from('wallets')
+        .update({ purchased: newPurchased, bonus: newBonus, creator: newCreator, updated_at: now })
+        .eq('user_id', user.uid);
 
-      // Log transaction
-      const txRef = adminDb.collection('transactions').doc();
-      batch.set(txRef, {
-        id: txRef.id,
+      await supabaseAdmin.from('transactions').insert({
         user_id: user.uid,
         amount: -creationFee,
         type: 'community_creation_fee',
-        description: `Paid 100 Sparks to request community: ${name.trim()}`,
-        created_at: new Date().toISOString(),
+        description: `Paid ${creationFee} Sparks to request community: ${name.trim()}`,
+        created_at: now,
       });
     }
-
-    await batch.commit();
 
     return NextResponse.json({
       success: true,
@@ -155,4 +138,3 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Failed to submit community request' }, { status: 500 });
   }
 }
-

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../../lib/getAdminUser';
-import { adminDb } from '../../../../lib/firebaseAdmin';
+import { supabaseAdmin } from '../../../../lib/supabase/admin';
 import { rateLimit, getClientIp } from '../../../../lib/rateLimit';
 import { logger } from '../../../../utils/logger';
 import { sendAdminAlert } from '../../../../utils/alerts';
@@ -23,22 +23,19 @@ function generate5CharAlphanumeric() {
 }
 
 async function generateUnique5CharRefCode() {
-  if (!adminDb) {
-    return generate5CharAlphanumeric();
-  }
   let attempts = 0;
   while (attempts < 100) {
     const code = generate5CharAlphanumeric();
     try {
-      const snap = await adminDb.collection('payment_requests')
-        .where('reference_code', '==', code)
-        .where('status', '==', 'pending')
-        .get();
-      if (snap.empty) {
-        return code;
-      }
+      const { data } = await supabaseAdmin
+        .from('payment_requests')
+        .select('id')
+        .eq('reference_code', code)
+        .eq('status', 'pending')
+        .maybeSingle();
+      if (!data) return code; // No existing match — this code is unique
     } catch (err) {
-      logger.warn('Firestore unique code check failed. Returning generated code:', { error: err.message });
+      logger.warn('Supabase unique code check failed. Returning generated code:', { error: err.message });
       return code;
     }
     attempts++;
@@ -71,24 +68,23 @@ export async function POST(request) {
   if (!pack) return NextResponse.json({ error: 'Invalid pack selection' }, { status: 400 });
 
   try {
-    if (!adminDb) throw new Error('Database not configured');
-
     // Check for existing pending request for this user+pack
-    const existing = await adminDb.collection('payment_requests')
-      .where('userId', '==', user.uid)
-      .where('pack_key', '==', packKey)
-      .where('status', '==', 'pending')
-      .get();
+    const { data: existing } = await supabaseAdmin
+      .from('payment_requests')
+      .select('id, reference_code')
+      .eq('user_id', user.uid)
+      .eq('pack_key', packKey)
+      .eq('status', 'pending')
+      .maybeSingle();
 
-    if (!existing.empty) {
-      const ex = existing.docs[0];
-      return NextResponse.json({ ok: true, reference_code: ex.data().reference_code, existing: true });
+    if (existing) {
+      return NextResponse.json({ ok: true, reference_code: existing.reference_code, existing: true });
     }
 
     const reference_code = await generateUnique5CharRefCode();
 
-    await adminDb.collection('payment_requests').add({
-      userId:         user.uid,
+    const { error } = await supabaseAdmin.from('payment_requests').insert({
+      user_id:        user.uid,
       email:          user.email,
       pack_key:       packKey,
       pack_name:      pack.name,
@@ -98,6 +94,8 @@ export async function POST(request) {
       status:         'pending',
       created_at:     new Date().toISOString(),
     });
+
+    if (error) throw new Error(error.message);
 
     logger.audit('PAYMENT_REQUEST_CREATED', user.uid, {
       reference_code,

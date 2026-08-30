@@ -9,9 +9,7 @@ import {
   PanelLeftClose, PanelLeftOpen
 } from 'lucide-react';
 import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
-import { db, auth } from '../lib/firebaseClient';
-import { collection, query, where, onSnapshot, getDocs, doc } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { supabase } from '../lib/supabase/client';
 import CreateMenuModal from './CreateMenuModal';
 
 const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy'];
@@ -27,7 +25,6 @@ export default function Sidebar({ user }) {
 
   // ── Sidebar collapse state ──────────────────────────────────────────────────
   const [isCollapsed, setIsCollapsed] = useState(false);
-
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -47,23 +44,9 @@ export default function Sidebar({ user }) {
     }
   };
 
-  // ── Firebase Auth UID (separate from SSR user.id) ──────────────────────────
-  // We must wait for client-side Firebase Auth to be ready before attaching
-  // any Firestore listeners that have isOwner() rules, otherwise we get
-  // permission-denied errors because request.auth is null during hydration.
-  const [firebaseUid, setFirebaseUid] = useState(null);
-
-  useEffect(() => {
-    if (!auth) return;
-    const unsub = onAuthStateChanged(auth, (fbUser) => {
-      setFirebaseUid(fbUser ? fbUser.uid : null);
-    });
-    return () => unsub();
-  }, []);
-
   // ── Notification state ─────────────────────────────────────────────────────
   const [unreadCount, setUnreadCount] = useState(0);
-  const [unreadMsgCount, setUnreadMsgCount] = useState(0); // Unread messages badge
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
   const [pendingBookingsCount, setPendingBookingsCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -91,50 +74,42 @@ export default function Sidebar({ user }) {
     };
   }, []);
 
-  // Notification loader
-  useEffect(() => {
+  // Notification Realtime Channel & Initial Fetch
+  const fetchApiCount = async () => {
     if (!user?.id) return;
+    try {
+      const res = await fetch('/api/notifications');
+      if (!res.ok) return;
+      const data = await res.json();
+      const count = data.unreadCount || 0;
+      setUnreadCount(count);
+      prevCountRef.current = count;
+    } catch { /* silent */ }
+  };
 
-    let unsub = null;
-    let pollInterval = null;
-
-    const fetchApiCount = async () => {
-      try {
-        const res = await fetch('/api/notifications');
-        if (!res.ok) return;
-        const data = await res.json();
-        const count = data.unreadCount || 0;
-        setUnreadCount(count);
-        prevCountRef.current = count;
-      } catch { /* silent */ }
-    };
+  useEffect(() => {
+    if (!user?.id || !supabase) return;
 
     fetchApiCount();
 
-    if (db) {
-      try {
-        const notifRef = collection(db, 'users', user.id, 'notifications');
-        const q = query(notifRef, where('read', '==', false));
-
-        unsub = onSnapshot(q, (snap) => {
-          const count = snap.size;
-          setUnreadCount(count);
-          prevCountRef.current = count;
-        }, () => {
-          if (!pollInterval) {
-            pollInterval = setInterval(fetchApiCount, 15000);
-          }
-        });
-      } catch {
-        pollInterval = setInterval(fetchApiCount, 15000);
-      }
-    } else {
-      pollInterval = setInterval(fetchApiCount, 15000);
-    }
+    const channel = supabase
+      .channel(`sidebar-notifications-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchApiCount();
+        }
+      )
+      .subscribe();
 
     return () => {
-      if (unsub) unsub();
-      if (pollInterval) clearInterval(pollInterval);
+      supabase.removeChannel(channel);
     };
   }, [user?.id]);
 
@@ -146,120 +121,124 @@ export default function Sidebar({ user }) {
     }
   }, [isOnNotifPage]);
 
-  // ── Unread Messages listener ────────────────────────────────────────────────
-  useEffect(() => {
-    if (!user?.id || !db) return;
+  // ── Unread Messages listener via Supabase Realtime ──────────────────────────
+  const pollUnread = async () => {
+    if (!user?.id) return;
     const isOnMessagesPage = pathname === '/messages';
-
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-
-    let pollInterval = null;
-    const pollUnread = async () => {
-      try {
-        const res = await fetch('/api/chats');
-        if (!res.ok) return;
-        const data = await res.json();
-        let total = 0;
-        (data.chats || []).forEach(c => {
-          total += (c.unreadCount?.[user.id] || 0);
-        });
-        setUnreadMsgCount(isOnMessagesPage ? 0 : total);
-        prevMsgCountRef.current = total;
-      } catch { /* silent */ }
-    };
-
-    let unsub = null;
     try {
-      const q = query(
-        collection(db, 'chats'),
-        where('participants', 'array-contains', user.id)
-      );
-
-      unsub = onSnapshot(q, (snap) => {
-        let totalUnread = 0;
-        snap.forEach(d => {
-          const data = d.data();
-          const count = data.unreadCount?.[user.id] || 0;
-          totalUnread += count;
-        });
-
-        setUnreadMsgCount(isOnMessagesPage ? 0 : totalUnread);
-
-        if (totalUnread > prevMsgCountRef.current && prevMsgCountRef.current !== 0 && !isOnMessagesPage) {
-          if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-            new Notification('New Message on Meova', {
-              body: 'You received a new message from a campus student.',
-              icon: '/logo.png',
-              badge: '/logo.png',
-            });
-          }
-        }
-        
-        prevMsgCountRef.current = totalUnread;
-      }, () => {
-        pollUnread();
-        pollInterval = setInterval(pollUnread, 10000);
+      const res = await fetch('/api/chats');
+      if (!res.ok) return;
+      const data = await res.json();
+      let total = 0;
+      (data.chats || []).forEach(c => {
+        const counts = c.unread_count || c.unreadCount || {};
+        total += (counts[user.id] || 0);
       });
-    } catch { /* graceful fail */ }
+      setUnreadMsgCount(isOnMessagesPage ? 0 : total);
+      prevMsgCountRef.current = total;
+    } catch { /* silent */ }
+  };
+
+  useEffect(() => {
+    if (!user?.id || !supabase) return;
 
     pollUnread();
-    
+
+    const channel = supabase
+      .channel(`sidebar-chats-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'chats',
+        },
+        () => {
+          pollUnread();
+        }
+      )
+      .subscribe();
+
     return () => {
-      if (unsub) unsub();
-      if (pollInterval) clearInterval(pollInterval);
+      supabase.removeChannel(channel);
     };
   }, [user?.id, pathname]);
 
   // ── Pending Bookings listener ───────────────────────────────────────────────
   useEffect(() => {
-    if (!user?.id || !db) return;
-    let unsub = null;
-    try {
-      const q = query(
-        collection(db, 'bookings'),
-        where('hostId', '==', user.id),
-        where('status', '==', 'Requested')
-      );
-      unsub = onSnapshot(q, (snap) => {
-        setPendingBookingsCount(snap.size);
-      });
-    } catch { /* graceful fail */ }
-    return () => { if (unsub) unsub(); };
+    if (!user?.id || !supabase) return;
+
+    const fetchPendingBookings = async () => {
+      try {
+        const { count } = await supabase
+          .from('bookings')
+          .select('*', { count: 'exact', head: true })
+          .eq('host_id', user.id)
+          .eq('status', 'Requested');
+        setPendingBookingsCount(count || 0);
+      } catch {}
+    };
+
+    fetchPendingBookings();
+
+    const channel = supabase
+      .channel(`sidebar-bookings-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bookings',
+          filter: `host_id=eq.${user.id}`,
+        },
+        () => {
+          fetchPendingBookings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 
-
-  // ── Wallet real-time listener ───────────────────────────────────────────────
-  // Subscribe to Firestore wallets/{uid} so navbar sparks update instantly.
-  // We gate on `firebaseUid` (not user.id) to ensure Firebase client Auth is
-  // fully initialized — avoids permission-denied during SSR hydration.
+  // ── Wallet real-time listener via Supabase Realtime ─────────────────────────
   useEffect(() => {
-    if (!firebaseUid || !db) return;
+    if (!user?.id || !supabase) return;
 
-    let unsub = null;
-    try {
-      const walletRef = doc(db, 'wallets', firebaseUid);
-      unsub = onSnapshot(walletRef, (snap) => {
-        if (snap.exists()) {
-          const w = snap.data();
-          setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
-        }
-      }, (err) => {
-        // Firestore error — fall back to API fetch once
-        console.warn('[Sidebar] Wallet listener error, falling back to API:', err.code);
-        fetch('/api/wallet')
-          .then(r => r.json())
-          .then(data => {
-            const w = data.wallet;
-            if (w) setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
-          })
-          .catch(() => {});
+    // Fetch initial wallet balance
+    supabase
+      .from('wallets')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data: w }) => {
+        if (w) setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
       });
-    } catch { /* graceful fail */ }
 
-    return () => { if (unsub) unsub(); };
-  }, [firebaseUid]);
+    const channel = supabase
+      .channel(`sidebar-wallet-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wallets',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const w = payload.new;
+          if (w) {
+            setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   const isActive = (href) => {
     if (href === '/') return pathname === '/';
@@ -295,7 +274,6 @@ export default function Sidebar({ user }) {
     <>
       {/* ── Mobile top header ────────────────── */}
       <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[58px] flex items-center justify-between px-4 bg-white/90 backdrop-blur-xl border-b border-zinc-100 shadow-2xs">
-        
         <Link href="/" className="flex items-center gap-2 group">
           <img src="/logo-v1.png" alt="Meova" className="h-9 w-auto object-contain" />
         </Link>
@@ -368,8 +346,6 @@ export default function Sidebar({ user }) {
           padding: isCollapsed ? '24px 10px' : '24px 16px' 
         }}
       >
-
-        {/* Brand & ChatGPT-style Sidebar Toggle Button */}
         <div className={`flex items-center mb-8 ${isCollapsed ? 'flex-col gap-3 justify-center' : 'justify-between px-1'}`}>
           {isCollapsed ? (
             <>

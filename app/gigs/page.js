@@ -15,38 +15,7 @@ const fetcher = (url) => fetch(url).then(res => res.json());
 
 const CATEGORIES = ['All', 'Design', 'Development', 'Writing', 'Marketing', 'Photography', 'Video/Reels', 'Music', 'Research', 'Craft/Art'];
 
-const DEFAULT_GIGS = [
-  {
-    id: 'gig-1',
-    title: 'Figma UI Designer for Campus App',
-    company: 'Meetuply Team',
-    category: 'Design',
-    budget: '500',
-    duration: '3 Days',
-    type: 'FREELANCE',
-    desc: 'Looking for a student designer to create sleek dark-mode UI mockups for campus app.'
-  },
-  {
-    id: 'gig-2',
-    title: 'Next.js Frontend Bug Fixes',
-    company: 'Coding Club',
-    category: 'Development',
-    budget: '750',
-    duration: '1 Week',
-    type: 'PROJECT',
-    desc: 'Help integrate Tailwind CSS components and optimize client page load speed.'
-  },
-  {
-    id: 'gig-3',
-    title: 'Campus Fest Poster & Reel Creation',
-    company: 'Media Circle',
-    category: 'Marketing',
-    budget: '400',
-    duration: '2 Days',
-    type: 'CREATIVE',
-    desc: 'Create 3 Instagram reels and event posters for the upcoming cultural fest.'
-  }
-];
+// Mock gigs removed to prevent false interactions and empty economy.
 
 export default function CampusGigsPage() {
   const searchParams = useSearchParams();
@@ -57,9 +26,10 @@ export default function CampusGigsPage() {
   const [selectedCat, setSelectedCat] = useState('All');
   const [appliedGigs, setAppliedGigs] = useState(new Set());
   const [managingGig, setManagingGig] = useState(null); // gig being managed in drawer
+  const [deletingGig, setDeletingGig] = useState(null);
   const { data: gigsData, mutate: mutateGigs } = useSWR('/api/gigs', fetcher);
   const fetchedGigs = (gigsData?.gigs || []).filter(g => !g.status || g.status === 'open' || g.status === 'in_progress');
-  const gigs = fetchedGigs.length > 0 ? fetchedGigs : DEFAULT_GIGS;
+  const gigs = fetchedGigs;
 
   // Create gig modal state
   const [showModal, setShowModal] = useState(false);
@@ -98,6 +68,19 @@ export default function CampusGigsPage() {
       setPitch('');
     } catch { toast.error('Network error.'); }
     finally { setApplyLoading(false); }
+  };
+
+  const handleDeleteGig = async (gigId) => {
+    if (!confirm('Are you sure you want to delete this gig? Your escrowed sparks will be refunded.')) return;
+    setDeletingGig(gigId);
+    try {
+      const res = await fetch(`/api/gigs/${gigId}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!res.ok) { toast.error(json.error || 'Failed to delete gig'); return; }
+      toast.success('Gig deleted and Sparks refunded! ⚡');
+      mutateGigs();
+    } catch { toast.error('Network error.'); }
+    finally { setDeletingGig(null); }
   };
 
   const handleBudgetChange = (e) => {
@@ -223,12 +206,19 @@ export default function CampusGigsPage() {
           {/* Gig Cards */}
           <div className="grid gap-4">
             {filtered.length === 0 ? (
-              <div className="bg-white border border-zinc-200 rounded-3xl p-14 text-center shadow-xs">
-                <Briefcase size={32} className="mx-auto mb-3 text-zinc-300" />
-                <h4 className="text-sm font-black text-zinc-800">No campus gigs found</h4>
-                <p className="text-xs text-zinc-400 mt-1 font-semibold">Be the first to post a freelance gig!</p>
-                <button onClick={() => setShowModal(true)} className="mt-4 px-4 py-2 rounded-xl bg-[#fcf6fa] text-[#D94F00] border border-[#eac5e0] text-xs font-black cursor-pointer">
-                  + Post a Gig
+              <div className="py-12 flex flex-col items-center justify-center text-center px-4 bg-white rounded-3xl border border-zinc-100 shadow-xs">
+                <div className="w-16 h-16 rounded-3xl bg-orange-50 border border-orange-100 flex items-center justify-center mb-4">
+                  <Briefcase size={24} className="text-[#F05A00]" />
+                </div>
+                <h3 className="text-base font-black text-zinc-900 tracking-tight">No Gigs Found</h3>
+                <p className="text-xs font-semibold text-zinc-500 mt-1 max-w-xs leading-relaxed">
+                  There are no active gigs in this category right now.
+                </p>
+                <button 
+                  onClick={() => setShowModal(true)}
+                  className="mt-6 px-6 py-2.5 rounded-xl bg-zinc-900 text-white text-[11px] font-black uppercase tracking-wider hover:bg-zinc-800 transition-all active:scale-95 flex items-center gap-2"
+                >
+                  <Plus size={14} /> Post the first Gig
                 </button>
               </div>
             ) : (
@@ -258,19 +248,28 @@ export default function CampusGigsPage() {
                       </div>
 
                       {isOwn ? (
-                        <button
-                          onClick={() => setManagingGig(gig)}
-                          className="px-5 py-2.5 text-[10px] font-black tracking-wider uppercase rounded-xl bg-[#fcf6fa] text-[#D94F00] border border-[#eac5e0] hover:bg-[#f5ebf4] cursor-pointer transition-all flex items-center gap-1.5"
-                        >
-                          {(gig.applicationsCount || 0) > 0 ? (
-                            <>
-                              <Users size={12} />
-                              <span>{gig.applicationsCount}</span>
-                            </>
-                          ) : (
-                            <span>Manage</span>
-                          )}
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteGig(gig.id); }}
+                            disabled={deletingGig === gig.id}
+                            className="px-3 py-2.5 text-[10px] font-black tracking-wider uppercase rounded-xl bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 cursor-pointer transition-all disabled:opacity-50"
+                          >
+                            <X size={14} strokeWidth={2.5} />
+                          </button>
+                          <button
+                            onClick={() => setManagingGig(gig)}
+                            className="px-5 py-2.5 text-[10px] font-black tracking-wider uppercase rounded-xl bg-[#fcf6fa] text-[#D94F00] border border-[#eac5e0] hover:bg-[#f5ebf4] cursor-pointer transition-all flex items-center gap-1.5"
+                          >
+                            {(gig.applicationsCount || 0) > 0 ? (
+                              <>
+                                <Users size={12} />
+                                <span>{gig.applicationsCount}</span>
+                              </>
+                            ) : (
+                              <span>Manage</span>
+                            )}
+                          </button>
+                        </div>
                       ) : (
                         <button
                           onClick={() => { setApplyingToGig(gig); setPitch(''); }}

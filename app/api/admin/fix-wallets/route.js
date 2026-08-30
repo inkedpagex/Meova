@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '../../../../lib/firebaseAdmin';
+import { supabaseAdmin } from '../../../../lib/supabase/admin';
 
 export async function GET() {
   try {
@@ -7,38 +7,47 @@ export async function GET() {
     let rejectedCount = 0;
 
     // 1. Reset negative creator balances
-    const walletsSnap = await adminDb.collection('wallets').where('creator', '<', 0).get();
-    
-    if (!walletsSnap.empty) {
-      const batch = adminDb.batch();
-      walletsSnap.docs.forEach(doc => {
-        batch.update(doc.ref, { creator: 0 });
+    const { data: negativeWallets } = await supabaseAdmin
+      .from('wallets')
+      .select('user_id')
+      .lt('creator', 0);
+
+    if (negativeWallets && negativeWallets.length > 0) {
+      for (const w of negativeWallets) {
+        await supabaseAdmin
+          .from('wallets')
+          .update({ creator: 0, updated_at: new Date().toISOString() })
+          .eq('user_id', w.user_id);
         fixedWallets++;
-      });
-      await batch.commit();
+      }
     }
 
     // 2. Reject all pending withdrawals
-    const withdrawalsSnap = await adminDb.collection('withdrawals').where('status', '==', 'pending').get();
-    
-    if (!withdrawalsSnap.empty) {
-      const batch2 = adminDb.batch();
-      withdrawalsSnap.docs.forEach(doc => {
-        batch2.update(doc.ref, { 
-          status: 'rejected',
-          remarks: 'System upgrade: Please re-request your withdrawal to securely sync with our new Escrow system.',
-          reviewed_at: new Date().toISOString()
-        });
+    const { data: pendingWithdrawals } = await supabaseAdmin
+      .from('withdrawals')
+      .select('id')
+      .eq('status', 'pending');
+
+    if (pendingWithdrawals && pendingWithdrawals.length > 0) {
+      const now = new Date().toISOString();
+      for (const wd of pendingWithdrawals) {
+        await supabaseAdmin
+          .from('withdrawals')
+          .update({
+            status: 'rejected',
+            remarks: 'System upgrade: Please re-request your withdrawal to securely sync with our new Escrow system.',
+            reviewed_at: now,
+          })
+          .eq('id', wd.id);
         rejectedCount++;
-      });
-      await batch2.commit();
+      }
     }
 
-    return NextResponse.json({ 
-      ok: true, 
-      fixedWallets, 
+    return NextResponse.json({
+      ok: true,
+      fixedWallets,
       rejectedCount,
-      message: 'Data correction completed successfully.' 
+      message: 'Data correction completed successfully.'
     });
   } catch (err) {
     console.error('Error during data correction:', err);

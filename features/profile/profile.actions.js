@@ -1,8 +1,8 @@
-﻿'use server';
+'use server';
 
 import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
-import { adminDb } from '../../lib/firebaseAdmin';
+import { supabaseAdmin } from '../../lib/supabase/admin';
 import { TABLE_PROFILES } from './constants';
 import { getUserAdmin } from '../../lib/getUserAdmin';
 
@@ -13,6 +13,7 @@ export async function updateProfileAdmin(updates) {
       throw new Error('Unauthorized');
     }
 
+    // Store overrides in cookie for immediate UI reflection (photo_url may be base64)
     const cookieUpdates = { ...updates };
     if (cookieUpdates.photo_url && cookieUpdates.photo_url.startsWith('data:')) {
       delete cookieUpdates.photo_url;
@@ -24,12 +25,18 @@ export async function updateProfileAdmin(updates) {
       path: '/'
     });
 
-    if (adminDb) {
-      const docRef = adminDb.collection(TABLE_PROFILES).doc(user.id);
-      await docRef.update({
+    // Update profile in Supabase
+    const { error } = await supabaseAdmin
+      .from(TABLE_PROFILES)
+      .update({
         ...updates,
-        updated_at: new Date().toISOString()
-      }).catch(() => {}); // ignore mock errors
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (error) {
+      console.error('[updateProfileAdmin] Supabase error:', error.message);
+      // Non-fatal — cookie was already set for immediate UI update
     }
 
     // Revalidate the persistent cache so the user sees fresh data immediately

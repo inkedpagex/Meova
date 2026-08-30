@@ -1,23 +1,30 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../lib/getAdminUser';
-import { adminDb } from '../../../lib/firebaseAdmin';
+import { supabaseAdmin } from '../../../lib/supabase/admin';
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const targetUserId = searchParams.get('targetUserId');
-    
-    if (!adminDb) return NextResponse.json({ reviews: [] });
 
-    let query = adminDb.collection('reviews');
+    let query = supabaseAdmin
+      .from('reviews')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
     if (targetUserId) {
-      query = query.where('targetUserId', '==', targetUserId);
+      query = query.eq('target_user_id', targetUserId);
     }
-    
-    const snap = await query.orderBy('created_at', 'desc').limit(20).get();
-    const reviews = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    return NextResponse.json({ reviews });
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('[GET /api/reviews]', error.message);
+      return NextResponse.json({ reviews: [] });
+    }
+
+    return NextResponse.json({ reviews: data || [] });
   } catch (err) {
     console.error('[GET /api/reviews]', err.message);
     return NextResponse.json({ reviews: [] });
@@ -28,7 +35,6 @@ export async function POST(request) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
     const { bookingId, experienceId, targetUserId, rating, written, categories } = await request.json();
 
@@ -37,24 +43,22 @@ export async function POST(request) {
     }
 
     const review = {
-      bookingId,
-      experienceId: experienceId || '',
-      authorId: user.uid,
-      authorName: user.full_name || 'Student',
-      targetUserId,
+      reviewer_id: user.uid,
+      target_user_id: targetUserId,
       rating: Number(rating) || 5,
-      written: written || '',
-      categories: categories || [],
+      comment: written || '',
       created_at: new Date().toISOString(),
     };
 
-    await adminDb.collection('reviews').add(review);
+    const { error: reviewErr } = await supabaseAdmin.from('reviews').insert(review);
+    if (reviewErr) throw new Error(reviewErr.message);
 
     // Notify the user who received the review
-    await adminDb.collection('notifications').add({
-      userId: targetUserId,
+    await supabaseAdmin.from('notifications').insert({
+      user_id: targetUserId,
+      sender_id: user.uid,
       title: 'New Review Received! ⭐',
-      body: `${user.full_name || 'Someone'} left you a ${rating}-star review.`,
+      message: `${user.full_name || 'Someone'} left you a ${rating}-star review.`,
       type: 'review',
       read: false,
       created_at: new Date().toISOString(),
@@ -66,4 +70,3 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
-

@@ -4,41 +4,38 @@
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../../../lib/getAdminUser';
-import { adminDb } from '../../../../../lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { supabaseAdmin } from '../../../../../lib/supabase/admin';
 import { sendPush } from '../../../../../lib/sendPushNotification';
 
 export async function GET(request, { params }) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ messages: [] });
 
     const { id: chatId } = await params;
     
-    const chatDoc = await adminDb.collection('chats').doc(chatId).get();
-    if (!chatDoc.exists) {
+    const { data: messages, error } = await supabaseAdmin
+      .from('chat_messages')
+      .select('*')
+      .eq('chat_id', chatId)
+      .order('created_at', { ascending: true })
+      .limit(100);
+
+    if (error) {
+      console.error('[GET /api/chats/[id]/messages]', error.message);
       return NextResponse.json({ messages: [] });
     }
 
-    const messagesSnap = await adminDb
-      .collection('chats')
-      .doc(chatId)
-      .collection('messages')
-      .orderBy('timestamp', 'asc')
-      .limit(100)
-      .get();
+    const formattedMessages = (messages || []).map(msg => ({
+      id: msg.id,
+      senderId: msg.sender_id,
+      text: msg.text,
+      status: msg.status || 'sent',
+      timestamp: msg.created_at ? new Date(msg.created_at).getTime() : Date.now(),
+      created_at: msg.created_at,
+    }));
 
-    const messages = messagesSnap.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        timestamp: data.timestamp?.toMillis ? data.timestamp.toMillis() : Date.now()
-      };
-    });
-
-    return NextResponse.json({ messages });
+    return NextResponse.json({ messages: formattedMessages });
   } catch (err) {
     console.error('[GET /api/chats/[id]/messages]', err.message);
     return NextResponse.json({ messages: [] });
@@ -49,7 +46,6 @@ export async function POST(request, { params }) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
     const { id: chatId } = await params;
     const { text } = await request.json();
@@ -58,84 +54,95 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Message text is required' }, { status: 400 });
     }
 
-    const chatRef = adminDb.collection('chats').doc(chatId);
-    let chatDoc = await chatRef.get();
+    // Check if chat exists
+    let { data: chatData } = await supabaseAdmin
+      .from('chats')
+      .select('*')
+      .eq('id', chatId)
+      .maybeSingle();
 
-    if (!chatDoc.exists) {
-      // Auto-create chat document if it doesn't exist yet
-      const rawParts = chatId.startsWith('group_')
-        ? [user.uid, 'group']
-        : chatId.split('_').filter(Boolean);
+    if (!chatData) {
+      const rawParts = chatId.split('_').filter(Boolean);
       const participants = Array.from(new Set([user.uid, ...rawParts]));
 
-      await chatRef.set({
-        id: chatId,
-        participants,
-        participantNames: { [user.uid]: user.name || user.email || 'User' },
-        createdAt: FieldValue.serverTimestamp(),
-        lastMessage: text.trim(),
-        lastMessageAt: FieldValue.serverTimestamp(),
-        lastSenderId: user.uid,
-      }, { merge: true });
+      const { data: newChat, error: createErr } = await supabaseAdmin
+        .from('chats')
+        .insert({
+          id: chatId,
+          participants,
+          participant_names: { [user.uid]: user.full_name || 'User' },
+          last_message: text.trim(),
+          last_message_at: new Date().toISOString(),
+          last_sender_id: user.uid,
+          unread_count: { [user.uid]: 0 },
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
 
-      chatDoc = await chatRef.get();
-    } else {
-      const currentParts = chatDoc.data()?.participants || [];
-      if (!currentParts.includes(user.uid)) {
-        await chatRef.update({
-          participants: FieldValue.arrayUnion(user.uid)
-        });
+      if (createErr) {
+        console.error('[POST /api/chats/[id]/messages create error]', createErr.message);
+        return NextResponse.json({ error: 'Failed to create chat thread' }, { status: 500 });
       }
+      chatData = newChat;
     }
 
-    const chatData = chatDoc.data() || {};
-    const otherId = (chatData.participants || []).find(p => p !== user.uid);
-    const ts = FieldValue.serverTimestamp();
+    const participants = chatData.participants || [];
+    const otherId = participants.find(p => p !== user.uid);
+    const nowIso = new Date().toISOString();
 
-    // 1. Add message
-    const msgRef = chatRef.collection('messages').doc();
-    const messageData = {
-      senderId: user.uid,
-      text: text.trim(),
-      timestamp: ts,
-      status: 'sent',
-    };
-    
-    // We use a batch so message and chat update are atomic
-    const batch = adminDb.batch();
-    batch.set(msgRef, messageData);
+    // Insert message into chat_messages table
+    const { data: msgData, error: msgErr } = await supabaseAdmin
+      .from('chat_messages')
+      .insert({
+        chat_id: chatId,
+        sender_id: user.uid,
+        text: text.trim(),
+        status: 'sent',
+        created_at: nowIso,
+      })
+      .select()
+      .single();
 
-    // 2. Update chat metadata
-    const chatUpdate = {
-      lastMessage: text.trim(),
-      lastMessageAt: ts,
-      lastSenderId: user.uid,
-      [`unreadCount.${user.uid}`]: 0,
-    };
-    if (otherId) {
-      chatUpdate[`unreadCount.${otherId}`] = FieldValue.increment(1);
+    if (msgErr) {
+      console.error('[POST /api/chats/[id]/messages insert error]', msgErr.message);
+      return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
     }
-    
-    batch.update(chatRef, chatUpdate);
-    await batch.commit();
 
-    // 3. Push notification to the recipient (fire-and-forget, non-blocking)
+    // Update chat metadata
+    const currentUnread = chatData.unread_count || {};
+    const updatedUnread = {
+      ...currentUnread,
+      [user.uid]: 0,
+    };
     if (otherId) {
-      const senderName = user.name || user.email?.split('@')[0] || 'Someone';
+      updatedUnread[otherId] = (currentUnread[otherId] || 0) + 1;
+    }
+
+    await supabaseAdmin
+      .from('chats')
+      .update({
+        last_message: text.trim(),
+        last_message_at: nowIso,
+        last_sender_id: user.uid,
+        unread_count: updatedUnread,
+      })
+      .eq('id', chatId);
+
+    // Push notification to recipient
+    if (otherId) {
+      const senderName = user.full_name || user.email?.split('@')[0] || 'Someone';
       const preview = text.trim().length > 60 ? text.trim().slice(0, 60) + '…' : text.trim();
       sendPush(otherId, {
         title: `💬 ${senderName}`,
         body: preview,
         url: `/messages`,
-      }).catch(() => {}); // never block the response
+      }).catch(() => {});
     }
 
-    return NextResponse.json({ ok: true, messageId: msgRef.id });
+    return NextResponse.json({ ok: true, messageId: msgData.id });
   } catch (err) {
     console.error('[POST /api/chats/[id]/messages]', err.message);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
-
-
-

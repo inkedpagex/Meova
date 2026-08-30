@@ -1,23 +1,27 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function GET() {
   const currentUser = await requireAuth();
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const blocksSnap = await adminDb.collection('blocks')
-      .where('blocker', '==', currentUser.uid)
-      .get();
-    
-    const blocksSnap2 = await adminDb.collection('blocks')
-      .where('blocked', '==', currentUser.uid)
-      .get();
-      
+    // Fetch blocks where current user is blocker OR blocked
+    const [{ data: blockerData }, { data: blockedData }] = await Promise.all([
+      supabaseAdmin
+        .from('blocks')
+        .select('blocked_id')
+        .eq('blocker_id', currentUser.uid),
+      supabaseAdmin
+        .from('blocks')
+        .select('blocker_id')
+        .eq('blocked_id', currentUser.uid),
+    ]);
+
     const blockedUids = new Set([
-      ...blocksSnap.docs.map(doc => doc.data().blocked),
-      ...blocksSnap2.docs.map(doc => doc.data().blocker)
+      ...(blockerData || []).map(b => b.blocked_id),
+      ...(blockedData || []).map(b => b.blocker_id),
     ]);
 
     return NextResponse.json({ blocks: Array.from(blockedUids) });

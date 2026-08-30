@@ -5,33 +5,31 @@
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../../lib/getAdminUser';
-import { adminDb } from '../../../../lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { supabaseAdmin } from '../../../../lib/supabase/admin';
 
 export async function POST(request) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
     const { token } = await request.json();
     if (!token || typeof token !== 'string' || token.length < 10) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 400 });
     }
 
-    // Store token in users/{uid}/fcmTokens/{token} (token as doc ID for easy dedup)
-    const tokenRef = adminDb
-      .collection('users')
-      .doc(user.uid)
-      .collection('fcmTokens')
-      .doc(token.slice(-40)); // Use last 40 chars as doc ID to avoid Firestore path length limits
+    // Upsert token in fcm_tokens table (token is unique — prevents duplicates)
+    const { error } = await supabaseAdmin
+      .from('fcm_tokens')
+      .upsert({
+        user_id: user.uid,
+        token,
+        created_at: new Date().toISOString(),
+      }, { onConflict: 'token' });
 
-    await tokenRef.set({
-      token,
-      platform: 'web',
-      userAgent: request.headers.get('user-agent') || '',
-      updatedAt: FieldValue.serverTimestamp(),
-    }, { merge: true });
+    if (error) {
+      console.error('[POST /api/fcm/register]', error.message);
+      return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {
@@ -45,17 +43,17 @@ export async function DELETE(request) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
     const { token } = await request.json();
     if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 });
 
-    await adminDb
-      .collection('users')
-      .doc(user.uid)
-      .collection('fcmTokens')
-      .doc(token.slice(-40))
-      .delete();
+    const { error } = await supabaseAdmin
+      .from('fcm_tokens')
+      .delete()
+      .eq('token', token)
+      .eq('user_id', user.uid);
+
+    if (error) throw new Error(error.message);
 
     return NextResponse.json({ success: true });
   } catch (err) {
@@ -63,4 +61,3 @@ export async function DELETE(request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
-

@@ -19,6 +19,9 @@ export const metadata = {
   title: 'Meova — Your Campus Life',
   description: 'Join experiences, meet people, and grow your campus social circle with Meova.',
   manifest: '/manifest.json',
+  verification: {
+    google: '69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -51,6 +54,7 @@ export default async function RootLayout({ children }) {
         return (
           <html lang="en">
             <head>
+              <meta name="google-site-verification" content="69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w" />
               <link rel="manifest" href="/manifest.json" />
               <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-content" />
               <meta name="theme-color" content="#ffffff" />
@@ -97,6 +101,7 @@ export default async function RootLayout({ children }) {
   return (
       <html lang="en" data-theme="light" style={{ colorScheme: 'light' }}>
         <head>
+          <meta name="google-site-verification" content="69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
           <meta name="theme-color" content="#F05A00" />
           <meta name="mobile-web-app-capable" content="yes" />

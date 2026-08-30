@@ -1,68 +1,58 @@
-/**
- * POST /api/notifications
- * Server-side utility to write a notification to a user's sub-collection.
- * Called internally from bookings, wallet, and messages API routes.
- *
- * Body: { userId, title, body, type }
- * Types: 'booking' | 'sparks' | 'message'
- */
 import { NextResponse } from 'next/server';
-import { adminDb } from '../../../lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
-import { rateLimit } from '../../../lib/rateLimit';
+import { supabaseAdmin } from '../../../lib/supabase/admin';
+import { rateLimit, getClientIp } from '../../../lib/rateLimit';
 import { requireAuth } from '../../../lib/getAdminUser';
 
-export async function GET(req) {
+export async function GET() {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const snap = await adminDb
-      .collection('users')
-      .doc(user.id)
-      .collection('notifications')
-      .orderBy('created_at', 'desc')
-      .limit(30)
-      .get();
+    const { data: notifications, error } = await supabaseAdmin
+      .from('notifications')
+      .select('*')
+      .eq('user_id', user.uid)
+      .order('created_at', { ascending: false })
+      .limit(30);
 
-    const notifications = snap.docs.map(doc => {
-      const d = doc.data();
-      return {
-        id: doc.id,
-        title: d.title,
-        body: d.body,
-        type: d.type,
-        read: d.read,
-        created_at: d.created_at?.toDate?.()?.toISOString() || null,
-      };
-    });
+    if (error) {
+      console.error('[GET /api/notifications]', error.message);
+      return NextResponse.json({ notifications: [], unreadCount: 0 });
+    }
 
-    const unreadCount = notifications.filter(n => !n.read).length;
-    return NextResponse.json({ notifications, unreadCount });
+    const formatted = (notifications || []).map(n => ({
+      id: n.id,
+      title: n.title,
+      body: n.message || n.body,
+      type: n.type,
+      read: n.read,
+      created_at: n.created_at,
+    }));
+
+    const unreadCount = formatted.filter(n => !n.read).length;
+    return NextResponse.json({ notifications: formatted, unreadCount });
   } catch (err) {
     console.error('[GET /api/notifications]', err.message);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
 
-export async function PATCH(req) {
-  // Mark all as read
+export async function PATCH() {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const snap = await adminDb
-      .collection('users')
-      .doc(user.id)
-      .collection('notifications')
-      .where('read', '==', false)
-      .get();
+    const { error } = await supabaseAdmin
+      .from('notifications')
+      .update({ read: true })
+      .eq('user_id', user.uid)
+      .eq('read', false);
 
-    const batch = adminDb.batch();
-    snap.docs.forEach(doc => batch.update(doc.ref, { read: true }));
-    await batch.commit();
+    if (error) {
+      console.error('[PATCH /api/notifications]', error.message);
+    }
 
-    return NextResponse.json({ success: true, marked: snap.size });
+    return NextResponse.json({ success: true });
   } catch (err) {
     console.error('[PATCH /api/notifications]', err.message);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
@@ -70,8 +60,11 @@ export async function PATCH(req) {
 }
 
 export async function POST(req) {
-  const limited = rateLimit(req, { limit: 30, windowMs: 60_000 });
-  if (limited) return limited;
+  const ip = getClientIp(req);
+  const rl = rateLimit(`notif:${ip}`, { limit: 30, windowMs: 60_000 });
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
 
   try {
     const { userId, title, body, type } = await req.json();
@@ -79,20 +72,22 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const validTypes = ['booking', 'sparks', 'message'];
+    const validTypes = ['booking', 'sparks', 'message', 'alert'];
     const notifType = validTypes.includes(type) ? type : 'system';
 
-    await adminDb
-      .collection('users')
-      .doc(userId)
-      .collection('notifications')
-      .add({
-        title,
-        body,
-        type: notifType,
-        read: false,
-        created_at: FieldValue.serverTimestamp(),
-      });
+    const { error } = await supabaseAdmin.from('notifications').insert({
+      user_id: userId,
+      title,
+      message: body,
+      type: notifType,
+      read: false,
+      created_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      console.error('[POST /api/notifications insert error]', error.message);
+      return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {
@@ -100,4 +95,3 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
-

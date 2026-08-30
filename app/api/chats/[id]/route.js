@@ -3,29 +3,36 @@
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../../lib/getAdminUser';
-import { adminDb } from '../../../../lib/firebaseAdmin';
+import { supabaseAdmin } from '../../../../lib/supabase/admin';
 
 export async function PATCH(request, { params }) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ ok: false });
 
     const { id: chatId } = await params;
-    const chatRef = adminDb.collection('chats').doc(chatId);
-    const snap = await chatRef.get();
 
-    if (!snap.exists) return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
+    const { data: chat, error: fetchErr } = await supabaseAdmin
+      .from('chats')
+      .select('id, participants, unread_count')
+      .eq('id', chatId)
+      .maybeSingle();
 
-    const data = snap.data();
-    if (!data.participants.includes(user.uid)) {
+    if (fetchErr || !chat) return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
+
+    if (!chat.participants?.includes(user.uid)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Reset unread count for this user
-    await chatRef.update({
-      [`unreadCount.${user.uid}`]: 0,
-    });
+    // Reset unread count for this user in the jsonb object
+    const updatedUnreadCount = { ...(chat.unread_count || {}), [user.uid]: 0 };
+
+    const { error: updateErr } = await supabaseAdmin
+      .from('chats')
+      .update({ unread_count: updatedUnreadCount })
+      .eq('id', chatId);
+
+    if (updateErr) throw new Error(updateErr.message);
 
     return NextResponse.json({ ok: true });
   } catch (err) {
@@ -33,4 +40,3 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
-

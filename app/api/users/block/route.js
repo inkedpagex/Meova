@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function POST(request) {
   const currentUser = await requireAuth();
@@ -17,12 +17,15 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Cannot block yourself' }, { status: 400 });
     }
 
-    const blockRef = adminDb.collection('blocks').doc(`${currentUser.uid}_${targetUid}`);
-    await blockRef.set({
-      blocker: currentUser.uid,
-      blocked: targetUid,
-      created_at: new Date().toISOString()
-    });
+    const { error } = await supabaseAdmin
+      .from('blocks')
+      .upsert({
+        blocker_id: currentUser.uid,
+        blocked_id: targetUid,
+        created_at: new Date().toISOString()
+      }, { onConflict: 'blocker_id,blocked_id' });
+
+    if (error) throw new Error(error.message);
 
     return NextResponse.json({ success: true });
   } catch (err) {

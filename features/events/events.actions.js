@@ -1,7 +1,6 @@
 'use server';
 
-import { adminDb } from '../../lib/firebaseAdmin';
-import { TABLE_RSVPS } from './constants';
+import { supabaseAdmin } from '../../lib/supabase/admin';
 import { getUserAdmin } from '../../lib/getUserAdmin';
 import { revalidatePath } from 'next/cache';
 
@@ -9,14 +8,17 @@ export async function rsvpToEventAction(eventId) {
   try {
     const user = await getUserAdmin();
     if (!user) throw new Error('Unauthorized');
-    if (!adminDb) throw new Error('DB unavailable');
 
-    const rsvpId = `${eventId}_${user.id}`;
-    await adminDb.collection(TABLE_RSVPS).doc(rsvpId).set({
-      event_id: eventId,
-      user_id: user.id,
-      created_at: new Date().toISOString()
-    });
+    const { error } = await supabaseAdmin
+      .from('rsvps')
+      .upsert({
+        event_id: eventId,
+        user_id: user.id,
+        status: 'going',
+        created_at: new Date().toISOString()
+      }, { onConflict: 'event_id,user_id' });
+
+    if (error) throw new Error(error.message);
 
     revalidatePath(`/events`);
     revalidatePath(`/events/${eventId}`);
@@ -31,10 +33,14 @@ export async function cancelRsvpAction(eventId) {
   try {
     const user = await getUserAdmin();
     if (!user) throw new Error('Unauthorized');
-    if (!adminDb) throw new Error('DB unavailable');
 
-    const rsvpId = `${eventId}_${user.id}`;
-    await adminDb.collection(TABLE_RSVPS).doc(rsvpId).delete();
+    const { error } = await supabaseAdmin
+      .from('rsvps')
+      .delete()
+      .eq('event_id', eventId)
+      .eq('user_id', user.id);
+
+    if (error) throw new Error(error.message);
 
     revalidatePath(`/events`);
     revalidatePath(`/events/${eventId}`);

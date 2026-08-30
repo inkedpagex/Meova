@@ -1,6 +1,6 @@
 // Public student profile page — /users/[id]
 import { fetchProfileAdmin, fetchJoinedCirclesAdmin, fetchReviewsAdmin, fetchUsersAdmin } from '../../../lib/firebaseAdminQueries';
-import { adminDb } from '../../../lib/firebaseAdmin';
+import { supabaseAdmin } from '../../../lib/supabase/admin';
 import { getUserAdmin } from '../../../lib/getUserAdmin';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -70,14 +70,15 @@ export default async function UserProfilePage({ params }) {
 
   let pendingBooking = null;
   if (currentUser && currentUser.id !== id) {
-    const snap = await adminDb.collection('bookings')
-      .where('hostId', '==', currentUser.id)
-      .where('guestId', '==', id)
-      .where('status', '==', 'Requested')
-      .limit(1)
-      .get();
-    if (!snap.empty) {
-      pendingBooking = { id: snap.docs[0].id, ...snap.docs[0].data() };
+    const { data: bookingRows } = await supabaseAdmin
+      .from('bookings')
+      .select('*')
+      .eq('host_id', currentUser.id)
+      .eq('guest_id', id)
+      .eq('status', 'Requested')
+      .limit(1);
+    if (bookingRows && bookingRows.length > 0) {
+      pendingBooking = bookingRows[0];
     }
   }
 

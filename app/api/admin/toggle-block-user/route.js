@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/getAdminUser';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function POST(request) {
   const admin = await requireAdmin();
@@ -13,18 +13,21 @@ export async function POST(request) {
       return NextResponse.json({ error: 'targetUid and boolean isBlocked required' }, { status: 400 });
     }
 
-    const userRef = adminDb.collection('users').doc(targetUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return NextResponse.json({ error: 'User doc not found' }, { status: 404 });
+    const { data: targetProfile, error: profileErr } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', targetUid)
+      .maybeSingle();
+
+    if (profileErr || !targetProfile) {
+      return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
     }
 
-    const targetData = userSnap.data() || {};
     const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
-    const targetEmail = (targetData.email || '').toLowerCase();
+    const targetEmail = (targetProfile.email || '').toLowerCase();
 
     if (
-      targetData.role === 'admin' ||
+      targetProfile.role === 'admin' ||
       targetUid === admin.uid ||
       targetEmail === 'chirag2006chak@gmail.com' ||
       adminEmails.includes(targetEmail)
@@ -32,32 +35,36 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Administrator accounts cannot be blocked.' }, { status: 400 });
     }
 
-    await userRef.update({
-      isBlocked,
-      status: isBlocked ? 'blocked' : 'active',
-      updatedAt: new Date().toISOString(),
-    });
+    const now = new Date().toISOString();
 
-    // ── Cascade Block to Posts and Gigs ────────────────────────
-    const batch = adminDb.batch();
-    const postsSnap = await adminDb.collection('posts').where('authorId', '==', targetUid).get();
-    postsSnap.forEach(doc => {
-      batch.update(doc.ref, { isHidden: isBlocked });
-    });
+    // Update profile
+    await supabaseAdmin
+      .from('profiles')
+      .update({
+        is_blocked: isBlocked,
+        status: isBlocked ? 'blocked' : 'active',
+        updated_at: now,
+      })
+      .eq('id', targetUid);
 
-    const gigsSnap = await adminDb.collection('gigs').where('authorId', '==', targetUid).get();
-    gigsSnap.forEach(doc => {
-      batch.update(doc.ref, { isHidden: isBlocked });
-    });
-    await batch.commit();
-    // ───────────────────────────────────────────────────────────
+    // Cascade block to posts and gigs
+    await Promise.all([
+      supabaseAdmin
+        .from('posts')
+        .update({ is_hidden: isBlocked })
+        .eq('author_id', targetUid),
+      supabaseAdmin
+        .from('gigs')
+        .update({ is_hidden: isBlocked })
+        .eq('author_id', targetUid),
+    ]);
 
     // Write audit log
-    await adminDb.collection('audit_logs').add({
-      admin_id:   admin.uid,
-      action:     isBlocked ? 'BLOCK_USER' : 'UNBLOCK_USER',
-      target_uid: targetUid,
-      timestamp:  new Date().toISOString(),
+    await supabaseAdmin.from('audit_logs').insert({
+      admin_uid: admin.uid,
+      action: isBlocked ? 'BLOCK_USER' : 'UNBLOCK_USER',
+      target_id: targetUid,
+      created_at: now,
     });
 
     return NextResponse.json({

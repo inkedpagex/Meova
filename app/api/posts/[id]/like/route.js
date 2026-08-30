@@ -1,34 +1,48 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/getAdminUser';
-import { FieldValue } from 'firebase-admin/firestore';
 
 export async function POST(request, { params }) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
     const { id } = params;
     if (!id) return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
 
-    const postRef = adminDb.collection('posts').doc(id);
-    const postSnap = await postRef.get();
+    // Check post exists
+    const { data: post, error: fetchErr } = await supabaseAdmin
+      .from('posts')
+      .select('id, likes_count')
+      .eq('id', id)
+      .maybeSingle();
 
-    if (!postSnap.exists) {
+    if (fetchErr || !post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    // In a full production app, we would also add the user to a 'likedBy' array or subcollection
-    // to prevent multiple likes from the same user. For now, we just increment the counter securely.
-    await postRef.update({
-      likes: FieldValue.increment(1)
-    });
+    // Check if user already liked this post
+    const { data: existingLike } = await supabaseAdmin
+      .from('post_likes')
+      .select('id')
+      .eq('post_id', id)
+      .eq('user_id', user.uid)
+      .maybeSingle();
 
-    return NextResponse.json({ ok: true, message: 'Post liked successfully', likes: (postSnap.data().likes || 0) + 1 });
+    if (existingLike) {
+      return NextResponse.json({ ok: true, message: 'Already liked', likes: post.likes_count });
+    }
+
+    // Insert like record
+    await supabaseAdmin.from('post_likes').insert({ post_id: id, user_id: user.uid });
+
+    // Increment likes_count
+    const newCount = (post.likes_count || 0) + 1;
+    await supabaseAdmin.from('posts').update({ likes_count: newCount }).eq('id', id);
+
+    return NextResponse.json({ ok: true, message: 'Post liked successfully', likes: newCount });
   } catch (err) {
     console.error(`[POST /api/posts/${params.id}/like]`, err.message);
     return NextResponse.json({ error: 'Failed to like post' }, { status: 500 });
   }
 }
-

@@ -1,29 +1,33 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '../../../../lib/getAdminUser';
-import { adminDb } from '../../../../lib/firebaseAdmin';
+import { requireAdmin } from '@/lib/getAdminUser';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function GET() {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
   try {
-    // Parallel fetch users and wallets
-    const [usersSnap, walletsSnap] = await Promise.all([
-      adminDb.collection('users').get(),
-      adminDb.collection('wallets').get()
-    ]);
+    // Fetch users with their wallet balances via join
+    const { data: profiles, error: profilesErr } = await supabaseAdmin
+      .from('profiles')
+      .select(`
+        *,
+        wallets (
+          purchased,
+          bonus,
+          creator
+        )
+      `)
+      .order('created_at', { ascending: false });
 
-    const walletsMap = {};
-    walletsSnap.docs.forEach(doc => {
-      const data = doc.data();
-      // Total spendable/withdrawable balance = purchased + bonus + creator
-      walletsMap[doc.id] = (data.purchased || 0) + (data.bonus || 0) + (data.creator || 0);
-    });
+    if (profilesErr) throw new Error(profilesErr.message);
 
-    const users = usersSnap.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      sparksBalance: walletsMap[doc.id] || 0
+    const users = (profiles || []).map(p => ({
+      ...p,
+      sparksBalance: p.wallets
+        ? (p.wallets.purchased || 0) + (p.wallets.bonus || 0) + (p.wallets.creator || 0)
+        : 0,
+      wallets: undefined, // remove nested wallet object from response
     }));
 
     return NextResponse.json({ users });

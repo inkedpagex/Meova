@@ -1,80 +1,91 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/getAdminUser';
-import { FieldValue } from 'firebase-admin/firestore';
 
 export async function POST(request, { params }) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
     const { id } = await params;
     if (!id) return NextResponse.json({ error: 'Gig ID is required' }, { status: 400 });
 
-    const gigRef = adminDb.collection('gigs').doc(id);
-    const gigSnap = await gigRef.get();
+    const { data: gig, error: fetchErr } = await supabaseAdmin
+      .from('gigs')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
 
-    if (!gigSnap.exists) {
+    if (fetchErr || !gig) {
       return NextResponse.json({ error: 'Gig not found' }, { status: 404 });
     }
 
-    const gig = gigSnap.data();
-
-    // Can't apply to your own gig
-    if (gig.authorId === user.uid) {
+    if (gig.author_id === user.uid) {
       return NextResponse.json({ error: 'You cannot apply to your own gig' }, { status: 400 });
     }
 
-    // Can't apply to closed/expired gig
     if (gig.status === 'closed' || gig.status === 'expired') {
       return NextResponse.json({ error: 'This gig is no longer accepting applications' }, { status: 400 });
     }
 
-    // Check for duplicate application
-    const applicationRef = gigRef.collection('applications').doc(user.uid);
-    const appSnap = await applicationRef.get();
-    if (appSnap.exists) {
+    // Check duplicate application
+    const { data: existingApp } = await supabaseAdmin
+      .from('gig_applications')
+      .select('*')
+      .eq('gig_id', id)
+      .eq('applicant_id', user.uid)
+      .maybeSingle();
+
+    if (existingApp) {
       return NextResponse.json({ error: 'Already applied to this gig' }, { status: 400 });
     }
 
     const { pitch } = await request.json().catch(() => ({}));
 
-    const batch = adminDb.batch();
+    // 1. Insert application
+    const { error: insertErr } = await supabaseAdmin
+      .from('gig_applications')
+      .insert({
+        gig_id: id,
+        applicant_id: user.uid,
+        applicant_name: user.full_name || 'Student',
+        applicant_photo: user.photo_url || '',
+        applicant_username: user.username || '',
+        applicant_branch: user.branch || 'Campus',
+        pitch: (pitch || '').trim().slice(0, 300),
+        status: 'PENDING',
+        applied_at: new Date().toISOString(),
+      });
 
-    // 1. Create the application document (with optional pitch message)
-    batch.set(applicationRef, {
-      applicantId: user.uid,
-      applicantName: user.full_name || 'Student',
-      applicantPhoto: user.photo_url || '',
-      applicantUsername: user.username || '',
-      applicantBranch: user.branch || 'Campus',
-      pitch: (pitch || '').trim().slice(0, 300),
-      status: 'PENDING',
-      appliedAt: new Date().toISOString(),
-    });
+    if (insertErr) {
+      console.error('[POST /api/gigs/[id]/apply insert error]', insertErr.message);
+      return NextResponse.json({ error: 'Failed to submit application' }, { status: 500 });
+    }
 
-    // 2. Increment the application count on the gig
-    batch.update(gigRef, {
-      applicationsCount: FieldValue.increment(1),
-    });
+    // 2. Increment applications_count on gig
+    const newCount = (gig.applications_count || 0) + 1;
+    await supabaseAdmin
+      .from('gigs')
+      .update({ applications_count: newCount })
+      .eq('id', id);
 
-    await batch.commit();
-
-    // Notify gig author
-    adminDb.collection('users').doc(gig.authorId).collection('notifications').add({
-      title: 'New Gig Application ⚡',
-      body: `${user.full_name || 'Someone'} applied to your gig "${gig.title}"`,
-      type: 'gig_application',
-      gigId: id,
-      read: false,
-      created_at: FieldValue.serverTimestamp(),
-    }).catch(() => {});
+    // Notify author
+    if (gig.author_id) {
+      await supabaseAdmin.from('notifications').insert({
+        user_id: gig.author_id,
+        sender_id: user.uid,
+        title: 'New Gig Application ⚡',
+        message: `${user.full_name || 'Someone'} applied to your gig "${gig.title}"`,
+        type: 'gig_application',
+        gig_id: id,
+        read: false,
+        created_at: new Date().toISOString(),
+      }).catch(() => {});
+    }
 
     return NextResponse.json({ ok: true, message: 'Application submitted successfully' });
   } catch (err) {
-    console.error(`[POST /api/gigs/[id]/apply]`, err.message);
+    console.error('[POST /api/gigs/[id]/apply]', err.message);
     return NextResponse.json({ error: 'Failed to apply to gig' }, { status: 500 });
   }
 }
-

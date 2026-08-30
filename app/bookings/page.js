@@ -6,7 +6,7 @@ import { useUserContext } from "../../components/providers/UserProvider";
 import { useRouter } from "next/navigation";
 import {
   Calendar, Clock, MapPin, QrCode, ScanLine, X, Loader2,
-  CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight
+  CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight, MessageCircle
 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { Scanner } from "@yudiel/react-qr-scanner";
@@ -89,6 +89,29 @@ export default function BookingsPage() {
   const [disputeLoading, setDisputeLoading] = useState(false);
   const [disputeSuccess, setDisputeSuccess] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(null); // bookingId being cancelled
+  const [actionLoading, setActionLoading] = useState(null); // `${bookingId}-${action}`
+
+  const handleHostAction = async (bookingId, action) => {
+    setActionLoading(`${bookingId}-${action}`);
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, action })
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success(`Meeting ${action}ed successfully!`);
+        mutate();
+      } else {
+        toast.error(d.error || `Failed to ${action}`);
+      }
+    } catch {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const { data, error, mutate, isLoading } = useSWR(user ? "/api/bookings" : null, fetcher);
   const { data: walletData } = useSWR(user ? "/api/wallet" : null, fetcher);
@@ -380,6 +403,14 @@ export default function BookingsPage() {
                 </div>
               </div>
 
+              {/* Agenda (If exists) */}
+              {booking.agenda && (
+                <div className="mt-3 p-3 bg-zinc-50/50 border border-zinc-100 rounded-xl">
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Meeting Purpose</p>
+                  <p className="text-xs text-zinc-700 font-medium leading-relaxed italic">"{booking.agenda}"</p>
+                </div>
+              )}
+
               {/* Countdown Timer for Active Bookings */}
               {activeTab === "Active" && (
                 <MeetingCountdownTimer booking={booking} />
@@ -440,19 +471,48 @@ export default function BookingsPage() {
                       )}
                     </>
                   ) : (
-                    <button 
-                      onClick={(e) => { 
-                        e.stopPropagation();
-                        setSelectedBooking(booking); 
-                        setShowScanModal(true); 
-                        setScanStatus("idle");
-                        setIsScanning(true);
-                        setManualCode("");
-                      }}
-                      className="flex-1 bg-[#F05A00] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#D94F00] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(240,90,0,0.3)]"
-                    >
-                      <ScanLine size={16} /> Scan Guest QR
-                    </button>
+                    <>
+                      {booking.status === "Requested" ? (
+                        <div className="flex gap-2 w-full flex-wrap">
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); router.push(`/messages?uid=${booking.guestId}`); }}
+                            className="w-full bg-zinc-100 text-zinc-600 rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-200 active:scale-[0.98] transition-all"
+                          >
+                            <MessageCircle size={16} /> Propose New Time
+                          </button>
+                          <div className="flex gap-2 w-full">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleHostAction(booking.id, 'reject'); }}
+                              disabled={actionLoading === `${booking.id}-reject`}
+                              className="flex-1 bg-rose-50 text-rose-600 rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-rose-100 active:scale-[0.98] transition-all disabled:opacity-50"
+                            >
+                              {actionLoading === `${booking.id}-reject` ? <Loader2 size={16} className="animate-spin" /> : 'Decline'}
+                            </button>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleHostAction(booking.id, 'accept'); }}
+                              disabled={actionLoading === `${booking.id}-accept`}
+                              className="flex-1 bg-emerald-500 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-emerald-600 active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_4px_15px_rgba(16,185,129,0.3)]"
+                            >
+                              {actionLoading === `${booking.id}-accept` ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={16} /> Accept</>}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation();
+                            setSelectedBooking(booking); 
+                            setShowScanModal(true); 
+                            setScanStatus("idle");
+                            setIsScanning(true);
+                            setManualCode("");
+                          }}
+                          className="flex-1 bg-[#F05A00] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#D94F00] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(240,90,0,0.3)]"
+                        >
+                          <ScanLine size={16} /> Scan Guest QR
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               )}

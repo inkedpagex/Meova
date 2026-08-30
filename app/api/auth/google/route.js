@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '../../../../lib/firebaseAdmin';
+import { adminAuth } from '../../../../lib/firebaseAdmin';
 import { rateLimit, getClientIp } from '../../../../lib/rateLimit';
 
 export async function POST(request) {
@@ -18,9 +18,10 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Access token required' }, { status: 400 });
     }
 
-    if (!adminAuth || !adminDb) {
+    if (!adminAuth) {
       return NextResponse.json({ error: 'Firebase Admin not initialized' }, { status: 503 });
     }
+
 
     // 1. Verify the Google access token by fetching the user profile from Google
     const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {

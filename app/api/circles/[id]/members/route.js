@@ -3,88 +3,72 @@
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function GET(request, { params }) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
     const { id: circleId } = await params;
     if (!circleId) return NextResponse.json({ error: 'Invalid community ID' }, { status: 400 });
 
-    const circleDoc = await adminDb.collection('circles').doc(circleId).get();
-    if (!circleDoc.exists) {
+    // Fetch circle
+    const { data: circle, error: circleErr } = await supabaseAdmin
+      .from('circles')
+      .select('id, name, creator_id, total_sparks_earned, member_count')
+      .eq('id', circleId)
+      .maybeSingle();
+
+    if (circleErr || !circle) {
       return NextResponse.json({ error: 'Community not found' }, { status: 404 });
     }
 
-    const circle = circleDoc.data();
-    const isHost = circle.host_id === user.uid;
+    const isHost = circle.creator_id === user.uid;
     const isAdmin = user.role === 'admin';
 
     if (!isHost && !isAdmin) {
       return NextResponse.json({ error: 'Forbidden: Only host can view member details' }, { status: 403 });
     }
 
-    // Fetch all members for this community
-    const membersSnap = await adminDb
-      .collection('circle_members')
-      .where('circle_id', '==', circleId)
-      .get();
+    // Fetch all members with their profile info via join
+    const { data: members, error: membersErr } = await supabaseAdmin
+      .from('circle_members')
+      .select(`
+        circle_id,
+        user_id,
+        role,
+        sparks_paid,
+        joined_at,
+        profiles (
+          id,
+          full_name,
+          photo_url,
+          year,
+          branch,
+          email
+        )
+      `)
+      .eq('circle_id', circleId)
+      .order('joined_at', { ascending: false });
 
-    const memberRecords = membersSnap.docs.map(doc => doc.data());
+    if (membersErr) throw new Error(membersErr.message);
 
-    // Fetch user profiles for all member IDs
-    const userIds = Array.from(new Set(memberRecords.map(m => m.user_id).filter(Boolean)));
-    const usersMap = {};
-
-    if (userIds.length > 0) {
-      // Chunk array into batches of 10 for Firestore 'in' query limitation
-      const chunks = [];
-      for (let i = 0; i < userIds.length; i += 10) {
-        chunks.push(userIds.slice(i, i + 10));
-      }
-
-      for (const chunk of chunks) {
-        const uSnap = await adminDb
-          .collection('users')
-          .where('id', 'in', chunk)
-          .get();
-
-        uSnap.docs.forEach(d => {
-          const uData = d.data();
-          usersMap[d.id] = {
-            id: d.id,
-            full_name: uData.full_name || uData.display_name || uData.name || 'Campus Student',
-            photo_url: uData.photo_url || uData.image || '',
-            college: uData.college || 'GLA University',
-            year: uData.year || 'Student',
-            branch: uData.branch || '',
-            email: uData.email || '',
-          };
-        });
-      }
-    }
-
-    const roster = memberRecords.map(m => {
-      const u = usersMap[m.user_id] || {
-        id: m.user_id,
-        full_name: 'Campus Student',
-        photo_url: '',
-        college: 'GLA University',
-        year: 'Student',
-        branch: '',
-      };
-
-      return {
-        ...m,
-        student: u,
-      };
-    });
-
-    // Sort: Host first, then newest members
-    roster.sort((a, b) => (b.joined_at || '').localeCompare(a.joined_at || ''));
+    const roster = (members || []).map(m => ({
+      circle_id: m.circle_id,
+      user_id: m.user_id,
+      role: m.role,
+      sparks_paid: m.sparks_paid,
+      joined_at: m.joined_at,
+      student: {
+        id: m.profiles?.id || m.user_id,
+        full_name: m.profiles?.full_name || 'Campus Student',
+        photo_url: m.profiles?.photo_url || '',
+        year: m.profiles?.year || 'Student',
+        branch: m.profiles?.branch || '',
+        email: m.profiles?.email || '',
+      },
+    }));
 
     return NextResponse.json({
       success: true,
@@ -99,4 +83,3 @@ export async function GET(request, { params }) {
     return NextResponse.json({ error: 'Failed to fetch member details' }, { status: 500 });
   }
 }
-

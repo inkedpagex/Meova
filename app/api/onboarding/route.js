@@ -1,25 +1,17 @@
 import { NextResponse } from 'next/server';
-import { adminDb, adminAuth } from '@/lib/firebaseAdmin';
+import { requireAuth } from '@/lib/getAdminUser';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { cookies } from 'next/headers';
 
 const USERNAME_REGEX = /^[a-z0-9_]{3,20}$/;
 
 export async function POST(request) {
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('__Meova_session')?.value;
-    if (!sessionCookie) {
+    const user = await requireAuth();
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    // Verify session
-    let uid;
-    try {
-      const decoded = await adminAuth.verifyIdToken(sessionCookie);
-      uid = decoded.uid;
-    } catch {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-    }
+    const uid = user.uid;
 
     const body = await request.json();
     const {
@@ -53,65 +45,74 @@ export async function POST(request) {
 
     const cleanUsername = username.toLowerCase().trim();
 
-    if (!adminDb) {
-      return NextResponse.json({ error: 'Server not initialized.' }, { status: 500 });
+    // Check username availability in public.usernames
+    const { data: usernameDoc } = await supabaseAdmin
+      .from('usernames')
+      .select('*')
+      .eq('username', cleanUsername)
+      .maybeSingle();
+
+    if (usernameDoc && (usernameDoc.user_id || usernameDoc.uid) !== uid) {
+      return NextResponse.json({ error: 'This username was just taken. Please choose another.' }, { status: 409 });
     }
 
-    // ── Atomically claim username using Firestore transaction ────
-    const userRef = adminDb.collection('users').doc(uid);
-    const usernameRef = adminDb.collection('usernames').doc(cleanUsername);
+    // Check if user previously held a different username and clean it up
+    const { data: currentProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('username')
+      .eq('id', uid)
+      .maybeSingle();
 
-    await adminDb.runTransaction(async (tx) => {
-      const usernameSnap = await tx.get(usernameRef);
+    if (currentProfile?.username && currentProfile.username !== cleanUsername) {
+      await supabaseAdmin
+        .from('usernames')
+        .delete()
+        .eq('username', currentProfile.username);
+    }
 
-      if (usernameSnap.exists && usernameSnap.data().uid !== uid) {
-        throw new Error('USERNAME_TAKEN');
-      }
-
-      // Check if user already has a different username and release it
-      const userSnap = await tx.get(userRef);
-      const existingUsername = userSnap.exists ? userSnap.data().username : null;
-      if (existingUsername && existingUsername !== cleanUsername) {
-        const oldUsernameRef = adminDb.collection('usernames').doc(existingUsername);
-        tx.delete(oldUsernameRef);
-      }
-
-      // Claim new username
-      tx.set(usernameRef, { uid, claimedAt: new Date().toISOString() });
-
-      // Update user profile
-      const profileData = {
+    // Claim username in public.usernames
+    await supabaseAdmin
+      .from('usernames')
+      .upsert({
         username: cleanUsername,
-        full_name: full_name.trim(),
-        gender,
-        year,
-        branch: branch.trim(),
-        university: university?.trim() || '',
-        bio: bio?.trim() || '',
-        interests: interests || [],
-        instagram: instagram?.trim() || '',
-        photo_url: photo_url || '',
-        profileComplete: true,
-        updated_at: new Date().toISOString(),
-      };
+        user_id: uid,
+        uid: uid,
+        created_at: new Date().toISOString(),
+      }, { onConflict: 'username' });
 
-      if (userSnap.exists) {
-        tx.update(userRef, profileData);
-      } else {
-        tx.set(userRef, { ...profileData, role: 'user', created_at: new Date().toISOString() });
-      }
-    });
+    // Update public.profiles
+    const profilePayload = {
+      username: cleanUsername,
+      full_name: full_name.trim(),
+      gender,
+      year,
+      branch: branch.trim(),
+      university: university?.trim() || '',
+      bio: bio?.trim() || '',
+      interests: interests || [],
+      instagram: instagram?.trim() || '',
+      photo_url: photo_url || '',
+      profile_complete: true,
+      updated_at: new Date().toISOString(),
+    };
 
-    // Update profile override cookie so server components pick up the changes instantly
+    const { error: profileErr } = await supabaseAdmin
+      .from('profiles')
+      .update(profilePayload)
+      .eq('id', uid);
+
+    if (profileErr) {
+      console.error('[onboarding POST profile update error]', profileErr.message);
+      return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
+    }
+
+    const cookieStore = await cookies();
     cookieStore.set(
       '__Meova_profile_overrides',
       JSON.stringify({ full_name: full_name.trim(), username: cleanUsername, photo_url: photo_url || '' }),
       { maxAge: 60 * 60 * 24 * 30, path: '/' }
     );
 
-    // ── Critical: set profileComplete cookie so layout gate skips the Firestore
-    // check on the very next request (prevents ERR_FAILED redirect loop on slow
-    // connections where Firestore write hasn't propagated yet).
     cookieStore.set('__Meova_pc', '1', {
       maxAge: 60 * 60 * 24 * 365,
       path: '/',
@@ -121,9 +122,6 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    if (err.message === 'USERNAME_TAKEN') {
-      return NextResponse.json({ error: 'This username was just taken. Please choose another.' }, { status: 409 });
-    }
     console.error('[onboarding POST]', err.message);
     return NextResponse.json({ error: err.message || 'Server error.' }, { status: 500 });
   }

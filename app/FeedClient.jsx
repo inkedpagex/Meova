@@ -251,6 +251,19 @@ export default function FeedClient() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
+  const handleDeletePost = async (postId) => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    try {
+      const res = await fetch(`/api/feed/${postId}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!res.ok) { toast.error(json.error || 'Failed to delete post'); return; }
+      toast.success('Post deleted successfully');
+      mutatePosts();
+    } catch {
+      toast.error('Network error.');
+    }
+  };
+
   // Redesign Home page active modals and deck states
   const [stackIndex, setStackIndex] = useState(0);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -1137,6 +1150,17 @@ export default function FeedClient() {
                       <Heart size={15} className={isLiked ? 'fill-current text-rose-600' : ''} />
                       <span>{currentLikes} Vibes</span>
                     </button>
+
+                    {/* Delete Button */}
+                    {post.authorId === currentUser?.id && (
+                      <button 
+                        onClick={() => handleDeletePost(post.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-red-500 hover:bg-red-50 transition-all cursor-pointer"
+                      >
+                        <X size={15} />
+                        <span className="hidden sm:inline">Delete</span>
+                      </button>
+                    )}
 
                     {/* Share Button */}
                     <button 

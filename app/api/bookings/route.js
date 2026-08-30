@@ -1,32 +1,31 @@
 /**
  * GET  /api/bookings    — Get user's bookings
- * POST /api/bookings    — Create a booking (deducts sparks via Firestore transaction)
- * PATCH /api/bookings   — Update booking status (accept/reject/complete/dispute/auto_refund)
+ * POST /api/bookings    — Create a booking (deducts sparks via spend_sparks RPC)
+ * PATCH /api/bookings   — Update booking status (accept/reject/complete/dispute/cancel)
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../lib/getAdminUser';
-import { adminDb } from '../../../lib/firebaseAdmin';
-import { spendSparks } from '../../../lib/wallet';
-import { FieldValue } from 'firebase-admin/firestore';
+import { supabaseAdmin } from '../../../lib/supabase/admin';
+import { spendSparks, creditSparks } from '../../../lib/wallet';
 import { sendPush } from '../../../lib/sendPushNotification';
 
 export async function GET() {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ bookings: [] });
 
-    const [asGuest, asHost] = await Promise.all([
-      adminDb.collection('bookings').where('guestId', '==', user.uid).get(),
-      adminDb.collection('bookings').where('hostId', '==', user.uid).get(),
-    ]);
+    const { data: bookings, error } = await supabaseAdmin
+      .from('bookings')
+      .select('*')
+      .or(`guest_id.eq.${user.uid},host_id.eq.${user.uid}`)
+      .order('created_at', { ascending: false });
 
-    const toObj = doc => ({ id: doc.id, ...doc.data() });
-    const all = [...asGuest.docs.map(toObj), ...asHost.docs.map(toObj)];
-    const seen = new Set();
-    const bookings = all.filter(b => { if (seen.has(b.id)) return false; seen.add(b.id); return true; });
+    if (error) {
+      console.error('[GET /api/bookings]', error.message);
+      return NextResponse.json({ bookings: [] });
+    }
 
-    return NextResponse.json({ bookings });
+    return NextResponse.json({ bookings: bookings || [] });
   } catch (err) {
     console.error('[GET /api/bookings]', err.message);
     return NextResponse.json({ bookings: [] });
@@ -37,7 +36,6 @@ export async function POST(request) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
     const body = await request.json();
     const { experienceId, title, price, duration, location, category, hostId, hostName, hostPhoto, date, time, agenda } = body;
@@ -51,25 +49,33 @@ export async function POST(request) {
     }
 
     // Rate Limiting (Anti-Spam): Max 3 pending requests
-    const pendingSnap = await adminDb.collection('bookings')
-      .where('guestId', '==', user.uid)
-      .where('status', '==', 'Requested')
-      .get();
-      
-    if (pendingSnap.size >= 3) {
+    const { count: pendingCount, error: countErr } = await supabaseAdmin
+      .from('bookings')
+      .select('*', { count: 'exact', head: true })
+      .eq('guest_id', user.uid)
+      .eq('status', 'Requested');
+
+    if (!countErr && (pendingCount || 0) >= 3) {
       return NextResponse.json({ error: 'You have too many pending requests (Max: 3). Please wait for hosts to respond.' }, { status: 429 });
     }
 
-    // Deduct sparks atomically
-    const spendResult = await spendSparks(user.uid, price || 0);
-    if (!spendResult.ok) {
-      return NextResponse.json({ error: spendResult.error || 'Insufficient Sparks' }, { status: 402 });
+    // Deduct sparks atomically via spend_sparks RPC (includes row lock and transaction logging)
+    const priceAmount = price || 0;
+    if (priceAmount > 0) {
+      const spendResult = await spendSparks(
+        user.uid,
+        priceAmount,
+        `Booked "${title}"`,
+        'booking_escrow',
+        null
+      );
+
+      if (!spendResult.ok) {
+        return NextResponse.json({ error: spendResult.error || 'Insufficient Sparks' }, { status: 402 });
+      }
     }
 
-    // Build scheduledAt from date + time.
-    // Since experience days are stored as weekday names ("Monday" etc.),
-    // we first try to parse it as a real date. If that fails (NaN),
-    // we store null — the auto-refund cron will fall back to created_at + 24h.
+    // Build scheduledAt timestamp
     let scheduledAt = null;
     try {
       if (date && time) {
@@ -77,66 +83,55 @@ export async function POST(request) {
         if (!isNaN(parsed.getTime())) {
           scheduledAt = parsed.toISOString();
         }
-        // Also accept ISO date strings directly (for future calendar picker)
-        const iso = new Date(date);
-        if (!scheduledAt && !isNaN(iso.getTime()) && time) {
-          const [h, m] = time.replace(/ ?[AP]M/i, '').split(':').map(Number);
-          const isPM = /PM/i.test(time);
-          iso.setHours(isPM && h !== 12 ? h + 12 : (!isPM && h === 12 ? 0 : h), m || 0, 0, 0);
-          if (!isNaN(iso.getTime())) scheduledAt = iso.toISOString();
-        }
       }
     } catch (_) {}
 
-    // Create the booking
     const meetingCode = String(Math.floor(100000 + Math.random() * 900000));
-    const booking = {
-      experienceId,
+    const bookingPayload = {
+      experience_id: experienceId,
       title,
-      price: price || 0,
+      price: priceAmount,
+      sparks_amount: priceAmount,
       duration: duration || 45,
       location: location || '',
       category: category || '',
-      hostId,
-      hostName: hostName || '',
-      hostPhoto: hostPhoto || '',
-      guestId: user.uid,
-      guestName: user.full_name || '',
-      guestPhoto: user.photo || user.instagram_photo || '',
+      host_id: hostId,
+      host_name: hostName || '',
+      host_photo: hostPhoto || '',
+      guest_id: user.uid,
+      guest_name: user.full_name || '',
+      guest_photo: user.photo_url || '',
       date: date || '',
       time: time || '',
       agenda: agenda || '',
       status: 'Requested',
-      meetingCode,
-      scheduledAt,
+      meeting_code: meetingCode,
+      scheduled_at: scheduledAt,
       created_at: new Date().toISOString(),
     };
 
-    const ref = await adminDb.collection('bookings').add(booking);
+    const { data: newBooking, error: insertErr } = await supabaseAdmin
+      .from('bookings')
+      .insert(bookingPayload)
+      .select()
+      .single();
 
-    // Log spend transaction
-    await adminDb.collection('transactions').add({
-      userId: user.uid,
-      type: 'event_booking',
-      amount: -(price || 0),
-      description: `Booked "${title}"`,
-      status: 'COMPLETED',
+    if (insertErr) {
+      console.error('[POST /api/bookings insert error]', insertErr.message);
+      return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
+    }
+
+    // Notify host via in-app notifications table
+    await supabaseAdmin.from('notifications').insert({
+      user_id: hostId,
+      sender_id: user.uid,
+      title: 'New Booking Request ⚡',
+      message: `${user.full_name || 'Someone'} requested ${title}. ${agenda ? `Agenda: "${agenda}"` : ''}`,
+      type: 'booking',
+      booking_id: newBooking.id,
+      read: false,
       created_at: new Date().toISOString(),
     });
-
-    // Notify host — Firestore + FCM push
-    await adminDb
-      .collection('users')
-      .doc(hostId)
-      .collection('notifications')
-      .add({
-        title: 'New Booking Request ⚡',
-        body: `${user.full_name || 'Someone'} requested ${title}. ${agenda ? `Agenda: "${agenda}"` : ''}`,
-        type: 'booking',
-        bookingId: ref.id,
-        read: false,
-        created_at: FieldValue.serverTimestamp(),
-      });
 
     // FCM push (non-blocking)
     sendPush(hostId, {
@@ -145,7 +140,7 @@ export async function POST(request) {
       url: '/bookings',
     }).catch(() => {});
 
-    return NextResponse.json({ booking: { id: ref.id, ...booking } });
+    return NextResponse.json({ booking: newBooking });
   } catch (err) {
     console.error('[POST /api/bookings]', err.message);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
@@ -156,154 +151,167 @@ export async function PATCH(request) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
     const { bookingId, action, code } = await request.json();
     if (!bookingId || !action) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
 
-    const ref = adminDb.collection('bookings').doc(bookingId);
-    // ACID Transaction for booking state changes
-    await adminDb.runTransaction(async (t) => {
-      const snap = await t.get(ref);
-      if (!snap.exists) throw new Error('Booking not found');
-      const booking = { id: snap.id, ...snap.data() };
+    const { data: booking, error: fetchErr } = await supabaseAdmin
+      .from('bookings')
+      .select('*')
+      .eq('id', bookingId)
+      .maybeSingle();
 
-      // Security
-      if (booking.hostId !== user.uid && booking.guestId !== user.uid) {
-        throw new Error('Unauthorized');
+    if (fetchErr || !booking) {
+      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+    }
+
+    // Security check
+    if (booking.host_id !== user.uid && booking.guest_id !== user.uid) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    if (action === 'accept' && booking.host_id === user.uid) {
+      await supabaseAdmin
+        .from('bookings')
+        .update({ status: 'Confirmed' })
+        .eq('id', bookingId);
+
+      // Notification to guest
+      await supabaseAdmin.from('notifications').insert({
+        user_id: booking.guest_id,
+        sender_id: user.uid,
+        title: 'Booking Accepted! 🎉',
+        message: `${user.full_name || 'Host'} accepted "${booking.title}".`,
+        type: 'accepted',
+        booking_id: bookingId,
+        read: false,
+        created_at: new Date().toISOString(),
+      });
+
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === 'reject' && booking.host_id === user.uid) {
+      if (booking.status !== 'Requested') {
+        return NextResponse.json({ error: 'Booking cannot be rejected at this stage' }, { status: 400 });
       }
 
-      if (action === 'accept' && booking.hostId === user.uid) {
-        t.update(ref, { status: 'Confirmed' });
-        const notifRef = adminDb.collection('users').doc(booking.guestId).collection('notifications').doc();
-        t.set(notifRef, {
-          title: 'Booking Accepted! 🎉',
-          body: `${user.full_name || 'Host'} accepted "${booking.title}".`,
-          type: 'accepted', bookingId, read: false,
-          created_at: FieldValue.serverTimestamp(),
-        });
+      await supabaseAdmin
+        .from('bookings')
+        .update({ status: 'Rejected' })
+        .eq('id', bookingId);
 
-        // System Chat Nudge
-        const sortedIds = [booking.guestId, booking.hostId].sort();
-        const chatId = `${sortedIds[0]}_${sortedIds[1]}`;
-        
-        const chatDocRef = adminDb.collection('chats').doc(chatId);
-        t.set(chatDocRef, {
-          participants: [booking.guestId, booking.hostId],
-          updatedAt: FieldValue.serverTimestamp()
-        }, { merge: true });
-
-        const chatMsgRef = chatDocRef.collection('messages').doc();
-        t.set(chatMsgRef, {
-          senderId: 'system',
-          text: `Meeting confirmed for "${booking.title}"! Say hi 👋`,
-          timestamp: FieldValue.serverTimestamp(),
-          status: 'delivered'
-        });
-
-        return;
+      // Refund guest via credit_sparks RPC
+      const price = booking.price || booking.sparks_amount || 0;
+      if (price > 0) {
+        await creditSparks(
+          booking.guest_id,
+          price,
+          'purchased',
+          'dispute_refund',
+          `Booking rejected refund for "${booking.title}"`,
+          bookingId
+        );
       }
 
-      if (action === 'reject' && booking.hostId === user.uid) {
-        if (booking.status !== 'Requested') throw new Error('Booking cannot be rejected at this stage');
-        t.update(ref, { status: 'Rejected' });
-        // Refund
-        const guestWalletRef = adminDb.collection('wallets').doc(booking.guestId);
-        t.set(guestWalletRef, {
-          purchased: FieldValue.increment(booking.price || 0),
-          updated_at: new Date().toISOString(),
-        }, { merge: true });
-        const txRef = adminDb.collection('transactions').doc();
-        t.set(txRef, {
-          userId: booking.guestId, type: 'refund',
-          amount: booking.price || 0, description: 'Booking rejected — refund',
-          status: 'COMPLETED', created_at: new Date().toISOString(),
-        });
-        return;
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === 'dispute' && booking.guest_id === user.uid) {
+      if (!['Requested', 'Confirmed', 'Accepted'].includes(booking.status)) {
+        return NextResponse.json({ error: 'Cannot dispute this booking at this stage' }, { status: 400 });
       }
 
-      if (action === 'dispute' && booking.guestId === user.uid) {
-        if (!['Requested', 'Confirmed', 'Accepted'].includes(booking.status)) {
-          throw new Error('Cannot dispute this booking at this stage');
-        }
-        t.update(ref, { status: 'Disputed', disputedAt: new Date().toISOString(), disputedBy: user.uid });
-        // Notify host
-        const hostNotifRef = adminDb.collection('users').doc(booking.hostId).collection('notifications').doc();
-        t.set(hostNotifRef, {
-          title: '⚠️ Meeting Disputed',
-          body: `${user.full_name || 'Guest'} reported the meeting "${booking.title}" didn't happen.`,
-          type: 'dispute', bookingId, read: false,
-          created_at: FieldValue.serverTimestamp(),
-        });
-        return;
+      await supabaseAdmin
+        .from('bookings')
+        .update({
+          status: 'Disputed',
+          disputed_at: new Date().toISOString(),
+          disputed_by: user.uid,
+        })
+        .eq('id', bookingId);
+
+      await supabaseAdmin.from('notifications').insert({
+        user_id: booking.host_id,
+        sender_id: user.uid,
+        title: '⚠️ Meeting Disputed',
+        message: `${user.full_name || 'Guest'} reported the meeting "${booking.title}" didn't happen.`,
+        type: 'dispute',
+        booking_id: bookingId,
+        read: false,
+        created_at: new Date().toISOString(),
+      });
+
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === 'complete' && booking.host_id === user.uid) {
+      if (booking.status === 'Meeting Completed') {
+        return NextResponse.json({ error: 'Already completed' }, { status: 400 });
+      }
+      if (!code || code !== (booking.meeting_code || booking.meetingCode)) {
+        return NextResponse.json({ error: 'Incorrect meeting code' }, { status: 400 });
       }
 
-      if (action === 'complete' && booking.hostId === user.uid) {
-        if (booking.status === 'Meeting Completed') throw new Error('Already completed');
-        if (!code || code !== booking.meetingCode) {
-          throw new Error('Incorrect meeting code');
-        }
-        const hostShare = Math.floor((booking.price || 0) * 0.9);
-        t.update(ref, { status: 'Meeting Completed' });
-        
-        const hostWalletRef = adminDb.collection('wallets').doc(booking.hostId);
-        t.set(hostWalletRef, {
-          creator: FieldValue.increment(hostShare),
-          lifetime_earned: FieldValue.increment(hostShare),
-          updated_at: new Date().toISOString(),
-        }, { merge: true });
-        
-        const txRef = adminDb.collection('transactions').doc();
-        t.set(txRef, {
-          userId: booking.hostId, type: 'creator_earnings',
-          amount: hostShare, description: `Hosted "${booking.title}"`,
-          status: 'COMPLETED', created_at: new Date().toISOString(),
-        });
-        return;
+      const price = booking.price || booking.sparks_amount || 0;
+      const hostShare = Math.floor(price * 0.9);
+
+      await supabaseAdmin
+        .from('bookings')
+        .update({ status: 'Meeting Completed' })
+        .eq('id', bookingId);
+
+      if (hostShare > 0) {
+        await creditSparks(
+          booking.host_id,
+          hostShare,
+          'creator',
+          'booking_payout',
+          `Hosted "${booking.title}"`,
+          bookingId
+        );
       }
 
-      if (action === 'cancel' && booking.guestId === user.uid) {
-        if (['Meeting Completed', 'Canceled', 'Rejected'].includes(booking.status)) {
-          throw new Error('Cannot cancel this booking anymore');
-        }
-        t.update(ref, { status: 'Canceled' });
-        
-        const guestWalletRef = adminDb.collection('wallets').doc(booking.guestId);
-        t.set(guestWalletRef, {
-          purchased: FieldValue.increment(booking.price || 0),
-          updated_at: new Date().toISOString(),
-        }, { merge: true });
-        
-        const txRef = adminDb.collection('transactions').doc();
-        t.set(txRef, {
-          userId: booking.guestId, type: 'refund',
-          amount: booking.price || 0, description: 'Booking cancelled — refund',
-          status: 'COMPLETED', created_at: new Date().toISOString(),
-        });
-        return;
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === 'cancel' && booking.guest_id === user.uid) {
+      if (['Meeting Completed', 'Canceled', 'Rejected'].includes(booking.status)) {
+        return NextResponse.json({ error: 'Cannot cancel this booking anymore' }, { status: 400 });
       }
 
-      if (action === 'close') {
-        t.update(ref, { status: 'Booking Closed' });
-        return;
+      await supabaseAdmin
+        .from('bookings')
+        .update({ status: 'Canceled' })
+        .eq('id', bookingId);
+
+      const price = booking.price || booking.sparks_amount || 0;
+      if (price > 0) {
+        await creditSparks(
+          booking.guest_id,
+          price,
+          'purchased',
+          'dispute_refund',
+          `Booking cancelled refund for "${booking.title}"`,
+          bookingId
+        );
       }
 
-      throw new Error('Invalid action or unauthorized');
-    });
+      return NextResponse.json({ success: true });
+    }
 
-    return NextResponse.json({ success: true });
+    if (action === 'close') {
+      await supabaseAdmin
+        .from('bookings')
+        .update({ status: 'Booking Closed' })
+        .eq('id', bookingId);
+
+      return NextResponse.json({ success: true });
+    }
+
+    return NextResponse.json({ error: 'Invalid action or unauthorized' }, { status: 400 });
   } catch (err) {
     console.error('[PATCH /api/bookings]', err.message);
-    const knownErrors = [
-      'Incorrect meeting code', 'Already completed', 'Booking not found', 
-      'Unauthorized', 'Booking cannot be rejected at this stage', 
-      'Cannot dispute this booking at this stage', 'Cannot cancel this booking anymore', 
-      'Invalid action or unauthorized'
-    ];
-    if (knownErrors.includes(err.message)) {
-      return NextResponse.json({ error: err.message }, { status: 400 });
-    }
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
-

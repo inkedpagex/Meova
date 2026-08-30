@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '../../../lib/firebaseAdmin';
+import { supabaseAdmin } from '../../../lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,13 +9,14 @@ export async function GET() {
   let dbLatencyMs = -1;
 
   try {
-    if (adminDb) {
-      const pingStart = Date.now();
-      // Fast single-doc query to test database latency
-      await adminDb.collection('users').limit(1).get();
-      dbLatencyMs = Date.now() - pingStart;
-      dbStatus = 'healthy';
-    }
+    const pingStart = Date.now();
+    const { error } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .limit(1);
+
+    dbLatencyMs = Date.now() - pingStart;
+    dbStatus = error ? `error: ${error.message}` : 'healthy';
   } catch (err) {
     dbStatus = `error: ${err?.message || 'DB query failed'}`;
   }
@@ -27,6 +28,7 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     uptimeSeconds: Math.floor(process.uptime ? process.uptime() : 0),
     database: {
+      provider: 'supabase',
       status: dbStatus,
       latencyMs: dbLatencyMs,
     },
@@ -42,8 +44,6 @@ export async function GET() {
 
   return NextResponse.json(healthData, {
     status: httpStatus,
-    headers: {
-      'Cache-Control': 'no-store, no-cache, must-revalidate',
-    },
+    headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
   });
 }

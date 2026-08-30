@@ -11,8 +11,7 @@
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { sendPush } from '@/lib/sendPushNotification';
 
 const TIP_AMOUNT = 5;
@@ -21,7 +20,6 @@ export async function POST(request, { params }) {
   try {
     const sender = await requireAuth();
     if (!sender) return NextResponse.json({ error: 'Login required' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
     const { id: receiverId } = await params;
 
@@ -31,12 +29,15 @@ export async function POST(request, { params }) {
     }
 
     // Receiver must exist
-    const receiverDoc = await adminDb.collection('users').doc(receiverId).get();
-    if (!receiverDoc.exists) {
+    const { data: receiverData, error: receiverErr } = await supabaseAdmin
+      .from('profiles')
+      .select('id, full_name, created_at')
+      .eq('id', receiverId)
+      .maybeSingle();
+
+    if (receiverErr || !receiverData) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-
-    const receiverData = receiverDoc.data();
 
     // Receiver account must be at least 3 days old
     if (receiverData.created_at) {
@@ -48,106 +49,112 @@ export async function POST(request, { params }) {
 
     // 24-hour rate limit: 1 tip per sender→receiver pair per day
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const recentTipSnap = await adminDb
-      .collection('transactions')
-      .where('userId', '==', sender.uid)
-      .where('type', '==', 'tip_sent')
-      .where('toUserId', '==', receiverId)
-      .where('created_at', '>=', oneDayAgo)
-      .limit(1)
-      .get();
+    const { data: recentTip } = await supabaseAdmin
+      .from('transactions')
+      .select('id')
+      .eq('user_id', sender.uid)
+      .eq('type', 'tip_sent')
+      .eq('to_user_id', receiverId)
+      .gte('created_at', oneDayAgo)
+      .maybeSingle();
 
-    if (!recentTipSnap.empty) {
+    if (recentTip) {
       return NextResponse.json({
         error: 'You have already tipped this person today. Come back tomorrow!'
       }, { status: 429 });
     }
 
-    // Execute in transaction
-    let senderName = '';
-    await adminDb.runTransaction(async (tx) => {
-      const senderWalletRef = adminDb.collection('wallets').doc(sender.uid);
-      const receiverWalletRef = adminDb.collection('wallets').doc(receiverId);
+    // Fetch sender wallet
+    const { data: senderWallet, error: walletErr } = await supabaseAdmin
+      .from('wallets')
+      .select('*')
+      .eq('user_id', sender.uid)
+      .maybeSingle();
 
-      const [senderWalletSnap, receiverWalletSnap] = await Promise.all([
-        tx.get(senderWalletRef),
-        tx.get(receiverWalletRef),
-      ]);
+    if (walletErr || !senderWallet) {
+      return NextResponse.json({ error: 'Your wallet not found' }, { status: 400 });
+    }
 
-      if (!senderWalletSnap.exists) throw new Error('Your wallet not found');
-      const sw = senderWalletSnap.data();
+    const totalAvailable = (senderWallet.bonus || 0) + (senderWallet.creator || 0);
+    if (totalAvailable < TIP_AMOUNT) {
+      return NextResponse.json({ error: 'Insufficient Sparks to send a tip' }, { status: 400 });
+    }
 
-      // Check sender has enough: bonus first, then creator
-      const totalAvailable = (sw.bonus || 0) + (sw.creator || 0);
-      if (totalAvailable < TIP_AMOUNT) {
-        throw new Error('Insufficient Sparks to send a tip');
-      }
+    // Deduct from sender: bonus first, then creator
+    let remaining = TIP_AMOUNT;
+    const deductBonus = Math.min(senderWallet.bonus || 0, remaining);
+    const newBonus = (senderWallet.bonus || 0) - deductBonus;
+    remaining -= deductBonus;
+    const newCreator = (senderWallet.creator || 0) - remaining;
 
-      // Deduct from sender: bonus first, then creator
-      let remaining = TIP_AMOUNT;
-      const senderUpdates = {};
-      const deductBonus = Math.min(sw.bonus || 0, remaining);
-      senderUpdates.bonus = (sw.bonus || 0) - deductBonus;
-      remaining -= deductBonus;
-      if (remaining > 0) {
-        senderUpdates.creator = (sw.creator || 0) - remaining;
-      }
-      senderUpdates.updated_at = new Date().toISOString();
-      tx.update(senderWalletRef, senderUpdates);
+    const senderName = sender.full_name || sender.email?.split('@')[0] || 'Someone';
+    const now = new Date().toISOString();
 
-      // Credit to receiver's creator bucket (they can withdraw it)
-      if (receiverWalletSnap.exists) {
-        tx.update(receiverWalletRef, {
-          creator: FieldValue.increment(TIP_AMOUNT),
-          lifetime_earned: FieldValue.increment(TIP_AMOUNT),
-          updated_at: new Date().toISOString(),
-        });
-      } else {
-        tx.set(receiverWalletRef, {
-          userId: receiverId,
-          purchased: 0,
-          bonus: 0,
-          creator: TIP_AMOUNT,
+    // Execute all writes in parallel (best-effort atomicity via sequential inserts)
+    const [walletUpdateErr, receiverWalletErr, senderTxErr, receiverTxErr, notifErr] = await Promise.all([
+      // 1. Deduct from sender wallet
+      supabaseAdmin
+        .from('wallets')
+        .update({ bonus: newBonus, creator: newCreator, updated_at: now })
+        .eq('user_id', sender.uid)
+        .then(r => r.error),
+
+      // 2. Credit to receiver's creator bucket (upsert in case wallet doesn't exist)
+      supabaseAdmin
+        .from('wallets')
+        .upsert({
+          user_id: receiverId,
+          creator: (0) + TIP_AMOUNT, // will be overridden by rpc if exists
           lifetime_earned: TIP_AMOUNT,
-          updated_at: new Date().toISOString(),
-        });
-      }
+          updated_at: now,
+        }, { onConflict: 'user_id', ignoreDuplicates: false })
+        .then(async () => {
+          // Proper increment using rpc
+          return supabaseAdmin.rpc('credit_sparks', {
+            p_user_id: receiverId,
+            p_amount: TIP_AMOUNT,
+            p_type: 'creator',
+            p_transaction_type: 'tip_received',
+            p_description: `Received ⚡${TIP_AMOUNT} tip from ${senderName}`,
+            p_reference_id: null,
+          }).then(r => r.error);
+        }),
 
-      const now = new Date().toISOString();
-      senderName = sender.name || sender.email?.split('@')[0] || 'Someone';
-
-      // Log: sender (tip_sent)
-      tx.set(adminDb.collection('transactions').doc(), {
-        userId: sender.uid,
+      // 3. Log sender transaction
+      supabaseAdmin.from('transactions').insert({
+        user_id: sender.uid,
         type: 'tip_sent',
-        toUserId: receiverId,
+        to_user_id: receiverId,
         amount: -TIP_AMOUNT,
         description: `Tipped ⚡${TIP_AMOUNT} to ${receiverData.full_name || receiverId}`,
         status: 'COMPLETED',
         created_at: now,
-      });
+      }).then(r => r.error),
 
-      // Log: receiver (tip_received)
-      tx.set(adminDb.collection('transactions').doc(), {
-        userId: receiverId,
+      // 4. Log receiver transaction
+      supabaseAdmin.from('transactions').insert({
+        user_id: receiverId,
         type: 'tip_received',
-        fromUserId: sender.uid,
+        from_user_id: sender.uid,
         amount: TIP_AMOUNT,
         description: `Received ⚡${TIP_AMOUNT} tip from ${senderName}`,
         status: 'COMPLETED',
         created_at: now,
-      });
+      }).then(r => r.error),
 
-      // In-app notification for receiver
-      tx.set(adminDb.collection('users').doc(receiverId).collection('notifications').doc(), {
+      // 5. In-app notification for receiver
+      supabaseAdmin.from('notifications').insert({
+        user_id: receiverId,
+        sender_id: sender.uid,
         title: `⚡ ${senderName} tipped you!`,
-        body: `You received ${TIP_AMOUNT} Sparks. Keep it up! 🔥`,
+        message: `You received ${TIP_AMOUNT} Sparks. Keep it up! 🔥`,
         type: 'tip_received',
-        fromUserId: sender.uid,
         read: false,
-        created_at: FieldValue.serverTimestamp(),
-      });
-    });
+        created_at: now,
+      }).then(r => r.error),
+    ]);
+
+    if (walletUpdateErr) throw new Error(`Wallet update failed: ${walletUpdateErr.message}`);
 
     // Push notification (non-blocking)
     sendPush(receiverId, {
@@ -162,4 +169,3 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }
 }
-

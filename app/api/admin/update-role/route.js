@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '../../../../lib/getAdminUser';
-import { adminDb } from '../../../../lib/firebaseAdmin';
+import { supabaseAdmin } from '../../../../lib/supabase/admin';
 
 export async function POST(request) {
   const admin = await requireAdmin();
@@ -18,28 +18,35 @@ export async function POST(request) {
   }
 
   try {
-    const userRef = adminDb.collection('users').doc(targetUid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) {
-      return NextResponse.json({ error: 'User doc not found' }, { status: 404 });
+    const { data: profile, error: fetchErr } = await supabaseAdmin
+      .from('profiles')
+      .select('id, role')
+      .eq('id', targetUid)
+      .maybeSingle();
+
+    if (fetchErr || !profile) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const oldData = userSnap.data();
-    const oldRole = oldData.role || 'user';
+    const oldRole = profile.role || 'user';
+    const now = new Date().toISOString();
 
-    await userRef.update({
-      role,
-      updatedAt: new Date().toISOString(),
-    });
+    // Update role
+    const { error: updateErr } = await supabaseAdmin
+      .from('profiles')
+      .update({ role, updated_at: now })
+      .eq('id', targetUid);
+
+    if (updateErr) throw new Error(updateErr.message);
 
     // Write audit log
-    await adminDb.collection('audit_logs').add({
-      admin_id:   admin.uid,
-      action:     'UPDATE_ROLE',
+    await supabaseAdmin.from('audit_logs').insert({
+      admin_id: admin.uid,
+      action: 'UPDATE_ROLE',
       target_uid: targetUid,
-      old_value:  oldRole,
-      new_value:  role,
-      timestamp:  new Date().toISOString(),
+      old_value: { role: oldRole },
+      new_value: { role },
+      timestamp: now,
     });
 
     return NextResponse.json({ ok: true, message: `Role updated to ${role}` });

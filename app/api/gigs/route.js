@@ -1,22 +1,22 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/getAdminUser';
+import { spendSparks } from '@/lib/wallet';
 
-export async function GET(request) {
+export async function GET() {
   try {
-    if (!adminDb) return NextResponse.json({ gigs: [] });
-    
-    // Fetch gigs from newest to oldest
-    const snap = await adminDb.collection('gigs').orderBy('createdAt', 'desc').get();
-    
-    const gigs = snap.docs
-      .map(doc => ({ 
-        id: doc.id, 
-        ...doc.data() 
-      }))
-      .filter(g => !g.isHidden);
-    
-    return NextResponse.json({ gigs });
+    const { data: gigs, error } = await supabaseAdmin
+      .from('gigs')
+      .select('*')
+      .neq('is_hidden', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[GET /api/gigs]', error.message);
+      return NextResponse.json({ gigs: [] });
+    }
+
+    return NextResponse.json({ gigs: gigs || [] });
   } catch (err) {
     console.error('[GET /api/gigs]', err.message);
     return NextResponse.json({ gigs: [] });
@@ -27,10 +27,9 @@ export async function POST(request) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
     const { title, company, category, budget, duration, type, desc } = await request.json();
-    
+
     if (!title || !desc) {
       return NextResponse.json({ error: 'Title and description are required' }, { status: 400 });
     }
@@ -40,19 +39,22 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Reward must be between 0 and 2000 Sparks' }, { status: 400 });
     }
 
-    // Verify wallet has enough Sparks
-    const walletRef = adminDb.collection('wallets').doc(user.uid);
-    const walletDoc = await walletRef.get();
-    let currentSparks = 0;
-    if (walletDoc.exists) {
-      const wData = walletDoc.data();
-      currentSparks = (wData.purchased || 0) + (wData.bonus || 0) + (wData.creator || 0);
-    }
-    if (budgetNum > currentSparks) {
-      return NextResponse.json({ error: 'Insufficient Sparks in wallet' }, { status: 400 });
+    // Deduct Sparks immediately for escrow via spendSparks RPC
+    if (budgetNum > 0) {
+      const spendResult = await spendSparks(
+        user.uid,
+        budgetNum,
+        `Escrow for Gig: "${title}"`,
+        'gig_escrow',
+        null
+      );
+
+      if (!spendResult.ok) {
+        return NextResponse.json({ error: spendResult.error || 'Insufficient Sparks to fund this gig' }, { status: 402 });
+      }
     }
 
-    const newGig = {
+    const newGigPayload = {
       title,
       company: company || user.full_name || 'Campus Host',
       category: category || 'General',
@@ -60,18 +62,27 @@ export async function POST(request) {
       duration: duration || 'Flexible',
       type: type || 'CAMPUS GIG',
       desc,
-      authorId: user.uid,
-      authorName: user.full_name || 'Host',
-      createdAt: new Date().toISOString(),
-      applicationsCount: 0,
+      author_id: user.uid,
+      author_name: user.full_name || 'Host',
+      created_at: new Date().toISOString(),
+      applications_count: 0,
+      is_hidden: false,
     };
 
-    const docRef = await adminDb.collection('gigs').add(newGig);
-    
-    return NextResponse.json({ ok: true, gig: { id: docRef.id, ...newGig } });
+    const { data: insertedGig, error: insertErr } = await supabaseAdmin
+      .from('gigs')
+      .insert(newGigPayload)
+      .select()
+      .single();
+
+    if (insertErr) {
+      console.error('[POST /api/gigs insert error]', insertErr.message);
+      return NextResponse.json({ error: 'Failed to create gig' }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, gig: insertedGig });
   } catch (err) {
     console.error('[POST /api/gigs]', err.message);
     return NextResponse.json({ error: 'Failed to create gig' }, { status: 500 });
   }
 }
-

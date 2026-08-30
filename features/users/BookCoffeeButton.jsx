@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Zap, Layers, X, CheckCircle, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -17,6 +18,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
   const [error, setError] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('GD Subway');
   const [selectedTime, setSelectedTime] = useState('Noon (11 AM - 2 PM)');
+  const [agenda, setAgenda] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -72,7 +74,8 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
           hostName: targetName,
           hostPhoto: targetPhoto || '',
           date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
-          time: selectedTime
+          time: selectedTime,
+          agenda: agenda.trim()
         })
       });
       
@@ -109,7 +112,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
       )}
 
       {/* Modal overlay */}
-      {open && (
+      {open && typeof document !== 'undefined' && createPortal(
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4"
           style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
@@ -218,6 +221,17 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                       ))}
                     </div>
                   </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider block">Meeting Purpose (Optional)</label>
+                    <textarea
+                      value={agenda}
+                      onChange={(e) => setAgenda(e.target.value)}
+                      placeholder="e.g. Want to discuss startup ideas, get notes, etc."
+                      className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-[13px] font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#F05A00] transition-colors resize-none"
+                      rows={2}
+                    />
+                  </div>
                   
                   <div className="flex items-start justify-between gap-3 pt-2 border-t border-[var(--border-subtle)]">
                     <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider flex-shrink-0">Duration</span>
@@ -296,7 +310,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
             )}
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 }

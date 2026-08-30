@@ -1,5 +1,5 @@
 // Database table names for the Profile feature.
-export const TABLE_PROFILES = 'users';
+export const TABLE_PROFILES = 'profiles';
 export const TABLE_CIRCLE_MEMBERS = 'circle_members';
 export const TABLE_CIRCLES = 'circles';
 export const INTEREST_TAGS = [

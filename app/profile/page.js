@@ -1,4 +1,4 @@
-﻿// Profile page — Server Component. Requires login (protected by proxy).
+// Profile page — Server Component. Requires login (protected by proxy).
 import { getUserAdmin } from '../../lib/getUserAdmin';
 import { fetchProfileAdmin } from '../../lib/firebaseAdminQueries';
 import { getOrCreateWallet } from '../../lib/wallet';
@@ -57,29 +57,48 @@ export default async function ProfilePage() {
 
   let userGigs = [];
   try {
-    const { adminDb } = await import('../../lib/firebaseAdmin');
-    if (adminDb) {
-      const [hostedSnap, appliedSnap] = await Promise.all([
-        adminDb.collection('gigs').where('hostId', '==', user.id).limit(5).get(),
-        adminDb.collection('gigs').where('selectedApplicant.id', '==', user.id).limit(5).get()
-      ]);
-      const allGigs = [...hostedSnap.docs, ...appliedSnap.docs].map(d => {
-        const data = d.data();
-        return {
-          id: d.id,
-          title: data.title || '',
-          status: data.status || 'open',
-          role: data.hostId === user.id ? 'host' : 'applicant',
-          createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString()
-        };
-      });
-      userGigs = Array.from(new Map(allGigs.map(g => [g.id, g])).values())
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 5);
-    }
+    const { supabaseAdmin } = await import('../../lib/supabase/admin');
+
+    const [{ data: hostedGigs }, { data: appliedApps }] = await Promise.all([
+      // Gigs hosted by this user
+      supabaseAdmin
+        .from('gigs')
+        .select('id, title, status, created_at, host_id, author_id')
+        .or(`host_id.eq.${user.id},author_id.eq.${user.id}`)
+        .limit(5),
+      // Gigs applied to by this user (via gig_applications)
+      supabaseAdmin
+        .from('gig_applications')
+        .select('gig_id, created_at, gigs(id, title, status, created_at)')
+        .eq('applicant_id', user.id)
+        .limit(5),
+    ]);
+
+    const hostedMapped = (hostedGigs || []).map(g => ({
+      id: g.id,
+      title: g.title || '',
+      status: g.status || 'open',
+      role: 'host',
+      createdAt: g.created_at || new Date().toISOString(),
+    }));
+
+    const appliedMapped = (appliedApps || [])
+      .filter(a => a.gigs)
+      .map(a => ({
+        id: a.gigs.id,
+        title: a.gigs.title || '',
+        status: a.gigs.status || 'open',
+        role: 'applicant',
+        createdAt: a.gigs.created_at || new Date().toISOString(),
+      }));
+
+    userGigs = Array.from(
+      new Map([...hostedMapped, ...appliedMapped].map(g => [g.id, g])).values()
+    ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
   } catch (err) {
     console.error('Error fetching gigs for profile:', err);
   }
+
 
   return <ProfileClient initialProfile={profile} initialSparks={initialSparks} initialGigs={userGigs} />;
 }

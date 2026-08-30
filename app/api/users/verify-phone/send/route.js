@@ -1,16 +1,14 @@
 /**
  * POST /api/users/verify-phone/send
- * Send OTP to the given phone number using Firebase Auth phone verification.
- * We use Firebase Admin to create a custom verification code stored in Firestore.
- * (Simple 6-digit OTP approach — no external SMS provider needed initially)
+ * Send OTP to the given phone number.
+ * OTP is stored in Supabase phone_otps table with 10-min TTL.
  *
  * In production: integrate Twilio/MSG91 here.
- * For now: OTP stored in Firestore with 10-min TTL (admin can see it for testing).
+ * For now: OTP stored in DB (admin can see it for testing).
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 export async function POST(request) {
@@ -34,14 +32,15 @@ export async function POST(request) {
   const fullPhone = `+91${cleaned}`;
 
   // Check this phone isn't already used by another verified account
-  const existingSnap = await adminDb
-    .collection('users')
-    .where('phone', '==', fullPhone)
-    .where('phone_verified', '==', true)
-    .limit(1)
-    .get();
+  const { data: existing } = await supabaseAdmin
+    .from('profiles')
+    .select('id')
+    .eq('phone', fullPhone)
+    .eq('phone_verified', true)
+    .neq('id', user.uid)
+    .maybeSingle();
 
-  if (!existingSnap.empty && existingSnap.docs[0].id !== user.uid) {
+  if (existing) {
     return NextResponse.json({
       error: 'This phone number is already linked to another account.'
     }, { status: 409 });
@@ -51,20 +50,26 @@ export async function POST(request) {
   const otp = String(Math.floor(100000 + Math.random() * 900000));
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min TTL
 
-  // Store OTP in Firestore
-  await adminDb.collection('phone_otps').doc(user.uid).set({
-    phone: fullPhone,
-    otp,
-    expiresAt,
-    attempts: 0,
-    createdAt: FieldValue.serverTimestamp(),
-  });
+  // Upsert OTP record in Supabase
+  const { error: upsertErr } = await supabaseAdmin
+    .from('phone_otps')
+    .upsert({
+      user_id: user.uid,
+      phone: fullPhone,
+      otp,
+      expires_at: expiresAt,
+      attempts: 0,
+      created_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' });
+
+  if (upsertErr) {
+    console.error('[OTP send]', upsertErr.message);
+    return NextResponse.json({ error: 'Failed to generate OTP' }, { status: 500 });
+  }
 
   // TODO: In production, send SMS via Twilio/MSG91 here
-  // For now, log to console (admin can see during testing)
   console.log(`[OTP] Phone: ${fullPhone} | OTP: ${otp} | User: ${user.uid}`);
 
-  // NOTE: Return success but NOT the OTP to client (security)
   return NextResponse.json({
     ok: true,
     message: `OTP sent to ${fullPhone.slice(0, 6)}XXXX${fullPhone.slice(-2)}`,
@@ -72,4 +77,3 @@ export async function POST(request) {
     ...(process.env.NODE_ENV === 'development' ? { _dev_otp: otp } : {}),
   });
 }
-

@@ -7,7 +7,7 @@
 // and purge the old cache — no manual "Clear Cache" needed by anyone.
 // Just update this timestamp whenever you deploy a major change.
 
-const CACHE_VERSION = '2026-08-26T15:54'; // ← update this on deploy
+const CACHE_VERSION = '2026-08-26T18:17'; // ← update this on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/manifest.json',
@@ -25,7 +25,6 @@ try {
     apiKey: 'AIzaSyAWKHPIr_QZq0KYw-3SkDCRe_zACdkkd4o',
     authDomain: 'Meova-ae3bc.firebaseapp.com',
     projectId: 'Meova-ae3bc',
-    storageBucket: 'Meova-ae3bc.firebasestorage.app',
     messagingSenderId: '752250926726',
     appId: '1:752250926726:web:98d2d7122acecf6a648307',
   };

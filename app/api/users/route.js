@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
 import { fetchUsersAdmin } from '@/lib/firebaseAdminQueries';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function GET() {
   const currentUser = await requireAuth();
@@ -9,17 +9,19 @@ export async function GET() {
 
   try {
     const users = await fetchUsersAdmin(100);
-    
-    // Fetch blocks
-    const blocksSnap = await adminDb.collection('blocks')
-      .where('blocker', '==', currentUser.uid)
-      .get();
-    const blockedByMe = new Set(blocksSnap.docs.map(doc => doc.data().blocked));
 
-    const blocksSnap2 = await adminDb.collection('blocks')
-      .where('blocked', '==', currentUser.uid)
-      .get();
-    const blockedMe = new Set(blocksSnap2.docs.map(doc => doc.data().blocker));
+    const { data: blocksByMe } = await supabaseAdmin
+      .from('blocks')
+      .select('blocked_id')
+      .eq('blocker_id', currentUser.uid);
+
+    const { data: blocksMe } = await supabaseAdmin
+      .from('blocks')
+      .select('blocker_id')
+      .eq('blocked_id', currentUser.uid);
+
+    const blockedByMe = new Set((blocksByMe || []).map(b => b.blocked_id));
+    const blockedMe = new Set((blocksMe || []).map(b => b.blocker_id));
 
     const filteredUsers = users.filter(u => 
       u.id !== currentUser.uid && 

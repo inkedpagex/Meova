@@ -3,40 +3,45 @@
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
-import { adminDb } from '@/lib/firebaseAdmin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function POST(request, { params }) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
 
     const { id: circleId } = await params;
     if (!circleId) return NextResponse.json({ error: 'Invalid community ID' }, { status: 400 });
 
-    const circleRef = adminDb.collection('circles').doc(circleId);
-    const circleDoc = await circleRef.get();
-    if (!circleDoc.exists) {
+    // Fetch circle
+    const { data: circle, error: circleErr } = await supabaseAdmin
+      .from('circles')
+      .select('*')
+      .eq('id', circleId)
+      .maybeSingle();
+
+    if (circleErr || !circle) {
       return NextResponse.json({ error: 'Community not found' }, { status: 404 });
     }
 
-    const circle = circleDoc.data();
-    const isHost = circle.host_id === user.uid;
+    const isHost = circle.creator_id === user.uid;
 
     if (circle.status !== 'active' && !isHost) {
       return NextResponse.json({ error: 'This community is currently pending admin approval.' }, { status: 403 });
     }
 
-    const memberDocRef = adminDb.collection('circle_members').doc(`${circleId}_${user.uid}`);
-    const memberDoc = await memberDocRef.get();
-    const isAlreadyMember = memberDoc.exists;
+    // Check if already a member
+    const { data: existingMember } = await supabaseAdmin
+      .from('circle_members')
+      .select('id')
+      .eq('circle_id', circleId)
+      .eq('user_id', user.uid)
+      .maybeSingle();
 
-    // Fetch secret invite link from private `circle_links` collection
-    const linkDoc = await adminDb.collection('circle_links').doc(circleId).get();
-    const secretLink = linkDoc.exists ? linkDoc.data().invite_link : (circle.whatsapp_link || 'https://chat.whatsapp.com/');
+    const isAlreadyMember = !!existingMember;
+    const secretLink = circle.invite_link || 'https://chat.whatsapp.com/';
 
-    // If already joined or is host, return invite link directly
+    // Already joined or is host — return invite link directly
     if (isAlreadyMember || isHost) {
       return NextResponse.json({
         success: true,
@@ -48,14 +53,16 @@ export async function POST(request, { params }) {
 
     const price = circle.price || 0;
 
-    // Handle Paid Community Entry
     if (price > 0) {
-      const buyerWalletRef = adminDb.collection('wallets').doc(user.uid);
-      const hostWalletRef = adminDb.collection('wallets').doc(circle.host_id);
+      // Fetch buyer wallet
+      const { data: buyerWallet } = await supabaseAdmin
+        .from('wallets')
+        .select('purchased, bonus, creator')
+        .eq('user_id', user.uid)
+        .maybeSingle();
 
-      const buyerWalletDoc = await buyerWalletRef.get();
-      const buyerWallet = buyerWalletDoc.exists ? buyerWalletDoc.data() : { purchased: 0, bonus: 0, creator: 0 };
-      const currentBalance = (buyerWallet.purchased || 0) + (buyerWallet.bonus || 0) + (buyerWallet.creator || 0);
+      const bw = buyerWallet || { purchased: 0, bonus: 0, creator: 0 };
+      const currentBalance = (bw.purchased || 0) + (bw.bonus || 0) + (bw.creator || 0);
 
       if (currentBalance < price) {
         return NextResponse.json({
@@ -65,11 +72,11 @@ export async function POST(request, { params }) {
         }, { status: 402 });
       }
 
-      // Deduct from buyer: prioritize bonus -> purchased -> creator
+      // Deduct from buyer: bonus → purchased → creator
       let remainingToDeduct = price;
-      let newBonus = buyerWallet.bonus || 0;
-      let newPurchased = buyerWallet.purchased || 0;
-      let newCreator = buyerWallet.creator || 0;
+      let newBonus = bw.bonus || 0;
+      let newPurchased = bw.purchased || 0;
+      let newCreator = bw.creator || 0;
 
       if (newBonus >= remainingToDeduct) {
         newBonus -= remainingToDeduct;
@@ -78,7 +85,6 @@ export async function POST(request, { params }) {
         remainingToDeduct -= newBonus;
         newBonus = 0;
       }
-
       if (remainingToDeduct > 0) {
         if (newPurchased >= remainingToDeduct) {
           newPurchased -= remainingToDeduct;
@@ -88,86 +94,75 @@ export async function POST(request, { params }) {
           newPurchased = 0;
         }
       }
-
       if (remainingToDeduct > 0) {
         newCreator = Math.max(0, newCreator - remainingToDeduct);
       }
 
-      // Atomic Transaction / Batch
-      const batch = adminDb.batch();
+      const now = new Date().toISOString();
 
-      // 1. Update Buyer Wallet
-      batch.set(buyerWalletRef, {
-        userId: user.uid,
-        email: user.email || '',
-        purchased: newPurchased,
-        bonus: newBonus,
-        creator: newCreator,
-        updated_at: new Date().toISOString(),
-      }, { merge: true });
+      // All writes in parallel
+      await Promise.all([
+        // 1. Update buyer wallet
+        supabaseAdmin
+          .from('wallets')
+          .update({ purchased: newPurchased, bonus: newBonus, creator: newCreator, updated_at: now })
+          .eq('user_id', user.uid),
 
-      // 2. Credit 100% Sparks to Host's Wallet (creator balance)
-      batch.set(hostWalletRef, {
-        userId: circle.host_id,
-        creator: FieldValue.increment(price),
-        updated_at: new Date().toISOString(),
-      }, { merge: true });
+        // 2. Credit host wallet (increment creator bucket)
+        supabaseAdmin.rpc('credit_sparks', {
+          p_user_id: circle.creator_id,
+          p_amount: price,
+          p_type: 'creator',
+          p_transaction_type: 'community_earning',
+          p_description: `Earned ⚡${price} from ${user.full_name || 'a member'} joining ${circle.name}`,
+          p_reference_id: circleId,
+        }),
 
-      // 3. Log Buyer Debit Transaction
-      const buyerTxRef = adminDb.collection('wallet_transactions').doc();
-      batch.set(buyerTxRef, {
-        userId: user.uid,
-        amount: -price,
-        type: 'community_join',
-        circleId,
-        circleName: circle.name,
-        created_at: new Date().toISOString(),
-      });
+        // 3. Add member record
+        supabaseAdmin.from('circle_members').insert({
+          circle_id: circleId,
+          user_id: user.uid,
+          role: 'member',
+          sparks_paid: price,
+          joined_at: now,
+        }),
 
-      // 4. Log Host Credit Transaction
-      const hostTxRef = adminDb.collection('wallet_transactions').doc();
-      batch.set(hostTxRef, {
-        userId: circle.host_id,
-        amount: price,
-        type: 'community_earning',
-        circleId,
-        circleName: circle.name,
-        buyerId: user.uid,
-        buyerName: user.name || user.email || 'Campus Member',
-        created_at: new Date().toISOString(),
-      });
+        // 4. Increment circle stats
+        supabaseAdmin
+          .from('circles')
+          .update({
+            member_count: (circle.member_count || 1) + 1,
+            total_sparks_earned: (circle.total_sparks_earned || 0) + price,
+            updated_at: now,
+          })
+          .eq('id', circleId),
 
-      // 5. Add Member Record
-      batch.set(memberDocRef, {
-        circle_id: circleId,
-        user_id: user.uid,
-        role: 'member',
-        sparks_paid: price,
-        joined_at: new Date().toISOString(),
-      });
-
-      // 6. Increment Circle Stats
-      batch.update(circleRef, {
-        member_count: FieldValue.increment(1),
-        total_sparks_earned: FieldValue.increment(price),
-        updated_at: new Date().toISOString(),
-      });
-
-      await batch.commit();
+        // 5. Log buyer debit transaction
+        supabaseAdmin.from('transactions').insert({
+          user_id: user.uid,
+          amount: -price,
+          type: 'community_join',
+          description: `Paid ⚡${price} to join ${circle.name}`,
+          reference_id: circleId,
+          created_at: now,
+        }),
+      ]);
     } else {
       // Free Community Join
-      await memberDocRef.set({
-        circle_id: circleId,
-        user_id: user.uid,
-        role: 'member',
-        sparks_paid: 0,
-        joined_at: new Date().toISOString(),
-      });
-
-      await circleRef.update({
-        member_count: FieldValue.increment(1),
-        updated_at: new Date().toISOString(),
-      });
+      const now = new Date().toISOString();
+      await Promise.all([
+        supabaseAdmin.from('circle_members').insert({
+          circle_id: circleId,
+          user_id: user.uid,
+          role: 'member',
+          sparks_paid: 0,
+          joined_at: now,
+        }),
+        supabaseAdmin
+          .from('circles')
+          .update({ member_count: (circle.member_count || 1) + 1, updated_at: now })
+          .eq('id', circleId),
+      ]);
     }
 
     return NextResponse.json({
@@ -182,4 +177,3 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Failed to join community' }, { status: 500 });
   }
 }
-

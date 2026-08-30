@@ -11,13 +11,7 @@ import {
   User, Sparkles, Compass, Info, Smile
 } from 'lucide-react';
 import useSWR from 'swr';
-import { db, auth } from '@/lib/firebaseClient';
-import { onAuthStateChanged } from 'firebase/auth';
-import {
-  collection, addDoc, serverTimestamp,
-  query, orderBy, limit, onSnapshot,
-  doc, updateDoc, increment, getDoc, where
-} from 'firebase/firestore';
+import { supabase } from '@/lib/supabase/client';
 import { getUserAvatarUrl, getCartoonAvatar } from '@/utils/avatar';
 import { useUserContext } from '@/components/providers/UserProvider';
 
@@ -51,13 +45,21 @@ function avatarUrl(uid, name, photo) {
 // ─── Chat List Item ───────────────────────────────────────────────────────────
 
 function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
-  const otherId = chat.participants?.find(p => p !== currentUid) || '';
+  const participants = chat.participants || [];
+  const unreadCountObj = chat.unread_count || chat.unreadCount || {};
+  const participantNamesObj = chat.participant_names || chat.participantNames || {};
+  const participantPhotosObj = chat.participant_photos || chat.participantPhotos || {};
+
+  const otherId = participants.find(p => p !== currentUid) || '';
   const otherName = chat.isGroup
-    ? (chat.name || chat.participantNames?.group || 'Group Chat')
-    : (directoryUser?.full_name || chat.participantNames?.[otherId] || 'Campus Student');
-  const otherPhoto = directoryUser?.photo_url || chat.participantPhotos?.[otherId] || '';
-  const unread = chat.unreadCount?.[currentUid] || 0;
-  const isMe = chat.lastSenderId === currentUid;
+    ? (chat.name || participantNamesObj.group || 'Group Chat')
+    : (directoryUser?.full_name || participantNamesObj[otherId] || 'Campus Student');
+  const otherPhoto = directoryUser?.photo_url || participantPhotosObj[otherId] || '';
+  const unread = unreadCountObj[currentUid] || 0;
+  const lastSenderId = chat.last_sender_id || chat.lastSenderId;
+  const lastMessage = chat.last_message || chat.lastMessage;
+  const lastMessageAt = chat.last_message_at || chat.lastMessageAt;
+  const isMe = lastSenderId === currentUid;
 
   return (
     <button
@@ -90,13 +92,13 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
             {otherName}
           </span>
           <span className="text-[10px] text-zinc-400 font-bold flex-shrink-0 ml-2">
-            {timeAgo(chat.lastMessageAt)}
+            {timeAgo(lastMessageAt)}
           </span>
         </div>
         <div className="flex items-center justify-between gap-1">
           <p className={`text-xs truncate ${unread > 0 ? 'text-zinc-900 font-black' : 'text-zinc-500 font-medium'}`}>
             {isMe && <span className="text-zinc-400 font-semibold">You: </span>}
-            {chat.lastMessage || 'Sent a message'}
+            {lastMessage || 'Sent a message'}
           </p>
           {unread > 0 && (
             <span className="w-2.5 h-2.5 rounded-full bg-[#F05A00] flex-shrink-0 shadow-xs" />
@@ -149,7 +151,8 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
 // ─── Message Bubble ───────────────────────────────────────────────────────────
 
 function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderId }) {
-  const isSystem = msg.senderId === 'system';
+  const sender = msg.senderId || msg.sender_id;
+  const isSystem = sender === 'system';
 
   if (isSystem) {
     return (
@@ -193,7 +196,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
           {msg.text}
         </div>
         <div className={`flex items-center gap-1 mt-1 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
-          <span className="text-[9px] text-zinc-400 font-semibold">{formatTime(msg.timestamp)}</span>
+          <span className="text-[9px] text-zinc-400 font-semibold">{formatTime(msg.timestamp || msg.created_at)}</span>
           {isMe && <CheckCheck className="w-3 h-3 text-[#F05A00] opacity-80" />}
         </div>
       </div>
@@ -212,15 +215,12 @@ function MessagesContent() {
   const currentUid = globalUser?.id || globalUser?.uid || null;
   const currentUser = globalUser;
 
-  const [firebaseUid, setFirebaseUid] = useState(null);
-
   const [chats, setChats] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeChatId, setActiveChatId] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
-  const [loadingChats, setLoadingChats] = useState(true);
   const [sendingMsg, setSendingMsg] = useState(false);
   const [showList, setShowList] = useState(true);
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
@@ -228,28 +228,23 @@ function MessagesContent() {
   const { data: usersData } = useSWR('/api/users', fetcher);
   const suggestedStudents = usersData?.users || [];
 
-  // API Fallback Data
-  const { data: initialChatsData, mutate: mutateChats } = useSWR('/api/chats', fetcher);
-  
-  // Update state from API immediately if real-time not ready
+  const { data: initialChatsData, isLoading: loadingChats, mutate: mutateChats } = useSWR(
+    currentUid ? '/api/chats' : null,
+    fetcher
+  );
+
   useEffect(() => {
-    if (initialChatsData?.chats && !firebaseUid) {
+    if (initialChatsData?.chats) {
       setChats(initialChatsData.chats);
-      setLoadingChats(false);
     }
-  }, [initialChatsData, firebaseUid]);
+  }, [initialChatsData]);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
-  const unsubChatsRef = useRef(null);
-  const unsubMsgsRef = useRef(null);
   const chatContainerRef = useRef(null);
 
-  // ── Keyboard height fix ────────────────────────────────────────────────────
-  // We now rely on native CSS `interactive-widget=resizes-content` in layout.js
-  // which makes the layout viewport shrink automatically when keyboard opens.
+  // Keyboard layout handling
   useEffect(() => {
-    // Keep the latest message in view if keyboard opens
     const handleResize = () => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
     };
@@ -257,110 +252,89 @@ function MessagesContent() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-
-
-  // ── Wait for Firebase Client Auth ──────────────────────────────────────────
+  // Real-time Chat List updates
   useEffect(() => {
-    let timeoutId;
-    const unsub = onAuthStateChanged(auth, (fbUser) => {
-      clearTimeout(timeoutId);
-      if (fbUser) {
-        setFirebaseUid(fbUser.uid);
-        setLoadingChats(true);
-      } else {
-        setFirebaseUid(null);
-        timeoutId = setTimeout(() => {
-          setLoadingChats(false);
-        }, 8000);
-      }
-    });
-    return () => {
-      unsub();
-      clearTimeout(timeoutId);
-    };
-  }, []);
+    if (!currentUid || !supabase) return;
 
-  // ── Subscribe to chat list ──────────────────────────────────────────────────
-  useEffect(() => {
-    if (!firebaseUid || !db) return;
-
-    const q2 = query(
-      collection(db, 'chats'),
-      where('participants', 'array-contains', firebaseUid)
-    );
-
-    if (unsubChatsRef.current) unsubChatsRef.current();
-    unsubChatsRef.current = onSnapshot(q2, (snap) => {
-      const getTime = (ts) => {
-        if (!ts) return Date.now();
-        if (typeof ts.toMillis === 'function') return ts.toMillis();
-        if (ts.seconds) return ts.seconds * 1000;
-        if (ts instanceof Date) return ts.getTime();
-        if (typeof ts === 'number') return ts;
-        return new Date(ts).getTime() || Date.now();
-      };
-
-      const all = snap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .sort((a, b) => getTime(b.lastMessageAt) - getTime(a.lastMessageAt));
-
-      setChats(all);
-      setLoadingChats(false);
-    }, (err) => {
-      console.error('Chats subscription error:', err.message);
-      setLoadingChats(false);
-    });
+    const channel = supabase
+      .channel(`chat-list-${currentUid}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'chats',
+        },
+        () => {
+          mutateChats();
+        }
+      )
+      .subscribe();
 
     return () => {
-      if (unsubChatsRef.current) unsubChatsRef.current();
+      supabase.removeChannel(channel);
     };
-  }, [currentUid, firebaseUid]);
+  }, [currentUid, mutateChats]);
+
+  // Real-time Chat Messages updates for active chat
+  useEffect(() => {
+    if (!activeChatId || !supabase) return;
+
+    const channel = supabase
+      .channel(`chat-messages-${activeChatId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `chat_id=eq.${activeChatId}`,
+        },
+        (payload) => {
+          const newMsg = payload.new;
+          setMessages(prev => {
+            if (prev.some(m => m.id === newMsg.id)) return prev;
+            return [
+              ...prev,
+              {
+                id: newMsg.id,
+                senderId: newMsg.sender_id,
+                text: newMsg.text,
+                status: newMsg.status || 'sent',
+                timestamp: newMsg.created_at ? new Date(newMsg.created_at).getTime() : Date.now(),
+                created_at: newMsg.created_at,
+              }
+            ];
+          });
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeChatId]);
 
   // ── Open Chat ──────────────────────────────────────────────────────────────
   const openChat = useCallback(async (chat) => {
     setActiveChatId(chat.id);
     setActiveChat(chat);
     setShowList(false);
-    
-    if (unsubMsgsRef.current) {
-      unsubMsgsRef.current();
-      unsubMsgsRef.current = null;
+
+    try {
+      const res = await fetch(`/api/chats/${chat.id}/messages`);
+      const data = await res.json();
+      if (data.messages) {
+        setMessages(data.messages);
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 50);
+      }
+    } catch (err) {
+      console.error('Failed to load messages:', err);
     }
+  }, []);
 
-    fetch(`/api/chats/${chat.id}/messages`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.messages && !unsubMsgsRef.current) {
-          setMessages(data.messages);
-          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 50);
-        }
-      })
-      .catch(console.error);
-
-    if (firebaseUid && db) {
-      const msgsQ = query(
-        collection(db, 'chats', chat.id, 'messages'),
-        orderBy('timestamp', 'asc'),
-        limit(100)
-      );
-
-      unsubMsgsRef.current = onSnapshot(msgsQ, (snap) => {
-        const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setMessages(msgs);
-        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
-
-        if (currentUid && db) {
-          updateDoc(doc(db, 'chats', chat.id), {
-            [`unreadCount.${currentUid}`]: 0,
-          }).catch(() => {});
-        }
-      }, (err) => console.error('Messages subscription error:', err.message));
-    }
-
-    fetch(`/api/chats/${chat.id}`, { method: 'PATCH' }).catch(() => {});
-  }, [currentUid, firebaseUid]);
-
-  const openChatWithUser = useCallback((targetUid) => {
+  const openChatWithUser = useCallback((targetUid, targetName = null) => {
     if (!currentUid) return;
     setShowNewMessageModal(false);
     const sorted = [currentUid, targetUid].sort();
@@ -369,30 +343,30 @@ function MessagesContent() {
 
     if (existing) {
       openChat(existing);
+      router.replace(`/messages?uid=${targetUid}`);
     } else {
-      fetch('/api/chats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ otherUserId: targetUid }),
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.chatId) {
-            router.push(`/messages?uid=${targetUid}`);
-          }
-        })
-        .catch(console.error);
+      const mockChat = {
+        id: targetChatId,
+        participants: [currentUid, targetUid],
+        participant_names: targetName ? { [targetUid]: targetName } : {},
+        isMock: true,
+        last_message: 'Say hi! (Costs 5 Sparks)',
+        last_message_at: new Date().toISOString(),
+      };
+      setActiveChatId(targetChatId);
+      setActiveChat(mockChat);
+      setShowList(false);
+      router.replace(`/messages?uid=${targetUid}`);
     }
   }, [currentUid, chats, openChat, router]);
 
   const processedParamRef = useRef(null);
 
-  // ── Auto-Open Chat based on Query Param (?uid=, ?user=, or ?group=) ──────
+  // Auto-open chat via query param
   useEffect(() => {
     if (!targetParam || !currentUid || loadingChats) return;
     if (processedParamRef.current === targetParam && activeChatId) return;
 
-    // 1. Try finding by chat ID
     const existingById = chats.find(c => c.id === targetParam);
     if (existingById) {
       processedParamRef.current = targetParam;
@@ -400,71 +374,40 @@ function MessagesContent() {
       return;
     }
 
-    // 2. Try finding by student ID
     const studentById = suggestedStudents.find(s => s.id === targetParam);
     if (studentById) {
       processedParamRef.current = targetParam;
-      openChatWithUser(studentById.id);
+      openChatWithUser(studentById.id, studentById.full_name || studentById.username);
       return;
     }
 
-    // 3. Try finding student by name / username
-    const paramLower = targetParam.toLowerCase();
-    const studentByName = suggestedStudents.find(s => 
-      s.full_name?.toLowerCase() === paramLower || 
-      s.username?.toLowerCase() === paramLower
-    );
-    if (studentByName) {
-      processedParamRef.current = targetParam;
-      openChatWithUser(studentByName.id);
-      return;
-    }
-
-    // 4. Try finding by group or chat title in existing chats
-    const chatByName = chats.find(c => {
-      const pNames = Object.values(c.participantNames || {}).map(n => String(n).toLowerCase());
-      return pNames.includes(paramLower) || c.groupName?.toLowerCase() === paramLower || c.id?.toLowerCase() === paramLower;
-    });
-    if (chatByName) {
-      processedParamRef.current = targetParam;
-      openChat(chatByName);
-      return;
-    }
-
-    // 5. If the URL param looks like a Firestore UID (from ?uid= or ?user=),
-    //    fetch that user directly from the API — don't fall through to group chat.
-    //    This handles users not included in the initial 50-user directory fetch.
     const isUidParam = searchParams.has('uid') || searchParams.has('user');
     if (isUidParam) {
       processedParamRef.current = targetParam;
-      // Attempt to open/create a 1-on-1 chat with this UID directly
       openChatWithUser(targetParam);
       return;
     }
 
-    // 6. Only use group chat fallback when explicitly navigated to via ?group= param
     const groupChatObj = {
       id: `group_${encodeURIComponent(targetParam)}`,
-      participantNames: { group: targetParam },
-      participantPhotos: {},
+      participant_names: { group: targetParam },
       participants: [currentUid, 'group'],
       isGroup: true,
       name: targetParam,
-      lastMessage: 'Welcome to the group chat!',
-      lastMessageAt: Date.now(),
+      last_message: 'Welcome to the group chat!',
+      last_message_at: new Date().toISOString(),
     };
     processedParamRef.current = targetParam;
     setActiveChatId(groupChatObj.id);
     setActiveChat(groupChatObj);
     setShowList(false);
-  }, [targetParam, currentUid, loadingChats, chats, suggestedStudents, openChat, openChatWithUser, activeChatId]);
-
+  }, [targetParam, currentUid, loadingChats, chats, suggestedStudents, openChat, openChatWithUser, activeChatId, searchParams]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
 
-  // ── Send Message ───────────────────────────────────────────────────────────
+  // Send message
   const sendMessage = async () => {
     const text = inputText.trim();
     if (!text || !activeChatId || !currentUid || sendingMsg) return;
@@ -472,8 +415,29 @@ function MessagesContent() {
     setInputText('');
     setSendingMsg(true);
     inputRef.current?.focus();
-    
-    // Optimistic UI Update
+
+    if (activeChat?.isMock) {
+      const otherUserId = activeChat.participants.find(p => p !== currentUid);
+      try {
+        const createRes = await fetch('/api/chats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otherUserId }),
+        });
+        const createData = await createRes.json();
+        if (!createRes.ok) {
+          import('@/lib/toast').then(m => m.toast.error(createData.error || 'Failed to start chat (Need 5 Sparks)'));
+          setSendingMsg(false);
+          return;
+        }
+        setActiveChat(prev => ({ ...prev, isMock: false }));
+      } catch (err) {
+        console.error('Failed to create chat:', err);
+        setSendingMsg(false);
+        return;
+      }
+    }
+
     const tempId = `temp-${Date.now()}`;
     const newMsg = {
       id: tempId,
@@ -482,7 +446,7 @@ function MessagesContent() {
       timestamp: Date.now(),
       status: 'sending'
     };
-    
+
     setMessages(prev => [...prev, newMsg]);
     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
 
@@ -492,25 +456,14 @@ function MessagesContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
       });
-      
+
       if (!res.ok) throw new Error('Failed to send message via API');
-      
-      // If we don't have real-time active, trigger mutate/fetch to update list
-      if (!firebaseUid) {
-        mutateChats();
-        const msgsRes = await fetch(`/api/chats/${activeChatId}/messages`);
-        if (msgsRes.ok) {
-          const data = await msgsRes.json();
-          if (data.messages) setMessages(data.messages);
-        }
-      }
-      // If real-time is active, the snapshot will update the list and messages automatically!
+      mutateChats();
     } catch (err) {
       console.error('Failed to send message:', err.message);
-      // Remove optimistic message
       setMessages(prev => prev.filter(m => m.id !== tempId));
       setInputText(text);
-    } finally {
+    } fontFinally: {
       setSendingMsg(false);
     }
   };
@@ -522,14 +475,15 @@ function MessagesContent() {
     }
   };
 
-  // Search Filtering
   const q = searchQuery.trim().toLowerCase();
 
   const filteredChats = chats.filter(c => {
     if (!q) return true;
-    const otherId = c.participants?.find(p => p !== currentUid) || '';
-    const otherName = (c.participantNames?.[otherId] || '').toLowerCase();
-    const lastMsg = (c.lastMessage || '').toLowerCase();
+    const participants = c.participants || [];
+    const pNames = c.participant_names || c.participantNames || {};
+    const otherId = participants.find(p => p !== currentUid) || '';
+    const otherName = (pNames[otherId] || '').toLowerCase();
+    const lastMsg = (c.last_message || c.lastMessage || '').toLowerCase();
     const student = suggestedStudents.find(s => s.id === otherId);
     const studentName = (student?.full_name || '').toLowerCase();
     const username = (student?.username || '').toLowerCase();
@@ -552,12 +506,14 @@ function MessagesContent() {
     return nameMatch || userMatch || branchMatch || yearMatch;
   });
 
-  const otherId = activeChat?.participants?.find(p => p !== currentUid) || '';
+  const activeParticipants = activeChat?.participants || [];
+  const otherId = activeParticipants.find(p => p !== currentUid) || '';
   const directoryUser = suggestedStudents.find(s => s.id === otherId);
-  const otherName = directoryUser?.full_name || activeChat?.participantNames?.[otherId] || 'Campus Student';
-  const otherPhoto = directoryUser?.photo_url || activeChat?.participantPhotos?.[otherId] || '';
+  const pNames = activeChat?.participant_names || activeChat?.participantNames || {};
+  const pPhotos = activeChat?.participant_photos || activeChat?.participantPhotos || {};
+  const otherName = directoryUser?.full_name || pNames[otherId] || 'Campus Student';
+  const otherPhoto = directoryUser?.photo_url || pPhotos[otherId] || '';
 
-  // User not logged in
   if (!loadingChats && !currentUid) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
@@ -575,7 +531,6 @@ function MessagesContent() {
     );
   }
 
-
   return (
     <div
       ref={chatContainerRef}
@@ -586,15 +541,12 @@ function MessagesContent() {
       }`}
       style={!showList ? { top: 58, zIndex: 999 } : {}}
     >
-
-      {/* ── LEFT SIDEBAR: Chat List ───────────────────────────────────────────── */}
+      {/* LEFT SIDEBAR */}
       <div className={`
         flex flex-col w-full md:w-[340px] lg:w-[380px] md:flex-shrink-0
         border-r border-zinc-200/80 bg-white
         ${!showList ? 'hidden md:flex' : 'flex'}
       `}>
-        
-        {/* Sidebar Header */}
         <div className="px-4 py-3.5 flex items-center justify-between border-b border-zinc-100">
           <span className="font-black text-lg text-zinc-900 tracking-tight">
             @{currentUser?.username || currentUser?.full_name?.toLowerCase().replace(/\s+/g, '') || 'messages'}
@@ -609,7 +561,6 @@ function MessagesContent() {
           </button>
         </div>
 
-        {/* Search Bar */}
         <div className="px-4 py-2.5">
           <div className="relative">
             <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -632,9 +583,6 @@ function MessagesContent() {
           </div>
         </div>
 
-
-
-        {/* List Content */}
         <div suppressHydrationWarning className="flex-1 overflow-y-auto no-scrollbar py-2 px-2 space-y-0.5">
           {loadingChats ? (
             <div className="flex items-center justify-center py-20">
@@ -653,7 +601,7 @@ function MessagesContent() {
                         currentUid={currentUid}
                         isActive={chat.id === activeChatId}
                         onClick={() => openChat(chat)}
-                        directoryUser={suggestedStudents.find(s => s.id === chat.participants?.find(p => p !== currentUid))}
+                        directoryUser={suggestedStudents.find(s => s.id === (chat.participants || []).find(p => p !== currentUid))}
                       />
                     ))}
                   </div>
@@ -680,32 +628,17 @@ function MessagesContent() {
                   </div>
                 </div>
               )}
-
-              {q && filteredChats.length === 0 && filteredSuggested.length === 0 && (
-                <div className="py-12 text-center px-4">
-                  <p className="text-xs font-bold text-zinc-800 mb-1">No results for &quot;{searchQuery}&quot;</p>
-                  <p className="text-[11px] text-zinc-400 mb-3">Try searching for a student name, username, or branch.</p>
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="text-xs font-bold text-[#F05A00] hover:underline cursor-pointer"
-                  >
-                    Clear search
-                  </button>
-                </div>
-              )}
             </>
           )}
         </div>
       </div>
 
-      {/* ── RIGHT MAIN PANEL: Active Conversation ────────────────────────────── */}
+      {/* RIGHT MAIN PANEL */}
       <div className={`
         flex flex-col flex-1 h-full min-h-0 bg-white
         ${showList && !activeChatId ? 'hidden md:flex' : 'flex'}
       `}>
         {!activeChatId ? (
-          /* Instagram Direct Empty Screen */
           <div className="flex flex-col items-center justify-center flex-1 h-full text-center p-8">
             <div className="w-24 h-24 rounded-full border-2 border-zinc-900 flex items-center justify-center mb-4">
               <MessageSquare className="w-12 h-12 text-zinc-900 stroke-[1.5]" />
@@ -736,7 +669,6 @@ function MessagesContent() {
                         setShowList(true); 
                         setActiveChatId(null); 
                         setActiveChat(null); 
-                        // Clear the URL param so it doesn't auto-reopen immediately
                         if (searchParams.has('uid') || searchParams.has('user') || searchParams.has('group')) {
                           router.replace('/messages');
                         }
@@ -841,9 +773,11 @@ function MessagesContent() {
 
               <AnimatePresence initial={false}>
                 {messages.map((msg, idx) => {
-                  const isMe = msg.senderId === currentUid;
+                  const sender = msg.senderId || msg.sender_id;
+                  const isMe = sender === currentUid;
                   const prevMsg = messages[idx - 1];
-                  const showAvatar = !prevMsg || prevMsg.senderId !== msg.senderId;
+                  const prevSender = prevMsg ? (prevMsg.senderId || prevMsg.sender_id) : null;
+                  const showAvatar = !prevMsg || prevSender !== sender;
 
                   return (
                     <MessageBubble
@@ -861,7 +795,7 @@ function MessagesContent() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Bar pinned to bottom (Only for 1-on-1 chats, hidden for official broadcast channels) */}
+            {/* Input Bar */}
             {(() => {
               const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
               if (isGroup) {
@@ -870,14 +804,6 @@ function MessagesContent() {
                     <p className="text-xs font-bold text-zinc-500">
                       📢 Broadcast Channel · Only admins can post updates here.
                     </p>
-                    <a
-                      href="https://chat.whatsapp.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-1 text-[11px] font-black text-emerald-600 hover:underline"
-                    >
-                      Join Official WhatsApp Channel for discussions →
-                    </a>
                   </div>
                 );
               }
@@ -892,7 +818,7 @@ function MessagesContent() {
                       onKeyDown={handleKeyDown}
                       onFocus={() => {
                         setTimeout(() => {
-                          window.scrollTo(0, 0); // Force layout viewport back to top if browser scrolled it
+                          window.scrollTo(0, 0);
                           messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
                         }, 300);
                       }}
@@ -921,7 +847,7 @@ function MessagesContent() {
         )}
       </div>
 
-      {/* ── NEW MESSAGE MODAL ─────────────────────────────────────────────────── */}
+      {/* NEW MESSAGE MODAL */}
       {showNewMessageModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-zinc-100 anim-fade-in">
@@ -935,7 +861,7 @@ function MessagesContent() {
                 Cancel
               </button>
             </div>
-            
+
             <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar space-y-1">
               <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider px-3 mb-2">Select a Campus Student</p>
               {suggestedStudents.map(student => (
@@ -953,8 +879,6 @@ function MessagesContent() {
     </div>
   );
 }
-
-// ─── Page Export ──────────────────────────────────────────────────────────────
 
 export default function MessagesPage() {
   return (

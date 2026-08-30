@@ -1,23 +1,21 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/getAdminUser';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function GET() {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const disputesSnap = await adminDb.collection('bookings')
-      .where('status', '==', 'Disputed')
-      .get();
-    
-    const disputes = disputesSnap.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      created_at: doc.data().created_at?.toDate?.()?.toISOString() || doc.data().created_at,
-    }));
+    const { data, error } = await supabaseAdmin
+      .from('bookings')
+      .select('*')
+      .eq('status', 'Disputed')
+      .order('created_at', { ascending: false });
 
-    return NextResponse.json({ disputes });
+    if (error) throw new Error(error.message);
+
+    return NextResponse.json({ disputes: data || [] });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

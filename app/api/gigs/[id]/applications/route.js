@@ -3,20 +3,17 @@
  * PATCH /api/gigs/[id]/applications — host accepts or rejects an applicant
  *
  * On ACCEPT:
- *   - Deduct escrow Sparks from host wallet
  *   - Generate 6-digit meetingCode stored on application doc
- *   - Auto-open DM thread between host + freelancer
- *   - Notify freelancer (in-app)
+ *   - Auto-open DM thread between host + freelancer (via chats table)
+ *   - Notify freelancer (in-app notification)
  *
  * On REJECT:
  *   - Update status to REJECTED
  *   - Notify freelancer (in-app)
  */
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/getAdminUser';
-import { spendSparks } from '@/lib/wallet';
-import { FieldValue } from 'firebase-admin/firestore';
 import { sendPush } from '@/lib/sendPushNotification';
 
 // ── GET — list all applicants ───────────────────────────────────────────────
@@ -24,25 +21,34 @@ export async function GET(request, { params }) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ applications: [] });
 
     const { id } = await params;
-    const gigRef = adminDb.collection('gigs').doc(id);
-    const gigSnap = await gigRef.get();
 
-    if (!gigSnap.exists) {
+    // Fetch gig to verify ownership
+    const { data: gig, error: gigErr } = await supabaseAdmin
+      .from('gigs')
+      .select('id, host_id, author_id')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (gigErr || !gig) {
       return NextResponse.json({ error: 'Gig not found' }, { status: 404 });
     }
 
-    // Only the gig author can see applicants
-    if (gigSnap.data().authorId !== user.uid) {
+    const authorId = gig.author_id || gig.host_id;
+    if (authorId !== user.uid) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const appsSnap = await gigRef.collection('applications').orderBy('appliedAt', 'desc').get();
-    const applications = appsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const { data: applications, error: appsErr } = await supabaseAdmin
+      .from('gig_applications')
+      .select('*')
+      .eq('gig_id', id)
+      .order('created_at', { ascending: false });
 
-    return NextResponse.json({ applications });
+    if (appsErr) throw new Error(appsErr.message);
+
+    return NextResponse.json({ applications: applications || [] });
   } catch (err) {
     console.error('[GET /api/gigs/[id]/applications]', err.message);
     return NextResponse.json({ applications: [] });
@@ -54,7 +60,6 @@ export async function PATCH(request, { params }) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
     const { id } = await params;
     const { applicantId, action } = await request.json();
@@ -63,78 +68,89 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: 'Missing applicantId or invalid action' }, { status: 400 });
     }
 
-    const gigRef = adminDb.collection('gigs').doc(id);
-    const gigSnap = await gigRef.get();
+    // Fetch gig
+    const { data: gig, error: gigErr } = await supabaseAdmin
+      .from('gigs')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
 
-    if (!gigSnap.exists) return NextResponse.json({ error: 'Gig not found' }, { status: 404 });
-    const gig = gigSnap.data();
+    if (gigErr || !gig) return NextResponse.json({ error: 'Gig not found' }, { status: 404 });
 
-    if (gig.authorId !== user.uid) {
+    const authorId = gig.author_id || gig.host_id;
+    if (authorId !== user.uid) {
       return NextResponse.json({ error: 'Only the gig author can manage applications' }, { status: 403 });
     }
 
-    const appRef = gigRef.collection('applications').doc(applicantId);
-    const appSnap = await appRef.get();
-    if (!appSnap.exists) return NextResponse.json({ error: 'Application not found' }, { status: 404 });
-    const app = appSnap.data();
-    if (app.status !== 'PENDING') {
+    // Fetch application
+    const { data: app, error: appErr } = await supabaseAdmin
+      .from('gig_applications')
+      .select('*')
+      .eq('gig_id', id)
+      .eq('applicant_id', applicantId)
+      .maybeSingle();
+
+    if (appErr || !app) return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+    if (app.status !== 'pending') {
       return NextResponse.json({ error: 'Application already processed' }, { status: 400 });
     }
 
+    const now = new Date().toISOString();
+
     // ── ACCEPT ──────────────────────────────────────────────────────────────
     if (action === 'accept') {
-      const budget = parseInt(gig.budget) || 0;
-
-      // Deduct Sparks from host as escrow
-      if (budget > 0) {
-        const spendResult = await spendSparks(user.uid, budget);
-        if (!spendResult.ok) {
-          return NextResponse.json({ error: spendResult.error || 'Insufficient Sparks to fund this gig' }, { status: 402 });
-        }
-      }
-
       const meetingCode = String(Math.floor(100000 + Math.random() * 900000));
 
-      await adminDb.runTransaction(async (tx) => {
-        // Update application
-        tx.update(appRef, {
-          status: 'ACCEPTED',
-          meetingCode,
-          acceptedAt: new Date().toISOString(),
-          escrowAmount: budget,
-        });
+      // Auto-open DM thread between host and freelancer
+      const sortedIds = [user.uid, applicantId].sort();
+      const chatId = `${sortedIds[0]}_${sortedIds[1]}`;
 
-        // Mark gig as in-progress (still visible but not accepting new apps)
-        tx.update(gigRef, { status: 'in_progress', acceptedApplicantId: applicantId });
+      await Promise.all([
+        // Update application status
+        supabaseAdmin
+          .from('gig_applications')
+          .update({ status: 'ACCEPTED', meeting_code: meetingCode, accepted_at: now })
+          .eq('gig_id', id)
+          .eq('applicant_id', applicantId),
 
-        // Open DM thread between host and freelancer
-        const sortedIds = [user.uid, applicantId].sort();
-        const chatId = `${sortedIds[0]}_${sortedIds[1]}`;
-        const chatRef = adminDb.collection('chats').doc(chatId);
-        tx.set(chatRef, {
-          participants: [user.uid, applicantId],
-          updatedAt: FieldValue.serverTimestamp(),
-        }, { merge: true });
+        // Mark gig as in-progress
+        supabaseAdmin
+          .from('gigs')
+          .update({ status: 'in_progress', accepted_applicant_id: applicantId, updated_at: now })
+          .eq('id', id),
 
-        const msgRef = chatRef.collection('messages').doc();
-        tx.set(msgRef, {
-          senderId: 'system',
+        // Upsert chat thread
+        supabaseAdmin
+          .from('chats')
+          .upsert({
+            id: chatId,
+            participants: [user.uid, applicantId],
+            last_message: `🎉 You've been accepted for the gig "${gig.title}"! Connect here to coordinate.`,
+            last_sender_id: 'system',
+            last_message_at: now,
+            created_at: now,
+          }, { onConflict: 'id' }),
+
+        // System message in chat
+        supabaseAdmin.from('chat_messages').insert({
+          chat_id: chatId,
+          sender_id: 'system',
           text: `🎉 You've been accepted for the gig "${gig.title}"! Connect here to coordinate.`,
-          timestamp: FieldValue.serverTimestamp(),
           status: 'delivered',
-        });
+          created_at: now,
+        }),
 
         // Notify freelancer
-        const notifRef = adminDb.collection('users').doc(applicantId).collection('notifications').doc();
-        tx.set(notifRef, {
+        supabaseAdmin.from('notifications').insert({
+          user_id: applicantId,
+          sender_id: user.uid,
           title: '🎉 Gig Accepted!',
-          body: `${user.full_name || 'Host'} accepted you for "${gig.title}". Check messages to get started.`,
+          message: `${user.full_name || 'Host'} accepted you for "${gig.title}". Check messages to get started.`,
           type: 'gig_accepted',
-          gigId: id,
           read: false,
-          created_at: FieldValue.serverTimestamp(),
-        });
-      });
+          created_at: now,
+        }),
+      ]);
 
       // FCM push (non-blocking)
       sendPush(applicantId, {
@@ -148,19 +164,23 @@ export async function PATCH(request, { params }) {
 
     // ── REJECT ──────────────────────────────────────────────────────────────
     if (action === 'reject') {
-      await adminDb.runTransaction(async (tx) => {
-        tx.update(appRef, { status: 'REJECTED', rejectedAt: new Date().toISOString() });
+      await Promise.all([
+        supabaseAdmin
+          .from('gig_applications')
+          .update({ status: 'REJECTED', rejected_at: now })
+          .eq('gig_id', id)
+          .eq('applicant_id', applicantId),
 
-        const notifRef = adminDb.collection('users').doc(applicantId).collection('notifications').doc();
-        tx.set(notifRef, {
+        supabaseAdmin.from('notifications').insert({
+          user_id: applicantId,
+          sender_id: user.uid,
           title: 'Application Update',
-          body: `Your application for "${gig.title}" was not selected this time.`,
+          message: `Your application for "${gig.title}" was not selected this time.`,
           type: 'gig_rejected',
-          gigId: id,
           read: false,
-          created_at: FieldValue.serverTimestamp(),
-        });
-      });
+          created_at: now,
+        }),
+      ]);
 
       sendPush(applicantId, {
         title: 'Application Update',
@@ -175,4 +195,3 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
   }
 }
-
