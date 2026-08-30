@@ -7,7 +7,7 @@
 // and purge the old cache — no manual "Clear Cache" needed by anyone.
 // Just update this timestamp whenever you deploy a major change.
 
-const CACHE_VERSION = '2026-08-26T18:17'; // ← update this on deploy
+const CACHE_VERSION = '2026-08-30T19:43'; // ← update this on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/manifest.json',
