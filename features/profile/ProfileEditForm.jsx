@@ -65,7 +65,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         setPhotoUploadStage('Uploading to cloud...');
 
         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
-        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'unsigned_preset';
+        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'Meova_unsigned';
         
         const formData = new FormData();
         formData.append('file', compressedFile);

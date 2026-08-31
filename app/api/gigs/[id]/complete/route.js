@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/getAdminUser';
 import { creditSparks } from '@/lib/wallet';
 import { sendPush } from '@/lib/sendPushNotification';
+import { rateLimit } from '@/lib/rateLimit';
 
 async function isCircularPair(hostId, freelancerId) {
   try {
@@ -61,6 +62,14 @@ export async function POST(request, { params }) {
 
     if (app.status === 'COMPLETED') {
       return NextResponse.json({ error: 'Gig already marked as completed' }, { status: 400 });
+    }
+
+    // Brute-force protection: Max 5 attempts per 15 minutes per gig
+    const rl = rateLimit(`gig_complete_code:${user.uid}:${id}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+    if (!rl.ok) {
+      return NextResponse.json({
+        error: `Too many wrong code attempts. Please wait ${rl.retryAfter}s before trying again.`
+      }, { status: 429, headers: { 'Retry-After': rl.retryAfter } });
     }
 
     const meetingCode = app.meeting_code || app.meetingCode;

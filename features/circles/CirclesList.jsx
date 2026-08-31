@@ -392,7 +392,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                     ) : (
                       <div className="flex items-center gap-1">
                         <span className="text-[9.5px] font-black text-[#F05A00] uppercase tracking-wide bg-orange-50 px-1.5 py-0.5 rounded-md border border-orange-100">
-                          by Meetuply
+                          by Meova
                         </span>
                       </div>
                     )}

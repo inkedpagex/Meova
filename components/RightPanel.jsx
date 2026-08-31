@@ -75,7 +75,7 @@ export default function RightPanel({ people = [], upcomingEvents = [] }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-black uppercase tracking-wider text-zinc-900 whitespace-nowrap">Upcoming Events</h4>
-          <Link href="/circles" className="text-[10px] font-black text-[#F05A00] hover:text-[#D94F00] whitespace-nowrap">Explore</Link>
+          <Link href="/discover" className="text-[10px] font-black text-[#F05A00] hover:text-[#D94F00] whitespace-nowrap">Explore</Link>
         </div>
 
         <div className="space-y-2.5">

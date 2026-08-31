@@ -298,9 +298,13 @@ create table if not exists public.reviews (
 -- ----------------------------------------------------------------------------
 create index if not exists idx_profiles_username on public.profiles(username);
 create index if not exists idx_gigs_host_id on public.gigs(host_id);
+create index if not exists idx_gigs_author_status on public.gigs(author_id, status);
 create index if not exists idx_bookings_guest_id on public.bookings(guest_id);
 create index if not exists idx_bookings_host_id on public.bookings(host_id);
-create index if not exists idx_notifications_user_id on public.notifications(user_id);
+create index if not exists idx_bookings_host_status on public.bookings(host_id, status);
+create index if not exists idx_notifications_user_unread on public.notifications(user_id, read, created_at desc);
+create index if not exists idx_transactions_user_date on public.transactions(user_id, created_at desc);
+create index if not exists idx_posts_category_date on public.posts(category, created_at desc);
 create index if not exists idx_chat_messages_chat_id on public.chat_messages(chat_id);
 create index if not exists idx_blocks_blocker on public.blocks(blocker_id);
 create index if not exists idx_blocks_blocked on public.blocks(blocked_id);

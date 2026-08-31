@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar';
 import RightPanel from '../components/RightPanel';
 import { getUserWithRole } from '../lib/getAdminUser';
 import { getOrCreateWallet } from '../lib/wallet';
-import { fetchUsersAdmin, fetchUpcomingEventsAdmin } from '../lib/firebaseAdminQueries';
+import { fetchUsersAdmin, fetchUpcomingEventsAdmin } from '../lib/supabaseQueries';
 import Script from 'next/script';
 import GoogleAuthProviderWrapper from '../components/GoogleAuthProviderWrapper';
 import { headers } from 'next/headers';
@@ -17,7 +17,7 @@ import BlockedPage from './blocked/page';
 
 export const metadata = {
   title: 'Meova — Your Campus Life',
-  description: 'Join experiences, meet people, and grow your campus social circle with Meova.',
+  description: 'Connect with campus students, book 1-on-1 meetups, and join circles with Meova.',
   manifest: '/manifest.json',
   verification: {
     google: '69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w',

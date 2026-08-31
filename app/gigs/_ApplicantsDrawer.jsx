@@ -91,6 +91,14 @@ export default function ApplicantsDrawer({ gig, onClose }) {
   const [code, setCode] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
 
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const apps = data?.applications || [];
   const acceptedApp = apps.find(a => a.status === 'ACCEPTED');
 

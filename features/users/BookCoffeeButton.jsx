@@ -9,7 +9,7 @@ import Link from 'next/link';
 const COFFEE_COST = 50;
 
 export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto, isLoggedIn, accentColor, renderButton }) {
-  const color = accentColor || '#ffffff';
+  const color = (accentColor && accentColor !== '#ffffff') ? accentColor : '#F05A00';
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [booked, setBooked] = useState(false);

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search, Check, MapPin, Zap, Coffee, BookOpen, Activity, Music,
   Layers, Camera, Trophy, Users, Palette, Star,
-  AlertTriangle
+  AlertTriangle, X
 } from 'lucide-react';
 import useSWR from 'swr';
 import { useUserContext } from '../../components/providers/UserProvider';
@@ -436,10 +436,20 @@ export default function DiscoverClient() {
       <div className="relative">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400" />
         <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Search people, experiences, communities..."
-          className="w-full pl-11 pr-4 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all bg-zinc-100 border border-zinc-200 text-zinc-900" />
+          placeholder="Search people, circles, gigs..."
+          className="w-full pl-11 pr-10 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all bg-zinc-100 border border-zinc-200 text-zinc-900 focus:border-[#F05A00]" />
+        {search && (
+          <button 
+            type="button" 
+            onClick={() => setSearch('')}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-zinc-400 hover:text-zinc-600 cursor-pointer"
+            title="Clear search"
+          >
+            <X size={15} />
+          </button>
+        )}
         {isSearching && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+          <div className="absolute right-10 top-1/2 -translate-y-1/2">
             <div className="w-4 h-4 border-2 border-[#F05A00] border-t-transparent rounded-full animate-spin" />
           </div>
         )}

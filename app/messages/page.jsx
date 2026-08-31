@@ -711,7 +711,7 @@ function MessagesContent() {
 
                   {isGroup ? (
                     <a
-                      href="https://chat.whatsapp.com/"
+                      href={activeChat?.link || activeChat?.channel_link || activeChat?.invite_link || "https://chat.whatsapp.com/"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-black transition-colors"
@@ -747,12 +747,12 @@ function MessagesContent() {
                     </div>
                     <h3 className="text-base font-black text-zinc-900">{otherName}</h3>
                     <p className="text-xs text-zinc-500 mb-4 font-semibold">
-                      {isGroup ? 'Verified Campus Community · Official Channel' : 'GLA Student · Meetuply'}
+                      {isGroup ? 'Verified Campus Community · Official Channel' : 'Campus Student · Meova'}
                     </p>
 
                     {isGroup ? (
                       <a 
-                        href="https://chat.whatsapp.com/"
+                        href={activeChat?.link || activeChat?.channel_link || activeChat?.invite_link || "https://chat.whatsapp.com/"}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition-all flex items-center gap-2 shadow-xs cursor-pointer active:scale-95"

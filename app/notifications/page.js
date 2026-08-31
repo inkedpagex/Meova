@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -67,9 +67,26 @@ export default function NotificationsPage() {
   const unread = filtered.filter(n => !n.read);
   const read = filtered.filter(n => n.read);
 
+  const handleNotifClick = (n) => {
+    if (n.url || n.link) {
+      router.push(n.url || n.link);
+    } else if (n.type === 'booking') {
+      router.push('/bookings');
+    } else if (n.type === 'message') {
+      router.push('/messages');
+    } else if (n.type === 'sparks') {
+      router.push('/wallet');
+    } else {
+      router.push('/');
+    }
+  };
+
   const NotifRow = ({ n }) => (
-    <div className={`p-4 rounded-2xl flex items-center gap-3 transition-all ${!n.read ? 'ring-1 ring-[#f5ebf4]' : ''}`}
-      style={{ background: n.read ? 'var(--bg-elevated)' : '#faf5ff', border: n.read ? '1px solid var(--border-subtle)' : '1px solid #e9d5ff' }}>
+    <div 
+      onClick={() => handleNotifClick(n)}
+      className={`p-4 rounded-2xl flex items-center gap-3 transition-all cursor-pointer hover:shadow-xs active:scale-[0.99] ${!n.read ? 'ring-1 ring-[#f5ebf4]' : ''}`}
+      style={{ background: n.read ? 'var(--bg-elevated)' : '#faf5ff', border: n.read ? '1px solid var(--border-subtle)' : '1px solid #e9d5ff' }}
+    >
       <NotifIcon type={n.type} />
       <div className="min-w-0 flex-1">
         <p className="text-[12px] font-bold leading-snug" style={{ color: 'var(--text-primary)' }}>{n.title}</p>

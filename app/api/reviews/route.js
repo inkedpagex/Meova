@@ -36,17 +36,23 @@ export async function POST(request) {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { bookingId, experienceId, targetUserId, rating, written, categories } = await request.json();
+    const { bookingId, targetUserId, rating, written } = await request.json();
 
     if (!bookingId || !targetUserId || !rating) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    if (targetUserId === user.uid) {
+      return NextResponse.json({ error: 'You cannot review yourself' }, { status: 400 });
+    }
+
+    const numRating = Math.min(5, Math.max(1, Math.round(Number(rating)) || 5));
+
     const review = {
       reviewer_id: user.uid,
       target_user_id: targetUserId,
-      rating: Number(rating) || 5,
-      comment: written || '',
+      rating: numRating,
+      comment: (written || '').slice(0, 500),
       created_at: new Date().toISOString(),
     };
 

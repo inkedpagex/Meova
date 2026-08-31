@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState, useEffect } from 'react';
 import { WifiOff, RefreshCw } from 'lucide-react';
 
@@ -48,7 +48,7 @@ export default function NetworkWrapper({ children }) {
           You're Offline
         </h1>
         <p className="text-sm font-semibold text-zinc-500 max-w-xs mb-8">
-          Check your Wi-Fi or cellular data connection to continue using Meetuply.
+          Check your Wi-Fi or cellular data connection to continue using Meova.
         </p>
 
         <button 

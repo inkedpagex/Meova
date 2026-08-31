@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/getAdminUser';
-import { fetchPendingCirclesAdmin } from '@/lib/firebaseAdminQueries';
+import { fetchPendingCirclesAdmin } from '@/lib/supabaseQueries';
 
 export async function GET(request) {
   try {

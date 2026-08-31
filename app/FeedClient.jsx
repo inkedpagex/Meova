@@ -5,7 +5,7 @@ import QRCode from 'react-qr-code';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Skeleton from '../components/Skeleton';
 import {
   Zap, MessageCircle, Heart, Share2, Calendar, MapPin,
@@ -181,6 +181,7 @@ function getExpCardTheme(category) {
 
 export default function FeedClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user: currentUser, wallet: currentWallet, people } = useUserContext();
   const initialSparks = currentWallet ? (currentWallet.purchased || 0) + (currentWallet.bonus || 0) + (currentWallet.creator || 0) : 0;
   
@@ -204,6 +205,12 @@ export default function FeedClient() {
 
   // Campus Photo Post State
   const [showPostModal, setShowPostModal] = useState(false);
+
+  useEffect(() => {
+    if (searchParams?.get('action') === 'create-post') {
+      setShowPostModal(true);
+    }
+  }, [searchParams]);
   const [selectedPostPhoto, setSelectedPostPhoto] = useState(null);
   const [postCaption, setPostCaption] = useState('');
   const [postCategory, setPostCategory] = useState('UI/UX Work');
@@ -266,17 +273,8 @@ export default function FeedClient() {
 
   // Redesign Home page active modals and deck states
   const [stackIndex, setStackIndex] = useState(0);
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBookingsModal, setShowBookingsModal] = useState(false);
   const [dismissedVibes, setDismissedVibes] = useState({});
-
-  // Form states for creating experience
-  const [newExpTitle, setNewExpTitle] = useState('');
-  const [newExpCategory, setNewExpCategory] = useState('Coffee');
-  const [newExpPrice, setNewExpPrice] = useState(100);
-  const [newExpDuration, setNewExpDuration] = useState(60);
-  const [newExpLocation, setNewExpLocation] = useState('');
-  const [createLoading, setCreateLoading] = useState(false);
 
   const [joinedGroups, setJoinedGroups] = useState(currentUser?.joinedGroups || {});
   const [groupFilter, setGroupFilter] = useState('All');
@@ -473,41 +471,7 @@ export default function FeedClient() {
 
 
 
-  const handleCreateExperience = async () => {
-    if (!newExpTitle.trim() || !newExpLocation.trim()) {
-      alert('Please fill in all fields!');
-      return;
-    }
-    setCreateLoading(true);
-    try {
-      const res = await fetch('/api/experiences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: newExpTitle,
-          category: newExpCategory,
-          price: Number(newExpPrice),
-          duration: Number(newExpDuration),
-          location: newExpLocation,
-          days: ['Any'],
-          slots: ['Anytime'],
-        }),
-      });
-      if (res.ok) {
-        setShowCreateModal(false);
-        setNewExpTitle(''); setNewExpLocation('');
-        await refreshDbState();
-        confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
-      } else {
-        const d = await res.json();
-        toast.error(d.error || 'Failed to create experience.');
-      }
-    } catch(e) {
-      toast.error('Network error. Please try again.');
-    } finally {
-      setCreateLoading(false);
-    }
-  };
+
 
   const handleAcceptRequest = async (bookingId) => {
     if (actionLoadingId) return;
@@ -761,7 +725,7 @@ export default function FeedClient() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search peers, experiences, gigs..."
+            placeholder="Search peers, circles, gigs..."
             className="w-full bg-white border border-zinc-200/90 focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 rounded-2xl pl-11 pr-10 py-3.5 text-xs font-bold text-zinc-900 placeholder-zinc-400 focus:outline-none transition-all shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
           />
           {searchQuery && (
@@ -1345,7 +1309,7 @@ export default function FeedClient() {
                 <div>
                   <h3 className="text-lg font-black text-[var(--text-primary)]">Booking Requested!</h3>
                   <p className="text-xs text-[var(--text-secondary)] leading-relaxed mt-2 font-semibold">
-                    You have successfully requested <strong className="text-[var(--text-primary)]">{selectedExp.title}</strong>. {selectedExp.price} Sparks have been locked in platform escrow. Check the <strong className="text-[var(--text-primary)]">Active Experience Hub</strong> at the top of the homepage for updates!
+                    You have successfully requested <strong className="text-[var(--text-primary)]">{selectedExp.title}</strong>. {selectedExp.price} Sparks have been locked in platform escrow. Check the <strong className="text-[var(--text-primary)]">Active Meetups Hub</strong> at the top of the homepage for updates!
                   </p>
                 </div>
                 <button
@@ -1505,7 +1469,7 @@ export default function FeedClient() {
             <div className="text-center">
               <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)]">Leave a Review</h3>
               <p className="text-[10px] text-[var(--text-secondary)] font-bold mt-1 uppercase tracking-wider">
-                How was your experience meeting with {currentUser.id === reviewBooking.hostId ? reviewBooking.guestName : reviewBooking.hostName}?
+                How was your campus meetup with {currentUser.id === reviewBooking.hostId ? reviewBooking.guestName : reviewBooking.hostName}?
               </p>
             </div>
 
@@ -1778,145 +1742,7 @@ export default function FeedClient() {
         </div>
       )}
 
-      {/* ── CREATE CUSTOM EXPERIENCE MODAL ───────────────────────── */}
-      {showCreateModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center pb-20 sm:pb-4 px-4 pt-4"
-          style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
-          onClick={() => !createLoading && setShowCreateModal(false)}
-        >
-          <div
-            className="relative w-full max-w-sm rounded-[2rem] p-6 space-y-4 anim-scale-in text-left max-h-[80vh] overflow-y-auto"
-            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            {!createLoading && (
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-lg text-[var(--text-muted)] hover:text-white transition-colors bg-[var(--bg-surface)]"
-              >
-                <X size={15} />
-              </button>
-            )}
 
-            <div>
-              <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)]">Host Campus Meet</h3>
-              <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase mt-1">Create a session other students can book</p>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Meet Title</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Badminton Match / Startup Brainstorm"
-                  value={newExpTitle}
-                  onChange={(e) => setNewExpTitle(e.target.value)}
-                  className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none focus:border-[var(--accent)]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Category</label>
-                  <select
-                    value={newExpCategory}
-                    onChange={(e) => setNewExpCategory(e.target.value)}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none cursor-pointer"
-                  >
-                    {['Coffee', 'Study', 'Startup', 'Photography', 'Sports', 'Music'].map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Duration (Mins)</label>
-                  <select
-                    value={newExpDuration}
-                    onChange={(e) => setNewExpDuration(Number(e.target.value))}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none cursor-pointer"
-                  >
-                    {[30, 60].map(d => (
-                      <option key={d} value={d}>{d} Mins</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Price (Sparks)</label>
-                  <input
-                    type="number"
-                    min={50}
-                    max={500}
-                    step={25}
-                    value={newExpPrice}
-                    onChange={(e) => setNewExpPrice(Number(e.target.value))}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none focus:border-[var(--accent)]"
-                  />
-                </div>
-                <div>
-                  <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Location</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Block 3 Cafeteria"
-                    value={newExpLocation}
-                    onChange={(e) => setNewExpLocation(e.target.value)}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none focus:border-[var(--accent)]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Available Day</label>
-                  <select
-                    value={newExpDays}
-                    onChange={(e) => setNewExpDays(e.target.value)}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none cursor-pointer"
-                  >
-                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Time Slot</label>
-                  <select
-                    value={newExpSlots}
-                    onChange={(e) => setNewExpSlots(e.target.value)}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] rounded-xl p-3 outline-none cursor-pointer"
-                  >
-                    {['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'].map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={handleCreateExperience}
-              disabled={createLoading}
-              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-black uppercase py-3.5 rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95 disabled:opacity-60 cursor-pointer shadow-md"
-            >
-              {createLoading ? (
-                <>
-                  <Loader2 size={13} className="animate-spin" />
-                  <span>Creating Meetup...</span>
-                </>
-              ) : (
-                <>
-                  <Plus size={14} />
-                  <span>List Campus Meetup</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ── MY BOOKINGS MODAL ─────────────────────────────────────── */}
       {showBookingsModal && (

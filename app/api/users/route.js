@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
-import { fetchUsersAdmin } from '@/lib/firebaseAdminQueries';
+import { fetchUsersAdmin } from '@/lib/supabaseQueries';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function GET() {

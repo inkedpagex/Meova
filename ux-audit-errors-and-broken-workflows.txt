@@ -1,0 +1,318 @@
+================================================================================
+MEOVA — COMPREHENSIVE UX AUDIT, MINOR ERRORS & BROKEN WORKFLOWS REPORT
+Generated: 2026-08-31
+Total Issues Identified: 52
+================================================================================
+
+--------------------------------------------------------------------------------
+SECTION 1: BROKEN LINKS, 404S & ROUTING FLAWS
+--------------------------------------------------------------------------------
+
+[ISSUE 01] Mobile Bottom Nav [+] Menu — 404 Error on Photo Post
+- File: components/CreateMenuModal.jsx (Line 15)
+- Problem: "Post Photo / Moment" links to '/create/photo' which does not exist in the project, throwing a 404 Not Found error.
+- Fix: Change link to '/?action=create-post' and hook up FeedClient to open the Post creation modal when the query parameter is present.
+
+[ISSUE 02] Desktop Right Panel "Upcoming Events" — Wrong Route
+- File: components/RightPanel.jsx (Line 78)
+- Problem: The "Explore" button next to Upcoming Events points to '/circles' (Communities) instead of '/events'.
+- Fix: Change href to '/events'.
+
+[ISSUE 03] Bookings Page Empty State Link Loop
+- File: app/bookings/page.js (Line 334)
+- Problem: "Browse Experiences" button redirects user to '/' (Home Feed) instead of '/discover' where campus classmates and meets are listed.
+- Fix: Change router.push('/') to router.push('/discover').
+
+[ISSUE 04] Discover Page Empty Communities Button
+- File: app/discover/DiscoverClient.jsx (Line 381)
+- Problem: When 0 communities are found, the button reloads the current page or causes an unnecessary route refresh.
+- Fix: Route to '/circles' or open community creation modal.
+
+[ISSUE 05] Feed Action Param Not Handled
+- File: app/FeedClient.jsx (Line 189)
+- Problem: FeedClient does not listen for searchParams (?action=create-post), preventing external components from triggering the post creation popup.
+- Fix: Add useSearchParams check in useEffect to trigger setShowPostModal(true).
+
+[ISSUE 06] Messages Official Channel Link Hardcoded
+- File: app/messages/page.jsx (Line 714, Line 755)
+- Problem: 'href="https://chat.whatsapp.com/"' is hardcoded, opening a generic empty WhatsApp URL rather than the actual circle invite link.
+- Fix: Use activeChat.link || activeChat.channel_link || '/circles' as dynamic URL.
+
+[ISSUE 07] Admin Dashboard Back Button Loop
+- File: app/admin/AdminClient.jsx (Line 190)
+- Problem: router.back() triggers a page reload/loop if the admin navigated directly to the URL.
+- Fix: Fallback to router.push('/') if window.history.length <= 1.
+
+[ISSUE 08] Wallet Back Button Exit Loop
+- File: app/wallet/page.js (Line 225)
+- Problem: router.back() can exit the web app if the user arrived via a direct link or push notification.
+- Fix: Check history length and fallback to router.push('/').
+
+
+--------------------------------------------------------------------------------
+SECTION 2: INVISIBLE BUTTONS & COLOR CONTRAST BUGS
+--------------------------------------------------------------------------------
+
+[ISSUE 09] Book Coffee Meet Confirm Button Invisible (White-on-White)
+- File: features/users/BookCoffeeButton.jsx (Line 12, Line 295)
+- Problem: Fallback accentColor is '#ffffff' and text color is hardcoded '#ffffff', rendering invisible text on a white button background.
+- Fix: Change default fallback to accentColor || '#F05A00'.
+
+[ISSUE 10] Feed Post Category Pill Low Contrast
+- File: app/FeedClient.jsx (Line 1082)
+- Problem: Light grey text on white/translucent background causes accessibility contrast failure.
+- Fix: Use higher contrast dark-mode compatible text color (text-zinc-700/font-black).
+
+[ISSUE 11] Discover Page Search Missing Clear (X) Button
+- File: app/discover/DiscoverClient.jsx (Line 439)
+- Problem: User has to manually backspace character by character to clear long queries.
+- Fix: Add an (X) clear button inside search bar when search.length > 0.
+
+[ISSUE 12] Notification Row Unread Indicator Subtlety
+- File: app/notifications/page.js (Line 79)
+- Problem: Tiny 2px dot makes distinguishing read vs unread notifications difficult on mobile screens.
+- Fix: Add a distinct left border accent or subtle highlight background for unread items.
+
+[ISSUE 13] Events Category Dynamic Theme Contrast
+- File: app/events/page.js (Line 92)
+- Problem: Certain category badge colors lack adequate contrast with white text.
+- Fix: Ensure dark-text badges for light background themes.
+
+[ISSUE 14] Gigs Category Pill Active State Border
+- File: app/gigs/page.js (Line 176)
+- Problem: Active filter pill is difficult to distinguish in sunlight/mobile screens.
+- Fix: Add strong brand orange background with crisp white text for active tab.
+
+
+--------------------------------------------------------------------------------
+SECTION 3: DEAD / NON-RESPONSIVE BUTTONS (NO ONCLICK)
+--------------------------------------------------------------------------------
+
+[ISSUE 15] Landing Page Coffee Meet Invite Card
+- File: features/auth/AuthForm.jsx (Line 218)
+- Problem: "Accept Invite" button in hero preview card has no onClick handler.
+- Fix: Attach onClick={() => loginWithGoogleGIS()} to trigger Google login popup.
+
+[ISSUE 16] Landing Page Campus Radar "Join Coffee"
+- File: features/auth/AuthForm.jsx (Line 471)
+- Problem: Interactive-looking "Join Coffee" pill does nothing when clicked.
+- Fix: Wire up to Google authentication modal.
+
+[ISSUE 17] Landing Page Library "Study Meet"
+- File: features/auth/AuthForm.jsx (Line 486)
+- Problem: "Study Meet" tag looks clickable but has no action.
+- Fix: Wire up to Google authentication modal.
+
+[ISSUE 18] Landing Page "View all activity" Button
+- File: features/auth/AuthForm.jsx (Line 519)
+- Problem: Bottom CTA button in preview feed is non-responsive.
+- Fix: Wire up to login trigger or scroll to signup form.
+
+[ISSUE 19] Notifications List Rows Non-Clickable
+- File: app/notifications/page.js (Line 70)
+- Problem: Tapping a notification (e.g. "New Booking Request", "Sparks Received") does not navigate to the corresponding page.
+- Fix: Add click handler routing to /bookings, /messages, or /wallet based on notification type.
+
+[ISSUE 20] Right Panel Classmates "Meet" Action Button
+- File: components/RightPanel.jsx (Line 64)
+- Problem: "Meet 50 Sparks" button is nested inside a Link, preventing direct booking modal launch.
+- Fix: Separate action button to directly launch BookCoffeeButton modal.
+
+[ISSUE 21] Feed Post Three-Dot "Report Post" Action
+- File: app/FeedClient.jsx (Line 1160)
+- Problem: Clicking "Report" does not send a report event or show confirmation feedback.
+- Fix: Add report confirmation toast and API trigger.
+
+[ISSUE 22] Circles List Search Enter Key Ignored
+- File: features/circles/CirclesList.jsx (Line 145)
+- Problem: Pressing "Enter" on virtual keyboards leaves the dropdown stuck open.
+- Fix: Add onKeyDown handler to blur input on Enter.
+
+
+--------------------------------------------------------------------------------
+SECTION 4: MISSING EXITS & UI TRAPS (USER STUCK)
+--------------------------------------------------------------------------------
+
+[ISSUE 23] Gender Prompt Modal Trap (No Dismiss Button)
+- File: components/GenderPromptModal.jsx (Line 24)
+- Problem: No 'Skip' or 'X' button; a user who doesn't want to specify gender immediately is blocked from using the entire app.
+- Fix: Add a close/skip button allowing temporary dismissal.
+
+[ISSUE 24] QR Payment Modal Backdrop Click Dismiss Missing
+- File: app/wallet/page.js (Line 410)
+- Problem: Clicking outside the modal does not close it, forcing users to hunt for the tiny 'X' button.
+- Fix: Add onClick={closeModal} to the backdrop element.
+
+[ISSUE 25] Applicants Drawer Escape Key Missing
+- File: app/gigs/_ApplicantsDrawer.jsx (Line 45)
+- Problem: Desktop user pressing 'Escape' cannot close the drawer.
+- Fix: Add window 'keydown' listener for Escape key.
+
+[ISSUE 26] Host Circle Dashboard Modal Sticky Close
+- File: features/circles/HostCircleDashboardModal.jsx (Line 85)
+- Problem: On small mobile screens, the close button scrolls out of view when scrolling down.
+- Fix: Make the modal header sticky with z-index.
+
+
+--------------------------------------------------------------------------------
+SECTION 5: OUTDATED REBRANDING STRINGS ("MEETUPLY" LEFTOVERS)
+--------------------------------------------------------------------------------
+
+[ISSUE 27] Terms of Service Page Rebranding
+- File: app/terms/page.js (Lines 4, 28, 33, 50, 60, 65, 70)
+- Problem: Multiple instances of old app name "Meetuply" throughout legal terms.
+- Fix: Replace all with "Meova".
+
+[ISSUE 28] Privacy Policy Page Rebranding
+- File: app/privacy/page.js (Lines 4, 28, 40, 82, 87)
+- Problem: 7 occurrences of "Meetuply" in privacy disclosures.
+- Fix: Replace all with "Meova".
+
+[ISSUE 29] Service Worker Push Notification Title
+- File: public/sw.js (Lines 23, 26, 39)
+- Problem: Push notifications show "Meetuply Notification" and "Open Meetuply".
+- Fix: Replace with "Meova Notification" and "Open Meova".
+
+[ISSUE 30] Wallet Signup Bonus Alert Title
+- File: lib/wallet.js (Line 68)
+- Problem: Automatic bonus alert says "Welcome to Meetuply!".
+- Fix: Change to "Welcome to Meova!".
+
+[ISSUE 31] User Profile Default Bio Fallback
+- File: app/users/[id]/page.js (Line 215)
+- Problem: Empty bio shows "🎓 GLA Student · Connecting on Meetuply! 🚀".
+- Fix: Change to "🎓 Campus Student · Connecting on Meova!".
+
+[ISSUE 32] Offline Network Toast Message
+- File: components/NetworkWrapper.jsx (Line 51)
+- Problem: "Check your connection to continue using Meetuply."
+- Fix: Change to "...continue using Meova."
+
+[ISSUE 33] QR Code UPI Payment Payee Name
+- File: app/wallet/page.js (Lines 154, 458)
+- Problem: UPI payment string contains "pn=Meetuply".
+- Fix: Change to "pn=Meova".
+
+[ISSUE 34] Messages Screen Header Subtitle
+- File: app/messages/page.jsx (Line 750)
+- Problem: Renders "GLA Student · Meetuply".
+- Fix: Update to "Campus Student · Meova".
+
+[ISSUE 35] Admin Dashboard Control Center Title
+- File: app/admin/AdminClient.jsx (Line 184)
+- Problem: "Meetuply Control Center" header text.
+- Fix: Update to "Meova Control Center".
+
+
+--------------------------------------------------------------------------------
+SECTION 6: MISLEADING / OUT-OF-CONTEXT UI LABELS
+--------------------------------------------------------------------------------
+
+[ISSUE 36] User Profile "Reserve Workspace Cabin"
+- File: app/users/[id]/page.js (Lines 288, 294)
+- Problem: Student profile says "Reserve Workspace Cabin" and "Study Cabin", confusing students expecting a coffee meet/mentorship.
+- Fix: Rename to "Book Campus Meet / 1-on-1 Session".
+
+[ISSUE 37] Gigs Page "Company Name" Label
+- File: app/gigs/page.js (Lines 37, 248)
+- Problem: Student freelance task form asks for "Company Name", confusing student peer posters.
+- Fix: Change label to "Club / Project / Host Name".
+
+[ISSUE 38] Free Circles Displaying "0 Sparks"
+- File: features/circles/CirclesList.jsx (Line 210)
+- Problem: Free community cards display "0 Sparks" rather than a clean "Free" badge.
+- Fix: Render green "Free" badge when price === 0.
+
+[ISSUE 39] Booking Auto-Refund Badge Code
+- File: app/bookings/page.js (Line 420)
+- Problem: Shows raw status "AutoRefunded" instead of user-friendly text.
+- Fix: Display "Refunded (Expired)".
+
+
+--------------------------------------------------------------------------------
+SECTION 7: IMAGE UPLOAD & CLOUDINARY DISCREPANCIES
+--------------------------------------------------------------------------------
+
+[ISSUE 40] Onboarding Cloudinary Preset Mismatch
+- File: app/onboarding/_parts.jsx (Line 92)
+- Problem: Fallback preset is 'unsigned_preset' while feed uses 'Meova_unsigned'.
+- Fix: Align fallback to 'Meova_unsigned'.
+
+[ISSUE 41] Profile Edit Cloudinary Preset Mismatch
+- File: features/profile/ProfileEditForm.jsx (Line 68)
+- Problem: Uses 'unsigned_preset' fallback, risking upload failure if env var is unset.
+- Fix: Align fallback to 'Meova_unsigned'.
+
+[ISSUE 42] Feed Post Image Aspect Ratio Distortion
+- File: app/FeedClient.jsx (Line 1105)
+- Problem: Non-standard image aspect ratios stretch awkwardly on desktop viewports.
+- Fix: Add proper aspect-ratio container with object-cover.
+
+[ISSUE 43] Avatar Error Handler Infinite Loop Risk
+- File: components/Sidebar.jsx (Line 465)
+- Problem: onError lacks e.target.onerror = null, which can cause infinite loop if cartoon avatar fails.
+- Fix: Add e.target.onerror = null before setting fallback src.
+
+
+--------------------------------------------------------------------------------
+SECTION 8: CHAT & REAL-TIME EDGE CASES
+--------------------------------------------------------------------------------
+
+[ISSUE 44] Direct Message Empty State Inactivity
+- File: app/messages/page.jsx (Line 645)
+- Problem: "Send Message" button in empty conversation state does not trigger suggested students list.
+- Fix: Ensure setShowNewMessageModal(true) reliably opens the selector.
+
+[ISSUE 45] Chat Input Mobile Keyboard Dismissal
+- File: app/messages/page.jsx (Line 820)
+- Problem: Sending a message dismisses the mobile keyboard, disrupting conversational flow.
+- Fix: Keep input focused after message submission.
+
+[ISSUE 46] Chat Unread Badge Flicker on Tab Switch
+- File: components/Sidebar.jsx (Line 125)
+- Problem: Unread counter resets to 0 momentarily before re-fetching when returning to the tab.
+- Fix: Preserve optimistic count in state during background polling.
+
+
+--------------------------------------------------------------------------------
+SECTION 9: WALLET, PAYMENTS & ESCROW EDGE CASES
+--------------------------------------------------------------------------------
+
+[ISSUE 47] Wallet Quick Add Pack Round-off Discrepancy
+- File: app/wallet/page.js (Line 128)
+- Problem: 'amount_inr: pack.inr > 1 ? pack.inr - 1 : pack.inr' creates an unexpected ₹1 discount intent mismatch (₹99 vs ₹100).
+- Fix: Use exact pack.inr amount.
+
+[ISSUE 48] Withdrawal Pre-Mature Zero Balance Alert
+- File: app/wallet/withdraw/page.js (Line 56)
+- Problem: New users with 0 Creator earnings see an error box immediately upon opening the page before even typing.
+- Fix: Only display validation error on form submission attempt.
+
+[ISSUE 49] QR Code Download on Mobile Browsers
+- File: app/wallet/page.js (Line 165)
+- Problem: Mobile Safari/Chrome blocks the download attribute without toast guidance.
+- Fix: Show instructions "Long press image to save" if download fails.
+
+
+--------------------------------------------------------------------------------
+SECTION 10: MOBILE RESPONSIVENESS & LAYOUT OVERLAPS
+--------------------------------------------------------------------------------
+
+[ISSUE 50] Bottom Navigation Overlap on Full-Height Forms
+- File: components/Sidebar.jsx (Line 500)
+- Problem: Modals and full-height forms have their bottom submit buttons obscured by the fixed mobile navigation bar.
+- Fix: Ensure hide-on-modal or proper pb-24 padding on scrollable containers.
+
+[ISSUE 51] Feed Campus Radar Horizontal Scroll Indicator
+- File: app/FeedClient.jsx (Line 760)
+- Problem: The "Live on Campus" avatar strip lacks subtle fade/arrows, so users don't realize more students are scrollable horizontally.
+- Fix: Add subtle right-side gradient fade indicator.
+
+[ISSUE 52] Profile Instagram Embed Mobile Overflow
+- File: components/InstagramEmbed.jsx (Line 45)
+- Problem: On small screen devices (<360px width), the Instagram post iframe overflows the container.
+- Fix: Apply max-w-full and overflow-hidden to embed wrapper.
+
+================================================================================
+END OF REPORT — 52 ISSUES CATALOGED
+================================================================================

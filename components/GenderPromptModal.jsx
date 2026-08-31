@@ -59,9 +59,19 @@ export default function GenderPromptModal({ user }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-md bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6"
+        className="w-full max-w-md bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="absolute top-4 right-4 p-2 rounded-full text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
+          title="Close"
+        >
+          ✕
+        </button>
+
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-100/80 text-[#F05A00] flex items-center justify-center mx-auto shadow-2xs">

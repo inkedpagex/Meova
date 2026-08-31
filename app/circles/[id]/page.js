@@ -4,7 +4,7 @@ import {
   fetchCircleDetailAdmin,
   fetchCircleMembersAdmin,
   fetchCircleEventsAdmin,
-} from '../../../lib/firebaseAdminQueries';
+} from '../../../lib/supabaseQueries';
 import CircleJoinButton from '../../../features/circles/CircleJoinButton';
 import RsvpButton from '../../../features/events/RsvpButton';
 import { ArrowLeft, Users, Send, Calendar, MapPin } from 'lucide-react';

@@ -12,7 +12,7 @@ export default function CreateMenuModal({ isOpen, onClose }) {
       desc: 'Share campus food photos, coffee meets, or vibes.',
       icon: Camera,
       badgeBg: 'bg-orange-50 border-orange-200 text-orange-600',
-      href: '/create/photo'
+      href: '/?action=create-post'
     },
     {
       title: 'Host a Channel',

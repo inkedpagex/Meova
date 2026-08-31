@@ -326,15 +326,15 @@ export default function BookingsPage() {
             <h3 className="text-sm font-black text-zinc-900 mb-1">No {activeTab.toLowerCase()} meetings</h3>
             <p className="text-xs text-zinc-500 font-medium">
               {activeTab === "Active" 
-                ? "You don't have any upcoming experiences right now." 
-                : "You haven't completed any meetings yet."}
+                ? "You don't have any upcoming campus meetups right now." 
+                : "No past meetups found."}
             </p>
             {activeTab === "Active" && (
               <button 
-                onClick={() => router.push("/")}
-                className="mt-5 bg-zinc-900 text-white text-xs font-bold px-5 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all"
+                onClick={() => router.push("/discover")}
+                className="mt-5 bg-zinc-900 text-white text-xs font-bold px-5 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all cursor-pointer"
               >
-                Browse Experiences
+                Find Students to Meet
               </button>
             )}
           </div>

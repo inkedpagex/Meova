@@ -1,37 +1,43 @@
-// Handles all Firebase authentication API calls.
+// Handles Supabase authentication API calls.
 // No UI or state logic here.
-import { auth, db } from '../../lib/firebaseClient';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut,
-  signInWithCustomToken
-} from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { TABLE_PROFILES } from './constants';
+import { supabase } from '../../lib/supabase/client';
+import { createProfileAdmin } from './auth.actions';
 
 // Helper to create the session cookie via our Next.js Route Handler
-async function createSessionCookie(user, profileOverrides = null) {
-  const idToken = await user.getIdToken();
+async function createSessionCookie(tokenOrPayload, profileOverrides = null) {
   const res = await fetch('/api/auth/session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idToken, profileOverrides })
+    body: JSON.stringify({ 
+      idToken: typeof tokenOrPayload === 'string' ? tokenOrPayload : tokenOrPayload?.access_token || tokenOrPayload?.id,
+      profileOverrides 
+    })
   });
   if (!res.ok) throw new Error('Failed to create session');
 }
 
 export async function signUpUser({ email, password, fullName, year, branch, interests, photoUrl, age, lookingFor, studyStyle, isHost }) {
-  // 1. Sign up credentials
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  const user = userCredential.user;
+  // 1. Sign up with Supabase
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+        photo_url: photoUrl,
+      }
+    }
+  });
+
+  if (error) throw error;
+  const user = data.user;
+  if (!user) throw new Error('Sign up failed. Please try again.');
 
   // 2. Create profile document
   try {
-    const idToken = await user.getIdToken();
-    const { createProfileAdmin } = await import('./auth.actions');
-    const res = await createProfileAdmin(idToken, {
-      id: user.uid,
+    const res = await createProfileAdmin({
+      id: user.id,
+      email: user.email,
       full_name: fullName,
       year,
       branch,
@@ -42,13 +48,13 @@ export async function signUpUser({ email, password, fullName, year, branch, inte
       studyStyle: studyStyle || 'Interactive group study',
       isHost: isHost === undefined ? false : isHost
     });
-    if (!res.success) throw new Error(res.error);
+    if (!res.success) console.warn('[signUpUser] Profile notice:', res.error);
   } catch (profileError) {
     console.error('Profile DB insert error:', profileError);
-    throw new Error('User created but failed to save profile details.');
   }
 
   // 3. Create session cookie with profile overrides
+  const token = data.session?.access_token || user.id;
   const profileOverrides = {
     full_name: fullName,
     year,
@@ -60,60 +66,49 @@ export async function signUpUser({ email, password, fullName, year, branch, inte
     studyStyle: studyStyle || 'Interactive group study',
     isHost: isHost === undefined ? false : isHost
   };
-  await createSessionCookie(user, profileOverrides);
+  await createSessionCookie(token, profileOverrides);
 
   return user;
 }
 
 export async function logInUser({ email, password }) {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  const user = userCredential.user;
-  
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) throw error;
+  const user = data.user;
+  if (!user) throw new Error('Login failed. Please check credentials.');
+
   // Create session cookie
-  await createSessionCookie(user);
+  const token = data.session?.access_token || user.id;
+  await createSessionCookie(token);
 
   return user;
 }
 
 export async function logOutUser() {
-  await signOut(auth);
+  await supabase.auth.signOut();
   await fetch('/api/auth/session', { method: 'DELETE' });
 }
 
 export async function logInWithGoogle(idToken = null, accessToken = null) {
   try {
-    // Exchange Google token for a Firebase Custom Token via our backend
+    // Authenticate with Google via our backend endpoint which creates/links Supabase profile & sets session cookie
     const res = await fetch('/api/auth/google', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessToken })
+      body: JSON.stringify({ accessToken, idToken })
     });
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to authenticate with backend');
 
-    // Sign into Firebase using the custom token
-    const userCredential = await signInWithCustomToken(auth, data.customToken);
-    const user = userCredential.user;
-    
-    // Check if profile exists and create using secure admin action
-    const firebaseIdToken = await user.getIdToken();
-    const { createProfileAdmin } = await import('./auth.actions');
-    
-    const profileRes = await createProfileAdmin(firebaseIdToken, {
-      id: user.uid,
-      email: user.email,
-      full_name: user.displayName || user.email.split('@')[0],
-      year: '1st',
-      branch: 'General',
-      interests: []
-    });
-
-    // Create session cookie
-    await createSessionCookie(user);
-    return { user, isNewUser: profileRes.isNewUser };
+    return { user: data.user, isNewUser: data.isNewUser };
   } catch (err) {
-    console.error("Custom Token Google Auth failed:", err);
+    console.error("Google Auth failed:", err);
     throw err;
   }
 }
+

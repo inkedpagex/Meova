@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/getAdminUser';
-import { spendSparks } from '@/lib/wallet';
+import { spendSparks, creditSparks } from '@/lib/wallet';
 
 export async function GET() {
   try {
@@ -34,12 +34,13 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Title and description are required' }, { status: 400 });
     }
 
-    const budgetNum = parseInt(budget, 10) || 0;
+    const budgetNum = Math.max(0, parseInt(budget, 10) || 0);
     if (budgetNum < 0 || budgetNum > 2000) {
       return NextResponse.json({ error: 'Reward must be between 0 and 2000 Sparks' }, { status: 400 });
     }
 
     // Deduct Sparks immediately for escrow via spendSparks RPC
+    let sparksDeducted = false;
     if (budgetNum > 0) {
       const spendResult = await spendSparks(
         user.uid,
@@ -52,6 +53,7 @@ export async function POST(request) {
       if (!spendResult.ok) {
         return NextResponse.json({ error: spendResult.error || 'Insufficient Sparks to fund this gig' }, { status: 402 });
       }
+      sparksDeducted = true;
     }
 
     const newGigPayload = {
@@ -77,7 +79,17 @@ export async function POST(request) {
 
     if (insertErr) {
       console.error('[POST /api/gigs insert error]', insertErr.message);
-      return NextResponse.json({ error: 'Failed to create gig' }, { status: 500 });
+      // Auto-Rollback: Refund escrow sparks if gig insert failed
+      if (sparksDeducted && budgetNum > 0) {
+        await creditSparks(
+          user.uid,
+          budgetNum,
+          'purchased',
+          'dispute_refund',
+          `Auto-refund for failed gig creation: "${title}"`
+        ).catch(err => console.error('[POST /api/gigs rollback failed]', err.message));
+      }
+      return NextResponse.json({ error: 'Failed to create gig. Sparks refunded if deducted.' }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true, gig: insertedGig });

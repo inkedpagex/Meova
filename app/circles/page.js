@@ -1,6 +1,6 @@
 // Circles list page — Server Component. Public access.
 import { getUserAdmin } from '../../lib/getAdminUser';
-import { fetchCirclesAdmin } from '../../lib/firebaseAdminQueries';
+import { fetchCirclesAdmin } from '../../lib/supabaseQueries';
 import CirclesList from '../../features/circles/CirclesList';
 
 export const metadata = { title: 'Communities — Meova.in' };

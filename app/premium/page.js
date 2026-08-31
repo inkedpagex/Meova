@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState } from 'react';
 import { Crown, CheckCircle2, ShieldCheck, Zap, ArrowRight, Star, Sparkles, MessageSquare, Award } from 'lucide-react';
 
@@ -50,7 +50,7 @@ export default function PremiumPage() {
             Meetuply Premium
           </h1>
           <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest mt-1">
-            Unlock exclusive features and supercharge your campus experience
+            Unlock exclusive features and supercharge your campus life
           </p>
         </div>
       </div>

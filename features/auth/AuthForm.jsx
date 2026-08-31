@@ -30,37 +30,6 @@ export default function AuthForm({ defaultMode = 'login' }) {
   const { loading, logInWithGoogle } = useAuth();
   const [error, setError] = useState(null);
 
-  // Handle Google redirect result (mobile fallback)
-  useEffect(() => {
-    async function checkRedirect() {
-      try {
-        const { getRedirectResult } = await import('firebase/auth');
-        const { auth } = await import('../../lib/firebaseClient');
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          const idToken = await result.user.getIdToken();
-          const { createProfileAdmin } = await import('./auth.actions');
-          await createProfileAdmin(idToken, {
-            id: result.user.uid,
-            email: result.user.email,
-            full_name: result.user.displayName || result.user.email.split('@')[0],
-            photo_url: result.user.photoURL || '',
-            year: '1st', branch: 'General', interests: [],
-          });
-          const res = await fetch('/api/auth/session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken }),
-          });
-          if (res.ok) window.location.href = nextPath;
-        }
-      } catch (err) {
-        console.error('Redirect result error:', err);
-      }
-    }
-    checkRedirect();
-  }, [nextPath]);
-
   const loginWithGoogleGIS = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setError(null);
@@ -246,7 +215,10 @@ export default function AuthForm({ defaultMode = 'login' }) {
                       <p className="text-[9.5px] text-zinc-400 font-medium mt-0.5">2 mins ago</p>
                     </div>
                   </div>
-                  <button className="w-full py-2 rounded-xl bg-[#F05A00] text-white text-[11px] font-black shadow-2xs hover:bg-[#E04E00] transition-colors">
+                  <button 
+                    onClick={() => loginWithGoogleGIS()}
+                    className="w-full py-2 rounded-xl bg-[#F05A00] text-white text-[11px] font-black shadow-2xs hover:bg-[#E04E00] transition-colors cursor-pointer active:scale-95"
+                  >
                     Accept Invite
                   </button>
                 </div>
@@ -467,9 +439,12 @@ export default function AuthForm({ defaultMode = 'login' }) {
                         <p className="text-[9.5px] text-emerald-600 font-semibold">Aarav is Free Now</p>
                       </div>
                     </div>
-                    <span className="px-3 py-1 bg-white border border-orange-200 text-[#F05A00] font-extrabold text-[10.5px] rounded-full cursor-pointer hover:bg-orange-50 transition-colors">
+                    <button 
+                      onClick={() => loginWithGoogleGIS()}
+                      className="px-3 py-1 bg-white border border-orange-200 text-[#F05A00] font-extrabold text-[10.5px] rounded-full cursor-pointer hover:bg-orange-50 active:scale-95 transition-all"
+                    >
                       Join Coffee
-                    </span>
+                    </button>
                   </div>
 
                   {/* Hotspot Row 2 */}
@@ -483,9 +458,12 @@ export default function AuthForm({ defaultMode = 'login' }) {
                         <p className="text-[9.5px] text-emerald-600 font-semibold">Diya is studying</p>
                       </div>
                     </div>
-                    <span className="px-3 py-1 bg-white border border-orange-200 text-[#E05600] font-extrabold text-[10.5px] rounded-full cursor-pointer hover:bg-orange-50 transition-colors">
+                    <button 
+                      onClick={() => loginWithGoogleGIS()}
+                      className="px-3 py-1 bg-white border border-orange-200 text-[#E05600] font-extrabold text-[10.5px] rounded-full cursor-pointer hover:bg-orange-50 active:scale-95 transition-all"
+                    >
                       Study Meet
-                    </span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -516,7 +494,10 @@ export default function AuthForm({ defaultMode = 'login' }) {
                   </div>
                 </div>
 
-                <button className="w-full py-2.5 rounded-xl bg-[#18181B] text-white text-[11.5px] font-black hover:bg-black transition-colors shadow-xs">
+                <button 
+                  onClick={() => loginWithGoogleGIS()}
+                  className="w-full py-2.5 rounded-xl bg-[#18181B] text-white text-[11.5px] font-black hover:bg-black transition-colors shadow-xs cursor-pointer active:scale-95"
+                >
                   View all activity
                 </button>
               </div>

@@ -463,6 +463,7 @@ export default function Sidebar({ user }) {
                     alt="me" 
                     className="w-full h-full object-cover" 
                     onError={(e) => {
+                      e.target.onerror = null;
                       e.target.src = getCartoonAvatar(user?.full_name || user?.id || 'user');
                     }}
                   />

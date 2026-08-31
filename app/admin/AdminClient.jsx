@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
@@ -181,7 +181,7 @@ export default function AdminClient() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/80 shadow-xs">
         <div>
           <h1 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">
-            Meetuply Control Center
+            Meova Control Center
           </h1>
           <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">
             Live overview of all campus meetings, UPI payments, creator earnings & withdrawals.

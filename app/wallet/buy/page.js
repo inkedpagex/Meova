@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { Zap, CheckCircle, Copy, ArrowLeft, Loader2, ArrowRight } from 'lucide-react';
@@ -29,7 +29,7 @@ export default function BuyPage() {
       .catch(() => {});
   }, []);
 
-  const qrData = selected ? `upi://pay?pa=${ADMIN_UPI}&pn=Meetuply&am=${selected.inr.toFixed(2)}&tn=${refCode}&cu=INR` : '';
+  const qrData = selected ? `upi://pay?pa=${ADMIN_UPI}&pn=Meova&am=${selected.inr.toFixed(2)}&tn=${refCode}&cu=INR` : '';
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
 
   async function handleProceed() {

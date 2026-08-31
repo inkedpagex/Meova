@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchCirclesAdmin } from '../../../lib/firebaseAdminQueries';
+import { fetchCirclesAdmin } from '@/lib/supabaseQueries';
 
 export const revalidate = 30; // 30 seconds cache
 

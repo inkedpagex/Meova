@@ -5,7 +5,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../lib/getAdminUser';
 import { supabaseAdmin } from '../../../lib/supabase/admin';
-import { spendSparks } from '../../../lib/wallet';
+import { spendSparks, creditSparks } from '../../../lib/wallet';
 
 export async function GET() {
   try {
@@ -99,7 +99,16 @@ export async function POST(request) {
 
       if (insertErr) {
         console.error('[POST /api/chats insert error]', insertErr.message);
-        return NextResponse.json({ error: 'Failed to initialize chat thread' }, { status: 500 });
+        // Auto-Rollback: Refund 5 Sparks
+        await creditSparks(
+          user.uid,
+          5,
+          'purchased',
+          'dispute_refund',
+          'Refund for failed chat initiation',
+          chatId
+        ).catch(err => console.error('[POST /api/chats rollback failed]', err.message));
+        return NextResponse.json({ error: 'Failed to initialize chat thread. 5 Sparks refunded.' }, { status: 500 });
       }
     }
 

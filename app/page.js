@@ -1,6 +1,6 @@
 import { getUserWithRole } from '../lib/getAdminUser';
 import { getOrCreateWallet } from '../lib/wallet';
-import { fetchUsersAdmin } from '../lib/firebaseAdminQueries';
+import { fetchUsersAdmin } from '../lib/supabaseQueries';
 import Link from 'next/link';
 import { 
   Zap, Bell, Rocket, Calendar, MapPin, ArrowUpRight 

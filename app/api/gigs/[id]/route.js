@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/getAdminUser';
+import { creditSparks } from '@/lib/wallet';
 
 export async function DELETE(request, { params }) {
   try {
@@ -30,39 +31,23 @@ export async function DELETE(request, { params }) {
 
     const budgetNum = parseInt(gig.budget || gig.reward_sparks, 10) || 0;
 
-    // Delete gig and refund sparks in parallel
-    const ops = [
-      supabaseAdmin.from('gigs').delete().eq('id', id),
-    ];
-
-    if (budgetNum > 0) {
-      ops.push(
-        // Refund sparks to purchased bucket
-        supabaseAdmin
-          .from('wallets')
-          .select('purchased')
-          .eq('user_id', user.uid)
-          .maybeSingle()
-          .then(async ({ data: wallet }) => {
-            if (wallet) {
-              await supabaseAdmin
-                .from('wallets')
-                .update({ purchased: (wallet.purchased || 0) + budgetNum, updated_at: new Date().toISOString() })
-                .eq('user_id', user.uid);
-            }
-          }),
-        supabaseAdmin.from('transactions').insert({
-          user_id: user.uid,
-          type: 'refund',
-          amount: budgetNum,
-          description: `Refund for deleted gig: "${gig.title}"`,
-          status: 'COMPLETED',
-          created_at: new Date().toISOString(),
-        })
-      );
+    // Delete gig
+    const { error: deleteErr } = await supabaseAdmin.from('gigs').delete().eq('id', id);
+    if (deleteErr) {
+      return NextResponse.json({ error: 'Failed to delete gig from database' }, { status: 500 });
     }
 
-    await Promise.all(ops);
+    // Refund sparks atomically via credit_sparks RPC
+    if (budgetNum > 0) {
+      await creditSparks(
+        user.uid,
+        budgetNum,
+        'purchased',
+        'dispute_refund',
+        `Refund for deleted gig: "${gig.title}"`,
+        id
+      );
+    }
 
     return NextResponse.json({ ok: true, message: 'Gig deleted and sparks refunded.' });
   } catch (err) {

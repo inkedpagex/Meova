@@ -1,14 +1,21 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/getAdminUser';
+import { rateLimit } from '@/lib/rateLimit';
 
 export async function POST(request, { params }) {
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { id } = params;
+    const { id } = await params;
     if (!id) return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
+
+    // Anti-Spam: Max 30 likes per minute per user
+    const rl = rateLimit(`like_post:${user.uid}`, { limit: 30, windowMs: 60 * 1000 });
+    if (!rl.ok) {
+      return NextResponse.json({ error: 'Too many like requests. Please slow down.' }, { status: 429 });
+    }
 
     // Check post exists
     const { data: post, error: fetchErr } = await supabaseAdmin

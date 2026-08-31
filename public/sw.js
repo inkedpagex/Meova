@@ -1,4 +1,4 @@
-// Meetuply Service Worker
+// Meova Service Worker
 // Strategy: Network-first for API routes, Cache-first for static assets
 // FCM: Background push notifications support
 //
@@ -14,49 +14,37 @@ const STATIC_ASSETS = [
   '/icon-512.png',
 ];
 
-// ── Firebase Messaging: Background Push Notifications ─────────────────────────
-// importScripts is only available in SW context (not in Next.js module context)
-// We use compat libraries as required by Firebase SW docs
-try {
-  importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
-  importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+// ── Standard Web Push: Background Push Notifications ─────────────────────────
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: 'Meova Notification', body: event.data ? event.data.text() : '' };
+  }
 
-  const firebaseConfig = {
-    apiKey: 'AIzaSyAWKHPIr_QZq0KYw-3SkDCRe_zACdkkd4o',
-    authDomain: 'Meova-ae3bc.firebaseapp.com',
-    projectId: 'Meova-ae3bc',
-    messagingSenderId: '752250926726',
-    appId: '1:752250926726:web:98d2d7122acecf6a648307',
+  const title = data.title || 'Meova';
+  const body = data.body || '';
+  const link = data.url || data.link || '/bookings';
+
+  const options = {
+    body,
+    icon: '/icon-512.png',
+    badge: '/icon-512.png',
+    tag: 'meova-push',
+    renotify: true,
+    vibrate: [200, 100, 200],
+    data: { url: link },
+    actions: [
+      { action: 'open', title: 'Open Meova' },
+      { action: 'dismiss', title: 'Dismiss' },
+    ],
   };
 
-  firebase.initializeApp(firebaseConfig);
-  const messaging = firebase.messaging();
-
-  // Handle background push messages (app is closed / in background)
-  messaging.onBackgroundMessage((payload) => {
-    const { title, body } = payload.notification || {};
-    const link = payload.fcmOptions?.link || '/bookings';
-
-    if (!title) return;
-
-    self.registration.showNotification(title, {
-      body: body || '',
-      icon: '/icon-512.png',
-      badge: '/icon-512.png',
-      tag: 'Meova-push',
-      renotify: true,
-      vibrate: [200, 100, 200],
-      data: { url: link },
-      actions: [
-        { action: 'open', title: 'Open Meetuply' },
-        { action: 'dismiss', title: 'Dismiss' },
-      ],
-    });
-  });
-} catch (e) {
-  // Firebase messaging not available — graceful degradation
-  console.warn('[SW] Firebase messaging init failed:', e.message);
-}
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
 
 // ── Notification click handler ────────────────────────────────────────────────
 self.addEventListener('notificationclick', (event) => {

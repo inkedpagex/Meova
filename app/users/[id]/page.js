@@ -1,5 +1,5 @@
 // Public student profile page — /users/[id]
-import { fetchProfileAdmin, fetchJoinedCirclesAdmin, fetchReviewsAdmin, fetchUsersAdmin } from '../../../lib/firebaseAdminQueries';
+import { fetchProfileAdmin, fetchJoinedCirclesAdmin, fetchReviewsAdmin, fetchUsersAdmin } from '../../../lib/supabaseQueries';
 import { supabaseAdmin } from '../../../lib/supabase/admin';
 import { getUserAdmin } from '../../../lib/getUserAdmin';
 import { redirect } from 'next/navigation';
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }) {
   const { id } = await params;
   const profile = await fetchProfileAdmin(id);
   return {
-    title: profile ? `${profile.full_name} — meetuply` : 'Student Profile — meetuply',
+    title: profile ? `${profile.full_name} — Meova` : 'Student Profile — Meova',
   };
 }
 
@@ -212,7 +212,7 @@ export default async function UserProfilePage({ params }) {
           </p>
 
           <p className="text-xs text-zinc-700 font-medium leading-relaxed pt-1 whitespace-pre-line">
-            {profile.bio || '🎓 GLA Student · Connecting on Meetuply! 🚀'}
+            {profile.bio || '🎓 Campus Student · Connecting on Meova! 🚀'}
           </p>
         </div>
 
@@ -285,19 +285,19 @@ export default async function UserProfilePage({ params }) {
           </div>
           <div>
             <h3 className="text-sm font-black text-[var(--text-primary)] mb-1 flex items-center gap-2">
-              Reserve Workspace Cabin
+              Campus Meet / 1-on-1 Session
               <span className="flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-500">
                 <Zap className="w-2.5 h-2.5 fill-current" /> 50 Sparks
               </span>
             </h3>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-semibold">
-              Spend 50 Sparks to reserve an active workspace cabin slot hosted by {profile.full_name?.split(' ')[0] || 'this student'}. 
-              Great for co-working, quiet study, or getting peer mentorship and code/design reviews.
+              Spend 50 Sparks to book a 1-on-1 campus meetup or coffee session with {profile.full_name?.split(' ')[0] || 'this student'}. 
+              Great for networking, project collaboration, quiet study, or peer mentorship.
             </p>
             <div className="flex items-center gap-4 mt-3">
               {[
                 { Icon: Calendar, text: 'Flexible slots' },
-                { Icon: MapPin, text: 'Study Cabin' },
+                { Icon: MapPin, text: 'Campus Spot' },
                 { Icon: CheckCircle, text: 'Auto approval' },
               ].map(({ Icon, text }) => (
                 <span key={text} className="flex items-center gap-1 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">

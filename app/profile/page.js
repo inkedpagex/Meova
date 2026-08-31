@@ -1,6 +1,6 @@
 // Profile page — Server Component. Requires login (protected by proxy).
 import { getUserAdmin } from '../../lib/getUserAdmin';
-import { fetchProfileAdmin } from '../../lib/firebaseAdminQueries';
+import { fetchProfileAdmin } from '../../lib/supabaseQueries';
 import { getOrCreateWallet } from '../../lib/wallet';
 import ProfileClient from './ProfileClient';
 import { redirect } from 'next/navigation';

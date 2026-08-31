@@ -8,6 +8,7 @@ import { requireAuth } from '../../../lib/getAdminUser';
 import { supabaseAdmin } from '../../../lib/supabase/admin';
 import { spendSparks, creditSparks } from '../../../lib/wallet';
 import { sendPush } from '../../../lib/sendPushNotification';
+import { rateLimit } from '../../../lib/rateLimit';
 
 export async function GET() {
   try {
@@ -40,12 +41,13 @@ export async function POST(request) {
     const body = await request.json();
     const { experienceId, title, price, duration, location, category, hostId, hostName, hostPhoto, date, time, agenda } = body;
 
-    if (!experienceId || !hostId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    const meetTargetId = hostId;
+    if (!meetTargetId) {
+      return NextResponse.json({ error: 'Missing hostId' }, { status: 400 });
     }
 
-    if (hostId === user.uid) {
-      return NextResponse.json({ error: 'Cannot book your own experience' }, { status: 400 });
+    if (meetTargetId === user.uid) {
+      return NextResponse.json({ error: 'Cannot book a meetup with yourself' }, { status: 400 });
     }
 
     // Rate Limiting (Anti-Spam): Max 3 pending requests
@@ -60,12 +62,14 @@ export async function POST(request) {
     }
 
     // Deduct sparks atomically via spend_sparks RPC (includes row lock and transaction logging)
-    const priceAmount = price || 0;
+    const priceAmount = Math.max(0, Number(price) || 0);
+    let sparksDeducted = false;
+
     if (priceAmount > 0) {
       const spendResult = await spendSparks(
         user.uid,
         priceAmount,
-        `Booked "${title}"`,
+        `Booked "${title || 'Campus Meet'}"`,
         'booking_escrow',
         null
       );
@@ -73,6 +77,7 @@ export async function POST(request) {
       if (!spendResult.ok) {
         return NextResponse.json({ error: spendResult.error || 'Insufficient Sparks' }, { status: 402 });
       }
+      sparksDeducted = true;
     }
 
     // Build scheduledAt timestamp
@@ -88,14 +93,14 @@ export async function POST(request) {
 
     const meetingCode = String(Math.floor(100000 + Math.random() * 900000));
     const bookingPayload = {
-      experience_id: experienceId,
-      title,
+      experience_id: experienceId || `meet_${meetTargetId}`,
+      title: title || 'Campus Meetup',
       price: priceAmount,
       sparks_amount: priceAmount,
       duration: duration || 45,
       location: location || '',
-      category: category || '',
-      host_id: hostId,
+      category: category || 'General',
+      host_id: meetTargetId,
       host_name: hostName || '',
       host_photo: hostPhoto || '',
       guest_id: user.uid,
@@ -118,7 +123,17 @@ export async function POST(request) {
 
     if (insertErr) {
       console.error('[POST /api/bookings insert error]', insertErr.message);
-      return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 });
+      // Auto-Rollback: Refund sparks if booking insertion failed
+      if (sparksDeducted && priceAmount > 0) {
+        await creditSparks(
+          user.uid,
+          priceAmount,
+          'purchased',
+          'dispute_refund',
+          `Auto-refund for failed booking: "${title || 'Campus Meet'}"`
+        ).catch(err => console.error('[POST /api/bookings rollback failed]', err.message));
+      }
+      return NextResponse.json({ error: 'Failed to create booking. Sparks refunded if deducted.' }, { status: 500 });
     }
 
     // Notify host via in-app notifications table
@@ -249,8 +264,18 @@ export async function PATCH(request) {
       if (booking.status === 'Meeting Completed') {
         return NextResponse.json({ error: 'Already completed' }, { status: 400 });
       }
-      if (!code || code !== (booking.meeting_code || booking.meetingCode)) {
-        return NextResponse.json({ error: 'Incorrect meeting code' }, { status: 400 });
+
+      // Brute-force protection: Max 5 code attempts per 15 minutes
+      const rl = rateLimit(`meeting_code:${user.uid}:${bookingId}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+      if (!rl.ok) {
+        return NextResponse.json({
+          error: `Too many wrong attempts. Please wait ${rl.retryAfter}s before trying again.`
+        }, { status: 429, headers: { 'Retry-After': rl.retryAfter } });
+      }
+
+      const expectedCode = String(booking.meeting_code || booking.meetingCode || '').trim();
+      if (!code || String(code).trim() !== expectedCode) {
+        return NextResponse.json({ error: 'Incorrect meeting code. Ask your guest for the 6-digit code.' }, { status: 400 });
       }
 
       const price = booking.price || booking.sparks_amount || 0;

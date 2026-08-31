@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -125,7 +125,7 @@ export default function WalletPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sparks: pack.sparks,
-          amount_inr: pack.inr > 1 ? pack.inr - 1 : pack.inr,
+          amount_inr: pack.inr,
           pack_name: `${pack.sparks} Sparks`,
           pack_key: pack.key
         }),
@@ -151,7 +151,7 @@ export default function WalletPage() {
 
   const downloadQRCode = async () => {
     try {
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetuply&am=${exactAmountInr}&cu=INR`)}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meova&am=${exactAmountInr}&cu=INR`)}`;
       const response = await fetch(qrUrl);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
@@ -163,7 +163,7 @@ export default function WalletPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetuply&am=${exactAmountInr}&cu=INR`)}`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meova&am=${exactAmountInr}&cu=INR`)}`;
       window.open(qrUrl, '_blank');
     }
   };
@@ -431,7 +431,7 @@ export default function WalletPage() {
         </h4>
         <ul className="space-y-2.5">
           {[
-            'Use Sparks to join experiences, events and tournaments.',
+            'Use Sparks to book campus meets, join circles, and fund gigs.',
             'Earn Sparks by hosting and participating.',
             '1 Spark = ₹1 · Minimum withdrawal: 500 Sparks',
             'Sparks never expire.',
@@ -446,8 +446,14 @@ export default function WalletPage() {
 
       {/* QR Code Payment Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm anim-fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-[360px] overflow-hidden shadow-2xl relative">
+        <div 
+          onClick={closeModal}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm anim-fade-in cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl w-full max-w-[360px] overflow-hidden shadow-2xl relative cursor-default"
+          >
             <div className="p-6 text-center">
               <h2 className="text-lg font-black text-zinc-900 mb-1">Pay with UPI</h2>
               <p className="text-[13px] text-zinc-600 font-medium mb-1">Please pay the <b className="text-[#D94F00]">exact amount</b> below</p>
@@ -455,7 +461,7 @@ export default function WalletPage() {
               
               <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center justify-center mb-6">
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meetuply&am=${exactAmountInr}&cu=INR`)}`} 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meova&am=${exactAmountInr}&cu=INR`)}`} 
                   alt="UPI QR Code" 
                   className="w-[180px] h-[180px] rounded-lg mb-3"
                 />
