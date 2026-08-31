@@ -1,20 +1,20 @@
 // Public student profile page — /users/[id]
-import { fetchProfileAdmin, fetchJoinedCirclesAdmin, fetchReviewsAdmin, fetchUsersAdmin } from '../../../lib/supabaseQueries';
+import { fetchProfileAdmin, fetchJoinedCirclesAdmin, fetchReviewsAdmin, fetchUsersAdmin, fetchUserPostsAdmin } from '../../../lib/supabaseQueries';
 import { supabaseAdmin } from '../../../lib/supabase/admin';
 import { getUserAdmin } from '../../../lib/getUserAdmin';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, GraduationCap, Users, Star,
   Code, Music, Dumbbell, Camera, Rocket, Palette, Gamepad2,
   BookOpen, Coffee, MessageCircle, Zap, Calendar, MapPin,
-  CheckCircle, Layers
+  CheckCircle, Layers, Linkedin, Github, Heart
 } from 'lucide-react';
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
 import AcceptBookingButton from '../../../features/users/AcceptBookingButton';
 import BlockUserButton from '../../../features/users/BlockUserButton';
 import MessageButton from '../../../features/users/MessageButton';
 import TipUserButton from '../../../features/users/TipUserButton';
+import ProfileCallButton from '../../../components/call/ProfileCallButton';
 import ProfileHighlightsSection from '../../../components/ProfileHighlightsSection';
 import InstagramEmbed from '../../../components/InstagramEmbed';
 
@@ -27,14 +27,14 @@ function avatarUrl(userOrSeed) {
 
 const INTEREST_META = {
   'Coding & Tech':        { Icon: Code,        color: '#3b82f6', label: 'Dev' },
-  'Music & Bands':        { Icon: Music,        color: '#b5609d', label: 'Music' },
-  'Sports & Fitness':     { Icon: Dumbbell,     color: '#22c55e', label: 'Sports' },
-  'Photography & Film':   { Icon: Camera,       color: '#06b6d4', label: 'Photo' },
-  'Entrepreneurship':     { Icon: Rocket,       color: '#f97316', label: 'Startup' },
-  'Art & Sketching':      { Icon: Palette,      color: '#ec4899', label: 'Art' },
-  'Gaming & E-sports':    { Icon: Gamepad2,     color: '#a78bfa', label: 'Gaming' },
-  'Literature & Poetry':  { Icon: BookOpen,     color: '#3b82f6', label: 'Lit' },
-  'Dance':                { Icon: Star,         color: '#ec4899', label: 'Dance' },
+  'Music & Bands':        { Icon: Music,       color: '#F05A00', label: 'Music' },
+  'Sports & Fitness':     { Icon: Dumbbell,    color: '#22c55e', label: 'Sports' },
+  'Photography & Film':   { Icon: Camera,      color: '#06b6d4', label: 'Photo' },
+  'Entrepreneurship':     { Icon: Rocket,      color: '#f97316', label: 'Startup' },
+  'Art & Sketching':      { Icon: Palette,     color: '#ec4899', label: 'Art' },
+  'Gaming & E-sports':    { Icon: Gamepad2,    color: '#a78bfa', label: 'Gaming' },
+  'Literature & Poetry':  { Icon: BookOpen,    color: '#3b82f6', label: 'Lit' },
+  'Dance':                { Icon: Star,        color: '#ec4899', label: 'Dance' },
 };
 
 // Helper: format relative date from ISO string
@@ -60,27 +60,35 @@ export async function generateMetadata({ params }) {
 
 export default async function UserProfilePage({ params }) {
   const { id } = await params;
-  const [profile, currentUser, joinedCircles, reviews, allUsers] = await Promise.all([
+  const [profile, currentUser, joinedCircles, reviews, allUsers, userPosts] = await Promise.all([
     fetchProfileAdmin(id),
     getUserAdmin(),
     fetchJoinedCirclesAdmin(id),
     fetchReviewsAdmin(id, 20),
     fetchUsersAdmin(50),
+    fetchUserPostsAdmin(id, 12),
   ]);
 
+  let activeMeeting = null;
   let pendingBooking = null;
   if (currentUser && currentUser.id !== id) {
     const { data: bookingRows } = await supabaseAdmin
       .from('bookings')
       .select('*')
-      .eq('host_id', currentUser.id)
-      .eq('guest_id', id)
-      .eq('status', 'Requested')
+      .or(`and(host_id.eq.${currentUser.id},guest_id.eq.${id}),and(host_id.eq.${id},guest_id.eq.${currentUser.id})`)
+      .in('status', ['Requested', 'Accepted', 'Confirmed'])
+      .order('created_at', { ascending: false })
       .limit(1);
+
     if (bookingRows && bookingRows.length > 0) {
-      pendingBooking = bookingRows[0];
+      activeMeeting = bookingRows[0];
+      if (activeMeeting.status === 'Requested' && activeMeeting.host_id === currentUser.id) {
+        pendingBooking = activeMeeting;
+      }
     }
   }
+
+  const hasActiveMeeting = activeMeeting && ['Accepted', 'Confirmed'].includes(activeMeeting.status);
 
   if (!profile) {
     return (
@@ -109,16 +117,18 @@ export default async function UserProfilePage({ params }) {
       </div>
     );
   }
+
   const interests = profile.interests || [];
   const primaryInterest = interests[0];
-  const primaryMeta = INTEREST_META[primaryInterest] || { Icon: Star, color: '#6b7280', label: primaryInterest };
-  const { Icon: PrimaryIcon } = primaryMeta;
+  const primaryMeta = INTEREST_META[primaryInterest] || { Icon: Star, color: '#F05A00', label: primaryInterest };
   const avgRating = reviews.length > 0
     ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
     : null;
 
+  const hostRate = Math.min(Math.max(parseInt(profile.rate, 10) || 50, 10), 500);
+
   return (
-    <div className="max-w-[680px] mx-auto anim-fade-in relative">
+    <div className="max-w-[680px] mx-auto anim-fade-in relative pb-12">
 
       {/* Ambient glow from primary interest color */}
       <div
@@ -126,9 +136,7 @@ export default async function UserProfilePage({ params }) {
         style={{ background: primaryMeta.color }}
       />
 
-
-
-      {/* ── INSTAGRAM HEADER BAR ─────────────────────── */}
+      {/* ── HEADER BAR ─────────────────────── */}
       <div className="flex items-center justify-between py-3 mb-4 border-b border-zinc-100">
         <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-zinc-100 transition-colors text-zinc-800">
           <ArrowLeft className="w-5 h-5" />
@@ -144,12 +152,12 @@ export default async function UserProfilePage({ params }) {
         )}
       </div>
 
-      {/* ── INSTAGRAM PROFILE HERO ─────────────────────── */}
+      {/* ── PROFILE HERO ─────────────────────── */}
       <div className="bg-white rounded-3xl p-4 sm:p-6 mb-6 border border-zinc-100 shadow-sm">
         
         {/* Avatar + Stats Row */}
         <div className="flex items-center justify-between gap-6 mb-4">
-          {/* Left: Instagram Avatar with Gradient Ring */}
+          {/* Avatar with Ring */}
           <div className="relative flex-shrink-0">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full p-[3px]" style={{ background: '#F05A00' }}>
               <div className="w-full h-full rounded-full overflow-hidden border-2 border-white bg-zinc-100">
@@ -182,7 +190,7 @@ export default async function UserProfilePage({ params }) {
             </div>
             <div>
               <span className="block text-base sm:text-lg font-black text-[#F05A00] leading-tight flex items-center justify-center gap-0.5">
-                {profile.rate || 100} <Zap className="w-3.5 h-3.5 fill-current text-[#F05A00] inline" />
+                {hostRate} <Zap className="w-3.5 h-3.5 fill-current text-[#F05A00] inline" />
               </span>
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Rate</span>
             </div>
@@ -216,6 +224,45 @@ export default async function UserProfilePage({ params }) {
           </p>
         </div>
 
+        {/* Social Links Row */}
+        {(profile.instagram || profile.linkedin || profile.github) && (
+          <div className="flex flex-wrap items-center gap-2 mb-5">
+            {profile.instagram && (
+              <a
+                href={`https://instagram.com/${profile.instagram.replace(/^@/, '')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 text-[11px] font-black text-[#F05A00] hover:bg-orange-100 transition-colors border border-orange-100"
+              >
+                <Camera size={13} />
+                <span>@{profile.instagram.replace(/^@/, '')}</span>
+              </a>
+            )}
+            {profile.linkedin && (
+              <a
+                href={profile.linkedin.startsWith('http') ? profile.linkedin : `https://linkedin.com/in/${profile.linkedin}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-[11px] font-black text-blue-600 hover:bg-blue-100 transition-colors border border-blue-100"
+              >
+                <Linkedin size={13} />
+                <span>LinkedIn</span>
+              </a>
+            )}
+            {profile.github && (
+              <a
+                href={profile.github.startsWith('http') ? profile.github : `https://github.com/${profile.github.replace(/^@/, '')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-100 text-[11px] font-black text-zinc-800 hover:bg-zinc-200 transition-colors border border-zinc-200"
+              >
+                <Github size={13} />
+                <span>GitHub</span>
+              </a>
+            )}
+          </div>
+        )}
+
         {/* Status Pills */}
         <div className="flex flex-wrap items-center gap-1.5 mb-5">
           {profile.isLiveOnCampus && (
@@ -228,9 +275,22 @@ export default async function UserProfilePage({ params }) {
           </span>
         </div>
 
-        {/* Action Buttons (Instagram 2-Column Style) */}
+        {/* Action Buttons */}
         {!isSelf && (
           <div className="flex flex-col gap-2.5 pt-3 border-t border-zinc-100">
+            {/* Direct In-App Privacy Call Button if active booking exists */}
+            {hasActiveMeeting && (
+              <div className="flex items-center gap-2">
+                <ProfileCallButton
+                  targetUserId={id}
+                  targetName={profile.full_name}
+                  targetPhoto={avatarUrl(profile)}
+                  bookingId={activeMeeting?.id}
+                  location={activeMeeting?.location}
+                />
+              </div>
+            )}
+
             <div className="flex items-center gap-2.5">
               {pendingBooking ? (
                 <div className="flex-1">
@@ -244,6 +304,7 @@ export default async function UserProfilePage({ params }) {
                     targetPhoto={avatarUrl(profile)}
                     isLoggedIn={isLoggedIn}
                     accentColor={primaryMeta.color}
+                    rate={hostRate}
                   />
                 </div>
               ) : (
@@ -268,12 +329,71 @@ export default async function UserProfilePage({ params }) {
         )}
       </div>
 
-      {/* ── INSTAGRAM HIGHLIGHTS (INTERESTS CIRCLES + SUGGESTED STUDENTS) ── */}
+      {/* ── HIGHLIGHTS (INTERESTS CIRCLES + SUGGESTED STUDENTS) ── */}
       <ProfileHighlightsSection 
         interests={interests} 
         allUsers={allUsers} 
         currentUserId={id} 
       />
+
+      {/* ── CAMPUS MOMENTS & POSTS GALLERY ───────────────── */}
+      <section className="mb-6 bg-white rounded-3xl p-5 border border-zinc-100 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[11px] font-black text-zinc-400 tracking-[0.14em] uppercase flex items-center gap-2">
+            <Camera className="w-3.5 h-3.5 text-[#F05A00]" />
+            Campus Moments ({userPosts.length})
+          </h2>
+        </div>
+
+        {userPosts.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {userPosts.map(post => {
+              const hasImage = post.media_urls && post.media_urls.length > 0;
+              const firstImg = hasImage ? post.media_urls[0] : null;
+
+              return (
+                <div
+                  key={post.id}
+                  className="group relative rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-50 flex flex-col justify-between aspect-square transition-all duration-200 hover:shadow-md hover:border-orange-200"
+                >
+                  {hasImage ? (
+                    <>
+                      <img
+                        src={firstImg}
+                        alt="Moment"
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+                    </>
+                  ) : (
+                    <div className="p-3.5 flex-1 flex flex-col justify-center">
+                      <p className="text-xs font-semibold text-zinc-800 line-clamp-4 leading-relaxed">
+                        {post.content}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="relative z-10 p-2.5 mt-auto flex items-center justify-between text-[10px] font-bold text-white">
+                    <span className="flex items-center gap-1 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full">
+                      <Heart size={10} className="fill-rose-500 text-rose-500" />
+                      <span>{post.likes_count || 0}</span>
+                    </span>
+                    <span className="text-[9px] opacity-80 font-medium">
+                      {timeAgo(post.created_at)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-8 rounded-2xl bg-zinc-50 border border-dashed border-zinc-200">
+            <Camera className="w-6 h-6 text-zinc-300 mx-auto mb-2" />
+            <p className="text-xs font-bold text-zinc-500">No moments shared yet</p>
+            <p className="text-[10px] text-zinc-400 mt-0.5">Moments posted on the campus feed will appear here</p>
+          </div>
+        )}
+      </section>
 
       {/* ── COFFEE SESSION INFO ───────────────── */}
       {profile.isIdOn !== false && (
@@ -287,18 +407,18 @@ export default async function UserProfilePage({ params }) {
             <h3 className="text-sm font-black text-[var(--text-primary)] mb-1 flex items-center gap-2">
               Campus Meet / 1-on-1 Session
               <span className="flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-yellow-400/10 text-yellow-500">
-                <Zap className="w-2.5 h-2.5 fill-current" /> 50 Sparks
+                <Zap className="w-2.5 h-2.5 fill-current" /> {hostRate} Sparks
               </span>
             </h3>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-semibold">
-              Spend 50 Sparks to book a 1-on-1 campus meetup or coffee session with {profile.full_name?.split(' ')[0] || 'this student'}. 
+              Spend {hostRate} Sparks to book a 1-on-1 campus meetup or coffee session with {profile.full_name?.split(' ')[0] || 'this student'}. 
               Great for networking, project collaboration, quiet study, or peer mentorship.
             </p>
             <div className="flex items-center gap-4 mt-3">
               {[
                 { Icon: Calendar, text: 'Flexible slots' },
                 { Icon: MapPin, text: 'Campus Spot' },
-                { Icon: CheckCircle, text: 'Auto approval' },
+                { Icon: CheckCircle, text: 'Instant coordination' },
               ].map(({ Icon, text }) => (
                 <span key={text} className="flex items-center gap-1 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
                   <Icon className="w-3 h-3 text-[var(--accent)]" /> {text}

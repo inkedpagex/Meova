@@ -31,6 +31,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
   const [category, setCategory] = useState('Tech');
   const [platform, setPlatform] = useState('WhatsApp');
   const [price, setPrice] = useState('50');
+  const [initialMembers, setInitialMembers] = useState('1');
   const [link, setLink] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
@@ -105,7 +106,11 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) { toast.error('Please enter a community name'); return; }
-    if (!link.trim()) { toast.error('Please enter your channel/group invite link'); return; }
+    const cleanLink = link.trim();
+    if (!cleanLink || (!cleanLink.startsWith('http://') && !cleanLink.startsWith('https://'))) {
+      toast.error('Please enter a valid link (starting with https://)');
+      return;
+    }
     if (!hasEnoughSparks) { toast.error('Insufficient Sparks to create a channel.'); return; }
 
     setSubmitting(true);
@@ -118,7 +123,8 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
           category,
           platform,
           price: parseInt(price, 10) || 0,
-          link: link.trim(),
+          initial_members_count: Math.max(1, parseInt(initialMembers, 10) || 1),
+          link: cleanLink,
           description: description.trim(),
           image: image.trim() || undefined,
         }),
@@ -128,7 +134,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
       setSubmitting(false);
 
       if (res.ok && data.success) {
-        toast.success('Community submitted! Pending admin approval.');
+        toast.success(isAdmin ? 'Community created successfully!' : 'Community submitted! Pending admin approval.');
         if (onSuccess) onSuccess(data.circle);
         onClose();
       } else {
@@ -246,6 +252,33 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
             </p>
           </div>
 
+          {/* Existing Base Members */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider">
+                Current / Existing Group Members
+              </label>
+              <span className="text-[10px] text-zinc-400 font-bold">
+                Starts count from this number
+              </span>
+            </div>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={initialMembers}
+              onChange={e => {
+                const val = e.target.value.replace(/[^0-9]/g, '');
+                setInitialMembers(val);
+              }}
+              placeholder="e.g. 127"
+              className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#F05A00] font-bold"
+            />
+            <p className="text-[10px] text-zinc-400 mt-1">
+              If you already have a running WhatsApp group with 127 members, set 127. New members joining via Meova will count as 128, 129…
+            </p>
+          </div>
+
           {/* Protected Channel Link */}
           <div>
             <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider mb-1">
@@ -264,7 +297,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
               <ShieldCheck size={12} />
-              <span>Protected: Stored securely in Firebase. Unlocked only after Sparks payment.</span>
+              <span>Protected: Stored securely in database. Unlocked only after Sparks payment.</span>
             </div>
           </div>
 

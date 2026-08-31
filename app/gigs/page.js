@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
-  Search, Briefcase, CheckCircle2, Plus, X, Sparkles, Users,
+  Search, Briefcase, CheckCircle2, Plus, X, Sparkles, Users, Zap
 } from 'lucide-react';
 import { toast } from '../../lib/toast';
 import useSWR from 'swr';
@@ -150,9 +151,13 @@ export default function CampusGigsPage() {
         </button>
       </div>
 
-      {/* Main tabs: Browse / My Gigs */}
+      {/* Main tabs: Browse / My Posted Gigs / Applied Gigs */}
       <div className="flex gap-6 border-b border-zinc-200/80">
-        {[['browse', 'Browse Gigs'], ['mine', 'My Activity']].map(([key, label]) => {
+        {[
+          ['browse', 'Browse Gigs'],
+          ['mine', 'My Posted Gigs'],
+          ['applied', 'Applied Gigs']
+        ].map(([key, label]) => {
           const active = activeTab === key;
           return (
             <button
@@ -232,8 +237,22 @@ export default function CampusGigsPage() {
                     <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#F05A00]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[9px] font-black uppercase tracking-wider bg-[#fcf6fa] text-[#D94F00] px-2.5 py-0.5 rounded-full border border-[#f5ebf4]">{gig.type || 'CAMPUS GIG'}</span>
-                        <span className="text-xs text-zinc-700 font-extrabold">by {gig.company}</span>
+                        <span className="text-[9px] font-black uppercase tracking-wider bg-orange-50 text-[#F05A00] px-2.5 py-0.5 rounded-full border border-orange-100">{gig.type || 'CAMPUS GIG'}</span>
+                        {gig.author_id || gig.authorId ? (
+                          <Link href={`/users/${gig.author_id || gig.authorId}`} onClick={(e) => e.stopPropagation()} className="text-xs text-zinc-700 font-extrabold hover:text-[#F05A00] hover:underline flex items-center gap-1.5 transition-colors">
+                            <div className="w-4 h-4 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200">
+                              <span className="text-[8px] text-[#F05A00] font-bold">{(gig.company || 'U')[0].toUpperCase()}</span>
+                            </div>
+                            by {gig.company}
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-zinc-700 font-extrabold flex items-center gap-1.5">
+                            <div className="w-4 h-4 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200">
+                              <span className="text-[8px] text-[#F05A00] font-bold">{(gig.company || 'U')[0].toUpperCase()}</span>
+                            </div>
+                            by {gig.company}
+                          </span>
+                        )}
                         <span className="text-xs text-zinc-400">· {gig.duration}</span>
                         {statusLabel && <span className="text-[10px] font-bold text-blue-600">{statusLabel}</span>}
                       </div>
@@ -243,7 +262,7 @@ export default function CampusGigsPage() {
 
                     <div className="flex md:flex-col items-end justify-between md:justify-center gap-3 border-t md:border-t-0 border-zinc-100 pt-4 md:pt-0">
                       <div className="text-right">
-                        <div className="flex items-center gap-1 text-zinc-950 font-black text-xl">{gig.budget}<span className="text-amber-500">⚡</span></div>
+                        <div className="flex items-center gap-1 text-zinc-950 font-black text-xl">{gig.budget}<Zap size={16} className="text-amber-500 fill-amber-500" /></div>
                         <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">Estimated</span>
                       </div>
 
@@ -258,7 +277,7 @@ export default function CampusGigsPage() {
                           </button>
                           <button
                             onClick={() => setManagingGig(gig)}
-                            className="px-5 py-2.5 text-[10px] font-black tracking-wider uppercase rounded-xl bg-[#fcf6fa] text-[#D94F00] border border-[#eac5e0] hover:bg-[#f5ebf4] cursor-pointer transition-all flex items-center gap-1.5"
+                            className="px-5 py-2.5 text-[10px] font-black tracking-wider uppercase rounded-xl bg-orange-50 text-[#F05A00] border border-orange-200 hover:bg-orange-100 cursor-pointer transition-all flex items-center gap-1.5"
                           >
                             {(gig.applicationsCount || 0) > 0 ? (
                               <>
@@ -288,9 +307,14 @@ export default function CampusGigsPage() {
         </>
       )}
 
-      {/* ── MY ACTIVITY TAB ── */}
+      {/* ── MY POSTED GIGS TAB ── */}
       {activeTab === 'mine' && user && (
-        <MyGigsActivity userId={user.uid} onManage={setManagingGig} />
+        <MyGigsActivity userId={user.uid} onManage={setManagingGig} initialTab="posted" />
+      )}
+
+      {/* ── APPLIED GIGS TAB ── */}
+      {activeTab === 'applied' && user && (
+        <MyGigsActivity userId={user.uid} onManage={setManagingGig} initialTab="applied" />
       )}
 
       {/* ── APPLICANTS DRAWER ── */}
@@ -315,12 +339,13 @@ export default function CampusGigsPage() {
                 value={pitch}
                 onChange={e => setPitch(e.target.value.slice(0, 300))}
                 placeholder="e.g. I've built 3 Figma projects for clubs and can deliver in 2 days…"
-                className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#9e4685] bg-zinc-50 min-h-[90px] resize-none"
+                className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50 min-h-[90px] resize-none"
               />
               <p className="text-[10px] text-zinc-400 mt-1 text-right">{pitch.length}/300</p>
             </div>
-            <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3">
-              <p className="text-[11px] font-bold text-amber-700">If accepted you'll earn <span className="font-black">{applyingToGig.budget}⚡</span> Sparks on completion.</p>
+            <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3 flex items-center gap-2">
+              <Zap size={14} className="text-amber-500 fill-amber-500 shrink-0" />
+              <p className="text-[11px] font-bold text-amber-700">If accepted you'll earn <span className="font-black">{applyingToGig.budget}</span> Sparks on completion.</p>
             </div>
             <button
               onClick={handleApply}

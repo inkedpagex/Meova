@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { X, CheckCircle2, XCircle, MessageCircle, User } from 'lucide-react';
+import { X, CheckCircle2, XCircle, MessageCircle, User, Phone } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from '../../lib/toast';
 import useSWR from 'swr';
 
@@ -72,9 +73,20 @@ function ApplicantCard({ app, gigId, onUpdate }) {
           </div>
         )}
         {app.status === 'ACCEPTED' && (
-          <div className="mt-3 p-3 rounded-xl bg-[#fcf6fa] border border-[#f5ebf4]">
-            <p className="text-[10px] font-black uppercase text-[#9e4685] mb-1">Gig in Progress</p>
-            <p className="text-[11px] font-bold text-[#60234d]">Sparks are held in Escrow. Ask the freelancer for their 6-digit completion code when the work is delivered.</p>
+          <div className="mt-3 p-3 rounded-xl bg-orange-50 border border-orange-100">
+            <p className="text-[10px] font-black uppercase text-[#F05A00] mb-1">Gig in Progress</p>
+            <p className="text-[11px] font-bold text-orange-900 mb-3">Sparks are held in Escrow. Ask the freelancer for their 6-digit completion code when the work is delivered.</p>
+            <div className="flex items-center gap-2">
+              <Link href={`/messages?uid=${app.applicantId}`} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-orange-200 text-[#F05A00] rounded-xl text-xs font-black hover:bg-orange-100 transition-colors">
+                <MessageCircle size={14} /> Message
+              </Link>
+              <button onClick={() => {
+                toast.success('Initiating secure private call...', { icon: '📞' });
+                setTimeout(() => window.location.href = `/messages?uid=${app.applicantId}`, 500);
+              }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-500 text-white rounded-xl text-xs font-black hover:bg-emerald-600 transition-colors shadow-sm cursor-pointer">
+                <Phone size={14} /> Secure Call
+              </button>
+            </div>
           </div>
         )}
       </div>

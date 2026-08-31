@@ -46,7 +46,7 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Gig is not currently in progress' }, { status: 400 });
     }
 
-    const freelancerId = gig.assigned_applicant_id || gig.acceptedApplicantId;
+    const freelancerId = gig.accepted_applicant_id || gig.assigned_applicant_id || gig.acceptedApplicantId;
     if (!freelancerId) {
       return NextResponse.json({ error: 'No accepted applicant found' }, { status: 400 });
     }

@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { Briefcase, Clock, CheckCircle2, XCircle, Hourglass, FileText, Send, Users, Zap, RefreshCw } from 'lucide-react';
+import { Briefcase, Clock, CheckCircle2, XCircle, Hourglass, FileText, Send, Users, Zap, RefreshCw, MessageCircle, Phone } from 'lucide-react';
+import Link from 'next/link';
 import useSWR from 'swr';
 
 const fetcher = url => fetch(url).then(r => r.json());
@@ -12,16 +13,21 @@ const STATUS_STYLE = {
   COMPLETED: { icon: <CheckCircle2 size={12}/>,  label: 'Completed', cls: 'bg-orange-50 text-[#D94F00] border-orange-200' },
 };
 
-export default function MyGigsActivity({ userId, onManage }) {
-  const [tab, setTab] = useState('posted'); // 'posted' | 'applied'
+export default function MyGigsActivity({ userId, onManage, initialTab = 'posted' }) {
+  const [tab, setTab] = useState(initialTab); // 'posted' | 'applied'
+
+  React.useEffect(() => {
+    if (initialTab) setTab(initialTab);
+  }, [initialTab]);
+
   const { data: gigsData } = useSWR('/api/gigs', fetcher);
   const { data: myAppsData } = useSWR(
-    tab === 'applied' ? `/api/users/${userId}/applications` : null,
+    userId ? `/api/users/${userId}/applications` : null,
     fetcher
   );
 
   const allGigs = gigsData?.gigs || [];
-  const postedGigs = allGigs.filter(g => g.authorId === userId);
+  const postedGigs = allGigs.filter(g => g.authorId === userId || g.author_id === userId || g.host_id === userId);
   const myApplications = myAppsData?.applications || [];
 
   const renderStatusBadge = (status) => {
@@ -40,16 +46,16 @@ export default function MyGigsActivity({ userId, onManage }) {
   return (
     <div className="space-y-4">
       {/* Sub-tabs */}
-      <div className="flex gap-1 p-1 bg-orange-50/60 border border-orange-100/80 rounded-2xl">
+      <div className="flex gap-1 p-1 bg-zinc-100 border border-zinc-200/80 rounded-2xl">
         {[
-          { key: 'posted', label: 'My Posts', icon: FileText },
-          { key: 'applied', label: 'Applied', icon: Send }
+          { key: 'posted', label: `My Posted Gigs (${postedGigs.length})`, icon: FileText },
+          { key: 'applied', label: `My Applications (${myApplications.length})`, icon: Send }
         ].map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setTab(key)}
             className={`flex-1 py-2.5 text-xs font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
-              tab === key ? 'bg-white text-zinc-900 shadow-sm border border-orange-100/50' : 'text-zinc-500 hover:text-zinc-700'
+              tab === key ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-700'
             }`}
           >
             <Icon size={14} className={tab === key ? 'text-[#F05A00]' : 'text-zinc-400'} />
@@ -62,33 +68,33 @@ export default function MyGigsActivity({ userId, onManage }) {
       {tab === 'posted' && (
         <div className="space-y-3">
           {postedGigs.length === 0 && (
-            <div className="text-center py-10 text-zinc-400">
+            <div className="text-center py-12 px-4 bg-white rounded-3xl border border-zinc-100 shadow-xs">
               <Briefcase size={28} className="mx-auto mb-2 text-zinc-300"/>
-              <p className="text-sm font-bold">No gigs posted yet</p>
-              <p className="text-xs mt-1">Post a gig to hire student freelancers</p>
+              <p className="text-sm font-bold text-zinc-800">No gigs posted yet</p>
+              <p className="text-xs text-zinc-400 mt-1">Post a campus gig to hire talented student peers.</p>
             </div>
           )}
           {postedGigs.map(gig => (
-            <div key={gig.id} className="p-4 rounded-2xl border border-zinc-200 bg-white space-y-2 hover:border-[#eac5e0] transition-all">
+            <div key={gig.id} className="p-4 rounded-2xl border border-zinc-200 bg-white space-y-2.5 hover:border-orange-200 transition-all shadow-xs">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-black text-zinc-900">{gig.title}</p>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">{gig.category} · {gig.duration}</p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">{gig.category || 'Freelance'} · {gig.duration || 'Flexible'}</p>
                 </div>
                 {renderStatusBadge(gig.status)}
               </div>
               <div className="flex items-center justify-between pt-1">
                 <span className="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
-                  {gig.budget} <Zap size={11} className="fill-current text-amber-500" />
+                  {gig.budget || gig.reward_sparks || 0} <Zap size={11} className="fill-current text-amber-500" />
                 </span>
                 <button
                   onClick={() => onManage(gig)}
-                  className="px-3.5 py-1.5 rounded-xl bg-orange-50 text-[#D94F00] border border-orange-100 text-xs font-black hover:bg-orange-100 cursor-pointer transition-all flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-xl bg-orange-50 text-[#D94F00] border border-orange-100 text-xs font-black hover:bg-orange-100 cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
                 >
-                  {(gig.applicationsCount || 0) > 0 ? (
+                  {(gig.applicationsCount || gig.applications_count || 0) > 0 ? (
                     <>
                       <Users size={13} />
-                      <span>{gig.applicationsCount} Applied</span>
+                      <span>{gig.applicationsCount || gig.applications_count} Applied</span>
                     </>
                   ) : (
                     <span>Manage</span>
@@ -103,40 +109,83 @@ export default function MyGigsActivity({ userId, onManage }) {
       {/* Applied gigs */}
       {tab === 'applied' && (
         <div className="space-y-3">
-          {!myAppsData && <p className="text-xs text-zinc-400 text-center py-8">Loading…</p>}
+          {!myAppsData && <p className="text-xs text-zinc-400 text-center py-8">Loading applications…</p>}
           {myAppsData && myApplications.length === 0 && (
-            <div className="text-center py-10 text-zinc-400">
+            <div className="text-center py-12 px-4 bg-white rounded-3xl border border-zinc-100 shadow-xs">
               <Clock size={28} className="mx-auto mb-2 text-zinc-300"/>
-              <p className="text-sm font-bold">No applications yet</p>
-              <p className="text-xs mt-1">Apply to gigs to start earning Sparks</p>
+              <p className="text-sm font-bold text-zinc-800">No applications yet</p>
+              <p className="text-xs text-zinc-400 mt-1">Browse open campus gigs and apply to start earning Sparks.</p>
             </div>
           )}
           {myApplications.map(app => {
-            const st = STATUS_STYLE[app.status] || STATUS_STYLE.PENDING;
+            const rawStatus = (app.status || 'pending').toUpperCase();
+            const st = STATUS_STYLE[rawStatus] || STATUS_STYLE.PENDING;
+
             return (
-              <div key={app.gigId + app.applicantId} className="p-4 rounded-2xl border border-zinc-200 bg-white space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-sm font-black text-zinc-900">{app.gigTitle || 'Gig'}</p>
+              <div key={app.id || (app.gigId + '-' + (app.appliedAt || ''))} className="p-4 rounded-2xl border border-zinc-200 bg-white space-y-3 shadow-xs hover:border-orange-200 transition-all">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-zinc-900 truncate">{app.gigTitle || 'Campus Gig'}</p>
                     <p className="text-[11px] text-zinc-400 mt-0.5">
-                      Applied {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString() : ''}
+                      Applied {app.appliedAt ? new Date(app.appliedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                     </p>
                   </div>
-                  <span className={`flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full border ${st.cls}`}>
-                    {st.icon}{st.label}
+                  <span className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border shrink-0 ${st.cls}`}>
+                    {st.icon} {st.label}
                   </span>
                 </div>
-                {app.status === 'ACCEPTED' && app.meetingCode && (
-                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
-                    <p className="text-[10px] font-black uppercase text-emerald-600 mb-1">Your completion code — share with host</p>
-                    <p className="text-2xl font-black tracking-[6px] text-emerald-800">{app.meetingCode}</p>
+
+                {app.pitch && (
+                  <div className="p-2.5 rounded-xl bg-zinc-50 border border-zinc-100 text-xs text-zinc-600 italic">
+                    &ldquo;{app.pitch}&rdquo;
                   </div>
                 )}
-                {app.status === 'COMPLETED' && (
-                  <p className="text-xs text-[#F05A00] font-bold flex items-center gap-1">
-                    <Zap size={12} className="fill-current text-amber-500" />
-                    <span>Sparks credited to your wallet</span>
-                  </p>
+
+                <div className="flex items-center justify-between pt-1 border-t border-zinc-100">
+                  <span className="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
+                    {app.gigBudget || 0} <Zap size={11} className="fill-current text-amber-500" />
+                  </span>
+
+                  {rawStatus === 'ACCEPTED' && (
+                    <span className="text-[11px] font-black text-emerald-600">
+                      Approved by Host
+                    </span>
+                  )}
+                </div>
+
+                {rawStatus === 'ACCEPTED' && app.meetingCode && (
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200/80">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-emerald-700 mb-1">
+                      Completion Security Code
+                    </p>
+                    <p className="text-xs text-emerald-600 font-semibold mb-2">
+                      Share this code with the host once your work is completed to release Sparks:
+                    </p>
+                    <div className="py-2 px-4 bg-white rounded-xl border border-emerald-200 text-center mb-3">
+                      <span className="text-2xl font-black tracking-[6px] text-emerald-800 font-mono">
+                        {app.meetingCode}
+                      </span>
+                    </div>
+                    {app.gigAuthorId && (
+                      <div className="flex items-center gap-2">
+                        <Link href={`/messages?uid=${app.gigAuthorId}`} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-emerald-200 text-emerald-700 rounded-xl text-xs font-black hover:bg-emerald-100 transition-colors">
+                          <MessageCircle size={14} /> Message Host
+                        </Link>
+                        <button onClick={() => {
+                          setTimeout(() => window.location.href = `/messages?uid=${app.gigAuthorId}`, 500);
+                        }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#F05A00] text-white rounded-xl text-xs font-black hover:bg-[#D94F00] transition-colors shadow-sm cursor-pointer">
+                          <Phone size={14} /> Secure Call
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {rawStatus === 'COMPLETED' && (
+                  <div className="p-2.5 rounded-xl bg-orange-50 border border-orange-100 flex items-center gap-2 text-xs text-[#F05A00] font-black">
+                    <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                    <span>Task completed & Sparks released to your wallet</span>
+                  </div>
                 )}
               </div>
             );

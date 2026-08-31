@@ -59,7 +59,7 @@ export default async function ProfilePage() {
   try {
     const { supabaseAdmin } = await import('../../lib/supabase/admin');
 
-    const [{ data: hostedGigs }, { data: appliedApps }] = await Promise.all([
+    const [{ data: hostedGigs }, { data: appliedApps }, { data: postsData }] = await Promise.all([
       // Gigs hosted by this user
       supabaseAdmin
         .from('gigs')
@@ -72,6 +72,12 @@ export default async function ProfilePage() {
         .select('gig_id, created_at, gigs(id, title, status, created_at)')
         .eq('applicant_id', user.id)
         .limit(5),
+      // User's own campus moments/posts
+      supabaseAdmin
+        .from('posts')
+        .select('id, content, media_urls, likes_count, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false }),
     ]);
 
     const hostedMapped = (hostedGigs || []).map(g => ({
@@ -95,12 +101,20 @@ export default async function ProfilePage() {
     userGigs = Array.from(
       new Map([...hostedMapped, ...appliedMapped].map(g => [g.id, g])).values()
     ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+
+    var userPosts = postsData || [];
   } catch (err) {
-    console.error('Error fetching gigs for profile:', err);
+    console.error('Error fetching gigs/posts for profile:', err);
   }
 
-
-  return <ProfileClient initialProfile={profile} initialSparks={initialSparks} initialGigs={userGigs} />;
+  return (
+    <ProfileClient
+      initialProfile={profile}
+      initialSparks={initialSparks}
+      initialGigs={userGigs}
+      initialPosts={userPosts || []}
+    />
+  );
 }
 
 export const dynamic = 'force-dynamic';

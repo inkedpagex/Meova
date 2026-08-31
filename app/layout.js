@@ -8,6 +8,7 @@ import Script from 'next/script';
 import GoogleAuthProviderWrapper from '../components/GoogleAuthProviderWrapper';
 import { headers } from 'next/headers';
 import { UserProvider } from '../components/providers/UserProvider';
+import { VoiceCallProvider } from '../components/providers/VoiceCallProvider';
 import FCMInitializer from '../components/FCMInitializer';
 import PWAInstallBanner from '../components/PWAInstallBanner';
 import NotificationPermissionPrompt from '../components/NotificationPermissionPrompt';
@@ -110,26 +111,28 @@ export default async function RootLayout({ children }) {
         <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh', fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif" }}>
           <GoogleAuthProviderWrapper>
             <UserProvider initialUser={user} initialWallet={user?.wallet} initialPeople={people}>
-              {/* FCM Push Notification initializer — client-only, non-rendering */}
-              <FCMInitializer />
-              {/* PWA Install Banner — shows when browser supports it */}
-              <PWAInstallBanner />
-              {/* In-App Realtime Push Banner — custom Meova UI instead of Chrome native alert */}
-              <InAppNotificationBanner />
-              {/* Notification permission — friendly prompt shown once after login */}
-              <NotificationPermissionPrompt user={user} />
-              <div className="flex min-h-screen">
-                <Sidebar user={user} />
+              <VoiceCallProvider>
+                {/* FCM Push Notification initializer — client-only, non-rendering */}
+                <FCMInitializer />
+                {/* PWA Install Banner — shows when browser supports it */}
+                <PWAInstallBanner />
+                {/* In-App Realtime Push Banner — custom Meova UI instead of Chrome native alert */}
+                <InAppNotificationBanner />
+                {/* Notification permission — friendly prompt shown once after login */}
+                <NotificationPermissionPrompt user={user} />
+                <div className="flex min-h-screen">
+                  <Sidebar user={user} />
 
-                {/* Network wrapper shows Offline screen if connection lost */}
-                <NetworkWrapper>
-                  <MainContentWrapper user={user}>
-                    {children}
-                  </MainContentWrapper>
-                </NetworkWrapper>
-                
-                <RightPanel people={people} upcomingEvents={events} />
-              </div>
+                  {/* Network wrapper shows Offline screen if connection lost */}
+                  <NetworkWrapper>
+                    <MainContentWrapper user={user}>
+                      {children}
+                    </MainContentWrapper>
+                  </NetworkWrapper>
+                  
+                  <RightPanel people={people} upcomingEvents={events} />
+                </div>
+              </VoiceCallProvider>
             </UserProvider>
           </GoogleAuthProviderWrapper>
 

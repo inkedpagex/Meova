@@ -75,6 +75,28 @@ alter table public.gigs
   add column if not exists updated_at            timestamp with time zone default now();
 
 -- ----------------------------------------------------------------------------
+-- Extend: bookings — meeting status, codes & disputes
+-- ----------------------------------------------------------------------------
+alter table public.bookings
+  add column if not exists title               text,
+  add column if not exists price               numeric default 0,
+  add column if not exists meeting_code        text,
+  add column if not exists disputed_at         timestamp with time zone,
+  add column if not exists disputed_by         text,
+  add column if not exists completed_at        timestamp with time zone,
+  add column if not exists cancelled_at        timestamp with time zone,
+  add column if not exists cancellation_reason text,
+  add column if not exists booking_date        text;
+
+-- ----------------------------------------------------------------------------
+-- Extend: notifications — direct action metadata
+-- ----------------------------------------------------------------------------
+alter table public.notifications
+  add column if not exists booking_id text,
+  add column if not exists gig_id     text,
+  add column if not exists action_url text;
+
+-- ----------------------------------------------------------------------------
 -- Extend: transactions — extra metadata fields
 -- ----------------------------------------------------------------------------
 alter table public.transactions
@@ -131,8 +153,26 @@ create index if not exists idx_circles_status on public.circles(status);
 create index if not exists idx_gigs_author_id on public.gigs(author_id);
 
 -- ----------------------------------------------------------------------------
+-- Extend: circles — monetization, base member count, and direct invite links
+-- ----------------------------------------------------------------------------
+alter table public.circles
+  add column if not exists whatsapp_link        text,
+  add column if not exists invite_link          text,
+  add column if not exists price                integer default 0,
+  add column if not exists is_paid              boolean default false,
+  add column if not exists platform             text default 'WhatsApp',
+  add column if not exists image                text,
+  add column if not exists member_count         integer default 1,
+  add column if not exists total_sparks_earned  integer default 0,
+  add column if not exists host_name            text,
+  add column if not exists host_photo           text,
+  add column if not exists updated_at           timestamp with time zone default now();
+
+-- ----------------------------------------------------------------------------
 -- Grant permissions on new tables
 -- ----------------------------------------------------------------------------
 grant all privileges on table public.phone_otps to postgres, anon, authenticated, service_role;
 grant all privileges on table public.post_likes to postgres, anon, authenticated, service_role;
 grant all privileges on table public.audit_logs to postgres, anon, authenticated, service_role;
+grant all privileges on table public.circles to postgres, anon, authenticated, service_role;
+grant all privileges on table public.circle_members to postgres, anon, authenticated, service_role;

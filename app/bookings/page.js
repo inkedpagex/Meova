@@ -6,15 +6,40 @@ import { useUserContext } from "../../components/providers/UserProvider";
 import { useRouter } from "next/navigation";
 import {
   Calendar, Clock, MapPin, QrCode, ScanLine, X, Loader2,
-  CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight, MessageCircle
+  CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight, MessageCircle, Phone
 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { toast } from "../../lib/toast";
 import Link from "next/link";
 import { getCartoonAvatar } from "../../utils/avatar";
+import { useVoiceCall } from "../../components/providers/VoiceCallProvider";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
+
+function normalizeBooking(b) {
+  if (!b) return null;
+  return {
+    ...b,
+    id: b.id,
+    title: b.title || 'Campus Meetup',
+    guestId: b.guest_id || b.guestId || '',
+    hostId: b.host_id || b.hostId || '',
+    guestName: b.guest_name || b.guestName || 'Campus Student',
+    hostName: b.host_name || b.hostName || 'Campus Host',
+    guestPhoto: b.guest_photo || b.guestPhoto || '',
+    hostPhoto: b.host_photo || b.hostPhoto || '',
+    meetingCode: b.meeting_code || b.meetingCode || '',
+    price: b.price !== undefined ? b.price : (b.sparks_amount !== undefined ? b.sparks_amount : 50),
+    location: b.location || 'Campus',
+    date: b.date || '',
+    time: b.time || '',
+    agenda: b.agenda || '',
+    status: b.status || 'Requested',
+    createdAt: b.created_at || b.createdAt,
+    scheduledAt: b.scheduled_at || b.scheduledAt,
+  };
+}
 
 function MeetingCountdownTimer({ booking }) {
   const [timeLeft, setTimeLeft] = useState('');
@@ -23,16 +48,44 @@ function MeetingCountdownTimer({ booking }) {
   useEffect(() => {
     const calculateTime = () => {
       let targetDate = null;
-      if (booking.date) {
-        const dateStr = booking.date === 'Today' 
-          ? new Date().toISOString().split('T')[0] 
-          : booking.date;
-        const timeStr = booking.time || '18:00';
-        targetDate = new Date(`${dateStr}T${timeStr}:00`);
+
+      if (booking.scheduledAt) {
+        const parsed = new Date(booking.scheduledAt);
+        if (!isNaN(parsed.getTime())) targetDate = parsed;
       }
-      
+
+      if (!targetDate && booking.date) {
+        let dateStr = booking.date;
+        if (booking.date === 'Today') {
+          dateStr = new Date().toISOString().split('T')[0];
+        } else if (booking.date === 'Tomorrow') {
+          dateStr = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+        } else if (booking.date === 'Day After') {
+          dateStr = new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0];
+        }
+
+        let hour = 18;
+        let minute = 0;
+        const timeStr = booking.time || '';
+        if (timeStr.includes('8 AM') || timeStr.includes('8-11')) hour = 8;
+        else if (timeStr.includes('11 AM') || timeStr.includes('11-2') || timeStr.includes('Noon')) hour = 11;
+        else if (timeStr.includes('2 PM') || timeStr.includes('2-5') || timeStr.includes('Afternoon')) hour = 14;
+        else if (timeStr.includes('5 PM') || timeStr.includes('5-6') || timeStr.includes('Evening')) hour = 17;
+        else if (timeStr.includes(':')) {
+          const parts = timeStr.split(':');
+          hour = parseInt(parts[0], 10) || 18;
+          minute = parseInt(parts[1], 10) || 0;
+        }
+
+        const dateObj = new Date(dateStr);
+        if (!isNaN(dateObj.getTime())) {
+          dateObj.setHours(hour, minute, 0, 0);
+          targetDate = dateObj;
+        }
+      }
+
       if (!targetDate || isNaN(targetDate.getTime())) {
-        const created = booking.created_at ? new Date(booking.created_at) : new Date();
+        const created = booking.createdAt ? new Date(booking.createdAt) : new Date();
         targetDate = new Date(created.getTime() + 2 * 60 * 60 * 1000);
       }
 
@@ -59,7 +112,7 @@ function MeetingCountdownTimer({ booking }) {
 
   return (
     <div className={`mt-2 flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-extrabold border ${
-      isLive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse' : 'bg-[#fcf6fa] text-[#D94F00] border-[#f5ebf4]'
+      isLive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse' : 'bg-orange-50/80 text-[#F05A00] border-orange-200'
     }`}>
       <span>{timeLeft}</span>
     </div>
@@ -69,6 +122,7 @@ function MeetingCountdownTimer({ booking }) {
 export default function BookingsPage() {
   const router = useRouter();
   const { user } = useUserContext();
+  const { startCall } = useVoiceCall();
   const [activeTab, setActiveTab] = useState("Active"); // "Active" | "History"
 
   // Modals state
@@ -118,7 +172,7 @@ export default function BookingsPage() {
   const sparksBalance = walletData?.wallet
     ? (walletData.wallet.purchased || 0) + (walletData.wallet.bonus || 0) + (walletData.wallet.creator || 0)
     : null;
-  const bookings = data?.bookings || [];
+  const bookings = (data?.bookings || []).map(normalizeBooking);
 
   const activeBookings = bookings.filter(b => b.status === "Requested" || b.status === "Accepted" || b.status === "Confirmed");
   const pastBookings = bookings.filter(b => ["Completed", "Rejected", "Cancelled", "Meeting Completed", "Booking Closed", "AutoRefunded", "Disputed", "Canceled"].includes(b.status));
@@ -133,17 +187,12 @@ export default function BookingsPage() {
 
   if (!user) return null;
 
-  // Has the meeting time passed? (for showing Report Issue button)
-  // - If scheduledAt exists: check if it's passed
-  // - Fallback: show button 2h after booking was created (covers weekday-name bookings)
-  // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const isMeetingTimePassed = (booking) => {
     if (booking.scheduledAt) {
       return now > new Date(booking.scheduledAt).getTime();
     }
-    // Fallback for bookings without a parseable scheduledAt
-    const created = booking.created_at ? new Date(booking.created_at) : null;
+    const created = booking.createdAt ? new Date(booking.createdAt) : null;
     if (!created || isNaN(created.getTime())) return false;
     return now > created.getTime() + 2 * 60 * 60 * 1000; // 2 hours after creation
   };
@@ -153,7 +202,8 @@ export default function BookingsPage() {
     const code = typeof codeToVerify === 'string' ? codeToVerify : manualCode;
     if (scanStatus === "processing" || scanStatus === "success" || !selectedBooking) return;
     
-    if (code.trim() === selectedBooking.meetingCode) {
+    const expectedCode = selectedBooking.meetingCode || selectedBooking.meeting_code;
+    if (code.trim() === expectedCode) {
       setScanStatus("processing");
       try {
         const res = await fetch("/api/bookings", {
@@ -454,16 +504,46 @@ export default function BookingsPage() {
                             : <X size={16} strokeWidth={2.5} />}
                         </button>
                       )}
+                      
+                      {/* Direct 1-on-1 Chat with Host */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); router.push(`/messages?uid=${otherPersonId}`); }}
+                        className="w-11 h-[46px] bg-orange-50 text-[#F05A00] border border-orange-200 hover:bg-orange-100 rounded-xl flex items-center justify-center active:scale-[0.98] transition-all cursor-pointer"
+                        title="Chat with Host"
+                      >
+                        <MessageCircle size={16} />
+                      </button>
+
+                      {/* Direct 1-on-1 In-App Privacy Voice Call */}
+                      {["Accepted", "Confirmed"].includes(booking.status) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startCall({
+                              targetUserId: otherPersonId,
+                              targetName: otherPerson,
+                              targetPhoto: otherPersonPhoto,
+                              bookingId: booking.id,
+                              location: booking.location,
+                            });
+                          }}
+                          className="w-11 h-[46px] bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 rounded-xl flex items-center justify-center active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+                          title="Call Host (100% Private)"
+                        >
+                          <Phone size={16} />
+                        </button>
+                      )}
+
                       <button 
                         onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); setShowQrModal(true); }}
-                        className="flex-1 bg-zinc-900 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-800 active:scale-[0.98] transition-all"
+                        className="flex-1 bg-zinc-900 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-800 active:scale-[0.98] transition-all cursor-pointer"
                       >
                         <QrCode size={16} /> View Ticket
                       </button>
                       {canReport && (
                         <button
                           onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); setShowDisputeModal(true); }}
-                          className="w-12 h-[46px] bg-rose-50 text-rose-500 border border-rose-100 rounded-xl flex items-center justify-center hover:bg-rose-100 active:scale-[0.98] transition-all"
+                          className="w-11 h-[46px] bg-rose-50 text-rose-500 border border-rose-100 rounded-xl flex items-center justify-center hover:bg-rose-100 active:scale-[0.98] transition-all cursor-pointer"
                           title="Report Issue"
                         >
                           <AlertTriangle size={16} strokeWidth={2.5} />
@@ -475,10 +555,10 @@ export default function BookingsPage() {
                       {booking.status === "Requested" ? (
                         <div className="flex gap-2 w-full flex-wrap">
                           <button 
-                            onClick={(e) => { e.stopPropagation(); router.push(`/messages?uid=${booking.guestId}`); }}
+                            onClick={(e) => { e.stopPropagation(); router.push(`/messages?uid=${otherPersonId}`); }}
                             className="w-full bg-zinc-100 text-zinc-600 rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-200 active:scale-[0.98] transition-all"
                           >
-                            <MessageCircle size={16} /> Propose New Time
+                            <MessageCircle size={16} /> Chat / Propose New Time
                           </button>
                           <div className="flex gap-2 w-full">
                             <button 
@@ -498,19 +578,47 @@ export default function BookingsPage() {
                           </div>
                         </div>
                       ) : (
-                        <button 
-                          onClick={(e) => { 
-                            e.stopPropagation();
-                            setSelectedBooking(booking); 
-                            setShowScanModal(true); 
-                            setScanStatus("idle");
-                            setIsScanning(true);
-                            setManualCode("");
-                          }}
-                          className="flex-1 bg-[#F05A00] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#D94F00] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(240,90,0,0.3)]"
-                        >
-                          <ScanLine size={16} /> Scan Guest QR
-                        </button>
+                        <div className="flex gap-2 w-full">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); router.push(`/messages?uid=${otherPersonId}`); }}
+                            className="w-11 h-[46px] bg-orange-50 text-[#F05A00] border border-orange-200 hover:bg-orange-100 rounded-xl flex items-center justify-center active:scale-[0.98] transition-all cursor-pointer"
+                            title="Chat with Guest"
+                          >
+                            <MessageCircle size={16} />
+                          </button>
+
+                          {/* Direct 1-on-1 In-App Privacy Voice Call */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startCall({
+                                targetUserId: otherPersonId,
+                                targetName: otherPerson,
+                                targetPhoto: otherPersonPhoto,
+                                bookingId: booking.id,
+                                location: booking.location,
+                              });
+                            }}
+                            className="w-11 h-[46px] bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 rounded-xl flex items-center justify-center active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+                            title="Call Guest (100% Private)"
+                          >
+                            <Phone size={16} />
+                          </button>
+
+                          <button 
+                            onClick={(e) => { 
+                              e.stopPropagation();
+                              setSelectedBooking(booking); 
+                              setShowScanModal(true); 
+                              setScanStatus("idle");
+                              setIsScanning(true);
+                              setManualCode("");
+                            }}
+                            className="flex-1 bg-[#F05A00] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#D94F00] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(240,90,0,0.3)] cursor-pointer"
+                          >
+                            <ScanLine size={16} /> Scan Guest QR / Code
+                          </button>
+                        </div>
                       )}
                     </>
                   )}
@@ -534,16 +642,16 @@ export default function BookingsPage() {
             
             <div className="p-8 flex flex-col items-center text-center">
               <p className="text-xs font-bold text-zinc-500 mb-6 max-w-[200px]">
-                Show this QR code to <strong className="text-zinc-900">{selectedBooking.hostName}</strong> when you meet.
+                Show this QR code to <strong className="text-zinc-900">{selectedBooking.hostName || selectedBooking.host_name || 'Host'}</strong> when you meet.
               </p>
               
-              <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_rgba(140,53,115,0.15)] border-2 border-[#f5ebf4]">
-                <QRCode value={selectedBooking.meetingCode} size={180} fgColor="#000" />
+              <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_rgba(240,90,0,0.12)] border-2 border-orange-100">
+                <QRCode value={selectedBooking.meetingCode || selectedBooking.meeting_code || '123456'} size={180} fgColor="#000" />
               </div>
               
               <div className="mt-8 bg-zinc-50 px-4 py-2 rounded-xl border border-dashed border-zinc-300 w-full">
-                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-1">Manual Code</p>
-                <p className="text-xl font-black tracking-[0.3em] text-zinc-900">{selectedBooking.meetingCode}</p>
+                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-1">Manual 6-Digit Code</p>
+                <p className="text-xl font-black tracking-[0.3em] text-zinc-900">{selectedBooking.meetingCode || selectedBooking.meeting_code || '------'}</p>
               </div>
             </div>
           </div>

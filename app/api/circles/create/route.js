@@ -14,16 +14,18 @@ export async function POST(request) {
     userUid = user.uid;
 
     const body = await request.json();
-    const { name, category, platform, price, description, link, image } = body;
+    const { name, category, platform, price, description, link, image, initial_members_count } = body;
 
     if (!name || !name.trim()) {
       return NextResponse.json({ error: 'Community name is required' }, { status: 400 });
     }
-    if (!link || !link.trim()) {
-      return NextResponse.json({ error: 'Valid channel link is required' }, { status: 400 });
+    const cleanLink = (link || '').trim();
+    if (!cleanLink || (!cleanLink.startsWith('http://') && !cleanLink.startsWith('https://'))) {
+      return NextResponse.json({ error: 'A valid group or channel link (WhatsApp/Telegram URL) is required.' }, { status: 400 });
     }
 
     const priceNum = Math.max(0, parseInt(price, 10) || 0);
+    const initialCount = Math.max(1, parseInt(initial_members_count, 10) || 1);
     const isAdmin = user.role === 'admin';
     const creationFee = isAdmin ? 0 : 100;
 
@@ -71,12 +73,13 @@ export async function POST(request) {
       is_paid: priceNum > 0,
       description: (description || '').trim(),
       image: image || 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&q=80',
-      invite_link: link.trim(),
+      invite_link: cleanLink,
       creator_id: user.uid,
       host_name: user.full_name || user.email || 'Campus Host',
       host_photo: user.photo_url || '',
-      status: 'pending_approval',
-      member_count: 1,
+      status: isAdmin ? 'active' : 'pending_approval',
+      member_count: initialCount,
+      members_count: initialCount,
       total_sparks_earned: 0,
       created_at: now,
       updated_at: now,

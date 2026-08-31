@@ -25,9 +25,29 @@ self.addEventListener('push', (event) => {
     data = { title: 'Meova Notification', body: event.data ? event.data.text() : '' };
   }
 
-  const title = data.title || 'Meova';
-  const body = data.body || '';
-  const link = data.url || data.link || '/bookings';
+  const isCall = data.type === 'incoming_call' || data.isCall || data.tag?.startsWith('incoming-call');
+  const title = data.title || (isCall ? 'Incoming Campus Voice Call' : 'Meova');
+  const body = data.body || (isCall ? 'Peer is calling you for your campus meetup...' : '');
+  const link = data.url || data.link || (isCall ? '/bookings' : '/');
+
+  if (isCall) {
+    const callOptions = {
+      body,
+      icon: data.callerPhoto || '/icon-512.png',
+      badge: '/icon-512.png',
+      tag: `incoming-call-${data.bookingId || 'call'}`,
+      renotify: true,
+      requireInteraction: true,
+      vibrate: [500, 250, 500, 250, 500, 250, 500, 250, 500],
+      data: { url: link, isCall: true, bookingId: data.bookingId },
+      actions: [
+        { action: 'accept', title: 'Accept Call' },
+        { action: 'decline', title: 'Decline' },
+      ],
+    };
+    event.waitUntil(self.registration.showNotification(title, callOptions));
+    return;
+  }
 
   const options = {
     body,
@@ -51,9 +71,9 @@ self.addEventListener('push', (event) => {
 // ── Notification click handler ────────────────────────────────────────────────
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  if (event.action === 'dismiss') return;
+  if (event.action === 'decline' || event.action === 'dismiss') return;
 
-  const url = event.notification.data?.url || '/';
+  const url = event.notification.data?.url || '/bookings';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       // If app is already open, focus it and navigate

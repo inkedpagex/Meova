@@ -111,23 +111,14 @@ function EventCard({ event, userId }) {
           </span>
         </div>
 
-        {/* Premium CTA — no chunky blue button */}
+        {/* Clean Event Tag CTA */}
         <div className="mt-auto">
-          {isRsvp ? (
-            <div
-              className="w-full py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-center border"
-              style={{ background: `${theme.from}10`, color: theme.from, borderColor: `${theme.from}30` }}
-            >
-              ✓ Going
-            </div>
-          ) : (
-            <div
-              className="w-full py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-center text-white transition-all group-hover:opacity-90 active:scale-95"
-              style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}
-            >
-              RSVP Now
-            </div>
-          )}
+          <div
+            className="w-full py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-center text-white transition-all group-hover:opacity-90 active:scale-95"
+            style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}
+          >
+            Explore Event
+          </div>
         </div>
       </div>
     </div>

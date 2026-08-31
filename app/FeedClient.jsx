@@ -14,7 +14,7 @@ import {
   ShieldAlert, Clock, AlertTriangle, ShieldCheck, Compass, Users,
   Coffee, Briefcase, Camera, Activity, Music, Bell, ChevronRight,
   SlidersHorizontal, Trophy, Gamepad, TrendingUp, HelpCircle, Film, Plus,
-  MoreHorizontal, Bookmark
+  MoreHorizontal
 } from 'lucide-react';
 import useSWR from 'swr';
 import imageCompression from 'browser-image-compression';
@@ -1215,15 +1215,6 @@ export default function FeedClient() {
                       <span>Share</span>
                     </button>
                   </div>
-
-                  {/* Bookmark Button */}
-                  <button 
-                    onClick={() => toast.success('Saved to bookmarks!')}
-                    className="text-zinc-400 hover:text-[#F05A00] p-2 rounded-full hover:bg-orange-50 transition-colors cursor-pointer"
-                    title="Save"
-                  >
-                    <Bookmark size={17} />
-                  </button>
                 </div>
               </div>
             );

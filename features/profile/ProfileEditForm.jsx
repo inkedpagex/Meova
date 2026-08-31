@@ -1,9 +1,6 @@
-// Client Component for editing user profile
-'use client';
-
 import React, { useState } from 'react';
 import { updateProfileAdmin } from './profile.actions';
-import { User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine, CheckCircle2, AlertCircle, Camera, Zap } from 'lucide-react';
+import { User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine, CheckCircle2, AlertCircle, Camera, Zap, Globe, Linkedin, Github } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
 
@@ -37,9 +34,11 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   const [year, setYear] = useState(initialProfile?.year || '1st');
   const [branch, setBranch] = useState(initialProfile?.branch || '');
   const [instagram, setInstagram] = useState(initialProfile?.instagram || '');
+  const [linkedin, setLinkedin] = useState(initialProfile?.linkedin || '');
+  const [github, setGithub] = useState(initialProfile?.github || '');
   const [photoUrl, setPhotoUrl] = useState(initialProfile?.photo_url || '');
   const [bio, setBio] = useState(initialProfile?.bio || '');
-  const [rate, setRate] = useState(initialProfile?.rate || '100');
+  const [rate, setRate] = useState(initialProfile?.rate !== undefined ? String(Math.min(initialProfile.rate, 500)) : '100');
   const [selectedInterests, setSelectedInterests] = useState(initialProfile?.interests || []);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoUploadStage, setPhotoUploadStage] = useState('');
@@ -141,11 +140,15 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
     if (!fullName || !branch) return setErrorMsg('Name and course/branch are required.');
     
     const rateNum = parseInt(rate, 10);
-    if (isNaN(rateNum) || rateNum < 50 || rateNum > 1000) {
-      return setErrorMsg('Meeting rate must be between 50 and 1000 Sparks.');
+    if (isNaN(rateNum) || rateNum < 10 || rateNum > 500) {
+      return setErrorMsg('Meeting rate must be between 10 and 500 Sparks.');
     }
 
     if (selectedInterests.length !== 3) return setErrorMsg('Please select exactly 3 interests.');
+
+    const cleanInstagram = instagram.trim().replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/\/$/, '');
+    const cleanLinkedin = linkedin.trim().replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '').replace(/\/$/, '');
+    const cleanGithub = github.trim().replace(/^@/, '').replace(/^https?:\/\/(www\.)?github\.com\//, '').replace(/\/$/, '');
 
     setLoading(true);
     try {
@@ -155,9 +158,11 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         branch,
         bio,
         interests: selectedInterests,
-        instagram: instagram,
+        instagram: cleanInstagram,
+        linkedin: cleanLinkedin,
+        github: cleanGithub,
         photo_url: photoUrl,
-        rate: parseInt(rate, 10) || 100
+        rate: rateNum
       });
       
       if (!res.success) {
@@ -174,9 +179,11 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
           branch,
           bio,
           interests: selectedInterests,
-          instagram: instagram,
+          instagram: cleanInstagram,
+          linkedin: cleanLinkedin,
+          github: cleanGithub,
           photo_url: photoUrl,
-          rate: parseInt(rate, 10) || 100
+          rate: rateNum
         });
       }
       
@@ -190,52 +197,49 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
     }
   };
 
-  // Premium UI Classes
   const inputClass = "w-full rounded-2xl py-4 pl-12 pr-5 text-[13px] font-black text-zinc-900 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] transition-all duration-300 placeholder:text-zinc-400/80 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/15 hover:border-[#cbd5e1]";
   const labelClass = "block text-[11px] font-black text-zinc-700 uppercase tracking-[0.15em] mb-2.5 flex items-center gap-2 ml-1";
   const iconWrapperClass = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none";
 
   return (
-    <form noValidate onSubmit={handleSave} className="space-y-10 relative">
-      
-      {/* Toast Notifications */}
-      <div className="absolute -top-16 left-0 right-0 z-50 flex justify-center pointer-events-none">
-        {errorMsg && (
-          <div className="anim-fade-up flex items-center gap-2 px-4 py-3 rounded-2xl shadow-popup" style={{ background: '#2a1215', border: '1px solid #ff4444', color: '#ff4444' }}>
-            <AlertCircle size={16} />
-            <span className="text-xs font-bold">{errorMsg}</span>
-          </div>
-        )}
-        {successMsg && (
-          <div className="anim-fade-up flex items-center gap-2 px-4 py-3 rounded-2xl shadow-popup" style={{ background: '#12251a', border: '1px solid #22c55e', color: '#22c55e' }}>
-            <CheckCircle2 size={16} />
-            <span className="text-xs font-bold">{successMsg}</span>
-          </div>
-        )}
-      </div>
+    <form onSubmit={handleSave} className="space-y-6">
+      {/* Notifications */}
+      {errorMsg && (
+        <div className="flex items-center gap-2 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold animate-in fade-in">
+          <AlertCircle size={16} className="shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      {successMsg && (
+        <div className="flex items-center gap-2 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-bold animate-in fade-in">
+          <CheckCircle2 size={16} className="shrink-0" />
+          <span>{successMsg}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Full Name */}
         <div>
           <label className={labelClass}>Full Name</label>
           <div className="relative group">
-            <span className={iconWrapperClass}><User size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
+            <span className={iconWrapperClass}><User size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
             <input 
               type="text" 
               value={fullName} 
               onChange={(e) => setFullName(e.target.value)} 
-              placeholder="e.g. Alex Johnson" 
+              placeholder="e.g. Chirag Sharma" 
               className={inputClass} 
               required 
             />
           </div>
         </div>
 
-        {/* Branch / Course */}
+        {/* Branch / Major */}
         <div>
-          <label className={labelClass}>Branch / Course</label>
+          <label className={labelClass}>Course / Branch</label>
           <div className="relative group">
-            <span className={iconWrapperClass}><BookOpen size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
+            <span className={iconWrapperClass}><BookOpen size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
             <input 
               type="text" 
               value={branch} 
@@ -253,7 +257,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         <div>
           <label className={labelClass}>Year of Study</label>
           <div className="relative group" ref={yearDropdownRef}>
-            <span className={iconWrapperClass}><GraduationCap size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
+            <span className={iconWrapperClass}><GraduationCap size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
             <button 
               type="button"
               onClick={() => setShowYearDropdown(!showYearDropdown)}
@@ -271,7 +275,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                     type="button"
                     onClick={() => { setYear(y); setShowYearDropdown(false); }}
                     className={`w-full text-left px-4 py-3 text-sm font-bold transition-all rounded-xl cursor-pointer ${
-                      year === y ? 'bg-[#fcf6fa] text-[#D94F00]' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                      year === y ? 'bg-orange-50 text-[#F05A00]' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                     }`}
                   >
                     {y} Year
@@ -298,30 +302,69 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         </div>
       </div>
 
+      {/* Social Links & Rate */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Instagram Handle */}
         <div>
-          <label className={labelClass}>Instagram Username / Link <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
+          <label className={labelClass}>Instagram Handle / Username <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
           <div className="relative group">
-            <span className={iconWrapperClass}><Camera size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
+            <span className={iconWrapperClass}><Camera size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
             <input 
               type="text" 
               value={instagram} 
               onChange={(e) => setInstagram(e.target.value)} 
-              placeholder="e.g. chir_ag897" 
+              placeholder="e.g. chirag_gla" 
               className={inputClass} 
             />
           </div>
           <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
-            Used to show your Instagram profile embed on your public profile page.
+            Display your Instagram link &amp; embed on your public profile.
           </p>
         </div>
 
-        {/* Meeting Rate */}
+        {/* LinkedIn Profile */}
         <div>
-          <label className={labelClass}>Meeting Rate (Sparks)</label>
+          <label className={labelClass}>LinkedIn Username / ID <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
           <div className="relative group">
-            <span className={iconWrapperClass}><Zap size={16} className="text-zinc-400 group-focus-within:text-[#9e4685] transition-colors" /></span>
+            <span className={iconWrapperClass}><Linkedin size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
+            <input 
+              type="text" 
+              value={linkedin} 
+              onChange={(e) => setLinkedin(e.target.value)} 
+              placeholder="e.g. in/chirag-sharma or username" 
+              className={inputClass} 
+            />
+          </div>
+          <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
+            Connect professionally with campus alumni and peers.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* GitHub / Portfolio */}
+        <div>
+          <label className={labelClass}>GitHub / Portfolio <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
+          <div className="relative group">
+            <span className={iconWrapperClass}><Github size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
+            <input 
+              type="text" 
+              value={github} 
+              onChange={(e) => setGithub(e.target.value)} 
+              placeholder="e.g. chirag-dev" 
+              className={inputClass} 
+            />
+          </div>
+          <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
+            Showcase your code repos and tech projects.
+          </p>
+        </div>
+
+        {/* Meeting Rate (Max 500 Sparks) */}
+        <div>
+          <label className={labelClass}>Meetup Rate (Sparks / Hour)</label>
+          <div className="relative group">
+            <span className={iconWrapperClass}><Zap size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
             <input 
               type="text" 
               inputMode="numeric"
@@ -337,7 +380,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             />
           </div>
           <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
-            Set between 50 and 1000 Sparks. This is what users pay to book a coffee session with you.
+            Set between 10 and 500 Sparks. This is what students spend to book a 1-on-1 session with you.
           </p>
         </div>
       </div>

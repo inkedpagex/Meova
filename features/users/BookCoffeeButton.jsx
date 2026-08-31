@@ -6,9 +6,8 @@ import { Zap, Layers, X, CheckCircle, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-const COFFEE_COST = 50;
-
-export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto, isLoggedIn, accentColor, renderButton }) {
+export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto, isLoggedIn, accentColor, rate = 50, renderButton }) {
+  const COFFEE_COST = Math.min(Math.max(parseInt(rate, 10) || 50, 10), 500);
   const color = (accentColor && accentColor !== '#ffffff') ? accentColor : '#F05A00';
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,6 +15,8 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
   const [wallet, setWallet] = useState(null);
   const [loadingWallet, setLoadingWallet] = useState(false);
   const [error, setError] = useState('');
+  const [selectedDate, setSelectedDate] = useState('Tomorrow'); // 'Today' | 'Tomorrow' | 'Day After' | 'YYYY-MM-DD'
+  const [customDate, setCustomDate] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('GD Subway');
   const [selectedTime, setSelectedTime] = useState('Noon (11 AM - 2 PM)');
   const [agenda, setAgenda] = useState('');
@@ -59,6 +60,20 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
   async function handleConfirm() {
     setLoading(true);
     setError('');
+
+    let finalDateStr = '';
+    if (selectedDate === 'Today') {
+      finalDateStr = new Date().toISOString().split('T')[0];
+    } else if (selectedDate === 'Tomorrow') {
+      finalDateStr = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    } else if (selectedDate === 'Day After') {
+      finalDateStr = new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0];
+    } else if (customDate) {
+      finalDateStr = customDate;
+    } else {
+      finalDateStr = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    }
+
     try {
       const res = await fetch('/api/bookings', {
         method: 'POST',
@@ -73,7 +88,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
           hostId: targetUserId,
           hostName: targetName,
           hostPhoto: targetPhoto || '',
-          date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
+          date: finalDateStr,
           time: selectedTime,
           agenda: agenda.trim()
         })
@@ -198,8 +213,44 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                     </div>
                   </div>
 
+                  {/* Date Selector */}
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider block">Preferred Time (Tomorrow)</label>
+                    <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider block">Meeting Day</label>
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+                      {[
+                        { label: "Today", value: "Today" },
+                        { label: "Tomorrow", value: "Tomorrow" },
+                        { label: "Day After", value: "Day After" },
+                        { label: "Pick Date", value: "Custom" }
+                      ].map((d) => (
+                        <button
+                          key={d.value}
+                          type="button"
+                          onClick={() => setSelectedDate(d.value)}
+                          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border transition-all cursor-pointer ${
+                            selectedDate === d.value
+                              ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-sm'
+                              : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-300'
+                          }`}
+                        >
+                          {d.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {selectedDate === 'Custom' && (
+                      <input
+                        type="date"
+                        min={new Date().toISOString().split('T')[0]}
+                        value={customDate}
+                        onChange={e => setCustomDate(e.target.value)}
+                        className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-[#F05A00]"
+                      />
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider block">Preferred Time Slot</label>
                     <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
                       {[
                         { label: "Morning (8-11)", value: "Morning (8 AM - 11 AM)" },
@@ -209,8 +260,9 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                       ].map((time) => (
                         <button
                           key={time.value}
+                          type="button"
                           onClick={() => setSelectedTime(time.value)}
-                          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border transition-all ${
+                          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border transition-all cursor-pointer ${
                             selectedTime === time.value
                               ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-sm'
                               : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-300'

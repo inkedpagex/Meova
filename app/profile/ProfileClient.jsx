@@ -4,13 +4,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert, ShieldCheck,
-  Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink, Phone, CheckCircle2, Loader2, Download
+  Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink, Phone, CheckCircle2, Loader2, Download,
+  Trash2, Heart, Plus, Linkedin, Github
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import ProfileEditForm from '../../features/profile/ProfileEditForm';
 import LogoutButton from '../../features/auth/LogoutButton';
 import { getUserAvatarUrl } from '../../utils/avatar';
 import { updateProfileAdmin } from '../../features/profile/profile.actions';
+import { toast } from '../../lib/toast';
 
 const InstagramIcon = ({ size = 14 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -44,9 +46,11 @@ function EmptyState({ icon: Icon, title, subtitle, action, onAction }) {
   );
 }
 
-export default function ProfileClient({ initialProfile, initialSparks = 0, initialGigs = [] }) {
+export default function ProfileClient({ initialProfile, initialSparks = 0, initialGigs = [], initialPosts = [] }) {
   const router = useRouter();
   const [profile, setProfile] = useState(initialProfile);
+  const [posts, setPosts] = useState(initialPosts);
+  const [deletingPostId, setDeletingPostId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
@@ -54,6 +58,25 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
   const [copied, setCopied] = useState(false);
 
   const [sparksBalance, setSparksBalance] = useState(initialSparks);
+
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm('Delete this moment? This cannot be undone.')) return;
+    setDeletingPostId(postId);
+    try {
+      const res = await fetch(`/api/posts?id=${postId}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error || 'Failed to delete moment');
+        return;
+      }
+      setPosts(prev => prev.filter(p => p.id !== postId));
+      toast.success('Moment deleted successfully.');
+    } catch {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setDeletingPostId(null);
+    }
+  };
 
   // App Permissions State
   const [locStatus, setLocStatus] = useState('prompt');
@@ -335,13 +358,31 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
               {profile?.bio || 'No bio yet — tap Edit Profile to add one.'}
             </p>
 
-            {/* Instagram */}
-            {profile?.instagram && (
-              <a href={`https://instagram.com/${profile.instagram}`} target="_blank" rel="noreferrer"
-                className="relative z-10 mt-4 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-50 text-[11px] font-black text-orange-500 hover:bg-orange-100 transition-colors">
-                <InstagramIcon size={14} />
-                <span>@{profile.instagram}</span>
-              </a>
+            {/* Social Links Row */}
+            {(profile?.instagram || profile?.linkedin || profile?.github) && (
+              <div className="relative z-10 mt-4 flex flex-wrap items-center justify-center gap-2">
+                {profile?.instagram && (
+                  <a href={`https://instagram.com/${profile.instagram.replace(/^@/, '')}`} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 text-[11px] font-black text-[#F05A00] hover:bg-orange-100 transition-colors border border-orange-100">
+                    <InstagramIcon size={13} />
+                    <span>@{profile.instagram.replace(/^@/, '')}</span>
+                  </a>
+                )}
+                {profile?.linkedin && (
+                  <a href={profile.linkedin.startsWith('http') ? profile.linkedin : `https://linkedin.com/in/${profile.linkedin}`} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-[11px] font-black text-blue-600 hover:bg-blue-100 transition-colors border border-blue-100">
+                    <Linkedin size={13} />
+                    <span>LinkedIn</span>
+                  </a>
+                )}
+                {profile?.github && (
+                  <a href={profile.github.startsWith('http') ? profile.github : `https://github.com/${profile.github.replace(/^@/, '')}`} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-100 text-[11px] font-black text-zinc-800 hover:bg-zinc-200 transition-colors border border-zinc-200">
+                    <Github size={13} />
+                    <span>GitHub</span>
+                  </a>
+                )}
+              </div>
             )}
 
             {/* Action buttons */}
@@ -483,6 +524,93 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                 subtitle="Time to host your first campus gig or accept one to earn sparks."
                 action="Explore Gigs"
                 onAction={() => router.push('/gigs')}
+              />
+            )}
+          </div>
+
+          {/* ── My Moments & Campus Posts ──────────────── */}
+          <div className="rounded-[24px] p-5 bg-white border border-zinc-100 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 flex items-center gap-2">
+                <Camera size={14} className="text-[#F05A00]" /> My Moments ({posts.length})
+              </span>
+              <button 
+                onClick={() => router.push('/?action=create-post')} 
+                className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-[#F05A00] hover:bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100 transition-colors cursor-pointer"
+              >
+                <Plus size={12} strokeWidth={3} />
+                <span>New Moment</span>
+              </button>
+            </div>
+
+            {posts.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {posts.map((post) => {
+                  const hasImage = post.media_urls && post.media_urls.length > 0;
+                  const firstImg = hasImage ? post.media_urls[0] : null;
+
+                  return (
+                    <div 
+                      key={post.id}
+                      className="group relative rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-50 flex flex-col justify-between aspect-square transition-all duration-200 hover:shadow-md hover:border-orange-200"
+                    >
+                      {hasImage ? (
+                        <>
+                          <img 
+                            src={firstImg} 
+                            alt="Campus Moment" 
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+                        </>
+                      ) : (
+                        <div className="p-3.5 flex-1 flex flex-col justify-center">
+                          <p className="text-xs font-semibold text-zinc-800 line-clamp-4 leading-relaxed">
+                            {post.content}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Top Action / Delete */}
+                      <div className="relative z-10 p-2 flex justify-end">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeletePost(post.id);
+                          }}
+                          disabled={deletingPostId === post.id}
+                          className="w-7 h-7 rounded-full bg-white/90 backdrop-blur-md text-zinc-600 hover:text-rose-600 hover:bg-white shadow-sm flex items-center justify-center transition-all cursor-pointer active:scale-90"
+                          title="Delete Moment"
+                        >
+                          {deletingPostId === post.id ? (
+                            <Loader2 size={12} className="animate-spin text-rose-500" />
+                          ) : (
+                            <Trash2 size={12} />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Bottom Info Bar */}
+                      <div className="relative z-10 p-2.5 flex items-center justify-between text-[10px] font-bold text-white">
+                        <span className="flex items-center gap-1 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full">
+                          <Heart size={10} className="fill-rose-500 text-rose-500" />
+                          <span>{post.likes_count || 0}</span>
+                        </span>
+                        <span className="text-[9px] opacity-80 font-medium">
+                          {post.created_at ? new Date(post.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyState
+                icon={Camera}
+                title="No Moments Shared Yet"
+                subtitle="Share coffee meets, campus vibes, or food photos on the live feed."
+                action="Share a Moment"
+                onAction={() => router.push('/?action=create-post')}
               />
             )}
           </div>

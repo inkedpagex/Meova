@@ -101,11 +101,33 @@ export async function PATCH(request, { params }) {
     if (action === 'accept') {
       const meetingCode = String(Math.floor(100000 + Math.random() * 900000));
 
+      // Fetch other pending applicants to notify them
+      const { data: otherApps } = await supabaseAdmin
+        .from('gig_applications')
+        .select('applicant_id')
+        .eq('gig_id', id)
+        .eq('status', 'pending')
+        .neq('applicant_id', applicantId);
+
+      const rejectPromises = (otherApps || []).map(a => [
+        supabaseAdmin.from('gig_applications').update({ status: 'REJECTED', rejected_at: now }).eq('gig_id', id).eq('applicant_id', a.applicant_id),
+        supabaseAdmin.from('notifications').insert({
+          user_id: a.applicant_id,
+          sender_id: user.uid,
+          title: 'Gig Filled',
+          message: `The gig "${gig.title}" has been assigned to another student.`,
+          type: 'gig_rejected',
+          read: false,
+          created_at: now,
+        })
+      ]).flat();
+
       // Auto-open DM thread between host and freelancer
       const sortedIds = [user.uid, applicantId].sort();
       const chatId = `${sortedIds[0]}_${sortedIds[1]}`;
 
       await Promise.all([
+        ...rejectPromises,
         // Update application status
         supabaseAdmin
           .from('gig_applications')

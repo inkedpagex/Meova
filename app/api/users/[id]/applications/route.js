@@ -34,7 +34,9 @@ export async function GET(request, { params }) {
           id,
           title,
           budget,
-          status
+          status,
+          author_id,
+          host_id
         )
       `)
       .eq('applicant_id', id)
@@ -50,6 +52,7 @@ export async function GET(request, { params }) {
       gigId: app.gig_id,
       gigTitle: app.gigs?.title || 'Gig',
       gigBudget: app.gigs?.budget || '0',
+      gigAuthorId: app.gigs?.author_id || app.gigs?.host_id,
       pitch: app.pitch,
       status: app.status,
       appliedAt: app.created_at,

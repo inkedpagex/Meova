@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search, SlidersHorizontal, Check, Zap, Users, Rocket,
-  Gamepad2, Music2, Code2, Palette, Trophy, Star, MessageSquare, Share2
+  Gamepad2, Music2, Code2, Palette, Trophy, Star, MessageSquare, Share2, LogOut
 } from 'lucide-react';
 import { getCartoonAvatar } from '../../utils/avatar';
 import { toast } from 'react-hot-toast';
@@ -107,7 +107,7 @@ const MOCK_COMMUNITIES = [
   },
 ];
 
-const FILTERS = ['All', 'My Channels', 'Tech', 'Gaming', 'Music', 'Design', 'Startup', 'Creators'];
+const FILTERS = ['All', 'Joined', 'My Channels', 'Tech', 'Gaming', 'Music', 'Design', 'Startup', 'Creators'];
 
 export default function CirclesList({ circles = [], joinedCircleIds = new Set(), userId = null }) {
   const router = useRouter();
@@ -161,14 +161,14 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
     id: c.id, 
     name: c.name, 
     category: c.category || 'General',
-    member_count: c.member_count || 0, 
+    member_count: c.member_count || c.members_count || 1, 
     desc: c.desc || c.description || '',
-    isPaid: c.isPaid || false, 
+    isPaid: c.isPaid || c.is_paid || false, 
     price: c.price || 0,
-    host_id: c.host_id,
+    host_id: c.creator_id || c.host_id,
     host_name: c.host_name,
     host_photo: c.host_photo,
-    whatsapp_link: c.whatsapp_link || 'https://chat.whatsapp.com/',
+    whatsapp_link: c.invite_link || c.whatsapp_link || 'https://chat.whatsapp.com/',
   }));
   const allCircles = [...MOCK_COMMUNITIES];
   dbMapped.forEach(c => { if (!allCircles.some(a => a.id === c.id)) allCircles.push(c); });
@@ -180,7 +180,9 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
     const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.category.toLowerCase().includes(search.toLowerCase());
     
     let matchFilter = true;
-    if (activeFilter === 'My Channels') {
+    if (activeFilter === 'Joined') {
+      matchFilter = Boolean(joinedMap[c.id] || c.host_id === userId);
+    } else if (activeFilter === 'My Channels') {
       matchFilter = c.host_id === userId;
     } else if (activeFilter !== 'All') {
       matchFilter = c.category === activeFilter;
@@ -204,6 +206,26 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
     if (!rulesCircle) return;
     executeSecureJoin(rulesCircle);
     setRulesCircle(null);
+  };
+
+  const handleLeaveCircle = async (circle, e) => {
+    e?.stopPropagation();
+    if (!window.confirm(`Leave the ${circle.name} community?`)) return;
+    try {
+      const res = await fetch(`/api/circles/${circle.id}/leave`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(`Left ${circle.name}`);
+        const next = { ...joinedMap };
+        delete next[circle.id];
+        setJoinedMap(next);
+        if (typeof window !== 'undefined') localStorage.setItem('Meova_joined_circles', JSON.stringify(next));
+      } else {
+        toast.error(data.error || 'Failed to leave community');
+      }
+    } catch {
+      toast.error('Network error');
+    }
   };
 
   const executeSecureJoin = async (circle) => {
@@ -233,10 +255,11 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
         setJoinedMap(next);
         if (typeof window !== 'undefined') localStorage.setItem('Meova_joined_circles', JSON.stringify(next));
 
-        if (data.invite_link) {
-          window.open(data.invite_link, '_blank');
+        const targetUrl = data.invite_link || circle.whatsapp_link;
+        if (targetUrl && (targetUrl.startsWith('http://') || targetUrl.startsWith('https://'))) {
+          window.open(targetUrl, '_blank');
         } else {
-          router.push(`/messages?user=${encodeURIComponent(circle.name)}`);
+          toast.success(`You are a verified member of ${circle.name}!`);
         }
       } else {
         toast.error(data.error || 'Failed to join community');
@@ -453,14 +476,22 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                   <Share2 size={15} />
                 </button>
 
-                {isHost && (
+                {isHost ? (
                   <button
                     onClick={(e) => { e.stopPropagation(); setManageCircle(circle); }}
                     className="px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-orange-50 text-[#F05A00] border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer"
                   >
                     Manage
                   </button>
-                )}
+                ) : isJoined ? (
+                  <button
+                    onClick={(e) => handleLeaveCircle(circle, e)}
+                    className="p-2 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                    title="Leave Community"
+                  >
+                    <LogOut size={14} />
+                  </button>
+                ) : null}
 
                 <button
                   onClick={(e) => { e.stopPropagation(); handleJoinClick(circle); }}
@@ -469,7 +500,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                   style={isJoined
                     ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
                     : { background: '#F05A00', color: 'white' }}>
-                  {joiningId === circle.id ? 'Joining...' : (isJoined ? 'JOINED' : (circle.isPaid ? `${circle.price} JOIN` : 'JOIN'))}
+                  {joiningId === circle.id ? 'Joining...' : (isJoined ? 'OPEN' : (circle.isPaid ? `${circle.price} JOIN` : 'JOIN'))}
                 </button>
               </div>
             </div>

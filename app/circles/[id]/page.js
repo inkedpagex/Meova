@@ -6,7 +6,6 @@ import {
   fetchCircleEventsAdmin,
 } from '../../../lib/supabaseQueries';
 import CircleJoinButton from '../../../features/circles/CircleJoinButton';
-import RsvpButton from '../../../features/events/RsvpButton';
 import { ArrowLeft, Users, Send, Calendar, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { formatEventDate } from '../../../utils/dateFormatter';
@@ -15,7 +14,7 @@ import { CircleAvatar } from '../../../components/CircleAvatar';
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const circle = await fetchCircleDetailAdmin(id).catch(() => null);
-  return { title: circle ? `${circle.name} — meetuply.in` : 'Circle — meetuply.in' };
+  return { title: circle ? `${circle.name} — Meova` : 'Community — Meova' };
 }
 
 export default async function CircleDetailPage({ params }) {
@@ -28,9 +27,26 @@ export default async function CircleDetailPage({ params }) {
     fetchCircleEventsAdmin(id),
   ]);
 
+  if (!circle) {
+    return (
+      <div className="w-full max-w-md mx-auto px-4 py-20 text-center">
+        <h2 className="text-xl font-black text-zinc-900 mb-2">Community Not Found</h2>
+        <p className="text-xs text-zinc-500 mb-6 font-medium">This campus circle does not exist or may have been removed.</p>
+        <Link
+          href="/circles"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#F05A00] text-white text-xs font-black shadow-md hover:bg-[#D94F00] transition-all"
+        >
+          <ArrowLeft size={14} /> Back to Communities
+        </Link>
+      </div>
+    );
+  }
+
   const isJoined = user
-    ? (circle.circle_members || []).some((m) => m.user_id === user.id)
+    ? ((circle.circle_members || []).some((m) => m.user_id === user.id) || (members || []).some((m) => m.user_id === user.id))
     : false;
+
+  const totalMembers = Math.max(circle.members_count || circle.member_count || 1, (members || []).length);
 
   const getInitials = (name) =>
     name ? name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) : '?';
@@ -91,7 +107,7 @@ export default async function CircleDetailPage({ params }) {
             <h2 className="text-lg font-black text-[var(--text-primary)] flex items-center gap-2">
               <Users size={18} className="text-[var(--text-secondary)]" /> Members
             </h2>
-            <span className="text-[10px] font-black text-white bg-[var(--accent)] px-3 py-1 rounded-full">{members.length}</span>
+            <span className="text-[10px] font-black text-white bg-[var(--accent)] px-3 py-1 rounded-full">{totalMembers}</span>
           </div>
           
           {members.length === 0 ? (
@@ -146,9 +162,8 @@ export default async function CircleDetailPage({ params }) {
                     </div>
                     <div className="flex items-center justify-between border-t border-[var(--border-subtle)] pt-4">
                       <span className="text-[9px] text-[var(--accent)] bg-[var(--accent-glow)] border border-[var(--accent-dim)] px-2.5 py-1 rounded-full font-black uppercase tracking-wider">
-                        {(event.rsvps_list || []).length} going
+                        Campus Event
                       </span>
-                      <RsvpButton eventId={event.id} userId={user?.id} isInitialRsvp={isRsvp} />
                     </div>
                   </div>
                 );
