@@ -8,7 +8,7 @@ import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 
 export default function RightPanel({ people = [], upcomingEvents = [] }) {
   const pathname = usePathname();
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/messages') || pathname === '/terms' || pathname === '/privacy') return null;
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/messages') || pathname === '/terms' || pathname === '/privacy' || pathname === '/offline') return null;
 
   const topPeople = people.slice(0, 3);
 
@@ -34,7 +34,16 @@ export default function RightPanel({ people = [], upcomingEvents = [] }) {
 
         <div className="space-y-2.5">
           {topPeople.length === 0 ? (
-            <p className="text-[11px] text-zinc-400 font-semibold italic whitespace-nowrap">No users found</p>
+            <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-100 text-center space-y-2">
+              <p className="text-xs font-bold text-zinc-500">No peers found yet</p>
+              <Link 
+                href="/discover" 
+                className="inline-flex items-center gap-1 text-[11px] font-black text-[#F05A00] hover:text-[#D94F00]"
+              >
+                <span>Find Classmates</span>
+                <span>→</span>
+              </Link>
+            </div>
           ) : (
             topPeople.map((person) => {
               const yr = (person.year || '1st').toString().replace(/\s*year\s*/i, '').trim();
@@ -43,10 +52,10 @@ export default function RightPanel({ people = [], upcomingEvents = [] }) {
                 <Link
                   key={person.id || person.uid}
                   href={`/users/${person.id || person.uid}`}
-                  className="flex items-center justify-between p-3 rounded-2xl border border-zinc-100 hover:border-orange-200 hover:bg-orange-50/30 transition-all cursor-pointer group"
+                  className="flex items-center justify-between p-2.5 rounded-2xl border border-zinc-100/90 hover:border-orange-200 hover:bg-orange-50/20 transition-all cursor-pointer group"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full overflow-hidden border border-orange-100 flex-shrink-0 relative group-hover:scale-105 transition-transform">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
+                    <div className="w-9 h-9 rounded-full overflow-hidden border border-orange-100 flex-shrink-0 relative group-hover:scale-105 transition-transform">
                       <img 
                         src={getUserAvatarUrl(person)} 
                         alt={person.full_name || 'User'} 
@@ -56,13 +65,13 @@ export default function RightPanel({ people = [], upcomingEvents = [] }) {
                         }}
                       />
                     </div>
-                    <div className="min-w-0">
-                      <h5 className="text-xs font-black text-zinc-900 truncate group-hover:text-[#F05A00] transition-colors">{person.full_name || 'Student'}</h5>
-                      <p className="text-[10px] font-bold text-zinc-400 truncate whitespace-nowrap">{yr} Yr · {br}</p>
+                    <div className="min-w-0 flex-1">
+                      <h5 className="text-[12px] font-black text-zinc-900 truncate group-hover:text-[#F05A00] transition-colors">{person.full_name || 'Student'}</h5>
+                      <p className="text-[10px] font-semibold text-zinc-400 truncate">{yr} Yr · {br}</p>
                     </div>
                   </div>
-                  <div className="text-[10px] font-black px-3 py-1.5 rounded-xl bg-[#F05A00] text-white hover:bg-[#D94F00] transition-all flex-shrink-0 flex items-center gap-1 whitespace-nowrap">
-                    Meet {person.spark_charge || 50} <Sparkles size={10} className="fill-current text-white/80" />
+                  <div className="text-[10px] font-black px-2.5 py-1.5 rounded-xl bg-orange-50 text-[#F05A00] border border-orange-100 group-hover:bg-[#F05A00] group-hover:text-white transition-all flex-shrink-0 flex items-center gap-1 whitespace-nowrap">
+                    Meet {person.spark_charge || 50} <Sparkles size={9} className="fill-current" />
                   </div>
                 </Link>
               );

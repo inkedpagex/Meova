@@ -1,14 +1,17 @@
-/**
- * POST /api/circles/create - Submit a new Host Community Request for Admin Approval
- */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { spendSparks, creditSparks } from '@/lib/wallet';
 
 export async function POST(request) {
+  let sparksDeducted = 0;
+  let userUid = null;
+  const circleId = crypto.randomUUID();
+
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    userUid = user.uid;
 
     const body = await request.json();
     const { name, category, platform, price, description, link, image } = body;
@@ -39,22 +42,24 @@ export async function POST(request) {
       }
     }
 
-    // Check wallet balance
-    const { data: walletData } = await supabaseAdmin
-      .from('wallets')
-      .select('purchased, bonus, creator')
-      .eq('user_id', user.uid)
-      .maybeSingle();
+    // 1. Deduct creation fee via atomic spendSparks RPC if applicable
+    if (creationFee > 0) {
+      const spendRes = await spendSparks(
+        user.uid,
+        creationFee,
+        `Community creation fee: ${name.trim()}`,
+        'circle_create_fee',
+        circleId
+      );
 
-    const currentSparks = walletData
-      ? (walletData.purchased || 0) + (walletData.bonus || 0) + (walletData.creator || 0)
-      : 0;
-
-    if (currentSparks < creationFee) {
-      return NextResponse.json({ error: 'Insufficient Sparks to create a community' }, { status: 400 });
+      if (!spendRes.success) {
+        return NextResponse.json({
+          error: spendRes.error || `You need ${creationFee} Sparks to request a community.`
+        }, { status: 402 });
+      }
+      sparksDeducted = creationFee;
     }
 
-    const circleId = crypto.randomUUID();
     const now = new Date().toISOString();
 
     const newCircleData = {
@@ -77,56 +82,31 @@ export async function POST(request) {
       updated_at: now,
     };
 
-    // Insert circle
+    // 2. Insert circle
     const { error: circleErr } = await supabaseAdmin.from('circles').insert(newCircleData);
-    if (circleErr) throw new Error(circleErr.message);
+    if (circleErr) {
+      console.error('[circles/create] insert error, rolling back:', circleErr.message);
+      // Auto-Rollback: Refund creation fee
+      if (sparksDeducted > 0) {
+        await creditSparks(
+          user.uid,
+          sparksDeducted,
+          'dispute_refund',
+          `Refund: Community creation failed (${name.trim()})`,
+          circleId
+        );
+      }
+      return NextResponse.json({ error: 'Failed to create community. Sparks refunded.' }, { status: 500 });
+    }
 
-    // Auto-add Host as the initial member
-    const { error: memberErr } = await supabaseAdmin.from('circle_members').insert({
+    // 3. Auto-add Host as the initial member
+    await supabaseAdmin.from('circle_members').insert({
       circle_id: circleId,
       user_id: user.uid,
       role: 'host',
       sparks_paid: 0,
       joined_at: now,
     });
-    if (memberErr) console.error('[circles/create] member insert error:', memberErr.message);
-
-    // Deduct Sparks if applicable
-    if (creationFee > 0 && walletData) {
-      let remainingToDeduct = creationFee;
-      let newPurchased = walletData.purchased || 0;
-      let newBonus = walletData.bonus || 0;
-      let newCreator = walletData.creator || 0;
-
-      if (newPurchased >= remainingToDeduct) {
-        newPurchased -= remainingToDeduct;
-        remainingToDeduct = 0;
-      } else {
-        remainingToDeduct -= newPurchased;
-        newPurchased = 0;
-        if (newBonus >= remainingToDeduct) {
-          newBonus -= remainingToDeduct;
-          remainingToDeduct = 0;
-        } else {
-          remainingToDeduct -= newBonus;
-          newBonus = 0;
-          newCreator -= remainingToDeduct;
-        }
-      }
-
-      await supabaseAdmin
-        .from('wallets')
-        .update({ purchased: newPurchased, bonus: newBonus, creator: newCreator, updated_at: now })
-        .eq('user_id', user.uid);
-
-      await supabaseAdmin.from('transactions').insert({
-        user_id: user.uid,
-        amount: -creationFee,
-        type: 'community_creation_fee',
-        description: `Paid ${creationFee} Sparks to request community: ${name.trim()}`,
-        created_at: now,
-      });
-    }
 
     return NextResponse.json({
       success: true,
@@ -135,6 +115,9 @@ export async function POST(request) {
     });
   } catch (err) {
     console.error('[POST /api/circles/create]', err.message);
+    if (sparksDeducted > 0 && userUid) {
+      await creditSparks(userUid, sparksDeducted, 'dispute_refund', 'Refund: Community creation failed', circleId).catch(() => {});
+    }
     return NextResponse.json({ error: 'Failed to submit community request' }, { status: 500 });
   }
 }

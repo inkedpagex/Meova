@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search, SlidersHorizontal, Check, Zap, Users, Rocket,
-  Gamepad2, Music2, Code2, Palette, Trophy, Star, MessageSquare
+  Gamepad2, Music2, Code2, Palette, Trophy, Star, MessageSquare, Share2
 } from 'lucide-react';
 import { getCartoonAvatar } from '../../utils/avatar';
 import { toast } from 'react-hot-toast';
@@ -19,7 +19,7 @@ const CATEGORY_ICONS = {
 const CATEGORY_COLORS = {
   Tech: { bg: '#eff6ff', color: '#3b82f6', border: '#bfdbfe' },
   Gaming: { bg: '#f0f9ff', color: '#0ea5e9', border: '#bae6fd' },
-  Music: { bg: '#fdf4ff', color: '#D94F00', border: '#e9d5ff' },
+  Music: { bg: '#fff4ed', color: '#F05A00', border: '#ffedd5' },
   Design: { bg: '#fff7ed', color: '#f97316', border: '#fed7aa' },
   Startup: { bg: '#fff3ec', color: '#F05A00', border: '#ffe0cc' },
   Sports: { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
@@ -111,6 +111,7 @@ const FILTERS = ['All', 'My Channels', 'Tech', 'Gaming', 'Music', 'Design', 'Sta
 
 export default function CirclesList({ circles = [], joinedCircleIds = new Set(), userId = null }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [joinedMap, setJoinedMap] = useState({});
@@ -121,6 +122,16 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [manageCircle, setManageCircle] = useState(null);
   const [joiningId, setJoiningId] = useState(null);
+
+  useEffect(() => {
+    const circleIdParam = searchParams?.get('id');
+    if (circleIdParam) {
+      const found = (circles || []).find(c => c.id === circleIdParam) || MOCK_COMMUNITIES.find(c => c.id === circleIdParam);
+      if (found) {
+        setRulesCircle(found);
+      }
+    }
+  }, [searchParams, circles]);
 
   useEffect(() => {
     let cancelled = false;
@@ -419,11 +430,33 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const circleUrl = `${window.location.origin}/circles?id=${circle.id}`;
+                    if (typeof window !== 'undefined' && navigator.share) {
+                      navigator.share({
+                        title: `${circle.name} on Meova`,
+                        text: circle.desc || `Join the ${circle.name} community on Meova!`,
+                        url: circleUrl
+                      }).catch(() => {});
+                    } else {
+                      navigator.clipboard.writeText(circleUrl);
+                      toast.success('Community link copied!');
+                    }
+                  }}
+                  className="p-2 rounded-xl text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
+                  title="Share Community"
+                >
+                  <Share2 size={15} />
+                </button>
+
                 {isHost && (
                   <button
                     onClick={(e) => { e.stopPropagation(); setManageCircle(circle); }}
-                    className="px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-[#fcf6fa] text-[#D94F00] border border-[#eac5e0] hover:bg-[#f5ebf4] transition-colors"
+                    className="px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-orange-50 text-[#F05A00] border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer"
                   >
                     Manage
                   </button>

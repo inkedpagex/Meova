@@ -10,9 +10,8 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
       .from('posts')
       .select('*')
-      .eq('is_hidden', false)
       .order('created_at', { ascending: false })
-      .limit(20);
+      .limit(30);
 
     if (error) {
       console.error('[GET /api/posts]', error.message);
@@ -43,17 +42,22 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Valid photo URL is required (under 1000 chars)' }, { status: 400 });
     }
 
+    let finalContent = (caption || '').trim();
+    const metaTags = [];
+    if (location && location.trim()) metaTags.push(`📍 ${location.trim()}`);
+    if (category && category.trim()) metaTags.push(`🏷️ ${category.trim()}`);
+    
+    if (metaTags.length > 0) {
+      finalContent = finalContent ? `${finalContent}\n\n${metaTags.join(' · ')}` : metaTags.join(' · ');
+    }
+
     const newPost = {
       user_id: user.uid,
       author_name: user.full_name || 'Campus Peer',
       author_photo: user.photo_url || null,
-      author_branch: user.branch || 'GLA Student',
       media_urls: [photoUrl],
-      content: (caption || '').slice(0, 1000),
-      location: (location || 'Campus').slice(0, 100),
-      category: (category || 'Food & Meets').slice(0, 50),
+      content: finalContent.slice(0, 1000),
       likes_count: 0,
-      is_hidden: false,
       created_at: new Date().toISOString(),
     };
 
@@ -64,14 +68,14 @@ export async function POST(request) {
       .single();
 
     if (error) {
-      console.error('[POST /api/posts]', error.message);
-      return NextResponse.json({ error: 'Failed to create post' }, { status: 500 });
+      console.error('[POST /api/posts insert error]:', error.message);
+      return NextResponse.json({ error: error.message || 'Failed to create post' }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true, post: data });
   } catch (err) {
     console.error('[POST /api/posts]', err.message);
-    return NextResponse.json({ error: 'Failed to create post' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Failed to create post' }, { status: 500 });
   }
 }
 

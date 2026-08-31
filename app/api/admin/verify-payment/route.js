@@ -53,14 +53,8 @@ export async function POST(request) {
         return NextResponse.json({ error: `Already ${reqData.status}` }, { status: 409 });
       }
 
-      // Mark payment request as approved
-      await supabaseAdmin
-        .from('payment_requests')
-        .update({ status: 'approved', reviewed_at: now, admin_id: admin.uid })
-        .eq('id', reqData.id);
-
-      // Credit sparks via creditSparks RPC
-      await creditSparks(
+      // 1. Credit sparks via atomic creditSparks RPC
+      const creditRes = await creditSparks(
         reqData.user_id,
         reqData.sparks,
         'purchased',
@@ -68,6 +62,16 @@ export async function POST(request) {
         `Purchased ${reqData.pack_name || ''} pack`,
         reqData.id
       );
+
+      if (creditRes && creditRes.success === false) {
+        return NextResponse.json({ error: creditRes.error || 'Failed to credit Sparks' }, { status: 500 });
+      }
+
+      // 2. Mark payment request as approved
+      await supabaseAdmin
+        .from('payment_requests')
+        .update({ status: 'approved', reviewed_at: now, admin_id: admin.uid })
+        .eq('id', reqData.id);
 
       // Notify user
       await supabaseAdmin.from('notifications').insert({

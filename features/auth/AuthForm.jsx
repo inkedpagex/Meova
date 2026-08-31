@@ -35,7 +35,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
       setError(null);
       const res = await logInWithGoogle(null, tokenResponse.access_token);
       if (res?.success) {
-        if (res.data?.isNewUser) {
+        if (res.data?.isNewUser || res.data?.user?.profile_complete === false) {
           window.location.href = '/onboarding';
         } else {
           window.location.href = nextPath;

@@ -32,14 +32,32 @@ export async function POST(request) {
 
   const { amount, method, upi_id, bank_details } = await request.json();
 
-  if (!amount || amount < 500) {
-    return NextResponse.json({ error: 'Minimum withdrawal is 500 Creator Sparks' }, { status: 400 });
+  if (!amount || amount < 500 || amount > 25000) {
+    return NextResponse.json({ error: 'Withdrawal amount must be between 500 and 25,000 Creator Sparks' }, { status: 400 });
   }
   if (!method || !['upi', 'bank'].includes(method)) {
     return NextResponse.json({ error: 'Method must be upi or bank' }, { status: 400 });
   }
-  if (method === 'upi' && !upi_id) {
-    return NextResponse.json({ error: 'UPI ID required' }, { status: 400 });
+
+  if (method === 'upi') {
+    const UPI_REGEX = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
+    if (!upi_id || !UPI_REGEX.test(upi_id.trim())) {
+      return NextResponse.json({ error: 'Please enter a valid UPI ID (e.g. username@okhdfcbank)' }, { status: 400 });
+    }
+  }
+
+  if (method === 'bank') {
+    if (!bank_details || !bank_details.account_number || !bank_details.ifsc) {
+      return NextResponse.json({ error: 'Bank account number and IFSC code are required' }, { status: 400 });
+    }
+    const cleanAccount = String(bank_details.account_number).trim();
+    if (!/^\d{9,18}$/.test(cleanAccount)) {
+      return NextResponse.json({ error: 'Bank account number must be 9 to 18 digits' }, { status: 400 });
+    }
+    const cleanIfsc = String(bank_details.ifsc).trim().toUpperCase();
+    if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(cleanIfsc)) {
+      return NextResponse.json({ error: 'Invalid IFSC code format (e.g. SBIN0001234)' }, { status: 400 });
+    }
   }
 
   try {

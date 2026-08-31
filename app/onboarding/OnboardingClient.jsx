@@ -31,6 +31,14 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
+  React.useEffect(() => {
+    setData(prev => ({
+      ...prev,
+      full_name: prev.full_name || initialName || '',
+      photo_url: prev.photo_url || initialPhoto || '',
+    }));
+  }, [initialName, initialPhoto]);
+
   const onChange = (field, value) => setData(prev => ({ ...prev, [field]: value }));
 
   const goNext = () => { setDir(1); setStep(s => s + 1); };
@@ -141,10 +149,10 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
           animation: 'ob-up 0.45s ease 0.2s both',
         }}>
           <p style={{ fontWeight: 900, fontSize: 22, color: '#fff', margin: 0, letterSpacing: '-0.3px' }}>
-            You&apos;re all set! 🎉
+            You&apos;re all set!
           </p>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)', marginTop: 6, margin: '6px 0 0' }}>
-            Opening Meetuply for you…
+            Opening Meova for you…
           </p>
         </div>
 

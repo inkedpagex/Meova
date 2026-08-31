@@ -39,14 +39,14 @@ function MeetingCountdownTimer({ booking }) {
       const diff = targetDate.getTime() - Date.now();
       if (diff <= 0 && diff > -3600000) {
         setIsLive(true);
-        setTimeLeft('🟢 Happening Now');
+        setTimeLeft('Happening Now');
       } else if (diff <= -3600000) {
         setTimeLeft('');
       } else {
         const hrs = Math.floor(diff / (1000 * 60 * 60));
         const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const secs = Math.floor((diff % (1000 * 60)) / 1000);
-        setTimeLeft(`⏳ Starts in ${hrs > 0 ? `${hrs}h ` : ''}${mins}m ${secs}s`);
+        setTimeLeft(`Starts in ${hrs > 0 ? `${hrs}h ` : ''}${mins}m ${secs}s`);
       }
     };
 
@@ -208,7 +208,7 @@ export default function BookingsPage() {
       });
       const d = await res.json();
       if (d.success) {
-        toast.success('Booking cancelled. Sparks refunded! ⚡');
+        toast.success('Booking cancelled. Sparks refunded.');
         mutate();
         setShowCancelModal(false);
         setBookingToCancel(null);

@@ -110,6 +110,28 @@ function FeedSkeleton() {
           ))}
         </div>
       </div>
+      <div className="space-y-4 pt-3 max-w-xl mx-auto">
+        <div className="flex items-center justify-between px-1">
+          <Skeleton variant="text" className="h-5 w-44" />
+          <Skeleton variant="rectangular" className="h-7 w-24 rounded-xl" />
+        </div>
+        {[1, 2].map(i => (
+          <div key={i} className="bg-white border border-zinc-100 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Skeleton variant="rectangular" className="w-10 h-10 rounded-xl" />
+                <div>
+                  <Skeleton variant="text" className="h-4 w-28 mb-1" />
+                  <Skeleton variant="text" className="h-3 w-36" />
+                </div>
+              </div>
+              <Skeleton variant="rectangular" className="h-7 w-16 rounded-xl" />
+            </div>
+            <Skeleton variant="rectangular" className="w-full aspect-[4/3] rounded-xl" />
+            <Skeleton variant="text" className="h-4 w-3/4" />
+          </div>
+        ))}
+      </div>
 
     </div>
   );
@@ -210,14 +232,112 @@ export default function FeedClient() {
     if (searchParams?.get('action') === 'create-post') {
       setShowPostModal(true);
     }
-  }, [searchParams]);
+    const postIdParam = searchParams?.get('post');
+    if (postIdParam && displayPosts.length > 0) {
+      const target = displayPosts.find(p => p.id === postIdParam);
+      if (target) {
+        setSelectedPostPhoto({
+          id: target.id,
+          authorId: target.user_id || target.authorId,
+          authorName: target.author_name || target.authorName || 'Campus Peer',
+          authorPhoto: target.author_photo || target.authorPhoto,
+          authorBranch: target.author_branch || target.authorBranch || 'Student',
+          photoUrl: target.media_urls?.[0] || target.photoUrl || target.image || '',
+          caption: target.content || target.caption || '',
+          category: target.category || 'Showcase',
+          location: target.location || 'Campus',
+          likes: target.likes_count ?? target.likes ?? 0,
+        });
+      }
+    }
+  }, [searchParams, displayPosts]);
   const [selectedPostPhoto, setSelectedPostPhoto] = useState(null);
   const [postCaption, setPostCaption] = useState('');
   const [postCategory, setPostCategory] = useState('UI/UX Work');
   const [postLocation, setPostLocation] = useState('Innovation Lab');
-  const [postFilePreview, setPostFilePreview] = useState('https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&auto=format&fit=crop&q=80');
-  const [postFile, setPostFile] = useState(null); // actual File object for upload
+  const [postFilePreview, setPostFilePreview] = useState('');
   const [postUploading, setPostUploading] = useState(false);
+  const [postFileUploading, setPostFileUploading] = useState(false);
+  const [postUploadStage, setPostUploadStage] = useState('');
+  const fileInputPostRef = React.useRef(null);
+
+  const handlePostFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image must be under 10MB');
+      return;
+    }
+
+    try {
+      setPostFileUploading(true);
+      setPostUploadStage('Compressing...');
+      const options = { maxSizeMB: 0.8, maxWidthOrHeight: 1200, useWebWorker: true };
+      const compressedFile = await imageCompression(file, options);
+
+      setPostUploadStage('Uploading...');
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dvqsosbeh';
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'Meova_unsigned';
+
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+      formData.append('upload_preset', uploadPreset);
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.secure_url) {
+        setPostFilePreview(data.secure_url);
+        toast.success('Photo uploaded!');
+      } else {
+        toast.error('Failed to upload image');
+      }
+    } catch (err) {
+      console.error('[handlePostFileSelect]', err);
+      toast.error('Error uploading photo');
+    } finally {
+      setPostFileUploading(false);
+      setPostUploadStage('');
+    }
+  };
+
+  const handlePublishPost = async () => {
+    if (!postFilePreview) {
+      toast.error('Please upload a photo first');
+      return;
+    }
+    setPostUploading(true);
+    try {
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          photoUrl: postFilePreview,
+          caption: postCaption,
+          location: postLocation,
+          category: postCategory,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || 'Failed to publish post');
+        return;
+      }
+      toast.success('Post published to campus feed.');
+      setShowPostModal(false);
+      setPostCaption('');
+      setPostFilePreview('');
+      mutatePosts();
+    } catch (err) {
+      console.error('[handlePublishPost]', err);
+      toast.error('Network error publishing post');
+    } finally {
+      setPostUploading(false);
+    }
+  };
 
   // Search & Filtering
   const [searchQuery, setSearchQuery] = useState('');
@@ -292,68 +412,6 @@ export default function FeedClient() {
       } catch (err) {
         console.error('Failed to sync groups', err);
       }
-    }
-  };
-
-  const handlePublishPost = async () => {
-    if (!postFile) {
-      toast.error('Please select or upload a photo!');
-      return;
-    }
-    setPostUploading(true);
-    try {
-      // 1. Compress image before uploading
-      const options = { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true };
-      const compressedFile = await imageCompression(postFile, options);
-
-      // 2. Upload to Cloudinary using unsigned preset
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'Meova_unsigned';
-
-      const formData = new FormData();
-      formData.append('file', compressedFile);
-      formData.append('upload_preset', uploadPreset);
-
-      const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!cloudRes.ok) throw new Error('Cloudinary image upload failed');
-      const cloudData = await cloudRes.json();
-      const photoUrl = cloudData.secure_url;
-
-      const newPostPayload = {
-        photoUrl,
-        caption: postCaption || '',
-        category: postCategory || 'Campus Work',
-        location: postLocation || 'Main Campus'
-      };
-
-      const res = await fetch('/api/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPostPayload)
-      });
-      
-      if (!res.ok) throw new Error('Failed to create post');
-      
-      const { post } = await res.json();
-      
-      // Optimistic update of SWR cache
-      mutatePosts({ posts: [post, ...campusPosts] }, false);
-
-      setShowPostModal(false);
-      setPostFile(null);
-      setPostFilePreview(null);
-      setPostCaption('');
-      confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-      toast.success('Your photo work has been posted to the Campus Feed!');
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to publish post. Try again.');
-    } finally {
-      setPostUploading(false);
     }
   };
 
@@ -682,7 +740,7 @@ export default function FeedClient() {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black text-zinc-950 tracking-tight truncate">
-                  Hi, {userData?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'Chirag'}
+                  Hi, {userData?.full_name?.split(' ')[0] || currentUser?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'Friend'}
                 </h1>
               </div>
               <p className="text-xs text-zinc-500 font-bold mt-0.5 truncate whitespace-nowrap">
@@ -987,9 +1045,23 @@ export default function FeedClient() {
               <h3 className="text-xs font-black text-zinc-800">No posts yet</h3>
               <p className="text-[11px] font-medium text-zinc-500 mt-0.5">Be the first to share a campus moment!</p>
             </div>
-          ) : displayPosts.map((post) => {
+          ) : displayPosts.map((rawPost) => {
+            const post = {
+              id: rawPost.id,
+              authorId: rawPost.user_id || rawPost.authorId,
+              authorName: rawPost.author_name || rawPost.authorName || 'Campus Peer',
+              authorPhoto: rawPost.author_photo || rawPost.authorPhoto,
+              authorBranch: rawPost.author_branch || rawPost.authorBranch || 'Student',
+              photoUrl: rawPost.media_urls?.[0] || rawPost.photoUrl || rawPost.image || '',
+              caption: rawPost.content || rawPost.caption || '',
+              category: rawPost.category || 'Showcase',
+              location: rawPost.location || 'Campus',
+              likes: rawPost.likes_count ?? rawPost.likes ?? 0,
+              timeAgo: rawPost.created_at ? new Date(rawPost.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Recently',
+            };
+
             const isLiked = likedPosts[post.id];
-            const currentLikes = (post.likes || 0) + (isLiked ? 1 : 0);
+            const currentLikes = post.likes + (isLiked ? 1 : 0);
             return (
               <div 
                 key={post.id}
@@ -1015,14 +1087,14 @@ export default function FeedClient() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <h4 className="text-xs sm:text-sm font-black text-zinc-950 group-hover:text-[#F05A00] transition-colors truncate">
-                          {post.authorName || 'Campus Peer'}
+                          {post.authorName}
                         </h4>
                         <span className="text-[9px] font-black uppercase tracking-wider bg-orange-50 text-[#F05A00] px-2 py-0.5 rounded-md border border-orange-100 flex-shrink-0">
-                          {post.authorBranch || 'CSE'}
+                          {post.authorBranch}
                         </span>
                       </div>
                       <p className="text-[10.5px] font-semibold text-zinc-400 truncate mt-0.5">
-                        {post.location || 'Campus'} · {post.timeAgo || 'Recently'}
+                        {post.location} · {post.timeAgo}
                       </p>
                     </div>
                   </div>
@@ -1056,19 +1128,13 @@ export default function FeedClient() {
                         <Search size={14} /> Full View
                       </span>
                     </div>
-                    
-                    {/* Category Chip */}
-                    <span className="absolute top-3 left-3 text-[9.5px] font-black text-white bg-gradient-to-r from-[#F05A00] to-[#F05A00] backdrop-blur-md px-2.5 py-1 rounded-md uppercase tracking-wider border border-white/20 shadow-xs flex items-center gap-1">
-                      <Sparkles size={10} />
-                      <span>{post.category || 'Showcase'}</span>
-                    </span>
                   </div>
                 )}
 
                 {/* 3. Caption Box */}
                 {post.caption && (
                   <div className="pt-0.5">
-                    <p className="text-[13px] sm:text-sm text-zinc-800 leading-snug font-medium">
+                    <p className="text-[13px] sm:text-sm text-zinc-800 leading-snug font-medium whitespace-pre-line">
                       {post.caption}
                     </p>
                   </div>
@@ -1086,7 +1152,7 @@ export default function FeedClient() {
                         // Optimistic SWR Update
                         const updatedPosts = campusPosts.map(p => 
                           p.id === post.id 
-                            ? { ...p, likes: currentLikes + (nextLiked ? 1 : -1) } 
+                            ? { ...p, likes_count: currentLikes + (nextLiked ? 1 : -1) } 
                             : p
                         );
                         mutatePosts({ posts: updatedPosts }, false);
@@ -1129,10 +1195,18 @@ export default function FeedClient() {
                     {/* Share Button */}
                     <button 
                       onClick={() => {
-                        if (typeof window !== 'undefined' && navigator.share) {
-                          navigator.share({ title: post.caption || 'Campus Post', url: window.location.href });
-                        } else {
-                          toast.success('Link copied!');
+                        if (typeof window !== 'undefined') {
+                          const postUrl = `${window.location.origin}/?post=${post.id}`;
+                          if (navigator.share) {
+                            navigator.share({
+                              title: `${post.authorName} on Meova`,
+                              text: post.caption ? `"${post.caption.slice(0, 80)}..."` : 'Check out this post on Meova!',
+                              url: postUrl
+                            }).catch(() => {});
+                          } else {
+                            navigator.clipboard.writeText(postUrl);
+                            toast.success('Post link copied to clipboard!');
+                          }
                         }
                       }}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 transition-all cursor-pointer"
@@ -1253,12 +1327,10 @@ export default function FeedClient() {
                   className={`flex-shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 ${
                     hasJoined
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                      : group.isPaid
-                        ? 'bg-[#F05A00] hover:bg-[#D94F00] text-white shadow-[0_4px_12px_rgba(240,90,0,0.25)]'
-                        : 'bg-orange-50 text-[#F05A00] hover:bg-orange-100 border border-orange-200/80'
+                      : 'bg-orange-50 text-[#F05A00] hover:bg-[#F05A00] hover:text-white border border-orange-200/90 shadow-2xs'
                   }`}
                 >
-                  {hasJoined ? 'Open Chat' : group.isPaid ? 'Subscribe' : 'Join'}
+                  {hasJoined ? 'Open' : 'Join'}
                 </button>
               </div>
             );
@@ -1618,7 +1690,7 @@ export default function FeedClient() {
                                   const b = bookings.find(bk => bk.id === selectedActiveBooking.id);
                                   setSelectedActiveBooking(null);
                                   if (b) setReviewBooking(b);
-                                  toast.success('Meeting verified! Payout released. 🎉');
+                                  toast.success('Meeting verified! Payout released.');
                                 } else {
                                   toast.error(data.error || 'Verification failed. Try manual code entry.');
                                 }
@@ -1682,7 +1754,7 @@ export default function FeedClient() {
                                 const b = bookings.find(bk => bk.id === selectedActiveBooking.id);
                                 setSelectedActiveBooking(null);
                                 if (b) setReviewBooking(b);
-                                toast.success('Verified! Payout released. 🎉');
+                                toast.success('Verified! Payout released.');
                               } else {
                                 toast.error(data.error || 'Verification failed. Check the code and retry.');
                               }
@@ -1953,43 +2025,66 @@ export default function FeedClient() {
               </button>
             </div>
 
-            {/* Quick Preset Sample Photos */}
+            {/* Direct Photo Upload */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider block">Choose Sample Photo or Upload</label>
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { label: 'UI Mockup', url: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&auto=format&fit=crop&q=80' },
-                  { label: 'Coffee Vibe', url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80' },
-                  { label: 'Coding Lab', url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&auto=format&fit=crop&q=80' },
-                  { label: 'Jam Session', url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80' }
-                ].map((sample) => (
-                  <button
-                    key={sample.label}
-                    type="button"
-                    onClick={() => setPostFilePreview(sample.url)}
-                    className={`relative rounded-xl overflow-hidden aspect-square border-2 transition-all cursor-pointer ${
-                      postFilePreview === sample.url ? 'border-[#F05A00] ring-2 ring-[#eac5e0] scale-95' : 'border-transparent opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={sample.url} alt={sample.label} className="w-full h-full object-cover" />
-                    <span className="absolute bottom-0 inset-x-0 bg-black/60 text-[8px] font-bold text-white text-center py-0.5 truncate">
-                      {sample.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Custom Image URL */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider block">Image URL / Custom Photo</label>
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider block">Upload Photo</label>
+              
               <input
-                type="text"
-                placeholder="Paste image link or select preset above..."
-                value={postFilePreview}
-                onChange={(e) => setPostFilePreview(e.target.value)}
-                className="w-full text-xs font-semibold text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-[#F05A00] focus:border-transparent focus:bg-white transition-all"
+                ref={fileInputPostRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/jpg"
+                onChange={handlePostFileSelect}
+                className="hidden"
               />
+
+              {postFilePreview ? (
+                <div className="relative rounded-2xl overflow-hidden border border-zinc-200 aspect-video bg-zinc-100 group">
+                  <img src={postFilePreview} alt="Upload preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputPostRef.current?.click()}
+                      disabled={postFileUploading}
+                      className="px-3 py-1.5 bg-white text-zinc-900 rounded-xl text-xs font-black shadow-md hover:bg-zinc-100 transition-all cursor-pointer"
+                    >
+                      Change Photo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPostFilePreview('')}
+                      className="p-1.5 bg-rose-500 text-white rounded-xl shadow-md hover:bg-rose-600 transition-all cursor-pointer"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={() => fileInputPostRef.current?.click()}
+                  className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 ${
+                    postFileUploading 
+                      ? 'border-orange-300 bg-orange-50/50' 
+                      : 'border-zinc-200 hover:border-[#F05A00] hover:bg-orange-50/30'
+                  }`}
+                >
+                  {postFileUploading ? (
+                    <div className="space-y-1.5">
+                      <Loader2 size={24} className="animate-spin text-[#F05A00] mx-auto" />
+                      <p className="text-xs font-black text-zinc-700">{postUploadStage || 'Processing...'}</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-100 text-[#F05A00] flex items-center justify-center">
+                        <Camera size={20} strokeWidth={2.2} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-zinc-900">Choose from gallery or camera</p>
+                        <p className="text-[10px] text-zinc-400 font-semibold mt-0.5">PNG, JPG, WEBP up to 10MB</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Caption Input */}
@@ -2011,7 +2106,7 @@ export default function FeedClient() {
                 <select
                   value={postCategory}
                   onChange={(e) => setPostCategory(e.target.value)}
-                  className="w-full bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-800 rounded-xl p-2.5 outline-none cursor-pointer"
+                  className="w-full bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-800 rounded-xl p-2.5 outline-none cursor-pointer focus:ring-2 focus:ring-[#F05A00] focus:border-transparent transition-all"
                 >
                   {['UI/UX Work', 'Campus Vibes', 'Project Showcase', 'Campus Event', 'Hackathon', 'Photography'].map(c => (
                     <option key={c} value={c}>{c}</option>

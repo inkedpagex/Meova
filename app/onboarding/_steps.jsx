@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import { GraduationCap, Building2, BookOpen, PenLine, AtSign, ArrowRight, ArrowLeft, ChevronDown } from 'lucide-react';
 
@@ -50,7 +50,7 @@ export function Step2({ data, onChange, onNext, onBack }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Academic info 🎓</h2>
+        <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Academic Info</h2>
         <p className="text-sm text-zinc-400 mt-1 font-medium">Tell us about your campus life</p>
       </div>
 
@@ -178,7 +178,7 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Your vibe ✨</h2>
+        <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Your Interests</h2>
         <p className="text-sm text-zinc-400 mt-1 font-medium">Pick 1–5 interests that define you</p>
       </div>
 
@@ -219,7 +219,7 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
                   background: sel ? '#F05A00' : '#fff',
                   color: sel ? '#fff' : '#71717a',
                   border: `1.5px solid ${sel ? '#F05A00' : '#e5e7eb'}`,
-                  boxShadow: sel ? '0 4px 12px rgba(140,53,115,0.25)' : '0 1px 3px rgba(0,0,0,0.06)',
+                  boxShadow: sel ? '0 4px 12px rgba(240,90,0,0.25)' : '0 1px 3px rgba(0,0,0,0.06)',
                   transform: sel ? 'translateY(-1px)' : 'none',
                 }}
               >
@@ -247,13 +247,13 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
         </button>
         <button
           onClick={onSubmit} disabled={!canSubmit}
-          className="flex-1 py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
-          style={{ background: canSubmit ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canSubmit ? '#fff' : '#9ca3af', boxShadow: canSubmit ? '0 8px 24px rgba(140,53,115,0.3)' : 'none' }}
+          className="flex-1 py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer"
+          style={{ background: canSubmit ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canSubmit ? '#fff' : '#9ca3af', boxShadow: canSubmit ? '0 8px 24px rgba(240,90,0,0.3)' : 'none' }}
         >
           {loading ? (
             <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"/> Saving...</>
           ) : (
-            <>🚀 Enter Meetuply</>
+            <>Enter Meova</>
           )}
         </button>
       </div>

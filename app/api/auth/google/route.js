@@ -38,50 +38,46 @@ export async function POST(request) {
       return NextResponse.json({ error: 'No email associated with this Google account' }, { status: 400 });
     }
 
-    // 2. Fetch or create Supabase user
+    // 2. Fetch or create Supabase user (Fast direct query — no listUsers scan)
     let authUser = null;
     let isNewUser = false;
 
-    // Check if profile exists first
+    // Check if profile exists first in public.profiles
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
-      .select('*')
+      .select('id, email, profile_complete, username')
       .eq('email', googleUser.email)
       .maybeSingle();
 
     if (existingProfile) {
       authUser = { id: existingProfile.id, email: existingProfile.email };
+      // If user hasn't finished onboarding or doesn't have a username, treat as new user
+      if (!existingProfile.profile_complete || !existingProfile.username) {
+        isNewUser = true;
+      }
     } else {
-      // Find or create in Supabase auth.users
+      isNewUser = true;
       try {
-        const { data: userList } = await supabaseAdmin.auth.admin.listUsers();
-        const matched = userList?.users?.find(u => u.email?.toLowerCase() === googleUser.email.toLowerCase());
+        const { data: newUserData, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+          email: googleUser.email,
+          email_confirm: true,
+          user_metadata: {
+            full_name: googleUser.name || googleUser.email.split('@')[0],
+            avatar_url: googleUser.picture || '',
+            google_sub: googleUser.sub,
+          },
+        });
 
-        if (matched) {
-          authUser = matched;
+        if (createErr) {
+          // If auth user already exists in auth.users, fallback to existing auth ID
+          console.warn('[Google Auth] createUser warning:', createErr.message);
+          authUser = { id: googleUser.sub || `usr_${Date.now()}`, email: googleUser.email };
         } else {
-          const { data: newUserData, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-            email: googleUser.email,
-            email_confirm: true,
-            user_metadata: {
-              full_name: googleUser.name || googleUser.email.split('@')[0],
-              avatar_url: googleUser.picture || '',
-              google_sub: googleUser.sub,
-            },
-          });
-
-          if (createErr) {
-            console.error('[Google Auth] Supabase admin createUser error:', createErr);
-            throw createErr;
-          }
           authUser = newUserData.user;
-          isNewUser = true;
         }
       } catch (authErr) {
-        console.warn('[Google Auth] Supabase auth list/create fallback:', authErr.message);
-        // Fallback: Use google sub as profile ID if auth table is restricted
+        console.warn('[Google Auth] Supabase auth fallback:', authErr.message);
         authUser = { id: googleUser.sub || `usr_${Date.now()}`, email: googleUser.email };
-        isNewUser = true;
       }
     }
 
@@ -96,7 +92,7 @@ export async function POST(request) {
       interests: [],
     });
 
-    if (profileRes?.isNewUser) {
+    if (profileRes?.isNewUser || !existingProfile?.profile_complete || !existingProfile?.username) {
       isNewUser = true;
     }
 
@@ -122,6 +118,11 @@ export async function POST(request) {
       sameSite: 'lax',
     });
 
+    // Clear stale pc cookie if user needs onboarding
+    if (isNewUser) {
+      cookieStore.delete('__Meova_pc');
+    }
+
     return NextResponse.json({
       success: true,
       user: {
@@ -130,6 +131,7 @@ export async function POST(request) {
         email: googleUser.email,
         displayName: googleUser.name,
         photoURL: googleUser.picture,
+        profile_complete: !isNewUser,
       },
       isNewUser,
     });

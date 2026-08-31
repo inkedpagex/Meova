@@ -67,7 +67,7 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-3 py-3 text-left transition-all cursor-pointer rounded-2xl ${
         isActive 
-          ? 'bg-[#fcf6fa]/90 font-medium border border-[#f5ebf4] shadow-2xs' 
+          ? 'bg-orange-50/80 font-medium border border-orange-100 shadow-2xs' 
           : 'hover:bg-zinc-50 border border-transparent'
       }`}
     >

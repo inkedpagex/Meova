@@ -12,6 +12,8 @@ const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icon-512.png',
+  '/logo.png',
+  '/offline',
 ];
 
 // ── Standard Web Push: Background Push Notifications ─────────────────────────
@@ -97,11 +99,11 @@ self.addEventListener('fetch', (event) => {
   // Always network-first for API routes and Next.js data fetching
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/data/')) return;
 
-  // For HTML navigations (like `/`, `/onboarding`, `/login`), bypass cache to prevent redirect loops.
-  if (request.mode === 'navigate' || request.headers.get('accept').includes('text/html')) {
+  // For HTML navigations (like `/`, `/onboarding`, `/login`), try network first, fallback to cached /offline page
+  if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
       fetch(request).catch(() => {
-        return new Response('Offline', { status: 503 });
+        return caches.match('/offline').then((cached) => cached || new Response('Offline', { status: 503 }));
       })
     );
     return;

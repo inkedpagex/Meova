@@ -11,11 +11,13 @@ import { UserProvider } from '../components/providers/UserProvider';
 import FCMInitializer from '../components/FCMInitializer';
 import PWAInstallBanner from '../components/PWAInstallBanner';
 import NotificationPermissionPrompt from '../components/NotificationPermissionPrompt';
+import InAppNotificationBanner from '../components/InAppNotificationBanner';
 import MainContentWrapper from '../components/MainContentWrapper';
 import NetworkWrapper from '../components/NetworkWrapper';
 import BlockedPage from './blocked/page';
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://meovaweb.vercel.app'),
   title: 'Meova — Your Campus Life',
   description: 'Connect with campus students, book 1-on-1 meetups, and join circles with Meova.',
   manifest: '/manifest.json',
@@ -66,17 +68,6 @@ export default async function RootLayout({ children }) {
         );
       }
 
-      const EXEMPT_PATHS = ['/onboarding', '/login', '/signup', '/api', '/terms', '/privacy', '/blocked'];
-      const isExempt = EXEMPT_PATHS.some(p => pathname.startsWith(p));
-      
-      if (!isExempt) {
-        const pcCookie = cookieStore.get('__Meova_pc')?.value;
-        const isComplete = pcCookie === '1' || fetchedUser.profileComplete !== false;
-        if (!isComplete) {
-          const { redirect } = await import('next/navigation');
-          redirect('/onboarding');
-        }
-      }
     }
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -123,6 +114,8 @@ export default async function RootLayout({ children }) {
               <FCMInitializer />
               {/* PWA Install Banner — shows when browser supports it */}
               <PWAInstallBanner />
+              {/* In-App Realtime Push Banner — custom Meova UI instead of Chrome native alert */}
+              <InAppNotificationBanner />
               {/* Notification permission — friendly prompt shown once after login */}
               <NotificationPermissionPrompt user={user} />
               <div className="flex min-h-screen">

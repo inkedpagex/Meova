@@ -64,7 +64,7 @@ export async function POST(request) {
       user_id: targetUserId,
       sender_id: user.uid,
       title: 'New Review Received! ⭐',
-      message: `${user.full_name || 'Someone'} left you a ${rating}-star review.`,
+      message: `${user.full_name || 'Someone'} left you a ${numRating}-star review.`,
       type: 'review',
       read: false,
       created_at: new Date().toISOString(),

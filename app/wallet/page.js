@@ -113,7 +113,7 @@ export default function WalletPage() {
 
   const openPaymentModal = async (pack = selectedPack) => {
     if (pendingRequests.length >= 3) {
-      setToast('⚠️ You have reached the limit of 3 pending payment requests. Please wait for verification.');
+      setToast('You have reached the limit of 3 pending payment requests. Please wait for verification.');
       return;
     }
     setSelectedPack(pack);
@@ -179,7 +179,7 @@ export default function WalletPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setToast(`✅ Payment request submitted for ₹${exactAmountInr}! We will verify it shortly.`);
+        setToast(`Payment request submitted for ₹${exactAmountInr}. We will verify it shortly.`);
         loadWallet(); // Reload to show in pending requests
         setIsModalOpen(false);
       } else {
@@ -201,7 +201,7 @@ export default function WalletPage() {
         body: JSON.stringify({ intentId: id }),
       });
       if (res.ok) {
-        setToast('✅ Request cancelled successfully.');
+        setToast('Request cancelled successfully.');
         loadWallet();
       } else {
         const data = await res.json();

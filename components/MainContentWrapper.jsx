@@ -43,7 +43,7 @@ export default function MainContentWrapper({ children }) {
     );
   }
 
-  const isStandalonePath = pathname === '/terms' || pathname === '/privacy';
+  const isStandalonePath = pathname === '/terms' || pathname === '/privacy' || pathname === '/offline';
 
   if (isStandalonePath) {
     return (

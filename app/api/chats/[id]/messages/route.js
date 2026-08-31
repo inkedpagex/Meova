@@ -1,11 +1,8 @@
-/**
- * GET  /api/chats/[id]/messages - Get messages for a specific chat
- * POST /api/chats/[id]/messages - Send a new message to a specific chat
- */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../../../lib/getAdminUser';
 import { supabaseAdmin } from '../../../../../lib/supabase/admin';
 import { sendPush } from '../../../../../lib/sendPushNotification';
+import { rateLimit } from '../../../../../lib/rateLimit';
 
 export async function GET(request, { params }) {
   try {
@@ -52,6 +49,16 @@ export async function POST(request, { params }) {
     
     if (!text || !text.trim()) {
       return NextResponse.json({ error: 'Message text is required' }, { status: 400 });
+    }
+
+    if (text.length > 2000) {
+      return NextResponse.json({ error: 'Message text cannot exceed 2000 characters' }, { status: 400 });
+    }
+
+    // Anti-Spam Rate Limit: 20 messages per 10 seconds per user
+    const rl = rateLimit(`send_msg:${user.uid}`, { limit: 20, windowMs: 10 * 1000 });
+    if (!rl.ok) {
+      return NextResponse.json({ error: 'Sending messages too quickly. Please slow down.' }, { status: 429 });
     }
 
     // Check if chat exists

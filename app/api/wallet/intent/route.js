@@ -51,11 +51,18 @@ export async function POST(request) {
       });
     }
 
-    // 3. Extract used decimals
-    const fifteenMinsAgo = Date.now() - 15 * 60 * 1000;
+    // 3. Auto-expire stale intents (> 10 mins old)
+    const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    await supabaseAdmin
+      .from('payment_requests')
+      .update({ status: 'expired' })
+      .eq('status', 'payment_intent')
+      .lt('created_at', tenMinsAgo);
+
+    // Extract used decimals from genuinely active intents
     const usedDecimals = new Set();
     activeDocs.forEach(d => {
-      if (d.status === 'payment_intent' && new Date(d.created_at).getTime() < fifteenMinsAgo) return;
+      if (d.status === 'payment_intent' && new Date(d.created_at).getTime() < (Date.now() - 10 * 60 * 1000)) return;
       const amt = d.amount_inr;
       if (amt && !Number.isInteger(amt)) {
         const dec = Math.round((amt - Math.floor(amt)) * 100);
@@ -63,19 +70,31 @@ export async function POST(request) {
       }
     });
 
-    // 4. Generate random decimal
-    let randomDecimal;
-    let attempts = 0;
-    do {
-      randomDecimal = Math.floor(Math.random() * 99) + 1;
-      attempts++;
-    } while (usedDecimals.has(randomDecimal) && attempts < 200);
-
-    if (attempts >= 200) {
-      return NextResponse.json({ error: 'Too many concurrent requests for this pack right now. Please try again later.' }, { status: 429 });
+    // 4. Deterministically find an available slot (1 to 99)
+    let selectedDecimal = null;
+    // Try random first for uniform spread
+    for (let i = 0; i < 30; i++) {
+      const rand = Math.floor(Math.random() * 99) + 1;
+      if (!usedDecimals.has(rand)) {
+        selectedDecimal = rand;
+        break;
+      }
+    }
+    // Fallback: Linear search for first free slot
+    if (!selectedDecimal) {
+      for (let slot = 1; slot <= 99; slot++) {
+        if (!usedDecimals.has(slot)) {
+          selectedDecimal = slot;
+          break;
+        }
+      }
     }
 
-    const uniqueAmount = Number((amount_inr + (randomDecimal / 100)).toFixed(2));
+    if (!selectedDecimal) {
+      return NextResponse.json({ error: 'All payment slots are currently active. Please try again in 2 minutes.' }, { status: 429 });
+    }
+
+    const uniqueAmount = Number((amount_inr + (selectedDecimal / 100)).toFixed(2));
 
     const { data: newIntent, error: insertErr } = await supabaseAdmin
       .from('payment_requests')

@@ -63,7 +63,7 @@ export default function CampusGigsPage() {
       const json = await res.json();
       if (!res.ok) { toast.error(json.error || 'Failed to apply'); return; }
       setAppliedGigs(prev => new Set([...prev, applyingToGig.id]));
-      toast.success('Application submitted! 🚀');
+      toast.success('Application submitted successfully.');
       setApplyingToGig(null);
       setPitch('');
     } catch { toast.error('Network error.'); }
@@ -77,7 +77,7 @@ export default function CampusGigsPage() {
       const res = await fetch(`/api/gigs/${gigId}`, { method: 'DELETE' });
       const json = await res.json();
       if (!res.ok) { toast.error(json.error || 'Failed to delete gig'); return; }
-      toast.success('Gig deleted and Sparks refunded! ⚡');
+      toast.success('Gig deleted and Sparks refunded.');
       mutateGigs();
     } catch { toast.error('Network error.'); }
     finally { setDeletingGig(null); }
@@ -101,7 +101,7 @@ export default function CampusGigsPage() {
     const totalSparks = wallet ? (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0) : 0;
     
     if (budgetNum > totalSparks) {
-      toast.error(`You only have ${totalSparks}⚡ in your wallet. Buy more to post this gig.`);
+      toast.error(`You only have ${totalSparks} Sparks in your wallet. Buy more to post this gig.`);
       return;
     }
 
@@ -117,7 +117,7 @@ export default function CampusGigsPage() {
       mutateGigs({ gigs: [gig, ...gigs] }, false);
       setShowModal(false);
       setGigTitle(''); setGigCompany(''); setGigDesc('');
-      toast.success('Gig posted! 🎉');
+      toast.success('Gig posted successfully.');
     } catch { toast.error('Failed to post gig. Try again.'); }
     finally { setIsSubmitting(false); }
   };
@@ -164,7 +164,7 @@ export default function CampusGigsPage() {
             >
               {label}
               {active && (
-                <div className="absolute bottom-[-1px] inset-x-0 h-0.5 bg-[#F05A00] rounded-t-full shadow-[0_-2px_8px_rgba(140,53,115,0.4)]" />
+                <div className="absolute bottom-[-1px] inset-x-0 h-0.5 bg-[#F05A00] rounded-t-full shadow-[0_-2px_8px_rgba(240,90,0,0.4)]" />
               )}
             </button>
           );
@@ -183,7 +183,7 @@ export default function CampusGigsPage() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search gigs, skills, clubs…"
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold focus:outline-none focus:border-[#9e4685] focus:bg-white text-zinc-900 placeholder-zinc-400 transition-all"
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 focus:bg-white text-zinc-900 placeholder-zinc-400 transition-all"
               />
             </div>
             <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
@@ -225,7 +225,7 @@ export default function CampusGigsPage() {
               filtered.map(gig => {
                 const hasApplied = appliedGigs.has(gig.id);
                 const isOwn = user?.uid === gig.authorId;
-                const statusLabel = gig.status === 'in_progress' ? '🔄 In Progress' : null;
+                const statusLabel = gig.status === 'in_progress' ? 'In Progress' : null;
 
                 return (
                   <div key={gig.id} className="bg-white border border-zinc-200/80 rounded-[24px] p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 hover:border-orange-300 hover:shadow-[0_8px_30px_rgba(140,53,115,0.06)] hover:-translate-y-0.5 transition-all group relative overflow-hidden">

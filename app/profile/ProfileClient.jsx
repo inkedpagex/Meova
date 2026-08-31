@@ -218,10 +218,11 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
-      const url = window.location.origin + `/users/${profile.id}`;
+      const url = `${window.location.origin}/users/${profile.id}`;
       if (navigator.share) {
         navigator.share({
-          title: 'Meetuply Profile',
+          title: `${profile.full_name || 'Student'} on Meova`,
+          text: `Check out @${profile.username || 'student'} on Meova!`,
           url: url
         }).catch(() => {});
       } else {

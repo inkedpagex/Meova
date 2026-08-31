@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 /**
  * NotificationPermissionPrompt.jsx
  * User-friendly notification permission request.
@@ -79,12 +79,11 @@ export default function NotificationPermissionPrompt({ user }) {
         `}</style>
 
         <div
-          className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden"
-          style={{ border: '1px solid rgba(140,53,115,0.15)' }}
+          className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden border border-orange-100/80"
         >
-          {/* Purple header bar */}
+          {/* Orange header bar */}
           <div
-            className="px-6 pt-6 pb-5"
+            className="px-6 pt-6 pb-5 relative"
             style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
           >
             <button
@@ -100,7 +99,7 @@ export default function NotificationPermissionPrompt({ user }) {
               </div>
               <div>
                 <h3 className="text-white font-black text-lg leading-tight">Stay in the loop</h3>
-                <p className="text-purple-200 text-[12px] font-medium mt-1">
+                <p className="text-orange-100 text-[12px] font-medium mt-1">
                   Enable notifications to never miss a moment
                 </p>
               </div>
@@ -133,14 +132,14 @@ export default function NotificationPermissionPrompt({ user }) {
           <div className="px-6 pb-6 pt-1 flex flex-col gap-2">
             <button
               onClick={handleAllow}
-              className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-95 shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)', boxShadow: '0 8px 24px rgba(140,53,115,0.35)' }}
+              className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-95 shadow-lg cursor-pointer"
+              style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)', boxShadow: '0 8px 24px rgba(240,90,0,0.35)' }}
             >
-              🔔 Enable Notifications
+              Enable Notifications
             </button>
             <button
               onClick={handleDismiss}
-              className="w-full py-3 rounded-2xl font-bold text-sm text-zinc-400 hover:text-zinc-600 transition-colors"
+              className="w-full py-3 rounded-2xl font-bold text-sm text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer"
             >
               Not now
             </button>

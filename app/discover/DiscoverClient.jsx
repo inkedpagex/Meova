@@ -437,7 +437,7 @@ export default function DiscoverClient() {
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400" />
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Search people, circles, gigs..."
-          className="w-full pl-11 pr-10 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all bg-zinc-100 border border-zinc-200 text-zinc-900 focus:border-[#F05A00]" />
+          className="w-full pl-11 pr-10 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all bg-zinc-50 border border-zinc-200 text-zinc-900 focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 focus:bg-white" />
         {search && (
           <button 
             type="button" 

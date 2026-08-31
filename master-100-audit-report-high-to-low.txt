@@ -1,0 +1,121 @@
+================================================================================
+         MEOVA — MASTER 100-POINT AUDIT REPORT (HIGH TO LOW SEVERITY)
+   (Critical Security, Financial Escrow, Broken Workflows, UI/UX & PWA)
+================================================================================
+Date: August 31, 2026
+Platform: Meova Campus Social & Marketplace
+Audit Target: Entire Frontend & Backend Codebase
+Structure: Categorized strictly from High Severity (Critical) to Low Severity (Minor Polish)
+
+================================================================================
+🔴 TIER 1: HIGH SEVERITY (CRITICAL SECURITY & FINANCIAL ESCROW) — Items 1 to 35
+================================================================================
+1. [Security / Financial] Non-Atomic Direct Wallet Update on Circle Join: app/api/circles/[id]/join/route.js manually updates wallets table instead of atomic spendSparks() RPC, causing race condition double-spending under concurrent clicks.
+2. [Security / Financial] Missing Escrow Rollback on Circle Join: If circle_members insert fails after sparks deduction in app/api/circles/[id]/join/route.js, sparks are lost forever without refund.
+3. [Security / Financial] Payment Verification RPC Rollback Gap: In app/api/admin/verify-payment/route.js, if creditSparks fails after status is updated to 'approved', payment is marked approved without crediting Sparks.
+4. [Security / Financial] Circle Creation Request Escrow Rollback: In app/api/circles/create/route.js, if pending approval insert fails after deducting 100 Sparks fee, user is not refunded.
+5. [Security / Financial] UPI Decimal Slot Exhaustion (DoS): Attacker creating 99 intents across accounts locks all decimal slots (.01 - .99) in app/api/wallet/intent/route.js, blocking all user checkouts.
+6. [Security / Auth] Admin Endpoint Database Verification: In app/api/admin routes, ensure role === 'admin' is strictly verified against public.profiles table rather than trusting cookie tokens alone.
+7. [Security / Auth] Google OAuth Token Replay Attack: app/api/auth/google/route.js must verify token audience matches NEXT_PUBLIC_GOOGLE_CLIENT_ID and token has not expired.
+8. [Security / Financial] Withdrawal Double-Debit Protection: app/api/wallet/withdraw/route.js requires row-level locking (SELECT ... FOR UPDATE) to prevent parallel double withdrawals.
+9. [Security / Financial] Dispute Escrow Locking: When a meeting or gig is disputed, escrow must be locked in 'disputed' state rather than allowing host to complete and claim payout.
+10. [Security / Data] User Post Deletion IDOR: DELETE /api/posts must enforce post.user_id === user.uid to ensure malicious actors cannot delete others' posts.
+11. [Security / Data] Phone OTP Brute Force Threshold: Ensure phone_otps table purges record immediately after 5 failed attempts in app/api/users/verify-phone/confirm/route.js.
+12. [Security / Data] Phone OTP Expiry Window: Ensure OTP expires strictly after 10 minutes and rejects any post-expiry verification attempts.
+13. [Security / Financial] Negative Balance Prevention Constraint: Wallets table in Supabase must maintain CHECK (purchased >= 0 AND bonus >= 0 AND creator >= 0).
+14. [Security / Financial] Strict Minimum Withdrawal Check: Server-side withdrawal API must reject amounts under 500 sparks ($5) regardless of client payload.
+15. [Security / Financial] Maximum Single Withdrawal Cap: Server-side withdrawal API must enforce max 25,000 sparks limit per transaction to prevent wallet draining.
+16. [Security / Data] XSS Injection via Profile Bio: Onboarding and profile edit APIs must strip HTML/script tags from bio and interests fields.
+17. [Security / Data] Cloudinary Preset Hijack Protection: Ensure all frontend image upload components use 'Meova_unsigned' preset consistently and reject non-image MIME types.
+18. [Security / DoS] Chat Message Payload Size Attack: POST /api/chats/[id]/messages must enforce 2,000 character limit to prevent memory exhaustion crashes.
+19. [Security / DoS] Comment Flood Attack: POST /api/posts/[id]/comment must have a sliding-window rate limit (10 comments / min).
+20. [Security / DoS] Feed Post Creation Spam: POST /api/posts must enforce 5 posts per 5 minutes per user rate limit.
+21. [Security / DoS] Campus Presence Realtime Flood: POST /api/users/free-now must enforce 10 status toggles per minute cooldown.
+22. [Security / Auth] Unauthenticated Root Access Gate: app/page.js must strictly check server session (getUserWithRole) and redirect unauthenticated guests to /login.
+23. [Security / Financial] Self-Booking Prevention: POST /api/bookings must reject bookings where guest_id === host_id.
+24. [Security / Financial] Self-Review Prevention: POST /api/reviews must reject reviews where reviewer_id === target_user_id.
+25. [Security / Financial] Rating Bounds Clamp: POST /api/reviews must strictly clamp rating between 1 and 5 (Math.min(5, Math.max(1, rating))).
+26. [Security / Financial] Zero Sparks Tip Exploit: Tipping endpoint must reject amounts <= 0, decimals, or non-integer numbers.
+27. [Security / Financial] Meeting Date in the Past Exploit: Booking creation must reject meet_date timestamps occurring in the past.
+28. [Security / Financial] Cron Auto-Refund Authorization: /api/cron/auto-refund must verify Authorization: Bearer CRON_SECRET header on every request.
+29. [Security / Data] Block User Idempotency: POST /api/users/block must handle duplicate block gracefully without 500 error.
+30. [Security / Data] FCM Token Hijacking on Logout: Logging out must invalidate the user's registered FCM token from active push sessions.
+31. [Security / Financial] Gig Host Escrow Auto-Refund: DELETE /api/gigs/[id] must credit escrow back to host atomically via creditSparks RPC.
+32. [Security / Financial] Meeting Code 6-Digit Brute-Force Lockout: PATCH /api/bookings must lock completion attempts after 5 consecutive failures for 15 minutes.
+33. [Security / Financial] Freelancer Completion Code Lockout: POST /api/gigs/[id]/complete must lock attempts after 5 failures for 15 minutes.
+34. [Security / Financial] Circular Pair Fraud Flagging: Completing 3+ gigs between the same 2 users must flag payout for manual admin review.
+35. [Security / Data] Database Composite Index on Unread Notifications: Index (user_id, read, created_at DESC) to prevent table scan DoS under heavy load.
+
+================================================================================
+🟡 TIER 2: MEDIUM SEVERITY (BROKEN WORKFLOWS & STATE DESYNC) — Items 36 to 70
+================================================================================
+36. [Workflow] Notifications Filter Tab Mismatch: app/notifications/page.js filter buttons must align with database notification types ('booking', 'gig', 'sparks', 'message', 'social').
+37. [Workflow] Notification Deep Link Routing: Clicking a notification must route directly to relevant sub-pages (/gigs, /bookings, /messages, /discover) rather than falling back to '/'.
+38. [Workflow] Notification Realtime Mark-Read Sync: Marking notifications as read on desktop must broadcast realtime event to clear mobile unread badges without page refresh.
+39. [Workflow] Offline Page PWA Navigation Fallback: Service worker sw.js must serve cached /offline page when HTML navigations fail without internet connection.
+40. [Workflow] Offline Standalone Viewport Layout: /offline page must hide sidebars and header bars to prevent squishing between desktop panels.
+41. [Workflow] Global Network Drop Overlay: NetworkWrapper.jsx must render full-screen fixed z-[99999] overlay when connection drops in-app.
+42. [Workflow] Bank Account Number Format: Withdrawal form must validate account numbers to be strictly 9 to 18 digits.
+43. [Workflow] Bank IFSC Code Regex: Withdrawal form must validate IFSC code matching ^[A-Z]{4}0[A-Z0-9]{6}$.
+44. [Workflow] UPI ID Regex Validation: Withdrawal form must validate UPI ID matching ^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$.
+45. [Workflow] Username Lowercase & Regex Check: Onboarding must sanitize usernames with /^[a-z0-9_]{3,20}$/ and force lowercase.
+46. [Workflow] University Email Domain Regex: Onboarding must validate university email with /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.
+47. [Workflow] Student Full Name Trimming: Full name in onboarding must be 2 to 50 characters, trimming leading and trailing whitespaces.
+48. [Workflow] Study Year Strict Enumeration: Year input must accept strictly ['1st', '2nd', '3rd', '4th', '5th', 'Alumni'].
+49. [Workflow] Branch Name Length Cap: Branch/Course string in profile must be capped at 60 characters to prevent UI badge clipping.
+50. [Workflow] Post Caption Length Bounds: Post creation modal must cap captions at 1,000 characters server-side.
+51. [Workflow] Post Location String Cap: Post location must be constrained to 100 characters max.
+52. [Workflow] Circle Name Length Validation: Circle creation must enforce names between 3 and 40 characters without symbols.
+53. [Workflow] Circle Description Bound: Circle descriptions must be capped at 500 characters max.
+54. [Workflow] Chat Message Auto-Scroll Behavior: Opening an existing chat thread with 50+ messages must smoothly scroll to bottom after DOM render.
+55. [Workflow] Chat Unread Message Counter Decrement: Opening a chat thread must emit read event to immediately decrement unread messages badge.
+56. [Workflow] Instagram Embed Dual-Mode Handling: components/InstagramEmbed.jsx must support both post embeds (iframe) and profile handles (gradient connect badge).
+57. [Workflow] Gig Apply Button Loading State: Clicking "Submit Application" must show loading spinner and disable button to prevent duplicate submissions.
+58. [Workflow] Post Like Debounce: Rapidly tapping post like button must debounce local state update before calling /api/posts/[id]/like.
+59. [Workflow] Block User Confirmation Modal: Blocking a student from /users/[id] must prompt an explicit confirmation modal before executing.
+60. [Workflow] Post Deletion Cascade: Deleting a post must delete associated post_likes and post_comments records to prevent orphan database rows.
+61. [Workflow] Feed SWR Cache Mutation on Post Creation: Creating a post must immediately mutate local SWR feed cache for instant optimistic display.
+62. [Workflow] Gender Prompt Modal Timer Expiry: Gender selection prompt dismissal cooldown in localStorage must check server-side profile state.
+63. [Workflow] RightPanel Empty Peers CTA: When classmates list is empty, render a clean card with an actionable "Find Classmates →" link.
+64. [Workflow] RightPanel Student Name Ellipsis: Enforce flex layout constraints so long student names never push the "Meet" button down.
+65. [Workflow] PWA Service Worker Asset Pre-Caching: STATIC_ASSETS in sw.js must include '/manifest.json', '/icon-512.png', '/logo.png', and '/offline'.
+66. [Workflow] Database Composite Index on Bookings: Index (host_id, status) for fast calendar queries.
+67. [Workflow] Database Composite Index on Transactions: Index (user_id, created_at DESC) for instant wallet transaction history.
+68. [Workflow] Database Composite Index on Posts: Index (category, created_at DESC) for category-filtered feed loading.
+69. [Workflow] Database Composite Index on Gigs: Index (author_id, status) for fast host gig activity drawer loading.
+70. [Workflow] Empty Notification State Action CTA: Notification page must render an "Explore Campus Feed" button when empty.
+
+================================================================================
+🟢 TIER 3: LOW SEVERITY (UI / UX INCONSISTENCIES & POLISH) — Items 71 to 100
+================================================================================
+71. [UI] Mobile iOS Safe Area Padding on Drawers: Add pb-[max(1.25rem,env(safe-area-inset-bottom))] to modal sticky action bars.
+72. [UI] Purge Legacy Meetuply Purple Colors: Replace all #9e4685, #faf5ff, #e9d5ff with Meova Orange #F05A00 across notifications and drawers.
+73. [UI] Sidebar Logo High-Res Asset: Point all desktop and mobile header images strictly to /logo.png (HTTP 200 OK).
+74. [UI] Feed Skeleton Aspect Ratio: FeedSkeleton.jsx post preview skeleton should match dynamic 1:1 / 4:5 post aspect ratio.
+75. [UI] Sparks Badge Pulse on Balance Update: Add subtle scale animation when user balance updates in header.
+76. [UI] Chat Bubble Outgoing Timestamp Contrast: Outgoing orange bubbles should have readable white/90 timestamp text.
+77. [UI] Search Bar Styling Parity: Align search input padding, focus ring (#F05A00/10), and icon colors between Feed and Discover.
+78. [UI] Terms & Privacy Header Breadcrumbs: Add sticky "← Back to Login / Home" header link on mobile view for terms and privacy pages.
+79. [UI] Circle Banner Image Dark Gradient Overlay: Add subtle gradient overlay on bright circle banners so white title text is always readable.
+80. [UI] Circle Details Member Avatars Stack: Circle member list avatars must use proper z-index and hover elevation without clipping.
+81. [UI] Gender Selection Card Hover Effects: Add subtle scale-up and border glow on hover for gender prompt modal cards.
+82. [UI] Dark Mode Contrast on Category Filter Pills: Ensure active category pills in Gigs and Discover have distinct contrast.
+83. [UI] Image Upload Progress Spinner: Show spinning loader in CreateMenuModal when Cloudinary upload takes longer than 2 seconds.
+84. [UI] Live Now Pulse Dot Background Sync: Pause pulsing green dot animation when page is hidden to save mobile battery.
+85. [UI] Free Now Status Button Ripple: Add active:scale-95 tactile feedback to "Free Now" toggle button in FeedClient header.
+86. [UI] Classmate Avatar Fallback Smoothness: Show cartoon avatar directly without flashing default grey square on image load errors.
+87. [UI] Wallet Transaction Reference ID Truncation: Apply font-mono text-xs truncate on bank payout reference codes on small screens.
+88. [UI] Booking Modal Time Picker Styling: Style native time picker inputs with rounded corners and orange focus rings.
+89. [UI] Booking Status Badge Harmony: Use amber for Pending, emerald for Accepted, rose for Rejected, orange for Completed.
+90. [UI] Onboarding Form Error Toast Placement: Render onboarding error messages as floating top toast alerts with slide-down animation.
+91. [UI] PWA Install Banner iOS Instructions: Show Safari "Tap Share → Add to Home Screen" tooltip on iOS devices.
+92. [UI] App Title Tag Brand Alignment: Ensure all page metadata titles use "Meova — [Page Title]" naming convention.
+93. [UI] Canonical Meta Tags: Add rel="canonical" to avoid duplicate URL indexation on search engines.
+94. [UI] Responsive Table Overflow on Admin Views: Wrap admin transaction tables in overflow-x-auto containers with custom scrollbars.
+95. [UI] Like Count Number Formatting: Display like counts >= 1,000 as 1.2k rather than raw long integer strings.
+96. [UI] Profile Badges Tooltip: Hovering interest badges on student profiles should show category tooltips on desktop.
+97. [UI] Spark Transfer Animation: Add subtle flying spark particle effect when receiving tips in chat.
+98. [UI] Empty Bookings Tab Visuals: Render a clean calendar icon and "Book 1-on-1 Coffee" button in bookings empty state.
+99. [UI] Service Worker Version Timestamp: Maintain versioned CACHE_NAME timestamp to automatically bust cache on every production build.
+100. [UI] Accessibility Alt Text Completeness: Ensure all dynamic user avatar images have descriptive alt={student.name} tags.
+================================================================================

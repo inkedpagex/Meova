@@ -43,19 +43,58 @@ export default function InstagramEmbed({ instagramInput }) {
   if (!isValidInstagram(instagramInput)) return null;
 
   const raw = instagramInput.trim();
+  const handle = raw.toLowerCase()
+    .replace(/^https?:\/\/(www\.)?instagram\.com\//, '')
+    .replace(/^@/, '')
+    .split('/')[0]
+    .split('?')[0]
+    .trim();
+
   const isUrl = raw.startsWith('http://') || raw.startsWith('https://');
   const isPost = isUrl && (raw.includes('/p/') || raw.includes('/reel/'));
 
-  if (!isPost) return null; // Profile feeds cannot be embedded and will show broken links. Only allow embedding posts/reels.
+  if (!isPost) {
+    return (
+      <div className="rounded-2xl p-4 bg-gradient-to-r from-pink-50 via-purple-50 to-orange-50 border border-pink-100 flex items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white text-xs font-black shadow-xs flex-shrink-0">
+            IG
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-black text-zinc-900 truncate">@{handle}</p>
+            <p className="text-[10px] text-zinc-500 font-semibold">Instagram Profile</p>
+          </div>
+        </div>
+        <a
+          href={`https://instagram.com/${handle}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white text-[11px] font-black hover:opacity-95 active:scale-95 transition-all shadow-2xs whitespace-nowrap flex-shrink-0"
+        >
+          View on Instagram ↗
+        </a>
+      </div>
+    );
+  }
 
   const embedUrl = `${raw.replace(/\/$/, '')}/embed/`;
 
   return (
-    <div className="rounded-3xl p-5 mb-6 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] shadow-md space-y-4">
-      <h3 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)] flex items-center gap-2">
-        <span className="text-[#e1306c]">📸</span> Host Instagram Vibe
-      </h3>
-      <div className="relative rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface)] h-[480px]">
+    <div className="rounded-3xl p-5 mb-6 bg-white border border-zinc-100 shadow-xs space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-black uppercase tracking-wider text-zinc-700 flex items-center gap-1.5">
+          <span className="text-[#e1306c]">📸</span> Instagram Vibe
+        </h3>
+        <a 
+          href={raw} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-[10px] font-black text-pink-600 hover:text-pink-700"
+        >
+          Open in App ↗
+        </a>
+      </div>
+      <div className="relative rounded-2xl overflow-hidden border border-zinc-100 bg-zinc-50 h-[480px]">
         <iframe
           src={embedUrl}
           className="w-full h-full border-none"

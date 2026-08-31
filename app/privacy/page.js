@@ -50,8 +50,8 @@ export default function PrivacyPage() {
             <p>We do not sell your personal information. We may share information with:</p>
             <ul className="list-disc list-inside space-y-1 ml-2 text-xs mt-2">
               <li><strong>Other Users:</strong> Your public profile (name, photo, interests, reviews) is visible to other logged-in users</li>
-              <li><strong>Firebase/Google:</strong> Our database and authentication provider (Google LLC)</li>
-              <li><strong>Cloudinary:</strong> Image hosting for profile photos</li>
+              <li><strong>Supabase / Cloud Infrastructure:</strong> Our secure database and authentication infrastructure</li>
+              <li><strong>Cloudinary:</strong> Image hosting for media and profile photos</li>
               <li><strong>Law Enforcement:</strong> When legally required to do so</li>
             </ul>
           </section>

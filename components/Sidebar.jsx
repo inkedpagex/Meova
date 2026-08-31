@@ -12,7 +12,7 @@ import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import { supabase } from '../lib/supabase/client';
 import CreateMenuModal from './CreateMenuModal';
 
-const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy'];
+const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy', '/offline'];
 
 export default function Sidebar({ user }) {
   const pathname = usePathname();
@@ -275,7 +275,7 @@ export default function Sidebar({ user }) {
       {/* ── Mobile top header ────────────────── */}
       <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[58px] flex items-center justify-between px-4 bg-white/90 backdrop-blur-xl border-b border-zinc-100 shadow-2xs">
         <Link href="/" className="flex items-center gap-2 group">
-          <img src="/logo-v1.png" alt="Meova" className="h-9 w-auto object-contain" />
+          <img src="/logo.png" alt="Meova" className="h-9 w-auto object-contain" />
         </Link>
 
         <div className="flex items-center gap-2.5">
@@ -284,10 +284,10 @@ export default function Sidebar({ user }) {
               {!isAdminRoute && (
                 <Link 
                   href="/wallet" 
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-orange-50 text-[#F05A00] border border-orange-100 hover:bg-orange-100 transition-all active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-orange-50 text-[#F05A00] border border-orange-100 hover:bg-orange-100 transition-all duration-200 active:scale-95 shadow-2xs"
                 >
                   <Zap size={13} className="fill-[#F05A00] text-[#F05A00]" />
-                  <span>{sparks.toLocaleString()}</span>
+                  <span className="tabular-nums font-black">{sparks.toLocaleString()}</span>
                 </Link>
               )}
 
@@ -363,7 +363,7 @@ export default function Sidebar({ user }) {
           ) : (
             <>
               <Link href="/" className="flex items-center gap-2 min-w-0">
-                <img src="/logo-v1.png" alt="Meova" className="h-11 w-auto object-contain" />
+                <img src="/logo.png" alt="Meova" className="h-11 w-auto object-contain" />
               </Link>
               <button 
                 onClick={toggleCollapse} 

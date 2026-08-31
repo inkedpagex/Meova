@@ -1,16 +1,18 @@
-/**
- * POST /api/circles/[id]/join - Securely join a community, deduct Sparks, credit 100% to Host, and unlock invite link
- */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { spendSparks, creditSparks } from '@/lib/wallet';
 
 export async function POST(request, { params }) {
+  let sparksDeducted = 0;
+  let userUid = null;
+  const { id: circleId } = await params;
+
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    userUid = user.uid;
 
-    const { id: circleId } = await params;
     if (!circleId) return NextResponse.json({ error: 'Invalid community ID' }, { status: 400 });
 
     // Fetch circle
@@ -54,115 +56,89 @@ export async function POST(request, { params }) {
     const price = circle.price || 0;
 
     if (price > 0) {
-      // Fetch buyer wallet
-      const { data: buyerWallet } = await supabaseAdmin
-        .from('wallets')
-        .select('purchased, bonus, creator')
-        .eq('user_id', user.uid)
-        .maybeSingle();
+      // 1. Atomic Spark Deduction via spend_sparks RPC (row-locked)
+      const spendResult = await spendSparks(
+        user.uid,
+        price,
+        `Joined circle ${circle.name}`,
+        'circle_join',
+        circleId
+      );
 
-      const bw = buyerWallet || { purchased: 0, bonus: 0, creator: 0 };
-      const currentBalance = (bw.purchased || 0) + (bw.bonus || 0) + (bw.creator || 0);
-
-      if (currentBalance < price) {
+      if (!spendResult.success) {
         return NextResponse.json({
-          error: `Insufficient Sparks. You need ${price} Sparks to join. Your balance: ${currentBalance} Sparks.`,
+          error: spendResult.error || `Insufficient Sparks to join ${circle.name}.`,
           requiredSparks: price,
-          currentSparks: currentBalance,
         }, { status: 402 });
       }
 
-      // Deduct from buyer: bonus → purchased → creator
-      let remainingToDeduct = price;
-      let newBonus = bw.bonus || 0;
-      let newPurchased = bw.purchased || 0;
-      let newCreator = bw.creator || 0;
-
-      if (newBonus >= remainingToDeduct) {
-        newBonus -= remainingToDeduct;
-        remainingToDeduct = 0;
-      } else {
-        remainingToDeduct -= newBonus;
-        newBonus = 0;
-      }
-      if (remainingToDeduct > 0) {
-        if (newPurchased >= remainingToDeduct) {
-          newPurchased -= remainingToDeduct;
-          remainingToDeduct = 0;
-        } else {
-          remainingToDeduct -= newPurchased;
-          newPurchased = 0;
-        }
-      }
-      if (remainingToDeduct > 0) {
-        newCreator = Math.max(0, newCreator - remainingToDeduct);
-      }
-
+      sparksDeducted = price;
       const now = new Date().toISOString();
 
-      // All writes in parallel
-      await Promise.all([
-        // 1. Update buyer wallet
-        supabaseAdmin
-          .from('wallets')
-          .update({ purchased: newPurchased, bonus: newBonus, creator: newCreator, updated_at: now })
-          .eq('user_id', user.uid),
-
-        // 2. Credit host wallet (increment creator bucket)
-        supabaseAdmin.rpc('credit_sparks', {
-          p_user_id: circle.creator_id,
-          p_amount: price,
-          p_type: 'creator',
-          p_transaction_type: 'community_earning',
-          p_description: `Earned ⚡${price} from ${user.full_name || 'a member'} joining ${circle.name}`,
-          p_reference_id: circleId,
-        }),
-
-        // 3. Add member record
-        supabaseAdmin.from('circle_members').insert({
+      // 2. Insert member record
+      const { error: memberErr } = await supabaseAdmin
+        .from('circle_members')
+        .insert({
           circle_id: circleId,
           user_id: user.uid,
           role: 'member',
           sparks_paid: price,
           joined_at: now,
-        }),
+        });
 
-        // 4. Increment circle stats
-        supabaseAdmin
-          .from('circles')
-          .update({
-            member_count: (circle.member_count || 1) + 1,
-            total_sparks_earned: (circle.total_sparks_earned || 0) + price,
-            updated_at: now,
-          })
-          .eq('id', circleId),
+      if (memberErr) {
+        console.error('[POST /api/circles/[id]/join] member insert error, rolling back:', memberErr.message);
+        // Auto-Rollback: Refund user immediately
+        await creditSparks(
+          user.uid,
+          price,
+          'dispute_refund',
+          `Refund: Failed to join ${circle.name}`,
+          circleId
+        );
+        return NextResponse.json({ error: 'Failed to record circle membership. Sparks have been refunded.' }, { status: 500 });
+      }
 
-        // 5. Log buyer debit transaction
-        supabaseAdmin.from('transactions').insert({
-          user_id: user.uid,
-          amount: -price,
-          type: 'community_join',
-          description: `Paid ⚡${price} to join ${circle.name}`,
-          reference_id: circleId,
-          created_at: now,
-        }),
-      ]);
+      // 3. Atomically Credit host wallet (creator bucket)
+      await creditSparks(
+        circle.creator_id,
+        price,
+        'creator',
+        'community_earning',
+        `Earned ⚡${price} from ${user.full_name || 'a member'} joining ${circle.name}`,
+        circleId
+      );
+
+      // 4. Increment circle stats
+      await supabaseAdmin
+        .from('circles')
+        .update({
+          member_count: (circle.member_count || 1) + 1,
+          total_sparks_earned: (circle.total_sparks_earned || 0) + price,
+          updated_at: now,
+        })
+        .eq('id', circleId);
     } else {
       // Free Community Join
       const now = new Date().toISOString();
-      await Promise.all([
-        supabaseAdmin.from('circle_members').insert({
+      const { error: memberErr } = await supabaseAdmin
+        .from('circle_members')
+        .insert({
           circle_id: circleId,
           user_id: user.uid,
           role: 'member',
           sparks_paid: 0,
           joined_at: now,
-        }),
-        supabaseAdmin
-          .from('circles')
-          .update({ member_count: (circle.member_count || 1) + 1, updated_at: now })
-          .eq('id', circleId),
-      ]);
+        });
+
+      if (memberErr) {
+        return NextResponse.json({ error: 'Failed to join community' }, { status: 500 });
+      }
+
+      await supabaseAdmin
+        .from('circles')
+        .update({ member_count: (circle.member_count || 1) + 1, updated_at: now })
+        .eq('id', circleId);
     }
 
     return NextResponse.json({

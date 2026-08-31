@@ -57,11 +57,17 @@ function Step1({ data, onChange, onNext }) {
 
   const checkUsername = useCallback(async (val) => {
     const clean = val.toLowerCase().trim();
-    if (!clean || clean.length < 3) {
+    if (!clean) {
       setUsernameStatus('idle'); setUsernameMsg(''); return;
     }
-    if (!/^[a-z0-9_]{3,20}$/.test(clean)) {
-      setUsernameStatus('invalid'); setUsernameMsg('Only lowercase letters, numbers, underscores (3-20 chars)'); return;
+    if (clean.length < 5) {
+      setUsernameStatus('invalid'); setUsernameMsg('Minimum 5 characters required'); return;
+    }
+    if (!/^[a-z]/.test(clean)) {
+      setUsernameStatus('invalid'); setUsernameMsg('Must start with a letter (a-z)'); return;
+    }
+    if (!/^[a-z][a-z0-9_]{4,19}$/.test(clean)) {
+      setUsernameStatus('invalid'); setUsernameMsg('Only letters, numbers, underscores (5-20 chars)'); return;
     }
     setUsernameStatus('checking'); setUsernameMsg('Checking...');
     try {
@@ -76,7 +82,7 @@ function Step1({ data, onChange, onNext }) {
     const val = e.target.value.replace(/[^a-z0-9_]/gi, '').toLowerCase();
     onChange('username', val);
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => checkUsername(val), 600);
+    debounceRef.current = setTimeout(() => checkUsername(val), 250);
   };
 
   const handlePhoto = async (e) => {
@@ -209,11 +215,11 @@ function Step1({ data, onChange, onNext }) {
           </div>
         </div>
         {usernameMsg && (
-          <p className={`text-[11px] font-semibold mt-1.5 ${usernameStatus === 'ok' ? 'text-emerald-600' : 'text-rose-500'}`}>
+          <p suppressHydrationWarning className={`text-[11px] font-semibold mt-1.5 ${usernameStatus === 'ok' ? 'text-emerald-600' : 'text-rose-500'}`}>
             {usernameMsg}
           </p>
         )}
-        <p className="text-[10px] text-zinc-400 mt-1">Lowercase letters, numbers, underscores · 3-20 chars</p>
+        <p suppressHydrationWarning className="text-[10px] text-zinc-400 mt-1">Start with a letter · numbers, underscores allowed · 5-20 chars</p>
       </div>
 
       {/* Gender Selection */}

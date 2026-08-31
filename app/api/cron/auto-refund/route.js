@@ -4,6 +4,12 @@ import { creditSparks } from '@/lib/wallet';
 
 export async function GET(request) {
   try {
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { data: bookings, error } = await supabaseAdmin
       .from('bookings')
       .select('*')

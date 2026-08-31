@@ -50,6 +50,13 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Cannot book a meetup with yourself' }, { status: 400 });
     }
 
+    if (date) {
+      const meetDateObj = new Date(`${date}T${time || '00:00'}:00`);
+      if (!isNaN(meetDateObj.getTime()) && meetDateObj.getTime() < Date.now() - 24 * 60 * 60 * 1000) {
+        return NextResponse.json({ error: 'Meetup date cannot be in the past' }, { status: 400 });
+      }
+    }
+
     // Rate Limiting (Anti-Spam): Max 3 pending requests
     const { count: pendingCount, error: countErr } = await supabaseAdmin
       .from('bookings')

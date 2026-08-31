@@ -212,7 +212,7 @@ export default async function UserProfilePage({ params }) {
           </p>
 
           <p className="text-xs text-zinc-700 font-medium leading-relaxed pt-1 whitespace-pre-line">
-            {profile.bio || '🎓 Campus Student · Connecting on Meova! 🚀'}
+            {profile.bio || 'Campus Student · Connecting on Meova'}
           </p>
         </div>
 

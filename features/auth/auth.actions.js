@@ -68,15 +68,19 @@ export async function createProfileAdmin(profileData) {
       const updates = {};
       if (profileData.photo_url) updates.photo_url = profileData.photo_url;
       if (profileData.full_name) updates.full_name = profileData.full_name;
-      if (profileData.year) updates.year = profileData.year;
-      if (profileData.branch) updates.branch = profileData.branch;
-      if (profileData.interests?.length) updates.interests = profileData.interests;
+      if (profileData.year && !existingProfile.year) updates.year = profileData.year;
+      if (profileData.branch && !existingProfile.branch) updates.branch = profileData.branch;
+      if (profileData.interests?.length && !existingProfile.interests?.length) updates.interests = profileData.interests;
 
       if (Object.keys(updates).length > 0) {
-        await supabaseAdmin
+        const { error: updateErr } = await supabaseAdmin
           .from('profiles')
           .update(updates)
           .eq('id', uid);
+
+        if (updateErr) {
+          console.error('[createProfileAdmin update error]', updateErr.message);
+        }
       }
     }
 

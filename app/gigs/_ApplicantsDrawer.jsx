@@ -29,7 +29,7 @@ function ApplicantCard({ app, gigId, onUpdate }) {
     PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
     ACCEPTED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     REJECTED: 'bg-red-50 text-red-500 border-red-200',
-    COMPLETED: 'bg-[#fcf6fa] text-[#D94F00] border-[#eac5e0]',
+    COMPLETED: 'bg-orange-50 text-[#F05A00] border-orange-200',
   };
 
   return (
@@ -37,8 +37,8 @@ function ApplicantCard({ app, gigId, onUpdate }) {
       {app.applicantPhoto ? (
         <img src={app.applicantPhoto} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-zinc-200" />
       ) : (
-        <div className="w-10 h-10 rounded-full bg-[#f5ebf4] flex items-center justify-center flex-shrink-0">
-          <User size={18} className="text-[#9e4685]" />
+        <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0 border border-orange-100">
+          <User size={18} className="text-[#F05A00]" />
         </div>
       )}
       <div className="flex-1 min-w-0">
@@ -127,7 +127,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-[#f5ebf4] max-h-[85vh] flex flex-col"
+        className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-zinc-100 max-h-[85vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -157,12 +157,12 @@ export default function ApplicantsDrawer({ gig, onClose }) {
 
         {/* Complete gig section */}
         {(gig.status === 'in_progress' || acceptedApp) && (
-          <div className="px-5 pb-5 flex-shrink-0">
+          <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] flex-shrink-0">
             <div className="border-t border-zinc-100 pt-4">
               {!completing ? (
                 <button
                   onClick={() => setCompleting(true)}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#F05A00] to-[#F05A00] text-white text-xs font-black hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+                  className="w-full py-3 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white text-xs font-black active:scale-95 transition-all cursor-pointer shadow-xs"
                 >
                   Mark as Completed & Release Sparks ⚡
                 </button>
@@ -174,11 +174,11 @@ export default function ApplicantsDrawer({ gig, onClose }) {
                     value={code}
                     onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
-                    className="w-full p-3 rounded-xl border border-zinc-200 text-center text-2xl font-black tracking-[8px] focus:outline-none focus:border-[#9e4685]"
+                    className="w-full p-3 rounded-xl border border-zinc-200 text-center text-2xl font-black tracking-[8px] focus:outline-none focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10"
                   />
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => setCompleting(false)} className="flex-1 py-3 rounded-2xl bg-zinc-100 text-zinc-600 text-xs font-black cursor-pointer">Cancel</button>
-                    <button type="submit" disabled={code.length !== 6 || codeLoading} className="flex-2 px-6 py-3 rounded-2xl bg-emerald-500 text-white text-xs font-black disabled:opacity-50 cursor-pointer active:scale-95 transition-all">
+                    <button type="button" onClick={() => setCompleting(false)} className="flex-1 py-3 rounded-2xl bg-zinc-100 text-zinc-600 text-xs font-black cursor-pointer hover:bg-zinc-200">Cancel</button>
+                    <button type="submit" disabled={code.length !== 6 || codeLoading} className="flex-2 px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black disabled:opacity-50 cursor-pointer active:scale-95 transition-all shadow-xs">
                       {codeLoading ? 'Verifying…' : 'Confirm & Pay'}
                     </button>
                   </div>

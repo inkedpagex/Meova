@@ -138,13 +138,16 @@ export default function WithdrawPage() {
           )}
 
           {creatorBalance < 500 ? (
-            <div className="bg-[var(--bg-elevated)] border border-red-500/20 p-5 rounded-2xl mb-6 shadow-sm">
-              <p style={{ fontSize: 13, color: '#f87171', fontWeight: 800 }}>
-                ⚠️ You need at least 500 Creator Sparks to withdraw.
-              </p>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, fontWeight: '600' }}>
-                Host premium workshops, coffee sessions, and gigs to accumulate Creator Earnings.
-              </p>
+            <div className="bg-[var(--bg-elevated)] border border-red-500/20 p-5 rounded-2xl mb-6 shadow-sm flex items-start gap-3">
+              <AlertCircle size={18} className="text-red-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p style={{ fontSize: 13, color: '#f87171', fontWeight: 800 }}>
+                  Minimum 500 Creator Sparks required to withdraw.
+                </p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, fontWeight: '600' }}>
+                  Host premium workshops, coffee sessions, and gigs to accumulate Creator Earnings.
+                </p>
+              </div>
             </div>
           ) : pendingCount < 3 && (
             <>

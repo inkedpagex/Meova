@@ -1,36 +1,12 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { requireAuth } from '@/lib/getAdminUser';
 import { supabaseAdmin } from '@/lib/supabase/admin';
-
-// Lightweight JWT payload decoder (no verification — used only to extract uid from trusted cookie)
-function decodeJwtPayload(token) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
-  }
-}
 
 export async function POST(request) {
   try {
-    const cookieStore = await cookies();
-    const sessionCookie =
-      cookieStore.get('sb-access-token')?.value ||
-      cookieStore.get('__Meova_session')?.value;
-
-    if (!sessionCookie) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const decoded = decodeJwtPayload(sessionCookie);
-    const uid = decoded?.sub || decoded?.user_id;
-    if (!uid) {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+    const user = await requireAuth();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized. Please login again.' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -43,13 +19,16 @@ export async function POST(request) {
     const { error } = await supabaseAdmin
       .from('profiles')
       .update({ gender, updated_at: new Date().toISOString() })
-      .eq('id', uid);
+      .eq('id', user.uid);
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error('[update-gender error]', error.message);
+      return NextResponse.json({ error: error.message || 'Failed to update gender.' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, gender });
   } catch (error) {
     console.error('Update gender error:', error);
-    return NextResponse.json({ error: 'Failed to update gender.' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to update gender.' }, { status: 500 });
   }
 }
