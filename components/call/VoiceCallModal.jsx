@@ -41,6 +41,7 @@ export default function VoiceCallModal({
   const [callState, setCallState] = useState(mode === 'incoming' ? 'incoming' : 'calling'); // 'calling' | 'incoming' | 'connecting' | 'connected' | 'ended'
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaker, setIsSpeaker] = useState(true);
+  const [isPeerMuted, setIsPeerMuted] = useState(false);
   const [duration, setDuration] = useState(0);
 
   const localStreamRef = useRef(null);
@@ -103,6 +104,8 @@ export default function VoiceCallModal({
     pc.ontrack = (event) => {
       if (remoteAudioRef.current && event.streams[0]) {
         remoteAudioRef.current.srcObject = event.streams[0];
+        remoteAudioRef.current.muted = !isSpeaker;
+        remoteAudioRef.current.volume = isSpeaker ? 1.0 : 0.0;
         remoteAudioRef.current.play().catch(() => {});
       }
     };
@@ -206,6 +209,13 @@ export default function VoiceCallModal({
 
     channel.on('broadcast', { event: 'call-end' }, () => {
       endCall('Call ended');
+    });
+
+    // Peer mute state update
+    channel.on('broadcast', { event: 'peer-mute' }, ({ payload }) => {
+      if (payload.senderId !== currentUserId) {
+        setIsPeerMuted(!!payload.muted);
+      }
     });
 
     channel.on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
@@ -334,24 +344,51 @@ export default function VoiceCallModal({
   const endCall = (msg) => {
     cleanupStreams();
     setCallState('ended');
-    // Modal shows 'Call Ended' state
     setTimeout(() => {
       onClose();
     }, 1000);
   };
 
+  // ── Fully functional Mute / Unmute ──────────────────────────────────────────
   const toggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+
+    // 1. Toggle local audio tracks
     if (localStreamRef.current) {
-      const audioTrack = localStreamRef.current.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = !audioTrack.enabled;
-        setIsMuted(!audioTrack.enabled);
-      }
+      localStreamRef.current.getAudioTracks().forEach(track => {
+        track.enabled = !nextMuted;
+      });
+    }
+
+    // 2. Toggle PeerConnection sender tracks
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.getSenders().forEach(sender => {
+        if (sender.track && sender.track.kind === 'audio') {
+          sender.track.enabled = !nextMuted;
+        }
+      });
+    }
+
+    // 3. Broadcast mute state to peer
+    if (channel) {
+      channel.send({
+        type: 'broadcast',
+        event: 'peer-mute',
+        payload: { senderId: currentUserId, muted: nextMuted },
+      }).catch(() => {});
     }
   };
 
+  // ── Fully functional Speaker Toggle ────────────────────────────────────────
   const toggleSpeaker = () => {
-    setIsSpeaker(prev => !prev);
+    const nextSpeaker = !isSpeaker;
+    setIsSpeaker(nextSpeaker);
+
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.muted = !nextSpeaker;
+      remoteAudioRef.current.volume = nextSpeaker ? 1.0 : 0.0;
+    }
   };
 
   const formatDuration = (secs) => {
@@ -362,7 +399,9 @@ export default function VoiceCallModal({
 
   if (!isOpen) return null;
 
-  const avatar = peerUser?.photo || getUserAvatarUrl(peerUser) || getCartoonAvatar(peerUser?.name || 'Student');
+  const peerName = peerUser?.name || 'Campus Student';
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(peerName)}&background=F05A00&color=ffffff&size=256&bold=true&format=png`;
+  const avatar = peerUser?.photo || getUserAvatarUrl(peerUser) || fallbackAvatar;
 
   return (
     <div className="fixed inset-0 z-[999999] bg-zinc-950 flex flex-col justify-between items-center text-white select-none overflow-hidden pb-8 pt-10 px-6 anim-fade-in">
@@ -377,7 +416,7 @@ export default function VoiceCallModal({
           className="w-full h-full object-cover opacity-15 blur-3xl scale-125"
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = getCartoonAvatar(peerUser?.name || 'user');
+            e.currentTarget.src = fallbackAvatar;
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-zinc-950/90 to-zinc-950" />
@@ -419,7 +458,7 @@ export default function VoiceCallModal({
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = getCartoonAvatar(peerUser?.name || 'user');
+                e.currentTarget.src = fallbackAvatar;
               }}
             />
           </div>
@@ -427,7 +466,7 @@ export default function VoiceCallModal({
 
         {/* Peer Name */}
         <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2 truncate max-w-[320px] drop-shadow-md">
-          {peerUser?.name || 'Campus Student'}
+          {peerName}
         </h2>
 
         {/* Live Call Status / Timer */}
@@ -462,9 +501,17 @@ export default function VoiceCallModal({
             <span className="text-sm font-bold text-zinc-400">Call Ended</span>
           )}
         </div>
+
+        {/* Peer Muted Status Indicator */}
+        {callState === 'connected' && isPeerMuted && (
+          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold">
+            <MicOff size={13} />
+            <span>{peerName} is muted</span>
+          </div>
+        )}
       </div>
 
-      {/* BOTTOM ACTION CONTROLS: WhatsApp Style */}
+      {/* BOTTOM ACTION CONTROLS */}
       <div className="relative z-10 w-full max-w-sm flex flex-col items-center">
         {callState === 'incoming' ? (
           /* Incoming Call Controls: Big Accept and Decline Buttons */
@@ -505,10 +552,10 @@ export default function VoiceCallModal({
                 onClick={toggleMute}
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                   isMuted 
-                    ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40' 
+                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/50 ring-2 ring-rose-400' 
                     : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
                 }`}
-                title={isMuted ? 'Unmute' : 'Mute'}
+                title={isMuted ? 'Unmute Mic' : 'Mute Mic'}
               >
                 {isMuted ? <MicOff size={22} /> : <Mic size={22} />}
               </button>
@@ -521,15 +568,15 @@ export default function VoiceCallModal({
                 type="button"
                 onClick={toggleSpeaker}
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                  isSpeaker 
-                    ? 'bg-white/20 text-white border border-white/20 shadow-md' 
-                    : 'bg-white/10 text-zinc-400 border border-white/10'
+                  !isSpeaker 
+                    ? 'bg-rose-600/80 text-white shadow-lg shadow-rose-600/30 ring-2 ring-rose-400' 
+                    : 'bg-white/20 text-white border border-white/20 shadow-md ring-2 ring-white/30'
                 }`}
-                title={isSpeaker ? 'Speaker On' : 'Speaker Off'}
+                title={isSpeaker ? 'Mute Speaker' : 'Turn On Speaker'}
               >
                 {isSpeaker ? <Volume2 size={22} /> : <VolumeX size={22} />}
               </button>
-              <span className="text-[11px] font-bold text-zinc-300">Speaker</span>
+              <span className="text-[11px] font-bold text-zinc-300">{isSpeaker ? 'Speaker' : 'Muted'}</span>
             </div>
 
             {/* End Call Button */}

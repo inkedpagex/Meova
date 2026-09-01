@@ -625,7 +625,7 @@ function MessagesContent() {
       ref={chatContainerRef}
       className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs transition-all duration-300 ${
         !showList
-          ? 'fixed inset-x-0 bottom-0 top-[58px] z-40 md:static md:top-auto md:z-0 md:rounded-3xl md:border rounded-none border-0 h-[calc(100dvh-58px)] md:h-[calc(100vh-80px)] flex-row'
+          ? 'fixed inset-x-0 bottom-0 top-[58px] z-[60] md:static md:top-auto md:z-0 md:rounded-3xl md:border rounded-none border-0 h-[calc(100dvh-58px)] md:h-[calc(100vh-80px)] flex-row'
           : 'h-[calc(100dvh-140px)] md:h-[calc(100vh-80px)] rounded-2xl border flex-row relative'
       }`}
     >
@@ -1032,7 +1032,7 @@ function MessagesContent() {
               const isGenuinelyNewChat = !loadingMessages && (activeChat?.isMock || (messages.length === 0 && !activeChat?.last_message));
 
               return (
-                <div className="border-t border-zinc-100 bg-white flex-shrink-0">
+                <div className="border-t border-zinc-100 bg-white flex-shrink-0 pb-safe">
                   {/* First message spark indicator */}
                   {isGenuinelyNewChat && (
                     <div className="flex items-center justify-between px-4 py-2 bg-orange-50/80 border-b border-orange-100 text-[11px] font-bold text-orange-950">
