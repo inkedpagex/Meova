@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import {
   Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert, ShieldCheck,
   Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink, Phone, CheckCircle2, Loader2, Download,
-  Trash2, Heart, Plus, Linkedin, Github
+  Trash2, Heart, Plus
 } from 'lucide-react';
+import { Linkedin, Github } from '../../components/ui/SocialIcons';
 import { QRCodeCanvas } from 'qrcode.react';
 import ProfileEditForm from '../../features/profile/ProfileEditForm';
 import LogoutButton from '../../features/auth/LogoutButton';

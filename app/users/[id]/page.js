@@ -7,8 +7,9 @@ import {
   ArrowLeft, GraduationCap, Users, Star,
   Code, Music, Dumbbell, Camera, Rocket, Palette, Gamepad2,
   BookOpen, Coffee, MessageCircle, Zap, Calendar, MapPin,
-  CheckCircle, Layers, Linkedin, Github, Heart
+  CheckCircle, Layers, Heart
 } from 'lucide-react';
+import { Linkedin, Github } from '../../../components/ui/SocialIcons';
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
 import AcceptBookingButton from '../../../features/users/AcceptBookingButton';
 import BlockUserButton from '../../../features/users/BlockUserButton';
