@@ -424,6 +424,9 @@ function MessagesContent() {
     }
   }, [currentUid]);
 
+  const isDismissedRef = useRef(false);
+  const initialProcessedRef = useRef(false);
+
   const openChatWithUser = useCallback((targetUid, targetName = null, targetPhoto = null) => {
     if (!currentUid) return;
     setShowNewMessageModal(false);
@@ -433,7 +436,6 @@ function MessagesContent() {
 
     if (existing) {
       openChat(existing);
-      router.replace(`/messages?uid=${targetUid}`);
     } else {
       const mockChat = {
         id: targetChatId,
@@ -449,34 +451,31 @@ function MessagesContent() {
       setMessages([]);
       setLoadingMessages(false);
       setShowList(false);
-      router.replace(`/messages?uid=${targetUid}`);
     }
-  }, [currentUid, chats, openChat, router]);
+  }, [currentUid, chats, openChat]);
 
-  const processedParamRef = useRef(null);
-
-  // Auto-open chat via query param
+  // Auto-open chat via query param only once on mount / initial load
   useEffect(() => {
+    if (isDismissedRef.current) return;
     if (!targetParam || !currentUid || loadingChats) return;
-    if (processedParamRef.current === targetParam && activeChatId) return;
+    if (initialProcessedRef.current) return;
+
+    initialProcessedRef.current = true;
 
     const existingById = chats.find(c => c.id === targetParam);
     if (existingById) {
-      processedParamRef.current = targetParam;
       openChat(existingById);
       return;
     }
 
     const studentById = suggestedStudents.find(s => s.id === targetParam);
     if (studentById) {
-      processedParamRef.current = targetParam;
       openChatWithUser(studentById.id, studentById.full_name || studentById.username);
       return;
     }
 
     const isUidParam = searchParams.has('uid') || searchParams.has('user');
     if (isUidParam) {
-      processedParamRef.current = targetParam;
       openChatWithUser(targetParam);
       return;
     }
@@ -490,11 +489,22 @@ function MessagesContent() {
       last_message: 'Welcome to the group chat!',
       last_message_at: new Date().toISOString(),
     };
-    processedParamRef.current = targetParam;
     setActiveChatId(groupChatObj.id);
     setActiveChat(groupChatObj);
     setShowList(false);
-  }, [targetParam, currentUid, loadingChats, chats, suggestedStudents, openChat, openChatWithUser, activeChatId, searchParams]);
+  }, [targetParam, currentUid, loadingChats, chats, suggestedStudents, openChat, openChatWithUser, searchParams]);
+
+  const handleBack = () => {
+    isDismissedRef.current = true;
+    setShowList(true);
+    setActiveChatId(null);
+    setActiveChat(null);
+    setMessages([]);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', '/messages');
+    }
+    router.replace('/messages');
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -884,17 +894,11 @@ function MessagesContent() {
                   <div className="flex items-center gap-3 min-w-0">
                     <button
                       type="button"
-                      onClick={() => { 
-                        setShowList(true); 
-                        setActiveChatId(null); 
-                        setActiveChat(null); 
-                        if (searchParams.has('uid') || searchParams.has('user') || searchParams.has('group')) {
-                          router.replace('/messages');
-                        }
-                      }}
-                      className="md:hidden p-1.5 -ml-1 rounded-full hover:bg-zinc-100 transition-colors text-zinc-900"
+                      onClick={handleBack}
+                      className="md:hidden p-2 -ml-2 rounded-full hover:bg-zinc-100 active:bg-zinc-200 transition-colors text-zinc-900 cursor-pointer flex items-center justify-center flex-shrink-0"
+                      title="Back"
                     >
-                      <ArrowLeft className="w-5 h-5" />
+                      <ArrowLeft className="w-5 h-5 text-zinc-900" strokeWidth={2.5} />
                     </button>
 
                     <div className="relative">

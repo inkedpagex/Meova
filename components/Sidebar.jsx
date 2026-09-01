@@ -511,7 +511,7 @@ export default function Sidebar({ user }) {
       </aside>
 
       {/* ── Mobile bottom tab bar ───────────── */}
-      {!(AUTH_PATHS.includes(pathname) || (pathname?.startsWith('/messages/') && pathname !== '/messages') || pathname?.startsWith('/admin') || isKeyboardOpen) && (
+      {!(AUTH_PATHS.includes(pathname) || pathname?.startsWith('/admin') || isKeyboardOpen) && (
         <nav 
           suppressHydrationWarning
           className="md:hidden hide-on-keyboard fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-white/95 backdrop-blur-xl border-t border-zinc-200/60 shadow-[0_-4px_25px_rgba(0,0,0,0.05)]"

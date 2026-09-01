@@ -3,9 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  Search, Check, MapPin, Zap, Coffee, BookOpen, Activity, Music,
-  Layers, Camera, Trophy, Users, Palette, Star,
-  AlertTriangle, X, Calendar, MessageSquare
+  Search, Check, MapPin, Zap, Coffee, BookOpen, Activity,
+  Star, AlertTriangle, X, MessageSquare, Calendar
 } from 'lucide-react';
 import useSWR from 'swr';
 import { useUserContext } from '../../components/providers/UserProvider';
@@ -25,7 +24,7 @@ const INTEREST_COLORS = {
   'default': '#F05A00',
 };
 
-const FILTERS = ['All', 'People', 'Communities', 'Tournaments'];
+const FILTERS = ['All', 'Live on Campus', 'Engineering', 'Management', 'Design', 'AI & Tech'];
 
 // ── Algolia Search Hook ───────────────────────────────────────────────────────
 // Gracefully falls back to local data if Algolia is not configured
@@ -108,16 +107,15 @@ export default function DiscoverClient() {
   const interestParam = searchParams ? searchParams.get('interest') || searchParams.get('category') : null;
   const { user: currentUser, people: contextPeople } = useUserContext();
   
-  const [activeFilter, setActiveFilter] = useState(interestParam ? 'People' : 'All');
+  const [activeFilter, setActiveFilter] = useState('All');
   const [search, setSearch] = useState(interestParam || '');
   const [connectedIds, setConnectedIds] = useState(new Set());
-  const [joinedIds, setJoinedIds] = useState(new Set());
 
   useEffect(() => {
     if (interestParam) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearch(interestParam);
-      setActiveFilter('People');
+      setActiveFilter('All');
     }
   }, [interestParam]);
   
@@ -142,13 +140,10 @@ export default function DiscoverClient() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
-  // SWR Hooks for caching and instant data fetching
-  const { data: circlesData } = useSWR('/api/circles', fetcher);
+  // SWR Hook for instant users data fetching
   const { data: usersData } = useSWR('/api/users', fetcher);
   const isPeopleLoading = usersData === undefined;
   
-  const circles = circlesData?.circles || [];
-  const isCirclesLoading = circlesData === undefined;
   // Algolia search
   const { peopleResults, experienceResults, isSearching } = useAlgoliaSearch(search);
   const isAlgoliaSearch = search.length >= 2 && !!ALGOLIA_APP_ID;
@@ -164,13 +159,6 @@ export default function DiscoverClient() {
         : dbUsers.filter(u => u.isIdOn !== false);
 
       setPeople(filteredUsers);
-
-      const savedJoined = localStorage.getItem('Meova_disc_joined');
-      if (savedJoined) {
-        try {
-          setJoinedIds(new Set(JSON.parse(savedJoined)));
-        } catch {}
-      }
     }
   }, [currentUser, contextPeople, usersData]);
 
@@ -189,19 +177,7 @@ export default function DiscoverClient() {
         return;
       }
     } catch {}
-    router.push(`/messages?user=${encodeURIComponent(person.full_name)}`);
-  };
-
-  const handleJoinCommunity = (c) => {
-    confetti({ particleCount: 40, spread: 40, origin: { y: 0.6 } });
-    setJoinedIds(prev => {
-      const next = new Set([...prev, c.id]);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('Meova_disc_joined', JSON.stringify([...next]));
-      }
-      return next;
-    });
-    setTimeout(() => router.push(`/messages?user=${encodeURIComponent(c.name)}`), 500);
+    router.push(`/messages?uid=${person.id}`);
   };
 
   const getAvatar = (p) => getUserAvatarUrl(p) || getCartoonAvatar(p.full_name || p.id);
@@ -229,6 +205,15 @@ export default function DiscoverClient() {
     });
 
     const fullList = sorted.filter(p => {
+      if (activeFilter === 'Live on Campus' && !p.isLiveOnCampus) return false;
+      if (activeFilter !== 'All' && activeFilter !== 'Live on Campus') {
+        const branch = (p.branch || '').toLowerCase();
+        const dept = (p.department || '').toLowerCase();
+        const bio = (p.bio || '').toLowerCase();
+        const filter = activeFilter.toLowerCase();
+        const match = branch.includes(filter) || dept.includes(filter) || bio.includes(filter) || (p.interests || []).some(i => i.toLowerCase().includes(filter));
+        if (!match) return false;
+      }
       if (!search || search.length < 2 || isAlgoliaSearch) return true;
       const q = search.toLowerCase();
       const nameMatch = p.full_name?.toLowerCase().includes(q);
@@ -429,91 +414,13 @@ export default function DiscoverClient() {
     );
   };
 
-  /* ─── Communities ─── */
-  const renderCommunitiesSection = () => {
-    const list = circles.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || (c.category || '').toLowerCase().includes(search.toLowerCase()));
-
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-[15px] font-black text-zinc-950">Communities</h2>
-          <span className="text-[11px] font-bold text-[#F05A00]">{list.length} groups</span>
-        </div>
-
-        {isCirclesLoading ? (
-          <div className="grid grid-cols-2 gap-3">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="p-4 rounded-2xl flex flex-col items-center bg-white border border-zinc-100">
-                <Skeleton variant="rectangular" className="w-14 h-14 rounded-2xl mb-3" />
-                <Skeleton variant="text" className="w-20 h-4 mb-1" />
-                <Skeleton variant="text" className="w-16 h-3 mb-3" />
-                <Skeleton variant="rectangular" className="w-full h-8 rounded-xl" />
-              </div>
-            ))}
-          </div>
-        ) : list.length === 0 ? (
-          <div className="rounded-2xl p-10 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
-            <Users size={24} className="text-[#F05A00]" />
-            <span>No communities created yet.</span>
-            <button onClick={() => router.push('/circles')} className="mt-2 px-4 py-2 bg-[#F05A00] hover:bg-[#D94F00] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition-all">
-              Browse Communities
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {list.map(c => {
-              const isJoined = joinedIds.has(c.id);
-              return (
-                <div key={c.id}
-                  className="p-4 rounded-2xl flex flex-col items-center text-center cursor-pointer transition-all hover:shadow-sm active:scale-[0.98] bg-white border border-zinc-100"
-                  onClick={() => isJoined ? router.push('/circles') : handleJoinCommunity(c)}>
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 bg-orange-50 border border-orange-100 text-[#F05A00]">
-                    <Users size={24} strokeWidth={2} />
-                  </div>
-                  <span className="text-[12px] font-black text-zinc-950">{c.name}</span>
-                  <span className="text-[9px] font-semibold text-zinc-400 mt-0.5">{(c.member_count || 0).toLocaleString()} members</span>
-                  <div className="mt-2">
-                    <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">Free</span>
-                  </div>
-                  <button className={`mt-3 w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95 ${
-                    isJoined ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-[#F05A00] hover:bg-[#D94F00] text-white'
-                  }`}>
-                    {isJoined ? 'Open' : 'Join'}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  /* ─── Tournaments ─── */
-  const renderTournamentsSection = () => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-[15px] font-black text-zinc-950">Live Tournaments</h2>
-        <span className="text-[11px] font-bold text-[#F05A00]">0 events</span>
-      </div>
-      <div className="rounded-2xl p-12 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
-        <Trophy size={28} className="text-[#F05A00]" />
-        <span>No campus tournaments scheduled yet.</span>
-      </div>
-    </div>
-  );
-
-  const showPeople = activeFilter === 'All' || activeFilter === 'People';
-  const showComm = activeFilter === 'All' || activeFilter === 'Communities';
-  const showTourn = activeFilter === 'All' || activeFilter === 'Tournaments';
-
   return (
     <div className="space-y-5 pt-[68px] md:pt-4 px-4 max-w-[640px] mx-auto pb-24">
       {/* Search */}
       <div className="relative">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400" />
         <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Search people, circles, gigs..."
+          placeholder="Search students by name, branch, skills..."
           className="w-full pl-11 pr-10 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all bg-zinc-50 border border-zinc-200 text-zinc-900 focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 focus:bg-white" />
         {search && (
           <button 
@@ -545,10 +452,8 @@ export default function DiscoverClient() {
         {FILTERS.map(f => chip(f))}
       </div>
 
-      {/* Sections */}
-      {showPeople && renderPeopleSection()}
-      {showComm && renderCommunitiesSection()}
-      {showTourn && renderTournamentsSection()}
+      {/* Student List */}
+      {renderPeopleSection()}
     </div>
   );
 }

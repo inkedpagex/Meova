@@ -18,6 +18,16 @@ import NetworkWrapper from '../components/NetworkWrapper';
 import BlockedPage from './blocked/page';
 import TopProgressBar from '../components/TopProgressBar';
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
+  themeColor: '#F05A00',
+};
+
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://meovaweb.vercel.app'),
   title: 'Meova — Your Campus Life',
