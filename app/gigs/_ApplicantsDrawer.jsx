@@ -20,7 +20,7 @@ function ApplicantCard({ app, gigId, onUpdate }) {
       });
       const json = await res.json();
       if (!res.ok) { toast.error(json.error || 'Failed'); return; }
-      toast.success(action === 'accept' ? '✅ Accepted! Sparks held in escrow.' : 'Applicant rejected.');
+      toast.success(action === 'accept' ? 'Accepted! Sparks held in escrow.' : 'Applicant rejected.');
       onUpdate();
     } catch { toast.error('Network error.'); }
     finally { setLoading(null); }
@@ -81,7 +81,7 @@ function ApplicantCard({ app, gigId, onUpdate }) {
                 <MessageCircle size={14} /> Message
               </Link>
               <button onClick={() => {
-                toast.success('Initiating secure private call...', { icon: '📞' });
+                toast.success('Initiating secure private call...');
                 setTimeout(() => window.location.href = `/messages?uid=${app.applicantId}`, 500);
               }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-500 text-white rounded-xl text-xs font-black hover:bg-emerald-600 transition-colors shadow-sm cursor-pointer">
                 <Phone size={14} /> Secure Call
@@ -125,7 +125,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
       });
       const json = await res.json();
       if (!res.ok) { toast.error(json.error || 'Failed'); return; }
-      toast.success(`✅ Gig complete! ${json.payout}⚡ paid to freelancer.`);
+      toast.success(`Gig complete! ${json.payout} Sparks paid to freelancer.`);
       mutate();
       onClose();
     } catch { toast.error('Network error'); }
@@ -139,7 +139,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-zinc-100 max-h-[85vh] flex flex-col"
+        className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-zinc-100 max-h-[85vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -148,7 +148,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
             <h3 className="text-sm font-black text-zinc-900">Applicants</h3>
             <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">{gig.title}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-zinc-100 text-zinc-400">
+          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-zinc-100 text-zinc-400 cursor-pointer">
             <X size={16} />
           </button>
         </div>
@@ -176,7 +176,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
                   onClick={() => setCompleting(true)}
                   className="w-full py-3 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white text-xs font-black active:scale-95 transition-all cursor-pointer shadow-xs"
                 >
-                  Mark as Completed & Release Sparks ⚡
+                  Mark as Completed & Release Sparks
                 </button>
               ) : (
                 <form noValidate onSubmit={handleComplete} className="space-y-3">

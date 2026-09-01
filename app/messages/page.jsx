@@ -135,7 +135,7 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
             {student.full_name || 'Student'}
           </p>
           <p className="text-xs font-semibold text-zinc-400 truncate mt-0.5">
-            @{student.username || 'gla_student'} · {student.branch || 'Campus'}
+            @{student.username || 'campus_student'} · {student.branch || 'Campus'}
           </p>
         </div>
       </div>
@@ -564,7 +564,7 @@ function MessagesContent() {
         </div>
         <h2 className="text-xl font-black text-zinc-900 mb-1">Sign in to Message</h2>
         <p className="text-xs text-zinc-500 max-w-xs mb-6">
-          Connect with GLA campus students directly.
+          Connect with campus students directly.
         </p>
         <Link href="/" className="px-6 py-2.5 rounded-full bg-[#F05A00] text-white font-black text-xs hover:bg-[#D94F00] transition-all">
           Go Home
@@ -716,7 +716,7 @@ function MessagesContent() {
               </div>
 
               {/* 1-Tap Quick Chat Suggestions Card */}
-              <div className="bg-white rounded-3xl border border-zinc-200/80 p-5 shadow-xs space-y-4">
+              <div className="bg-white rounded-2xl border border-zinc-200/80 p-5 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -899,7 +899,7 @@ function MessagesContent() {
                 const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
                 return (
                   <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                    <div className="w-20 h-20 rounded-full bg-[#fcf6fa] flex items-center justify-center overflow-hidden mb-3 border border-[#f5ebf4]">
+                    <div className="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden mb-3 border border-orange-100">
                       <img 
                         src={avatarUrl(otherId, otherName, otherPhoto)} 
                         alt={otherName} 
@@ -1025,7 +1025,7 @@ function MessagesContent() {
       {/* NEW MESSAGE MODAL */}
       {showNewMessageModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-zinc-100 anim-fade-in flex flex-col max-h-[85vh]">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-zinc-100 anim-fade-in flex flex-col max-h-[85vh]">
             <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
               <h2 className="text-base font-black text-zinc-900">New Message</h2>
               <button 

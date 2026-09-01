@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, AlertCircle, Zap } from 'lucide-react';
 import Link from 'next/link';
 
 export default function WithdrawPage() {
@@ -119,8 +119,8 @@ export default function WithdrawPage() {
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6, fontWeight: '600' }}>
               Cash out your Creator Earnings to UPI or bank.
             </p>
-            <p style={{ fontSize: 13, marginTop: 4, fontWeight: 800 }}>
-              Available: <span style={{ color: '#22c55e' }}>{(creatorBalance || 0).toLocaleString()} ⚡ Creator Sparks</span>
+            <p style={{ fontSize: 13, marginTop: 4, fontWeight: 800 }} className="flex items-center gap-1">
+              Available: <span style={{ color: '#22c55e' }} className="inline-flex items-center gap-1">{(creatorBalance || 0).toLocaleString()} <Zap size={13} className="fill-emerald-500 text-emerald-500" /> Creator Sparks</span>
             </p>
           </div>
 
@@ -172,8 +172,8 @@ export default function WithdrawPage() {
                     required
                     style={{ width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 12, padding: '12px 14px', color: 'var(--text-primary)', fontSize: 14, outline: 'none' }}
                   />
-                  <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 13, fontWeight: 800, color: 'var(--text-muted)' }}>
-                    ⚡
+                  <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+                    <Zap size={14} className="fill-orange-400 text-orange-400" />
                   </span>
                 </div>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5, fontWeight: '700' }}>

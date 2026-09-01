@@ -7,7 +7,7 @@
 // and purge the old cache — no manual "Clear Cache" needed by anyone.
 // Just update this timestamp whenever you deploy a major change.
 
-const CACHE_VERSION = '2026-09-01T18:37'; // ← update this on deploy
+const CACHE_VERSION = '2026-09-01T19:36'; // ← update this on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/manifest.json',
@@ -53,7 +53,7 @@ self.addEventListener('push', (event) => {
     body,
     icon: '/icon-512.png',
     badge: '/icon-512.png',
-    tag: 'meova-push',
+    tag: data.tag || `meova-notif-${Date.now()}`,
     renotify: true,
     vibrate: [200, 100, 200],
     data: { url: link },

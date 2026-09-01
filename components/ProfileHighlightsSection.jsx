@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -85,13 +85,13 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
               <div 
                 className={`w-14 h-14 rounded-full transition-all ${
                   isSelected 
-                    ? 'p-[2.5px] bg-gradient-to-tr from-[#F05A00] via-[#9e4685] to-[#F05A00] shadow-md shadow-[#9e4685]/25' 
+                    ? 'p-[2.5px] bg-[#F05A00] shadow-md shadow-[#F05A00]/25' 
                     : 'p-[2px] border-2 border-zinc-200 group-hover:border-orange-300'
                 }`}
               >
                 <div 
                   className={`w-full h-full rounded-full flex items-center justify-center transition-colors ${
-                    isSelected ? 'bg-[#fcf6fa]' : 'bg-zinc-50'
+                    isSelected ? 'bg-orange-50' : 'bg-zinc-50'
                   }`}
                   style={{ color: meta.color }}
                 >
@@ -110,14 +110,14 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
 
       {/* Suggested Students Drawer / Section */}
       {selectedInterest && (
-        <div className="mt-4 p-4 rounded-3xl bg-[#fcf6fa]/60 border border-[#f5ebf4]/80 anim-fade-in">
+        <div className="mt-4 p-4 rounded-2xl bg-orange-50/60 border border-orange-100 anim-fade-in">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#F05A00]" />
               <h3 className="text-xs font-black text-zinc-900 tracking-tight">
                 Students into <span className="text-[#F05A00]">{selectedInterest}</span>
               </h3>
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#f5ebf4] text-[#D94F00]">
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-orange-100 text-[#F05A00]">
                 {matchingUsers.length}
               </span>
             </div>
@@ -131,7 +131,7 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
           </div>
 
           {matchingUsers.length === 0 ? (
-            <div className="text-center py-6 bg-white/80 rounded-2xl border border-[#f5ebf4]">
+            <div className="text-center py-6 bg-white/80 rounded-2xl border border-orange-100">
               <p className="text-xs font-semibold text-zinc-500">
                 No other students tagged with <span className="font-bold text-[#F05A00]">{selectedInterest}</span> yet.
               </p>
@@ -142,9 +142,9 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
                 <div
                   key={student.id}
                   onClick={() => router.push(`/users/${student.id}`)}
-                  className="w-[150px] flex-shrink-0 bg-white rounded-2xl p-3 border border-[#f5ebf4]/80 flex flex-col items-center text-center cursor-pointer hover:border-orange-300 hover:shadow-md transition-all group"
+                  className="w-[150px] flex-shrink-0 bg-white rounded-2xl p-3 border border-zinc-100 flex flex-col items-center text-center cursor-pointer hover:border-orange-300 hover:shadow-md transition-all group"
                 >
-                  <div className="w-12 h-12 rounded-full overflow-hidden mb-2 relative border-2 border-[#eac5e0] group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-full overflow-hidden mb-2 relative border-2 border-orange-100 group-hover:scale-105 transition-transform">
                     <img 
                       src={getAvatar(student)} 
                       alt={student.full_name || 'Student'} 

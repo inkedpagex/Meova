@@ -134,7 +134,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
           onClick={() => !loading && setOpen(false)}
         >
           <div
-            className="relative w-full max-w-sm rounded-3xl p-6 anim-scale-in max-h-[100dvh] overflow-y-auto no-scrollbar"
+            className="relative w-full max-w-sm rounded-2xl p-6 anim-scale-in max-h-[100dvh] overflow-y-auto no-scrollbar"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -154,9 +154,9 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                 <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-7 h-7 text-emerald-400" />
                 </div>
-                <h3 className="text-lg font-black text-[var(--text-primary)] mb-2">Cabin Spot Reserved!</h3>
+                <h3 className="text-lg font-black text-[var(--text-primary)] mb-2">Campus Meetup Requested!</h3>
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-6 font-semibold">
-                  Your reservation request has been sent to <strong className="text-[var(--text-primary)]">{targetName}</strong>. {COFFEE_COST} Sparks have been deducted from your wallet. You&apos;ll receive a slot confirmation in dynamic alerts soon!
+                  Your meetup request has been sent to <strong className="text-[var(--text-primary)]">{targetName}</strong>. {COFFEE_COST} Sparks have been deducted from your wallet. You&apos;ll receive a slot confirmation in dynamic alerts soon!
                 </p>
                 <button
                   onClick={() => {

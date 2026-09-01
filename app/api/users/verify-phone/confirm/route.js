@@ -67,5 +67,5 @@ export async function POST(request) {
     supabaseAdmin.from('phone_otps').delete().eq('user_id', user.uid),
   ]);
 
-  return NextResponse.json({ ok: true, message: 'Phone number verified successfully! ✅' });
+  return NextResponse.json({ ok: true, message: 'Phone number verified successfully!' });
 }

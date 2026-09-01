@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '../../../../lib/supabase/admin';
+import { creditSparks } from '../../../../lib/wallet';
 
 const CRON_SECRET = process.env.CRON_SECRET || 'Meova-cron-secret-2024';
 const EXPIRY_DAYS = 14;
@@ -26,13 +27,38 @@ export async function GET(request) {
     const eligible = gigs || [];
 
     for (const gig of eligible) {
+      const now = new Date().toISOString();
       await supabaseAdmin
         .from('gigs')
         .update({
           status: 'expired',
-          expired_at: new Date().toISOString(),
+          expired_at: now,
         })
         .eq('id', gig.id);
+
+      const reward = gig.reward_sparks || parseInt(gig.budget) || 0;
+      const hostId = gig.host_id || gig.author_id;
+
+      if (reward > 0 && hostId) {
+        await creditSparks(
+          hostId,
+          reward,
+          'purchased',
+          'dispute_refund',
+          `Refund for expired gig: "${gig.title}"`,
+          gig.id
+        ).catch(e => console.error('[expire-gigs refund error]', e.message));
+
+        await supabaseAdmin.from('notifications').insert({
+          user_id: hostId,
+          sender_id: 'system',
+          title: 'Gig Expired & Sparks Refunded',
+          message: `Your gig "${gig.title}" has expired without being assigned. ${reward} Sparks have been refunded to your wallet.`,
+          type: 'alert',
+          read: false,
+          created_at: now,
+        }).catch(() => {});
+      }
 
       expired++;
     }

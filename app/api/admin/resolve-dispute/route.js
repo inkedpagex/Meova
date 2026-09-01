@@ -25,7 +25,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Booking is not in disputed status' }, { status: 400 });
     }
 
-    const amount = booking.price || booking.sparks_amount || 50;
+    const amount = Number(booking.sparks_spent || booking.price || booking.sparks_amount || 50);
 
     if (action === 'refund') {
       await supabaseAdmin

@@ -362,13 +362,13 @@ export default function CampusGigsPage() {
       {/* ── POST A GIG MODAL ── */}
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }} onClick={() => setShowModal(false)}>
-          <div className="w-full max-w-md bg-white rounded-3xl p-6 space-y-4 shadow-2xl border border-[#f5ebf4] max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md bg-white rounded-2xl p-6 space-y-4 shadow-2xl border border-zinc-100 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
               <div>
                 <h3 className="text-sm font-black text-zinc-900">Post a Campus Gig</h3>
                 <p className="text-[10px] font-semibold text-zinc-400">Hire student freelancers & creators</p>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-1 rounded-full text-zinc-400 hover:bg-zinc-100"><X size={16} /></button>
+              <button onClick={() => setShowModal(false)} className="p-1 rounded-full text-zinc-400 hover:bg-zinc-100 cursor-pointer"><X size={16} /></button>
             </div>
             <form noValidate onSubmit={handleCreateGig} className="space-y-3.5">
               <div>
@@ -391,7 +391,7 @@ export default function CampusGigsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Reward (Sparks ⚡)</label>
+                  <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Reward (Sparks)</label>
                   <input type="text" inputMode="numeric" pattern="[0-9]*" value={gigBudget} onChange={handleBudgetChange} placeholder="300" className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-black text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50" />
                 </div>
                 <div>
@@ -403,10 +403,11 @@ export default function CampusGigsPage() {
                 <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Description</label>
                 <textarea required value={gigDesc} onChange={e => setGigDesc(e.target.value)} placeholder="Describe tasks, deliverables, and skill requirements…" className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50 min-h-[80px]" />
               </div>
-              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3">
-                <p className="text-[11px] text-amber-700 font-bold">⚡ {gigBudget || '0'} Sparks will be held in escrow when you accept an applicant.</p>
+              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3 flex items-center gap-2">
+                <Zap size={14} className="fill-amber-500 text-amber-500 flex-shrink-0" />
+                <p className="text-[11px] text-amber-800 font-bold">{gigBudget || '0'} Sparks will be held in escrow when you accept an applicant.</p>
               </div>
-              <button type="submit" disabled={isSubmitting} className="w-full py-3.5 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-[#F05A00] to-[#F05A00] hover:opacity-90 shadow-md transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50">
+              <button type="submit" disabled={isSubmitting} className="w-full py-3.5 rounded-2xl text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] shadow-md transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50">
                 <Sparkles size={15} />{isSubmitting ? 'Publishing…' : 'Publish Gig to Campus'}
               </button>
             </form>

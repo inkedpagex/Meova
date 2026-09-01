@@ -14,6 +14,7 @@ import LogoutButton from '../../features/auth/LogoutButton';
 import { getUserAvatarUrl } from '../../utils/avatar';
 import { updateProfileAdmin } from '../../features/profile/profile.actions';
 import { toast } from '../../lib/toast';
+import PWAInstallModal from '../../components/PWAInstallModal';
 
 const InstagramIcon = ({ size = 14 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -87,6 +88,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
 
   // Phone verification
   const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [phoneInput, setPhoneInput] = useState('');
   const [phoneOtp, setPhoneOtp] = useState('');
   const [phoneStep, setPhoneStep] = useState('input'); // 'input' | 'otp'
@@ -123,14 +125,8 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
   const handleManualInstall = async () => {
     if (typeof window === 'undefined') return;
     localStorage.removeItem('Meova_pwa_dismissed');
-    
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if (isIOS) {
-      alert('To install on iPhone:\n1. Tap the Share button in Safari\n2. Scroll down and tap "Add to Home Screen".');
-      return;
-    } 
 
-    // For Android/Chrome: Try to trigger the native prompt directly if we caught it earlier
+    // 1. If browser has captured native prompt, trigger 1-click install dialog
     if (window.deferredPWAInstallPrompt) {
       try {
         window.deferredPWAInstallPrompt.prompt();
@@ -138,15 +134,15 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
         if (outcome === 'accepted') {
           window.deferredPWAInstallPrompt = null;
           setIsStandalone(true);
+          return;
         }
       } catch (err) {
         console.error('PWA prompt error:', err);
       }
-    } else {
-      // If the browser didn't give us the prompt (e.g. user dismissed native prompt previously, 
-      // so Chrome is blocking it via heuristics), we must fallback to manual instructions.
-      alert('To install on Android:\n1. Tap the 3-dot menu (⋮) in Chrome (top right)\n2. Tap "Install App" or "Add to Home screen".');
     }
+
+    // 2. Otherwise open the branded step-by-step install guide modal
+    setShowInstallGuide(true);
   };
 
   const requestLocation = () => {
@@ -158,8 +154,19 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
 
   const requestNotifications = async () => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
-      const p = await Notification.requestPermission();
-      setNotifStatus(p);
+      try {
+        const p = await Notification.requestPermission();
+        setNotifStatus(p);
+        if (p === 'granted') {
+          window.dispatchEvent(new Event('Meova_notif_granted'));
+          if (profile?.id) {
+            const { registerPushToken } = await import('../../lib/useFCM');
+            await registerPushToken(profile.id);
+          }
+        }
+      } catch (err) {
+        console.warn('Notification permission error:', err);
+      }
     }
   };
 
@@ -674,7 +681,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                   {/* Notifications */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-pink-600">
+                      <div className="w-8 h-8 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-[#F05A00]">
                         <Bell size={14} />
                       </div>
                       <div>
@@ -683,7 +690,29 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                       </div>
                     </div>
                     {notifStatus === 'granted' ? (
-                      <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Enabled</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await fetch('/api/notifications', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  title: 'Meova Alert',
+                                  message: 'Push notifications are working on your device!',
+                                  type: 'system',
+                                  url: '/profile',
+                                }),
+                              });
+                            } catch {}
+                          }}
+                          className="text-[9px] font-black text-[#F05A00] bg-orange-50 hover:bg-orange-100 border border-orange-200 px-2 py-1 rounded-lg uppercase tracking-wider transition-colors active:scale-95 cursor-pointer"
+                        >
+                          Test Push
+                        </button>
+                        <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Enabled</span>
+                      </div>
                     ) : notifStatus === 'denied' ? (
                       <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
@@ -905,6 +934,12 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
           </div>
         </div>
       )}
+
+      {/* ── PWA Install Guide Modal (Android / iOS / PC) ───────────────────── */}
+      <PWAInstallModal
+        isOpen={showInstallGuide}
+        onClose={() => setShowInstallGuide(false)}
+      />
     </>
   );
 }

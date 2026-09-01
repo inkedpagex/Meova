@@ -282,7 +282,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
     <div className="space-y-5 pb-24 pt-2">
 
       {/* Host a Community CTA Banner */}
-      <div className="bg-gradient-to-r from-[#4a1d00] via-[#7c2f00] to-[#a03b00] rounded-3xl p-5 text-white shadow-xl shadow-orange-950/20 border border-[#F05A00]/30 flex items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-[#4a1d00] via-[#7c2f00] to-[#a03b00] rounded-2xl p-5 text-white shadow-xl shadow-orange-950/20 border border-[#F05A00]/30 flex items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-1.5">
             <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-white/10 text-orange-200 border border-white/20">
@@ -334,7 +334,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
 
       {/* Featured community banner */}
       {featured && !search && activeFilter === 'All' && (
-        <div className="relative rounded-3xl p-5 overflow-hidden"
+        <div className="relative rounded-2xl p-5 overflow-hidden"
           style={{ background: '#F05A00', boxShadow: '0 8px 32px rgba(240,90,0,0.25)' }}>
           <div className="absolute top-0 right-0 w-36 h-36 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2 bg-white" />
           <div className="relative z-10">
@@ -389,7 +389,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
             <div
               key={circle.id}
               onClick={() => handleJoinClick(circle)}
-              className="rounded-3xl p-4 sm:p-4.5 flex items-center justify-between gap-3 transition-all cursor-pointer group"
+              className="rounded-2xl p-4 sm:p-4.5 flex items-center justify-between gap-3 transition-all cursor-pointer group"
               style={{
                 background: '#ffffff',
                 border: '1px solid #f0f0f0',
@@ -544,11 +544,11 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
           onClick={() => setRulesCircle(null)}
         >
           <div 
-            className="w-full max-w-sm bg-white rounded-3xl p-6 space-y-4 animate-in fade-in zoom-in duration-200 shadow-2xl border border-[#f5ebf4]"
+            className="w-full max-w-sm bg-white rounded-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-200 shadow-2xl border border-zinc-100"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 border-b border-zinc-100 pb-3">
-              <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0 border border-orange-100">
                 <Users size={18} className="text-[#F05A00]" />
               </div>
               <div className="flex-1 min-w-0">
@@ -561,15 +561,15 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
               <h4 className="text-xs font-black text-zinc-800 uppercase tracking-wider">Community Guidelines & Rules:</h4>
               <ul className="space-y-2 text-xs font-medium text-zinc-600">
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#D94F00] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">1</span>
+                  <span className="w-4 h-4 rounded-full bg-orange-50 text-[#F05A00] border border-orange-100 flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">1</span>
                   <span><strong>Respect & Kindness:</strong> Maintain constructive, friendly discussions with campus peers.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#D94F00] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">2</span>
+                  <span className="w-4 h-4 rounded-full bg-orange-50 text-[#F05A00] border border-orange-100 flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">2</span>
                   <span><strong>No Spam or Promo:</strong> Share relevant projects, meets, or notes only.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[#f5ebf4] text-[#D94F00] flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">3</span>
+                  <span className="w-4 h-4 rounded-full bg-orange-50 text-[#F05A00] border border-orange-100 flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5">3</span>
                   <span><strong>Campus Safety:</strong> Keep meetups in verified public campus spots.</span>
                 </li>
               </ul>

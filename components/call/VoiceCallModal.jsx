@@ -102,7 +102,54 @@ export default function VoiceCallModal({
       }
     };
 
-    // Signaling listener
+    // Helper: Caller creates and sends offer
+    const sendOffer = async () => {
+      try {
+        if (!pc || pc.signalingState === 'closed') return;
+        const offer = await pc.createOffer({ offerToReceiveAudio: true });
+        await pc.setLocalDescription(offer);
+        channel.send({
+          type: 'broadcast',
+          event: 'call-offer',
+          payload: { offer, callerId: currentUserId, roomId },
+        });
+      } catch (err) {
+        console.error('[WebRTC] createOffer error:', err);
+      }
+    };
+
+    // Helper: Receiver handles offer and sends answer
+    const handleOffer = async (offerPayload) => {
+      try {
+        if (!pc || pc.signalingState === 'closed' || !offerPayload) return;
+        if (!localStreamRef.current) {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+          localStreamRef.current = stream;
+          stream.getTracks().forEach(track => pc.addTrack(track, stream));
+        }
+        await pc.setRemoteDescription(new RTCSessionDescription(offerPayload));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        channel.send({
+          type: 'broadcast',
+          event: 'call-accept',
+          payload: { answer, responderId: currentUserId, roomId },
+        });
+      } catch (err) {
+        console.error('[WebRTC] handleOffer error:', err);
+      }
+    };
+
+    // ── Realtime Signaling Handlers ──────────────────────────────
+
+    // When receiver is ready, caller generates offer
+    channel.on('broadcast', { event: 'call-ready' }, async () => {
+      if (mode === 'outgoing') {
+        await sendOffer();
+      }
+    });
+
+    // When caller receives answer from receiver
     channel.on('broadcast', { event: 'call-accept' }, async ({ payload }) => {
       if (payload.answer && pc.signalingState !== 'closed') {
         try {
@@ -116,6 +163,13 @@ export default function VoiceCallModal({
       }
     });
 
+    // When receiver receives offer from caller
+    channel.on('broadcast', { event: 'call-offer' }, async ({ payload }) => {
+      if (payload.offer && mode === 'incoming') {
+        await handleOffer(payload.offer);
+      }
+    });
+
     channel.on('broadcast', { event: 'call-reject' }, () => {
       endCall('Call declined by peer');
     });
@@ -125,7 +179,7 @@ export default function VoiceCallModal({
     });
 
     channel.on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
-      if (payload.senderId !== currentUserId && payload.candidate && pc.remoteDescription) {
+      if (payload.senderId !== currentUserId && payload.candidate && pc.remoteDescription && pc.signalingState !== 'closed') {
         try {
           await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
         } catch (e) {
@@ -134,7 +188,7 @@ export default function VoiceCallModal({
       }
     });
 
-    // If caller, get user media and create Offer
+    // If caller, get user media immediately
     if (mode === 'outgoing') {
       (async () => {
         try {
@@ -142,14 +196,8 @@ export default function VoiceCallModal({
           localStreamRef.current = stream;
           stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-
-          channel.send({
-            type: 'broadcast',
-            event: 'call-offer',
-            payload: { offer, callerId: currentUserId, roomId },
-          });
+          // Send initial offer
+          await sendOffer();
         } catch (err) {
           console.error('[WebRTC] getUserMedia error:', err);
           toast.error('Microphone permission required for voice calls');
@@ -186,20 +234,14 @@ export default function VoiceCallModal({
       const pc = peerConnectionRef.current;
       if (pc) {
         stream.getTracks().forEach(track => pc.addTrack(track, stream));
+      }
 
-        // Listen for incoming offer or create answer
-        channel.on('broadcast', { event: 'call-offer' }, async ({ payload }) => {
-          if (payload.offer) {
-            await pc.setRemoteDescription(new RTCSessionDescription(payload.offer));
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-
-            channel.send({
-              type: 'broadcast',
-              event: 'call-accept',
-              payload: { answer, responderId: currentUserId, roomId },
-            });
-          }
+      // Send call-ready signal to tell caller to send/resend offer
+      if (channel) {
+        channel.send({
+          type: 'broadcast',
+          event: 'call-ready',
+          payload: { responderId: currentUserId, roomId },
         });
       }
     } catch {

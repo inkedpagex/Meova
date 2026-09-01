@@ -63,7 +63,7 @@ export async function POST(request) {
         reqData.id
       );
 
-      if (creditRes && creditRes.success === false) {
+      if (!creditRes.ok) {
         return NextResponse.json({ error: creditRes.error || 'Failed to credit Sparks' }, { status: 500 });
       }
 
@@ -77,7 +77,7 @@ export async function POST(request) {
       await supabaseAdmin.from('notifications').insert({
         user_id: reqData.user_id,
         sender_id: admin.uid,
-        title: `⚡ ${reqData.sparks} Sparks Added!`,
+        title: `${reqData.sparks} Sparks Added!`,
         message: `Your payment of ₹${reqData.amount_inr || reqData.sparks} was approved. Sparks are now in your wallet!`,
         type: 'sparks',
         read: false,

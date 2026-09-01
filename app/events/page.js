@@ -161,9 +161,9 @@ export default async function EventsPage() {
 
       {/* ── Grid ── */}
       {events.length === 0 ? (
-        <div className="rounded-[2rem] bg-white border border-zinc-100 p-16 text-center shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-[#fcf6fa] flex items-center justify-center mx-auto mb-5">
-            <Calendar size={28} className="text-[#9e4685]" />
+        <div className="rounded-2xl bg-white border border-zinc-100 p-16 text-center shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mx-auto mb-5">
+            <Calendar size={28} className="text-[#F05A00]" />
           </div>
           <p className="text-zinc-900 font-black text-[16px]">No upcoming events</p>
           <p className="text-zinc-400 text-[13px] font-medium mt-2">Check back later or host your own.</p>

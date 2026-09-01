@@ -144,6 +144,10 @@ export default async function RootLayout({ children }) {
               });
             });
           }
+          window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            window.deferredPWAInstallPrompt = e;
+          });
         `}} />
       </body>
     </html>

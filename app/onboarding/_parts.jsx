@@ -26,7 +26,7 @@ function StepBar({ step }) {
             <div className="flex flex-col items-center gap-1">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300 ${
                 done ? 'bg-emerald-500 text-white' :
-                active ? 'bg-[#F05A00] text-white shadow-lg shadow-[#eac5e0]' :
+                active ? 'bg-[#F05A00] text-white shadow-lg shadow-orange-200/50' :
                 'bg-zinc-100 text-zinc-400'
               }`}>
                 {done ? <CheckCircle2 size={16}/> : idx}
@@ -130,10 +130,10 @@ function Step1({ data, onChange, onNext }) {
       <div className="flex flex-col items-center gap-3">
         <div
           onClick={() => !uploading && fileRef.current?.click()}
-          className={`relative w-24 h-24 rounded-3xl overflow-hidden group transition-all hover:scale-105 active:scale-95 bg-[#f3f0ff] ${
+          className={`relative w-24 h-24 rounded-3xl overflow-hidden group transition-all hover:scale-105 active:scale-95 bg-orange-50/50 ${
             uploading ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'
           }`}
-          style={{ border: data.photo_url ? '3px solid #F05A00' : '2px dashed #c4b5fd' }}
+          style={{ border: data.photo_url ? '3px solid #F05A00' : '2px dashed #fed7aa' }}
         >
           {data.photo_url ? (
             <img 
@@ -256,7 +256,7 @@ function Step1({ data, onChange, onNext }) {
       <button
         onClick={onNext} disabled={!canNext}
         className="w-full py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        style={{ background: canNext ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canNext ? '#fff' : '#9ca3af', boxShadow: canNext ? '0 8px 24px rgba(140,53,115,0.3)' : 'none' }}
+        style={{ background: canNext ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canNext ? '#fff' : '#9ca3af', boxShadow: canNext ? '0 8px 24px rgba(240,90,0,0.25)' : 'none' }}
       >
         Continue <ArrowRight size={16}/>
       </button>

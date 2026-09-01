@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Camera } from 'lucide-react';
 
 const DUMMY_WORDS = [
   'random', 'test', 'temp', 'demo', 'asdf', 'qwerty', 'dummy', 'fake',
@@ -80,10 +81,10 @@ export default function InstagramEmbed({ instagramInput }) {
   const embedUrl = `${raw.replace(/\/$/, '')}/embed/`;
 
   return (
-    <div className="rounded-3xl p-5 mb-6 bg-white border border-zinc-100 shadow-xs space-y-3">
+    <div className="rounded-2xl p-5 mb-6 bg-white border border-zinc-100 shadow-xs space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-black uppercase tracking-wider text-zinc-700 flex items-center gap-1.5">
-          <span className="text-[#e1306c]">📸</span> Instagram Vibe
+          <Camera size={14} className="text-[#e1306c]" /> Instagram Vibe
         </h3>
         <a 
           href={raw} 

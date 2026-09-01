@@ -1,17 +1,7 @@
-/**
- * POST /api/users/[id]/tip
- *
- * Sender tips another user exactly 5 Sparks.
- * - Fixed at 5 Sparks (no custom amount — keeps it simple)
- * - Deducts from sender: bonus first, then creator
- * - Credits receiver's `creator` bucket (withdrawable earnings)
- * - 24-hour rate limit: 1 tip per sender→receiver pair per day
- * - Cannot tip yourself
- * - Cannot tip accounts < 3 days old (anti-abuse)
- */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { spendSparks, creditSparks } from '@/lib/wallet';
 import { sendPush } from '@/lib/sendPushNotification';
 
 const TIP_AMOUNT = 5;
@@ -54,7 +44,7 @@ export async function POST(request, { params }) {
       .select('id')
       .eq('user_id', sender.uid)
       .eq('type', 'tip_sent')
-      .eq('to_user_id', receiverId)
+      .eq('reference_id', receiverId)
       .gte('created_at', oneDayAgo)
       .maybeSingle();
 
@@ -64,101 +54,60 @@ export async function POST(request, { params }) {
       }, { status: 429 });
     }
 
-    // Fetch sender wallet
-    const { data: senderWallet, error: walletErr } = await supabaseAdmin
-      .from('wallets')
-      .select('*')
-      .eq('user_id', sender.uid)
-      .maybeSingle();
-
-    if (walletErr || !senderWallet) {
-      return NextResponse.json({ error: 'Your wallet not found' }, { status: 400 });
-    }
-
-    const totalAvailable = (senderWallet.bonus || 0) + (senderWallet.creator || 0);
-    if (totalAvailable < TIP_AMOUNT) {
-      return NextResponse.json({ error: 'Insufficient Sparks to send a tip' }, { status: 400 });
-    }
-
-    // Deduct from sender: bonus first, then creator
-    let remaining = TIP_AMOUNT;
-    const deductBonus = Math.min(senderWallet.bonus || 0, remaining);
-    const newBonus = (senderWallet.bonus || 0) - deductBonus;
-    remaining -= deductBonus;
-    const newCreator = (senderWallet.creator || 0) - remaining;
-
     const senderName = sender.full_name || sender.email?.split('@')[0] || 'Someone';
+
+    // 1. Deduct from sender wallet (bonus -> purchased -> creator)
+    const spendRes = await spendSparks(
+      sender.uid,
+      TIP_AMOUNT,
+      `Tipped ${TIP_AMOUNT} Sparks to ${receiverData.full_name || 'Classmate'}`,
+      'tip_sent',
+      receiverId
+    );
+
+    if (!spendRes.ok) {
+      return NextResponse.json({ error: spendRes.error || 'Insufficient Sparks to send a tip' }, { status: 400 });
+    }
+
+    // 2. Credit to receiver wallet (creator bucket)
+    const creditRes = await creditSparks(
+      receiverId,
+      TIP_AMOUNT,
+      'creator',
+      'tip_received',
+      `Received ${TIP_AMOUNT} Sparks tip from ${senderName}`,
+      sender.uid
+    );
+
+    if (!creditRes.ok) {
+      // Auto-Rollback: Refund sender
+      await creditSparks(
+        sender.uid,
+        TIP_AMOUNT,
+        'purchased',
+        'dispute_refund',
+        'Refund for failed tip transfer',
+        receiverId
+      ).catch(() => {});
+      return NextResponse.json({ error: 'Failed to deliver tip to receiver. Sparks refunded.' }, { status: 500 });
+    }
+
     const now = new Date().toISOString();
 
-    // Execute all writes in parallel (best-effort atomicity via sequential inserts)
-    const [walletUpdateErr, receiverWalletErr, senderTxErr, receiverTxErr, notifErr] = await Promise.all([
-      // 1. Deduct from sender wallet
-      supabaseAdmin
-        .from('wallets')
-        .update({ bonus: newBonus, creator: newCreator, updated_at: now })
-        .eq('user_id', sender.uid)
-        .then(r => r.error),
+    // 3. In-app notification for receiver
+    await supabaseAdmin.from('notifications').insert({
+      user_id: receiverId,
+      sender_id: sender.uid,
+      title: `${senderName} tipped you!`,
+      message: `You received ${TIP_AMOUNT} Sparks. Keep it up!`,
+      type: 'tip_received',
+      read: false,
+      created_at: now,
+    }).catch(() => {});
 
-      // 2. Credit to receiver's creator bucket (upsert in case wallet doesn't exist)
-      supabaseAdmin
-        .from('wallets')
-        .upsert({
-          user_id: receiverId,
-          creator: (0) + TIP_AMOUNT, // will be overridden by rpc if exists
-          lifetime_earned: TIP_AMOUNT,
-          updated_at: now,
-        }, { onConflict: 'user_id', ignoreDuplicates: false })
-        .then(async () => {
-          // Proper increment using rpc
-          return supabaseAdmin.rpc('credit_sparks', {
-            p_user_id: receiverId,
-            p_amount: TIP_AMOUNT,
-            p_type: 'creator',
-            p_transaction_type: 'tip_received',
-            p_description: `Received ⚡${TIP_AMOUNT} tip from ${senderName}`,
-            p_reference_id: null,
-          }).then(r => r.error);
-        }),
-
-      // 3. Log sender transaction
-      supabaseAdmin.from('transactions').insert({
-        user_id: sender.uid,
-        type: 'tip_sent',
-        to_user_id: receiverId,
-        amount: -TIP_AMOUNT,
-        description: `Tipped ⚡${TIP_AMOUNT} to ${receiverData.full_name || receiverId}`,
-        status: 'COMPLETED',
-        created_at: now,
-      }).then(r => r.error),
-
-      // 4. Log receiver transaction
-      supabaseAdmin.from('transactions').insert({
-        user_id: receiverId,
-        type: 'tip_received',
-        from_user_id: sender.uid,
-        amount: TIP_AMOUNT,
-        description: `Received ⚡${TIP_AMOUNT} tip from ${senderName}`,
-        status: 'COMPLETED',
-        created_at: now,
-      }).then(r => r.error),
-
-      // 5. In-app notification for receiver
-      supabaseAdmin.from('notifications').insert({
-        user_id: receiverId,
-        sender_id: sender.uid,
-        title: `⚡ ${senderName} tipped you!`,
-        message: `You received ${TIP_AMOUNT} Sparks. Keep it up! 🔥`,
-        type: 'tip_received',
-        read: false,
-        created_at: now,
-      }).then(r => r.error),
-    ]);
-
-    if (walletUpdateErr) throw new Error(`Wallet update failed: ${walletUpdateErr.message}`);
-
-    // Push notification (non-blocking)
+    // 4. Push notification (non-blocking)
     sendPush(receiverId, {
-      title: `⚡ ${senderName} tipped you!`,
+      title: `${senderName} tipped you!`,
       body: `You received ${TIP_AMOUNT} Sparks. Check your wallet.`,
       url: '/wallet',
     }).catch(() => {});

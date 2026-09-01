@@ -15,6 +15,7 @@ export function middleware(request) {
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/health') ||
     pathname.startsWith('/api/ping') ||
+    pathname.startsWith('/api/cron') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/icon') ||
     pathname.startsWith('/logo') ||

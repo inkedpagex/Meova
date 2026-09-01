@@ -104,10 +104,10 @@ export function Step2({ data, onChange, onNext, onBack }) {
                     onChange('branch', b);
                     setShowBranchDropdown(false);
                   }}
-                  className="w-full text-left px-4 py-3 text-sm font-medium transition-colors hover:bg-[#f3f0ff] hover:text-[#F05A00] border-b border-zinc-50 last:border-0"
+                  className="w-full text-left px-4 py-3 text-sm font-medium transition-colors hover:bg-orange-50 hover:text-[#F05A00] border-b border-zinc-50 last:border-0"
                   style={{ 
                     color: data.branch === b ? '#F05A00' : '#3f3f46', 
-                    background: data.branch === b ? '#f3f0ff' : 'transparent',
+                    background: data.branch === b ? '#fff7ed' : 'transparent',
                     fontWeight: data.branch === b ? 700 : 500
                   }}
                 >
@@ -159,7 +159,7 @@ export function Step2({ data, onChange, onNext, onBack }) {
         <button
           onClick={onNext} disabled={!canNext}
           className="flex-1 py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
-          style={{ background: canNext ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canNext ? '#fff' : '#9ca3af', boxShadow: canNext ? '0 8px 24px rgba(140,53,115,0.3)' : 'none' }}
+          style={{ background: canNext ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canNext ? '#fff' : '#9ca3af', boxShadow: canNext ? '0 8px 24px rgba(240,90,0,0.25)' : 'none' }}
         >
           Continue <ArrowRight size={16}/>
         </button>
@@ -251,7 +251,7 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
         <button
           onClick={onSubmit} disabled={!canSubmit}
           className="flex-1 py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer"
-          style={{ background: canSubmit ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canSubmit ? '#fff' : '#9ca3af', boxShadow: canSubmit ? '0 8px 24px rgba(240,90,0,0.3)' : 'none' }}
+          style={{ background: canSubmit ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canSubmit ? '#fff' : '#9ca3af', boxShadow: canSubmit ? '0 8px 24px rgba(240,90,0,0.25)' : 'none' }}
         >
           {loading ? (
             <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"/> Saving...</>

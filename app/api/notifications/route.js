@@ -68,8 +68,13 @@ export async function POST(req) {
   }
 
   try {
-    const { userId, title, body, type, url, link } = await req.json();
-    if (!userId || !title || !body) {
+    const authUser = await requireAuth();
+    const bodyData = await req.json();
+    const targetUserId = bodyData.userId || authUser?.uid;
+    const { title, body, message, type, url, link } = bodyData;
+    const notifBody = body || message;
+
+    if (!targetUserId || !title || !notifBody) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -77,9 +82,9 @@ export async function POST(req) {
     const notifUrl = url || link || '/notifications';
 
     const { error } = await supabaseAdmin.from('notifications').insert({
-      user_id: userId,
+      user_id: targetUserId,
       title,
-      message: body,
+      message: notifBody,
       type: notifType,
       read: false,
       created_at: new Date().toISOString(),
@@ -91,9 +96,9 @@ export async function POST(req) {
     }
 
     // Trigger background PWA Web Push notification to user's phone
-    sendPushToUser(userId, {
+    sendPushToUser(targetUserId, {
       title,
-      body,
+      body: notifBody,
       type: notifType,
       url: notifUrl,
     }).catch(e => console.warn('[WebPush] Dispatch background error:', e.message));

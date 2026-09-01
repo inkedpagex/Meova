@@ -10,8 +10,8 @@ async function isCircularPair(hostId, freelancerId) {
     const { data } = await supabaseAdmin
       .from('gigs')
       .select('id')
-      .eq('author_id', hostId)
-      .eq('assigned_applicant_id', freelancerId)
+      .eq('host_id', hostId)
+      .eq('accepted_applicant_id', freelancerId)
       .eq('status', 'completed')
       .limit(3);
     return (data || []).length >= 3;
@@ -38,7 +38,8 @@ export async function POST(request, { params }) {
 
     if (gigErr || !gig) return NextResponse.json({ error: 'Gig not found' }, { status: 404 });
 
-    if (gig.author_id !== user.uid) {
+    const hostId = gig.host_id || gig.author_id;
+    if (hostId !== user.uid) {
       return NextResponse.json({ error: 'Only the gig host can mark this as complete' }, { status: 403 });
     }
 
@@ -78,7 +79,7 @@ export async function POST(request, { params }) {
     }
 
     const suspicious = await isCircularPair(user.uid, freelancerId);
-    const escrowAmount = app.escrow_amount || parseInt(gig.budget) || 0;
+    const escrowAmount = app.escrow_amount || gig.reward_sparks || parseInt(gig.budget) || 0;
     const freelancerPayout = Math.floor(escrowAmount * 0.9);
     const now = new Date().toISOString();
 
@@ -144,8 +145,8 @@ export async function POST(request, { params }) {
     await supabaseAdmin.from('notifications').insert({
       user_id: freelancerId,
       sender_id: user.uid,
-      title: '⚡ Sparks Received!',
-      message: `You earned ${freelancerPayout}⚡ for completing "${gig.title}". Check your wallet.`,
+      title: 'Sparks Received',
+      message: `You earned ${freelancerPayout} Sparks for completing "${gig.title}". Check your wallet.`,
       type: 'gig_completed',
       gig_id: id,
       read: false,
@@ -153,7 +154,7 @@ export async function POST(request, { params }) {
     });
 
     sendPush(freelancerId, {
-      title: '⚡ Sparks Received!',
+      title: 'Sparks Received',
       body: `You earned ${freelancerPayout} Sparks for "${gig.title}"`,
       url: '/wallet',
     }).catch(() => {});

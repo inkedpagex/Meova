@@ -37,6 +37,7 @@ export async function POST(request) {
   }
 
   const now = new Date().toISOString();
+  const amount = Number(wd.amount || wd.sparks || 0);
 
   if (action === 'reject') {
     try {
@@ -50,7 +51,7 @@ export async function POST(request) {
       await Promise.all([
         supabaseAdmin
           .from('wallets')
-          .update({ creator: (wallet?.creator || 0) + wd.sparks, updated_at: now })
+          .update({ creator: (wallet?.creator || 0) + amount, updated_at: now })
           .eq('user_id', wd.user_id),
         supabaseAdmin
           .from('withdrawals')
@@ -80,7 +81,7 @@ export async function POST(request) {
         supabaseAdmin
           .from('wallets')
           .update({
-            lifetime_withdrawn: (wallet.lifetime_withdrawn || 0) + wd.sparks,
+            lifetime_withdrawn: (wallet.lifetime_withdrawn || 0) + amount,
             updated_at: now,
           })
           .eq('user_id', wd.user_id),
@@ -92,7 +93,7 @@ export async function POST(request) {
           user_id: wd.user_id,
           type: 'withdrawal',
           spark_type: 'creator',
-          amount: -wd.sparks,
+          amount: -amount,
           status: 'completed',
           metadata: { withdrawal_id: withdrawalId, method: wd.method || 'UPI' },
           created_at: now,
@@ -102,7 +103,7 @@ export async function POST(request) {
           action: 'APPROVE_WITHDRAWAL',
           target_uid: wd.user_id,
           old_value: { status: 'pending' },
-          new_value: { status: 'approved', amount: wd.sparks },
+          new_value: { status: 'approved', amount },
           timestamp: now,
         }),
       ]);
@@ -114,15 +115,15 @@ export async function POST(request) {
     logger.audit('WITHDRAWAL_APPROVED', admin.uid, {
       withdrawalId,
       targetUid: wd.user_id,
-      amount: wd.sparks,
+      amount,
     });
 
     sendAdminAlert({
       title: 'Withdrawal Approved',
-      message: `Admin approved payout of ${wd.sparks} Sparks for user ${wd.upi_id || wd.user_id}`,
+      message: `Admin approved payout of ${amount} Sparks for user ${wd.upi_id || wd.user_id}`,
       fields: [
         { name: 'Withdrawal ID', value: withdrawalId },
-        { name: 'Sparks', value: wd.sparks },
+        { name: 'Sparks', value: amount },
         { name: 'UPI', value: wd.upi_id || 'N/A' },
       ],
     }).catch(() => {});

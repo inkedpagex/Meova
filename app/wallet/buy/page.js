@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Zap, CheckCircle, Copy, ArrowLeft, Loader2, ArrowRight } from 'lucide-react';
+import { Zap, CheckCircle, Copy, ArrowLeft, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { SlideButton } from '@/components/ui/slide-button';
 
@@ -81,7 +81,7 @@ export default function BuyPage() {
   return (
     <div className="max-w-[480px] mx-auto anim-fade-in relative px-4 pb-12">
       {/* Background ambient glows */}
-      <div className="absolute top-[-50px] left-1/3 w-80 h-80 bg-[#9e4685]/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+      <div className="absolute top-[-50px] left-1/3 w-80 h-80 bg-[#F05A00]/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
       {step !== 'done' && (
         <Link href="/wallet" className="inline-flex items-center gap-2 text-xs font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all mb-8 uppercase tracking-wider">
@@ -94,7 +94,7 @@ export default function BuyPage() {
         <>
           <div className="mb-8">
             <h1 className="text-2xl font-black text-[var(--text-primary)] tracking-tight flex items-center gap-2">
-              Buy Sparks ⚡
+              Buy Sparks
             </h1>
             <p className="text-xs text-[var(--text-secondary)] mt-2 leading-relaxed font-semibold">
               Power up your student profile! Select a Sparks package to load campus tokens into your wallet.
@@ -124,12 +124,12 @@ export default function BuyPage() {
                     <span className="text-xl font-black text-[var(--text-primary)] tracking-tight">
                       {pack.sparks.toLocaleString()}
                     </span>
-                    <span className="text-yellow-400 text-sm">⚡</span>
+                    <Zap size={15} className="fill-amber-400 text-amber-400" />
                   </div>
 
                   {pack.bonus > 0 && (
                     <p className="text-[10px] text-[#D94F00] font-black mb-3">
-                      + {pack.bonus} Bonus ⚡
+                      + {pack.bonus} Bonus Sparks
                     </p>
                   )}
                   
@@ -195,8 +195,9 @@ export default function BuyPage() {
 
           {/* Reference code copy widget */}
           <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 text-left mb-6 relative overflow-hidden shadow-sm">
-            <p className="text-[9px] font-black text-amber-500 tracking-wider uppercase mb-2">
-              ⚠️ Add this reference code in UPI payment note/remarks
+            <p className="text-[9px] font-black text-amber-600 tracking-wider uppercase mb-2 flex items-center gap-1">
+              <AlertCircle size={12} className="text-amber-500" />
+              <span>Add this reference code in UPI payment note/remarks</span>
             </p>
             <div className="flex items-center justify-between gap-3">
               <code className="text-sm font-mono font-black text-[var(--text-primary)] tracking-widest">

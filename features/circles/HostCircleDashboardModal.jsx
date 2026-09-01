@@ -99,7 +99,7 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl border border-zinc-100 anim-fade-in flex flex-col h-[85vh]">
+      <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl border border-zinc-100 anim-fade-in flex flex-col h-[85vh]">
         
         {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/60">

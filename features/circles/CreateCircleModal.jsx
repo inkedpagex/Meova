@@ -22,7 +22,7 @@ const PLATFORMS = [
   { id: 'WhatsApp', label: 'WhatsApp Group / Channel', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   { id: 'Telegram', label: 'Telegram Channel', color: 'bg-orange-50 text-orange-700 border-orange-200' },
   { id: 'Instagram', label: 'Instagram Broadcast', color: 'bg-orange-50 text-pink-700 border-pink-200' },
-  { id: 'Discord', label: 'Discord Server', color: 'bg-[#fcf6fa] text-[#D94F00] border-[#eac5e0]' },
+  { id: 'Discord', label: 'Discord Server', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
 ];
 
 export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
@@ -148,7 +148,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-x-0 bottom-0 md:inset-0 z-[101] bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center anim-fade-in">
-      <div className="bg-white rounded-t-[32px] md:rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-zinc-100 anim-slide-up md:anim-scale-in flex flex-col max-h-[90vh] pb-safe">
+      <div className="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl border border-zinc-100 anim-slide-up md:anim-scale-in flex flex-col max-h-[90vh] pb-safe">
         
         {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">

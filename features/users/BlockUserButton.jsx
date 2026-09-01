@@ -69,7 +69,7 @@ export default function BlockUserButton({ targetUid, targetName, isLoggedIn, ico
           onClick={() => !loading && setShowModal(false)}
         >
           <div 
-            className="w-full max-w-sm bg-white rounded-3xl p-6 border border-zinc-100 shadow-2xl space-y-4 anim-scale-in"
+            className="w-full max-w-sm bg-white rounded-2xl p-6 border border-zinc-100 shadow-2xl space-y-4 anim-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Icon */}

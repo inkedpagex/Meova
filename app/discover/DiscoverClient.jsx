@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search, Check, MapPin, Zap, Coffee, BookOpen, Activity, Music,
   Layers, Camera, Trophy, Users, Palette, Star,
-  AlertTriangle, X
+  AlertTriangle, X, Calendar, MessageSquare
 } from 'lucide-react';
 import useSWR from 'swr';
 import { useUserContext } from '../../components/providers/UserProvider';
@@ -13,6 +13,7 @@ import { getCartoonAvatar, getUserAvatarUrl } from '../../utils/avatar';
 import confetti from 'canvas-confetti';
 import { useCampusPresence } from '../../lib/useCampusPresence';
 import Skeleton from '../../components/Skeleton';
+import BookCoffeeButton from '../../features/users/BookCoffeeButton';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -173,9 +174,21 @@ export default function DiscoverClient() {
     }
   }, [currentUser, contextPeople, usersData]);
 
-  const handleConnect = (person) => {
+  const handleConnect = async (person) => {
     confetti({ particleCount: 40, spread: 40, origin: { y: 0.6 } });
     setConnectedIds(prev => new Set([...prev, person.id]));
+    try {
+      const res = await fetch('/api/chats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otherUserId: person.id }),
+      });
+      const data = await res.json();
+      if (data?.chatId) {
+        router.push(`/messages?chatId=${data.chatId}`);
+        return;
+      }
+    } catch {}
     router.push(`/messages?user=${encodeURIComponent(person.full_name)}`);
   };
 
@@ -255,7 +268,7 @@ export default function DiscoverClient() {
         {isPeopleLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="bg-white rounded-3xl overflow-hidden border border-zinc-100 flex flex-col relative">
+              <div key={i} className="bg-white rounded-2xl overflow-hidden border border-zinc-100 flex flex-col relative">
                 <Skeleton variant="rectangular" className="w-full h-[180px]" />
                 <div className="p-3">
                   <Skeleton variant="text" className="w-24 h-4 mb-1" />
@@ -266,7 +279,7 @@ export default function DiscoverClient() {
             ))}
           </div>
         ) : list.length === 0 ? (
-          <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
+          <div className="rounded-2xl p-10 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
             <span>No classmates found matching your query.</span>
             {search && (
               <button onClick={() => setSearch('')} className="px-4 py-2 mt-2 bg-zinc-100 text-zinc-900 text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer">
@@ -280,7 +293,7 @@ export default function DiscoverClient() {
               {list.map(person => (
                 <div key={person.id}
                   onClick={() => router.push(`/users/${person.id}`)}
-                  className="rounded-3xl p-4 flex flex-col items-center text-center cursor-pointer transition-all hover:border-orange-300 hover:shadow-md group"
+                  className="rounded-2xl p-4 flex flex-col items-center text-center cursor-pointer transition-all hover:border-orange-300 hover:shadow-md group"
                   style={{ background: '#ffffff', border: person.isLiveOnCampus ? '1.5px solid #bbf7d0' : '1px solid #f0f0f0', boxShadow: person.isLiveOnCampus ? '0 0 0 3px rgba(16,185,129,0.06)' : '0 2px 8px rgba(0,0,0,0.03)' }}>
                   <div className="relative mb-3">
                     <div className="w-16 h-16 rounded-full overflow-hidden group-hover:scale-105 transition-transform"
@@ -319,16 +332,42 @@ export default function DiscoverClient() {
                       ))}
                     </div>
                   </div>
-                  <button onClick={(e) => {
-                    e.stopPropagation();
-                    connectedIds.has(person.id) ? router.push(`/messages?user=${encodeURIComponent(person.full_name)}`) : handleConnect(person);
-                  }}
-                    className="mt-3 w-full py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
-                    style={connectedIds.has(person.id)
-                      ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
-                      : { background: 'linear-gradient(to right, #F05A00, #F05A00)', color: '#ffffff' }}>
-                    {connectedIds.has(person.id) ? 'Message' : 'Connect'}
-                  </button>
+                  <div className="mt-3 w-full flex items-center gap-1.5 pt-1">
+                    <BookCoffeeButton
+                      targetUserId={person.id}
+                      targetName={person.full_name}
+                      targetPhoto={getAvatar(person)}
+                      isLoggedIn={!!currentUser}
+                      rate={50}
+                      renderButton={({ onClick }) => (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onClick();
+                          }}
+                          className="flex-1 py-2 px-1 rounded-xl text-[10px] font-black uppercase tracking-wide bg-orange-50 hover:bg-orange-100 text-[#F05A00] border border-orange-200/80 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                          title={`Book Meetup with ${person.full_name}`}
+                        >
+                          <Calendar size={12} />
+                          <span>Meet</span>
+                        </button>
+                      )}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleConnect(person);
+                      }}
+                      className="flex-1 py-2 px-1 rounded-xl text-[10px] font-black uppercase tracking-wide bg-[#F05A00] hover:bg-[#D94F00] text-white flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-xs whitespace-nowrap"
+                      title={`Chat with ${person.full_name}`}
+                    >
+                      <MessageSquare size={12} />
+                      <span>{connectedIds.has(person.id) ? 'Chat' : 'Connect'}</span>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -366,7 +405,7 @@ export default function DiscoverClient() {
         {isCirclesLoading ? (
           <div className="grid grid-cols-2 gap-3">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="p-4 rounded-3xl flex flex-col items-center bg-white border border-zinc-100">
+              <div key={i} className="p-4 rounded-2xl flex flex-col items-center bg-white border border-zinc-100">
                 <Skeleton variant="rectangular" className="w-14 h-14 rounded-2xl mb-3" />
                 <Skeleton variant="text" className="w-20 h-4 mb-1" />
                 <Skeleton variant="text" className="w-16 h-3 mb-3" />
@@ -375,10 +414,10 @@ export default function DiscoverClient() {
             ))}
           </div>
         ) : list.length === 0 ? (
-          <div className="rounded-3xl p-10 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
+          <div className="rounded-2xl p-10 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
             <Users size={24} className="text-[#F05A00]" />
             <span>No communities created yet.</span>
-            <button onClick={() => router.push('/circles')} className="mt-2 px-4 py-2 bg-gradient-to-r from-[#F05A00] to-[#F05A00] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition-all">
+            <button onClick={() => router.push('/circles')} className="mt-2 px-4 py-2 bg-[#F05A00] hover:bg-[#D94F00] text-white text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer active:scale-95 transition-all">
               Browse Communities
             </button>
           </div>
@@ -388,7 +427,7 @@ export default function DiscoverClient() {
               const isJoined = joinedIds.has(c.id);
               return (
                 <div key={c.id}
-                  className="p-4 rounded-3xl flex flex-col items-center text-center cursor-pointer transition-all hover:shadow-sm active:scale-[0.98] bg-white border border-zinc-100"
+                  className="p-4 rounded-2xl flex flex-col items-center text-center cursor-pointer transition-all hover:shadow-sm active:scale-[0.98] bg-white border border-zinc-100"
                   onClick={() => isJoined ? router.push('/circles') : handleJoinCommunity(c)}>
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 bg-orange-50 border border-orange-100 text-[#F05A00]">
                     <Users size={24} strokeWidth={2} />
@@ -399,7 +438,7 @@ export default function DiscoverClient() {
                     <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">Free</span>
                   </div>
                   <button className={`mt-3 w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95 ${
-                    isJoined ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-gradient-to-r from-[#F05A00] to-[#F05A00] text-white'
+                    isJoined ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-[#F05A00] hover:bg-[#D94F00] text-white'
                   }`}>
                     {isJoined ? 'Open' : 'Join'}
                   </button>
@@ -419,7 +458,7 @@ export default function DiscoverClient() {
         <h2 className="text-[15px] font-black text-zinc-950">Live Tournaments</h2>
         <span className="text-[11px] font-bold text-[#F05A00]">0 events</span>
       </div>
-      <div className="rounded-3xl p-12 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
+      <div className="rounded-2xl p-12 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
         <Trophy size={28} className="text-[#F05A00]" />
         <span>No campus tournaments scheduled yet.</span>
       </div>

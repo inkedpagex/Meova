@@ -31,7 +31,7 @@ export default function TipUserButton({ targetUid, targetName }) {
         return;
       }
 
-      toast.success(`Successfully tipped 5 Sparks to ${targetName}! ⚡`);
+      toast.success(`Successfully tipped 5 Sparks to ${targetName}!`);
       
       // Update global spark balance if possible, or just dispatch event
       window.dispatchEvent(new Event('wallet-updated'));

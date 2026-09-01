@@ -46,8 +46,8 @@ export default function PremiumPage() {
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-3xl md:text-5xl font-black text-[var(--text-primary)] tracking-tight">
-            Meetuply Premium
+          <h1 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight">
+            Meova Premium
           </h1>
           <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest mt-1">
             Unlock exclusive features and supercharge your campus life
@@ -68,7 +68,7 @@ export default function PremiumPage() {
               const Icon = feat.icon;
               return (
                 <div key={idx} className="flex gap-4 items-start">
-                  <div className="w-9 h-9 rounded-xl bg-[#D94F00]/10 border border-[#D94F00]/20 flex items-center justify-center text-[#818cf8] flex-shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-[#D94F00]/10 border border-[#D94F00]/20 flex items-center justify-center text-[#F05A00] flex-shrink-0">
                     <Icon size={16} />
                   </div>
                   <div>
@@ -86,7 +86,7 @@ export default function PremiumPage() {
         </div>
 
         {/* Pricing/Checkout Panel */}
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[2rem] p-8 space-y-6 relative shadow-lg">
+        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-8 space-y-6 relative shadow-lg">
           <h2 className="text-xs font-black uppercase tracking-wider text-[var(--text-secondary)]">
             Select Your Plan
           </h2>

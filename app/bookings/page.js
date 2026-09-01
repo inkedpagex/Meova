@@ -6,7 +6,7 @@ import { useUserContext } from "../../components/providers/UserProvider";
 import { useRouter } from "next/navigation";
 import {
   Calendar, Clock, MapPin, QrCode, ScanLine, X, Loader2,
-  CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight, MessageCircle, Phone
+  CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight, MessageCircle, Phone, Zap
 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { Scanner } from "@yudiel/react-qr-scanner";
@@ -306,7 +306,7 @@ export default function BookingsPage() {
     if (status === "AutoRefunded") return "text-amber-600 bg-amber-50 border-amber-100";
     if (status === "Disputed") return "text-orange-600 bg-orange-50 border-orange-100";
     if (status === "Booking Closed") return "text-zinc-500 bg-zinc-50 border-zinc-200";
-    return "text-[#F05A00] bg-[#fcf6fa] border-[#f5ebf4]";
+    return "text-[#F05A00] bg-orange-50 border-orange-100";
   };
 
   const statusLabel = (status) => {
@@ -328,8 +328,8 @@ export default function BookingsPage() {
         </div>
         {/* Sparks balance — helps user know how many Sparks they have before booking */}
         {sparksBalance !== null && (
-          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black" style={{ background: '#f3f0ff', color: '#F05A00' }}>
-            <span>⚡</span>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black bg-orange-50 text-[#F05A00] border border-orange-100">
+            <Zap size={13} className="fill-[#F05A00] text-[#F05A00]" />
             <span>{sparksBalance.toLocaleString()}</span>
           </div>
         )}
@@ -370,7 +370,7 @@ export default function BookingsPage() {
 
         {!isLoading && displayList.length === 0 && (
           <div className="flex flex-col items-center text-center justify-center py-16 px-6 bg-white rounded-2xl border border-dashed border-zinc-200">
-            <div className="w-12 h-12 bg-[#fcf6fa] rounded-full flex items-center justify-center text-[#F05A00] mb-3">
+            <div className="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center text-[#F05A00] mb-3 border border-orange-100">
               <Calendar size={20} strokeWidth={2.5} />
             </div>
             <h3 className="text-sm font-black text-zinc-900 mb-1">No {activeTab.toLowerCase()} meetings</h3>
@@ -432,7 +432,7 @@ export default function BookingsPage() {
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-black text-[#F05A00] flex items-center gap-1 justify-end">
-                    ⚡ {booking.price}
+                    <Zap size={13} className="fill-[#F05A00] text-[#F05A00]" /> {booking.price}
                   </span>
                 </div>
               </div>
@@ -632,7 +632,7 @@ export default function BookingsPage() {
       {/* ─── MODAL: GUEST QR TICKET ─── */}
       {showQrModal && selectedBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm anim-fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-[340px] overflow-hidden shadow-2xl anim-scale-in flex flex-col">
+          <div className="bg-white rounded-2xl w-full max-w-[340px] overflow-hidden shadow-2xl anim-scale-in flex flex-col">
             <div className="p-4 border-b flex items-center justify-between bg-zinc-50">
               <h3 className="text-sm font-black text-zinc-900">Meeting Ticket</h3>
               <button onClick={() => setShowQrModal(false)} className="w-8 h-8 rounded-full bg-white border flex items-center justify-center text-zinc-500 hover:text-black">
@@ -645,7 +645,7 @@ export default function BookingsPage() {
                 Show this QR code to <strong className="text-zinc-900">{selectedBooking.hostName || selectedBooking.host_name || 'Host'}</strong> when you meet.
               </p>
               
-              <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_rgba(240,90,0,0.12)] border-2 border-orange-100">
+              <div className="bg-white p-4 rounded-2xl shadow-[0_0_40px_rgba(240,90,0,0.12)] border-2 border-orange-100">
                 <QRCode value={selectedBooking.meetingCode || selectedBooking.meeting_code || '123456'} size={180} fgColor="#000" />
               </div>
               
@@ -661,7 +661,7 @@ export default function BookingsPage() {
       {/* ─── MODAL: CANCEL REQUEST ─── */}
       {showCancelModal && bookingToCancel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm anim-fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-[340px] p-6 shadow-2xl anim-scale-in text-center border border-zinc-100">
+          <div className="bg-white rounded-2xl w-full max-w-[340px] p-6 shadow-2xl anim-scale-in text-center border border-zinc-100">
             <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertTriangle size={24} />
             </div>
@@ -711,14 +711,14 @@ export default function BookingsPage() {
               Enter the 6-digit code from {selectedBooking.guestName}&apos;s phone to receive your Sparks.
             </p>
 
-            <div className="w-full bg-zinc-900/50 p-6 rounded-3xl border border-white/10 relative">
+            <div className="w-full bg-zinc-900/50 p-6 rounded-2xl border border-white/10 relative">
               {scanStatus === "success" ? (
-                <div className="absolute inset-0 bg-emerald-500 rounded-3xl flex flex-col items-center justify-center text-white anim-fade-in z-10">
+                <div className="absolute inset-0 bg-emerald-500 rounded-2xl flex flex-col items-center justify-center text-white anim-fade-in z-10">
                   <CheckCircle2 size={48} className="mb-2" />
                   <p className="font-black text-base">Verified!</p>
                 </div>
               ) : scanStatus === "processing" ? (
-                <div className="absolute inset-0 bg-black/80 rounded-3xl flex flex-col items-center justify-center text-white anim-fade-in z-10 backdrop-blur-sm">
+                <div className="absolute inset-0 bg-black/80 rounded-2xl flex flex-col items-center justify-center text-white anim-fade-in z-10 backdrop-blur-sm">
                   <Loader2 size={32} className="animate-spin mb-3 text-[#F05A00]" />
                   <p className="font-bold text-xs">Verifying...</p>
                 </div>
@@ -808,7 +808,7 @@ export default function BookingsPage() {
       {/* ─── MODAL: REPORT ISSUE ─── */}
       {showDisputeModal && selectedBooking && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4 bg-black/50 backdrop-blur-sm anim-fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-[380px] overflow-hidden shadow-2xl anim-scale-in">
+          <div className="bg-white rounded-2xl w-full max-w-[380px] overflow-hidden shadow-2xl anim-scale-in">
             <div className="p-5 border-b border-zinc-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center">

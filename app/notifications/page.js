@@ -152,7 +152,10 @@ export default function NotificationsPage() {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => router.back()}
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.history.length > 1) router.back();
+              else router.push('/');
+            }}
             className="p-2.5 rounded-2xl bg-white border border-zinc-200/80 text-zinc-700 hover:text-zinc-950 hover:bg-zinc-50 cursor-pointer transition-all active:scale-95 shadow-2xs"
           >
             <ArrowLeft size={16} strokeWidth={2.5} />
@@ -206,7 +209,7 @@ export default function NotificationsPage() {
 
       {/* Empty state */}
       {filtered.length === 0 && (
-        <div className="bg-white border border-zinc-200/80 rounded-3xl p-8 text-center space-y-4 my-8 shadow-xs">
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-8 text-center space-y-4 my-8 shadow-xs">
           <div className="w-14 h-14 rounded-2xl bg-orange-50 text-[#F05A00] flex items-center justify-center mx-auto border border-orange-100">
             <Bell size={24} strokeWidth={2.2} />
           </div>

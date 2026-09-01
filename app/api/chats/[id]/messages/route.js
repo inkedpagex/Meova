@@ -11,6 +11,22 @@ export async function GET(request, { params }) {
 
     const { id: chatId } = await params;
     
+    // Authorization check: Verify user is a participant
+    const { data: chatData, error: chatErr } = await supabaseAdmin
+      .from('chats')
+      .select('participants')
+      .eq('id', chatId)
+      .maybeSingle();
+
+    if (chatErr) {
+      console.error('[GET /api/chats/[id]/messages chat check]', chatErr.message);
+      return NextResponse.json({ messages: [] });
+    }
+
+    if (chatData && Array.isArray(chatData.participants) && !chatData.participants.includes(user.uid)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const { data: messages, error } = await supabaseAdmin
       .from('chat_messages')
       .select('*')
@@ -68,8 +84,15 @@ export async function POST(request, { params }) {
       .eq('id', chatId)
       .maybeSingle();
 
+    if (chatData && Array.isArray(chatData.participants) && !chatData.participants.includes(user.uid)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     if (!chatData) {
       const rawParts = chatId.split('_').filter(Boolean);
+      if (!rawParts.includes(user.uid)) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
       const participants = Array.from(new Set([user.uid, ...rawParts]));
 
       const { data: newChat, error: createErr } = await supabaseAdmin

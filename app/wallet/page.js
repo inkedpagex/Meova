@@ -222,7 +222,10 @@ export default function WalletPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.back()}
+          <button onClick={() => {
+            if (typeof window !== 'undefined' && window.history.length > 1) router.back();
+            else router.push('/');
+          }}
             className="p-2 rounded-xl border cursor-pointer transition-all active:scale-95"
             style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
             <ArrowLeft size={16} strokeWidth={2.5} />
@@ -240,7 +243,7 @@ export default function WalletPage() {
       )}
 
       {/* Hero Balance Card */}
-      <div className="relative rounded-3xl p-6 mb-5 overflow-hidden" style={{ background: 'linear-gradient(135deg, #F05A00, #F05A00)' }}>
+      <div className="relative rounded-2xl p-6 mb-5 overflow-hidden" style={{ background: 'linear-gradient(135deg, #F05A00, #F05A00)' }}>
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2" style={{ background: 'white' }} />
         <div className="relative z-10">
           <span className="text-[10px] font-black uppercase tracking-widest text-white/60 block mb-1">Your Balance</span>
@@ -282,13 +285,19 @@ export default function WalletPage() {
       {/* Lifetime Metrics */}
       {wallet && (
         <div className="mb-5 grid grid-cols-2 gap-3">
-          <div className="bg-[#fcf6fa] border border-[#eac5e0] rounded-2xl p-4 flex flex-col justify-center">
+          <div className="bg-orange-50/50 border border-orange-100 rounded-2xl p-4 flex flex-col justify-center">
             <span className="text-[9px] font-black uppercase tracking-wider text-[#F05A00] mb-1">Lifetime Earned</span>
-            <span className="text-xl font-black text-[#5e214d]">{wallet.lifetime_earned || 0} <span className="text-sm">⚡</span></span>
+            <div className="flex items-center gap-1">
+              <span className="text-xl font-black text-zinc-900">{wallet.lifetime_earned || 0}</span>
+              <Zap size={14} className="fill-[#F05A00] text-[#F05A00]" />
+            </div>
           </div>
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-center">
-            <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 mb-1">Total Withdrawn</span>
-            <span className="text-xl font-black text-slate-700">{wallet.lifetime_withdrawn || 0} <span className="text-sm">⚡</span></span>
+          <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 flex flex-col justify-center">
+            <span className="text-[9px] font-black uppercase tracking-wider text-zinc-500 mb-1">Total Withdrawn</span>
+            <div className="flex items-center gap-1">
+              <span className="text-xl font-black text-zinc-900">{wallet.lifetime_withdrawn || 0}</span>
+              <Zap size={14} className="fill-zinc-400 text-zinc-400" />
+            </div>
           </div>
         </div>
       )}
@@ -425,7 +434,7 @@ export default function WalletPage() {
       </div>
 
       {/* How Sparks Work */}
-      <div className="rounded-3xl p-5" style={{ background: 'rgba(140,53,115,0.05)', border: '1px solid rgba(140,53,115,0.12)' }}>
+      <div className="rounded-2xl p-5 bg-orange-50/40 border border-orange-100">
         <h4 className="text-xs font-black uppercase tracking-wider text-[#F05A00] flex items-center gap-1.5 mb-3">
           <HelpCircle size={14} /> How Sparks work?
         </h4>
@@ -452,7 +461,7 @@ export default function WalletPage() {
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl w-full max-w-[360px] overflow-hidden shadow-2xl relative cursor-default"
+            className="bg-white rounded-2xl w-full max-w-[360px] overflow-hidden shadow-2xl relative cursor-default border border-zinc-100"
           >
             <div className="p-6 text-center">
               <h2 className="text-lg font-black text-zinc-900 mb-1">Pay with UPI</h2>
@@ -467,14 +476,14 @@ export default function WalletPage() {
                 />
                 <button 
                   onClick={downloadQRCode}
-                  className="flex items-center gap-1.5 text-[11px] font-black text-[#D94F00] bg-[#fcf6fa] hover:bg-[#f5ebf4] px-3.5 py-1.5 rounded-full transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 text-[11px] font-black text-[#F05A00] bg-orange-50 hover:bg-orange-100 px-3.5 py-1.5 rounded-full transition-all cursor-pointer border border-orange-100"
                 >
                   <Download size={12} />
                   Download QR Image
                 </button>
               </div>
 
-              <div className="bg-[#fcf6fa] border border-[#f5ebf4] rounded-2xl p-4 mb-6 text-left">
+              <div className="bg-orange-50/60 border border-orange-100 rounded-2xl p-4 mb-6 text-left">
                 <p className="text-[11px] text-[#D94F00] font-bold leading-relaxed">
                   Please pay the exact amount shown above to verify your payment automatically.
                 </p>

@@ -47,6 +47,8 @@ export async function GET() {
         ...b,
         price: b.sparks_spent !== undefined ? b.sparks_spent : 50,
         sparks_amount: b.sparks_spent !== undefined ? b.sparks_spent : 50,
+        meeting_code: b.meeting_code || '',
+        meetingCode: b.meeting_code || '',
         guest_name: guest?.full_name || 'Campus Peer',
         guest_photo: guest?.photo_url || '',
         guest_username: guest?.username || '',
@@ -117,9 +119,10 @@ export async function POST(request) {
 
     const formattedTimeSlot = (timeSlot || [date, time].filter(Boolean).join(' ')).trim() || 'Flexible';
     const formattedAgenda = (agenda || title || '1-on-1 Campus Meetup').trim();
+    const generatedCode = String(Math.floor(100000 + Math.random() * 900000));
 
     // Match exact Supabase public.bookings columns:
-    // ['id', 'guest_id', 'host_id', 'sparks_spent', 'status', 'location', 'time_slot', 'agenda', 'created_at', 'updated_at']
+    // ['id', 'guest_id', 'host_id', 'sparks_spent', 'status', 'location', 'time_slot', 'agenda', 'meeting_code', 'created_at', 'updated_at']
     const bookingPayload = {
       guest_id: user.uid,
       host_id: meetTargetId,
@@ -128,6 +131,7 @@ export async function POST(request) {
       location: location?.trim() || 'Campus',
       time_slot: formattedTimeSlot,
       agenda: formattedAgenda,
+      meeting_code: generatedCode,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -157,7 +161,7 @@ export async function POST(request) {
     await supabaseAdmin.from('notifications').insert({
       user_id: meetTargetId,
       sender_id: user.uid,
-      title: 'New Booking Request ⚡',
+      title: 'New Booking Request',
       message: `${user.full_name || 'A classmate'} requested a meetup with you at ${bookingPayload.location}.`,
       type: 'booking',
       read: false,
@@ -166,7 +170,7 @@ export async function POST(request) {
 
     // Send background PWA push notification to host
     sendPushToUser(meetTargetId, {
-      title: 'New Booking Request ⚡',
+      title: 'New Booking Request',
       body: `${user.full_name || 'A classmate'} requested a meetup with you at ${bookingPayload.location}.`,
       url: '/bookings',
     }).catch(() => {});
@@ -174,6 +178,8 @@ export async function POST(request) {
     return NextResponse.json({
       booking: {
         ...newBooking,
+        meeting_code: generatedCode,
+        meetingCode: generatedCode,
         price: priceAmount,
         sparks_amount: priceAmount,
         title: formattedAgenda,
@@ -190,7 +196,7 @@ export async function PATCH(request) {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { bookingId, action } = await request.json();
+    const { bookingId, action, code } = await request.json();
     if (!bookingId || !action) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
 
     const { data: booking, error: fetchErr } = await supabaseAdmin
@@ -220,7 +226,7 @@ export async function PATCH(request) {
       await supabaseAdmin.from('notifications').insert({
         user_id: booking.guest_id,
         sender_id: user.uid,
-        title: 'Booking Accepted! 🎉',
+        title: 'Booking Accepted!',
         message: `${user.full_name || 'Host'} accepted your meetup request.`,
         type: 'accepted',
         read: false,
@@ -228,7 +234,7 @@ export async function PATCH(request) {
       });
 
       sendPushToUser(booking.guest_id, {
-        title: 'Booking Accepted! 🎉',
+        title: 'Booking Accepted!',
         body: `${user.full_name || 'Host'} accepted your meetup request.`,
         url: '/bookings',
       }).catch(() => {});
@@ -287,7 +293,7 @@ export async function PATCH(request) {
       await supabaseAdmin.from('notifications').insert({
         user_id: booking.host_id,
         sender_id: user.uid,
-        title: '⚠️ Meeting Disputed',
+        title: 'Meeting Disputed',
         message: `${user.full_name || 'Guest'} reported the meeting didn't happen. Admin review initiated.`,
         type: 'alert',
         read: false,
@@ -300,6 +306,14 @@ export async function PATCH(request) {
     if (action === 'complete') {
       if (booking.status === 'Meeting Completed') {
         return NextResponse.json({ error: 'Already completed' }, { status: 400 });
+      }
+
+      // If host is completing, verify the 6-digit code or QR code
+      if (user.uid === booking.host_id) {
+        const expectedCode = booking.meeting_code;
+        if (expectedCode && code && code.trim() !== String(expectedCode).trim()) {
+          return NextResponse.json({ error: 'Invalid meeting passcode. Ask the student for their 6-digit code.' }, { status: 400 });
+        }
       }
 
       const hostShare = Math.floor(price * 0.9);
@@ -323,7 +337,7 @@ export async function PATCH(request) {
       await supabaseAdmin.from('notifications').insert({
         user_id: booking.host_id,
         sender_id: booking.guest_id,
-        title: 'Meetup Completed! 💰',
+        title: 'Meetup Completed',
         message: `Your meetup was marked completed. +${hostShare} Sparks added to your Creator Balance!`,
         type: 'sparks',
         read: false,

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { sendPush } from '@/lib/sendPushNotification';
 
 export async function POST(request) {
   try {
@@ -30,6 +31,13 @@ export async function POST(request) {
       read: false,
       created_at: new Date().toISOString(),
     });
+
+    // 2. Dispatch Background Push Notification
+    sendPush(targetUserId, {
+      title: 'Incoming Voice Call',
+      body: `${name} is calling you for your meetup at ${loc}`,
+      url: `/bookings?callRoom=${roomId}&callerId=${user.uid}&autoAnswer=true`,
+    }).catch(() => {});
 
     return NextResponse.json({
       success: true,

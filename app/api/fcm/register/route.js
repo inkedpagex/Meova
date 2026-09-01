@@ -17,8 +17,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 400 });
     }
 
-    // Upsert token in fcm_tokens table (token is unique — prevents duplicates)
-    const { error } = await supabaseAdmin
+    // 1. Upsert token in fcm_tokens table
+    await supabaseAdmin
       .from('fcm_tokens')
       .upsert({
         user_id: user.uid,
@@ -26,10 +26,12 @@ export async function POST(request) {
         created_at: new Date().toISOString(),
       }, { onConflict: 'token' });
 
-    if (error) {
-      console.error('[POST /api/fcm/register]', error.message);
-      return NextResponse.json({ error: 'Internal error' }, { status: 500 });
-    }
+    // 2. Also save to profiles.fcm_token for redundancy
+    await supabaseAdmin
+      .from('profiles')
+      .update({ fcm_token: token })
+      .eq('id', user.uid)
+      .catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -43,11 +43,11 @@ export default function NetworkWrapper({ children }) {
           <div className="w-[300px] h-[300px] bg-amber-500/10 rounded-full blur-2xl translate-y-24" />
         </div>
 
-        <div className="relative w-full max-w-md bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.06)] text-center space-y-6">
+        <div className="relative w-full max-w-md bg-white border border-zinc-200/90 rounded-2xl p-6 sm:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.06)] text-center space-y-6">
           
           {/* Animated Icon Card */}
           <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
-            <div className="absolute inset-0 bg-[#F05A00]/15 rounded-3xl blur-xl animate-pulse" />
+            <div className="absolute inset-0 bg-[#F05A00]/15 rounded-2xl blur-xl animate-pulse" />
             <div className="relative w-20 h-20 bg-gradient-to-tr from-orange-50 to-white border border-orange-200/80 rounded-2xl flex items-center justify-center shadow-md rotate-[-3deg] hover:rotate-0 transition-transform duration-300">
               <WifiOff size={36} className="text-[#F05A00] stroke-[2.2]" />
             </div>
