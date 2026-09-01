@@ -7,11 +7,15 @@
 // and purge the old cache — no manual "Clear Cache" needed by anyone.
 // Just update this timestamp whenever you deploy a major change.
 
-const CACHE_VERSION = '2026-09-01T19:36'; // ← update this on deploy
+const CACHE_VERSION = '2026-09-01T19:48'; // ← update this on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icon-512.png',
+  '/icon-192.png',
+  '/icon-maskable-512.png',
+  '/icon-maskable-192.png',
+  '/apple-touch-icon.png',
   '/logo.png',
   '/offline',
 ];
