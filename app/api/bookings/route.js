@@ -43,19 +43,24 @@ export async function GET() {
     const enriched = bookings.map((b) => {
       const guest = profileMap.get(b.guest_id);
       const host = profileMap.get(b.host_id);
+      const codeMatch = b.agenda?.match(/\[CODE:(\d{6})\]/);
+      const meetingCode = codeMatch ? codeMatch[1] : (b.meeting_code || String(b.id).replace(/\D/g, '').slice(0, 6) || '123456');
+      const cleanAgenda = b.agenda ? b.agenda.replace(/\[CODE:\d{6}\]\s*/, '').trim() : '1-on-1 Campus Meetup';
+
       return {
         ...b,
         price: b.sparks_spent !== undefined ? b.sparks_spent : 50,
         sparks_amount: b.sparks_spent !== undefined ? b.sparks_spent : 50,
-        meeting_code: b.meeting_code || '',
-        meetingCode: b.meeting_code || '',
+        meeting_code: meetingCode,
+        meetingCode: meetingCode,
         guest_name: guest?.full_name || 'Campus Peer',
         guest_photo: guest?.photo_url || '',
         guest_username: guest?.username || '',
         host_name: host?.full_name || 'Campus Host',
         host_photo: host?.photo_url || '',
         host_username: host?.username || '',
-        title: b.agenda || '1-on-1 Campus Meetup',
+        title: cleanAgenda,
+        agenda: cleanAgenda,
         date: b.time_slot ? b.time_slot.split(' ')[0] : '',
         time: b.time_slot ? b.time_slot.split(' ').slice(1).join(' ') : '',
       };
@@ -122,7 +127,7 @@ export async function POST(request) {
     const generatedCode = String(Math.floor(100000 + Math.random() * 900000));
 
     // Match exact Supabase public.bookings columns:
-    // ['id', 'guest_id', 'host_id', 'sparks_spent', 'status', 'location', 'time_slot', 'agenda', 'meeting_code', 'created_at', 'updated_at']
+    // ['id', 'guest_id', 'host_id', 'sparks_spent', 'status', 'location', 'time_slot', 'agenda', 'created_at', 'updated_at']
     const bookingPayload = {
       guest_id: user.uid,
       host_id: meetTargetId,
@@ -130,8 +135,7 @@ export async function POST(request) {
       status: 'Requested',
       location: location?.trim() || 'Campus',
       time_slot: formattedTimeSlot,
-      agenda: formattedAgenda,
-      meeting_code: generatedCode,
+      agenda: `[CODE:${generatedCode}] ${formattedAgenda}`,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -310,9 +314,10 @@ export async function PATCH(request) {
 
       // If host is completing, verify the 6-digit code or QR code
       if (user.uid === booking.host_id) {
-        const expectedCode = booking.meeting_code;
-        if (expectedCode && code && code.trim() !== String(expectedCode).trim()) {
-          return NextResponse.json({ error: 'Invalid meeting passcode. Ask the student for their 6-digit code.' }, { status: 400 });
+        const codeMatch = booking.agenda?.match(/\[CODE:(\d{6})\]/);
+        const expectedCode = codeMatch ? codeMatch[1] : (booking.meeting_code || String(booking.id).replace(/\D/g, '').slice(0, 6));
+        if (expectedCode && (!code || code.trim() !== String(expectedCode).trim())) {
+          return NextResponse.json({ error: 'Please enter the valid 6-digit passcode or scan the student QR code.' }, { status: 400 });
         }
       }
 

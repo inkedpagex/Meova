@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Zap, Layers, X, CheckCircle, Loader2 } from 'lucide-react';
+import { Zap, Layers, X, CheckCircle, Loader2, Calendar, MapPin, Clock, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -90,10 +90,10 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
           hostPhoto: targetPhoto || '',
           date: finalDateStr,
           time: selectedTime,
-          agenda: agenda.trim()
-        })
+          agenda: agenda.trim(),
+        }),
       });
-      
+
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Failed to complete booking request.');
@@ -117,46 +117,66 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
       ) : (
         <button
           onClick={handleClick}
-          className="w-full flex items-center justify-center gap-1.5 px-3 py-3 rounded-2xl text-[11px] sm:text-xs font-black transition-all active:scale-95 hover:opacity-90 uppercase tracking-wide cursor-pointer shadow-md whitespace-nowrap"
-          style={{ background: '#F05A00', color: '#ffffff', border: 'none' }}
+          className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 hover:opacity-95 uppercase tracking-wide cursor-pointer shadow-xs whitespace-nowrap"
+          style={{ background: '#F05A00', color: '#ffffff' }}
         >
-          <Layers className="w-3.5 h-3.5 text-white flex-shrink-0" />
-          <span>Reserve {COFFEE_COST}</span>
-          <Zap className="w-3 h-3 text-yellow-300 fill-current flex-shrink-0" />
+          <Calendar className="w-3.5 h-3.5 text-white flex-shrink-0" />
+          <span>Book Meet · {COFFEE_COST} Sparks</span>
         </button>
       )}
 
       {/* Modal overlay */}
       {open && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4"
-          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+          className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 anim-fade-in"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' }}
           onClick={() => !loading && setOpen(false)}
         >
           <div
-            className="relative w-full max-w-sm rounded-2xl p-6 anim-scale-in max-h-[100dvh] overflow-y-auto no-scrollbar"
-            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
+            className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden anim-scale-in max-h-[92dvh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close */}
-            {!booked && !loading && (
-              <button
-                onClick={() => setOpen(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors bg-[var(--bg-surface)] hover:bg-[var(--bg-hover)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+            {/* Header */}
+            <div
+              className="px-5 py-4 text-white relative flex-shrink-0 flex items-center justify-between"
+              style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-full overflow-hidden bg-white/20 border-2 border-white/40 flex-shrink-0 shadow-sm flex items-center justify-center">
+                  {targetPhoto ? (
+                    <img src={targetPhoto} alt={targetName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-white font-black text-base">{targetName?.charAt(0) || 'C'}</span>
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-white leading-tight">Campus Meetup</h3>
+                  <p className="text-[11px] text-orange-100 font-medium truncate max-w-[220px]">
+                    with <strong className="text-white">{targetName}</strong>
+                  </p>
+                </div>
+              </div>
+
+              {!booked && !loading && (
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
 
             {booked ? (
               // ── Success state ──
-              <div className="text-center py-4">
-                <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-7 h-7 text-emerald-400" />
+              <div className="p-6 text-center space-y-4 overflow-y-auto">
+                <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600 shadow-xs">
+                  <CheckCircle className="w-7 h-7" />
                 </div>
-                <h3 className="text-lg font-black text-[var(--text-primary)] mb-2">Campus Meetup Requested!</h3>
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-6 font-semibold">
-                  Your meetup request has been sent to <strong className="text-[var(--text-primary)]">{targetName}</strong>. {COFFEE_COST} Sparks have been deducted from your wallet. You&apos;ll receive a slot confirmation in dynamic alerts soon!
+                <h3 className="text-base font-black text-zinc-900">Meetup Requested!</h3>
+                <p className="text-xs text-zinc-600 leading-relaxed font-medium">
+                  Your meetup request has been sent to <strong className="text-zinc-900">{targetName}</strong>. <strong>{COFFEE_COST} Sparks</strong> are held in secure escrow. You will receive an alert as soon as they confirm!
                 </p>
                 <button
                   onClick={() => {
@@ -164,201 +184,184 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                     setBooked(false);
                     router.refresh();
                   }}
-                  className="w-full py-3 rounded-xl text-xs font-black text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] active:scale-95 transition-all shadow-md cursor-pointer"
+                  className="w-full py-3 rounded-xl text-xs font-black uppercase tracking-wider text-white shadow-md active:scale-95 transition-all cursor-pointer"
+                  style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
                 >
                   Done
                 </button>
               </div>
             ) : (
-              // ── Confirm state ──
-              <>
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="p-1 rounded-2xl flex-shrink-0" style={{ background: `${color}15`, border: `1px solid ${color}25` }}>
-                    {targetPhoto ? (
-                      <img src={targetPhoto} alt={targetName} className="w-12 h-12 rounded-xl object-cover" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center">
-                        <Layers className="w-6 h-6" style={{ color }} />
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-base font-black text-[var(--text-primary)]">Campus Meetup</h3>
-                    <p className="text-[11px] text-[var(--text-secondary)] font-semibold">with {targetName}</p>
+              // ── Booking Configuration ──
+              <div className="p-5 space-y-4 overflow-y-auto flex-1 no-scrollbar">
+                {/* Location Selection */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+                    <MapPin size={11} className="text-[#F05A00]" /> Meeting Location
+                  </label>
+                  <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                    {[
+                      "GD Subway", "Library", "Gate No 1 Canteen", "KC Ground", "Ninand Ground",
+                      "Block 1", "Block 2", "Block 3", "Block 4", "Block 5", "Block 6"
+                    ].map((loc) => (
+                      <button
+                        key={loc}
+                        type="button"
+                        onClick={() => setSelectedLocation(loc)}
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+                          selectedLocation === loc
+                            ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-xs'
+                            : 'bg-zinc-50 text-zinc-600 border-zinc-200 hover:border-orange-300'
+                        }`}
+                      >
+                        {loc}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Details & Selection */}
-                <div className="rounded-2xl p-4 mb-4 space-y-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider block">Meeting Location</label>
-                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-                      {[
-                        "GD Subway", "Library", "Gate No 1 Canteen", "KC Ground", "Ninand Ground", 
-                        "Block 1", "Block 2", "Block 3", "Block 4", "Block 5", "Block 6", 
-                        "Block 7", "Block 8", "Block 9", "Block 10", "Block 11", "Block 12"
-                      ].map((loc) => (
-                        <button
-                          key={loc}
-                          onClick={() => setSelectedLocation(loc)}
-                          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border transition-all ${
-                            selectedLocation === loc
-                              ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-sm'
-                              : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-300'
-                          }`}
-                        >
-                          {loc}
-                        </button>
-                      ))}
-                    </div>
+                {/* Date Selector */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+                    <Calendar size={11} className="text-[#F05A00]" /> Meeting Day
+                  </label>
+                  <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                    {[
+                      { label: "Today", value: "Today" },
+                      { label: "Tomorrow", value: "Tomorrow" },
+                      { label: "Day After", value: "Day After" },
+                      { label: "Pick Date", value: "Custom" }
+                    ].map((d) => (
+                      <button
+                        key={d.value}
+                        type="button"
+                        onClick={() => setSelectedDate(d.value)}
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+                          selectedDate === d.value
+                            ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-xs'
+                            : 'bg-zinc-50 text-zinc-600 border-zinc-200 hover:border-orange-300'
+                        }`}
+                      >
+                        {d.label}
+                      </button>
+                    ))}
                   </div>
 
-                  {/* Date Selector */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider block">Meeting Day</label>
-                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-                      {[
-                        { label: "Today", value: "Today" },
-                        { label: "Tomorrow", value: "Tomorrow" },
-                        { label: "Day After", value: "Day After" },
-                        { label: "Pick Date", value: "Custom" }
-                      ].map((d) => (
-                        <button
-                          key={d.value}
-                          type="button"
-                          onClick={() => setSelectedDate(d.value)}
-                          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border transition-all cursor-pointer ${
-                            selectedDate === d.value
-                              ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-sm'
-                              : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-300'
-                          }`}
-                        >
-                          {d.label}
-                        </button>
-                      ))}
-                    </div>
-
-                    {selectedDate === 'Custom' && (
-                      <input
-                        type="date"
-                        min={new Date().toISOString().split('T')[0]}
-                        value={customDate}
-                        onChange={e => setCustomDate(e.target.value)}
-                        className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-[#F05A00]"
-                      />
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider block">Preferred Time Slot</label>
-                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-                      {[
-                        { label: "Morning (8-11)", value: "Morning (8 AM - 11 AM)" },
-                        { label: "Noon (11-2)", value: "Noon (11 AM - 2 PM)" },
-                        { label: "Afternoon (2-5)", value: "Afternoon (2 PM - 5 PM)" },
-                        { label: "Evening (5-6)", value: "Evening (5 PM - 6 PM)" }
-                      ].map((time) => (
-                        <button
-                          key={time.value}
-                          type="button"
-                          onClick={() => setSelectedTime(time.value)}
-                          className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border transition-all cursor-pointer ${
-                            selectedTime === time.value
-                              ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-sm'
-                              : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-orange-300'
-                          }`}
-                        >
-                          {time.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider block">Meeting Purpose (Optional)</label>
-                    <textarea
-                      value={agenda}
-                      onChange={(e) => setAgenda(e.target.value)}
-                      placeholder="e.g. Want to discuss startup ideas, get notes, etc."
-                      className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-[13px] font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#F05A00] transition-colors resize-none"
-                      rows={2}
+                  {selectedDate === 'Custom' && (
+                    <input
+                      type="date"
+                      min={new Date().toISOString().split('T')[0]}
+                      value={customDate}
+                      onChange={e => setCustomDate(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs font-bold text-zinc-900 focus:outline-none focus:border-[#F05A00] mt-1"
                     />
-                  </div>
-                  
-                  <div className="flex items-start justify-between gap-3 pt-2 border-t border-[var(--border-subtle)]">
-                    <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider flex-shrink-0">Duration</span>
-                    <span className="text-[11px] font-bold text-[var(--text-secondary)] text-right">1-Hour Session</span>
+                  )}
+                </div>
+
+                {/* Time Slot */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+                    <Clock size={11} className="text-[#F05A00]" /> Preferred Time
+                  </label>
+                  <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                    {[
+                      { label: "Morning (8-11)", value: "Morning (8 AM - 11 AM)" },
+                      { label: "Noon (11-2)", value: "Noon (11 AM - 2 PM)" },
+                      { label: "Afternoon (2-5)", value: "Afternoon (2 PM - 5 PM)" },
+                      { label: "Evening (5-6)", value: "Evening (5 PM - 6 PM)" }
+                    ].map((time) => (
+                      <button
+                        key={time.value}
+                        type="button"
+                        onClick={() => setSelectedTime(time.value)}
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+                          selectedTime === time.value
+                            ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-xs'
+                            : 'bg-zinc-50 text-zinc-600 border-zinc-200 hover:border-orange-300'
+                        }`}
+                      >
+                        {time.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Balance & Cost Info */}
-                <div className="space-y-2 mb-4">
-                  {/* Cost */}
-                  <div className="flex items-center justify-between p-4 rounded-2xl" style={{ background: '#fef3c7', border: '1px solid #fde68a' }}>
-                    <span className="text-xs font-bold text-[#92400e]">Booking cost</span>
-                    <span className="flex items-center gap-1.5 text-sm font-black text-[#d97706]">
-                      <Zap className="w-4 h-4 fill-current" />
-                      {COFFEE_COST} Sparks
+                {/* Agenda */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-wider block">
+                    Meeting Purpose (Optional)
+                  </label>
+                  <textarea
+                    value={agenda}
+                    onChange={(e) => setAgenda(e.target.value)}
+                    placeholder="e.g. Discuss startup ideas, exam notes, campus project..."
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#F05A00] transition-colors resize-none"
+                    rows={2}
+                  />
+                </div>
+
+                {/* Cost & Balance Summary */}
+                <div className="rounded-2xl bg-orange-50/70 border border-orange-100 p-3.5 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-zinc-700">Booking Cost</span>
+                    <span className="font-black text-[#F05A00] flex items-center gap-1">
+                      <Zap size={13} className="fill-[#F05A00]" /> {COFFEE_COST} Sparks
                     </span>
                   </div>
 
-                  {/* Wallet Balance */}
-                  <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
-                    <span className="text-[11px] font-bold text-[var(--text-secondary)]">Your Balance</span>
+                  <div className="flex items-center justify-between text-xs pt-1.5 border-t border-orange-100">
+                    <span className="font-medium text-zinc-500">Your Wallet Balance</span>
                     {loadingWallet ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-500" />
                     ) : (
-                      <span className="text-xs font-black text-[var(--text-primary)]">
+                      <span className="font-black text-zinc-900">
                         {spendableSparks} Sparks
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Errors & Low Balance Alert */}
+                {/* Error Banner */}
                 {error && (
-                  <div className="p-3 mb-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px] font-semibold text-center">
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-[11px] font-bold text-center">
                     {error}
                   </div>
                 )}
 
+                {/* Action Buttons */}
                 {wallet && !hasEnoughSparks && !loadingWallet ? (
-                  <div className="flex flex-col gap-3 mt-4">
-                    <div className="p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2" style={{ background: 'linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%)', border: '1px solid #fecdd3' }}>
-                      <Zap className="w-8 h-8 text-rose-500 fill-rose-500 mb-1 drop-shadow-sm" />
-                      <h4 className="text-sm font-black text-rose-600 uppercase tracking-widest">Out of Sparks</h4>
-                      <p className="text-[11px] font-bold text-rose-500/80 leading-relaxed px-4">
-                        You are short <strong className="text-rose-600">{COFFEE_COST - spendableSparks} Sparks</strong>. Recharge your wallet to continue connecting!
+                  <div className="space-y-2 pt-1">
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-100 text-center">
+                      <p className="text-[11px] font-bold text-rose-600">
+                        Short by {COFFEE_COST - spendableSparks} Sparks
                       </p>
                     </div>
                     <Link
                       href="/wallet/buy"
-                      className="w-full py-3.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-95 shadow-md bg-rose-500 hover:bg-rose-600 text-white"
+                      className="w-full py-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md bg-rose-500 hover:bg-rose-600 text-white"
                     >
-                      <span>Buy Sparks Now</span>
-                      <Zap className="w-3.5 h-3.5 fill-current" />
+                      <span>Buy Sparks</span>
+                      <Zap size={13} className="fill-current" />
                     </Link>
                   </div>
                 ) : (
                   <button
                     onClick={handleConfirm}
                     disabled={loading || loadingWallet || !wallet}
-                    className="w-full py-3.5 mt-2 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-95 disabled:cursor-not-allowed cursor-pointer shadow-md"
-                    style={{ background: color, color: '#ffffff', border: 'none' }}
+                    className="w-full py-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-md text-white"
+                    style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
                   >
                     {loading ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Confirming...</>
                     ) : (
-                      <><Layers className="w-4 h-4" /> Confirm &amp; Spend {COFFEE_COST} <Zap className="w-3.5 h-3.5 fill-current" /></>
+                      <><Layers className="w-3.5 h-3.5" /> Confirm &amp; Spend {COFFEE_COST} Sparks</>
                     )}
                   </button>
                 )}
 
-                <p className="text-[10px] text-[var(--text-muted)] text-center mt-3 font-semibold">
-                  Sparks will be deducted from your wallet immediately.{' '}
-                  <Link href="/wallet" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline">Check balance</Link>
+                <p className="text-[10px] text-zinc-400 text-center font-medium">
+                  Sparks will be held in escrow until meetup is completed.
                 </p>
-              </>
+              </div>
             )}
           </div>
         </div>

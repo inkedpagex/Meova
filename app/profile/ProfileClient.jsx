@@ -89,6 +89,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
   // Phone verification
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
+  const [isTestingPush, setIsTestingPush] = useState(false);
   const [phoneInput, setPhoneInput] = useState('');
   const [phoneOtp, setPhoneOtp] = useState('');
   const [phoneStep, setPhoneStep] = useState('input'); // 'input' | 'otp'
@@ -167,6 +168,47 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
       } catch (err) {
         console.warn('Notification permission error:', err);
       }
+    }
+  };
+
+  const handleTestPush = async () => {
+    if (isTestingPush) return;
+    setIsTestingPush(true);
+    try {
+      // 1. Register push token if not registered
+      if (profile?.id) {
+        const { registerPushToken } = await import('../../lib/useFCM');
+        await registerPushToken(profile.id);
+      }
+
+      // 2. Immediate local Service Worker notification
+      if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        if (reg && reg.showNotification) {
+          reg.showNotification('Meova Alert', {
+            body: 'Push notifications are working on your mobile!',
+            icon: '/icon-512.png',
+            badge: '/icon-512.png',
+            vibrate: [200, 100, 200],
+            tag: `test-push-${Date.now()}`,
+            data: { url: '/profile' },
+          });
+        }
+      }
+
+      // 3. Dispatch backend Web Push
+      await fetch('/api/notifications/test-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: profile?.id }),
+      });
+
+      toast.success('Test notification sent!');
+    } catch (err) {
+      console.warn('Test push error:', err);
+      toast.error('Failed to send test push');
+    } finally {
+      setIsTestingPush(false);
     }
   };
 
@@ -693,23 +735,11 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={async () => {
-                            try {
-                              await fetch('/api/notifications', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                  title: 'Meova Alert',
-                                  message: 'Push notifications are working on your device!',
-                                  type: 'system',
-                                  url: '/profile',
-                                }),
-                              });
-                            } catch {}
-                          }}
-                          className="text-[9px] font-black text-[#F05A00] bg-orange-50 hover:bg-orange-100 border border-orange-200 px-2 py-1 rounded-lg uppercase tracking-wider transition-colors active:scale-95 cursor-pointer"
+                          onClick={handleTestPush}
+                          disabled={isTestingPush}
+                          className="text-[9px] font-black text-[#F05A00] bg-orange-50 hover:bg-orange-100 disabled:opacity-50 border border-orange-200 px-2.5 py-1 rounded-lg uppercase tracking-wider transition-colors active:scale-95 cursor-pointer flex items-center gap-1"
                         >
-                          Test Push
+                          {isTestingPush ? 'Sending...' : 'Test Push'}
                         </button>
                         <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Enabled</span>
                       </div>

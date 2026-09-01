@@ -147,7 +147,7 @@ export async function PATCH(request, { params }) {
           .upsert({
             id: chatId,
             participants: [user.uid, applicantId],
-            last_message: `🎉 You've been accepted for the gig "${gig.title}"! Connect here to coordinate.`,
+            last_message: `You've been accepted for the gig "${gig.title}"! Connect here to coordinate.`,
             last_sender_id: 'system',
             last_message_at: now,
             created_at: now,
@@ -157,7 +157,7 @@ export async function PATCH(request, { params }) {
         supabaseAdmin.from('chat_messages').insert({
           chat_id: chatId,
           sender_id: 'system',
-          text: `🎉 You've been accepted for the gig "${gig.title}"! Connect here to coordinate.`,
+          text: `You've been accepted for the gig "${gig.title}"! Connect here to coordinate.`,
           status: 'delivered',
           created_at: now,
         }),
@@ -166,7 +166,7 @@ export async function PATCH(request, { params }) {
         supabaseAdmin.from('notifications').insert({
           user_id: applicantId,
           sender_id: user.uid,
-          title: '🎉 Gig Accepted!',
+          title: 'Gig Accepted!',
           message: `${user.full_name || 'Host'} accepted you for "${gig.title}". Check messages to get started.`,
           type: 'gig_accepted',
           read: false,
@@ -176,7 +176,7 @@ export async function PATCH(request, { params }) {
 
       // FCM push (non-blocking)
       sendPush(applicantId, {
-        title: '🎉 Gig Accepted!',
+        title: 'Gig Accepted!',
         body: `You got the gig: "${gig.title}"`,
         url: '/gigs',
       }).catch(() => {});

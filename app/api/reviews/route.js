@@ -65,7 +65,7 @@ export async function POST(request) {
     await supabaseAdmin.from('notifications').insert({
       user_id: targetUserId,
       sender_id: user.uid,
-      title: 'New Review Received! ⭐',
+      title: 'New Review Received!',
       message: `${user.full_name || 'Someone'} left you a ${numRating}-star review.`,
       type: 'review',
       read: false,
