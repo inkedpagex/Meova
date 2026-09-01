@@ -8,7 +8,6 @@ export async function GET() {
     const { data: gigs, error } = await supabaseAdmin
       .from('gigs')
       .select('*')
-      .neq('is_hidden', true)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -16,7 +15,18 @@ export async function GET() {
       return NextResponse.json({ gigs: [] });
     }
 
-    return NextResponse.json({ gigs: gigs || [] });
+    const formatted = (gigs || []).map((g) => ({
+      ...g,
+      budget: g.reward_sparks,
+      reward: g.reward_sparks,
+      desc: g.description,
+      author_id: g.host_id,
+      author_name: g.host_name,
+      author_photo: g.host_photo,
+      company: g.host_name || 'Campus Host',
+    }));
+
+    return NextResponse.json({ gigs: formatted });
   } catch (err) {
     console.error('[GET /api/gigs]', err.message);
     return NextResponse.json({ gigs: [] });
@@ -28,24 +38,28 @@ export async function POST(request) {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { title, company, category, budget, duration, type, desc } = await request.json();
+    const body = await request.json();
+    const { title, category, budget, reward, desc, description } = body;
 
-    if (!title || !desc) {
+    const finalTitle = (title || '').trim();
+    const finalDesc = (desc || description || '').trim();
+
+    if (!finalTitle || !finalDesc) {
       return NextResponse.json({ error: 'Title and description are required' }, { status: 400 });
     }
 
-    const budgetNum = Math.max(0, parseInt(budget, 10) || 0);
+    const budgetNum = Math.max(0, parseInt(budget || reward, 10) || 0);
     if (budgetNum < 0 || budgetNum > 2000) {
       return NextResponse.json({ error: 'Reward must be between 0 and 2000 Sparks' }, { status: 400 });
     }
 
-    // Deduct Sparks immediately for escrow via spendSparks RPC
+    // Deduct Sparks immediately for escrow via spendSparks
     let sparksDeducted = false;
     if (budgetNum > 0) {
       const spendResult = await spendSparks(
         user.uid,
         budgetNum,
-        `Escrow for Gig: "${title}"`,
+        `Escrow for Gig: "${finalTitle}"`,
         'gig_escrow',
         null
       );
@@ -56,19 +70,19 @@ export async function POST(request) {
       sparksDeducted = true;
     }
 
+    // Match exact Supabase public.gigs columns:
+    // ['id', 'title', 'description', 'category', 'reward_sparks', 'status', 'host_id', 'host_name', 'host_photo', 'selected_applicant_id', 'applications_count', 'created_at', 'expires_at']
     const newGigPayload = {
-      title,
-      company: company || user.full_name || 'Campus Host',
+      title: finalTitle,
+      description: finalDesc,
       category: category || 'General',
-      budget: String(budgetNum),
-      duration: duration || 'Flexible',
-      type: type || 'CAMPUS GIG',
-      desc,
-      author_id: user.uid,
-      author_name: user.full_name || 'Host',
-      created_at: new Date().toISOString(),
+      reward_sparks: budgetNum,
+      status: 'open',
+      host_id: user.uid,
+      host_name: user.full_name || 'Campus Student',
+      host_photo: user.photo_url || '',
       applications_count: 0,
-      is_hidden: false,
+      created_at: new Date().toISOString(),
     };
 
     const { data: insertedGig, error: insertErr } = await supabaseAdmin
@@ -86,13 +100,22 @@ export async function POST(request) {
           budgetNum,
           'purchased',
           'dispute_refund',
-          `Auto-refund for failed gig creation: "${title}"`
-        ).catch(err => console.error('[POST /api/gigs rollback failed]', err.message));
+          `Auto-refund for failed gig creation: "${finalTitle}"`
+        ).catch((err) => console.error('[POST /api/gigs rollback failed]', err.message));
       }
-      return NextResponse.json({ error: 'Failed to create gig. Sparks refunded if deducted.' }, { status: 500 });
+      return NextResponse.json({ error: `Failed to create gig: ${insertErr.message}` }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true, gig: insertedGig });
+    return NextResponse.json({
+      ok: true,
+      gig: {
+        ...insertedGig,
+        budget: budgetNum,
+        desc: finalDesc,
+        author_id: user.uid,
+        author_name: user.full_name,
+      },
+    });
   } catch (err) {
     console.error('[POST /api/gigs]', err.message);
     return NextResponse.json({ error: 'Failed to create gig' }, { status: 500 });

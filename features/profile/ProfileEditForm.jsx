@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { updateProfileAdmin } from './profile.actions';
-import { User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine, CheckCircle2, AlertCircle, Camera, Zap, Globe } from 'lucide-react';
-import { Linkedin, Github } from '../../components/ui/SocialIcons';
+import {
+  User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine,
+  CheckCircle2, AlertCircle, Camera, Zap, Globe, Sparkles, ChevronDown, Check
+} from 'lucide-react';
+import { Linkedin, Github, Instagram } from '../../components/ui/SocialIcons';
 import { useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
 
@@ -13,15 +16,17 @@ const INTEREST_TAGS = [
   'Fashion & Styling', 'Astronomy & Science',
 ];
 
+const STUDY_YEARS = ['1st', '2nd', '3rd', '4th', '5th', 'Alumni'];
+
 export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [showYearDropdown, setShowYearDropdown] = useState(false);
-  const yearDropdownRef = React.useRef(null);
+  const yearDropdownRef = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (e) => {
       if (yearDropdownRef.current && !yearDropdownRef.current.contains(e.target)) {
         setShowYearDropdown(false);
@@ -32,7 +37,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   }, []);
 
   const [fullName, setFullName] = useState(initialProfile?.full_name || '');
-  const [year, setYear] = useState(initialProfile?.year || '1st');
+  const [year, setYear] = useState(initialProfile?.year?.replace(/\s+Year$/i, '') || '1st');
   const [branch, setBranch] = useState(initialProfile?.branch || '');
   const [instagram, setInstagram] = useState(initialProfile?.instagram || '');
   const [linkedin, setLinkedin] = useState(initialProfile?.linkedin || '');
@@ -44,71 +49,73 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoUploadStage, setPhotoUploadStage] = useState('');
 
-  const fileInputRef = React.useRef(null);
+  const fileInputRef = useRef(null);
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrorMsg('Image size must be less than 5MB.');
-        return;
-      }
-      
-      setPhotoUploading(true);
-      setPhotoUploadStage('Compressing image...');
-      setErrorMsg('');
-      setSuccessMsg('');
-      
-      try {
-        const options = { maxSizeMB: 0.2, maxWidthOrHeight: 1024, useWebWorker: true };
-        const compressedFile = await imageCompression(file, options);
-        setPhotoUploadStage('Uploading to cloud...');
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
-        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'Meova_unsigned';
-        
-        const formData = new FormData();
-        formData.append('file', compressedFile);
-        formData.append('upload_preset', uploadPreset);
-        
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-          method: 'POST',
-          body: formData
-        });
-        
-        if (!res.ok) {
-          throw new Error('Failed to upload image to Cloudinary. Please check your cloud configuration.');
-        }
-        
-        const data = await res.json();
-        if (data.secure_url) {
-          setPhotoUrl(data.secure_url);
-          setPhotoUploadStage('Photo saved!');
-          
-          // Auto-save to prevent data loss trap
-          await updateProfileAdmin({
-            full_name: fullName,
-            year,
-            branch,
-            bio,
-            interests: selectedInterests,
-            instagram: instagram,
-            photo_url: data.secure_url,
-            rate: parseInt(rate, 10) || 100
-          });
-          
-          setSuccessMsg('Photo uploaded and saved successfully!');
-          router.refresh();
-        } else {
-          throw new Error('Invalid response from Cloudinary.');
-        }
-      } catch (err) {
-        console.error('Cloudinary upload error:', err);
-        setErrorMsg(err.message || 'Failed to upload photo to Cloudinary.');
-      } finally {
-        setPhotoUploading(false);
-        setTimeout(() => setPhotoUploadStage(''), 2000);
+    if (file.size > 8 * 1024 * 1024) {
+      setErrorMsg('Image size must be less than 8MB.');
+      return;
+    }
+
+    setPhotoUploading(true);
+    setPhotoUploadStage('Compressing image...');
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      const options = { maxSizeMB: 0.25, maxWidthOrHeight: 1024, useWebWorker: true };
+      const compressedFile = await imageCompression(file, options);
+      setPhotoUploadStage('Uploading to cloud...');
+
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dqq68y5ep';
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'Meova_unsigned';
+
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+      formData.append('upload_preset', uploadPreset);
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to upload image. Please try again.');
       }
+
+      const data = await res.json();
+      if (data.secure_url) {
+        setPhotoUrl(data.secure_url);
+        setPhotoUploadStage('Photo saved!');
+
+        // Auto-save photo URL immediately
+        await updateProfileAdmin({
+          full_name: fullName,
+          year,
+          branch,
+          bio,
+          interests: selectedInterests,
+          instagram,
+          linkedin,
+          github,
+          photo_url: data.secure_url,
+          rate: parseInt(rate, 10) || 100,
+        });
+
+        setSuccessMsg('Avatar updated successfully!');
+        router.refresh();
+      } else {
+        throw new Error('Invalid response from image server.');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      setErrorMsg(err.message || 'Failed to upload photo.');
+    } finally {
+      setPhotoUploading(false);
+      setTimeout(() => setPhotoUploadStage(''), 2000);
     }
   };
 
@@ -126,7 +133,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       setSelectedInterests(selectedInterests.filter((i) => i !== tag));
     } else {
       if (selectedInterests.length >= 5) {
-        setErrorMsg('Max 5 interests allowed.');
+        setErrorMsg('You can select up to 5 interests.');
         return;
       }
       setSelectedInterests([...selectedInterests, tag]);
@@ -138,15 +145,17 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
     setErrorMsg('');
     setSuccessMsg('');
 
-    if (!fullName || !branch) return setErrorMsg('Name and course/branch are required.');
-    
+    if (!fullName?.trim() || !branch?.trim()) {
+      return setErrorMsg('Name and course / branch are required.');
+    }
+
     const rateNum = parseInt(rate, 10);
     if (isNaN(rateNum) || rateNum < 10 || rateNum > 500) {
       return setErrorMsg('Meeting rate must be between 10 and 500 Sparks.');
     }
 
     if (selectedInterests.length < 1 || selectedInterests.length > 5) {
-      return setErrorMsg('Please select between 1 and 5 interests.');
+      return setErrorMsg('Please select between 1 and 5 campus interests.');
     }
 
     const cleanInstagram = instagram.trim().replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/\/$/, '');
@@ -156,41 +165,40 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
     setLoading(true);
     try {
       const res = await updateProfileAdmin({
-        full_name: fullName,
+        full_name: fullName.trim(),
         year,
-        branch,
-        bio,
+        branch: branch.trim(),
+        bio: bio.trim(),
         interests: selectedInterests,
         instagram: cleanInstagram,
         linkedin: cleanLinkedin,
         github: cleanGithub,
         photo_url: photoUrl,
-        rate: rateNum
+        rate: rateNum,
       });
-      
+
       if (!res.success) {
         throw new Error(res.error || 'Failed to update profile.');
       }
 
-      setSuccessMsg('Profile updated successfully!');
+      setSuccessMsg('Profile changes saved successfully!');
       router.refresh();
-      
+
       if (onSaveSuccess) {
         onSaveSuccess({
-          full_name: fullName,
+          full_name: fullName.trim(),
           year,
-          branch,
-          bio,
+          branch: branch.trim(),
+          bio: bio.trim(),
           interests: selectedInterests,
           instagram: cleanInstagram,
           linkedin: cleanLinkedin,
           github: cleanGithub,
           photo_url: photoUrl,
-          rate: rateNum
+          rate: rateNum,
         });
       }
-      
-      // Auto-hide success message after 3 seconds
+
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
       console.error(err);
@@ -200,285 +208,306 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
     }
   };
 
-  const inputClass = "w-full rounded-2xl py-4 pl-12 pr-5 text-[13px] font-black text-zinc-900 bg-[#f8fafc] border-[1.5px] border-[#e2e8f0] transition-all duration-300 placeholder:text-zinc-400/80 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/15 hover:border-[#cbd5e1]";
-  const labelClass = "block text-[11px] font-black text-zinc-700 uppercase tracking-[0.15em] mb-2.5 flex items-center gap-2 ml-1";
-  const iconWrapperClass = "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none";
-
   return (
-    <form onSubmit={handleSave} className="space-y-6">
-      {/* Notifications */}
+    <form onSubmit={handleSave} className="space-y-7">
+      {/* Alert Banners */}
       {errorMsg && (
-        <div className="flex items-center gap-2 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold animate-in fade-in">
-          <AlertCircle size={16} className="shrink-0" />
+        <div className="flex items-center gap-3 p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-700 text-xs font-semibold animate-in fade-in">
+          <AlertCircle size={18} className="shrink-0 text-rose-500" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="flex items-center gap-2 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-bold animate-in fade-in">
-          <CheckCircle2 size={16} className="shrink-0" />
+        <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold animate-in fade-in">
+          <CheckCircle2 size={18} className="shrink-0 text-emerald-500" />
           <span>{successMsg}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Full Name */}
-        <div>
-          <label className={labelClass}>Full Name</label>
-          <div className="relative group">
-            <span className={iconWrapperClass}><User size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
-            <input 
-              type="text" 
-              value={fullName} 
-              onChange={(e) => setFullName(e.target.value)} 
-              placeholder="e.g. Chirag Sharma" 
-              className={inputClass} 
-              required 
-            />
+      {/* ── Avatar Uploader Section ────────────────────────────────── */}
+      <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-gradient-to-b from-orange-50/50 to-zinc-50/80 border border-orange-100/60 text-center">
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="image/*"
+          className="hidden"
+        />
+
+        <div className="relative group mb-3">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl shadow-orange-500/10 bg-zinc-100 flex items-center justify-center">
+            {photoUrl ? (
+              <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <User size={36} className="text-zinc-400" />
+            )}
           </div>
+
+          {photoUploading && (
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-xs rounded-full flex flex-col items-center justify-center text-white">
+              <Loader2 size={20} className="animate-spin text-[#F05A00]" />
+              <span className="text-[10px] font-bold mt-1">Uploading...</span>
+            </div>
+          )}
+
+          <button
+            type="button"
+            disabled={photoUploading}
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#F05A00] text-white shadow-md flex items-center justify-center hover:bg-[#D94F00] transition-transform active:scale-90 cursor-pointer disabled:opacity-50"
+            title="Change Avatar"
+          >
+            <Camera size={14} />
+          </button>
         </div>
 
-        {/* Branch / Major */}
-        <div>
-          <label className={labelClass}>Course / Branch</label>
-          <div className="relative group">
-            <span className={iconWrapperClass}><BookOpen size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
-            <input 
-              type="text" 
-              value={branch} 
-              onChange={(e) => setBranch(e.target.value)} 
-              placeholder="e.g. B.Tech CSE" 
-              className={inputClass} 
-              required 
-            />
-          </div>
+        <div className="flex items-center gap-3 mt-1">
+          <button
+            type="button"
+            disabled={photoUploading}
+            onClick={() => fileInputRef.current?.click()}
+            className="text-xs font-bold text-[#F05A00] hover:text-[#D94F00] transition-colors cursor-pointer"
+          >
+            {photoUrl ? 'Change Photo' : 'Upload Avatar'}
+          </button>
+          {photoUrl && (
+            <>
+              <span className="text-zinc-300">·</span>
+              <button
+                type="button"
+                disabled={photoUploading}
+                onClick={handleRemovePhoto}
+                className="text-xs font-medium text-zinc-400 hover:text-rose-500 transition-colors cursor-pointer"
+              >
+                Remove
+              </button>
+            </>
+          )}
         </div>
+        <p className="text-[11px] text-zinc-400 mt-1 font-medium">JPEG or PNG under 8MB</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Year */}
-        <div>
-          <label className={labelClass}>Year of Study</label>
-          <div className="relative group" ref={yearDropdownRef}>
-            <span className={iconWrapperClass}><GraduationCap size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
-            <button 
+      {/* ── Basic Info ──────────────────────────────────────────────── */}
+      <div className="space-y-4">
+        <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Academic Identity</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Full Name */}
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">Full Name *</label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
+                <User size={16} />
+              </span>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Your full name"
+                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Course / Branch */}
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">Course / Branch *</label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
+                <BookOpen size={16} />
+              </span>
+              <input
+                type="text"
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+                placeholder="e.g. B.Tech Computer Science"
+                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Year of Study */}
+          <div className="relative" ref={yearDropdownRef}>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">Year of Study *</label>
+            <button
               type="button"
               onClick={() => setShowYearDropdown(!showYearDropdown)}
-              className={`${inputClass} flex items-center justify-between cursor-pointer`}
+              className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 flex items-center justify-between cursor-pointer transition-all"
             >
-              <span>{year === '1st' ? '1st Year' : year === '2nd' ? '2nd Year' : year === '3rd' ? '3rd Year' : year === '4th' ? '4th Year' : 'Select Year'}</span>
-              <svg className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${showYearDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              <span className="absolute left-3.5 text-zinc-400 pointer-events-none">
+                <GraduationCap size={16} />
+              </span>
+              <span>{year ? `${year} Year` : 'Select Year'}</span>
+              <ChevronDown size={16} className={`text-zinc-400 transition-transform ${showYearDropdown ? 'rotate-180' : ''}`} />
             </button>
-            
+
             {showYearDropdown && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-zinc-100 shadow-[0_12px_40px_rgba(0,0,0,0.08)] rounded-2xl overflow-hidden z-50 p-1">
-                {['1st', '2nd', '3rd', '4th'].map((y) => (
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-zinc-100 shadow-xl rounded-2xl p-1.5 z-50 animate-in fade-in duration-150">
+                {STUDY_YEARS.map((y) => (
                   <button
                     key={y}
                     type="button"
-                    onClick={() => { setYear(y); setShowYearDropdown(false); }}
-                    className={`w-full text-left px-4 py-3 text-sm font-bold transition-all rounded-xl cursor-pointer ${
-                      year === y ? 'bg-orange-50 text-[#F05A00]' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                    onClick={() => {
+                      setYear(y);
+                      setShowYearDropdown(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                      year === y ? 'bg-orange-50 text-[#F05A00]' : 'text-zinc-700 hover:bg-zinc-50'
                     }`}
                   >
-                    {y} Year
+                    <span>{y === 'Alumni' ? 'Alumni' : `${y} Year`}</span>
+                    {year === y && <Check size={14} className="text-[#F05A00]" />}
                   </button>
                 ))}
               </div>
             )}
           </div>
+
+          {/* Meetup Hourly Rate */}
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
+              Meetup Rate <span className="text-zinc-400 font-normal">(Sparks / Hour)</span>
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#F05A00]">
+                <Zap size={16} className="fill-current" />
+              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={rate}
+                onChange={(e) => setRate(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="100"
+                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+                required
+              />
+            </div>
+            <p className="text-[11px] text-zinc-400 mt-1 font-medium">10 - 500 Sparks for 1-on-1 sessions</p>
+          </div>
         </div>
 
         {/* Bio */}
         <div>
-          <label className={labelClass}>Short Bio <span className="text-zinc-400 text-[10px] font-bold ml-1">(Optional)</span></label>
-          <div className="relative group">
-            <span className={`${iconWrapperClass} top-[18px]`}><PenLine size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
-            <textarea 
-              value={bio} 
-              onChange={(e) => setBio(e.target.value)} 
-              placeholder="What are you currently working on?" 
-              className={`${inputClass} resize-none min-h-[60px] pt-4 leading-relaxed`} 
+          <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
+            Short Bio <span className="text-zinc-400 font-normal">(Optional)</span>
+          </label>
+          <div className="relative">
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="What are you currently learning or building?"
               rows={2}
+              maxLength={250}
+              className="w-full rounded-2xl p-3.5 text-sm font-medium text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all resize-none"
             />
+          </div>
+          <div className="flex justify-between items-center mt-1">
+            <span className="text-[11px] text-zinc-400 font-medium">Shown on your campus profile card</span>
+            <span className="text-[11px] text-zinc-400 font-semibold">{bio.length}/250</span>
           </div>
         </div>
       </div>
 
-      {/* Social Links & Rate */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Instagram Handle */}
-        <div>
-          <label className={labelClass}>Instagram Handle / Username <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
-          <div className="relative group">
-            <span className={iconWrapperClass}><Camera size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
-            <input 
-              type="text" 
-              value={instagram} 
-              onChange={(e) => setInstagram(e.target.value)} 
-              placeholder="e.g. chirag_gla" 
-              className={inputClass} 
-            />
-          </div>
-          <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
-            Display your Instagram link &amp; embed on your public profile.
-          </p>
-        </div>
+      {/* ── Social Profiles ────────────────────────────────────────── */}
+      <div className="space-y-4 pt-2">
+        <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Socials & Portfolio</h3>
 
-        {/* LinkedIn Profile */}
-        <div>
-          <label className={labelClass}>LinkedIn Username / ID <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
-          <div className="relative group">
-            <span className={iconWrapperClass}><Linkedin size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
-            <input 
-              type="text" 
-              value={linkedin} 
-              onChange={(e) => setLinkedin(e.target.value)} 
-              placeholder="e.g. in/chirag-sharma or username" 
-              className={inputClass} 
-            />
-          </div>
-          <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
-            Connect professionally with campus alumni and peers.
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* GitHub / Portfolio */}
-        <div>
-          <label className={labelClass}>GitHub / Portfolio <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
-          <div className="relative group">
-            <span className={iconWrapperClass}><Github size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
-            <input 
-              type="text" 
-              value={github} 
-              onChange={(e) => setGithub(e.target.value)} 
-              placeholder="e.g. chirag-dev" 
-              className={inputClass} 
-            />
-          </div>
-          <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
-            Showcase your code repos and tech projects.
-          </p>
-        </div>
-
-        {/* Meeting Rate (Max 500 Sparks) */}
-        <div>
-          <label className={labelClass}>Meetup Rate (Sparks / Hour)</label>
-          <div className="relative group">
-            <span className={iconWrapperClass}><Zap size={16} className="text-zinc-400 group-focus-within:text-[#F05A00] transition-colors" /></span>
-            <input 
-              type="text" 
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={rate} 
-              onChange={(e) => {
-                const val = e.target.value.replace(/[^0-9]/g, '');
-                setRate(val);
-              }} 
-              placeholder="100" 
-              className={inputClass} 
-              required 
-            />
-          </div>
-          <p className="text-[9px] text-zinc-400 mt-2 font-black uppercase tracking-wider ml-1">
-            Set between 10 and 500 Sparks. This is what students spend to book a 1-on-1 session with you.
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Profile Image Upload */}
-        <div>
-          <label className={labelClass}>Profile Photo <span className="text-zinc-400 text-[9px] font-bold ml-1">(Optional)</span></label>
-          
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            accept="image/*" 
-            className="hidden" 
-          />
-
-          <div className="relative flex items-center gap-4 p-3 rounded-2xl bg-[#f8fafc] border-[1.5px] border-dashed border-[#cbd5e1] hover:border-[#F05A00]/40 hover:bg-[#F05A00]/5 transition-all h-[64px] overflow-hidden">
-            {photoUploading && (
-              <div className="absolute inset-0 bg-black/65 backdrop-blur-xs flex items-center justify-center gap-2 z-20 text-white rounded-2xl animate-in fade-in duration-200">
-                <Loader2 size={18} className="text-[#F05A00] animate-spin" />
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-white/90">
-                  {photoUploadStage || 'Uploading...'}
-                </span>
-              </div>
-            )}
-            {photoUrl ? (
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
-                  <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex items-center justify-between flex-1 gap-2 pr-2">
-                  <button 
-                    type="button" 
-                    disabled={photoUploading}
-                    onClick={() => !photoUploading && fileInputRef.current?.click()}
-                    className="text-[11px] font-black uppercase tracking-wider text-[#F05A00] hover:text-[#D94F00] transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    Change
-                  </button>
-                  <button 
-                    type="button" 
-                    disabled={photoUploading}
-                    onClick={handleRemovePhoto}
-                    className="text-[11px] font-black uppercase tracking-wider text-rose-500 hover:text-rose-600 transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button 
-                type="button"
-                disabled={photoUploading}
-                onClick={() => !photoUploading && fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 h-full text-[13px] font-black text-[#F05A00] hover:text-[#D94F00] transition-colors cursor-pointer active:scale-95 disabled:opacity-50"
-              >
-                <Camera size={16} />
-                <span>Upload a sleek avatar</span>
-              </button>
-            )}
-          </div>
-          <p className="text-[10px] text-zinc-400 mt-2.5 font-bold uppercase tracking-widest ml-1">
-            Keep it under 2MB. Square images look best.
-          </p>
-        </div>
-      </div>
-
-      <div className="pt-2">
-        <div className="flex justify-between items-end mb-4">
+        <div className="space-y-3">
+          {/* Instagram */}
           <div>
-            <label className={labelClass}><Tag size={14} className="text-[#F05A00]" /> Campus Interests</label>
-            <p className="text-[11px] font-bold text-zinc-400 ml-1">Select 1 to 5 tags that describe your campus vibe.</p>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
+              Instagram Handle <span className="text-zinc-400 font-normal">(Optional)</span>
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-rose-500">
+                <Instagram size={16} />
+              </span>
+              <input
+                type="text"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                placeholder="e.g. chirag_gla"
+                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-medium text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+              />
+            </div>
           </div>
-          <span className={`text-[11px] font-black px-3.5 py-1.5 rounded-full transition-all ${
-            selectedInterests.length >= 1 && selectedInterests.length <= 5
-              ? 'bg-[#F05A00] text-white shadow-lg shadow-[#F05A00]/30'
-              : 'bg-zinc-100 text-zinc-400'
-          }`}>
-            {selectedInterests.length}/5
+
+          {/* LinkedIn */}
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
+              LinkedIn Profile / Username <span className="text-zinc-400 font-normal">(Optional)</span>
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-blue-600">
+                <Linkedin size={16} />
+              </span>
+              <input
+                type="text"
+                value={linkedin}
+                onChange={(e) => setLinkedin(e.target.value)}
+                placeholder="e.g. in/chirag-sharma or username"
+                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-medium text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+              />
+            </div>
+          </div>
+
+          {/* GitHub / Portfolio */}
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
+              GitHub Profile <span className="text-zinc-400 font-normal">(Optional)</span>
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-700">
+                <Github size={16} />
+              </span>
+              <input
+                type="text"
+                value={github}
+                onChange={(e) => setGithub(e.target.value)}
+                placeholder="e.g. chirag-dev"
+                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-medium text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Campus Interests ────────────────────────────────────────── */}
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Campus Interests</h3>
+            <p className="text-xs text-zinc-500 mt-0.5 font-medium">Pick 1 to 5 tags that define your vibe</p>
+          </div>
+          <span
+            className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+              selectedInterests.length >= 1 && selectedInterests.length <= 5
+                ? 'bg-orange-100 text-[#F05A00]'
+                : 'bg-zinc-100 text-zinc-500'
+            }`}
+          >
+            {selectedInterests.length} / 5
           </span>
         </div>
-        
-        <div className="flex flex-wrap gap-2.5 p-6 rounded-[24px] bg-[#f8fafc] border-[1.5px] border-[#e2e8f0]">
+
+        <div className="flex flex-wrap gap-2 p-4 rounded-3xl bg-zinc-50/80 border border-zinc-200/80">
           {INTEREST_TAGS.map((tag) => {
-            const sel = selectedInterests.includes(tag);
+            const isSelected = selectedInterests.includes(tag);
             return (
-              <button 
-                key={tag} 
-                type="button" 
+              <button
+                key={tag}
+                type="button"
                 onClick={() => handleInterestToggle(tag)}
-                className={`text-[11px] uppercase tracking-widest py-2.5 px-4 rounded-full transition-all duration-300 font-black active:scale-95 border-[1.5px] cursor-pointer ${
-                  sel 
-                    ? 'bg-white text-[#F05A00] border-[#F05A00] shadow-[0_4px_16px_rgba(140,53,115,0.2)] -translate-y-0.5'
-                    : 'bg-white border-transparent text-zinc-500 shadow-sm hover:border-[#cbd5e1] hover:text-zinc-700 hover:-translate-y-0.5'
+                className={`text-xs font-semibold px-3.5 py-2 rounded-xl transition-all cursor-pointer active:scale-95 border ${
+                  isSelected
+                    ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-sm shadow-orange-500/20'
+                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:text-zinc-900'
                 }`}
               >
                 {tag}
@@ -488,14 +517,15 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         </div>
       </div>
 
-      <div className="pt-6 border-t flex justify-end" style={{ borderColor: 'var(--border-subtle)' }}>
-        <button 
-          type="submit" 
+      {/* ── Submit Action ─────────────────────────────────────────── */}
+      <div className="pt-4 border-t border-zinc-100">
+        <button
+          type="submit"
           disabled={loading}
-          className="flex items-center gap-2 bg-gradient-to-r from-[#F05A00] to-[#D94F00] text-white text-[13px] font-black uppercase tracking-widest px-8 py-4 rounded-2xl shadow-[0_8px_20px_rgba(140,53,115,0.3)] hover:shadow-[0_10px_25px_rgba(140,53,115,0.4)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:hover:translate-y-0"
+          className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl bg-gradient-to-r from-[#F05A00] to-[#D94F00] text-white font-bold text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:hover:translate-y-0"
         >
-          {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          Save Profile
+          {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+          <span>Save Changes</span>
         </button>
       </div>
     </form>

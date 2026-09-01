@@ -295,7 +295,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
         </div>
 
         {isEditing ? (
-          <div className="rounded-3xl p-5" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+          <div className="rounded-[28px] p-6 bg-white border border-zinc-100 shadow-sm">
             <ProfileEditForm initialProfile={profile} onSaveSuccess={handleSaveSuccess} />
           </div>
         ) : (

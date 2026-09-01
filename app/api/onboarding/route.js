@@ -88,8 +88,10 @@ export async function POST(request) {
         created_at: new Date().toISOString(),
       }, { onConflict: 'username' });
 
-    // Update public.profiles
+    // Upsert into public.profiles (ensures creation even if row was not pre-seeded)
     const profilePayload = {
+      id: uid,
+      email: user.email || '',
       username: cleanUsername,
       full_name: full_name.trim(),
       gender,
@@ -105,11 +107,10 @@ export async function POST(request) {
 
     const { error: profileErr } = await supabaseAdmin
       .from('profiles')
-      .update(profilePayload)
-      .eq('id', uid);
+      .upsert(profilePayload, { onConflict: 'id' });
 
     if (profileErr) {
-      console.error('[onboarding POST profile update error]', profileErr.message);
+      console.error('[onboarding POST profile upsert error]', profileErr.message);
       return NextResponse.json({ error: profileErr.message || 'Failed to update profile' }, { status: 500 });
     }
 

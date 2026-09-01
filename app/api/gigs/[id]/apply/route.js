@@ -20,7 +20,8 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Gig not found' }, { status: 404 });
     }
 
-    if (gig.author_id === user.uid) {
+    const hostId = gig.host_id || gig.author_id;
+    if (hostId === user.uid) {
       return NextResponse.json({ error: 'You cannot apply to your own gig' }, { status: 400 });
     }
 
@@ -42,42 +43,40 @@ export async function POST(request, { params }) {
 
     const { pitch } = await request.json().catch(() => ({}));
 
-    // 1. Insert application
+    // Match exact Supabase public.gig_applications schema:
+    // ['id', 'gig_id', 'applicant_id', 'applicant_name', 'applicant_photo', 'pitch', 'status', 'created_at']
     const { error: insertErr } = await supabaseAdmin
       .from('gig_applications')
       .insert({
         gig_id: id,
         applicant_id: user.uid,
-        applicant_name: user.full_name || 'Student',
+        applicant_name: user.full_name || 'Campus Student',
         applicant_photo: user.photo_url || '',
-        applicant_username: user.username || '',
-        applicant_branch: user.branch || 'Campus',
         pitch: (pitch || '').trim().slice(0, 300),
-        status: 'PENDING',
-        applied_at: new Date().toISOString(),
+        status: 'pending',
+        created_at: new Date().toISOString(),
       });
 
     if (insertErr) {
       console.error('[POST /api/gigs/[id]/apply insert error]', insertErr.message);
-      return NextResponse.json({ error: 'Failed to submit application' }, { status: 500 });
+      return NextResponse.json({ error: `Failed to submit application: ${insertErr.message}` }, { status: 500 });
     }
 
-    // 2. Increment applications_count on gig
+    // Increment applications_count on gig
     const newCount = (gig.applications_count || 0) + 1;
     await supabaseAdmin
       .from('gigs')
       .update({ applications_count: newCount })
       .eq('id', id);
 
-    // Notify author
-    if (gig.author_id) {
+    // Notify gig host
+    if (hostId) {
       await supabaseAdmin.from('notifications').insert({
-        user_id: gig.author_id,
+        user_id: hostId,
         sender_id: user.uid,
         title: 'New Gig Application ⚡',
-        message: `${user.full_name || 'Someone'} applied to your gig "${gig.title}"`,
+        message: `${user.full_name || 'Someone'} applied to your gig "${gig.title}".`,
         type: 'gig_application',
-        gig_id: id,
         read: false,
         created_at: new Date().toISOString(),
       }).catch(() => {});
