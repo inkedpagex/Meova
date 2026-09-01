@@ -5,12 +5,12 @@ import imageCompression from 'browser-image-compression';
 
 const INTEREST_TAGS = [
   'Coding & Tech','Music & Bands','Dance','Photography & Film',
-  'Public Speaking','Art & Sketching','Sports & Fitness',
+  'Public Speaking & Debating','Art & Sketching','Sports & Fitness',
   'Gaming & E-sports','Literature & Poetry','Entrepreneurship',
-  'Theatre & Drama','Anime & Manga','Volunteering','Fashion & Styling','Astronomy & Science',
+  'Theatre & Drama','Anime & Manga','Volunteering & Social Service','Fashion & Styling','Astronomy & Science',
 ];
 
-const YEARS = ['1st Year','2nd Year','3rd Year','4th Year','5th Year'];
+const YEARS = ['1st', '2nd', '3rd', '4th', '5th'];
 
 // ─── Step Progress Bar ───────────────────────────────────────────────────────
 function StepBar({ step }) {
@@ -68,6 +68,10 @@ function Step1({ data, onChange, onNext }) {
     }
     if (!/^[a-z][a-z0-9_]{4,19}$/.test(clean)) {
       setUsernameStatus('invalid'); setUsernameMsg('Only letters, numbers, underscores (5-20 chars)'); return;
+    }
+    const digitCount = (clean.match(/\d/g) || []).length;
+    if (digitCount < 2) {
+      setUsernameStatus('invalid'); setUsernameMsg('Must contain at least 2 digits / numbers (e.g. chirag_04)'); return;
     }
     setUsernameStatus('checking'); setUsernameMsg('Checking...');
     try {
@@ -219,7 +223,7 @@ function Step1({ data, onChange, onNext }) {
             {usernameMsg}
           </p>
         )}
-        <p suppressHydrationWarning className="text-[10px] text-zinc-400 mt-1">Start with a letter · numbers, underscores allowed · 5-20 chars</p>
+        <p suppressHydrationWarning className="text-[10px] text-zinc-400 mt-1">Start with a letter · at least 2 numbers (e.g. chirag_04) · 5-20 chars</p>
       </div>
 
       {/* Gender Selection */}

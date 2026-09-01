@@ -124,8 +124,8 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
     if (selectedInterests.includes(tag)) {
       setSelectedInterests(selectedInterests.filter((i) => i !== tag));
     } else {
-      if (selectedInterests.length >= 3) {
-        setErrorMsg('Max 3 interests allowed.');
+      if (selectedInterests.length >= 5) {
+        setErrorMsg('Max 5 interests allowed.');
         return;
       }
       setSelectedInterests([...selectedInterests, tag]);
@@ -144,7 +144,9 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       return setErrorMsg('Meeting rate must be between 10 and 500 Sparks.');
     }
 
-    if (selectedInterests.length !== 3) return setErrorMsg('Please select exactly 3 interests.');
+    if (selectedInterests.length < 1 || selectedInterests.length > 5) {
+      return setErrorMsg('Please select between 1 and 5 interests.');
+    }
 
     const cleanInstagram = instagram.trim().replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/\/$/, '');
     const cleanLinkedin = linkedin.trim().replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '').replace(/\/$/, '');
@@ -452,15 +454,15 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       <div className="pt-2">
         <div className="flex justify-between items-end mb-4">
           <div>
-            <label className={labelClass}><Tag size={14} className="text-[#F05A00]" /> Top 3 Interests</label>
-            <p className="text-[11px] font-bold text-zinc-400 ml-1">Select exactly 3 tags that describe your campus vibe.</p>
+            <label className={labelClass}><Tag size={14} className="text-[#F05A00]" /> Campus Interests</label>
+            <p className="text-[11px] font-bold text-zinc-400 ml-1">Select 1 to 5 tags that describe your campus vibe.</p>
           </div>
           <span className={`text-[11px] font-black px-3.5 py-1.5 rounded-full transition-all ${
-            selectedInterests.length === 3
+            selectedInterests.length >= 1 && selectedInterests.length <= 5
               ? 'bg-[#F05A00] text-white shadow-lg shadow-[#F05A00]/30'
               : 'bg-zinc-100 text-zinc-400'
           }`}>
-            {selectedInterests.length}/3
+            {selectedInterests.length}/5
           </span>
         </div>
         

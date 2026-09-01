@@ -95,7 +95,7 @@ export default function NotificationsPage() {
     else if (t.includes('gig')) router.push('/gigs');
     else if (t.includes('message') || t.includes('chat')) router.push('/messages');
     else if (t.includes('spark') || t.includes('wallet') || t.includes('refund')) router.push('/wallet');
-    else if (t.includes('circle')) router.push('/discover');
+    else if (t.includes('circle')) router.push('/circles');
     else router.push('/');
   };
 

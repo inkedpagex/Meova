@@ -65,7 +65,7 @@ export async function POST(request, { params }) {
         circleId
       );
 
-      if (!spendResult.success) {
+      if (!spendResult.ok) {
         return NextResponse.json({
           error: spendResult.error || `Insufficient Sparks to join ${circle.name}.`,
           requiredSparks: price,
@@ -92,6 +92,7 @@ export async function POST(request, { params }) {
         await creditSparks(
           user.uid,
           price,
+          'purchased',
           'dispute_refund',
           `Refund: Failed to join ${circle.name}`,
           circleId

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { Clock, CheckCircle, XCircle, Search, ArrowUpRight, Loader2 } from 'lucide-react';
 
@@ -102,7 +102,7 @@ export default function AdminWithdrawalsPage() {
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                       <div className="space-y-1">
                         <p className="text-lg font-black text-emerald-600">
-                          ₹{w.amount_inr || w.amount} <span className="text-xs font-bold text-slate-400">({w.amount} Sparks)</span>
+                          ₹{w.amount_inr || w.amount} <span className="text-xs font-bold text-slate-400">({w.sparks || w.sparks_deducted || w.amount || 0} Sparks)</span>
                         </p>
                         <p className="text-xs font-extrabold text-slate-900">
                           Requested by: <span className="text-[#F05A00]">{w.email}</span>
@@ -183,7 +183,7 @@ export default function AdminWithdrawalsPage() {
                     >
                       <div>
                         <p className="text-xs font-black text-slate-900">
-                          {w.amount} Sparks — {w.email}
+                          {w.sparks || w.sparks_deducted || w.amount || 0} Sparks — {w.email}
                         </p>
                         <p className="text-[11px] font-medium text-slate-500 mt-0.5">
                           Remarks: {w.remarks || 'None'}

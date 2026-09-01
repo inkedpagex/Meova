@@ -28,16 +28,20 @@ export async function POST(request) {
     } = body;
 
     const VALID_YEARS = ['1st', '2nd', '3rd', '4th', '5th', 'Alumni'];
+    const cleanYear = String(year || '').replace(/\s+Year$/i, '').trim();
 
     // ── Validation ──────────────────────────────────────────────
     const errors = [];
-    if (!username || !USERNAME_REGEX.test(username.toLowerCase().trim()))
-      errors.push('Username is invalid (5-20 chars, start with a letter, lowercase letters/numbers/underscores).');
+    const cleanUsername = (username || '').toLowerCase().trim();
+    const digitCount = (cleanUsername.match(/\d/g) || []).length;
+
+    if (!cleanUsername || !USERNAME_REGEX.test(cleanUsername) || digitCount < 2)
+      errors.push('Username must be 5-20 chars, start with a letter, and contain at least 2 digits (e.g. chirag_04).');
     if (!full_name?.trim() || full_name.trim().length < 2 || full_name.trim().length > 50) 
       errors.push('Full name must be between 2 and 50 characters.');
     if (!gender || !['male', 'female', 'other'].includes(gender))
       errors.push('Gender selection is required.');
-    if (!year || !VALID_YEARS.includes(year)) 
+    if (!cleanYear || !VALID_YEARS.includes(cleanYear)) 
       errors.push('Please select a valid study year (1st, 2nd, 3rd, 4th, 5th, or Alumni).');
     if (!branch?.trim() || branch.trim().length > 60) 
       errors.push('Branch / Course is required (max 60 characters).');
@@ -48,8 +52,6 @@ export async function POST(request) {
     if (errors.length > 0) {
       return NextResponse.json({ error: errors[0] }, { status: 400 });
     }
-
-    const cleanUsername = username.toLowerCase().trim();
 
     // Check username availability in public.usernames
     const { data: usernameDoc } = await supabaseAdmin
@@ -91,9 +93,8 @@ export async function POST(request) {
       username: cleanUsername,
       full_name: full_name.trim(),
       gender,
-      year,
+      year: cleanYear,
       branch: branch.trim(),
-      university: university?.trim() || '',
       bio: bio?.trim() || '',
       interests: interests || [],
       instagram: instagram?.trim() || '',
@@ -109,7 +110,7 @@ export async function POST(request) {
 
     if (profileErr) {
       console.error('[onboarding POST profile update error]', profileErr.message);
-      return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
+      return NextResponse.json({ error: profileErr.message || 'Failed to update profile' }, { status: 500 });
     }
 
     const cookieStore = await cookies();

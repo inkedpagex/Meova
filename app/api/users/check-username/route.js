@@ -18,6 +18,14 @@ export async function GET(request) {
     });
   }
 
+  const digitCount = (username.match(/\d/g) || []).length;
+  if (digitCount < 2) {
+    return NextResponse.json({
+      available: false,
+      error: 'Username must contain at least 2 digits / numbers (e.g. chirag_04).',
+    });
+  }
+
   const RESERVED = ['admin', 'meova', 'meetify', 'support', 'help', 'api', 'root', 'system', 'user', 'mod', 'moderator'];
   if (RESERVED.includes(username)) {
     return NextResponse.json({ available: false, error: 'This username is reserved.' });

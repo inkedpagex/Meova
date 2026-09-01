@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GraduationCap, Building2, BookOpen, PenLine, AtSign, ArrowRight, ArrowLeft, ChevronDown } from 'lucide-react';
 
-const YEARS = ['1st Year','2nd Year','3rd Year','4th Year','5th Year'];
+const YEARS = ['1st', '2nd', '3rd', '4th', '5th'];
 
 const BRANCHES = [
   'B.Tech Computer Science',
@@ -25,9 +25,9 @@ const BRANCHES = [
 
 const INTEREST_TAGS = [
   'Coding & Tech','Music & Bands','Dance','Photography & Film',
-  'Public Speaking','Art & Sketching','Sports & Fitness',
+  'Public Speaking & Debating','Art & Sketching','Sports & Fitness',
   'Gaming & E-sports','Literature & Poetry','Entrepreneurship',
-  'Theatre & Drama','Anime & Manga','Volunteering','Fashion & Styling','Astronomy & Science',
+  'Theatre & Drama','Anime & Manga','Volunteering & Social Service','Fashion & Styling','Astronomy & Science',
 ];
 
 // ─── Step 2: Academic ─────────────────────────────────────────────────────────
@@ -58,20 +58,23 @@ export function Step2({ data, onChange, onNext, onBack }) {
       <div>
         <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3">Year of Study *</label>
         <div className="grid grid-cols-5 gap-2">
-          {YEARS.map(y => (
-            <button
-              key={y} type="button"
-              onClick={() => onChange('year', y)}
-              className="py-3 rounded-2xl text-xs font-black transition-all active:scale-95"
-              style={{
-                background: data.year === y ? '#F05A00' : '#f4f4f5',
-                color: data.year === y ? '#fff' : '#71717a',
-                boxShadow: data.year === y ? '0 4px 14px rgba(140,53,115,0.3)' : 'none',
-              }}
-            >
-              {y.replace(' Year', '')}
-            </button>
-          ))}
+          {YEARS.map(y => {
+            const isSelected = data.year === y || data.year === `${y} Year`;
+            return (
+              <button
+                key={y} type="button"
+                onClick={() => onChange('year', y)}
+                className="py-3 rounded-2xl text-xs font-black transition-all active:scale-95 cursor-pointer"
+                style={{
+                  background: isSelected ? '#F05A00' : '#f4f4f5',
+                  color: isSelected ? '#fff' : '#71717a',
+                  boxShadow: isSelected ? '0 4px 14px rgba(240,90,0,0.3)' : 'none',
+                }}
+              >
+                {y}
+              </button>
+            );
+          })}
         </div>
       </div>
 

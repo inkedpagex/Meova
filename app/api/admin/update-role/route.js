@@ -17,6 +17,10 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
   }
 
+  if (targetUid === admin.uid && role !== 'admin') {
+    return NextResponse.json({ error: 'You cannot demote your own administrator account.' }, { status: 400 });
+  }
+
   try {
     const { data: profile, error: fetchErr } = await supabaseAdmin
       .from('profiles')

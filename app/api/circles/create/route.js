@@ -54,7 +54,7 @@ export async function POST(request) {
         circleId
       );
 
-      if (!spendRes.success) {
+      if (!spendRes.ok) {
         return NextResponse.json({
           error: spendRes.error || `You need ${creationFee} Sparks to request a community.`
         }, { status: 402 });
@@ -94,6 +94,7 @@ export async function POST(request) {
         await creditSparks(
           user.uid,
           sparksDeducted,
+          'purchased',
           'dispute_refund',
           `Refund: Community creation failed (${name.trim()})`,
           circleId
@@ -119,7 +120,7 @@ export async function POST(request) {
   } catch (err) {
     console.error('[POST /api/circles/create]', err.message);
     if (sparksDeducted > 0 && userUid) {
-      await creditSparks(userUid, sparksDeducted, 'dispute_refund', 'Refund: Community creation failed', circleId).catch(() => {});
+      await creditSparks(userUid, sparksDeducted, 'purchased', 'dispute_refund', 'Refund: Community creation failed', circleId).catch(() => {});
     }
     return NextResponse.json({ error: 'Failed to submit community request' }, { status: 500 });
   }

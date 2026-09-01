@@ -36,7 +36,9 @@ export async function POST(request) {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { bookingId, targetUserId, rating, written } = await request.json();
+    const body = await request.json();
+    const { bookingId, targetUserId, rating } = body;
+    const commentText = (body.comment || body.written || body.text || body.message || '').slice(0, 500);
 
     if (!bookingId || !targetUserId || !rating) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -52,7 +54,7 @@ export async function POST(request) {
       reviewer_id: user.uid,
       target_user_id: targetUserId,
       rating: numRating,
-      comment: (written || '').slice(0, 500),
+      comment: commentText,
       created_at: new Date().toISOString(),
     };
 

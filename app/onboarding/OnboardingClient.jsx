@@ -63,15 +63,22 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
           photo_url: data.photo_url,
         }),
       });
-      const json = await res.json();
-      if (!res.ok) { setError(json.error || 'Something went wrong. Please try again.'); setLoading(false); return; }
-      // Show success animation while Firestore propagates profileComplete:true (800ms).
-      // Without this pause, slower devices hit a redirect loop causing ERR_FAILED.
+      let json = {};
+      try {
+        json = await res.json();
+      } catch (_) {}
+
+      if (!res.ok) {
+        setError(json.error || 'Something went wrong. Please try again.');
+        setLoading(false);
+        return;
+      }
+
       setDone(true);
       await new Promise(resolve => setTimeout(resolve, 800));
       window.location.href = '/';
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err?.message || 'Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -80,20 +87,16 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
   // ── Success / launch screen ──────────────────────────────────────────────────
   if (done) {
     return (
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 300,
-        background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 50%, #ec4899 100%)',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      }}>
+      <div className="fixed inset-0 z-[300] bg-white flex flex-col items-center justify-center p-6 anim-fade-in">
         <style>{`
           @keyframes ob-pulse {
-            0%   { transform: scale(0.85); opacity: 0.5; }
-            50%  { transform: scale(1.18); opacity: 0.12; }
-            100% { transform: scale(0.85); opacity: 0.5; }
+            0%   { transform: scale(0.85); opacity: 0.6; }
+            50%  { transform: scale(1.25); opacity: 0.15; }
+            100% { transform: scale(0.85); opacity: 0.6; }
           }
           @keyframes ob-pop {
             0%   { transform: scale(0); opacity: 0; }
-            65%  { transform: scale(1.15); opacity: 1; }
+            65%  { transform: scale(1.12); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
           }
           @keyframes ob-check {
@@ -106,7 +109,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
             to   { width: 100%; }
           }
           @keyframes ob-up {
-            from { opacity: 0; transform: translateY(14px); }
+            from { opacity: 0; transform: translateY(12px); }
             to   { opacity: 1; transform: translateY(0); }
           }
         `}</style>
@@ -115,22 +118,20 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
         <div style={{
           position: 'absolute',
           width: 140, height: 140, borderRadius: '50%',
-          background: 'rgba(255,255,255,0.18)',
+          background: 'rgba(240,90,0,0.12)',
           animation: 'ob-pulse 1.4s ease-in-out infinite',
         }} />
 
         {/* Checkmark circle */}
         <div style={{
-          width: 84, height: 84, borderRadius: '50%',
-          background: 'rgba(255,255,255,0.22)',
-          backdropFilter: 'blur(10px)',
-          border: '2px solid rgba(255,255,255,0.45)',
+          width: 80, height: 80, borderRadius: '50%',
+          background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           animation: 'ob-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both',
-          boxShadow: '0 12px 40px rgba(0,0,0,0.22)',
+          boxShadow: '0 12px 30px rgba(240,90,0,0.3)',
           position: 'relative', zIndex: 1,
         }}>
-          <svg width={40} height={40} viewBox="0 0 24 24" fill="none">
+          <svg width={36} height={36} viewBox="0 0 24 24" fill="none">
             <path
               d="M5 13l4 4L19 7"
               stroke="white"
@@ -138,34 +139,34 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeDasharray="50"
-              style={{ animation: 'ob-check 0.45s ease 0.35s both' }}
+              style={{ animation: 'ob-check 0.45s ease 0.25s both' }}
             />
           </svg>
         </div>
 
         {/* Text */}
         <div style={{
-          marginTop: 28, textAlign: 'center', position: 'relative', zIndex: 1,
-          animation: 'ob-up 0.45s ease 0.2s both',
+          marginTop: 24, textAlign: 'center', position: 'relative', zIndex: 1,
+          animation: 'ob-up 0.45s ease 0.15s both',
         }}>
-          <p style={{ fontWeight: 900, fontSize: 22, color: '#fff', margin: 0, letterSpacing: '-0.3px' }}>
+          <h2 className="text-2xl md:text-3xl font-black text-zinc-950 tracking-tight">
             You&apos;re all set!
-          </p>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)', marginTop: 6, margin: '6px 0 0' }}>
+          </h2>
+          <p className="text-sm font-bold text-zinc-400 mt-1.5">
             Opening Meova for you…
           </p>
         </div>
 
-        {/* Progress bar — fills in 0.75s matching the 800ms delay */}
+        {/* Progress bar — fills cleanly in orange */}
         <div style={{
-          marginTop: 36, width: 190, height: 4, position: 'relative', zIndex: 1,
-          background: 'rgba(255,255,255,0.22)', borderRadius: 99, overflow: 'hidden',
-          animation: 'ob-up 0.45s ease 0.3s both',
+          marginTop: 32, width: 200, height: 5, position: 'relative', zIndex: 1,
+          background: '#f4f4f5', borderRadius: 99, overflow: 'hidden',
+          animation: 'ob-up 0.45s ease 0.25s both',
         }}>
           <div style={{
             height: '100%', borderRadius: 99,
-            background: 'rgba(255,255,255,0.92)',
-            animation: 'ob-bar 0.72s cubic-bezier(0.4,0,0.2,1) 0.08s both',
+            background: 'linear-gradient(90deg, #F05A00, #D94F00)',
+            animation: 'ob-bar 0.72s cubic-bezier(0.4,0,0.2,1) 0.05s both',
           }} />
         </div>
       </div>

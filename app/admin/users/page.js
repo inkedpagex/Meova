@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Search, ShieldAlert, GraduationCap, Sparkles, UserCheck, Loader2, Ban, CheckCircle2 } from 'lucide-react';
+import { Search, ShieldAlert, GraduationCap, Sparkles, UserCheck, Loader2, Ban, CheckCircle2, Star, Award } from 'lucide-react';
 
 const ROLES = [
   { value: 'user', label: 'Student (Normal)', icon: GraduationCap },
@@ -105,7 +105,7 @@ export default function AdminUsersPage() {
         <div>
           <h1 className="text-lg md:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
             <span>User & Access Control</span>
-            <span className="text-xs font-black bg-[#fcf6fa] text-[#F05A00] border border-[#eac5e0] px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-black bg-orange-50 text-[#F05A00] border border-orange-200 px-2.5 py-0.5 rounded-full">
               {users.length} Total
             </span>
           </h1>
@@ -183,7 +183,7 @@ export default function AdminUsersPage() {
             let roleLabel = 'Student';
 
             if (isUserAdmin) {
-              roleBadgeBg = 'bg-[#f5ebf4] text-[#F05A00] border-[#eac5e0] font-bold';
+              roleBadgeBg = 'bg-orange-50 text-[#F05A00] border-orange-200 font-bold';
               roleLabel = 'Admin';
             } else if (isHost) {
               roleBadgeBg = 'bg-amber-50 text-amber-700 border-amber-200 font-bold';
@@ -207,7 +207,7 @@ export default function AdminUsersPage() {
                 <div className="flex items-center gap-3 min-w-0">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black border ${
                     isBlocked ? 'bg-rose-100 text-rose-600 border-rose-200' :
-                    isUserAdmin ? 'bg-[#fcf6fa] text-[#F05A00] border-[#eac5e0]' :
+                    isUserAdmin ? 'bg-orange-50 text-[#F05A00] border-orange-200' :
                     isHost ? 'bg-amber-50 text-amber-600 border-amber-200' :
                     isLead ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
                     'bg-slate-100 text-slate-600 border-slate-200'

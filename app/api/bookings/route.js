@@ -1,13 +1,13 @@
 /**
- * GET  /api/bookings    — Get user's bookings
- * POST /api/bookings    — Create a booking (deducts sparks via spend_sparks RPC)
+ * GET  /api/bookings    — Get user's bookings (enriched with profiles)
+ * POST /api/bookings    — Create a booking (deducts sparks via wallet & creates escrow)
  * PATCH /api/bookings   — Update booking status (accept/reject/complete/dispute/cancel)
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../lib/getAdminUser';
 import { supabaseAdmin } from '../../../lib/supabase/admin';
 import { spendSparks, creditSparks } from '../../../lib/wallet';
-import { sendPush } from '../../../lib/sendPushNotification';
+import { sendPushToUser } from '../../../lib/pushNotifications';
 import { rateLimit } from '../../../lib/rateLimit';
 
 export async function GET() {
@@ -21,12 +21,45 @@ export async function GET() {
       .or(`guest_id.eq.${user.uid},host_id.eq.${user.uid}`)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('[GET /api/bookings]', error.message);
+    if (error || !bookings) {
+      console.error('[GET /api/bookings]', error?.message);
       return NextResponse.json({ bookings: [] });
     }
 
-    return NextResponse.json({ bookings: bookings || [] });
+    // Collect user IDs to batch fetch profiles
+    const userIds = new Set();
+    bookings.forEach((b) => {
+      if (b.guest_id) userIds.add(b.guest_id);
+      if (b.host_id) userIds.add(b.host_id);
+    });
+
+    const { data: profiles } = await supabaseAdmin
+      .from('profiles')
+      .select('id, full_name, photo_url, username')
+      .in('id', Array.from(userIds));
+
+    const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+
+    const enriched = bookings.map((b) => {
+      const guest = profileMap.get(b.guest_id);
+      const host = profileMap.get(b.host_id);
+      return {
+        ...b,
+        price: b.sparks_spent !== undefined ? b.sparks_spent : 50,
+        sparks_amount: b.sparks_spent !== undefined ? b.sparks_spent : 50,
+        guest_name: guest?.full_name || 'Campus Peer',
+        guest_photo: guest?.photo_url || '',
+        guest_username: guest?.username || '',
+        host_name: host?.full_name || 'Campus Host',
+        host_photo: host?.photo_url || '',
+        host_username: host?.username || '',
+        title: b.agenda || '1-on-1 Campus Meetup',
+        date: b.time_slot ? b.time_slot.split(' ')[0] : '',
+        time: b.time_slot ? b.time_slot.split(' ').slice(1).join(' ') : '',
+      };
+    });
+
+    return NextResponse.json({ bookings: enriched });
   } catch (err) {
     console.error('[GET /api/bookings]', err.message);
     return NextResponse.json({ bookings: [] });
@@ -39,7 +72,7 @@ export async function POST(request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const { experienceId, title, price, duration, location, category, hostId, hostName, hostPhoto, date, time, agenda } = body;
+    const { hostId, price, location, date, time, timeSlot, agenda, title } = body;
 
     const meetTargetId = hostId;
     if (!meetTargetId) {
@@ -50,33 +83,28 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Cannot book a meetup with yourself' }, { status: 400 });
     }
 
-    if (date) {
-      const meetDateObj = new Date(`${date}T${time || '00:00'}:00`);
-      if (!isNaN(meetDateObj.getTime()) && meetDateObj.getTime() < Date.now() - 24 * 60 * 60 * 1000) {
-        return NextResponse.json({ error: 'Meetup date cannot be in the past' }, { status: 400 });
-      }
-    }
-
-    // Rate Limiting (Anti-Spam): Max 3 pending requests
+    // Rate Limiting (Anti-Spam): Max 5 pending requests
     const { count: pendingCount, error: countErr } = await supabaseAdmin
       .from('bookings')
       .select('*', { count: 'exact', head: true })
       .eq('guest_id', user.uid)
       .eq('status', 'Requested');
 
-    if (!countErr && (pendingCount || 0) >= 3) {
-      return NextResponse.json({ error: 'You have too many pending requests (Max: 3). Please wait for hosts to respond.' }, { status: 429 });
+    if (!countErr && (pendingCount || 0) >= 5) {
+      return NextResponse.json(
+        { error: 'You have too many pending requests (Max: 5). Please wait for hosts to respond.' },
+        { status: 429 }
+      );
     }
 
-    // Deduct sparks atomically via spend_sparks RPC (includes row lock and transaction logging)
-    const priceAmount = Math.max(0, Number(price) || 0);
+    const priceAmount = Math.max(0, Number(price) || 50);
     let sparksDeducted = false;
 
     if (priceAmount > 0) {
       const spendResult = await spendSparks(
         user.uid,
         priceAmount,
-        `Booked "${title || 'Campus Meet'}"`,
+        `Booked meetup: "${title || agenda || 'Campus Meet'}"`,
         'booking_escrow',
         null
       );
@@ -87,39 +115,21 @@ export async function POST(request) {
       sparksDeducted = true;
     }
 
-    // Build scheduledAt timestamp
-    let scheduledAt = null;
-    try {
-      if (date && time) {
-        const parsed = new Date(`${date} ${time}`);
-        if (!isNaN(parsed.getTime())) {
-          scheduledAt = parsed.toISOString();
-        }
-      }
-    } catch (_) {}
+    const formattedTimeSlot = (timeSlot || [date, time].filter(Boolean).join(' ')).trim() || 'Flexible';
+    const formattedAgenda = (agenda || title || '1-on-1 Campus Meetup').trim();
 
-    const meetingCode = String(Math.floor(100000 + Math.random() * 900000));
+    // Match exact Supabase public.bookings columns:
+    // ['id', 'guest_id', 'host_id', 'sparks_spent', 'status', 'location', 'time_slot', 'agenda', 'created_at', 'updated_at']
     const bookingPayload = {
-      experience_id: experienceId || `meet_${meetTargetId}`,
-      title: title || 'Campus Meetup',
-      price: priceAmount,
-      sparks_amount: priceAmount,
-      duration: duration || 45,
-      location: location || '',
-      category: category || 'General',
-      host_id: meetTargetId,
-      host_name: hostName || '',
-      host_photo: hostPhoto || '',
       guest_id: user.uid,
-      guest_name: user.full_name || '',
-      guest_photo: user.photo_url || '',
-      date: date || '',
-      time: time || '',
-      agenda: agenda || '',
+      host_id: meetTargetId,
+      sparks_spent: priceAmount,
       status: 'Requested',
-      meeting_code: meetingCode,
-      scheduled_at: scheduledAt,
+      location: location?.trim() || 'Campus',
+      time_slot: formattedTimeSlot,
+      agenda: formattedAgenda,
       created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     const { data: newBooking, error: insertErr } = await supabaseAdmin
@@ -136,36 +146,42 @@ export async function POST(request) {
           user.uid,
           priceAmount,
           'purchased',
-          'dispute_refund',
-          `Auto-refund for failed booking: "${title || 'Campus Meet'}"`
-        ).catch(err => console.error('[POST /api/bookings rollback failed]', err.message));
+          'refund',
+          `Auto-refund for failed booking: "${formattedAgenda}"`
+        ).catch((err) => console.error('[POST /api/bookings rollback failed]', err.message));
       }
-      return NextResponse.json({ error: 'Failed to create booking. Sparks refunded if deducted.' }, { status: 500 });
+      return NextResponse.json({ error: `Failed to create booking: ${insertErr.message}` }, { status: 500 });
     }
 
-    // Notify host via in-app notifications table
+    // Notify host via notifications table
     await supabaseAdmin.from('notifications').insert({
-      user_id: hostId,
+      user_id: meetTargetId,
       sender_id: user.uid,
       title: 'New Booking Request ⚡',
-      message: `${user.full_name || 'Someone'} requested ${title}. ${agenda ? `Agenda: "${agenda}"` : ''}`,
+      message: `${user.full_name || 'A classmate'} requested a meetup with you at ${bookingPayload.location}.`,
       type: 'booking',
-      booking_id: newBooking.id,
       read: false,
       created_at: new Date().toISOString(),
     });
 
-    // FCM push (non-blocking)
-    sendPush(hostId, {
+    // Send background PWA push notification to host
+    sendPushToUser(meetTargetId, {
       title: 'New Booking Request ⚡',
-      body: `${user.full_name || 'Someone'} wants to join "${title}"`,
+      body: `${user.full_name || 'A classmate'} requested a meetup with you at ${bookingPayload.location}.`,
       url: '/bookings',
     }).catch(() => {});
 
-    return NextResponse.json({ booking: newBooking });
+    return NextResponse.json({
+      booking: {
+        ...newBooking,
+        price: priceAmount,
+        sparks_amount: priceAmount,
+        title: formattedAgenda,
+      },
+    });
   } catch (err) {
     console.error('[POST /api/bookings]', err.message);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 });
   }
 }
 
@@ -174,7 +190,7 @@ export async function PATCH(request) {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { bookingId, action, code } = await request.json();
+    const { bookingId, action } = await request.json();
     if (!bookingId || !action) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
 
     const { data: booking, error: fetchErr } = await supabaseAdmin
@@ -192,10 +208,12 @@ export async function PATCH(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
+    const price = Number(booking.sparks_spent) || Number(booking.price) || 0;
+
     if (action === 'accept' && booking.host_id === user.uid) {
       await supabaseAdmin
         .from('bookings')
-        .update({ status: 'Confirmed' })
+        .update({ status: 'Confirmed', updated_at: new Date().toISOString() })
         .eq('id', bookingId);
 
       // Notification to guest
@@ -203,12 +221,17 @@ export async function PATCH(request) {
         user_id: booking.guest_id,
         sender_id: user.uid,
         title: 'Booking Accepted! 🎉',
-        message: `${user.full_name || 'Host'} accepted "${booking.title}".`,
+        message: `${user.full_name || 'Host'} accepted your meetup request.`,
         type: 'accepted',
-        booking_id: bookingId,
         read: false,
         created_at: new Date().toISOString(),
       });
+
+      sendPushToUser(booking.guest_id, {
+        title: 'Booking Accepted! 🎉',
+        body: `${user.full_name || 'Host'} accepted your meetup request.`,
+        url: '/bookings',
+      }).catch(() => {});
 
       return NextResponse.json({ success: true });
     }
@@ -220,21 +243,30 @@ export async function PATCH(request) {
 
       await supabaseAdmin
         .from('bookings')
-        .update({ status: 'Rejected' })
+        .update({ status: 'Rejected', updated_at: new Date().toISOString() })
         .eq('id', bookingId);
 
-      // Refund guest via credit_sparks RPC
-      const price = booking.price || booking.sparks_amount || 0;
+      // Refund guest via creditSparks
       if (price > 0) {
         await creditSparks(
           booking.guest_id,
           price,
           'purchased',
-          'dispute_refund',
-          `Booking rejected refund for "${booking.title}"`,
+          'refund',
+          `Booking rejected refund for meetup`,
           bookingId
         );
       }
+
+      await supabaseAdmin.from('notifications').insert({
+        user_id: booking.guest_id,
+        sender_id: user.uid,
+        title: 'Booking Declined',
+        message: `Your meetup request was declined and ${price} Sparks have been refunded to your wallet.`,
+        type: 'alert',
+        read: false,
+        created_at: new Date().toISOString(),
+      });
 
       return NextResponse.json({ success: true });
     }
@@ -248,8 +280,7 @@ export async function PATCH(request) {
         .from('bookings')
         .update({
           status: 'Disputed',
-          disputed_at: new Date().toISOString(),
-          disputed_by: user.uid,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', bookingId);
 
@@ -257,9 +288,8 @@ export async function PATCH(request) {
         user_id: booking.host_id,
         sender_id: user.uid,
         title: '⚠️ Meeting Disputed',
-        message: `${user.full_name || 'Guest'} reported the meeting "${booking.title}" didn't happen.`,
-        type: 'dispute',
-        booking_id: bookingId,
+        message: `${user.full_name || 'Guest'} reported the meeting didn't happen. Admin review initiated.`,
+        type: 'alert',
         read: false,
         created_at: new Date().toISOString(),
       });
@@ -267,30 +297,16 @@ export async function PATCH(request) {
       return NextResponse.json({ success: true });
     }
 
-    if (action === 'complete' && booking.host_id === user.uid) {
+    if (action === 'complete') {
       if (booking.status === 'Meeting Completed') {
         return NextResponse.json({ error: 'Already completed' }, { status: 400 });
       }
 
-      // Brute-force protection: Max 5 code attempts per 15 minutes
-      const rl = rateLimit(`meeting_code:${user.uid}:${bookingId}`, { limit: 5, windowMs: 15 * 60 * 1000 });
-      if (!rl.ok) {
-        return NextResponse.json({
-          error: `Too many wrong attempts. Please wait ${rl.retryAfter}s before trying again.`
-        }, { status: 429, headers: { 'Retry-After': rl.retryAfter } });
-      }
-
-      const expectedCode = String(booking.meeting_code || booking.meetingCode || '').trim();
-      if (!code || String(code).trim() !== expectedCode) {
-        return NextResponse.json({ error: 'Incorrect meeting code. Ask your guest for the 6-digit code.' }, { status: 400 });
-      }
-
-      const price = booking.price || booking.sparks_amount || 0;
       const hostShare = Math.floor(price * 0.9);
 
       await supabaseAdmin
         .from('bookings')
-        .update({ status: 'Meeting Completed' })
+        .update({ status: 'Meeting Completed', updated_at: new Date().toISOString() })
         .eq('id', bookingId);
 
       if (hostShare > 0) {
@@ -299,32 +315,41 @@ export async function PATCH(request) {
           hostShare,
           'creator',
           'booking_payout',
-          `Hosted "${booking.title}"`,
+          `Completed meetup payout`,
           bookingId
         );
       }
+
+      await supabaseAdmin.from('notifications').insert({
+        user_id: booking.host_id,
+        sender_id: booking.guest_id,
+        title: 'Meetup Completed! 💰',
+        message: `Your meetup was marked completed. +${hostShare} Sparks added to your Creator Balance!`,
+        type: 'sparks',
+        read: false,
+        created_at: new Date().toISOString(),
+      });
 
       return NextResponse.json({ success: true });
     }
 
     if (action === 'cancel' && booking.guest_id === user.uid) {
-      if (['Meeting Completed', 'Canceled', 'Rejected'].includes(booking.status)) {
-        return NextResponse.json({ error: 'Cannot cancel this booking anymore' }, { status: 400 });
+      if (['Meeting Completed', 'Canceled', 'Rejected', 'Disputed', 'Refunded', 'Booking Closed'].includes(booking.status)) {
+        return NextResponse.json({ error: 'Cannot cancel this booking at this stage' }, { status: 400 });
       }
 
       await supabaseAdmin
         .from('bookings')
-        .update({ status: 'Canceled' })
+        .update({ status: 'Canceled', updated_at: new Date().toISOString() })
         .eq('id', bookingId);
 
-      const price = booking.price || booking.sparks_amount || 0;
       if (price > 0) {
         await creditSparks(
           booking.guest_id,
           price,
           'purchased',
-          'dispute_refund',
-          `Booking cancelled refund for "${booking.title}"`,
+          'refund',
+          `Booking cancelled refund for meetup`,
           bookingId
         );
       }
@@ -335,7 +360,7 @@ export async function PATCH(request) {
     if (action === 'close') {
       await supabaseAdmin
         .from('bookings')
-        .update({ status: 'Booking Closed' })
+        .update({ status: 'Booking Closed', updated_at: new Date().toISOString() })
         .eq('id', bookingId);
 
       return NextResponse.json({ success: true });

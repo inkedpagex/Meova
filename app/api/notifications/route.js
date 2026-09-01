@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '../../../lib/supabase/admin';
 import { rateLimit, getClientIp } from '../../../lib/rateLimit';
 import { requireAuth } from '../../../lib/getAdminUser';
+import { sendPushToUser } from '../../../lib/pushNotifications';
 
 export async function GET() {
   try {
@@ -67,13 +68,13 @@ export async function POST(req) {
   }
 
   try {
-    const { userId, title, body, type } = await req.json();
+    const { userId, title, body, type, url, link } = await req.json();
     if (!userId || !title || !body) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const validTypes = ['booking', 'sparks', 'message', 'alert'];
-    const notifType = validTypes.includes(type) ? type : 'system';
+    const notifType = type || 'system';
+    const notifUrl = url || link || '/notifications';
 
     const { error } = await supabaseAdmin.from('notifications').insert({
       user_id: userId,
@@ -88,6 +89,14 @@ export async function POST(req) {
       console.error('[POST /api/notifications insert error]', error.message);
       return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
     }
+
+    // Trigger background PWA Web Push notification to user's phone
+    sendPushToUser(userId, {
+      title,
+      body,
+      type: notifType,
+      url: notifUrl,
+    }).catch(e => console.warn('[WebPush] Dispatch background error:', e.message));
 
     return NextResponse.json({ success: true });
   } catch (err) {

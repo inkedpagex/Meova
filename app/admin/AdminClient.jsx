@@ -123,19 +123,23 @@ export default function AdminClient() {
     }
   };
 
-  // Quick Action: Approve withdrawal
-  const handleApproveWithdrawal = async (requestId) => {
+  // Quick Action: Process withdrawal (Approve or Reject)
+  const handleProcessWithdrawal = async (withdrawalId, isApproved) => {
     try {
       const res = await fetch('/api/admin/approve-withdrawal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId }),
+        body: JSON.stringify({
+          withdrawalId,
+          action: isApproved ? 'approve' : 'reject',
+          remarks: isApproved ? 'Approved via Admin Quick Actions' : 'Rejected via Admin Quick Actions'
+        }),
       });
       if (res.ok) {
         loadData();
       } else {
         const data = await res.json();
-        alert(data.error || 'Failed to approve withdrawal.');
+        alert(data.error || `Failed to ${isApproved ? 'approve' : 'reject'} withdrawal.`);
       }
     } catch {
       alert('Network error');
@@ -148,7 +152,7 @@ export default function AdminClient() {
       const res = await fetch('/api/admin/resolve-dispute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookingId, resolution }),
+        body: JSON.stringify({ bookingId, action: resolution }),
       });
       if (res.ok) {
         loadData();
@@ -201,7 +205,7 @@ export default function AdminClient() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 md:gap-4">
         
         {/* Card 1: Total Users */}
-        <div className="bg-white border border-[#f5ebf4] rounded-2xl p-4 shadow-2xs flex flex-col justify-between h-32">
+        <div className="bg-white border border-orange-100 rounded-2xl p-4 shadow-2xs flex flex-col justify-between h-32">
           <div className="flex items-start justify-between">
             <div>
               <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">
@@ -211,7 +215,7 @@ export default function AdminClient() {
                 {stats.totalUsers}
               </span>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-[#fcf6fa] flex items-center justify-center text-[#F05A00]">
+            <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center text-[#F05A00]">
               <Users size={16} />
             </div>
           </div>
@@ -456,7 +460,7 @@ export default function AdminClient() {
               if (statusLower === 'confirmed') badgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
               if (statusLower === 'requested') badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
               if (statusLower === 'disputed') badgeStyle = 'bg-rose-50 text-rose-700 border-rose-200';
-              if (statusLower === 'completed') badgeStyle = 'bg-[#fcf6fa] text-[#D94F00] border-[#eac5e0]';
+              if (statusLower === 'completed') badgeStyle = 'bg-orange-50 text-[#F05A00] border-orange-200';
 
               return (
                 <div
