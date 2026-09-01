@@ -78,11 +78,15 @@ export async function POST(request, { params }) {
     }
 
     // Check if chat exists
-    let { data: chatData } = await supabaseAdmin
+    let { data: chatData, error: findErr } = await supabaseAdmin
       .from('chats')
       .select('*')
       .eq('id', chatId)
       .maybeSingle();
+
+    if (findErr) {
+      console.error('[POST /api/chats/[id]/messages find chat error]', findErr.message);
+    }
 
     if (chatData && Array.isArray(chatData.participants) && !chatData.participants.includes(user.uid)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -117,30 +121,11 @@ export async function POST(request, { params }) {
       chatData = newChat;
     }
 
-    const participants = chatData.participants || [];
+    const participants = chatData?.participants || [];
     const otherId = participants.find(p => p !== user.uid);
     const nowIso = new Date().toISOString();
 
-    // Insert message into chat_messages table
-    const { data: msgData, error: msgErr } = await supabaseAdmin
-      .from('chat_messages')
-      .insert({
-        chat_id: chatId,
-        sender_id: user.uid,
-        text: text.trim(),
-        status: 'sent',
-        created_at: nowIso,
-      })
-      .select()
-      .single();
-
-    if (msgErr) {
-      console.error('[POST /api/chats/[id]/messages insert error]', msgErr.message);
-      return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
-    }
-
-    // Update chat metadata
-    const currentUnread = chatData.unread_count || {};
+    const currentUnread = chatData?.unread_count || {};
     const updatedUnread = {
       ...currentUnread,
       [user.uid]: 0,
@@ -149,44 +134,56 @@ export async function POST(request, { params }) {
       updatedUnread[otherId] = (currentUnread[otherId] || 0) + 1;
     }
 
-    await supabaseAdmin
-      .from('chats')
-      .update({
-        last_message: text.trim(),
-        last_message_at: nowIso,
-        last_sender_id: user.uid,
-        unread_count: updatedUnread,
-      })
-      .eq('id', chatId);
+    // Parallelize message insert and chat update for instant response
+    const [msgRes] = await Promise.all([
+      supabaseAdmin
+        .from('chat_messages')
+        .insert({
+          chat_id: chatId,
+          sender_id: user.uid,
+          text: text.trim(),
+          status: 'sent',
+          created_at: nowIso,
+        })
+        .select()
+        .single(),
+      supabaseAdmin
+        .from('chats')
+        .update({
+          last_message: text.trim(),
+          last_message_at: nowIso,
+          last_sender_id: user.uid,
+          unread_count: updatedUnread,
+        })
+        .eq('id', chatId)
+    ]);
 
-    // Push notification to recipient
+    if (msgRes.error) {
+      console.error('[POST /api/chats/[id]/messages insert error]', msgRes.error.message);
+      return NextResponse.json({ error: 'Failed to send message: ' + msgRes.error.message }, { status: 500 });
+    }
+
+    // Background push notification to recipient (non-blocking)
     if (otherId) {
       const senderName = user.full_name || user.email?.split('@')[0] || 'Someone';
+      const senderPhoto = user.photo_url || '';
       const preview = text.trim().length > 60 ? text.trim().slice(0, 60) + '...' : text.trim();
       
-      // Insert in-app notification record first (triggers real-time banner in app)
-      await supabaseAdmin.from('notifications').insert({
-        user_id: otherId,
-        sender_id: user.uid,
-        title: `New message from ${senderName}`,
-        message: preview,
-        type: 'message',
-        read: false,
-        created_at: new Date().toISOString(),
-      }).catch(() => {});
-
-      // Also fire background Web Push for locked/background devices
       sendPush(otherId, {
-        title: `${senderName} sent a message`,
+        title: `${senderName}`,
         body: preview,
         url: `/messages`,
         type: 'message',
-      }).catch(() => {});
+        photo: senderPhoto,
+        senderPhoto,
+        senderName,
+        tag: `chat_${chatId}`,
+      }).catch(pushErr => console.warn('[POST /api/chats/[id]/messages push error]', pushErr.message));
     }
 
-    return NextResponse.json({ ok: true, messageId: msgData.id });
+    return NextResponse.json({ ok: true, messageId: msgRes.data?.id });
   } catch (err) {
     console.error('[POST /api/chats/[id]/messages]', err.message);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 });
   }
 }

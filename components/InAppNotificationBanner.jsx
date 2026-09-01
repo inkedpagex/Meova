@@ -2,22 +2,108 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Zap, MessageSquare, Calendar, Users, Briefcase, X, Phone, PhoneOff } from 'lucide-react';
+import { Bell, Zap, MessageSquare, Calendar, Users, Briefcase, X, Phone, PhoneOff, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase/client';
 import { useUserContext } from './providers/UserProvider';
+import { getCartoonAvatar } from '../utils/avatar';
 
-const ICONS = {
-  booking: Calendar,
-  message: MessageSquare,
-  chat: MessageSquare,
-  sparks: Zap,
-  wallet: Zap,
-  tip: Zap,
-  gig: Briefcase,
-  circle: Users,
-  incoming_call: Phone,
-  call: Phone,
-  default: Bell,
+const NOTIF_CONFIG = {
+  message: {
+    icon: MessageSquare,
+    accent: '#F05A00',
+    tag: 'Message',
+    bg: 'bg-gradient-to-r from-orange-50/95 via-white/98 to-white/95',
+    border: 'border-orange-200/90 shadow-[0_12px_36px_rgba(240,90,0,0.16)]',
+    actionText: 'Reply',
+  },
+  chat: {
+    icon: MessageSquare,
+    accent: '#F05A00',
+    tag: 'Chat',
+    bg: 'bg-gradient-to-r from-orange-50/95 via-white/98 to-white/95',
+    border: 'border-orange-200/90 shadow-[0_12px_36px_rgba(240,90,0,0.16)]',
+    actionText: 'Reply',
+  },
+  incoming_call: {
+    icon: Phone,
+    accent: '#10b981',
+    tag: 'Voice Call',
+    bg: 'bg-gradient-to-r from-emerald-50/95 via-white/98 to-white/95',
+    border: 'border-emerald-300/90 shadow-[0_14px_40px_rgba(16,185,129,0.22)]',
+    actionText: 'Join',
+  },
+  call: {
+    icon: Phone,
+    accent: '#10b981',
+    tag: 'Voice Call',
+    bg: 'bg-gradient-to-r from-emerald-50/95 via-white/98 to-white/95',
+    border: 'border-emerald-300/90 shadow-[0_14px_40px_rgba(16,185,129,0.22)]',
+    actionText: 'Join',
+  },
+  booking: {
+    icon: Calendar,
+    accent: '#6366f1',
+    tag: 'Meetup',
+    bg: 'bg-gradient-to-r from-indigo-50/95 via-white/98 to-white/95',
+    border: 'border-indigo-200/90 shadow-[0_12px_36px_rgba(99,102,241,0.16)]',
+    actionText: 'View Meetup',
+  },
+  meetup: {
+    icon: Calendar,
+    accent: '#6366f1',
+    tag: 'Meetup',
+    bg: 'bg-gradient-to-r from-indigo-50/95 via-white/98 to-white/95',
+    border: 'border-indigo-200/90 shadow-[0_12px_36px_rgba(99,102,241,0.16)]',
+    actionText: 'View Meetup',
+  },
+  sparks: {
+    icon: Zap,
+    accent: '#f59e0b',
+    tag: 'Sparks',
+    bg: 'bg-gradient-to-r from-amber-50/95 via-white/98 to-white/95',
+    border: 'border-amber-200/90 shadow-[0_12px_36px_rgba(245,158,11,0.16)]',
+    actionText: 'View Wallet',
+  },
+  wallet: {
+    icon: Zap,
+    accent: '#f59e0b',
+    tag: 'Wallet',
+    bg: 'bg-gradient-to-r from-amber-50/95 via-white/98 to-white/95',
+    border: 'border-amber-200/90 shadow-[0_12px_36px_rgba(245,158,11,0.16)]',
+    actionText: 'View Wallet',
+  },
+  tip: {
+    icon: Zap,
+    accent: '#f59e0b',
+    tag: 'Tip Received',
+    bg: 'bg-gradient-to-r from-amber-50/95 via-white/98 to-white/95',
+    border: 'border-amber-200/90 shadow-[0_12px_36px_rgba(245,158,11,0.16)]',
+    actionText: 'View Balance',
+  },
+  gig: {
+    icon: Briefcase,
+    accent: '#8b5cf6',
+    tag: 'Campus Gig',
+    bg: 'bg-gradient-to-r from-purple-50/95 via-white/98 to-white/95',
+    border: 'border-purple-200/90 shadow-[0_12px_36px_rgba(139,92,246,0.16)]',
+    actionText: 'View Gig',
+  },
+  circle: {
+    icon: Users,
+    accent: '#06b6d4',
+    tag: 'Circle',
+    bg: 'bg-gradient-to-r from-cyan-50/95 via-white/98 to-white/95',
+    border: 'border-cyan-200/90 shadow-[0_12px_36px_rgba(6,182,212,0.16)]',
+    actionText: 'View Circle',
+  },
+  default: {
+    icon: Bell,
+    accent: '#F05A00',
+    tag: 'Meova',
+    bg: 'bg-gradient-to-r from-orange-50/90 via-white/98 to-white/95',
+    border: 'border-orange-200/80 shadow-[0_12px_36px_rgba(240,90,0,0.14)]',
+    actionText: 'View',
+  },
 };
 
 export default function InAppNotificationBanner() {
@@ -67,7 +153,6 @@ export default function InAppNotificationBanner() {
           const newRow = payload.new;
           if (!newRow) return;
 
-          // Clear any existing timer
           if (timerRef.current) clearTimeout(timerRef.current);
 
           setIsExiting(false);
@@ -80,10 +165,9 @@ export default function InAppNotificationBanner() {
             senderPhoto: newRow.sender_photo,
           });
 
-          // Auto dismiss after 5.5 seconds
           timerRef.current = setTimeout(() => {
             dismiss();
-          }, 5500);
+          }, 6000);
         }
       )
       .subscribe();
@@ -98,51 +182,73 @@ export default function InAppNotificationBanner() {
 
   const notifType = (activeNotif.type || '').toLowerCase();
   const isCallNotif = notifType === 'incoming_call' || notifType === 'call' || activeNotif.title?.toLowerCase().includes('call');
-  const IconComponent = ICONS[notifType] || ICONS.default;
-  const accentColor = isCallNotif ? '#10b981' : '#F05A00';
-  const bgClass = isCallNotif ? 'border-emerald-200/80 shadow-[0_12px_36px_rgba(16,185,129,0.18)]' : 'border-orange-200/90 shadow-[0_12px_36px_rgba(240,90,0,0.18)]';
+  const cfg = NOTIF_CONFIG[notifType] || NOTIF_CONFIG.default;
+  const IconComponent = cfg.icon;
 
   return (
     <div
-      className={`fixed top-4 left-1/2 -translate-x-1/2 z-[99999] w-[calc(100%-32px)] max-w-sm transition-all duration-300 pointer-events-auto ${
+      className={`fixed top-4 left-1/2 -translate-x-1/2 z-[99999] w-[calc(100%-28px)] max-w-sm transition-all duration-300 pointer-events-auto ${
         isExiting ? 'opacity-0 -translate-y-4 scale-95' : 'opacity-100 translate-y-0 scale-100 animate-in slide-in-from-top-4'
       }`}
     >
       <div
-        className={`bg-white/95 backdrop-blur-xl border ${bgClass} rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer group hover:border-opacity-100 transition-all`}
+        className={`${cfg.bg} backdrop-blur-xl border ${cfg.border} rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer group hover:scale-[1.01] transition-all`}
         onClick={!isCallNotif ? handleClick : undefined}
       >
-        {/* Brand Icon or Avatar */}
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs"
-          style={{ background: `${accentColor}15`, border: `1px solid ${accentColor}25`, color: accentColor }}
-        >
-          {isCallNotif ? (
-            <Phone size={18} strokeWidth={2.5} className="animate-pulse" />
-          ) : (
-            <IconComponent size={18} strokeWidth={2.5} />
-          )}
-        </div>
+        {/* Avatar or Themed Category Icon */}
+        {activeNotif.senderPhoto ? (
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-zinc-200/80 shadow-xs">
+            <img 
+              src={activeNotif.senderPhoto} 
+              alt="" 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = getCartoonAvatar(activeNotif.senderName || 'user');
+              }}
+            />
+          </div>
+        ) : (
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs transition-transform group-hover:scale-105"
+            style={{ 
+              background: `${cfg.accent}15`, 
+              border: `1px solid ${cfg.accent}30`, 
+              color: cfg.accent 
+            }}
+          >
+            {isCallNotif ? (
+              <Phone size={18} strokeWidth={2.5} className="animate-pulse" />
+            ) : (
+              <IconComponent size={18} strokeWidth={2.2} />
+            )}
+          </div>
+        )}
 
-        {/* Text Body */}
+        {/* Text Details */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-1">
+          <div className="flex items-center justify-between gap-1.5 mb-0.5">
             <h4 className="text-xs font-black text-zinc-950 truncate tracking-tight">
               {activeNotif.title}
             </h4>
             <span
-              className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md border flex-shrink-0"
-              style={{ background: `${accentColor}12`, color: accentColor, borderColor: `${accentColor}25` }}
+              className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border flex-shrink-0"
+              style={{ 
+                background: `${cfg.accent}12`, 
+                color: cfg.accent, 
+                borderColor: `${cfg.accent}25` 
+              }}
             >
-              Now
+              {cfg.tag}
             </span>
           </div>
-          <p className="text-[11px] font-semibold text-zinc-600 line-clamp-2 mt-0.5 leading-snug">
+
+          <p className="text-[11px] font-semibold text-zinc-600 line-clamp-2 leading-snug">
             {activeNotif.message}
           </p>
 
-          {/* Call Actions */}
-          {isCallNotif && (
+          {/* Call Action Buttons */}
+          {isCallNotif ? (
             <div className="flex items-center gap-2 mt-2.5">
               <button
                 type="button"
@@ -151,11 +257,11 @@ export default function InAppNotificationBanner() {
                   dismiss();
                   router.push('/bookings');
                 }}
-                className="flex-1 py-2 rounded-xl text-[11px] font-black text-white flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                className="flex-1 py-2 rounded-xl text-[11px] font-black text-white flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer shadow-md shadow-emerald-500/20"
                 style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
               >
                 <Phone size={12} />
-                Accept
+                <span>Accept</span>
               </button>
               <button
                 type="button"
@@ -166,13 +272,18 @@ export default function InAppNotificationBanner() {
                 className="flex-1 py-2 rounded-xl text-[11px] font-black bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
               >
                 <PhoneOff size={12} />
-                Decline
+                <span>Decline</span>
               </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 mt-1 text-[10px] font-bold" style={{ color: cfg.accent }}>
+              <span>{cfg.actionText}</span>
+              <ArrowRight size={10} strokeWidth={2.5} />
             </div>
           )}
         </div>
 
-        {/* Dismiss Button */}
+        {/* Close Button */}
         {!isCallNotif && (
           <button
             type="button"

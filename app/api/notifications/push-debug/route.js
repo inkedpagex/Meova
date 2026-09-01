@@ -24,14 +24,7 @@ export async function GET() {
       .select('token, created_at')
       .eq('user_id', user.uid);
 
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('fcm_token')
-      .eq('id', user.uid)
-      .maybeSingle();
-
     const tokens = tokenRows || [];
-    const profileToken = profile?.fcm_token;
 
     // Check each token is a valid push subscription JSON
     const tokenDetails = tokens.map((row, i) => {
@@ -40,7 +33,7 @@ export async function GET() {
         return {
           index: i + 1,
           valid: !!(parsed?.endpoint),
-          endpoint: parsed?.endpoint?.slice(0, 60) + '...',
+          endpoint: parsed?.endpoint ? parsed.endpoint.slice(0, 60) + '...' : 'INVALID',
           created_at: row.created_at,
         };
       } catch {
@@ -57,8 +50,8 @@ export async function GET() {
         if (firstValid) {
           const sub = JSON.parse(firstValid.token);
           await webpush.sendNotification(sub, JSON.stringify({
-            title: 'Push Debug Test',
-            body: 'If you see this, push is working!',
+            title: 'Meova Push Debug',
+            body: 'If you see this outside the app, Web Push is working perfectly!',
             url: '/profile',
             type: 'system',
           }), { TTL: 60, urgency: 'high' });
@@ -72,9 +65,9 @@ export async function GET() {
     return NextResponse.json({
       userId: user.uid,
       vapidConfigured: vapidOk,
-      vapidPublicKeyPrefix: publicKey.slice(0, 20) + '...',
+      vapidPublicKeyPrefix: publicKey ? publicKey.slice(0, 20) + '...' : 'MISSING',
       tokenCount: tokens.length,
-      hasProfileFallbackToken: !!profileToken,
+      tokenQueryError: tokenErr ? tokenErr.message : null,
       tokens: tokenDetails,
       testPushResult: testResult,
     });

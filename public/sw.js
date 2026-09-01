@@ -1,13 +1,8 @@
 // Meova Service Worker
 // Strategy: Network-first for API routes, Cache-first for static assets
-// FCM: Background push notifications support
-//
-// ⚡ CACHE VERSIONING — This timestamp is updated on every deploy.
-// Old users' service workers will detect the new version, activate immediately,
-// and purge the old cache — no manual "Clear Cache" needed by anyone.
-// Just update this timestamp whenever you deploy a major change.
+// FCM & WebPush: Background push notifications support with dynamic category theming
 
-const CACHE_VERSION = '2026-09-01T20:42'; // ← update this on deploy
+const CACHE_VERSION = '2026-09-01T21:05'; // ← updated on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/manifest.json',
@@ -31,17 +26,22 @@ self.addEventListener('push', (event) => {
     data = { title: 'Meova', body: event.data ? event.data.text() : '' };
   }
 
-  const isCall = data.type === 'incoming_call' || data.isCall || data.tag?.startsWith('incoming-call');
+  const notifType = (data.type || '').toLowerCase();
+  const isCall = notifType === 'incoming_call' || notifType === 'call' || !!data.isCall || data.tag?.startsWith('incoming-call');
   const title = data.title || (isCall ? 'Incoming Campus Voice Call' : 'Meova');
-  const body = data.body || (isCall ? 'Peer is calling you for your campus meetup...' : '');
+  const body = data.body || '';
   const link = data.url || data.link || (isCall ? '/bookings' : '/');
 
+  // Avatar / Thumbnail resolution: prefer real sender photo over app icon
+  const avatarPhoto = data.photo || data.senderPhoto || data.callerPhoto || data.icon || '/icon-192.png';
+
+  // 1. INCOMING CALL NOTIFICATION
   if (isCall) {
     const callOptions = {
-      body,
-      icon: data.callerPhoto || '/notif-icon.png',
+      body: body || 'Peer is calling you for your campus meetup...',
+      icon: avatarPhoto,
       badge: '/badge.png',
-      tag: `incoming-call-${data.bookingId || 'call'}`,
+      tag: `call-${data.bookingId || 'active'}`,
       renotify: true,
       requireInteraction: true,
       vibrate: [500, 250, 500, 250, 500, 250, 500, 250, 500],
@@ -55,17 +55,34 @@ self.addEventListener('push', (event) => {
     return;
   }
 
+  // 2. CATEGORY-SPECIFIC NOTIFICATIONS
+  let actions = [{ action: 'open', title: 'Open Meova' }];
+  let vibratePattern = [150, 80, 150];
+
+  if (notifType === 'message' || notifType === 'chat') {
+    actions = [{ action: 'reply', title: 'Open Chat' }];
+    vibratePattern = [200, 100, 200];
+  } else if (notifType === 'booking' || notifType === 'meetup') {
+    actions = [{ action: 'view', title: 'View Meetup' }];
+    vibratePattern = [250, 100, 150];
+  } else if (notifType === 'sparks' || notifType === 'wallet' || notifType === 'tip') {
+    actions = [{ action: 'view', title: 'View Balance' }];
+    vibratePattern = [100, 80, 100, 80, 100];
+  } else if (notifType === 'gig' || notifType === 'job') {
+    actions = [{ action: 'view', title: 'View Gig' }];
+  } else if (notifType === 'circle' || notifType === 'community') {
+    actions = [{ action: 'view', title: 'View Circle' }];
+  }
+
   const options = {
     body,
-    icon: data.icon || '/notif-icon.png',
+    icon: avatarPhoto,
     badge: '/badge.png',
-    tag: data.tag || `meova-notif-${Date.now()}`,
+    tag: data.tag || `meova-${notifType || 'gen'}-${Date.now()}`,
     renotify: true,
-    vibrate: [150, 80, 150],
-    data: { url: link },
-    actions: [
-      { action: 'open', title: 'Open Meova' },
-    ],
+    vibrate: vibratePattern,
+    data: { url: link, type: notifType },
+    actions,
   };
 
   event.waitUntil(
@@ -78,7 +95,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   if (event.action === 'decline' || event.action === 'dismiss') return;
 
-  const url = event.notification.data?.url || '/bookings';
+  const url = event.notification.data?.url || '/';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       // If app is already open, focus it and navigate
@@ -113,44 +130,56 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// ── Fetch: Network first for API/HTML, cache-first for static assets ─────────
+// ── Fetch: Network-first for dynamic, cache-fallback for shell ────────────────
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET and cross-origin requests
-  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+  // Skip non-GET requests and browser extensions
+  if (request.method !== 'GET') return;
+  if (!url.protocol.startsWith('http')) return;
 
-  // Always network-first for API routes and Next.js data fetching
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/data/')) return;
+  // Never cache API routes, auth endpoints, or Supabase calls
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.hostname.includes('supabase.co') ||
+    url.hostname.includes('googleapis.com') ||
+    url.hostname.includes('identitytoolkit')
+  ) {
+    return;
+  }
 
-  // For HTML navigations (like `/`, `/onboarding`, `/login`), try network first, fallback to cached /offline page
-  if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
+  // Static shell assets: Stale-While-Revalidate
+  if (
+    url.pathname.startsWith('/_next/static/') ||
+    url.pathname.startsWith('/fonts/') ||
+    STATIC_ASSETS.includes(url.pathname)
+  ) {
     event.respondWith(
-      fetch(request).catch(() => {
-        return caches.match('/offline').then((cached) => cached || new Response('Offline', { status: 503 }));
+      caches.match(request).then((cached) => {
+        const fetchPromise = fetch(request)
+          .then((networkRes) => {
+            if (networkRes.ok) {
+              const clone = networkRes.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            }
+            return networkRes;
+          })
+          .catch(() => cached);
+        return cached || fetchPromise;
       })
     );
     return;
   }
 
-  // Static assets (fonts, images, JS, CSS): cache-first
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
-        // Only cache successful responses for static-looking paths
-        if (response.ok && (
-          url.pathname.match(/\.(png|jpg|jpeg|svg|ico|woff2?|css|js)$/) ||
-          url.pathname.startsWith('/_next/static/')
-        )) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        }
-        return response;
-      }).catch(() => {
-        return new Response('Offline', { status: 503 });
-      });
-    })
-  );
+  // Navigation / Page routes: Network-first, offline fallback
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(async () => {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        return caches.match('/offline');
+      })
+    );
+  }
 });

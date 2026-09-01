@@ -1,6 +1,6 @@
 /**
  * POST /api/fcm/register
- * Save an FCM device token for the authenticated user.
+ * Save a Web Push subscription token for the authenticated user.
  * Called by the client's useFCM hook on first permission grant.
  */
 import { NextResponse } from 'next/server';
@@ -12,41 +12,42 @@ export async function POST(request) {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { token } = await request.json();
+    const body = await request.json().catch(() => ({}));
+    const { token } = body;
+
     if (!token || typeof token !== 'string' || token.length < 10) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 400 });
     }
 
-    // 1. Upsert token in fcm_tokens table
-    await supabaseAdmin
+    // Upsert into fcm_tokens table (unique constraint is on 'token')
+    const { data, error: upsertErr } = await supabaseAdmin
       .from('fcm_tokens')
-      .upsert({
-        user_id: user.uid,
-        token,
-        created_at: new Date().toISOString(),
-      }, { onConflict: 'token' });
+      .upsert(
+        { user_id: user.uid, token },
+        { onConflict: 'token' }
+      )
+      .select();
 
-    // 2. Also save to profiles.fcm_token for redundancy
-    await supabaseAdmin
-      .from('profiles')
-      .update({ fcm_token: token })
-      .eq('id', user.uid)
-      .catch(() => {});
+    if (upsertErr) {
+      console.error('[POST /api/fcm/register] fcm_tokens upsert error:', upsertErr.message);
+      return NextResponse.json({ error: upsertErr.message }, { status: 500 });
+    }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, count: data?.length || 1 });
   } catch (err) {
-    console.error('[POST /api/fcm/register]', err.message);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    console.error('[POST /api/fcm/register] Unexpected error:', err.message);
+    return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 });
   }
 }
 
 export async function DELETE(request) {
-  // Unregister a token (when user logs out)
+  // Unregister a token (called when user logs out)
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { token } = await request.json();
+    const body = await request.json().catch(() => ({}));
+    const { token } = body;
     if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 });
 
     const { error } = await supabaseAdmin
@@ -55,7 +56,10 @@ export async function DELETE(request) {
       .eq('token', token)
       .eq('user_id', user.uid);
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error('[DELETE /api/fcm/register] delete error:', error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

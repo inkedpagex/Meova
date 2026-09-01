@@ -14,18 +14,16 @@ export async function POST(req) {
     }
 
     // Check if tokens exist in database
-    const { data: tokens } = await supabaseAdmin
+    const { data: tokens, error: tokensErr } = await supabaseAdmin
       .from('fcm_tokens')
       .select('token')
       .eq('user_id', targetUserId);
 
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('fcm_token')
-      .eq('id', targetUserId)
-      .maybeSingle();
+    if (tokensErr) {
+      console.error('[POST /api/notifications/test-push] query error:', tokensErr.message);
+    }
 
-    const hasTokens = (tokens && tokens.length > 0) || !!profile?.fcm_token;
+    const hasTokens = !!(tokens && tokens.length > 0);
 
     // Send the Web Push alert
     await sendPushToUser(targetUserId, {
@@ -43,13 +41,15 @@ export async function POST(req) {
       type: 'system',
       read: false,
       created_at: new Date().toISOString(),
-    }).catch(() => {});
+    });
 
     return NextResponse.json({
       success: true,
       hasTokens,
-      tokenCount: (tokens?.length || 0) + (profile?.fcm_token ? 1 : 0),
-      message: 'Test notification dispatched successfully!',
+      tokenCount: tokens?.length || 0,
+      message: hasTokens
+        ? 'Test notification dispatched successfully!'
+        : 'Dispatched, but no registered device tokens were found for this user. Enable notifications in browser first.',
     });
   } catch (err) {
     console.error('[POST /api/notifications/test-push]', err.message);

@@ -223,6 +223,7 @@ function MessagesContent() {
   const [activeChatId, setActiveChatId] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const [inputText, setInputText] = useState('');
   const [sendingMsg, setSendingMsg] = useState(false);
   const [showList, setShowList] = useState(true);
@@ -259,6 +260,7 @@ function MessagesContent() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const chatContainerRef = useRef(null);
+  const activeChannelRef = useRef(null);
 
   // Keyboard layout handling
   useEffect(() => {
@@ -293,12 +295,25 @@ function MessagesContent() {
     };
   }, [currentUid, mutateChats]);
 
-  // Real-time Chat Messages updates for active chat
+  // Real-time Chat Messages updates for active chat (Instant Broadcast + Postgres WAL)
   useEffect(() => {
     if (!activeChatId || !supabase) return;
 
     const channel = supabase
       .channel(`chat-messages-${activeChatId}`)
+      .on(
+        'broadcast',
+        { event: 'new-message' },
+        ({ payload }) => {
+          const newMsg = payload;
+          if (newMsg?.senderId === currentUid) return; // skip own broadcast
+          setMessages(prev => {
+            if (prev.some(m => m.id === newMsg.id || (newMsg.tempId && m.id === newMsg.tempId))) return prev;
+            return [...prev, newMsg];
+          });
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 30);
+        }
+      )
       .on(
         'postgres_changes',
         {
@@ -312,7 +327,7 @@ function MessagesContent() {
           setMessages(prev => {
             if (prev.some(m => m.id === newMsg.id)) return prev;
             return [
-              ...prev,
+              ...prev.filter(m => !m.id?.startsWith('temp-') || m.text !== newMsg.text),
               {
                 id: newMsg.id,
                 senderId: newMsg.sender_id,
@@ -323,21 +338,26 @@ function MessagesContent() {
               }
             ];
           });
-          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 30);
         }
       )
       .subscribe();
 
+    activeChannelRef.current = channel;
+
     return () => {
+      activeChannelRef.current = null;
       supabase.removeChannel(channel);
     };
-  }, [activeChatId]);
+  }, [activeChatId, currentUid]);
 
   // ── Open Chat (With Mark As Read) ──────────────────────────────────────────
   const openChat = useCallback(async (chat) => {
     setActiveChatId(chat.id);
     setActiveChat(chat);
     setShowList(false);
+    setLoadingMessages(true);
+    setMessages([]);
 
     // Optimistically clear unread badge in state
     setChats(prev => prev.map(c => {
@@ -365,10 +385,12 @@ function MessagesContent() {
       }
     } catch (err) {
       console.error('Failed to load messages:', err);
+    } finally {
+      setLoadingMessages(false);
     }
   }, [currentUid]);
 
-  const openChatWithUser = useCallback((targetUid, targetName = null) => {
+  const openChatWithUser = useCallback((targetUid, targetName = null, targetPhoto = null) => {
     if (!currentUid) return;
     setShowNewMessageModal(false);
     const sorted = [currentUid, targetUid].sort();
@@ -383,12 +405,15 @@ function MessagesContent() {
         id: targetChatId,
         participants: [currentUid, targetUid],
         participant_names: targetName ? { [targetUid]: targetName } : {},
+        participant_photos: targetPhoto ? { [targetUid]: targetPhoto } : {},
         isMock: true,
         last_message: 'Say hi! (Costs 5 Sparks)',
         last_message_at: new Date().toISOString(),
       };
       setActiveChatId(targetChatId);
       setActiveChat(mockChat);
+      setMessages([]);
+      setLoadingMessages(false);
       setShowList(false);
       router.replace(`/messages?uid=${targetUid}`);
     }
@@ -475,14 +500,32 @@ function MessagesContent() {
     const tempId = `temp-${Date.now()}`;
     const newMsg = {
       id: tempId,
+      tempId,
       senderId: currentUid,
       text,
       timestamp: Date.now(),
-      status: 'sending'
+      status: 'sent'
     };
 
     setMessages(prev => [...prev, newMsg]);
-    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 30);
+
+    // Instant WebSocket broadcast to active recipient
+    if (activeChannelRef.current) {
+      activeChannelRef.current.send({
+        type: 'broadcast',
+        event: 'new-message',
+        payload: {
+          id: tempId,
+          tempId,
+          senderId: currentUid,
+          text,
+          status: 'sent',
+          timestamp: Date.now(),
+          created_at: new Date().toISOString(),
+        }
+      }).catch(() => {});
+    }
 
     try {
       const res = await fetch(`/api/chats/${activeChatId}/messages`, {
@@ -582,10 +625,9 @@ function MessagesContent() {
       ref={chatContainerRef}
       className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs transition-all duration-300 ${
         !showList
-          ? 'fixed inset-x-0 bottom-0 flex-row md:relative md:h-[calc(100vh-64px)] md:top-auto md:z-0 md:rounded-3xl rounded-none border-0'
-          : 'h-[calc(100dvh-156px)] md:h-[calc(100vh-64px)] rounded-2xl border flex-row relative'
+          ? 'fixed inset-x-0 bottom-0 top-[58px] z-40 md:static md:top-auto md:z-0 md:rounded-3xl md:border rounded-none border-0 h-[calc(100dvh-58px)] md:h-[calc(100vh-80px)] flex-row'
+          : 'h-[calc(100dvh-140px)] md:h-[calc(100vh-80px)] rounded-2xl border flex-row relative'
       }`}
-      style={!showList ? { top: 58, zIndex: 999 } : {}}
     >
       {/* LEFT SIDEBAR */}
       <div className={`
@@ -899,65 +941,78 @@ function MessagesContent() {
 
             {/* Messages Scroll Area */}
             <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-1 no-scrollbar bg-white">
-              {messages.length === 0 && (() => {
-                const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
-                return (
-                  <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                    <div className="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden mb-3 border border-orange-100">
-                      <img 
-                        src={avatarUrl(otherId, otherName, otherPhoto)} 
-                        alt={otherName} 
-                        className="w-full h-full object-cover" 
-                      />
-                    </div>
-                    <h3 className="text-base font-black text-zinc-900">{otherName}</h3>
-                    <p className="text-xs text-zinc-500 mb-4 font-semibold">
-                      {isGroup ? 'Verified Campus Community · Official Channel' : 'Campus Student · Meova'}
-                    </p>
+              {loadingMessages ? (
+                <div className="flex flex-col items-center justify-center h-full py-12 text-zinc-400 gap-2.5">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#F05A00]" />
+                  <span className="text-xs font-bold text-zinc-400 tracking-tight">Loading conversation...</span>
+                </div>
+              ) : (
+                <>
+                  {messages.length === 0 && (() => {
+                    const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
+                    return (
+                      <div className="flex flex-col items-center justify-center h-full text-center py-10">
+                        <div className="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden mb-3 border border-orange-100 shadow-sm">
+                          <img 
+                            src={avatarUrl(otherId, otherName, otherPhoto)} 
+                            alt={otherName} 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
+                            }}
+                          />
+                        </div>
+                        <h3 className="text-base font-black text-zinc-900">{otherName}</h3>
+                        <p className="text-xs text-zinc-500 mb-4 font-semibold">
+                          {isGroup ? 'Verified Campus Community · Official Channel' : 'Campus Student · Meova'}
+                        </p>
 
-                    {isGroup ? (
-                      <a 
-                        href={activeChat?.link || activeChat?.channel_link || activeChat?.invite_link || "https://chat.whatsapp.com/"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition-all flex items-center gap-2 shadow-xs cursor-pointer active:scale-95"
-                      >
-                        Join Official WhatsApp Channel
-                      </a>
-                    ) : (
-                      <Link 
-                        href={`/users/${otherId}`}
-                        className="px-4 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-xs font-bold transition-colors"
-                      >
-                        View profile
-                      </Link>
-                    )}
-                  </div>
-                );
-              })()}
+                        {isGroup ? (
+                          <a 
+                            href={activeChat?.link || activeChat?.channel_link || activeChat?.invite_link || "https://chat.whatsapp.com/"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition-all flex items-center gap-2 shadow-xs cursor-pointer active:scale-95"
+                          >
+                            Join Official WhatsApp Channel
+                          </a>
+                        ) : (
+                          <Link 
+                            href={`/users/${otherId}`}
+                            className="px-4 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-xs font-bold transition-colors"
+                          >
+                            View profile
+                          </Link>
+                        )}
+                      </div>
+                    );
+                  })()}
 
-              <AnimatePresence initial={false}>
-                {messages.map((msg, idx) => {
-                  const sender = msg.senderId || msg.sender_id;
-                  const isMe = sender === currentUid;
-                  const prevMsg = messages[idx - 1];
-                  const prevSender = prevMsg ? (prevMsg.senderId || prevMsg.sender_id) : null;
-                  const showAvatar = !prevMsg || prevSender !== sender;
+                  <AnimatePresence initial={false}>
+                    {messages.map((msg, idx) => {
+                      const sender = msg.senderId || msg.sender_id;
+                      const isMe = sender === currentUid;
+                      const prevMsg = messages[idx - 1];
+                      const prevSender = prevMsg ? (prevMsg.senderId || prevMsg.sender_id) : null;
+                      const showAvatar = !prevMsg || prevSender !== sender;
 
-                  return (
-                    <MessageBubble
-                      key={msg.id}
-                      msg={msg}
-                      isMe={isMe}
-                      showAvatar={showAvatar}
-                      senderPhoto={otherPhoto}
-                      senderName={otherName}
-                      senderId={otherId}
-                    />
-                  );
-                })}
-              </AnimatePresence>
-              <div ref={messagesEndRef} />
+                      return (
+                        <MessageBubble
+                          key={msg.id}
+                          msg={msg}
+                          isMe={isMe}
+                          showAvatar={showAvatar}
+                          senderPhoto={otherPhoto}
+                          senderName={otherName}
+                          senderId={otherId}
+                        />
+                      );
+                    })}
+                  </AnimatePresence>
+                  <div ref={messagesEndRef} />
+                </>
+              )}
             </div>
 
             {/* Input Bar */}
@@ -974,10 +1029,12 @@ function MessagesContent() {
                 );
               }
 
+              const isGenuinelyNewChat = !loadingMessages && (activeChat?.isMock || (messages.length === 0 && !activeChat?.last_message));
+
               return (
                 <div className="border-t border-zinc-100 bg-white flex-shrink-0">
                   {/* First message spark indicator */}
-                  {(activeChat?.isMock || messages.length === 0) && (
+                  {isGenuinelyNewChat && (
                     <div className="flex items-center justify-between px-4 py-2 bg-orange-50/80 border-b border-orange-100 text-[11px] font-bold text-orange-950">
                       <div className="flex items-center gap-1.5">
                         <Zap size={13} className="text-[#F05A00] fill-[#F05A00] flex-shrink-0" />
