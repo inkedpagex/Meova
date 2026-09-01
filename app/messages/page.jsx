@@ -262,14 +262,48 @@ function MessagesContent() {
   const chatContainerRef = useRef(null);
   const activeChannelRef = useRef(null);
 
-  // Keyboard layout handling
+  // ── Keyboard & Mobile Visual Viewport Handling (Attaches to top of keyboard) ──
   useEffect(() => {
-    const handleResize = () => {
+    if (typeof window === 'undefined') return;
+
+    const handleViewportChange = () => {
+      if (window.innerWidth >= 768) {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.style.height = '';
+          chatContainerRef.current.style.top = '';
+          chatContainerRef.current.style.bottom = '';
+        }
+        return;
+      }
+
+      if (chatContainerRef.current && !showList) {
+        if (window.visualViewport) {
+          const vpHeight = window.visualViewport.height;
+          const vpTop = window.visualViewport.offsetTop;
+          const topOffset = 58;
+          chatContainerRef.current.style.height = `${vpHeight - topOffset}px`;
+          chatContainerRef.current.style.top = `${topOffset + vpTop}px`;
+        }
+      }
       messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+      window.visualViewport.addEventListener('scroll', handleViewportChange);
+    }
+    window.addEventListener('resize', handleViewportChange);
+
+    handleViewportChange();
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportChange);
+        window.visualViewport.removeEventListener('scroll', handleViewportChange);
+      }
+      window.removeEventListener('resize', handleViewportChange);
+    };
+  }, [showList]);
 
   // Real-time Chat List updates
   useEffect(() => {
@@ -623,7 +657,7 @@ function MessagesContent() {
   return (
     <div
       ref={chatContainerRef}
-      className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs transition-all duration-300 ${
+      className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs ${
         !showList
           ? 'fixed inset-x-0 bottom-0 top-[58px] z-[60] md:static md:top-auto md:z-0 md:rounded-3xl md:border rounded-none border-0 h-[calc(100dvh-58px)] md:h-[calc(100vh-80px)] flex-row'
           : 'h-[calc(100dvh-140px)] md:h-[calc(100vh-80px)] rounded-2xl border flex-row relative'
@@ -1032,7 +1066,7 @@ function MessagesContent() {
               const isGenuinelyNewChat = !loadingMessages && (activeChat?.isMock || (messages.length === 0 && !activeChat?.last_message));
 
               return (
-                <div className="border-t border-zinc-100 bg-white flex-shrink-0 pb-safe">
+                <div className="border-t border-zinc-100 bg-white flex-shrink-0">
                   {/* First message spark indicator */}
                   {isGenuinelyNewChat && (
                     <div className="flex items-center justify-between px-4 py-2 bg-orange-50/80 border-b border-orange-100 text-[11px] font-bold text-orange-950">
@@ -1044,19 +1078,13 @@ function MessagesContent() {
                     </div>
                   )}
 
-                  <div className="p-3">
+                  <div className="p-2.5 sm:p-3">
                     <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[#F05A00] focus-within:border-transparent transition-all">
                       <textarea
                         ref={inputRef}
                         value={inputText}
                         onChange={e => setInputText(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        onFocus={() => {
-                          setTimeout(() => {
-                            window.scrollTo(0, 0);
-                            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-                          }, 300);
-                        }}
                         placeholder="Message..."
                         rows={1}
                         className="flex-1 resize-none bg-transparent text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none max-h-28 font-medium"
