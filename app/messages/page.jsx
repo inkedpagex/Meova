@@ -491,13 +491,17 @@ function MessagesContent() {
         body: JSON.stringify({ text })
       });
 
-      if (!res.ok) throw new Error('Failed to send message via API');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error ${res.status}`);
+      }
       mutateChats();
     } catch (err) {
       console.error('Failed to send message:', err.message);
       setMessages(prev => prev.filter(m => m.id !== tempId));
       setInputText(text);
-    } fontFinally: {
+      import('@/lib/toast').then(m => m.toast.error('Failed to send message. Try again.'));
+    } finally {
       setSendingMsg(false);
     }
   };

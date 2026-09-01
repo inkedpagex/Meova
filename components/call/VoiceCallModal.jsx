@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Loader2, ShieldCheck } from 'lucide-react';
 import { getUserAvatarUrl, getCartoonAvatar } from '../../utils/avatar';
 import { startIncomingRingtone, startOutgoingRingtone, playConnectedSound, stopRingtone } from '../../lib/ringtone';
-import { toast } from '../../lib/toast';
 
 const ICE_SERVERS = {
   iceServers: [
@@ -283,7 +282,7 @@ export default function VoiceCallModal({
   const endCall = (msg) => {
     cleanupStreams();
     setCallState('ended');
-    if (msg) toast.info(msg);
+    // Modal shows 'Call Ended' state — no extra toast needed
     setTimeout(() => {
       onClose();
     }, 1000);

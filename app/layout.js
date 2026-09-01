@@ -138,14 +138,7 @@ export default async function RootLayout({ children }) {
             </UserProvider>
           </GoogleAuthProviderWrapper>
 
-        <Script id="pwa-sw" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
-          if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-              navigator.serviceWorker.register('/sw.js').catch(function(err) {
-                console.warn('SW registration failed:', err);
-              });
-            });
-          }
+        <Script id="pwa-install-handler" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
           window.addEventListener('beforeinstallprompt', function(e) {
             e.preventDefault();
             window.deferredPWAInstallPrompt = e;

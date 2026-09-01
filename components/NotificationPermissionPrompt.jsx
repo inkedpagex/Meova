@@ -17,15 +17,16 @@ export default function NotificationPermissionPrompt({ user }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (!user?.uid) return;
+    const userId = user?.uid || user?.id;
+    if (!userId) return;
     if (!('Notification' in window)) return;
     if (Notification.permission !== 'default') return; // already granted or denied
     if (localStorage.getItem(PROMPT_KEY) === '1') return; // already shown
 
-    // Show after 3s so it doesn't feel like an immediate ambush
-    const t = setTimeout(() => setShow(true), 3000);
+    // Show after 4s so it doesn't feel like an immediate ambush
+    const t = setTimeout(() => setShow(true), 4000);
     return () => clearTimeout(t);
-  }, [user?.uid]);
+  }, [user?.uid, user?.id]);
 
   const handleAllow = async () => {
     setShow(false);
