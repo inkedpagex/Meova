@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../lib/supabase/client';
 import { useUserContext } from './UserProvider';
 import VoiceCallModal from '../call/VoiceCallModal';
@@ -16,8 +16,10 @@ export function VoiceCallProvider({ children }) {
   const [activeCall, setActiveCall] = useState(null); // { mode, peerUser, roomId }
   const [activeChannel, setActiveChannel] = useState(null);
   const activeChannelRef = useRef(null);
+  // Track whether we're already in a call to prevent double-invites
+  const inCallRef = useRef(false);
 
-  // Listen to private personal incoming call channel
+  // ── Listen to personal incoming call channel ──────────────────────────────
   useEffect(() => {
     if (!currentUserId || !supabase) return;
 
@@ -26,24 +28,32 @@ export function VoiceCallProvider({ children }) {
     });
 
     userChannel.on('broadcast', { event: 'call-invite' }, ({ payload }) => {
-      // Incoming call received
-      if (!activeCall) {
-        const callRoomChannel = supabase.channel(payload.roomId, {
-          config: { broadcast: { self: false } },
-        });
-        callRoomChannel.subscribe();
-        activeChannelRef.current = callRoomChannel;
-        setActiveChannel(callRoomChannel);
+      // Only accept if not already in a call
+      if (inCallRef.current) return;
 
-        setActiveCall({
-          mode: 'incoming',
-          peerUser: {
-            id: payload.callerId,
-            name: payload.callerName,
-            photo: payload.callerPhoto,
-          },
-          roomId: payload.roomId,
-        });
+      const callRoomChannel = supabase.channel(payload.roomId, {
+        config: { broadcast: { self: false } },
+      });
+      callRoomChannel.subscribe();
+      activeChannelRef.current = callRoomChannel;
+      setActiveChannel(callRoomChannel);
+      inCallRef.current = true;
+
+      setActiveCall({
+        mode: 'incoming',
+        peerUser: {
+          id: payload.callerId,
+          name: payload.callerName,
+          photo: payload.callerPhoto,
+        },
+        roomId: payload.roomId,
+      });
+    });
+
+    // Also listen for call-end on user channel (in case room channel isn't subscribed yet)
+    userChannel.on('broadcast', { event: 'call-end' }, () => {
+      if (inCallRef.current) {
+        handleCloseCall();
       }
     });
 
@@ -51,26 +61,44 @@ export function VoiceCallProvider({ children }) {
 
     return () => {
       supabase.removeChannel(userChannel);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUserId]);
+
+  // ── Cleanup active call channel on unmount ────────────────────────────────
+  useEffect(() => {
+    return () => {
       if (activeChannelRef.current) {
         supabase.removeChannel(activeChannelRef.current);
+        activeChannelRef.current = null;
       }
     };
-  }, [currentUserId, activeCall]);
+  }, []);
 
-  const startCall = async ({ targetUserId, targetName, targetPhoto, bookingId, location }) => {
+  const startCall = useCallback(async ({ targetUserId, targetName, targetPhoto, bookingId, location }) => {
     if (!currentUserId || !targetUserId) return;
+    if (inCallRef.current) return; // Prevent double-call
 
     const roomId = `call_${bookingId || `${currentUserId}_${targetUserId}_${Date.now()}`}`;
     
-    // 1. Create WebRTC Room Channel
+    // 1. Create WebRTC Room Channel and subscribe first
     const roomChannel = supabase.channel(roomId, {
       config: { broadcast: { self: false } },
     });
-    roomChannel.subscribe();
+
+    await new Promise((resolve) => {
+      roomChannel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') resolve();
+      });
+      // Resolve after 3s timeout if subscribe never fires
+      setTimeout(resolve, 3000);
+    });
+
     activeChannelRef.current = roomChannel;
     setActiveChannel(roomChannel);
+    inCallRef.current = true;
 
-    // 2. Broadcast call-invite directly to target user's personal channel
+    // 2. Broadcast call-invite to target user's personal channel
     const targetChannel = supabase.channel(`call-user-${targetUserId}`);
     targetChannel.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
@@ -84,11 +112,14 @@ export function VoiceCallProvider({ children }) {
             roomId,
             bookingId,
           },
+        }).then(() => {
+          // Clean up invite channel after sending (we don't need to keep it)
+          setTimeout(() => supabase.removeChannel(targetChannel), 2000);
         });
       }
     });
 
-    // 3. Send Web Push Notification to Wake Up Locked / Background phone
+    // 3. Send Web Push to wake locked/background device
     fetch('/api/calls/invite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -110,16 +141,33 @@ export function VoiceCallProvider({ children }) {
       },
       roomId,
     });
-  };
+  }, [currentUserId, user]);
 
-  const handleCloseCall = () => {
+  const handleCloseCall = useCallback(() => {
+    inCallRef.current = false;
+
     if (activeChannelRef.current) {
-      supabase.removeChannel(activeChannelRef.current);
-      activeChannelRef.current = null;
+      // Send call-end broadcast before closing channel
+      try {
+        activeChannelRef.current.send({
+          type: 'broadcast',
+          event: 'call-end',
+          payload: { senderId: currentUserId },
+        }).catch(() => {});
+      } catch {}
+      
+      // Give 500ms for the signal to dispatch before removing the channel
+      setTimeout(() => {
+        if (activeChannelRef.current) {
+          supabase.removeChannel(activeChannelRef.current);
+          activeChannelRef.current = null;
+        }
+      }, 500);
     }
+
     setActiveChannel(null);
     setActiveCall(null);
-  };
+  }, [currentUserId]);
 
   return (
     <VoiceCallContext.Provider value={{ startCall }}>

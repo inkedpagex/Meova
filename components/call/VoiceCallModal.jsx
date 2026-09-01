@@ -264,23 +264,29 @@ export default function VoiceCallModal({
 
   const handleEndCall = () => {
     stopRingtone();
+    // Broadcast call-end to peer before cleanup
     if (channel) {
       channel.send({
         type: 'broadcast',
         event: 'call-end',
         payload: { senderId: currentUserId, roomId },
-      });
+      }).catch(() => {});
     }
-    endCall('Call ended');
+    // Cleanup streams locally and close modal after short delay
+    cleanupStreams();
+    setCallState('ended');
+    setTimeout(() => {
+      onClose();
+    }, 1000);
   };
 
   const endCall = (msg) => {
     cleanupStreams();
     setCallState('ended');
-    if (msg) toast(msg);
+    if (msg) toast.info(msg);
     setTimeout(() => {
       onClose();
-    }, 1200);
+    }, 1000);
   };
 
   const toggleMute = () => {

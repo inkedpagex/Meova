@@ -16,6 +16,7 @@ import InAppNotificationBanner from '../components/InAppNotificationBanner';
 import MainContentWrapper from '../components/MainContentWrapper';
 import NetworkWrapper from '../components/NetworkWrapper';
 import BlockedPage from './blocked/page';
+import TopProgressBar from '../components/TopProgressBar';
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://meovaweb.vercel.app'),
@@ -109,6 +110,7 @@ export default async function RootLayout({ children }) {
           <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800" rel="stylesheet" />
         </head>
         <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh', fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif" }}>
+          <TopProgressBar />
           <GoogleAuthProviderWrapper>
             <UserProvider initialUser={user} initialWallet={user?.wallet} initialPeople={people}>
               <VoiceCallProvider>

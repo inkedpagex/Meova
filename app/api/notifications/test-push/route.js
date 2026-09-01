@@ -29,8 +29,8 @@ export async function POST(req) {
 
     // Send the Web Push alert
     await sendPushToUser(targetUserId, {
-      title: 'Meova Alert',
-      body: 'Push notifications are working on your mobile!',
+      title: 'Meova Campus Life',
+      body: 'Push notifications are active and ready on your device!',
       url: '/profile',
       type: 'system',
     });
@@ -38,8 +38,8 @@ export async function POST(req) {
     // Also record in in-app notifications
     await supabaseAdmin.from('notifications').insert({
       user_id: targetUserId,
-      title: 'Meova Alert',
-      message: 'Push notifications are working on your mobile!',
+      title: 'Meova Campus Life',
+      message: 'Push notifications are active and ready on your device!',
       type: 'system',
       read: false,
       created_at: new Date().toISOString(),

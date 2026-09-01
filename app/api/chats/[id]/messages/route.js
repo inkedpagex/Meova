@@ -162,11 +162,25 @@ export async function POST(request, { params }) {
     // Push notification to recipient
     if (otherId) {
       const senderName = user.full_name || user.email?.split('@')[0] || 'Someone';
-      const preview = text.trim().length > 60 ? text.trim().slice(0, 60) + '…' : text.trim();
+      const preview = text.trim().length > 60 ? text.trim().slice(0, 60) + '...' : text.trim();
+      
+      // Insert in-app notification record first (triggers real-time banner in app)
+      await supabaseAdmin.from('notifications').insert({
+        user_id: otherId,
+        sender_id: user.uid,
+        title: `New message from ${senderName}`,
+        message: preview,
+        type: 'message',
+        read: false,
+        created_at: new Date().toISOString(),
+      }).catch(() => {});
+
+      // Also fire background Web Push for locked/background devices
       sendPush(otherId, {
-        title: `💬 ${senderName}`,
+        title: `${senderName} sent a message`,
         body: preview,
         url: `/messages`,
+        type: 'message',
       }).catch(() => {});
     }
 

@@ -18,6 +18,11 @@ export default function Sidebar({ user }) {
   const pathname = usePathname();
   const router = useRouter();
   const isAdminRoute = pathname.startsWith('/admin');
+  const [pendingPath, setPendingPath] = useState(null);
+
+  useEffect(() => {
+    setPendingPath(null);
+  }, [pathname]);
 
   const [sparks, setSparks] = useState(
     user?.wallet ? (user.wallet.purchased || 0) + (user.wallet.bonus || 0) + (user.wallet.creator || 0) : 0
@@ -380,22 +385,31 @@ export default function Sidebar({ user }) {
         <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar">
           {NAV.map(({ href, label, Icon, badge }) => {
             if (href === '/profile' && !user) return null;
-            const active = isActive(href);
+            const active = pendingPath ? pendingPath === href : isActive(href);
             const isNotif = label === 'Notifications';
             const hasUnread = isNotif && unreadCount > 0;
             const isMessages = label === 'Messages';
             const hasUnreadMsgs = isMessages && unreadMsgCount > 0;
             const hasBadge = badge && badge > 0;
 
+            const handleLinkClick = () => {
+              setPendingPath(href);
+              if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+                try { navigator.vibrate(10); } catch {}
+              }
+            };
+
             if (isCollapsed) {
               return (
                 <Link 
                   key={href} 
                   href={href}
+                  prefetch={true}
+                  onClick={handleLinkClick}
                   title={label}
-                  className={`relative flex items-center justify-center w-12 h-11 mx-auto rounded-xl transition-all ${
+                  className={`relative flex items-center justify-center w-12 h-11 mx-auto rounded-xl transition-all active:scale-90 ${
                     active 
-                      ? 'bg-orange-50 text-[#F05A00] border border-orange-100' 
+                      ? 'bg-orange-50 text-[#F05A00] border border-orange-100 shadow-xs' 
                       : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
                   }`}
                 >
@@ -411,9 +425,11 @@ export default function Sidebar({ user }) {
               <Link 
                 key={href} 
                 href={href}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
+                prefetch={true}
+                onClick={handleLinkClick}
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all active:scale-95 ${
                   active 
-                    ? 'bg-orange-50 text-[#F05A00] border border-orange-100 font-black' 
+                    ? 'bg-orange-50 text-[#F05A00] border border-orange-100 font-black shadow-xs' 
                     : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
                 }`}
               >
@@ -507,19 +523,36 @@ export default function Sidebar({ user }) {
         {MOBILE_NAV.map(({ href, label, Icon, isCenter }) => {
           if ((href === '/profile') && !user) {
             return (
-              <Link key={href} href="/login" className="flex-1 flex flex-col items-center justify-center h-full text-zinc-400 hover:text-[#F05A00] transition-colors">
+              <Link
+                key={href}
+                href="/login"
+                prefetch={true}
+                onClick={() => {
+                  setPendingPath('/login');
+                  if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+                    try { navigator.vibrate(10); } catch {}
+                  }
+                }}
+                className="flex-1 flex flex-col items-center justify-center h-full text-zinc-400 hover:text-[#F05A00] transition-colors active:scale-90"
+              >
                 <LogIn size={20} strokeWidth={2} />
                 <span className="text-[10px] font-black mt-0.5">Login</span>
               </Link>
             );
           }
-          const active = isActive(href);
+          const active = pendingPath ? pendingPath === href : isActive(href);
 
           if (isCenter) {
             return (
               <button 
                 key={href} 
-                onClick={(e) => { e.preventDefault(); setShowCreateModal(true); }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+                    try { navigator.vibrate(15); } catch {}
+                  }
+                  setShowCreateModal(true);
+                }}
                 className="flex-1 flex flex-col items-center justify-center relative -top-3.5 h-full select-none outline-none"
                 style={{ zIndex: 60 }}
               >
@@ -538,18 +571,25 @@ export default function Sidebar({ user }) {
             <Link 
               key={href} 
               href={href}
-              className={`flex-1 flex flex-col items-center justify-center h-full relative select-none transition-all ${
+              prefetch={true}
+              onClick={() => {
+                setPendingPath(href);
+                if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+                  try { navigator.vibrate(10); } catch {}
+                }
+              }}
+              className={`flex-1 flex flex-col items-center justify-center h-full relative select-none transition-all active:scale-90 ${
                 active ? 'text-[#F05A00]' : 'text-zinc-400 hover:text-zinc-600'
               }`}
             >
-              <div className={`p-1.5 rounded-xl transition-all ${active ? 'bg-orange-50/80 text-[#F05A00]' : ''}`}>
+              <div className={`p-1.5 rounded-xl transition-all ${active ? 'bg-orange-50/90 text-[#F05A00] scale-105' : ''}`}>
                 <Icon size={20} strokeWidth={active ? 2.5 : 2} />
               </div>
               <span className={`text-[10px] font-extrabold -mt-0.5 tracking-tight ${active ? 'text-[#F05A00]' : 'text-zinc-400'}`}>
                 {label}
               </span>
               {active && (
-                <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-4 h-1 rounded-full bg-[#F05A00]" />
+                <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-4 h-1 rounded-full bg-[#F05A00] shadow-xs" />
               )}
             </Link>
           );

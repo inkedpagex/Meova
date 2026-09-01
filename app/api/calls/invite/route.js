@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
-import { supabaseAdmin } from '@/lib/supabase/admin';
 import { sendPush } from '@/lib/sendPushNotification';
 
 export async function POST(request) {
@@ -16,33 +15,24 @@ export async function POST(request) {
     }
 
     const name = callerName || user.full_name || 'Campus Student';
-    const photo = callerPhoto || user.photo_url || '';
     const loc = location || 'Campus Meetup';
     const roomId = `call_${bookingId || `${user.uid}_${targetUserId}`}`;
 
-    // 1. Insert In-App Notification
-    await supabaseAdmin.from('notifications').insert({
-      user_id: targetUserId,
-      title: 'Incoming Campus Voice Call',
-      message: `${name} is calling you for your meetup at ${loc}`,
-      type: 'incoming_call',
-      booking_id: bookingId || null,
-      action_url: `/bookings?callRoom=${roomId}&callerId=${user.uid}&autoAnswer=true`,
-      read: false,
-      created_at: new Date().toISOString(),
-    });
-
-    // 2. Dispatch Background Push Notification
-    sendPush(targetUserId, {
+    // sendPush handles BOTH in-app notification insert + device web push in one call
+    await sendPush(targetUserId, {
       title: 'Incoming Voice Call',
       body: `${name} is calling you for your meetup at ${loc}`,
       url: `/bookings?callRoom=${roomId}&callerId=${user.uid}&autoAnswer=true`,
+      type: 'incoming_call',
+      isCall: true,
+      bookingId: bookingId || null,
+      callerPhoto: callerPhoto || '',
     }).catch(() => {});
 
     return NextResponse.json({
       success: true,
       roomId,
-      message: 'Call invite dispatched'
+      message: 'Call invite dispatched',
     });
   } catch (err) {
     console.error('[POST /api/calls/invite]', err.message);

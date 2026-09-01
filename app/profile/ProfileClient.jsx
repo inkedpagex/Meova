@@ -185,13 +185,16 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
       if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
         const reg = await navigator.serviceWorker.ready;
         if (reg && reg.showNotification) {
-          reg.showNotification('Meova Alert', {
-            body: 'Push notifications are working on your mobile!',
-            icon: '/icon-512.png',
-            badge: '/icon-512.png',
-            vibrate: [200, 100, 200],
+          reg.showNotification('Meova Campus Life', {
+            body: 'Push notifications are active and ready on your device!',
+            icon: '/notif-icon.png',
+            badge: '/badge.png',
+            vibrate: [150, 80, 150],
             tag: `test-push-${Date.now()}`,
             data: { url: '/profile' },
+            actions: [
+              { action: 'open', title: 'Open Meova' },
+            ],
           });
         }
       }

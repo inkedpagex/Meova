@@ -7,7 +7,7 @@
 // and purge the old cache — no manual "Clear Cache" needed by anyone.
 // Just update this timestamp whenever you deploy a major change.
 
-const CACHE_VERSION = '2026-09-01T20:01'; // ← update this on deploy
+const CACHE_VERSION = '2026-09-01T20:24'; // ← update this on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/manifest.json',
@@ -16,6 +16,8 @@ const STATIC_ASSETS = [
   '/icon-maskable-512.png',
   '/icon-maskable-192.png',
   '/apple-touch-icon.png',
+  '/badge.png',
+  '/notif-icon.png',
   '/logo.png',
   '/offline',
 ];
@@ -26,7 +28,7 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
-    data = { title: 'Meova Notification', body: event.data ? event.data.text() : '' };
+    data = { title: 'Meova', body: event.data ? event.data.text() : '' };
   }
 
   const isCall = data.type === 'incoming_call' || data.isCall || data.tag?.startsWith('incoming-call');
@@ -37,8 +39,8 @@ self.addEventListener('push', (event) => {
   if (isCall) {
     const callOptions = {
       body,
-      icon: data.callerPhoto || '/icon-512.png',
-      badge: '/icon-512.png',
+      icon: data.callerPhoto || '/notif-icon.png',
+      badge: '/badge.png',
       tag: `incoming-call-${data.bookingId || 'call'}`,
       renotify: true,
       requireInteraction: true,
@@ -55,15 +57,14 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body,
-    icon: '/icon-512.png',
-    badge: '/icon-512.png',
+    icon: data.icon || '/notif-icon.png',
+    badge: '/badge.png',
     tag: data.tag || `meova-notif-${Date.now()}`,
     renotify: true,
-    vibrate: [200, 100, 200],
+    vibrate: [150, 80, 150],
     data: { url: link },
     actions: [
       { action: 'open', title: 'Open Meova' },
-      { action: 'dismiss', title: 'Dismiss' },
     ],
   };
 
