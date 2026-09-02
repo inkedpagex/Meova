@@ -7,8 +7,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { calculateMeetupRate } from '../../lib/pricing';
 
-export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto, isLoggedIn, accentColor, rate = 100, completedMeets, renderButton }) {
-  const COFFEE_COST = calculateMeetupRate(completedMeets !== undefined ? completedMeets : rate);
+export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto, isLoggedIn, accentColor, rate, completedMeets, renderButton }) {
+  const meetsCount = typeof completedMeets === 'number'
+    ? completedMeets
+    : (typeof rate === 'number' && rate <= 25 ? rate : 0);
+  const COFFEE_COST = calculateMeetupRate(meetsCount);
   const color = (accentColor && accentColor !== '#ffffff') ? accentColor : '#F05A00';
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);

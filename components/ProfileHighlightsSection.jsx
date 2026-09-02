@@ -163,6 +163,7 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
                     targetPhoto={getUserAvatarUrl(student)}
                     isLoggedIn={!!currentUserId}
                     accentColor="#F05A00"
+                    completedMeets={student.completed_meets_count || 0}
                     renderButton={({ onClick }) => (
                       <button
                         type="button"
@@ -172,7 +173,7 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
                         }}
                         className="mt-2 w-full py-1.5 rounded-xl bg-[#F05A00] hover:bg-[#D94F00] transition-colors text-white text-[10px] font-black flex items-center justify-center gap-1 shadow-sm cursor-pointer"
                       >
-                        Meet 50 <Zap className="w-3 h-3 text-yellow-300 fill-current" />
+                        Meet 100 <Zap className="w-3 h-3 text-yellow-300 fill-current" />
                       </button>
                     )}
                   />

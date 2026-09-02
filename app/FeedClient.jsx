@@ -106,6 +106,7 @@ export default function FeedClient() {
   const [newIncomingPostsCount, setNewIncomingPostsCount] = useState(0);
 
   const [likedPosts, setLikedPosts] = useState({});
+  const likingPostIdsRef = useRef(new Set());
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'peers' | 'gigs'
   const [showPostModal, setShowPostModal] = useState(false);
   const [selectedPostPhoto, setSelectedPostPhoto] = useState(null);
@@ -715,6 +716,9 @@ export default function FeedClient() {
                           <button
                             type="button"
                             onClick={async () => {
+                              if (likingPostIdsRef.current.has(post.id)) return;
+                              likingPostIdsRef.current.add(post.id);
+
                               const nextLiked = !isLiked;
                               setLikedPosts((prev) => ({ ...prev, [post.id]: nextLiked }));
 
@@ -726,6 +730,10 @@ export default function FeedClient() {
                                 }
                               } catch {
                                 setLikedPosts((prev) => ({ ...prev, [post.id]: isLiked }));
+                              } finally {
+                                setTimeout(() => {
+                                  likingPostIdsRef.current.delete(post.id);
+                                }, 500);
                               }
                             }}
                             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${

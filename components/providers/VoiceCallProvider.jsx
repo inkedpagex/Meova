@@ -23,9 +23,7 @@ export function VoiceCallProvider({ children }) {
   useEffect(() => {
     if (!currentUserId || !supabase) return;
 
-    const userChannel = supabase.channel(`call-user-${currentUserId}`, {
-      config: { broadcast: { self: false } },
-    });
+    const userChannel = supabase.channel(`call-user-${currentUserId}`);
 
     userChannel.on('broadcast', { event: 'call-invite' }, ({ payload }) => {
       // Only accept if not already in a call
@@ -77,20 +75,17 @@ export function VoiceCallProvider({ children }) {
 
   const startCall = useCallback(async ({ targetUserId, targetName, targetPhoto, bookingId, location }) => {
     if (!currentUserId || !targetUserId) return;
-    if (inCallRef.current) return; // Prevent double-call
+    if (inCallRef.current) return;
 
     const roomId = `call_${bookingId || `${currentUserId}_${targetUserId}_${Date.now()}`}`;
     
-    // 1. Create WebRTC Room Channel and subscribe first
-    const roomChannel = supabase.channel(roomId, {
-      config: { broadcast: { self: false } },
-    });
+    // 1. Create WebRTC Room Channel — do NOT set self:false, we need broadcasts to reach both sides
+    const roomChannel = supabase.channel(roomId);
 
     await new Promise((resolve) => {
       roomChannel.subscribe((status) => {
         if (status === 'SUBSCRIBED') resolve();
       });
-      // Resolve after 3s timeout if subscribe never fires
       setTimeout(resolve, 3000);
     });
 
@@ -113,13 +108,12 @@ export function VoiceCallProvider({ children }) {
             bookingId,
           },
         }).then(() => {
-          // Clean up invite channel after sending (we don't need to keep it)
           setTimeout(() => supabase.removeChannel(targetChannel), 2000);
         });
       }
     });
 
-    // 3. Send Web Push to wake locked/background device
+    // 3. Send Web Push to wake background device
     fetch('/api/calls/invite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -134,11 +128,7 @@ export function VoiceCallProvider({ children }) {
 
     setActiveCall({
       mode: 'outgoing',
-      peerUser: {
-        id: targetUserId,
-        name: targetName || 'Campus Student',
-        photo: targetPhoto || '',
-      },
+      peerUser: { id: targetUserId, name: targetName || 'Campus Student', photo: targetPhoto || '' },
       roomId,
     });
   }, [currentUserId, user]);

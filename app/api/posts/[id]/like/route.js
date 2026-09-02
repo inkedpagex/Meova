@@ -63,29 +63,42 @@ export async function POST(request, { params }) {
       const notifTitle = `${senderName} liked your moment`;
       const notifBody = 'Tap to view your post on campus feed.';
 
-      // 1. In-app notification row
-      supabaseAdmin.from('notifications').insert({
-        user_id: post.user_id,
-        sender_id: user.uid,
-        sender_name: senderName,
-        sender_photo: user.photo_url || null,
-        title: notifTitle,
-        message: notifBody,
-        type: 'like',
-        read: false,
-        url: '/?tab=feed',
-        created_at: new Date().toISOString(),
-      }).then(() => {}).catch((err) => console.error('[Notif on like error]', err.message));
+      // Deduplication: Check if a like notification from this sender was already sent within the last 15 minutes
+      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+      const { data: recentNotif } = await supabaseAdmin
+        .from('notifications')
+        .select('id')
+        .eq('user_id', post.user_id)
+        .eq('sender_id', user.uid)
+        .eq('type', 'like')
+        .gte('created_at', fifteenMinutesAgo)
+        .maybeSingle();
 
-      // 2. WebPush background notification
-      sendPushToUser(post.user_id, {
-        title: notifTitle,
-        body: notifBody,
-        url: '/?tab=feed',
-        type: 'like',
-        senderPhoto: user.photo_url || null,
-        senderName,
-      }).catch((err) => console.error('[Push on like error]', err.message));
+      if (!recentNotif) {
+        // 1. In-app notification row
+        supabaseAdmin.from('notifications').insert({
+          user_id: post.user_id,
+          sender_id: user.uid,
+          sender_name: senderName,
+          sender_photo: user.photo_url || null,
+          title: notifTitle,
+          message: notifBody,
+          type: 'like',
+          read: false,
+          url: '/?tab=feed',
+          created_at: new Date().toISOString(),
+        }).then(() => {}).catch((err) => console.error('[Notif on like error]', err.message));
+
+        // 2. WebPush background notification
+        sendPushToUser(post.user_id, {
+          title: notifTitle,
+          body: notifBody,
+          url: '/?tab=feed',
+          type: 'like',
+          senderPhoto: user.photo_url || null,
+          senderName,
+        }).catch((err) => console.error('[Push on like error]', err.message));
+      }
     }
 
     return NextResponse.json({ ok: true, liked: true, likes: newCount });

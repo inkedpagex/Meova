@@ -19,6 +19,7 @@ import ProfileCallButton from '../../../components/call/ProfileCallButton';
 import ProfileHighlightsSection from '../../../components/ProfileHighlightsSection';
 import InstagramEmbed from '../../../components/InstagramEmbed';
 import ZoomableProfileAvatar from '../../../components/ZoomableProfileAvatar';
+import { calculateMeetupRate } from '../../../lib/pricing';
 
 import { getUserAvatarUrl, getCartoonAvatar } from '../../../utils/avatar';
 
@@ -127,7 +128,8 @@ export default async function UserProfilePage({ params }) {
     ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
     : null;
 
-  const hostRate = Math.min(Math.max(parseInt(profile.rate, 10) || 50, 10), 500);
+  const completedMeets = (reviews && reviews.length > 0) ? reviews.length : (profile.completed_meets_count || 0);
+  const hostRate = calculateMeetupRate(completedMeets);
 
   return (
     <div className="max-w-[680px] mx-auto anim-fade-in relative pb-12">
@@ -300,7 +302,7 @@ export default async function UserProfilePage({ params }) {
                     targetPhoto={avatarUrl(profile)}
                     isLoggedIn={isLoggedIn}
                     accentColor={primaryMeta.color}
-                    rate={hostRate}
+                    completedMeets={completedMeets}
                   />
                 </div>
               ) : (

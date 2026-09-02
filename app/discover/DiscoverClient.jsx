@@ -352,7 +352,7 @@ export default function DiscoverClient() {
                       targetName={person.full_name}
                       targetPhoto={getAvatar(person)}
                       isLoggedIn={!!currentUser}
-                      rate={50}
+                      completedMeets={person.completed_meets_count || 0}
                       renderButton={({ onClick }) => (
                         <button
                           type="button"

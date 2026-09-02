@@ -75,7 +75,17 @@ export default function NotificationsPage() {
         const res = await fetch('/api/notifications');
         if (!res.ok) { setLoading(false); return; }
         const data = await res.json();
-        setNotifications(data.notifications || []);
+        const rawNotifs = data.notifications || [];
+        // Deduplicate duplicate events sent within close intervals
+        const seen = new Set();
+        const deduped = rawNotifs.filter((n) => {
+          const timeBucket = n.created_at ? Math.floor(new Date(n.created_at).getTime() / (30 * 1000)) : 'none';
+          const key = `${n.sender_id || ''}_${n.type || ''}_${n.title || ''}_${timeBucket}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setNotifications(deduped);
       } catch (err) {
         console.error('[NotificationsPage] load error:', err);
       } finally {
