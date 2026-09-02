@@ -222,6 +222,73 @@ create index if not exists idx_post_reports_post on public.post_reports(post_id)
 create index if not exists idx_user_reports_target on public.user_reports(reported_user_id);
 
 -- ----------------------------------------------------------------------------
+-- New: rsvps — Campus Event Attendance Tracking
+-- ----------------------------------------------------------------------------
+create table if not exists public.rsvps (
+  id          text primary key default gen_random_uuid()::text,
+  event_id    text not null references public.events(id) on delete cascade,
+  user_id     text not null references public.profiles(id) on delete cascade,
+  status      text default 'going',
+  created_at  timestamp with time zone default now(),
+  unique (event_id, user_id)
+);
+
+-- ----------------------------------------------------------------------------
+-- Comprehensive Column Extensions across all core tables
+-- ----------------------------------------------------------------------------
+alter table public.profiles
+  add column if not exists phone_verified          boolean default false,
+  add column if not exists phone_verified_at       timestamp with time zone,
+  add column if not exists live_until              timestamp with time zone,
+  add column if not exists last_location_update    timestamp with time zone,
+  add column if not exists completed_meets_count   integer default 0;
+
+alter table public.notifications
+  add column if not exists url           text,
+  add column if not exists sender_name   text,
+  add column if not exists sender_photo  text,
+  add column if not exists gig_id        text;
+
+alter table public.payment_requests
+  add column if not exists email           text,
+  add column if not exists amount_inr      numeric,
+  add column if not exists unique_decimal  text,
+  add column if not exists reference_code  text,
+  add column if not exists updated_at      timestamp with time zone;
+
+alter table public.withdrawals
+  add column if not exists email         text,
+  add column if not exists bank_details  jsonb,
+  add column if not exists admin_id      text,
+  add column if not exists reviewed_at   timestamp with time zone,
+  add column if not exists processed_at  timestamp with time zone,
+  add column if not exists remarks       text;
+
+alter table public.bookings
+  add column if not exists auto_refunded_at  timestamp with time zone,
+  add column if not exists completed_at      timestamp with time zone;
+
+alter table public.gigs
+  add column if not exists expired_at             timestamp with time zone,
+  add column if not exists accepted_applicant_id  text;
+
+alter table public.transactions
+  add column if not exists spark_type     text,
+  add column if not exists metadata       jsonb,
+  add column if not exists withdrawal_id  text;
+
+alter table public.audit_logs
+  add column if not exists admin_uid      text,
+  add column if not exists target_id      text,
+  add column if not exists details        jsonb,
+  add column if not exists amount         numeric,
+  add column if not exists message        text,
+  add column if not exists host_id        text,
+  add column if not exists freelancer_id  text,
+  add column if not exists gig_title      text,
+  add column if not exists created_at     timestamp with time zone default now();
+
+-- ----------------------------------------------------------------------------
 -- Grant permissions on new tables
 -- ----------------------------------------------------------------------------
 grant all privileges on table public.phone_otps to postgres, anon, authenticated, service_role;
@@ -232,3 +299,5 @@ grant all privileges on table public.circle_members to postgres, anon, authentic
 grant all privileges on table public.story_campaign_claims to postgres, anon, authenticated, service_role;
 grant all privileges on table public.post_reports to postgres, anon, authenticated, service_role;
 grant all privileges on table public.user_reports to postgres, anon, authenticated, service_role;
+grant all privileges on table public.rsvps to postgres, anon, authenticated, service_role;
+
