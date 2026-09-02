@@ -8,7 +8,7 @@ import { requireAuth } from '../../../lib/getAdminUser';
 import { supabaseAdmin } from '../../../lib/supabase/admin';
 import { spendSparks, creditSparks } from '../../../lib/wallet';
 import { sendPushToUser } from '../../../lib/pushNotifications';
-import { rateLimit } from '../../../lib/rateLimit';
+import { rateLimit, getClientIp } from '../../../lib/rateLimit';
 
 export async function GET() {
   try {

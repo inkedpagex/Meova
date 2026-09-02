@@ -5,18 +5,25 @@ export async function GET() {
   const apiKey = process.env.METERED_API_KEY;
 
   if (apiKey) {
-    try {
-      const res = await fetch(
-        `https://meova.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`,
-        { next: { revalidate: 3600 } }
-      );
-      if (res.ok) {
-        const servers = await res.json();
-        return NextResponse.json({ iceServers: servers });
-      }
-    } catch (e) {
-      console.warn('[ICE] Metered API failed, falling back to public TURN:', e.message);
+    // Metered.ca credentials endpoint — try app-specific URL first, then generic
+    const meteredUrls = [
+      `https://meova.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`,
+      `https://global.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`,
+    ];
+
+    for (const meteredUrl of meteredUrls) {
+      try {
+        const res = await fetch(meteredUrl, { cache: 'no-store' });
+        if (res.ok) {
+          const servers = await res.json();
+          if (Array.isArray(servers) && servers.length > 0) {
+            console.log('[ICE] Metered.ca credentials fetched:', servers.length, 'servers');
+            return NextResponse.json({ iceServers: servers });
+          }
+        }
+      } catch {}
     }
+    console.warn('[ICE] Metered.ca unreachable, using OpenRelay fallback');
   }
 
   // Fallback: OpenRelay Project free public TURN servers
