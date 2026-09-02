@@ -1,4 +1,5 @@
 import './globals.css';
+import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
 import Sidebar from '../components/Sidebar';
 import RightPanel from '../components/RightPanel';
 import { getUserWithRole } from '../lib/getAdminUser';
@@ -7,6 +8,20 @@ import { fetchUsersAdmin, fetchUpcomingEventsAdmin } from '../lib/supabaseQuerie
 import Script from 'next/script';
 import GoogleAuthProviderWrapper from '../components/GoogleAuthProviderWrapper';
 import { headers } from 'next/headers';
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-outfit',
+  weight: ['400', '500', '600', '700', '800', '900'],
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-plus-jakarta',
+  weight: ['400', '500', '600', '700', '800'],
+});
 import { UserProvider } from '../components/providers/UserProvider';
 import { VoiceCallProvider } from '../components/providers/VoiceCallProvider';
 import FCMInitializer from '../components/FCMInitializer';
@@ -140,7 +155,7 @@ export default async function RootLayout({ children }) {
   }
 
   return (
-      <html lang="en" data-theme="light" style={{ colorScheme: 'light' }}>
+    <html lang="en" className={`${outfit.variable} ${plusJakarta.variable}`} data-theme="light" style={{ colorScheme: 'light' }}>
         <head>
           <meta name="google-site-verification" content="69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
@@ -154,14 +169,11 @@ export default async function RootLayout({ children }) {
           <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
           <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
           <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link rel="preconnect" href="https://dvqsosbeh.supabase.co" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://dvqsosbeh.supabase.co" />
           <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://res.cloudinary.com" />
           <link rel="preconnect" href="https://api.dicebear.com" crossOrigin="anonymous" />
-          <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800" rel="stylesheet" />
           
           {/* ── Google Search Rich Snippets & Sitelinks Structured Data (JSON-LD) ── */}
           <script
