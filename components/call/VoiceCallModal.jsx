@@ -104,9 +104,14 @@ export default function VoiceCallModal({
     pc.ontrack = (event) => {
       if (remoteAudioRef.current && event.streams[0]) {
         remoteAudioRef.current.srcObject = event.streams[0];
-        remoteAudioRef.current.muted = !isSpeaker;
-        remoteAudioRef.current.volume = isSpeaker ? 1.0 : 0.0;
-        remoteAudioRef.current.play().catch(() => {});
+        remoteAudioRef.current.muted = false;
+        remoteAudioRef.current.volume = 1.0;
+        remoteAudioRef.current.play().catch((err) => {
+          console.warn('[Audio play error]', err);
+        });
+        stopRingtone();
+        playConnectedSound();
+        setCallState('connected');
       }
     };
 
@@ -116,8 +121,8 @@ export default function VoiceCallModal({
         stopRingtone();
         playConnectedSound();
         setCallState('connected');
-      } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
-        endCall('Call disconnected');
+      } else if (pc.connectionState === 'failed') {
+        endCall('Call connection failed');
       }
     };
 
@@ -145,23 +150,30 @@ export default function VoiceCallModal({
     const handleOffer = async (offerPayload) => {
       try {
         if (isCancelled || !pc || pc.signalingState === 'closed' || !offerPayload) return;
-        if (pc.signalingState !== 'stable') return;
 
         if (!localStreamRef.current) {
-          const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
-          if (isCancelled || !pc || pc.signalingState === 'closed') {
-            stream.getTracks().forEach(track => track.stop());
-            return;
-          }
-          localStreamRef.current = stream;
-          stream.getTracks().forEach(track => {
-            if (pc && pc.signalingState !== 'closed') {
-              pc.addTrack(track, stream);
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
+            if (isCancelled || !pc || pc.signalingState === 'closed') {
+              stream.getTracks().forEach(track => track.stop());
+              return;
             }
-          });
+            localStreamRef.current = stream;
+            stream.getTracks().forEach(track => {
+              if (pc && pc.signalingState !== 'closed') {
+                pc.addTrack(track, stream);
+              }
+            });
+          } catch (micErr) {
+            console.error('[WebRTC] receiver getUserMedia error:', micErr);
+          }
         }
-        if (isCancelled || pc.signalingState !== 'stable') return;
-        await pc.setRemoteDescription(new RTCSessionDescription(offerPayload));
+
+        if (isCancelled || pc.signalingState === 'closed') return;
+
+        if (pc.signalingState === 'stable') {
+          await pc.setRemoteDescription(new RTCSessionDescription(offerPayload));
+        }
 
         // Flush queued candidates
         while (pendingCandidates.length > 0) {
@@ -188,10 +200,18 @@ export default function VoiceCallModal({
 
     // ── Realtime Signaling Handlers ──────────────────────────────
 
-    // When receiver is ready, caller generates offer
+    // When receiver is ready, caller transmits offer
     channel.on('broadcast', { event: 'call-ready' }, async () => {
-      if (mode === 'outgoing' && !isCancelled && pc && pc.signalingState === 'stable') {
-        await sendOffer();
+      if (mode === 'outgoing' && !isCancelled && pc && pc.signalingState !== 'closed') {
+        if (pc.localDescription) {
+          channel.send({
+            type: 'broadcast',
+            event: 'call-offer',
+            payload: { offer: pc.localDescription, callerId: currentUserId, roomId },
+          });
+        } else {
+          await sendOffer();
+        }
       }
     });
 
@@ -330,6 +350,17 @@ export default function VoiceCallModal({
           event: 'call-ready',
           payload: { responderId: currentUserId, roomId },
         });
+
+        // Backup pulse 350ms later to guarantee offer transmission over mobile networks
+        setTimeout(() => {
+          if (channel && !isCancelled) {
+            channel.send({
+              type: 'broadcast',
+              event: 'call-ready',
+              payload: { responderId: currentUserId, roomId },
+            }).catch(() => {});
+          }
+        }, 350);
       }
     } catch {
       toast.error('Microphone permission required');
