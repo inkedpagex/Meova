@@ -169,6 +169,59 @@ alter table public.circles
   add column if not exists updated_at           timestamp with time zone default now();
 
 -- ----------------------------------------------------------------------------
+-- Extend: bookings — 20-minute live synchronized timer & progression
+-- ----------------------------------------------------------------------------
+alter table public.bookings
+  add column if not exists started_at        timestamp with time zone,
+  add column if not exists duration_minutes  integer default 20,
+  add column if not exists host_tier_price   numeric default 100;
+
+-- ----------------------------------------------------------------------------
+-- New: story_campaign_claims — Top 100 Instagram Story Growth Campaign
+-- ----------------------------------------------------------------------------
+create table if not exists public.story_campaign_claims (
+  id                  text primary key default gen_random_uuid()::text,
+  user_id             text not null references public.profiles(id) on delete cascade,
+  user_name           text,
+  user_email          text,
+  instagram_handle    text not null,
+  reward_sparks       numeric default 100,
+  status              text default 'pending', -- 'pending' | 'approved' | 'rejected'
+  admin_note          text,
+  reviewed_by         text references public.profiles(id) on delete set null,
+  reviewed_at         timestamp with time zone,
+  created_at          timestamp with time zone default now()
+);
+
+-- ----------------------------------------------------------------------------
+-- New: post_reports & user_reports — Campus Content & Safety Moderation Shield
+-- ----------------------------------------------------------------------------
+create table if not exists public.post_reports (
+  id          text primary key default gen_random_uuid()::text,
+  post_id     text not null references public.posts(id) on delete cascade,
+  reporter_id text not null references public.profiles(id) on delete cascade,
+  reason      text not null,
+  created_at  timestamp with time zone default now(),
+  unique (post_id, reporter_id)
+);
+
+create table if not exists public.user_reports (
+  id               text primary key default gen_random_uuid()::text,
+  reported_user_id text not null references public.profiles(id) on delete cascade,
+  reporter_id      text not null references public.profiles(id) on delete cascade,
+  reason           text not null,
+  created_at       timestamp with time zone default now()
+);
+
+-- ----------------------------------------------------------------------------
+-- Indexes for new campaign and safety tables
+-- ----------------------------------------------------------------------------
+create index if not exists idx_story_claims_status on public.story_campaign_claims(status, created_at desc);
+create index if not exists idx_story_claims_user on public.story_campaign_claims(user_id);
+create index if not exists idx_post_reports_post on public.post_reports(post_id);
+create index if not exists idx_user_reports_target on public.user_reports(reported_user_id);
+
+-- ----------------------------------------------------------------------------
 -- Grant permissions on new tables
 -- ----------------------------------------------------------------------------
 grant all privileges on table public.phone_otps to postgres, anon, authenticated, service_role;
@@ -176,3 +229,6 @@ grant all privileges on table public.post_likes to postgres, anon, authenticated
 grant all privileges on table public.audit_logs to postgres, anon, authenticated, service_role;
 grant all privileges on table public.circles to postgres, anon, authenticated, service_role;
 grant all privileges on table public.circle_members to postgres, anon, authenticated, service_role;
+grant all privileges on table public.story_campaign_claims to postgres, anon, authenticated, service_role;
+grant all privileges on table public.post_reports to postgres, anon, authenticated, service_role;
+grant all privileges on table public.user_reports to postgres, anon, authenticated, service_role;

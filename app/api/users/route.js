@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/getAdminUser';
-import { fetchUsersAdmin } from '@/lib/supabaseQueries';
+import { fetchUsersAdmin, fetchProfileAdmin } from '@/lib/supabaseQueries';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { rankPeersForUser } from '@/lib/algorithm/recommendationEngine';
 
 export async function GET() {
   const currentUser = await requireAuth();
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const users = await fetchUsersAdmin(100);
+    const [users, currentUserProfile] = await Promise.all([
+      fetchUsersAdmin(120),
+      fetchProfileAdmin(currentUser.uid),
+    ]);
 
     const { data: blocksByMe } = await supabaseAdmin
       .from('blocks')
@@ -29,7 +33,10 @@ export async function GET() {
       !blockedMe.has(u.id)
     );
 
-    return NextResponse.json({ users: filteredUsers });
+    // Apply Campus Activity & Personalized Affinity Ranking Algorithm
+    const rankedUsers = rankPeersForUser(currentUserProfile || currentUser, filteredUsers);
+
+    return NextResponse.json({ users: rankedUsers });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -5,9 +5,10 @@ import { createPortal } from 'react-dom';
 import { Zap, Layers, X, CheckCircle, Loader2, Calendar, MapPin, Clock, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { calculateMeetupRate } from '../../lib/pricing';
 
-export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto, isLoggedIn, accentColor, rate = 50, renderButton }) {
-  const COFFEE_COST = Math.min(Math.max(parseInt(rate, 10) || 50, 10), 500);
+export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto, isLoggedIn, accentColor, rate = 100, completedMeets, renderButton }) {
+  const COFFEE_COST = calculateMeetupRate(completedMeets !== undefined ? completedMeets : rate);
   const color = (accentColor && accentColor !== '#ffffff') ? accentColor : '#F05A00';
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);

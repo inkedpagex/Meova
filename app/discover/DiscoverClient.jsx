@@ -320,9 +320,15 @@ export default function DiscoverClient() {
                     <span className="text-xs sm:text-sm font-black text-zinc-900 group-hover:text-[#F05A00] transition-colors leading-tight line-clamp-1">
                       {person.full_name}
                     </span>
-                    <span className="text-[10.5px] font-semibold text-zinc-500 mt-0.5 line-clamp-1">
-                      {person.year ? (person.year.toLowerCase().includes('year') ? person.year : `${person.year} Year`) : ''} {person.branch ? `· ${person.branch}` : ''}
-                    </span>
+                    {person._affinityReason ? (
+                      <span className="text-[10px] font-black text-[#F05A00] bg-orange-50 border border-orange-100/80 px-2 py-0.5 rounded-full mt-1 line-clamp-1">
+                        {person._affinityReason}
+                      </span>
+                    ) : (
+                      <span className="text-[10.5px] font-semibold text-zinc-500 mt-0.5 line-clamp-1">
+                        {person.year ? (person.year.toLowerCase().includes('year') ? person.year : `${person.year} Year`) : ''} {person.branch ? `· ${person.branch}` : ''}
+                      </span>
+                    )}
 
                     <div className="flex flex-wrap gap-1 mt-2 justify-center" style={{ minHeight: 22 }}>
                       {(person.interests || []).slice(0, 2).map((tag, idx) => (

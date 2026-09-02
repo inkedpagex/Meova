@@ -75,36 +75,65 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    const ip = getClientIp(request);
+    const rl = rateLimit(`booking:${ip}`, { limit: 10, windowMs: 60_000 });
+    if (!rl.ok) {
+      return NextResponse.json({ error: 'Too many booking requests. Please slow down.' }, { status: 429 });
+    }
+
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const body = await request.json();
-    const { hostId, price, location, date, time, timeSlot, agenda, title } = body;
+    const { targetUserId, hostId, title, timeSlot, date, time, location, agenda } = await request.json();
+    const meetTargetId = targetUserId || hostId;
 
-    const meetTargetId = hostId;
     if (!meetTargetId) {
-      return NextResponse.json({ error: 'Missing hostId' }, { status: 400 });
+      return NextResponse.json({ error: 'Target user required' }, { status: 400 });
     }
 
     if (meetTargetId === user.uid) {
-      return NextResponse.json({ error: 'Cannot book a meetup with yourself' }, { status: 400 });
+      return NextResponse.json({ error: 'You cannot book a meetup with yourself.' }, { status: 400 });
     }
 
-    // Rate Limiting (Anti-Spam): Max 5 pending requests
+    // Safety 1: Max 3 active pending outgoing requests
     const { count: pendingCount, error: countErr } = await supabaseAdmin
       .from('bookings')
       .select('*', { count: 'exact', head: true })
       .eq('guest_id', user.uid)
-      .eq('status', 'Requested');
+      .in('status', ['Requested', 'requested', 'Pending']);
 
-    if (!countErr && (pendingCount || 0) >= 5) {
+    if (!countErr && (pendingCount || 0) >= 3) {
       return NextResponse.json(
-        { error: 'You have too many pending requests (Max: 5). Please wait for hosts to respond.' },
+        { error: 'You already have 3 pending meetup requests. Please wait for hosts to respond before sending more.' },
         { status: 429 }
       );
     }
 
-    const priceAmount = Math.max(0, Number(price) || 50);
+    // Safety 2: 48-hour cooldown if this host recently declined your request
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+    const { data: recentRejection } = await supabaseAdmin
+      .from('bookings')
+      .select('id')
+      .eq('guest_id', user.uid)
+      .eq('host_id', meetTargetId)
+      .in('status', ['Rejected', 'rejected'])
+      .gt('updated_at', fortyEightHoursAgo)
+      .maybeSingle();
+
+    if (recentRejection) {
+      return NextResponse.json({
+        error: 'This student recently declined your meetup request. Please respect their privacy and wait 48 hours before requesting again.'
+      }, { status: 429 });
+    }
+
+    // Dynamic Pricing: Compute rate based on host's verified completed meetups
+    const { count: hostCompletedMeets } = await supabaseAdmin
+      .from('bookings')
+      .select('*', { count: 'exact', head: true })
+      .eq('host_id', meetTargetId)
+      .in('status', ['Meeting Completed', 'Completed', 'completed']);
+
+    const priceAmount = calculateMeetupRate(hostCompletedMeets || 0);
     let sparksDeducted = false;
 
     if (priceAmount > 0) {
@@ -117,7 +146,7 @@ export async function POST(request) {
       );
 
       if (!spendResult.ok) {
-        return NextResponse.json({ error: spendResult.error || 'Insufficient Sparks' }, { status: 402 });
+        return NextResponse.json({ error: spendResult.error || 'Insufficient Sparks in wallet' }, { status: 402 });
       }
       sparksDeducted = true;
     }
@@ -126,8 +155,6 @@ export async function POST(request) {
     const formattedAgenda = (agenda || title || '1-on-1 Campus Meetup').trim();
     const generatedCode = String(Math.floor(100000 + Math.random() * 900000));
 
-    // Match exact Supabase public.bookings columns:
-    // ['id', 'guest_id', 'host_id', 'sparks_spent', 'status', 'location', 'time_slot', 'agenda', 'created_at', 'updated_at']
     const bookingPayload = {
       guest_id: user.uid,
       host_id: meetTargetId,
@@ -307,25 +334,55 @@ export async function PATCH(request) {
       return NextResponse.json({ success: true });
     }
 
+    if (action === 'start_meeting' || action === 'verify_code') {
+      if (booking.status === 'Meeting Completed' || booking.status === 'In Progress') {
+        return NextResponse.json({ success: true, status: booking.status, started_at: booking.started_at });
+      }
+
+      // Verify the 6-digit code or QR code
+      const codeMatch = booking.agenda?.match(/\[CODE:(\d{6})\]/);
+      const expectedCode = codeMatch ? codeMatch[1] : (booking.meeting_code || String(booking.id).replace(/\D/g, '').slice(0, 6));
+      if (expectedCode && (!code || code.trim() !== String(expectedCode).trim())) {
+        return NextResponse.json({ error: 'Invalid 6-digit code. Please verify the code on your classmate’s screen.' }, { status: 400 });
+      }
+
+      const now = new Date().toISOString();
+      await supabaseAdmin
+        .from('bookings')
+        .update({
+          status: 'In Progress',
+          started_at: now,
+          duration_minutes: 20,
+          updated_at: now,
+        })
+        .eq('id', bookingId);
+
+      // Notify both participants
+      const otherUserId = user.uid === booking.host_id ? booking.guest_id : booking.host_id;
+      await supabaseAdmin.from('notifications').insert({
+        user_id: otherUserId,
+        sender_id: user.uid,
+        title: 'Meeting Started!',
+        message: `Your 20-minute meetup is now live! Timer has started.`,
+        type: 'accepted',
+        read: false,
+        created_at: now,
+      });
+
+      return NextResponse.json({ success: true, status: 'In Progress', started_at: now, duration_minutes: 20 });
+    }
+
     if (action === 'complete') {
       if (booking.status === 'Meeting Completed') {
         return NextResponse.json({ error: 'Already completed' }, { status: 400 });
       }
 
-      // If host is completing, verify the 6-digit code or QR code
-      if (user.uid === booking.host_id) {
-        const codeMatch = booking.agenda?.match(/\[CODE:(\d{6})\]/);
-        const expectedCode = codeMatch ? codeMatch[1] : (booking.meeting_code || String(booking.id).replace(/\D/g, '').slice(0, 6));
-        if (expectedCode && (!code || code.trim() !== String(expectedCode).trim())) {
-          return NextResponse.json({ error: 'Please enter the valid 6-digit passcode or scan the student QR code.' }, { status: 400 });
-        }
-      }
-
       const hostShare = Math.floor(price * 0.9);
+      const now = new Date().toISOString();
 
       await supabaseAdmin
         .from('bookings')
-        .update({ status: 'Meeting Completed', updated_at: new Date().toISOString() })
+        .update({ status: 'Meeting Completed', completed_at: now, updated_at: now })
         .eq('id', bookingId);
 
       if (hostShare > 0) {
@@ -346,10 +403,10 @@ export async function PATCH(request) {
         message: `Your meetup was marked completed. +${hostShare} Sparks added to your Creator Balance!`,
         type: 'sparks',
         read: false,
-        created_at: new Date().toISOString(),
+        created_at: now,
       });
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, status: 'Meeting Completed' });
     }
 
     if (action === 'cancel' && booking.guest_id === user.uid) {

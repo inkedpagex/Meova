@@ -2,12 +2,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, CreditCard, ArrowUpRight, Users, Radio } from 'lucide-react';
+import { LayoutDashboard, CreditCard, ArrowUpRight, Users, Radio, Camera } from 'lucide-react';
 
 const ADMIN_TABS = [
   { href: '/admin',             label: 'Dashboard',   Icon: LayoutDashboard },
   { href: '/admin/payments',    label: 'Payments',    Icon: CreditCard },
   { href: '/admin/withdrawals', label: 'Withdrawals', Icon: ArrowUpRight },
+  { href: '/admin/campaigns',   label: 'Stories',     Icon: Camera },
   { href: '/admin/communities', label: 'Circles',     Icon: Radio },
   { href: '/admin/users',       label: 'Users',       Icon: Users },
 ];

@@ -18,6 +18,7 @@ import { toast } from '../lib/toast';
 import { getUserAvatarUrl, getCartoonAvatar } from '@/utils/avatar';
 import { optimizeCloudinaryUrl, optimizeAvatarUrl } from '@/utils/imageOptimizer';
 import BookCoffeeButton from '@/features/users/BookCoffeeButton';
+import StoryCampaignBanner from '../components/StoryCampaignBanner';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -433,6 +434,9 @@ export default function FeedClient() {
         </div>
       </div>
 
+      {/* ── TOP 100 INSTAGRAM STORY CAMPAIGN BANNER (AUTO-HIDES ONCE 100 SLOTS FILLED) ── */}
+      <StoryCampaignBanner className="mb-3" />
+
       {/* ── 2. QUICK SEGMENT TABS ────────────────────────────────── */}
       <div className="flex items-center gap-2 px-0.5">
         <button
@@ -537,9 +541,15 @@ export default function FeedClient() {
                     <h4 className="text-xs font-black text-zinc-950 truncate max-w-full group-hover:text-[#F05A00]">
                       {peer.full_name}
                     </h4>
-                    <span className="text-[9.5px] font-bold text-[#F05A00] bg-orange-50 px-2 py-0.5 rounded-full mt-0.5 truncate max-w-full">
-                      {cleanYr} Yr · {cleanBranch}
-                    </span>
+                    {peer._affinityReason ? (
+                      <span className="text-[9.5px] font-black text-[#F05A00] bg-orange-50 px-2 py-0.5 rounded-full mt-0.5 truncate max-w-full">
+                        {peer._affinityReason}
+                      </span>
+                    ) : (
+                      <span className="text-[9.5px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full mt-0.5 truncate max-w-full">
+                        {cleanYr} Yr · {cleanBranch}
+                      </span>
+                    )}
 
                     <div className="w-full mt-3">
                       <BookCoffeeButton

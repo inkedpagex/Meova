@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Info, Zap, Plus, HelpCircle, Loader2, CheckCircle, Download, Copy, Check, X } from 'lucide-react';
 import Skeleton from '../../components/Skeleton';
 import { toast } from '../../lib/toast';
+import StoryCampaignBanner from '../../components/StoryCampaignBanner';
 
 function WalletSkeleton() {
   return (
@@ -249,6 +250,9 @@ export default function WalletPage() {
           <h1 className="text-sm font-black uppercase tracking-wider text-zinc-950">Sparks Wallet</h1>
         </div>
       </div>
+
+      {/* Instagram Story Campaign Banner */}
+      <StoryCampaignBanner className="mb-5" />
 
       {/* Hero Balance Card */}
       <div className="relative rounded-3xl p-6 mb-5 overflow-hidden bg-gradient-to-br from-[#FF6B1A] via-[#F05A00] to-[#D94F00] shadow-xl shadow-orange-500/20 text-white">

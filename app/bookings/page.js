@@ -31,15 +31,73 @@ function normalizeBooking(b) {
     guestPhoto: b.guest_photo || b.guestPhoto || '',
     hostPhoto: b.host_photo || b.hostPhoto || '',
     meetingCode: b.meeting_code || b.meetingCode || '',
-    price: b.price !== undefined ? b.price : (b.sparks_amount !== undefined ? b.sparks_amount : 50),
+    price: b.price !== undefined ? b.price : (b.sparks_spent !== undefined ? b.sparks_spent : 100),
     location: b.location || 'Campus',
     date: b.date || '',
     time: b.time || '',
     agenda: b.agenda || '',
     status: b.status || 'Requested',
+    startedAt: b.started_at || b.startedAt || null,
+    durationMinutes: b.duration_minutes || 20,
     createdAt: b.created_at || b.createdAt,
     scheduledAt: b.scheduled_at || b.scheduledAt,
   };
+}
+
+function Live20MinMeetingTimer({ booking, onComplete }) {
+  const durationMs = (booking.durationMinutes || 20) * 60 * 1000;
+  const startedTime = booking.startedAt ? new Date(booking.startedAt).getTime() : Date.now();
+  const endTime = startedTime + durationMs;
+
+  const [remainingMs, setRemainingMs] = useState(Math.max(0, endTime - Date.now()));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const rem = Math.max(0, endTime - Date.now());
+      setRemainingMs(rem);
+      if (rem <= 0) {
+        clearInterval(timer);
+        if (onComplete) onComplete(booking);
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [endTime, booking, onComplete]);
+
+  const totalSecs = Math.floor(remainingMs / 1000);
+  const mins = Math.floor(totalSecs / 60);
+  const secs = totalSecs % 60;
+  const percent = Math.min(100, Math.max(0, (remainingMs / durationMs) * 100));
+
+  return (
+    <div className="mt-3 p-3.5 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-teal-500/10 border border-emerald-300/40 space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+          </span>
+          <span className="text-xs font-black uppercase tracking-wider text-emerald-900">
+            Meetup In Progress
+          </span>
+        </div>
+        <span className="text-sm font-black text-emerald-950 font-mono">
+          {String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}
+        </span>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="w-full h-1.5 rounded-full bg-emerald-100 overflow-hidden">
+        <div 
+          className="h-full bg-emerald-500 transition-all duration-1000 ease-linear rounded-full"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+
+      <p className="text-[10px] text-emerald-700 font-bold text-center">
+        Timer is live on both phones · Auto-completes when 20:00 finishes
+      </p>
+    </div>
+  );
 }
 
 function MeetingCountdownTimer({ booking }) {
@@ -230,7 +288,7 @@ export default function BookingsPage() {
     return now > created.getTime() + 2 * 60 * 60 * 1000; // 2 hours after creation
   };
 
-  // Handle Manual Code Verification
+  // Handle Manual Code Verification -> Starts 20-Minute Live Timer
   const handleVerifyCode = async (codeToVerify) => {
     const code = typeof codeToVerify === 'string' ? codeToVerify : manualCode;
     if (scanStatus === "processing" || scanStatus === "success" || !selectedBooking) return;
@@ -242,37 +300,20 @@ export default function BookingsPage() {
         const res = await fetch("/api/bookings", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bookingId: selectedBooking.id, action: "complete", code: code.trim() })
+          body: JSON.stringify({ bookingId: selectedBooking.id, action: "start_meeting", code: code.trim() })
         });
         
         const data = await res.json();
         if (data.ok || data.success) {
           setScanStatus("success");
-          setScanMessage("Verification successful! Sparks credited to your wallet.");
-          const justCompletedBooking = selectedBooking;
+          setScanMessage("Code verified! 20-minute meetup timer started on both phones.");
           setTimeout(() => {
             setShowScanModal(false);
             setScanStatus("idle");
             setManualCode("");
             setSelectedBooking(null);
             mutate();
-            setIsScanning(true);
-            
-            // Auto open rating review modal for the guest
-            if (justCompletedBooking) {
-              const otherId = justCompletedBooking.guestId || justCompletedBooking.guest_id;
-              const otherName = justCompletedBooking.guestName || justCompletedBooking.guest_name;
-              const otherPhoto = justCompletedBooking.guestPhoto || justCompletedBooking.guest_photo;
-              openRatingModal({
-                targetUserId: otherId,
-                targetName: otherName,
-                targetPhoto: otherPhoto,
-                contextType: 'meeting',
-                contextTitle: justCompletedBooking.title || '1-on-1 Campus Meetup',
-                bookingId: justCompletedBooking.id,
-              });
-            }
-          }, 1800);
+          }, 1400);
         } else {
           setScanStatus("error");
           setScanMessage(data.error || "Verification failed");
@@ -287,6 +328,38 @@ export default function BookingsPage() {
       setScanStatus("error");
       setScanMessage("Invalid Code for this meeting.");
       setTimeout(() => setScanStatus("idle"), 2500);
+    }
+  };
+
+  // Complete / Finish Meeting (Releases Escrow & Opens Rating Modal)
+  const handleFinishMeeting = async (booking) => {
+    if (!booking) return;
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: booking.id, action: "complete" })
+      });
+      const data = await res.json();
+      if (data.ok || data.success) {
+        toast.success("Meeting completed! Sparks credited to host.");
+        mutate();
+        
+        const otherId = booking.guestId === user.uid ? booking.hostId : booking.guestId;
+        const otherName = booking.guestId === user.uid ? booking.hostName : booking.guestName;
+        const otherPhoto = booking.guestId === user.uid ? booking.hostPhoto : booking.guestPhoto;
+        
+        openRatingModal({
+          targetUserId: otherId,
+          targetName: otherName,
+          targetPhoto: otherPhoto,
+          contextType: 'meeting',
+          contextTitle: booking.title || '1-on-1 Campus Meetup',
+          bookingId: booking.id,
+        });
+      }
+    } catch {
+      toast.error("Failed to complete meeting.");
     }
   };
 
@@ -351,6 +424,7 @@ export default function BookingsPage() {
 
   const statusColor = (status) => {
     if (status === "Completed" || status === "Meeting Completed") return "text-emerald-600 bg-emerald-50 border-emerald-100";
+    if (status === "In Progress" || status === "in_progress") return "text-emerald-700 bg-emerald-50 border-emerald-200 animate-pulse";
     if (status === "Rejected" || status === "Cancelled" || status === "Canceled") return "text-rose-600 bg-rose-50 border-rose-100";
     if (status === "AutoRefunded") return "text-amber-600 bg-amber-50 border-amber-100";
     if (status === "Disputed") return "text-orange-600 bg-orange-50 border-orange-100";
@@ -361,6 +435,7 @@ export default function BookingsPage() {
   const statusLabel = (status) => {
     if (status === "AutoRefunded") return "Auto Refunded";
     if (status === "Meeting Completed") return "Completed";
+    if (status === "In Progress" || status === "in_progress") return "In Progress (Live)";
     if (status === "Booking Closed") return "Closed";
     return status;
   };
@@ -510,9 +585,14 @@ export default function BookingsPage() {
                 </div>
               )}
 
-              {/* Countdown Timer for Active Bookings */}
-              {activeTab === "Active" && (
+              {/* Countdown Timer for Upcoming Bookings */}
+              {activeTab === "Active" && booking.status !== "In Progress" && (
                 <MeetingCountdownTimer booking={booking} />
+              )}
+
+              {/* Live 20-Minute Synchronized Meeting Timer for In-Progress Meets */}
+              {activeTab === "Active" && (booking.status === "In Progress" || booking.status === "in_progress") && (
+                <Live20MinMeetingTimer booking={booking} onComplete={handleFinishMeeting} />
               )}
 
               {/* Auto-refund info banner */}
@@ -583,12 +663,22 @@ export default function BookingsPage() {
                         </button>
                       )}
 
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); setShowQrModal(true); }}
-                        className="flex-1 bg-zinc-900 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-800 active:scale-[0.98] transition-all cursor-pointer"
-                      >
-                        <QrCode size={16} /> View Ticket
-                      </button>
+                      {booking.status === "In Progress" || booking.status === "in_progress" ? (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleFinishMeeting(booking); }}
+                          className="flex-1 bg-emerald-600 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-emerald-700 active:scale-[0.98] transition-all cursor-pointer shadow-md shadow-emerald-500/20"
+                        >
+                          <CheckCircle2 size={16} /> Finish Meetup
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); setShowQrModal(true); }}
+                          className="flex-1 bg-zinc-900 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-800 active:scale-[0.98] transition-all cursor-pointer"
+                        >
+                          <QrCode size={16} /> View Ticket
+                        </button>
+                      )}
+
                       {canReport && (
                         <button
                           onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); setShowDisputeModal(true); }}
@@ -654,19 +744,28 @@ export default function BookingsPage() {
                             <Phone size={16} />
                           </button>
 
-                          <button 
-                            onClick={(e) => { 
-                              e.stopPropagation();
-                              setSelectedBooking(booking); 
-                              setShowScanModal(true); 
-                              setScanStatus("idle");
-                              setIsScanning(true);
-                              setManualCode("");
-                            }}
-                            className="flex-1 bg-[#F05A00] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#D94F00] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(240,90,0,0.3)] cursor-pointer"
-                          >
-                            <ScanLine size={16} /> Scan Guest QR / Code
-                          </button>
+                          {booking.status === "In Progress" || booking.status === "in_progress" ? (
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleFinishMeeting(booking); }}
+                              className="flex-1 bg-emerald-600 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-emerald-700 active:scale-[0.98] transition-all cursor-pointer shadow-md shadow-emerald-500/20"
+                            >
+                              <CheckCircle2 size={16} /> Complete & Get Sparks
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={(e) => { 
+                                e.stopPropagation();
+                                setSelectedBooking(booking); 
+                                setShowScanModal(true); 
+                                setScanStatus("idle");
+                                setIsScanning(true);
+                                setManualCode("");
+                              }}
+                              className="flex-1 bg-[#F05A00] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#D94F00] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(240,90,0,0.3)] cursor-pointer"
+                            >
+                              <ScanLine size={16} /> Scan Guest QR / Code
+                            </button>
+                          )}
                         </div>
                       )}
                     </>
