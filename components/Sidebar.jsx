@@ -12,7 +12,7 @@ import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import { supabase } from '../lib/supabase/client';
 import CreateMenuModal from './CreateMenuModal';
 
-const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy', '/offline'];
+const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy', '/offline', '/gla-university'];
 
 export default function Sidebar({ user }) {
   const pathname = usePathname();

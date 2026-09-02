@@ -43,7 +43,14 @@ export default function MainContentWrapper({ children }) {
     );
   }
 
-  const isStandalonePath = pathname === '/terms' || pathname === '/privacy' || pathname === '/offline';
+  const isStandalonePath =
+    pathname === '/terms' ||
+    pathname === '/privacy' ||
+    pathname === '/offline' ||
+    pathname === '/login' ||
+    pathname === '/signup' ||
+    pathname === '/gla-university' ||
+    pathname?.startsWith('/gla-university');
 
   if (isStandalonePath) {
     return (
