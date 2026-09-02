@@ -195,13 +195,13 @@ export default function InAppNotificationBanner() {
         className={`${cfg.bg} backdrop-blur-xl border ${cfg.border} rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer group hover:scale-[1.01] transition-all`}
         onClick={!isCallNotif ? handleClick : undefined}
       >
-        {/* Avatar or Themed Category Icon */}
+        {/* Avatar or Themed Category Icon — 100% Round Circular DP */}
         {activeNotif.senderPhoto ? (
-          <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-zinc-200/80 shadow-xs">
+          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-200 shadow-xs">
             <img 
               src={activeNotif.senderPhoto} 
               alt="" 
-              className="w-full h-full object-cover"
+              className="w-full h-full rounded-full object-cover"
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 e.currentTarget.src = getCartoonAvatar(activeNotif.senderName || 'user');
@@ -210,7 +210,7 @@ export default function InAppNotificationBanner() {
           </div>
         ) : (
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs transition-transform group-hover:scale-105"
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-xs transition-transform group-hover:scale-105"
             style={{ 
               background: `${cfg.accent}15`, 
               border: `1px solid ${cfg.accent}30`, 

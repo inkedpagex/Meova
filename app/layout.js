@@ -41,6 +41,11 @@ export const metadata = {
     statusBarStyle: 'default',
     title: 'Meova',
   },
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default async function RootLayout({ children }) {

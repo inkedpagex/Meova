@@ -217,7 +217,7 @@ export default function WalletPage() {
   if (loading) return <WalletSkeleton />;
 
   return (
-    <div className="min-h-screen px-4 py-4 max-w-[500px] mx-auto pb-24 anim-fade-in relative" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen px-4 pt-[68px] md:pt-6 max-w-[500px] mx-auto pb-24 anim-fade-in relative">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
@@ -226,43 +226,43 @@ export default function WalletPage() {
             if (typeof window !== 'undefined' && window.history.length > 1) router.back();
             else router.push('/');
           }}
-            className="p-2 rounded-xl border cursor-pointer transition-all active:scale-95"
-            style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
+            className="p-2 rounded-xl bg-white border border-zinc-200 text-zinc-800 hover:bg-zinc-50 cursor-pointer transition-all active:scale-95 shadow-2xs"
+            title="Back"
+          >
             <ArrowLeft size={16} strokeWidth={2.5} />
           </button>
-          <h1 className="text-[13px] font-black uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>Sparks Wallet</h1>
+          <h1 className="text-sm font-black uppercase tracking-wider text-zinc-950">Sparks Wallet</h1>
         </div>
       </div>
 
       {/* Toast */}
       {toast && (
-        <div className="mb-4 px-4 py-3 rounded-2xl text-xs font-semibold leading-relaxed anim-fade-up"
-          style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)', color: '#065f46' }}>
+        <div className="mb-4 px-4 py-3 rounded-2xl text-xs font-semibold leading-relaxed anim-fade-up bg-emerald-50 border border-emerald-200 text-emerald-800">
           {toast}
         </div>
       )}
 
       {/* Hero Balance Card */}
-      <div className="relative rounded-2xl p-6 mb-5 overflow-hidden" style={{ background: 'linear-gradient(135deg, #F05A00, #F05A00)' }}>
-        <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2" style={{ background: 'white' }} />
+      <div className="relative rounded-3xl p-6 mb-5 overflow-hidden bg-gradient-to-br from-[#FF6B1A] via-[#F05A00] to-[#D94F00] shadow-xl shadow-orange-500/20 text-white">
+        <div className="absolute top-0 right-0 w-44 h-44 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="relative z-10">
-          <span className="text-[10px] font-black uppercase tracking-widest text-white/60 block mb-1">Your Balance</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-orange-100 block mb-1">Your Balance</span>
           <div className="flex items-center gap-2">
             <span className="text-4xl font-black text-white tracking-tight">{balance.toLocaleString()}</span>
-            <Zap size={24} className="text-orange-400 fill-current" />
+            <Zap size={24} className="text-amber-300 fill-amber-300" />
           </div>
-          <span className="text-[9px] text-white/50 font-semibold mt-1 block">1 Spark = ₹1</span>
+          <span className="text-[10px] text-orange-100 font-semibold mt-1 block">1 Spark = ₹1</span>
 
           {/* Breakdown */}
           {wallet && (
-            <div className="flex gap-4 mt-3">
+            <div className="flex gap-4 mt-3.5 pt-3.5 border-t border-white/20">
               {[
                 { label: 'Purchased', val: wallet.purchased || 0 },
                 { label: 'Bonus',     val: wallet.bonus || 0 },
               ].map(({ label, val }) => (
                 <div key={label}>
-                  <p className="text-[8px] uppercase tracking-wider text-white/40 font-bold">{label}</p>
-                  <p className="text-[13px] font-black text-white">{val}</p>
+                  <p className="text-[9px] uppercase tracking-wider text-orange-200 font-bold">{label}</p>
+                  <p className="text-sm font-black text-white">{val}</p>
                 </div>
               ))}
             </div>
@@ -270,12 +270,11 @@ export default function WalletPage() {
 
           <div className="flex gap-3 mt-5">
             <button onClick={() => openPaymentModal(selectedPack)} disabled={intentLoading}
-              className="flex-1 bg-white text-zinc-900 font-black text-[11px] uppercase tracking-wider py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50">
+              className="flex-1 bg-white hover:bg-orange-50 text-zinc-950 font-black text-[11px] uppercase tracking-wider py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50">
               {intentLoading ? <Loader2 size={14} className="animate-spin" /> : 'Add Sparks'}
             </button>
             <button onClick={() => router.push('/wallet/withdraw')}
-              className="flex-1 text-white font-black text-[11px] uppercase tracking-wider py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-all"
-              style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)' }}>
+              className="flex-1 bg-white/15 hover:bg-white/25 border border-white/25 text-white font-black text-[11px] uppercase tracking-wider py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-all">
               Withdraw
             </button>
           </div>

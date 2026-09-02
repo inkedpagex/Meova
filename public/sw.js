@@ -2,7 +2,7 @@
 // Strategy: Network-first for API routes, Cache-first for static assets
 // FCM & WebPush: Background push notifications support with dynamic category theming
 
-const CACHE_VERSION = '2026-09-01T21:49'; // ← updated on deploy
+const CACHE_VERSION = '2026-09-02T07:07'; // ← updated on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/manifest.json',

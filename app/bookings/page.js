@@ -6,7 +6,7 @@ import { useUserContext } from "../../components/providers/UserProvider";
 import { useRouter } from "next/navigation";
 import {
   Calendar, Clock, MapPin, QrCode, ScanLine, X, Loader2,
-  CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight, MessageCircle, Phone, Zap
+  CheckCircle2, ArrowRight, User, AlertTriangle, ChevronRight, MessageCircle, Phone, Zap, Star
 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { Scanner } from "@yudiel/react-qr-scanner";
@@ -14,6 +14,7 @@ import { toast } from "../../lib/toast";
 import Link from "next/link";
 import { getCartoonAvatar } from "../../utils/avatar";
 import { useVoiceCall } from "../../components/providers/VoiceCallProvider";
+import RatingReviewModal from "../../components/RatingReviewModal";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -104,7 +105,8 @@ function MeetingCountdownTimer({ booking }) {
     };
 
     calculateTime();
-    const interval = setInterval(calculateTime, 1000);
+    // Only tick every 10 seconds to keep UI silky smooth and eliminate frame drops
+    const interval = setInterval(calculateTime, 10000);
     return () => clearInterval(interval);
   }, [booking]);
 
@@ -132,6 +134,30 @@ export default function BookingsPage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [bookingToCancel, setBookingToCancel] = useState(null);
+
+  // Rating & Review state
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingModalData, setRatingModalData] = useState(null);
+  const [reviewedBookings, setReviewedBookings] = useState(new Set());
+
+  useEffect(() => {
+    // Check local storage for reviewed bookings
+    try {
+      const reviewed = new Set();
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('reviewed_booking_')) {
+          reviewed.add(k.replace('reviewed_booking_', ''));
+        }
+      }
+      setReviewedBookings(reviewed);
+    } catch {}
+  }, []);
+
+  const openRatingModal = (data) => {
+    setRatingModalData(data);
+    setShowRatingModal(true);
+  };
 
   // Verification state
   const [scanStatus, setScanStatus] = useState("idle"); // idle, processing, success, error
@@ -167,8 +193,15 @@ export default function BookingsPage() {
     }
   };
 
-  const { data, error, mutate, isLoading } = useSWR(user ? "/api/bookings" : null, fetcher);
-  const { data: walletData } = useSWR(user ? "/api/wallet" : null, fetcher);
+  const { data, error, mutate, isLoading } = useSWR(user ? "/api/bookings" : null, fetcher, {
+    revalidateOnFocus: true,
+    dedupingInterval: 4000,
+    keepPreviousData: true,
+  });
+  const { data: walletData } = useSWR(user ? "/api/wallet" : null, fetcher, {
+    dedupingInterval: 4000,
+    keepPreviousData: true,
+  });
   const sparksBalance = walletData?.wallet
     ? (walletData.wallet.purchased || 0) + (walletData.wallet.bonus || 0) + (walletData.wallet.creator || 0)
     : null;
@@ -215,7 +248,8 @@ export default function BookingsPage() {
         const data = await res.json();
         if (data.ok || data.success) {
           setScanStatus("success");
-          setScanMessage("Verification successful! Sparks have been credited.");
+          setScanMessage("Verification successful! Sparks credited to your wallet.");
+          const justCompletedBooking = selectedBooking;
           setTimeout(() => {
             setShowScanModal(false);
             setScanStatus("idle");
@@ -223,7 +257,22 @@ export default function BookingsPage() {
             setSelectedBooking(null);
             mutate();
             setIsScanning(true);
-          }, 2000);
+            
+            // Auto open rating review modal for the guest
+            if (justCompletedBooking) {
+              const otherId = justCompletedBooking.guestId || justCompletedBooking.guest_id;
+              const otherName = justCompletedBooking.guestName || justCompletedBooking.guest_name;
+              const otherPhoto = justCompletedBooking.guestPhoto || justCompletedBooking.guest_photo;
+              openRatingModal({
+                targetUserId: otherId,
+                targetName: otherName,
+                targetPhoto: otherPhoto,
+                contextType: 'meeting',
+                contextTitle: justCompletedBooking.title || '1-on-1 Campus Meetup',
+                bookingId: justCompletedBooking.id,
+              });
+            }
+          }, 1800);
         } else {
           setScanStatus("error");
           setScanMessage(data.error || "Verification failed");
@@ -624,6 +673,42 @@ export default function BookingsPage() {
                   )}
                 </div>
               )}
+
+              {/* Rating & Review Section for Completed Meetings — BOTH Guest and Host */}
+              {["Completed", "Meeting Completed"].includes(booking.status) && (
+                <div className="mt-3.5 pt-3 border-t border-zinc-100 flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-xl">
+                    <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                    <span>Meeting Completed</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openRatingModal({
+                        targetUserId: otherPersonId,
+                        targetName: otherPerson,
+                        targetPhoto: otherPersonPhoto,
+                        contextType: 'meeting',
+                        contextTitle: booking.title || '1-on-1 Campus Meetup',
+                        bookingId: booking.id,
+                      });
+                    }}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-2xs ${
+                      reviewedBookings.has(booking.id)
+                        ? 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
+                        : 'bg-[#F05A00] hover:bg-[#D94F00] text-white shadow-xs'
+                    }`}
+                  >
+                    <Star
+                      size={13}
+                      className={reviewedBookings.has(booking.id) ? 'fill-amber-400 text-amber-500' : 'fill-white text-white'}
+                    />
+                    <span>{reviewedBookings.has(booking.id) ? 'Rated ★' : `Rate ${isGuest ? 'Host' : 'Guest'}`}</span>
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}
@@ -872,6 +957,28 @@ export default function BookingsPage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* ─── MODAL: RATING & REVIEWS ─── */}
+      {showRatingModal && ratingModalData && (
+        <RatingReviewModal
+          isOpen={showRatingModal}
+          onClose={() => {
+            setShowRatingModal(false);
+            setRatingModalData(null);
+          }}
+          targetUserId={ratingModalData.targetUserId}
+          targetName={ratingModalData.targetName}
+          targetPhoto={ratingModalData.targetPhoto}
+          contextType={ratingModalData.contextType || 'meeting'}
+          contextTitle={ratingModalData.contextTitle}
+          bookingId={ratingModalData.bookingId}
+          onSuccess={({ rating }) => {
+            if (ratingModalData.bookingId) {
+              setReviewedBookings((prev) => new Set([...prev, ratingModalData.bookingId]));
+            }
+          }}
+        />
       )}
 
     </div>

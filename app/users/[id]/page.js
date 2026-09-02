@@ -65,9 +65,9 @@ export default async function UserProfilePage({ params }) {
     fetchProfileAdmin(id),
     getUserAdmin(),
     fetchJoinedCirclesAdmin(id),
-    fetchReviewsAdmin(id, 20),
-    fetchUsersAdmin(50),
-    fetchUserPostsAdmin(id, 12),
+    fetchReviewsAdmin(id, 10),
+    fetchUsersAdmin(8),
+    fetchUserPostsAdmin(id, 8),
   ]);
 
   let activeMeeting = null;

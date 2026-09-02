@@ -5,33 +5,51 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, Zap, Bell, CheckCircle2, MessageSquare,
-  BookOpen, Briefcase, AlertTriangle, Users, Sparkles, Compass
+  BookOpen, Briefcase, AlertTriangle, Users, Sparkles, Compass, Star
 } from 'lucide-react';
 import Skeleton from '../../components/Skeleton';
+import { getCartoonAvatar } from '../../utils/avatar';
 
-const FILTERS = ['All', 'Bookings', 'Gigs', 'Sparks', 'Messages', 'Social'];
+const FILTERS = ['All', 'Bookings', 'Gigs', 'Sparks', 'Reviews', 'Social'];
 
-function NotifIcon({ type }) {
-  const base = "w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 border";
-  if (type === 'booking' || type === 'booking_request' || type === 'booking_accepted') {
-    return <div className={`${base} bg-orange-50 text-[#F05A00] border-orange-100`}><BookOpen size={17} strokeWidth={2.2} /></div>;
+function NotifIcon({ type, photo, name }) {
+  if (photo) {
+    return (
+      <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 border-2 border-white ring-1 ring-zinc-200/80 shadow-xs bg-zinc-100">
+        <img
+          src={photo}
+          alt=""
+          className="w-full h-full rounded-full object-cover"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = getCartoonAvatar(name || 'user');
+          }}
+        />
+      </div>
+    );
   }
-  if (type === 'sparks' || type === 'spark_credit' || type === 'tip') {
-    return <div className={`${base} bg-amber-50 text-amber-600 border-amber-100`}><Zap size={17} className="fill-current" /></div>;
+
+  const base = "w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 border shadow-xs transition-transform";
+  const t = (type || '').toLowerCase();
+  if (t.includes('booking') || t.includes('meet')) {
+    return <div className={`${base} bg-orange-50 text-[#F05A00] border-orange-200`}><BookOpen size={18} strokeWidth={2.2} /></div>;
   }
-  if (type === 'gig' || type === 'gig_application' || type === 'gig_accepted') {
-    return <div className={`${base} bg-emerald-50 text-emerald-600 border-emerald-100`}><Briefcase size={17} strokeWidth={2.2} /></div>;
+  if (t.includes('spark') || t.includes('wallet') || t.includes('tip') || t.includes('refund')) {
+    return <div className={`${base} bg-amber-50 text-amber-600 border-amber-200`}><Zap size={18} className="fill-current" /></div>;
   }
-  if (type === 'dispute' || type === 'flagged') {
-    return <div className={`${base} bg-rose-50 text-rose-600 border-rose-100`}><AlertTriangle size={17} strokeWidth={2.2} /></div>;
+  if (t.includes('gig')) {
+    return <div className={`${base} bg-emerald-50 text-emerald-600 border-emerald-200`}><Briefcase size={18} strokeWidth={2.2} /></div>;
   }
-  if (type === 'circle' || type === 'circle_joined') {
-    return <div className={`${base} bg-purple-50 text-purple-600 border-purple-100`}><Users size={17} strokeWidth={2.2} /></div>;
+  if (t.includes('review') || t.includes('rate') || t.includes('rating')) {
+    return <div className={`${base} bg-amber-50 text-amber-500 border-amber-200`}><Star size={18} className="fill-current text-amber-400" /></div>;
   }
-  if (type === 'message') {
-    return <div className={`${base} bg-blue-50 text-blue-600 border-blue-100`}><MessageSquare size={17} strokeWidth={2.2} /></div>;
+  if (t.includes('dispute') || t.includes('flag')) {
+    return <div className={`${base} bg-rose-50 text-rose-600 border-rose-200`}><AlertTriangle size={18} strokeWidth={2.2} /></div>;
   }
-  return <div className={`${base} bg-zinc-100 text-zinc-500 border-zinc-200`}><Bell size={17} strokeWidth={2.2} /></div>;
+  if (t.includes('circle') || t.includes('social') || t.includes('community')) {
+    return <div className={`${base} bg-purple-50 text-purple-600 border-purple-200`}><Users size={18} strokeWidth={2.2} /></div>;
+  }
+  return <div className={`${base} bg-orange-50 text-[#F05A00] border-orange-200`}><Bell size={18} strokeWidth={2.2} /></div>;
 }
 
 function timeAgo(iso) {
@@ -72,12 +90,15 @@ export default function NotificationsPage() {
   }, []);
 
   const filtered = notifications.filter(n => {
-    if (filter === 'All') return true;
     const t = (n.type || '').toLowerCase();
+    // Chat messages strictly belong to /messages tab, never show in notification tab
+    if (t === 'message' || t === 'chat') return false;
+
+    if (filter === 'All') return true;
     if (filter === 'Bookings') return t.includes('booking') || t.includes('meet');
     if (filter === 'Gigs') return t.includes('gig');
     if (filter === 'Sparks') return t.includes('spark') || t.includes('wallet') || t.includes('tip') || t.includes('refund');
-    if (filter === 'Messages') return t.includes('message') || t.includes('chat');
+    if (filter === 'Reviews') return t.includes('review') || t.includes('rate') || t.includes('rating');
     if (filter === 'Social') return t.includes('circle') || t.includes('like') || t.includes('comment') || t.includes('follow');
     return true;
   });
@@ -99,26 +120,46 @@ export default function NotificationsPage() {
     else router.push('/');
   };
 
-  const NotifRow = ({ n }) => (
-    <div 
-      onClick={() => handleNotifClick(n)}
-      className={`p-4 rounded-2xl flex items-center gap-3.5 transition-all cursor-pointer hover:shadow-xs active:scale-[0.99] border ${
-        !n.read 
-          ? 'bg-orange-50/40 border-orange-100/90 ring-1 ring-orange-200/50' 
-          : 'bg-white border-zinc-100/90 hover:border-zinc-200'
-      }`}
-    >
-      <NotifIcon type={n.type} />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[12.5px] font-black text-zinc-900 leading-snug truncate">{n.title || 'Campus Notification'}</p>
-          <span className="text-[10px] font-bold text-zinc-400 whitespace-nowrap flex-shrink-0">{timeAgo(n.created_at)}</span>
+  const getCategoryBadge = (type) => {
+    const t = (type || '').toLowerCase();
+    if (t.includes('booking') || t.includes('meet')) return { label: 'Meetup', cls: 'bg-orange-50 text-[#F05A00] border-orange-200' };
+    if (t.includes('spark') || t.includes('wallet') || t.includes('tip') || t.includes('refund')) return { label: 'Sparks', cls: 'bg-amber-50 text-amber-700 border-amber-200' };
+    if (t.includes('gig')) return { label: 'Gig', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+    if (t.includes('review') || t.includes('rate')) return { label: 'Review', cls: 'bg-amber-50 text-amber-600 border-amber-200' };
+    if (t.includes('circle') || t.includes('community')) return { label: 'Circle', cls: 'bg-purple-50 text-purple-700 border-purple-200' };
+    if (t.includes('dispute') || t.includes('flag')) return { label: 'Alert', cls: 'bg-rose-50 text-rose-700 border-rose-200' };
+    return { label: 'Update', cls: 'bg-zinc-100 text-zinc-600 border-zinc-200' };
+  };
+
+  const NotifRow = ({ n }) => {
+    const badge = getCategoryBadge(n.type);
+
+    return (
+      <div 
+        onClick={() => handleNotifClick(n)}
+        className={`p-3.5 sm:p-4 rounded-2xl flex items-start gap-3.5 transition-all cursor-pointer hover:shadow-xs active:scale-[0.99] border ${
+          !n.read 
+            ? 'bg-gradient-to-r from-orange-50/60 via-white to-white border-orange-200/90 shadow-2xs ring-1 ring-orange-200/40' 
+            : 'bg-white border-zinc-100 hover:border-zinc-200 shadow-2xs'
+        }`}
+      >
+        <NotifIcon type={n.type} photo={n.sender_photo || n.photo} name={n.sender_name || n.title} />
+        <div className="min-w-0 flex-1 pt-0.5">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${badge.cls}`}>
+                {badge.label}
+              </span>
+              <p className="text-xs font-black text-zinc-900 leading-snug truncate">{n.title || 'Campus Alert'}</p>
+            </div>
+            <span className="text-[10px] font-bold text-zinc-400 whitespace-nowrap flex-shrink-0">{timeAgo(n.created_at)}</span>
+          </div>
+          <p className="text-[11.5px] text-zinc-600 font-medium leading-relaxed line-clamp-2">{n.body || n.message}</p>
         </div>
-        <p className="text-[11.5px] mt-0.5 text-zinc-600 font-medium leading-snug line-clamp-2">{n.body || n.message}</p>
+        {!n.read && <span className="w-2 h-2 rounded-full bg-[#F05A00] flex-shrink-0 shadow-xs mt-2" />}
       </div>
-      {!n.read && <span className="w-2.5 h-2.5 rounded-full bg-[#F05A00] flex-shrink-0 shadow-xs" />}
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (
@@ -133,7 +174,7 @@ export default function NotificationsPage() {
         <div className="space-y-2.5 pt-2">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="flex items-center gap-3 p-4 bg-white border border-zinc-100 rounded-2xl">
-              <Skeleton variant="circular" className="w-10 h-10 flex-shrink-0" />
+              <Skeleton variant="circular" className="w-11 h-11 rounded-full flex-shrink-0" />
               <div className="flex-1 space-y-1.5">
                 <Skeleton variant="text" className="h-4 w-48" />
                 <Skeleton variant="text" className="h-3 w-32" />
@@ -209,14 +250,14 @@ export default function NotificationsPage() {
 
       {/* Empty state */}
       {filtered.length === 0 && (
-        <div className="bg-white border border-zinc-200/80 rounded-2xl p-8 text-center space-y-4 my-8 shadow-xs">
-          <div className="w-14 h-14 rounded-2xl bg-orange-50 text-[#F05A00] flex items-center justify-center mx-auto border border-orange-100">
+        <div className="bg-white border border-zinc-200/80 rounded-3xl p-8 text-center space-y-4 my-8 shadow-xs">
+          <div className="w-14 h-14 rounded-full bg-orange-50 text-[#F05A00] flex items-center justify-center mx-auto border border-orange-100 shadow-2xs">
             <Bell size={24} strokeWidth={2.2} />
           </div>
           <div>
             <h3 className="text-sm font-black text-zinc-900">No {filter !== 'All' ? filter : ''} notifications</h3>
             <p className="text-xs text-zinc-500 font-medium mt-1 max-w-xs mx-auto leading-relaxed">
-              When peers book campus meets, send messages, or you earn Sparks, alerts will show up here.
+              When peers book meetups, leave reviews, or you earn Sparks, alerts will show up here.
             </p>
           </div>
           <Link

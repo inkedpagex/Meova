@@ -1,8 +1,9 @@
 'use client';
-import React, { useState } from 'react';
-import { Briefcase, Clock, CheckCircle2, XCircle, Hourglass, FileText, Send, Users, Zap, RefreshCw, MessageCircle, Phone } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Briefcase, Clock, CheckCircle2, XCircle, Hourglass, FileText, Send, Users, Zap, RefreshCw, MessageCircle, Phone, Star } from 'lucide-react';
 import Link from 'next/link';
 import useSWR from 'swr';
+import RatingReviewModal from '../../components/RatingReviewModal';
 
 const fetcher = url => fetch(url).then(r => r.json());
 
@@ -15,8 +16,29 @@ const STATUS_STYLE = {
 
 export default function MyGigsActivity({ userId, onManage, initialTab = 'posted' }) {
   const [tab, setTab] = useState(initialTab); // 'posted' | 'applied'
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingModalData, setRatingModalData] = useState(null);
+  const [reviewedGigs, setReviewedGigs] = useState(new Set());
 
-  React.useEffect(() => {
+  useEffect(() => {
+    try {
+      const reviewed = new Set();
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('reviewed_gig_')) {
+          reviewed.add(k.replace('reviewed_gig_', ''));
+        }
+      }
+      setReviewedGigs(reviewed);
+    } catch {}
+  }, []);
+
+  const openRatingModal = (data) => {
+    setRatingModalData(data);
+    setShowRatingModal(true);
+  };
+
+  useEffect(() => {
     if (initialTab) setTab(initialTab);
   }, [initialTab]);
 
@@ -182,15 +204,59 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
                 )}
 
                 {rawStatus === 'COMPLETED' && (
-                  <div className="p-2.5 rounded-xl bg-orange-50 border border-orange-100 flex items-center gap-2 text-xs text-[#F05A00] font-black">
-                    <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
-                    <span>Task completed & Sparks released to your wallet</span>
+                  <div className="p-3 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-xs text-[#F05A00] font-black">
+                      <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                      <span>Task Completed</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => openRatingModal({
+                        targetUserId: app.gigAuthorId || app.authorId,
+                        targetName: app.gigAuthorName || 'Gig Client',
+                        targetPhoto: app.gigAuthorPhoto || '',
+                        contextType: 'gig',
+                        contextTitle: app.gigTitle || 'Campus Gig',
+                        gigId: app.gigId,
+                      })}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-2xs ${
+                        reviewedGigs.has(app.gigId)
+                          ? 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
+                          : 'bg-[#F05A00] hover:bg-[#D94F00] text-white shadow-xs'
+                      }`}
+                    >
+                      <Star size={13} className={reviewedGigs.has(app.gigId) ? 'fill-amber-400 text-amber-500' : 'fill-white text-white'} />
+                      <span>{reviewedGigs.has(app.gigId) ? 'Rated ★' : 'Rate Client'}</span>
+                    </button>
                   </div>
                 )}
               </div>
             );
           })}
         </div>
+      )}
+
+      {/* ─── MODAL: RATING & REVIEWS ─── */}
+      {showRatingModal && ratingModalData && (
+        <RatingReviewModal
+          isOpen={showRatingModal}
+          onClose={() => {
+            setShowRatingModal(false);
+            setRatingModalData(null);
+          }}
+          targetUserId={ratingModalData.targetUserId}
+          targetName={ratingModalData.targetName}
+          targetPhoto={ratingModalData.targetPhoto}
+          contextType="gig"
+          contextTitle={ratingModalData.contextTitle}
+          gigId={ratingModalData.gigId}
+          onSuccess={({ rating }) => {
+            if (ratingModalData.gigId) {
+              setReviewedGigs(prev => new Set([...prev, ratingModalData.gigId]));
+            }
+          }}
+        />
       )}
     </div>
   );

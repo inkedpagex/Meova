@@ -6,15 +6,19 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const targetUserId = searchParams.get('targetUserId');
+    const reviewerId = searchParams.get('reviewerId');
 
     let query = supabaseAdmin
       .from('reviews')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(20);
+      .limit(50);
 
     if (targetUserId) {
       query = query.eq('target_user_id', targetUserId);
+    }
+    if (reviewerId) {
+      query = query.eq('reviewer_id', reviewerId);
     }
 
     const { data, error } = await query;
@@ -37,10 +41,10 @@ export async function POST(request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const { bookingId, targetUserId, rating } = body;
+    const { bookingId, gigId, targetUserId, rating } = body;
     const commentText = (body.comment || body.written || body.text || body.message || '').slice(0, 500);
 
-    if (!bookingId || !targetUserId || !rating) {
+    if ((!bookingId && !gigId) || !targetUserId || !rating) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 

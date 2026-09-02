@@ -5,22 +5,49 @@ import { rateLimit } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const { data, error } = await supabaseAdmin
+    const { searchParams } = new URL(request.url);
+    const cursor = searchParams.get('cursor');
+    const limit = Math.min(30, Math.max(1, parseInt(searchParams.get('limit') || '12', 10)));
+    const category = searchParams.get('category');
+
+    let query = supabaseAdmin
       .from('posts')
-      .select('*')
+      .select('id, user_id, author_name, author_photo, author_branch, media_urls, content, likes_count, comments_count, created_at')
       .order('created_at', { ascending: false })
-      .limit(30);
+      .limit(limit + 1);
+
+    if (cursor) {
+      query = query.lt('created_at', cursor);
+    }
+    if (category && category !== 'All') {
+      query = query.ilike('content', `%${category}%`);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('[GET /api/posts]', error.message);
-      return NextResponse.json({ posts: [] });
+      return NextResponse.json({ posts: [], hasMore: false, nextCursor: null });
     }
-    return NextResponse.json({ posts: data || [] });
+
+    const rawPosts = data || [];
+    const hasMore = rawPosts.length > limit;
+    const posts = hasMore ? rawPosts.slice(0, limit) : rawPosts;
+    const nextCursor = hasMore && posts.length > 0 ? posts[posts.length - 1].created_at : null;
+
+    return NextResponse.json(
+      { posts, hasMore, nextCursor },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=6, stale-while-revalidate=59',
+        },
+      }
+    );
   } catch (err) {
     console.error('[GET /api/posts]', err.message);
-    return NextResponse.json({ posts: [] });
+    return NextResponse.json({ posts: [], hasMore: false, nextCursor: null });
   }
 }
 

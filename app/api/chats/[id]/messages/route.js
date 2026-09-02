@@ -122,7 +122,7 @@ export async function POST(request, { params }) {
     }
 
     const participants = chatData?.participants || [];
-    const otherId = participants.find(p => p !== user.uid);
+    const otherId = participants.find(p => String(p) !== String(user.uid) && String(p) !== String(user.id));
     const nowIso = new Date().toISOString();
 
     const currentUnread = chatData?.unread_count || {};

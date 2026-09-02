@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -207,43 +207,58 @@ export default function Sidebar({ user }) {
     };
   }, [user?.id]);
 
-  // ── Wallet real-time listener via Supabase Realtime ─────────────────────────
+  // ── Wallet real-time listener & API fetch ──────────────────────────────────
+  const fetchWalletBalance = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch('/api/wallet');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data?.wallet) {
+        const w = data.wallet;
+        const total = (w.purchased || 0) + (w.bonus || 0) + (w.creator || 0);
+        setSparks(total);
+      }
+    } catch { /* silent */ }
+  }, [user?.id]);
+
   useEffect(() => {
-    if (!user?.id || !supabase) return;
+    if (!user?.id) return;
 
-    // Fetch initial wallet balance
-    supabase
-      .from('wallets')
-      .select('*')
-      .eq('user_id', user.id)
-      .maybeSingle()
-      .then(({ data: w }) => {
-        if (w) setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
-      });
+    fetchWalletBalance();
 
-    const channel = supabase
-      .channel(`sidebar-wallet-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'wallets',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          const w = payload.new;
-          if (w) {
-            setSparks((w.purchased || 0) + (w.bonus || 0) + (w.creator || 0));
+    const handleWalletUpdated = () => {
+      fetchWalletBalance();
+    };
+
+    window.addEventListener('wallet-updated', handleWalletUpdated);
+    window.addEventListener('focus', handleWalletUpdated);
+
+    let channel = null;
+    if (supabase) {
+      channel = supabase
+        .channel(`sidebar-wallet-${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'wallets',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            fetchWalletBalance();
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      window.removeEventListener('wallet-updated', handleWalletUpdated);
+      window.removeEventListener('focus', handleWalletUpdated);
+      if (channel && supabase) supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [user?.id, fetchWalletBalance]);
 
   const isActive = (href) => {
     if (href === '/') return pathname === '/';

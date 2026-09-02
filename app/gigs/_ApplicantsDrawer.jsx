@@ -1,13 +1,14 @@
 'use client';
 import React, { useState } from 'react';
-import { X, CheckCircle2, XCircle, MessageCircle, User, Phone } from 'lucide-react';
+import { X, CheckCircle2, XCircle, MessageCircle, User, Phone, Star } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from '../../lib/toast';
 import useSWR from 'swr';
+import RatingReviewModal from '../../components/RatingReviewModal';
 
 const fetcher = url => fetch(url).then(r => r.json());
 
-function ApplicantCard({ app, gigId, onUpdate }) {
+function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
   const [loading, setLoading] = useState(null); // 'accept' | 'reject'
 
   const handle = async (action) => {
@@ -52,6 +53,7 @@ function ApplicantCard({ app, gigId, onUpdate }) {
         </div>
         {app.applicantBranch && <p className="text-xs text-zinc-400 mt-0.5">{app.applicantBranch}</p>}
         {app.pitch && <p className="text-xs text-zinc-600 mt-2 leading-relaxed italic">"{app.pitch}"</p>}
+        
         {app.status === 'PENDING' && (
           <div className="flex gap-2 mt-3">
             <button
@@ -72,6 +74,7 @@ function ApplicantCard({ app, gigId, onUpdate }) {
             </button>
           </div>
         )}
+
         {app.status === 'ACCEPTED' && (
           <div className="mt-3 p-3 rounded-xl bg-orange-50 border border-orange-100">
             <p className="text-[10px] font-black uppercase text-[#F05A00] mb-1">Gig in Progress</p>
@@ -89,6 +92,25 @@ function ApplicantCard({ app, gigId, onUpdate }) {
             </div>
           </div>
         )}
+
+        {app.status === 'COMPLETED' && (
+          <div className="mt-3 pt-2 border-t border-zinc-200/80 flex items-center justify-between gap-2">
+            <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1">
+              <CheckCircle2 size={13} /> Completed
+            </span>
+            <button
+              onClick={() => onRate(app)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+                isReviewed
+                  ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                  : 'bg-[#F05A00] hover:bg-[#D94F00] text-white shadow-2xs'
+              }`}
+            >
+              <Star size={12} className={isReviewed ? 'fill-amber-400 text-amber-500' : 'fill-white text-white'} />
+              <span>{isReviewed ? 'Rated ★' : 'Rate Freelancer'}</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -102,6 +124,22 @@ export default function ApplicantsDrawer({ gig, onClose }) {
   const [completing, setCompleting] = useState(false);
   const [code, setCode] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingTarget, setRatingTarget] = useState(null);
+  const [reviewedApplicants, setReviewedApplicants] = useState(new Set());
+
+  React.useEffect(() => {
+    try {
+      const reviewed = new Set();
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(`reviewed_gig_${gig?.id}_`)) {
+          reviewed.add(k.replace(`reviewed_gig_${gig?.id}_`, ''));
+        }
+      }
+      setReviewedApplicants(reviewed);
+    } catch {}
+  }, [gig?.id]);
 
   React.useEffect(() => {
     const handleKeyDown = (e) => {
@@ -127,7 +165,14 @@ export default function ApplicantsDrawer({ gig, onClose }) {
       if (!res.ok) { toast.error(json.error || 'Failed'); return; }
       toast.success(`Gig complete! ${json.payout} Sparks paid to freelancer.`);
       mutate();
-      onClose();
+      
+      // Auto open rating modal for accepted applicant
+      if (acceptedApp) {
+        setRatingTarget(acceptedApp);
+        setShowRatingModal(true);
+      } else {
+        onClose();
+      }
     } catch { toast.error('Network error'); }
     finally { setCodeLoading(false); }
   };
@@ -163,7 +208,17 @@ export default function ApplicantsDrawer({ gig, onClose }) {
             </div>
           )}
           {apps.map(app => (
-            <ApplicantCard key={app.id} app={app} gigId={gig.id} onUpdate={mutate} />
+            <ApplicantCard
+              key={app.id}
+              app={app}
+              gigId={gig.id}
+              onUpdate={mutate}
+              onRate={(targetApp) => {
+                setRatingTarget(targetApp);
+                setShowRatingModal(true);
+              }}
+              isReviewed={reviewedApplicants.has(app.applicantId)}
+            />
           ))}
         </div>
 
@@ -200,6 +255,29 @@ export default function ApplicantsDrawer({ gig, onClose }) {
           </div>
         )}
       </div>
+
+      {/* ─── MODAL: RATING & REVIEWS ─── */}
+      {showRatingModal && ratingTarget && (
+        <RatingReviewModal
+          isOpen={showRatingModal}
+          onClose={() => {
+            setShowRatingModal(false);
+            setRatingTarget(null);
+            onClose();
+          }}
+          targetUserId={ratingTarget.applicantId}
+          targetName={ratingTarget.applicantName}
+          targetPhoto={ratingTarget.applicantPhoto}
+          contextType="gig"
+          contextTitle={gig.title || 'Campus Gig'}
+          gigId={gig.id}
+          onSuccess={({ rating }) => {
+            if (gig?.id && ratingTarget.applicantId) {
+              setReviewedApplicants(prev => new Set([...prev, ratingTarget.applicantId]));
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

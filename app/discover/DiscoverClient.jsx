@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
   Search, Check, MapPin, Zap, Coffee, BookOpen, Activity,
   Star, AlertTriangle, X, MessageSquare, Calendar
@@ -276,9 +277,10 @@ export default function DiscoverClient() {
           <>
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {list.map(person => (
-                <div
+                <Link
                   key={person.id}
-                  onClick={() => router.push(`/users/${person.id}`)}
+                  href={`/users/${person.id}`}
+                  prefetch={true}
                   className="rounded-2xl p-4 flex flex-col items-center text-center cursor-pointer transition-all bg-white border border-zinc-200/80 hover:border-orange-300 hover:shadow-md active:scale-[0.99] relative overflow-hidden group shadow-xs"
                 >
                   <div className="relative mb-2.5">
@@ -320,8 +322,8 @@ export default function DiscoverClient() {
                     <span className="text-xs sm:text-sm font-black text-zinc-900 group-hover:text-[#F05A00] transition-colors leading-tight line-clamp-1">
                       {person.full_name}
                     </span>
-                    <span className="text-[10px] font-semibold text-zinc-500 mt-0.5 line-clamp-1">
-                      {person.year ? `${person.year} Year` : ''} {person.branch ? `· ${person.branch}` : ''}
+                    <span className="text-[10.5px] font-semibold text-zinc-500 mt-0.5 line-clamp-1">
+                      {person.year ? (person.year.toLowerCase().includes('year') ? person.year : `${person.year} Year`) : ''} {person.branch ? `· ${person.branch}` : ''}
                     </span>
 
                     <div className="flex flex-wrap gap-1 mt-2 justify-center" style={{ minHeight: 22 }}>
@@ -351,10 +353,11 @@ export default function DiscoverClient() {
                         <button
                           type="button"
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
                             onClick();
                           }}
-                          className="flex-1 py-2 px-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-orange-50 hover:bg-orange-100 text-[#F05A00] border border-orange-200 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-2xs"
+                          className="flex-1 py-2 px-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-orange-50 hover:bg-orange-100 text-[#F05A00] border border-orange-200 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-2xs"
                           title={`Book Meetup with ${person.full_name}`}
                         >
                           <Calendar size={11} />
@@ -366,17 +369,18 @@ export default function DiscoverClient() {
                     <button
                       type="button"
                       onClick={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         handleConnect(person);
                       }}
-                      className="flex-1 py-2 px-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-[#F05A00] hover:bg-[#D94F00] text-white flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-xs whitespace-nowrap"
+                      className="flex-1 py-2 px-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-[#F05A00] hover:bg-[#D94F00] text-white flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-xs whitespace-nowrap"
                       title={`Chat with ${person.full_name}`}
                     >
                       <MessageSquare size={11} />
-                      <span>{connectedIds.has(person.id) ? 'Chat' : 'Connect'}</span>
+                      <span>Chat</span>
                     </button>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 

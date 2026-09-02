@@ -1,23 +1,36 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Skeleton from '../components/Skeleton';
 import {
   Heart, MessageCircle, Share2, Plus, Sparkles, Zap,
   Camera, X, Loader2, Send, MapPin, Search, ChevronRight,
-  Briefcase, Users, MessageSquare, ArrowUpRight
+  Briefcase, Users, MessageSquare, ArrowUpRight, ArrowUp
 } from 'lucide-react';
 import useSWR from 'swr';
+import useSWRInfinite from 'swr/infinite';
 import imageCompression from 'browser-image-compression';
 import { useUserContext } from '../components/providers/UserProvider';
+import { supabase } from '../lib/supabase/client';
 import confetti from 'canvas-confetti';
 import { toast } from '../lib/toast';
 import { getUserAvatarUrl, getCartoonAvatar } from '@/utils/avatar';
+import { optimizeCloudinaryUrl, optimizeAvatarUrl } from '@/utils/imageOptimizer';
 import BookCoffeeButton from '@/features/users/BookCoffeeButton';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
+
+const getPostsKey = (pageIndex, previousPageData) => {
+  // If reached end
+  if (previousPageData && !previousPageData.hasMore) return null;
+  // First page
+  if (pageIndex === 0) return '/api/posts?limit=12';
+  // Keyset cursor pagination
+  if (!previousPageData?.nextCursor) return null;
+  return `/api/posts?cursor=${encodeURIComponent(previousPageData.nextCursor)}&limit=12`;
+};
 
 function FeedSkeleton() {
   return (
@@ -54,17 +67,98 @@ export default function FeedClient() {
   const searchParams = useSearchParams();
   const { user: currentUser, wallet: currentWallet, people } = useUserContext();
 
-  const { data: postsData, error: postsError, mutate: mutatePosts } = useSWR('/api/posts', fetcher);
-  const { data: gigsData } = useSWR('/api/gigs', fetcher);
+  // ── Infinite Keyset Scroll ───────────────────────────────────────
+  const {
+    data: postsPages,
+    error: postsError,
+    size,
+    setSize,
+    isValidating,
+    mutate: mutatePosts,
+  } = useSWRInfinite(getPostsKey, fetcher, {
+    revalidateFirstPage: false,
+    persistSize: true,
+    dedupingInterval: 8000,
+    revalidateOnFocus: false,
+  });
 
-  const campusPosts = postsData?.posts || [];
+  const { data: gigsData } = useSWR('/api/gigs', fetcher, {
+    dedupingInterval: 12000,
+    revalidateOnFocus: false,
+  });
+
+  const campusPosts = useMemo(() => {
+    return postsPages ? postsPages.flatMap((page) => page.posts || []) : [];
+  }, [postsPages]);
+
   const displayPosts = campusPosts;
-  const dbHydrated = postsData !== undefined || postsError !== undefined;
+  const dbHydrated = postsPages !== undefined || postsError !== undefined;
+  const isReachingEnd = postsPages && (!postsPages[postsPages.length - 1]?.hasMore || postsPages[postsPages.length - 1]?.posts?.length === 0);
+  const isLoadingMore = size > 0 && postsPages && typeof postsPages[size - 1] === 'undefined';
+
+  // Realtime new posts incoming pill
+  const [newIncomingPostsCount, setNewIncomingPostsCount] = useState(0);
 
   const [likedPosts, setLikedPosts] = useState({});
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'peers' | 'gigs'
   const [showPostModal, setShowPostModal] = useState(false);
   const [selectedPostPhoto, setSelectedPostPhoto] = useState(null);
+
+  // Sentinel ref for infinite scroll
+  const observerTarget = useRef(null);
+
+  useEffect(() => {
+    const target = observerTarget.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isReachingEnd && !isValidating && !isLoadingMore) {
+          setSize((prev) => prev + 1);
+        }
+      },
+      { rootMargin: '450px' }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [isReachingEnd, isValidating, isLoadingMore, setSize]);
+
+  // Realtime listener for incoming posts (non-intrusive banner)
+  useEffect(() => {
+    if (!supabase) return;
+
+    const channel = supabase
+      .channel('feed-realtime-posts')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'posts',
+        },
+        (payload) => {
+          // If the post is by the current user, mutate immediately
+          if (payload.new?.user_id === currentUser?.id) {
+            mutatePosts();
+            return;
+          }
+          // Otherwise, increment floating pill badge so user's scroll is not interrupted
+          setNewIncomingPostsCount((prev) => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUser?.id, mutatePosts]);
+
+  const handleRefreshToTop = () => {
+    setNewIncomingPostsCount(0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    mutatePosts();
+  };
 
   // Post modal fields
   const [postCaption, setPostCaption] = useState('');
@@ -205,6 +299,20 @@ export default function FeedClient() {
   return (
     <div className="max-w-[580px] mx-auto space-y-4 select-none animate-in fade-in duration-300">
       
+      {/* ── FLOATING NEW MOMENTS PILL ───────────────────────────── */}
+      {newIncomingPostsCount > 0 && (
+        <div className="sticky top-20 z-30 flex justify-center pointer-events-none anim-scale-in">
+          <button
+            type="button"
+            onClick={handleRefreshToTop}
+            className="pointer-events-auto px-4 py-2 rounded-full bg-[#F05A00] hover:bg-[#D94F00] text-white text-xs font-black shadow-lg shadow-orange-500/30 flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+          >
+            <ArrowUp size={14} strokeWidth={2.5} />
+            <span>{newIncomingPostsCount} New Moment{newIncomingPostsCount > 1 ? 's' : ''}</span>
+          </button>
+        </div>
+      )}
+
       {/* ── 1. CAMPUS STORIES (INSTAGRAM / BEREAL STYLE) ────────── */}
       <div className="bg-white border border-zinc-200/80 rounded-3xl p-3 shadow-xs">
         <div className="flex gap-3.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 scroll-smooth">
@@ -217,9 +325,11 @@ export default function FeedClient() {
             <div className="relative w-14 h-14 rounded-full p-[2px] border-2 border-dashed border-[#F05A00] group-hover:scale-105 transition-transform">
               <div className="w-full h-full rounded-full overflow-hidden bg-zinc-100">
                 <img
-                  src={getUserAvatarUrl(currentUser)}
+                  src={optimizeAvatarUrl(getUserAvatarUrl(currentUser))}
                   alt=""
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = getCartoonAvatar(currentUser?.full_name || 'user');
@@ -235,21 +345,24 @@ export default function FeedClient() {
             </span>
           </div>
 
-          {/* Peer Stories */}
-          {campusPeers.map((peer) => {
+          {/* Peer Stories (Top 15 Active Peers for performance) */}
+          {campusPeers.slice(0, 15).map((peer) => {
             const firstName = peer.full_name?.split(' ')[0] || 'Student';
             return (
-              <div
+              <Link
                 key={peer.id}
-                onClick={() => router.push(`/users/${peer.id}`)}
+                href={`/users/${peer.id}`}
+                prefetch={true}
                 className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group"
               >
                 <div className="relative w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-[#F05A00] via-orange-400 to-amber-400 group-hover:scale-105 transition-transform shadow-2xs">
                   <div className="w-full h-full rounded-full overflow-hidden bg-white p-[1px]">
                     <img
-                      src={getUserAvatarUrl(peer)}
+                      src={optimizeAvatarUrl(getUserAvatarUrl(peer))}
                       alt=""
                       className="w-full h-full rounded-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = getCartoonAvatar(peer.full_name || 'user');
@@ -261,7 +374,7 @@ export default function FeedClient() {
                 <span className="text-[10.5px] font-bold text-zinc-800 truncate max-w-[58px]">
                   {firstName}
                 </span>
-              </div>
+              </Link>
             );
           })}
         </div>
@@ -318,22 +431,25 @@ export default function FeedClient() {
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
-            {campusPeers.map((peer) => {
+            {campusPeers.slice(0, 20).map((peer) => {
               const cleanYr = (peer.year || '1st').toString().replace(/\s*year\s*/i, '').trim();
               const cleanBranch = (peer.branch || 'CSE').replace(/COMPUTER SCIENCE/i, 'CSE');
 
               return (
-                <div
+                <Link
                   key={peer.id}
-                  onClick={() => router.push(`/users/${peer.id}`)}
+                  href={`/users/${peer.id}`}
+                  prefetch={true}
                   className="bg-white border border-zinc-200/80 hover:border-orange-300 rounded-3xl p-3.5 flex flex-col items-center text-center shadow-xs hover:shadow-md transition-all cursor-pointer group"
                 >
                   <div className="relative w-14 h-14 rounded-full p-[1.5px] bg-gradient-to-tr from-[#F05A00] to-amber-400 mb-2 group-hover:scale-105 transition-transform">
                     <div className="w-full h-full rounded-full overflow-hidden bg-white">
                       <img
-                        src={getUserAvatarUrl(peer)}
+                        src={optimizeAvatarUrl(getUserAvatarUrl(peer))}
                         alt=""
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
                           e.currentTarget.src = getCartoonAvatar(peer.full_name || 'user');
@@ -361,6 +477,7 @@ export default function FeedClient() {
                         <button
                           type="button"
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
                             confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } });
                             onClick(e);
@@ -373,7 +490,7 @@ export default function FeedClient() {
                       )}
                     />
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
@@ -383,7 +500,7 @@ export default function FeedClient() {
       {/* ── 4. SOCIAL POST FEED (MOMENTS TAB) ────────────────────── */}
       {activeTab === 'feed' && (
         <div className="space-y-4">
-          {displayPosts.length === 0 ? (
+          {displayPosts.length === 0 && !isValidating ? (
             <div className="bg-white rounded-3xl border border-zinc-200/80 p-6 text-center space-y-3 shadow-xs">
               <div className="w-12 h-12 rounded-2xl bg-orange-50 text-[#F05A00] flex items-center justify-center mx-auto">
                 <Camera size={22} />
@@ -401,175 +518,190 @@ export default function FeedClient() {
               </button>
             </div>
           ) : (
-            displayPosts.map((rawPost) => {
-              const post = {
-                id: rawPost.id,
-                authorId: rawPost.user_id || rawPost.authorId,
-                authorName: rawPost.author_name || rawPost.authorName || 'Campus Student',
-                authorPhoto: rawPost.author_photo || rawPost.authorPhoto,
-                authorBranch: rawPost.author_branch || rawPost.authorBranch || 'Student',
-                photoUrl: rawPost.media_urls?.[0] || rawPost.photoUrl || rawPost.image || '',
-                caption: rawPost.content || rawPost.caption || '',
-                category: rawPost.category || 'Showcase',
-                location: rawPost.location || 'Campus',
-                likes: rawPost.likes_count ?? rawPost.likes ?? 0,
-                timeAgo: rawPost.created_at ? new Date(rawPost.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Just now',
-              };
+            <>
+              {displayPosts.map((rawPost) => {
+                const post = {
+                  id: rawPost.id,
+                  authorId: rawPost.user_id || rawPost.authorId,
+                  authorName: rawPost.author_name || rawPost.authorName || 'Campus Student',
+                  authorPhoto: rawPost.author_photo || rawPost.authorPhoto,
+                  authorBranch: rawPost.author_branch || rawPost.authorBranch || 'Student',
+                  photoUrl: rawPost.media_urls?.[0] || rawPost.photoUrl || rawPost.image || '',
+                  caption: rawPost.content || rawPost.caption || '',
+                  category: rawPost.category || 'Showcase',
+                  location: rawPost.location || 'Campus',
+                  likes: rawPost.likes_count ?? rawPost.likes ?? 0,
+                  timeAgo: rawPost.created_at ? new Date(rawPost.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Just now',
+                };
 
-              const isLiked = likedPosts[post.id];
-              const currentLikes = post.likes + (isLiked ? 1 : 0);
+                const isLiked = likedPosts[post.id];
+                const currentLikes = post.likes + (isLiked ? 1 : 0);
 
-              return (
-                <div
-                  key={post.id}
-                  className="bg-white border border-zinc-200/80 rounded-3xl overflow-hidden shadow-xs hover:border-zinc-300 transition-all duration-200"
-                >
-                  {/* Post Header */}
-                  <div className="flex items-center justify-between p-3.5 pb-2.5">
-                    <div
-                      onClick={() => post.authorId && router.push(`/users/${post.authorId}`)}
-                      className="flex items-center gap-2.5 cursor-pointer group"
-                    >
-                      <div className="w-9 h-9 rounded-full overflow-hidden bg-zinc-100 ring-2 ring-[#F05A00]/20 flex-shrink-0">
+                return (
+                  <div
+                    key={post.id}
+                    style={{ contentVisibility: 'auto', containIntrinsicSize: '0 520px' }}
+                    className="bg-white border border-zinc-200/80 rounded-3xl overflow-hidden shadow-xs hover:border-zinc-300 transition-all duration-200"
+                  >
+                    {/* Post Header */}
+                    <div className="flex items-center justify-between p-3.5 pb-2.5">
+                      <div
+                        onClick={() => post.authorId && router.push(`/users/${post.authorId}`)}
+                        className="flex items-center gap-2.5 cursor-pointer group"
+                      >
+                        <div className="w-9 h-9 rounded-full overflow-hidden bg-zinc-100 ring-2 ring-[#F05A00]/20 flex-shrink-0">
+                          <img
+                            src={optimizeAvatarUrl(post.authorPhoto || getCartoonAvatar(post.authorName))}
+                            alt=""
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            loading="lazy"
+                            decoding="async"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = getCartoonAvatar(post.authorName);
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="text-xs font-black text-zinc-950 group-hover:text-[#F05A00] transition-colors">
+                              {post.authorName}
+                            </h4>
+                            <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-orange-50 text-[#F05A00] border border-orange-100">
+                              {post.authorBranch}
+                            </span>
+                          </div>
+                          <p className="text-[10px] font-semibold text-zinc-400">
+                            {post.location} · {post.timeAgo}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Quick Message CTA */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (post.authorId) router.push(`/messages?uid=${post.authorId}`);
+                          else router.push('/messages');
+                        }}
+                        className="text-[11px] font-black text-[#F05A00] hover:text-white bg-orange-50 hover:bg-[#F05A00] border border-orange-200 px-3 py-1 rounded-full transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1"
+                      >
+                        <MessageCircle size={12} />
+                        <span>Message</span>
+                      </button>
+                    </div>
+
+                    {/* Photo Container */}
+                    {post.photoUrl && (
+                      <div
+                        onClick={() => setSelectedPostPhoto(post)}
+                        className="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-zinc-950 overflow-hidden cursor-pointer"
+                      >
                         <img
-                          src={post.authorPhoto || getCartoonAvatar(post.authorName)}
+                          src={optimizeCloudinaryUrl(post.photoUrl, { width: 900 })}
                           alt=""
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = getCartoonAvatar(post.authorName);
-                          }}
+                          className="w-full h-full object-cover hover:scale-[1.01] transition-transform duration-300"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="text-xs font-black text-zinc-950 group-hover:text-[#F05A00] transition-colors">
-                            {post.authorName}
-                          </h4>
-                          <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-orange-50 text-[#F05A00] border border-orange-100">
-                            {post.authorBranch}
-                          </span>
-                        </div>
-                        <p className="text-[10px] font-semibold text-zinc-400">
-                          {post.location} · {post.timeAgo}
-                        </p>
-                      </div>
-                    </div>
+                    )}
 
-                    {/* Quick Message CTA */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (post.authorId) router.push(`/messages?uid=${post.authorId}`);
-                        else router.push('/messages');
-                      }}
-                      className="text-[11px] font-black text-[#F05A00] hover:text-white bg-orange-50 hover:bg-[#F05A00] border border-orange-200 px-3 py-1 rounded-full transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1"
-                    >
-                      <MessageCircle size={12} />
-                      <span>Message</span>
-                    </button>
-                  </div>
-
-                  {/* Photo Container */}
-                  {post.photoUrl && (
-                    <div
-                      onClick={() => setSelectedPostPhoto(post)}
-                      className="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-zinc-950 overflow-hidden cursor-pointer"
-                    >
-                      <img
-                        src={post.photoUrl}
-                        alt=""
-                        className="w-full h-full object-cover hover:scale-[1.01] transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-
-                  {/* Actions & Caption */}
-                  <div className="p-3.5 pt-2.5 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {/* Like Button */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const nextLiked = !isLiked;
-                            setLikedPosts(prev => ({ ...prev, [post.id]: nextLiked }));
-                            
-                            const updatedPosts = campusPosts.map(p =>
-                              p.id === post.id
-                                ? { ...p, likes_count: currentLikes + (nextLiked ? 1 : -1) }
-                                : p
-                            );
-                            mutatePosts({ posts: updatedPosts }, false);
-
-                            if (nextLiked) {
-                              confetti({ particleCount: 40, spread: 50, origin: { y: 0.65 } });
-                              fetch(`/api/posts/${post.id}/like`, { method: 'POST' }).catch(() => {});
-                            }
-                          }}
-                          className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
-                            isLiked
-                              ? 'bg-rose-50 text-rose-600 border border-rose-200'
-                              : 'bg-zinc-100 text-zinc-600 hover:bg-rose-50 hover:text-rose-600'
-                          }`}
-                        >
-                          <Heart size={13} className={isLiked ? 'fill-current text-rose-600' : ''} />
-                          <span>{currentLikes}</span>
-                        </button>
-
-                        {/* Direct Chat */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (post.authorId) router.push(`/messages?uid=${post.authorId}`);
-                            else router.push('/messages');
-                          }}
-                          className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition-all cursor-pointer"
-                        >
-                          <MessageSquare size={13} />
-                          <span>Chat</span>
-                        </button>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        {post.authorId === currentUser?.id && (
+                    {/* Actions & Caption */}
+                    <div className="p-3.5 pt-2.5 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {/* Like Button */}
                           <button
                             type="button"
-                            onClick={() => handleDeletePost(post.id)}
-                            className="p-1 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors cursor-pointer"
-                            title="Delete"
-                          >
-                            <X size={14} />
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (navigator.share) {
-                              navigator.share({ title: post.authorName, text: post.caption, url: window.location.href }).catch(() => {});
-                            } else {
-                              navigator.clipboard.writeText(window.location.href);
-                              toast.success('Link copied to clipboard');
-                            }
-                          }}
-                          className="p-1 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-full transition-colors cursor-pointer"
-                          title="Share"
-                        >
-                          <Share2 size={14} />
-                        </button>
-                      </div>
-                    </div>
+                            onClick={() => {
+                              const nextLiked = !isLiked;
+                              setLikedPosts((prev) => ({ ...prev, [post.id]: nextLiked }));
 
-                    {post.caption && (
-                      <p className="text-xs text-zinc-800 leading-relaxed font-medium">
-                        <span className="font-black text-zinc-950 mr-1.5">{post.authorName}</span>
-                        {post.caption}
-                      </p>
-                    )}
+                              if (nextLiked) {
+                                confetti({ particleCount: 40, spread: 50, origin: { y: 0.65 } });
+                                fetch(`/api/posts/${post.id}/like`, { method: 'POST' }).catch(() => {});
+                              }
+                            }}
+                            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
+                              isLiked
+                                ? 'bg-rose-50 text-rose-600 border border-rose-200'
+                                : 'bg-zinc-100 text-zinc-600 hover:bg-rose-50 hover:text-rose-600'
+                            }`}
+                          >
+                            <Heart size={13} className={isLiked ? 'fill-current text-rose-600' : ''} />
+                            <span>{currentLikes}</span>
+                          </button>
+
+                          {/* Direct Chat */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (post.authorId) router.push(`/messages?uid=${post.authorId}`);
+                              else router.push('/messages');
+                            }}
+                            className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition-all cursor-pointer"
+                          >
+                            <MessageSquare size={13} />
+                            <span>Chat</span>
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          {post.authorId === currentUser?.id && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePost(post.id)}
+                              className="p-1 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors cursor-pointer"
+                              title="Delete"
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (navigator.share) {
+                                navigator.share({ title: post.authorName, text: post.caption, url: window.location.href }).catch(() => {});
+                              } else {
+                                navigator.clipboard.writeText(window.location.href);
+                                toast.success('Link copied to clipboard');
+                              }
+                            }}
+                            className="p-1 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-full transition-colors cursor-pointer"
+                            title="Share"
+                          >
+                            <Share2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {post.caption && (
+                        <p className="text-xs text-zinc-800 leading-relaxed font-medium">
+                          <span className="font-black text-zinc-950 mr-1.5">{post.authorName}</span>
+                          {post.caption}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+
+              {/* Infinite Scroll Sentinel */}
+              <div ref={observerTarget} className="py-4 flex items-center justify-center">
+                {isLoadingMore && (
+                  <div className="flex items-center gap-2 text-xs font-black text-zinc-400">
+                    <Loader2 size={16} className="animate-spin text-[#F05A00]" />
+                    <span>Loading more moments...</span>
+                  </div>
+                )}
+                {isReachingEnd && displayPosts.length > 0 && (
+                  <p className="text-[11px] font-black uppercase tracking-wider text-zinc-300">
+                    You&apos;ve seen all campus moments
+                  </p>
+                )}
+              </div>
+            </>
           )}
         </div>
       )}

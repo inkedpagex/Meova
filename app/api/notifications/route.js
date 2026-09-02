@@ -13,22 +13,29 @@ export async function GET() {
       .from('notifications')
       .select('*')
       .eq('user_id', user.uid)
+      .not('type', 'in', '("message","chat")')
       .order('created_at', { ascending: false })
-      .limit(30);
+      .limit(40);
 
     if (error) {
       console.error('[GET /api/notifications]', error.message);
       return NextResponse.json({ notifications: [], unreadCount: 0 });
     }
 
-    const formatted = (notifications || []).map(n => ({
-      id: n.id,
-      title: n.title,
-      body: n.message || n.body,
-      type: n.type,
-      read: n.read,
-      created_at: n.created_at,
-    }));
+    const formatted = (notifications || [])
+      .filter(n => n.type !== 'message' && n.type !== 'chat')
+      .map(n => ({
+        id: n.id,
+        title: n.title,
+        body: n.message || n.body,
+        type: n.type,
+        read: n.read,
+        photo: n.photo || n.sender_photo || null,
+        sender_photo: n.sender_photo || n.photo || null,
+        sender_name: n.sender_name || null,
+        url: n.url || n.link || null,
+        created_at: n.created_at,
+      }));
 
     const unreadCount = formatted.filter(n => !n.read).length;
     return NextResponse.json({ notifications: formatted, unreadCount });
