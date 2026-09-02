@@ -3,6 +3,8 @@ import { getUserAdmin } from '../../lib/getAdminUser';
 import { fetchCirclesAdmin } from '../../lib/supabaseQueries';
 import CirclesList from '../../features/circles/CirclesList';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Student Circles & Campus Communities | Meova — GLA University',
   description: 'Join student circles and campus communities at GLA University on Meova. Tech, design, sports, cultural — find your tribe, collaborate, and grow together.',

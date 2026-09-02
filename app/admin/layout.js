@@ -2,6 +2,8 @@ import { requireAdmin } from '../../lib/getAdminUser';
 import { redirect } from 'next/navigation';
 import AdminHeaderClient from './AdminHeaderClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminLayout({ children }) {
   const admin = await requireAdmin();
   if (!admin) redirect('/');

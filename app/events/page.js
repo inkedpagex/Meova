@@ -3,6 +3,8 @@ import { fetchUpcomingEventsAdmin } from '../../lib/supabaseQueries';
 import Link from 'next/link';
 import { Calendar, MapPin, Users, Clock, Zap, Music, Code, Trophy, BookOpen, Palette, Mic } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = { title: 'Events — Meova' };
 
 // Category → premium gradient + icon

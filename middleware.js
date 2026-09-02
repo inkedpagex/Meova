@@ -3,13 +3,20 @@ import { NextResponse } from 'next/server';
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // 1. Whitelist all public routes, static assets, and auth endpoints
+  // 1. Whitelist all public routes, SEO files, static assets, and auth endpoints
   const isPublic =
     pathname === '/login' ||
     pathname === '/signup' ||
     pathname === '/terms' ||
     pathname === '/privacy' ||
     pathname === '/offline' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/robots.txt' ||
+    pathname === '/gla-university' ||
+    pathname.startsWith('/gla-university') ||
+    pathname.endsWith('.xml') ||
+    pathname.endsWith('.txt') ||
+    pathname.endsWith('.json') ||
     pathname.startsWith('/login') ||
     pathname.startsWith('/signup') ||
     pathname.startsWith('/api/auth') ||
@@ -19,6 +26,7 @@ export function middleware(request) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/icon') ||
     pathname.startsWith('/logo') ||
+    pathname.startsWith('/favicon') ||
     pathname === '/favicon.ico' ||
     pathname === '/manifest.json' ||
     pathname === '/sw.js';
@@ -54,8 +62,8 @@ export const config = {
      * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - static image/asset extensions
+     * - static image/asset extensions, xml, txt
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|xml|txt)).*)',
   ],
 };
