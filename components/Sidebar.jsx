@@ -10,13 +10,17 @@ import {
 } from 'lucide-react';
 import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import { supabase } from '../lib/supabase/client';
+import { useUserContext } from './providers/UserProvider';
 import CreateMenuModal from './CreateMenuModal';
 
 const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy', '/offline', '/gla-university'];
 
-export default function Sidebar({ user }) {
+export default function Sidebar({ user: propUser }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { user: contextUser, wallet, refreshWallet } = useUserContext();
+  const user = contextUser || propUser;
+  const currentUserId = user?.id || user?.uid;
   const isAdminRoute = pathname.startsWith('/admin');
   const [pendingPath, setPendingPath] = useState(null);
 
@@ -24,9 +28,18 @@ export default function Sidebar({ user }) {
     setPendingPath(null);
   }, [pathname]);
 
-  const [sparks, setSparks] = useState(
-    user?.wallet ? (user.wallet.purchased || 0) + (user.wallet.bonus || 0) + (user.wallet.creator || 0) : 0
-  );
+  const initialSparks = wallet
+    ? (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0)
+    : (user?.wallet ? (user.wallet.purchased || 0) + (user.wallet.bonus || 0) + (user.wallet.creator || 0) : 0);
+
+  const [sparks, setSparks] = useState(initialSparks);
+
+  useEffect(() => {
+    if (wallet) {
+      const total = (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0);
+      setSparks(total);
+    }
+  }, [wallet]);
 
   // ── Sidebar collapse state ──────────────────────────────────────────────────
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -209,7 +222,7 @@ export default function Sidebar({ user }) {
 
   // ── Wallet real-time listener & API fetch ──────────────────────────────────
   const fetchWalletBalance = useCallback(async () => {
-    if (!user?.id) return;
+    if (!currentUserId) return;
     try {
       const res = await fetch('/api/wallet');
       if (!res.ok) return;
@@ -220,10 +233,10 @@ export default function Sidebar({ user }) {
         setSparks(total);
       }
     } catch { /* silent */ }
-  }, [user?.id]);
+  }, [currentUserId]);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!currentUserId) return;
 
     fetchWalletBalance();
 
@@ -237,14 +250,14 @@ export default function Sidebar({ user }) {
     let channel = null;
     if (supabase) {
       channel = supabase
-        .channel(`sidebar-wallet-${user.id}`)
+        .channel(`sidebar-wallet-${currentUserId}`)
         .on(
           'postgres_changes',
           {
             event: '*',
             schema: 'public',
             table: 'wallets',
-            filter: `user_id=eq.${user.id}`,
+            filter: `user_id=eq.${currentUserId}`,
           },
           () => {
             fetchWalletBalance();
@@ -258,7 +271,7 @@ export default function Sidebar({ user }) {
       window.removeEventListener('focus', handleWalletUpdated);
       if (channel && supabase) supabase.removeChannel(channel);
     };
-  }, [user?.id, fetchWalletBalance]);
+  }, [currentUserId, fetchWalletBalance]);
 
   const isActive = (href) => {
     if (href === '/') return pathname === '/';

@@ -7,7 +7,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   try {
-    const user = await requireAuth();
+    let user = null;
+    try {
+      user = await requireAuth();
+    } catch {}
+    const userId = user?.uid || user?.id;
+
     const { searchParams } = new URL(request.url);
     const cursor = searchParams.get('cursor');
     const limit = Math.min(30, Math.max(1, parseInt(searchParams.get('limit') || '12', 10)));
@@ -40,12 +45,12 @@ export async function GET(request) {
 
     // Check which posts the current user has already liked
     let likedSet = new Set();
-    if (user && postsSlice.length > 0) {
+    if (userId && postsSlice.length > 0) {
       const postIds = postsSlice.map(p => p.id);
       const { data: likedRows } = await supabaseAdmin
         .from('post_likes')
         .select('post_id')
-        .eq('user_id', user.uid)
+        .eq('user_id', userId)
         .in('post_id', postIds);
 
       if (likedRows) {

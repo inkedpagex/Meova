@@ -56,60 +56,69 @@ export async function POST(request) {
   const user = await requireAuth();
   if (!user) return NextResponse.json({ error: 'Login required' }, { status: 401 });
 
-  let packKey;
+  let sparks, amount_inr, pack_name, pack_key;
   try {
     const body = await request.json();
-    packKey = sanitizeText(body.packKey, 20);
+    pack_key = body.pack_key || body.packKey || 'pack_custom';
+    sparks = Number(body.sparks || PACKS[pack_key]?.sparks || 100);
+    amount_inr = Number(body.amount_inr || PACKS[pack_key]?.amount_inr || sparks);
+    pack_name = body.pack_name || `${sparks} Sparks`;
   } catch (err) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const pack = PACKS[packKey];
-  if (!pack) return NextResponse.json({ error: 'Invalid pack selection' }, { status: 400 });
+  if (!sparks || sparks <= 0 || !amount_inr) {
+    return NextResponse.json({ error: 'Invalid spark amount' }, { status: 400 });
+  }
 
   try {
-    // Check for existing pending request for this user+pack
-    const { data: existing } = await supabaseAdmin
-      .from('payment_requests')
-      .select('id, reference_code')
-      .eq('user_id', user.uid)
-      .eq('pack_key', packKey)
-      .eq('status', 'pending')
-      .maybeSingle();
-
-    if (existing) {
-      return NextResponse.json({ ok: true, reference_code: existing.reference_code, existing: true });
-    }
-
     const reference_code = await generateUnique5CharRefCode();
 
-    const { error } = await supabaseAdmin.from('payment_requests').insert({
-      user_id:        user.uid,
-      email:          user.email,
-      pack_key:       packKey,
-      pack_name:      pack.name,
-      sparks:         pack.sparks,
-      amount_inr:     pack.amount_inr,
-      reference_code,
-      status:         'pending',
-      created_at:     new Date().toISOString(),
-    });
+    const basePayload = {
+      user_id: user.uid,
+      sparks,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+    };
 
-    if (error) throw new Error(error.message);
+    // Try standard schema first (rupees, unique_decimal, user_email)
+    const dec = Math.round((amount_inr - Math.floor(amount_inr)) * 100);
+    const { error: primaryErr } = await supabaseAdmin
+      .from('payment_requests')
+      .insert({
+        ...basePayload,
+        user_email: user.email || '',
+        user_name: user.full_name || '',
+        rupees: amount_inr,
+        unique_decimal: dec > 0 ? String(dec) : '',
+      });
+
+    if (primaryErr) {
+      // Fallback to alternate schema columns
+      await supabaseAdmin
+        .from('payment_requests')
+        .insert({
+          ...basePayload,
+          email: user.email,
+          pack_key,
+          pack_name,
+          amount_inr,
+          reference_code,
+        });
+    }
 
     logger.audit('PAYMENT_REQUEST_CREATED', user.uid, {
       reference_code,
-      packKey,
-      amount: pack.amount_inr,
+      pack_key,
+      amount: amount_inr,
     });
 
-    // Send real-time alert to admin webhook if configured
     sendAdminAlert({
       title: 'New Payment Recharge Request',
-      message: `User ${user.email} requested ${pack.sparks} Sparks (₹${pack.amount_inr})`,
+      message: `User ${user.email} requested ${sparks} Sparks (₹${amount_inr})`,
       fields: [
         { name: 'Ref Code', value: reference_code },
-        { name: 'Amount', value: `₹${pack.amount_inr}` },
+        { name: 'Amount', value: `₹${amount_inr}` },
         { name: 'User', value: user.email },
       ],
     }).catch(() => {});

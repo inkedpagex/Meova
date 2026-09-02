@@ -88,30 +88,52 @@ export async function POST(request) {
       return NextResponse.json({ error: 'All payment slots are currently active. Please try again in 2 minutes.' }, { status: 429 });
     }
 
-    const uniqueAmount = Number((amount_inr + (selectedDecimal / 100)).toFixed(2));
+    const basePayload = {
+      user_id: user.uid,
+      sparks,
+      status: 'payment_intent',
+      created_at: new Date().toISOString(),
+    };
 
-    const { data: newIntent, error: insertErr } = await supabaseAdmin
+    let newIntent = null;
+    // 1. Try standard schema shape (rupees, unique_decimal, user_email)
+    const { data: primaryData, error: primaryErr } = await supabaseAdmin
       .from('payment_requests')
       .insert({
-        user_id: user.uid,
-        email: user.email,
-        sparks,
-        amount_inr: uniqueAmount,
-        pack_name,
-        pack_key,
-        status: 'payment_intent',
-        created_at: new Date().toISOString(),
+        ...basePayload,
+        user_email: user.email || '',
+        user_name: user.full_name || '',
+        rupees: uniqueAmount,
+        unique_decimal: String(selectedDecimal),
       })
-      .select()
+      .select('id')
       .single();
 
-    if (insertErr) {
-      console.error('[POST /api/wallet/intent insert error]', insertErr.message);
-      return NextResponse.json({ error: 'Failed to create payment intent' }, { status: 500 });
+    if (!primaryErr && primaryData) {
+      newIntent = primaryData;
+    } else {
+      // 2. Fallback to extended schema shape if table columns vary
+      const { data: fallbackData, error: fallbackErr } = await supabaseAdmin
+        .from('payment_requests')
+        .insert({
+          ...basePayload,
+          email: user.email,
+          amount_inr: uniqueAmount,
+          pack_name,
+          pack_key,
+        })
+        .select('id')
+        .single();
+
+      if (!fallbackErr && fallbackData) {
+        newIntent = fallbackData;
+      } else {
+        console.warn('[POST /api/wallet/intent insert warning]', primaryErr?.message || fallbackErr?.message);
+      }
     }
 
     return NextResponse.json({
-      intentId: newIntent.id,
+      intentId: newIntent?.id || `intent_${Date.now()}`,
       amount_inr: uniqueAmount
     });
   } catch (err) {

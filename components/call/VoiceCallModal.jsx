@@ -11,7 +11,11 @@ const ICE_SERVERS = {
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
+    { urls: 'stun:global.stun.twilio.com:3478' },
   ],
+  iceCandidatePoolSize: 10,
 };
 
 // ── WebRTC Audio Constraints (Acoustic Echo Cancellation, Noise Suppression, Auto Gain) ──
@@ -20,10 +24,6 @@ const AUDIO_CONSTRAINTS = {
     echoCancellation: { ideal: true },
     noiseSuppression: { ideal: true },
     autoGainControl: { ideal: true },
-    googEchoCancellation: { ideal: true },
-    googAutoGainControl: { ideal: true },
-    googNoiseSuppression: { ideal: true },
-    googHighpassFilter: { ideal: true },
     channelCount: { ideal: 1 },
   },
   video: false,
@@ -89,6 +89,29 @@ export default function VoiceCallModal({
     const pc = new RTCPeerConnection(ICE_SERVERS);
     peerConnectionRef.current = pc;
 
+    // Add bidirectional audio transceiver
+    try {
+      pc.addTransceiver('audio', { direction: 'sendrecv' });
+    } catch (e) {
+      console.warn('[WebRTC] addTransceiver warning:', e);
+    }
+
+    const attachLocalStream = (stream) => {
+      if (!pc || pc.signalingState === 'closed' || !stream) return;
+      const audioTrack = stream.getAudioTracks()[0];
+      if (!audioTrack) return;
+
+      const senders = pc.getSenders();
+      const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+      if (audioSender && audioSender.replaceTrack) {
+        audioSender.replaceTrack(audioTrack).catch(() => {});
+      } else {
+        try {
+          pc.addTrack(audioTrack, stream);
+        } catch {}
+      }
+    };
+
     // ICE Candidate handler
     pc.onicecandidate = (event) => {
       if (event.candidate && channel && !isCancelled) {
@@ -102,17 +125,22 @@ export default function VoiceCallModal({
 
     // Remote Audio Stream handler
     pc.ontrack = (event) => {
-      if (remoteAudioRef.current && event.streams[0]) {
-        remoteAudioRef.current.srcObject = event.streams[0];
+      const stream = event.streams && event.streams[0] ? event.streams[0] : new MediaStream([event.track]);
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.srcObject = stream;
         remoteAudioRef.current.muted = false;
         remoteAudioRef.current.volume = 1.0;
-        remoteAudioRef.current.play().catch((err) => {
-          console.warn('[Audio play error]', err);
-        });
-        stopRingtone();
-        playConnectedSound();
-        setCallState('connected');
+        
+        const playPromise = remoteAudioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            console.warn('[WebRTC Audio Autoplay Policy]:', err);
+          });
+        }
       }
+      stopRingtone();
+      playConnectedSound();
+      setCallState('connected');
     };
 
     // Connection state change
@@ -159,14 +187,12 @@ export default function VoiceCallModal({
               return;
             }
             localStreamRef.current = stream;
-            stream.getTracks().forEach(track => {
-              if (pc && pc.signalingState !== 'closed') {
-                pc.addTrack(track, stream);
-              }
-            });
+            attachLocalStream(stream);
           } catch (micErr) {
             console.error('[WebRTC] receiver getUserMedia error:', micErr);
           }
+        } else {
+          attachLocalStream(localStreamRef.current);
         }
 
         if (isCancelled || pc.signalingState === 'closed') return;
@@ -284,11 +310,7 @@ export default function VoiceCallModal({
             return;
           }
           localStreamRef.current = stream;
-          stream.getTracks().forEach(track => {
-            if (pc && pc.signalingState !== 'closed') {
-              pc.addTrack(track, stream);
-            }
-          });
+          attachLocalStream(stream);
 
           // Send initial offer
           if (pc && pc.signalingState !== 'closed') {
@@ -330,6 +352,11 @@ export default function VoiceCallModal({
     stopRingtone();
 
     try {
+      // Warm up / unlock audio element on user gesture
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.play().catch(() => {});
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
       const pc = peerConnectionRef.current;
       if (!pc || pc.signalingState === 'closed') {
@@ -337,11 +364,19 @@ export default function VoiceCallModal({
         return;
       }
       localStreamRef.current = stream;
-      stream.getTracks().forEach(track => {
-        if (pc && pc.signalingState !== 'closed') {
-          pc.addTrack(track, stream);
+      
+      const audioTrack = stream.getAudioTracks()[0];
+      if (audioTrack) {
+        const senders = pc.getSenders();
+        const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+        if (audioSender && audioSender.replaceTrack) {
+          audioSender.replaceTrack(audioTrack).catch(() => {});
+        } else {
+          try {
+            pc.addTrack(audioTrack, stream);
+          } catch {}
         }
-      });
+      }
 
       // Send call-ready signal to tell caller to send/resend offer
       if (channel) {
@@ -353,7 +388,7 @@ export default function VoiceCallModal({
 
         // Backup pulse 350ms later to guarantee offer transmission over mobile networks
         setTimeout(() => {
-          if (channel && !isCancelled) {
+          if (channel) {
             channel.send({
               type: 'broadcast',
               event: 'call-ready',

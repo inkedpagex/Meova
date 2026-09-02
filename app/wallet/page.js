@@ -77,7 +77,6 @@ export default function WalletPage() {
   const [loading, setLoading] = useState(true);
   const [selectedPack, setSelectedPack] = useState(PACKS[1]);
   const [requestLoading, setRequestLoading] = useState(false);
-  const [toast, setToast] = useState('');
   const [pendingRequests, setPendingRequests] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [intentId, setIntentId] = useState(null);
@@ -117,8 +116,11 @@ export default function WalletPage() {
       toast.error('Limit reached: You already have 3 pending payment verification requests.');
       return;
     }
+    const randPaise = Math.floor(Math.random() * 88) + 11;
+    const initialDecimalAmount = Number((pack.inr + randPaise / 100).toFixed(2));
+
     setSelectedPack(pack);
-    setExactAmountInr(pack.inr);
+    setExactAmountInr(initialDecimalAmount);
     setIsModalOpen(true);
     setIntentLoading(true);
     
@@ -134,13 +136,13 @@ export default function WalletPage() {
     })
       .then(res => res.json())
       .then(data => {
-        if (data && data.intentId && data.amount_inr) {
+        if (data && data.amount_inr) {
           setIntentId(data.intentId);
           setExactAmountInr(data.amount_inr);
         }
       })
       .catch((err) => {
-        console.warn('[WalletIntent] fallback to standard pack price:', err);
+        console.warn('[WalletIntent] server error:', err);
       })
       .finally(() => {
         setIntentLoading(false);
@@ -247,13 +249,6 @@ export default function WalletPage() {
           <h1 className="text-sm font-black uppercase tracking-wider text-zinc-950">Sparks Wallet</h1>
         </div>
       </div>
-
-      {/* Toast */}
-      {toast && (
-        <div className="mb-4 px-4 py-3 rounded-2xl text-xs font-semibold leading-relaxed anim-fade-up bg-emerald-50 border border-emerald-200 text-emerald-800">
-          {toast}
-        </div>
-      )}
 
       {/* Hero Balance Card */}
       <div className="relative rounded-3xl p-6 mb-5 overflow-hidden bg-gradient-to-br from-[#FF6B1A] via-[#F05A00] to-[#D94F00] shadow-xl shadow-orange-500/20 text-white">
@@ -491,7 +486,7 @@ export default function WalletPage() {
                 Pay the <strong className="text-[#D94F00]">exact amount</strong> below
               </p>
               <p className="text-3xl font-black text-zinc-950 tracking-tight mb-4">
-                ₹{exactAmountInr}
+                ₹{Number(exactAmountInr || 0).toFixed(2)}
               </p>
               
               <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center justify-center mb-4">
