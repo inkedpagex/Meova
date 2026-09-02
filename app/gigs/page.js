@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Search, Briefcase, CheckCircle2, Plus, X, Sparkles, Users, Zap,
@@ -17,11 +17,20 @@ const fetcher = (url) => fetch(url).then(res => res.json());
 
 const CATEGORIES = ['All', 'Design', 'Development', 'Writing', 'Marketing', 'Photography', 'Video/Reels', 'Music', 'Research', 'Craft/Art'];
 
-// Mock gigs removed to prevent false interactions and empty economy.
-
 export default function CampusGigsPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { user, wallet } = useUserContext();
+
+  const { data: flagsData } = useSWR('/api/feature-flags', fetcher, {
+    dedupingInterval: 15000,
+  });
+
+  useEffect(() => {
+    if (flagsData?.flags && flagsData.flags.gigs === false) {
+      router.replace('/');
+    }
+  }, [flagsData, router]);
 
   const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'mine'
   const [search, setSearch] = useState('');

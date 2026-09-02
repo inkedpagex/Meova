@@ -4,9 +4,17 @@ import React from 'react';
 import Link from 'next/link';
 import { Camera, Users, Briefcase, X, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import useSWR from 'swr';
+
+const fetcher = url => fetch(url).then(r => r.json());
 
 export default function CreateMenuModal({ isOpen, onClose }) {
-  const options = [
+  const { data: flagsData } = useSWR('/api/feature-flags', fetcher, {
+    dedupingInterval: 15000,
+  });
+  const isGigsEnabled = flagsData?.flags?.gigs === true;
+
+  const rawOptions = [
     {
       title: 'Post Photo / Moment',
       desc: 'Share campus food photos, coffee meets, or vibes.',
@@ -22,6 +30,7 @@ export default function CreateMenuModal({ isOpen, onClose }) {
       href: '/circles'
     },
     {
+      id: 'gigs',
       title: 'Post a Gig',
       desc: 'Hire talent or offer paid freelance tasks for students.',
       icon: Briefcase,
@@ -29,6 +38,8 @@ export default function CreateMenuModal({ isOpen, onClose }) {
       href: '/gigs?action=post-gig'
     },
   ];
+
+  const options = rawOptions.filter(opt => opt.id !== 'gigs' || isGigsEnabled);
 
   return (
     <AnimatePresence>

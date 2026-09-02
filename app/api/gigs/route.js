@@ -2,11 +2,17 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/getAdminUser';
 import { spendSparks, creditSparks } from '@/lib/wallet';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
+    const isEnabled = await isFeatureEnabled('gigs');
+    if (!isEnabled) {
+      return NextResponse.json({ gigs: [], featureDisabled: true });
+    }
+
     const { data: gigs, error } = await supabaseAdmin
       .from('gigs')
       .select('*')
@@ -44,6 +50,11 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    const isEnabled = await isFeatureEnabled('gigs');
+    if (!isEnabled) {
+      return NextResponse.json({ error: 'Campus Gigs feature is currently disabled by Admin.' }, { status: 403 });
+    }
+
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

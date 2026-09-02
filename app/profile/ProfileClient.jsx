@@ -15,6 +15,7 @@ import { getUserAvatarUrl } from '../../utils/avatar';
 import { updateProfileAdmin } from '../../features/profile/profile.actions';
 import { toast } from '../../lib/toast';
 import PWAInstallModal from '../../components/PWAInstallModal';
+import ZoomableProfileAvatar from '../../components/ZoomableProfileAvatar';
 
 const InstagramIcon = ({ size = 14 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -378,8 +379,16 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             {/* Background Accent */}
             <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#F05A00]/5 to-transparent pointer-events-none" />
             
-            <div className="relative z-10 w-28 h-28 rounded-full overflow-hidden mb-4 shadow-xl shadow-[#F05A00]/10 ring-4 ring-white bg-zinc-50">
-              <img src={avatarSrc} alt={profile?.full_name} className="w-full h-full object-cover" />
+            <div className="relative z-10 mb-4">
+              <ZoomableProfileAvatar
+                src={avatarSrc}
+                alt={profile?.full_name}
+                name={profile?.full_name}
+                username={profile?.username}
+                sizeClass="w-28 h-28"
+                ringColor="#F05A00"
+                isIdOn={false}
+              />
             </div>
 
             {/* Name */}

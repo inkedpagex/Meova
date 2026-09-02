@@ -301,3 +301,21 @@ grant all privileges on table public.post_reports to postgres, anon, authenticat
 grant all privileges on table public.user_reports to postgres, anon, authenticated, service_role;
 grant all privileges on table public.rsvps to postgres, anon, authenticated, service_role;
 
+-- ----------------------------------------------------------------------------
+-- New: app_settings — Live App Feature Flags & Dynamic Controls
+-- ----------------------------------------------------------------------------
+create table if not exists public.app_settings (
+  key         text primary key,
+  value       text not null,
+  description text,
+  updated_at  timestamp with time zone default now()
+);
+
+-- Default: Gigs module disabled by default until official launch
+insert into public.app_settings (key, value, description)
+values ('feature_gigs', 'false', 'Enable/disable campus gigs across the entire app')
+on conflict (key) do nothing;
+
+grant all privileges on table public.app_settings to postgres, anon, authenticated, service_role;
+
+

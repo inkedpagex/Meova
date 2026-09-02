@@ -409,28 +409,50 @@ export async function PATCH(request) {
       return NextResponse.json({ success: true, status: 'Meeting Completed' });
     }
 
-    if (action === 'cancel' && booking.guest_id === user.uid) {
-      if (['Meeting Completed', 'Canceled', 'Rejected', 'Disputed', 'Refunded', 'Booking Closed'].includes(booking.status)) {
+    if (action === 'cancel') {
+      if (booking.guest_id !== user.uid && booking.host_id !== user.uid) {
+        return NextResponse.json({ error: 'Unauthorized to cancel this booking' }, { status: 403 });
+      }
+
+      if (['Meeting Completed', 'Canceled', 'Cancelled', 'Rejected', 'Disputed', 'AutoRefunded', 'Booking Closed', 'In Progress'].includes(booking.status)) {
         return NextResponse.json({ error: 'Cannot cancel this booking at this stage' }, { status: 400 });
       }
 
+      const isHostCancelling = booking.host_id === user.uid;
+      const otherUserId = isHostCancelling ? booking.guest_id : booking.host_id;
+      const now = new Date().toISOString();
+
       await supabaseAdmin
         .from('bookings')
-        .update({ status: 'Canceled', updated_at: new Date().toISOString() })
+        .update({ status: 'Canceled', updated_at: now })
         .eq('id', bookingId);
 
+      // 100% Escrow Refund to Guest
       if (price > 0) {
         await creditSparks(
           booking.guest_id,
           price,
           'purchased',
           'refund',
-          `Booking cancelled refund for meetup`,
+          `Meetup cancelled refund: "${booking.title || 'Campus meet'}"`,
           bookingId
         );
       }
 
-      return NextResponse.json({ success: true });
+      // Notification to other participant
+      await supabaseAdmin.from('notifications').insert({
+        user_id: otherUserId,
+        sender_id: user.uid,
+        title: 'Meeting Cancelled',
+        message: isHostCancelling
+          ? `The host cancelled the meetup. ${price > 0 ? `${price} Sparks have been refunded to your wallet.` : ''}`
+          : `${user.full_name || 'Guest'} cancelled the meetup. ${price > 0 ? `${price} Sparks have been refunded.` : ''}`,
+        type: 'alert',
+        read: false,
+        created_at: now,
+      });
+
+      return NextResponse.json({ success: true, message: 'Meeting cancelled and Sparks refunded.' });
     }
 
     if (action === 'close') {

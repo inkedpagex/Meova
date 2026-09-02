@@ -1,8 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Briefcase, Clock, CheckCircle2, XCircle, Hourglass, FileText, Send, Users, Zap, RefreshCw, MessageCircle, Phone, Star } from 'lucide-react';
+import { Briefcase, Clock, CheckCircle2, XCircle, Hourglass, FileText, Send, Users, Zap, RefreshCw, MessageCircle, Phone, Star, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
 import useSWR from 'swr';
+import { toast } from '../../lib/toast';
 import RatingReviewModal from '../../components/RatingReviewModal';
 
 const fetcher = url => fetch(url).then(r => r.json());
@@ -19,6 +20,8 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [ratingModalData, setRatingModalData] = useState(null);
   const [reviewedGigs, setReviewedGigs] = useState(new Set());
+  const [cancellingGigId, setCancellingGigId] = useState(null);
+  const [withdrawingAppId, setWithdrawingAppId] = useState(null);
 
   useEffect(() => {
     try {
@@ -42,11 +45,50 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
     if (initialTab) setTab(initialTab);
   }, [initialTab]);
 
-  const { data: gigsData } = useSWR('/api/gigs', fetcher);
-  const { data: myAppsData } = useSWR(
+  const { data: gigsData, mutate: mutateGigs } = useSWR('/api/gigs', fetcher);
+  const { data: myAppsData, mutate: mutateApps } = useSWR(
     userId ? `/api/users/${userId}/applications` : null,
     fetcher
   );
+
+  const handleCancelGig = async (gig) => {
+    const budget = gig.budget || gig.reward_sparks || 0;
+    if (!confirm(`Are you sure you want to cancel this gig? ${budget} Sparks in escrow will be immediately refunded to your wallet.`)) return;
+    setCancellingGigId(gig.id);
+    try {
+      const res = await fetch(`/api/gigs/${gig.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || 'Gig cancelled. Escrow refunded.');
+        mutateGigs();
+      } else {
+        toast.error(data.error || 'Failed to cancel gig');
+      }
+    } catch {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setCancellingGigId(null);
+    }
+  };
+
+  const handleWithdrawApp = async (app) => {
+    if (!confirm('Are you sure you want to withdraw your application?')) return;
+    setWithdrawingAppId(app.gigId);
+    try {
+      const res = await fetch(`/api/gigs/${app.gigId}/apply`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || 'Application withdrawn.');
+        mutateApps();
+      } else {
+        toast.error(data.error || 'Failed to withdraw application');
+      }
+    } catch {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setWithdrawingAppId(null);
+    }
+  };
 
   const allGigs = gigsData?.gigs || [];
   const postedGigs = allGigs.filter(g => g.authorId === userId || g.author_id === userId || g.host_id === userId);
@@ -109,19 +151,33 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
                 <span className="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
                   {gig.budget || gig.reward_sparks || 0} <Zap size={11} className="fill-current text-amber-500" />
                 </span>
-                <button
-                  onClick={() => onManage(gig)}
-                  className="px-3.5 py-1.5 rounded-xl bg-orange-50 text-[#D94F00] border border-orange-100 text-xs font-black hover:bg-orange-100 cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
-                >
-                  {(gig.applicationsCount || gig.applications_count || 0) > 0 ? (
-                    <>
-                      <Users size={13} />
-                      <span>{gig.applicationsCount || gig.applications_count} Applied</span>
-                    </>
-                  ) : (
-                    <span>Manage</span>
+                <div className="flex items-center gap-1.5">
+                  {gig.status !== 'completed' && (
+                    <button
+                      type="button"
+                      onClick={() => handleCancelGig(gig)}
+                      disabled={cancellingGigId === gig.id}
+                      className="px-2.5 py-1.5 rounded-xl border border-zinc-200 text-zinc-500 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 text-xs font-black transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1"
+                      title="Cancel Gig & Refund Escrow"
+                    >
+                      <Trash2 size={12} />
+                      <span>Cancel</span>
+                    </button>
                   )}
-                </button>
+                  <button
+                    onClick={() => onManage(gig)}
+                    className="px-3.5 py-1.5 rounded-xl bg-orange-50 text-[#D94F00] border border-orange-100 text-xs font-black hover:bg-orange-100 cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
+                  >
+                    {(gig.applicationsCount || gig.applications_count || 0) > 0 ? (
+                      <>
+                        <Users size={13} />
+                        <span>{gig.applicationsCount || gig.applications_count} Applied</span>
+                      </>
+                    ) : (
+                      <span>Manage</span>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -168,10 +224,15 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
                     {app.gigBudget || 0} <Zap size={11} className="fill-current text-amber-500" />
                   </span>
 
-                  {rawStatus === 'ACCEPTED' && (
-                    <span className="text-[11px] font-black text-emerald-600">
-                      Approved by Host
-                    </span>
+                  {['PENDING', 'ACCEPTED'].includes(rawStatus) && (
+                    <button
+                      type="button"
+                      onClick={() => handleWithdrawApp(app)}
+                      disabled={withdrawingAppId === app.gigId}
+                      className="text-[11px] font-bold text-rose-500 hover:text-rose-600 hover:underline cursor-pointer disabled:opacity-50"
+                    >
+                      Withdraw Application
+                    </button>
                   )}
                 </div>
 

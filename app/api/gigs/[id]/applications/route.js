@@ -64,7 +64,7 @@ export async function PATCH(request, { params }) {
     const { id } = await params;
     const { applicantId, action } = await request.json();
 
-    if (!applicantId || !['accept', 'reject'].includes(action)) {
+    if (!applicantId || !['accept', 'reject', 'cancel_accepted', 'unassign'].includes(action)) {
       return NextResponse.json({ error: 'Missing applicantId or invalid action' }, { status: 400 });
     }
 
@@ -91,11 +91,39 @@ export async function PATCH(request, { params }) {
       .maybeSingle();
 
     if (appErr || !app) return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+    const now = new Date().toISOString();
+
+    // ── CANCEL ACCEPTED APPLICANT (REOPEN GIG) ──────────────────────────────
+    if (action === 'cancel_accepted' || action === 'unassign') {
+      await Promise.all([
+        supabaseAdmin
+          .from('gig_applications')
+          .update({ status: 'CANCELLED', updated_at: now })
+          .eq('gig_id', id)
+          .eq('applicant_id', applicantId),
+
+        supabaseAdmin
+          .from('gigs')
+          .update({ status: 'open', accepted_applicant_id: null, updated_at: now })
+          .eq('id', id),
+
+        supabaseAdmin.from('notifications').insert({
+          user_id: applicantId,
+          sender_id: user.uid,
+          title: 'Gig Assignment Cancelled',
+          message: `The host cancelled your assignment for "${gig.title}". The gig has been reopened.`,
+          type: 'alert',
+          read: false,
+          created_at: now,
+        }),
+      ]);
+
+      return NextResponse.json({ ok: true, message: 'Applicant unassigned. Gig reopened.' });
+    }
+
     if (app.status !== 'pending') {
       return NextResponse.json({ error: 'Application already processed' }, { status: 400 });
     }
-
-    const now = new Date().toISOString();
 
     // ── ACCEPT ──────────────────────────────────────────────────────────────
     if (action === 'accept') {

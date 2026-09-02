@@ -25,33 +25,50 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: 'Forbidden. You are not the author.' }, { status: 403 });
     }
 
-    if (gig.status === 'completed' || gig.status === 'in_progress') {
-      return NextResponse.json({ error: 'Cannot delete a gig that is in progress or completed.' }, { status: 400 });
+    if (gig.status === 'completed') {
+      return NextResponse.json({ error: 'Cannot cancel a gig that is already completed.' }, { status: 400 });
     }
 
     const budgetNum = parseInt(gig.budget || gig.reward_sparks, 10) || 0;
+    const acceptedApplicantId = gig.accepted_applicant_id;
 
     // Delete gig
     const { error: deleteErr } = await supabaseAdmin.from('gigs').delete().eq('id', id);
     if (deleteErr) {
-      return NextResponse.json({ error: 'Failed to delete gig from database' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to cancel gig from database' }, { status: 500 });
     }
 
-    // Refund sparks atomically via credit_sparks RPC
+    // Clean up applications
+    await supabaseAdmin.from('gig_applications').delete().eq('gig_id', id);
+
+    // Refund escrowed sparks atomically to host
     if (budgetNum > 0) {
       await creditSparks(
         user.uid,
         budgetNum,
         'purchased',
-        'dispute_refund',
-        `Refund for deleted gig: "${gig.title}"`,
+        'refund',
+        `Refund for cancelled gig: "${gig.title}"`,
         id
       );
     }
 
-    return NextResponse.json({ ok: true, message: 'Gig deleted and sparks refunded.' });
+    // Notify accepted freelancer if any
+    if (acceptedApplicantId) {
+      await supabaseAdmin.from('notifications').insert({
+        user_id: acceptedApplicantId,
+        sender_id: user.uid,
+        title: 'Gig Cancelled',
+        message: `The client cancelled the gig "${gig.title}". The task has been closed.`,
+        type: 'alert',
+        read: false,
+        created_at: new Date().toISOString(),
+      }).catch(() => {});
+    }
+
+    return NextResponse.json({ ok: true, message: 'Gig cancelled and Sparks refunded to your wallet.' });
   } catch (err) {
     console.error('[DELETE /api/gigs/[id]]', err.message);
-    return NextResponse.json({ error: 'Failed to delete gig' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to cancel gig' }, { status: 500 });
   }
 }

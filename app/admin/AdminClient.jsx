@@ -38,6 +38,8 @@ export default function AdminClient() {
   const [payments, setPayments] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
   const [disputes, setDisputes] = useState([]);
+  const [featureFlags, setFeatureFlags] = useState({ gigs: false });
+  const [togglingFlag, setTogglingFlag] = useState(false);
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
 
@@ -49,13 +51,19 @@ export default function AdminClient() {
   const loadData = useCallback(async () => {
     setFetching(true);
     try {
-      const [statsRes, bookingsRes, paymentsRes, withdrawalsRes, disputesRes] = await Promise.all([
+      const [statsRes, bookingsRes, paymentsRes, withdrawalsRes, disputesRes, flagsRes] = await Promise.all([
         fetch('/api/admin/dashboard-stats'),
         fetch('/api/admin/list-bookings'),
         fetch('/api/admin/list-payments'),
         fetch('/api/admin/list-withdrawals'),
         fetch('/api/admin/list-disputes'),
+        fetch('/api/admin/feature-flags'),
       ]);
+
+      if (flagsRes.ok) {
+        const fData = await flagsRes.json();
+        setFeatureFlags(fData.flags || { gigs: false });
+      }
 
       if (statsRes.ok) {
         const statsData = await statsRes.json();
@@ -162,6 +170,30 @@ export default function AdminClient() {
       }
     } catch {
       alert('Network error');
+    }
+  };
+
+  // Toggle feature flags (e.g. Gigs)
+  const handleToggleGigs = async () => {
+    const nextVal = !featureFlags.gigs;
+    setTogglingFlag(true);
+    setFeatureFlags(prev => ({ ...prev, gigs: nextVal }));
+    try {
+      const res = await fetch('/api/admin/feature-flags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ featureName: 'gigs', enabled: nextVal }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Failed to update feature toggle');
+        setFeatureFlags(prev => ({ ...prev, gigs: !nextVal }));
+      }
+    } catch {
+      alert('Network error');
+      setFeatureFlags(prev => ({ ...prev, gigs: !nextVal }));
+    } finally {
+      setTogglingFlag(false);
     }
   };
 
@@ -299,6 +331,59 @@ export default function AdminClient() {
           <p className="text-[10.5px] font-semibold text-slate-400">
             Pending: <span className="font-bold text-rose-600">{stats.pendingWithdrawals}</span>
           </p>
+        </div>
+      </div>
+
+      {/* ── SECTION: CAMPUS FEATURE LAUNCH CONTROLS ───────────────────── */}
+      <div className="bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-md border border-zinc-800 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <h3 className="text-xs md:text-sm font-black uppercase tracking-wider text-zinc-100">
+                Live App Modules & Launch Switches
+              </h3>
+            </div>
+            <p className="text-[11px] text-zinc-400 mt-1 font-medium">
+              Control feature visibility across the entire student platform in real-time.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+          {/* Switch 1: Campus Gigs */}
+          <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black text-white">Campus Gigs Module</span>
+                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                  featureFlags.gigs ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                }`}>
+                  {featureFlags.gigs ? 'Active on App' : 'Hidden from App'}
+                </span>
+              </div>
+              <p className="text-[10.5px] text-zinc-400 leading-relaxed font-medium">
+                {featureFlags.gigs
+                  ? 'Gigs tab, creation menu, and /gigs are visible to all students.'
+                  : 'Gigs tab, buttons, and /gigs routes are 100% hidden from the entire website.'}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleToggleGigs}
+              disabled={togglingFlag}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                featureFlags.gigs ? 'bg-[#F05A00]' : 'bg-zinc-700'
+              } disabled:opacity-50`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                  featureFlags.gigs ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
         </div>
       </div>
 

@@ -65,19 +65,34 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid Instagram handle' }, { status: 400 });
     }
 
-    // Check if user already submitted
-    const { data: existingClaim } = await supabaseAdmin
+    // 1. Check if this user account already submitted or claimed
+    const { data: existingUserClaim } = await supabaseAdmin
       .from('story_campaign_claims')
       .select('*')
       .eq('user_id', user.uid)
       .in('status', ['pending', 'approved'])
       .maybeSingle();
 
-    if (existingClaim) {
-      if (existingClaim.status === 'approved') {
+    if (existingUserClaim) {
+      if (existingUserClaim.status === 'approved') {
         return NextResponse.json({ error: 'You have already claimed your 100 Sparks reward!' }, { status: 400 });
       }
       return NextResponse.json({ error: 'Your story verification claim is already under review.' }, { status: 400 });
+    }
+
+    // 2. Check if this exact Instagram handle was already submitted or approved by ANY account
+    const { data: duplicateHandleClaim } = await supabaseAdmin
+      .from('story_campaign_claims')
+      .select('id, status, instagram_handle')
+      .ilike('instagram_handle', `@${cleanHandle}`)
+      .in('status', ['pending', 'approved'])
+      .maybeSingle();
+
+    if (duplicateHandleClaim) {
+      if (duplicateHandleClaim.status === 'approved') {
+        return NextResponse.json({ error: `Instagram handle @${cleanHandle} has already been rewarded with 100 Sparks!` }, { status: 400 });
+      }
+      return NextResponse.json({ error: `Instagram handle @${cleanHandle} is already submitted and currently under review.` }, { status: 400 });
     }
 
     // Check slot limit

@@ -82,7 +82,13 @@ export default function FeedClient() {
     revalidateOnFocus: true,
   });
 
-  const { data: gigsData } = useSWR('/api/gigs', fetcher, {
+  const { data: flagsData } = useSWR('/api/feature-flags', fetcher, {
+    dedupingInterval: 15000,
+    revalidateOnFocus: false,
+  });
+  const isGigsEnabled = flagsData?.flags?.gigs === true;
+
+  const { data: gigsData } = useSWR(isGigsEnabled ? '/api/gigs' : null, fetcher, {
     dedupingInterval: 12000,
     revalidateOnFocus: false,
   });
@@ -461,17 +467,19 @@ export default function FeedClient() {
         >
           Active Peers
         </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('gigs')}
-          className={`flex-1 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
-            activeTab === 'gigs'
-              ? 'bg-zinc-950 text-white shadow-md'
-              : 'bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-50'
-          }`}
-        >
-          Gigs
-        </button>
+        {isGigsEnabled && (
+          <button
+            type="button"
+            onClick={() => setActiveTab('gigs')}
+            className={`flex-1 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
+              activeTab === 'gigs'
+                ? 'bg-zinc-950 text-white shadow-md'
+                : 'bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-50'
+            }`}
+          >
+            Gigs
+          </button>
+        )}
       </div>
 
       {/* ── 3. FEATURED ACTIVE STUDENTS (PEERS TAB) ─────────────── */}

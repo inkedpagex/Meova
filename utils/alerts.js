@@ -22,12 +22,12 @@ export async function sendAdminAlert({ title, message, fields = [], severity = '
     const payload = {
       embeds: [
         {
-          title: `⚡ Meetuply Alert: ${title}`,
+          title: `Meova Alert: ${title}`,
           description: message,
           color: severity === 'urgent' ? 0xef4444 : severity === 'warn' ? 0xf59e0b : 0x7c3aed,
           fields: fields.map(f => ({ name: f.name, value: String(f.value), inline: true })),
           timestamp: new Date().toISOString(),
-          footer: { text: 'Meetuply Production Monitor' },
+          footer: { text: 'Meova Production Monitor' },
         },
       ],
     };

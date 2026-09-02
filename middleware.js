@@ -5,6 +5,7 @@ export function middleware(request) {
 
   // 1. Whitelist all public routes, SEO files, static assets, and auth endpoints
   const isPublic =
+    pathname === '/' ||
     pathname === '/login' ||
     pathname === '/signup' ||
     pathname === '/terms' ||

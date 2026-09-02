@@ -62,7 +62,7 @@ export async function GET(request) {
         await supabaseAdmin.from('notifications').insert({
           user_id: booking.guest_id,
           sender_id: booking.host_id,
-          title: 'Sparks Auto-Refunded ⚡',
+          title: 'Sparks Auto-Refunded',
           message: `Your meeting "${booking.title}" wasn't scanned. ${price} Sparks have been refunded.`,
           type: 'auto_refund',
           booking_id: booking.id,

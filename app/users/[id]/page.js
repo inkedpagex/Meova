@@ -18,6 +18,7 @@ import TipUserButton from '../../../features/users/TipUserButton';
 import ProfileCallButton from '../../../components/call/ProfileCallButton';
 import ProfileHighlightsSection from '../../../components/ProfileHighlightsSection';
 import InstagramEmbed from '../../../components/InstagramEmbed';
+import ZoomableProfileAvatar from '../../../components/ZoomableProfileAvatar';
 
 import { getUserAvatarUrl, getCartoonAvatar } from '../../../utils/avatar';
 
@@ -158,22 +159,16 @@ export default async function UserProfilePage({ params }) {
         
         {/* Avatar + Stats Row */}
         <div className="flex items-center justify-between gap-6 mb-4">
-          {/* Avatar with Ring */}
-          <div className="relative flex-shrink-0">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full p-[3px]" style={{ background: '#F05A00' }}>
-              <div className="w-full h-full rounded-full overflow-hidden border-2 border-white bg-zinc-100">
-                <img
-                  src={avatarUrl(profile)}
-                  alt={profile.full_name || 'User'}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-            {/* Live Indicator */}
-            {profile.isIdOn !== false && (
-              <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
-            )}
-          </div>
+          {/* Zoomable Avatar with Ring */}
+          <ZoomableProfileAvatar
+            src={avatarUrl(profile)}
+            alt={profile.full_name || 'User'}
+            name={profile.full_name}
+            username={profile.username}
+            sizeClass="w-20 h-20 sm:w-24 sm:h-24"
+            ringColor="#F05A00"
+            isIdOn={profile.isIdOn !== false}
+          />
 
           {/* Right: Stats Counters */}
           <div className="flex-1 flex items-center justify-around text-center">

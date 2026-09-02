@@ -90,6 +90,20 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
                 <Phone size={14} /> Secure Call
               </button>
             </div>
+            <div className="mt-2.5 pt-2 border-t border-orange-200/60 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm('Are you sure you want to cancel this assignment? The gig will be reopened for other students.')) {
+                    handle('cancel_accepted');
+                  }
+                }}
+                disabled={!!loading}
+                className="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer disabled:opacity-50"
+              >
+                Cancel Assignment & Reopen Gig
+              </button>
+            </div>
           </div>
         )}
 

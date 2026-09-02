@@ -901,35 +901,41 @@ function MessagesContent() {
                       <ArrowLeft className="w-5 h-5 text-zinc-900" strokeWidth={2.5} />
                     </button>
 
-                    <div className="relative">
-                      <img
-                        src={avatarUrl(otherId, otherName, otherPhoto)}
-                        alt=""
-                        className="w-10 h-10 rounded-full object-cover border border-zinc-200"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
-                        }}
-                      />
-                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
-                    </div>
+                    <Link
+                      href={isGroup ? '/circles' : (otherId ? `/users/${otherId}` : '#')}
+                      className="flex items-center gap-3 min-w-0 group hover:opacity-85 transition-all cursor-pointer"
+                      title={isGroup ? 'View Community' : 'View Profile'}
+                    >
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src={avatarUrl(otherId, otherName, otherPhoto)}
+                          alt=""
+                          className="w-10 h-10 rounded-full object-cover border border-zinc-200 group-hover:ring-2 group-hover:ring-[#F05A00]/30 transition-all"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
+                          }}
+                        />
+                        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                      </div>
 
-                    <div className="min-w-0">
-                      <p className="text-sm font-black text-zinc-900 truncate">
-                        {otherName}
-                      </p>
-                      {isGroup ? (
-                        <p className="text-[11px] font-bold text-[#F05A00] flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#F05A00] animate-pulse" />
-                          Verified Campus Channel
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-zinc-900 group-hover:text-[#F05A00] truncate transition-colors">
+                          {otherName}
                         </p>
-                      ) : (
-                        <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          Active on Campus
-                        </p>
-                      )}
-                    </div>
+                        {isGroup ? (
+                          <p className="text-[11px] font-bold text-[#F05A00] flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#F05A00] animate-pulse" />
+                            Verified Campus Channel
+                          </p>
+                        ) : (
+                          <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Active on Campus
+                          </p>
+                        )}
+                      </div>
+                    </Link>
                   </div>
 
                   {isGroup ? (
@@ -990,21 +996,26 @@ function MessagesContent() {
                     const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
                     return (
                       <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                        <div className="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden mb-3 border border-orange-100 shadow-sm">
-                          <img 
-                            src={avatarUrl(otherId, otherName, otherPhoto)} 
-                            alt={otherName} 
-                            className="w-full h-full object-cover" 
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
-                            }}
-                          />
-                        </div>
-                        <h3 className="text-base font-black text-zinc-900">{otherName}</h3>
-                        <p className="text-xs text-zinc-500 mb-4 font-semibold">
-                          {isGroup ? 'Verified Campus Community · Official Channel' : 'Campus Student · Meova'}
-                        </p>
+                        <Link
+                          href={isGroup ? '/circles' : (otherId ? `/users/${otherId}` : '#')}
+                          className="group cursor-pointer inline-flex flex-col items-center"
+                        >
+                          <div className="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden mb-3 border border-orange-100 shadow-sm group-hover:ring-4 group-hover:ring-orange-100 transition-all">
+                            <img 
+                              src={avatarUrl(otherId, otherName, otherPhoto)} 
+                              alt={otherName} 
+                              className="w-full h-full object-cover" 
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
+                              }}
+                            />
+                          </div>
+                          <h3 className="text-base font-black text-zinc-900 group-hover:text-[#F05A00] transition-colors">{otherName}</h3>
+                          <p className="text-xs text-zinc-500 mb-4 font-semibold">
+                            {isGroup ? 'Verified Campus Community · Official Channel' : 'Campus Student · Meova'}
+                          </p>
+                        </Link>
 
                         {isGroup ? (
                           <a 

@@ -620,13 +620,13 @@ export default function BookingsPage() {
                 <div className="mt-4 flex gap-2">
                   {isGuest ? (
                     <>
-                      {/* Cancel button: only for Requested (before host accepts), with instant refund */}
-                      {booking.status === "Requested" && (
+                      {/* Cancel button: Available for Requested and Confirmed/Accepted before start, with instant 100% refund */}
+                      {["Requested", "Confirmed", "Accepted"].includes(booking.status) && (
                         <button
                           onClick={(e) => { e.stopPropagation(); initiateCancel(booking); }}
                           disabled={cancelLoading === booking.id}
-                          className="w-12 h-[46px] bg-zinc-50 text-zinc-500 border border-zinc-200 rounded-xl flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 active:scale-[0.98] transition-all disabled:opacity-50"
-                          title="Cancel Request (full refund)"
+                          className="w-11 h-[46px] bg-zinc-50 text-zinc-500 border border-zinc-200 rounded-xl flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
+                          title="Cancel Meetup (100% Refund)"
                         >
                           {cancelLoading === booking.id
                             ? <Loader2 size={16} className="animate-spin" />
@@ -718,6 +718,20 @@ export default function BookingsPage() {
                         </div>
                       ) : (
                         <div className="flex gap-2 w-full">
+                          {/* Host Cancel Button for Confirmed/Accepted meets */}
+                          {["Confirmed", "Accepted"].includes(booking.status) && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); initiateCancel(booking); }}
+                              disabled={cancelLoading === booking.id}
+                              className="w-11 h-[46px] bg-zinc-50 text-zinc-500 border border-zinc-200 rounded-xl flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
+                              title="Cancel Meetup (Guest will be refunded)"
+                            >
+                              {cancelLoading === booking.id
+                                ? <Loader2 size={16} className="animate-spin" />
+                                : <X size={16} strokeWidth={2.5} />}
+                            </button>
+                          )}
+
                           <button
                             onClick={(e) => { e.stopPropagation(); router.push(`/messages?uid=${otherPersonId}`); }}
                             className="w-11 h-[46px] bg-orange-50 text-[#F05A00] border border-orange-200 hover:bg-orange-100 rounded-xl flex items-center justify-center active:scale-[0.98] transition-all cursor-pointer"
@@ -849,9 +863,13 @@ export default function BookingsPage() {
             <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertTriangle size={24} />
             </div>
-            <h3 className="text-lg font-black text-zinc-900 mb-2">Cancel Booking?</h3>
+            <h3 className="text-lg font-black text-zinc-900 mb-2">Cancel Meetup?</h3>
             <p className="text-xs text-zinc-500 font-medium mb-6 leading-relaxed">
-              Are you sure you want to cancel this booking request? Your <strong className="text-zinc-800">{bookingToCancel.price} Sparks</strong> will be refunded immediately.
+              {bookingToCancel.hostId === user?.uid ? (
+                <>Are you sure you want to cancel this meetup? The guest will receive an immediate full refund of <strong className="text-zinc-800">{bookingToCancel.price} Sparks</strong>.</>
+              ) : (
+                <>Are you sure you want to cancel this meetup? Your <strong className="text-zinc-800">{bookingToCancel.price} Sparks</strong> will be refunded immediately to your wallet.</>
+              )}
             </p>
             <div className="flex gap-2">
               <button

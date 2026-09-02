@@ -55,6 +55,23 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Claim is already approved' }, { status: 400 });
       }
 
+      // Check if another claim with the same Instagram handle has already been approved
+      if (claim.instagram_handle) {
+        const { data: alreadyApprovedWithHandle } = await supabaseAdmin
+          .from('story_campaign_claims')
+          .select('id, user_id, instagram_handle')
+          .ilike('instagram_handle', claim.instagram_handle)
+          .eq('status', 'approved')
+          .neq('id', claimId)
+          .maybeSingle();
+
+        if (alreadyApprovedWithHandle) {
+          return NextResponse.json({
+            error: `Cannot approve: Instagram handle "${claim.instagram_handle}" has already been rewarded on another account.`
+          }, { status: 400 });
+        }
+      }
+
       const rewardAmount = Number(claim.reward_sparks) || 100;
 
       // Credit 100 Sparks bonus to user
