@@ -65,7 +65,7 @@ def generate_icons():
     app_icon_canvas.save(os.path.join(app_dir, "icon.png"), "PNG", optimize=True)
     print("Generated: app/icon.png [Transparent]")
 
-    # 3. Generate Transparent Favicon (ICO multi-layer)
+    # 3. Generate Transparent Favicon (ICO multi-layer) & Google Search 48x48 Icon
     fav_canvas = Image.new("RGBA", (64, 64), (0, 0, 0, 0)) # Fully transparent
     target_fav = 58
     scale_fav = min(target_fav / logo.width, target_fav / logo.height)
@@ -75,6 +75,17 @@ def generate_icons():
     fav_canvas.paste(resized_fav, ((64 - fav_w) // 2, (64 - fav_h) // 2), resized_fav)
     fav_canvas.save(os.path.join(base_dir, "favicon.ico"), format="ICO", sizes=[(16,16), (32,32), (48,48), (64,64)])
     print("Generated: favicon.ico [Transparent]")
+
+    # 4. Generate Google Search specific 48x48 favicon
+    g_canvas = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
+    g_target = 44
+    g_scale = min(g_target / logo.width, g_target / logo.height)
+    g_w = int(logo.width * g_scale)
+    g_h = int(logo.height * g_scale)
+    resized_g = logo.resize((g_w, g_h), Image.Resampling.LANCZOS)
+    g_canvas.paste(resized_g, ((48 - g_w) // 2, (48 - g_h) // 2), resized_g)
+    g_canvas.save(os.path.join(base_dir, "favicon-48x48.png"), "PNG", optimize=True)
+    print("Generated: favicon-48x48.png (Google Search Standard)")
 
 if __name__ == "__main__":
     generate_icons()

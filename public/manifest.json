@@ -1,16 +1,23 @@
 {
-  "name": "Meova",
+  "id": "/",
+  "name": "Meova — Campus Social & Meetup Platform",
   "short_name": "Meova",
-  "description": "Connect with campus students for gigs, meets, and real networking.",
-  "start_url": "/",
+  "description": "Connect with college peers, book 1-on-1 study & coffee meetups, earn Sparks on campus gigs, and join student circles on Meova.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#F05A00",
   "orientation": "portrait-primary",
-  "scope": "/",
   "lang": "en-IN",
-  "categories": ["social", "productivity", "lifestyle"],
+  "categories": ["social", "education", "lifestyle"],
   "icons": [
+    {
+      "src": "/favicon-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
@@ -38,26 +45,32 @@
   ],
   "shortcuts": [
     {
-      "name": "Messages",
+      "name": "Campus Feed",
+      "short_name": "Feed",
+      "description": "Explore latest campus moments and peers",
+      "url": "/?tab=feed",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Messages & Chats",
       "short_name": "Messages",
-      "description": "Open your campus chats",
+      "description": "Open your campus peer chats",
       "url": "/messages",
-      "icons": [{ "src": "/icon-512.png", "sizes": "512x512" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "My Gigs",
+      "name": "Campus Gigs",
       "short_name": "Gigs",
-      "description": "View your active gigs",
+      "description": "Apply to earn Sparks on campus tasks",
       "url": "/gigs",
-      "icons": [{ "src": "/icon-512.png", "sizes": "512x512" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Wallet",
+      "name": "Sparks Wallet",
       "short_name": "Wallet",
-      "description": "Check your Sparks balance",
+      "description": "Check your Sparks balance and withdrawals",
       "url": "/wallet",
-      "icons": [{ "src": "/icon-512.png", "sizes": "512x512" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
-  ],
-  "screenshots": []
+  ]
 }
