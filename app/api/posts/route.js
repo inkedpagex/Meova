@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   try {
+    const user = await requireAuth();
     const { searchParams } = new URL(request.url);
     const cursor = searchParams.get('cursor');
     const limit = Math.min(30, Math.max(1, parseInt(searchParams.get('limit') || '12', 10)));
@@ -14,7 +15,7 @@ export async function GET(request) {
 
     let query = supabaseAdmin
       .from('posts')
-      .select('id, user_id, author_name, author_photo, author_branch, media_urls, content, likes_count, comments_count, created_at')
+      .select('id, user_id, author_name, author_photo, media_urls, content, likes_count, created_at')
       .order('created_at', { ascending: false })
       .limit(limit + 1);
 
@@ -34,14 +35,34 @@ export async function GET(request) {
 
     const rawPosts = data || [];
     const hasMore = rawPosts.length > limit;
-    const posts = hasMore ? rawPosts.slice(0, limit) : rawPosts;
-    const nextCursor = hasMore && posts.length > 0 ? posts[posts.length - 1].created_at : null;
+    const postsSlice = hasMore ? rawPosts.slice(0, limit) : rawPosts;
+    const nextCursor = hasMore && postsSlice.length > 0 ? postsSlice[postsSlice.length - 1].created_at : null;
+
+    // Check which posts the current user has already liked
+    let likedSet = new Set();
+    if (user && postsSlice.length > 0) {
+      const postIds = postsSlice.map(p => p.id);
+      const { data: likedRows } = await supabaseAdmin
+        .from('post_likes')
+        .select('post_id')
+        .eq('user_id', user.uid)
+        .in('post_id', postIds);
+
+      if (likedRows) {
+        likedSet = new Set(likedRows.map(r => r.post_id));
+      }
+    }
+
+    const posts = postsSlice.map(p => ({
+      ...p,
+      isLiked: likedSet.has(p.id),
+    }));
 
     return NextResponse.json(
       { posts, hasMore, nextCursor },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=6, stale-while-revalidate=59',
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
         },
       }
     );
@@ -71,8 +92,8 @@ export async function POST(request) {
 
     let finalContent = (caption || '').trim();
     const metaTags = [];
-    if (location && location.trim()) metaTags.push(`📍 ${location.trim()}`);
-    if (category && category.trim()) metaTags.push(`🏷️ ${category.trim()}`);
+    if (location && location.trim()) metaTags.push(location.trim());
+    if (category && category.trim()) metaTags.push(category.trim());
     
     if (metaTags.length > 0) {
       finalContent = finalContent ? `${finalContent}\n\n${metaTags.join(' · ')}` : metaTags.join(' · ');

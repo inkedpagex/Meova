@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Zap, Clock, RefreshCw, Loader2 } from 'lucide-react';
 
@@ -141,7 +141,7 @@ export default function AdminPaymentsPage() {
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-xs">
           <Zap size={28} className="text-slate-300 mx-auto mb-3" />
           <p className="text-sm font-black text-slate-800">
-            {filter === 'pending' ? 'No pending payment requests 🎉' : 'No payment records yet'}
+            {filter === 'pending' ? 'No pending payment requests' : 'No payment records yet'}
           </p>
         </div>
       ) : (

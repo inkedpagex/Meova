@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/getAdminUser';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
@@ -45,25 +45,28 @@ export async function POST(request) {
       targetProfile.username ? supabaseAdmin.from('usernames').delete().eq('username', targetProfile.username) : Promise.resolve(),
       supabaseAdmin.from('usernames').delete().eq('user_id', targetUid),
 
-      // User posts, comments, likes
-      supabaseAdmin.from('posts').delete().eq('author_id', targetUid),
-      supabaseAdmin.from('comments').delete().eq('author_id', targetUid),
-      supabaseAdmin.from('likes').delete().eq('user_id', targetUid),
+      // User posts & likes
+      supabaseAdmin.from('posts').delete().eq('user_id', targetUid),
+      supabaseAdmin.from('post_likes').delete().eq('user_id', targetUid),
 
       // Gigs & Applications
-      supabaseAdmin.from('gigs').delete().eq('author_id', targetUid),
-      supabaseAdmin.from('applications').delete().eq('user_id', targetUid),
+      supabaseAdmin.from('gigs').delete().eq('host_id', targetUid),
+      supabaseAdmin.from('gig_applications').delete().eq('applicant_id', targetUid),
 
       // Circle memberships & owned circles
       supabaseAdmin.from('circle_members').delete().eq('user_id', targetUid),
       supabaseAdmin.from('circles').delete().eq('creator_id', targetUid),
 
-      // Wallets & Transactions
+      // Wallets, Transactions, Payment Requests & Withdrawals
       supabaseAdmin.from('wallets').delete().eq('user_id', targetUid),
-      supabaseAdmin.from('wallet_transactions').delete().eq('user_id', targetUid),
+      supabaseAdmin.from('transactions').delete().eq('user_id', targetUid),
+      supabaseAdmin.from('payment_requests').delete().eq('user_id', targetUid),
+      supabaseAdmin.from('withdrawals').delete().eq('user_id', targetUid),
 
-      // Notifications & Blocks
+      // Notifications, FCM Tokens, OTPs & Blocks
       supabaseAdmin.from('notifications').delete().eq('user_id', targetUid),
+      supabaseAdmin.from('fcm_tokens').delete().eq('user_id', targetUid),
+      supabaseAdmin.from('phone_otps').delete().eq('user_id', targetUid),
       supabaseAdmin.from('blocks').delete().eq('blocker_id', targetUid),
       supabaseAdmin.from('blocks').delete().eq('blocked_id', targetUid),
 

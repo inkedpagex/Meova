@@ -3,6 +3,8 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/getAdminUser';
 import { spendSparks, creditSparks } from '@/lib/wallet';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const { data: gigs, error } = await supabaseAdmin
@@ -26,7 +28,14 @@ export async function GET() {
       company: g.host_name || 'Campus Host',
     }));
 
-    return NextResponse.json({ gigs: formatted });
+    return NextResponse.json(
+      { gigs: formatted },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        },
+      }
+    );
   } catch (err) {
     console.error('[GET /api/gigs]', err.message);
     return NextResponse.json({ gigs: [] });

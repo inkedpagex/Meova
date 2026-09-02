@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Loader2, ShieldCheck, Lock } from 'lucide-react';
+import { Phone, PhoneOff, Mic, MicOff, Volume2, Volume1, VolumeX, Loader2, ShieldCheck, Lock } from 'lucide-react';
 import { getUserAvatarUrl, getCartoonAvatar } from '../../utils/avatar';
 import { startIncomingRingtone, startOutgoingRingtone, playConnectedSound, stopRingtone } from '../../lib/ringtone';
 import { toast } from '../../lib/toast';
@@ -40,7 +40,7 @@ export default function VoiceCallModal({
 }) {
   const [callState, setCallState] = useState(mode === 'incoming' ? 'incoming' : 'calling'); // 'calling' | 'incoming' | 'connecting' | 'connected' | 'ended'
   const [isMuted, setIsMuted] = useState(false);
-  const [isSpeaker, setIsSpeaker] = useState(true);
+  const [audioOutput, setAudioOutput] = useState('speaker'); // 'speaker' | 'earpiece'
   const [isPeerMuted, setIsPeerMuted] = useState(false);
   const [duration, setDuration] = useState(0);
 
@@ -140,9 +140,13 @@ export default function VoiceCallModal({
     };
 
     // Helper: Receiver handles offer and sends answer
+    const pendingCandidates = [];
+
     const handleOffer = async (offerPayload) => {
       try {
         if (isCancelled || !pc || pc.signalingState === 'closed' || !offerPayload) return;
+        if (pc.signalingState !== 'stable') return;
+
         if (!localStreamRef.current) {
           const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
           if (isCancelled || !pc || pc.signalingState === 'closed') {
@@ -156,11 +160,20 @@ export default function VoiceCallModal({
             }
           });
         }
-        if (isCancelled || pc.signalingState === 'closed') return;
+        if (isCancelled || pc.signalingState !== 'stable') return;
         await pc.setRemoteDescription(new RTCSessionDescription(offerPayload));
-        if (isCancelled || pc.signalingState === 'closed') return;
+
+        // Flush queued candidates
+        while (pendingCandidates.length > 0) {
+          const cand = pendingCandidates.shift();
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(cand));
+          } catch {}
+        }
+
+        if (isCancelled || pc.signalingState !== 'have-remote-offer') return;
         const answer = await pc.createAnswer();
-        if (isCancelled || pc.signalingState === 'closed') return;
+        if (isCancelled || pc.signalingState !== 'have-remote-offer') return;
         await pc.setLocalDescription(answer);
         if (isCancelled || !channel) return;
         channel.send({
@@ -177,16 +190,25 @@ export default function VoiceCallModal({
 
     // When receiver is ready, caller generates offer
     channel.on('broadcast', { event: 'call-ready' }, async () => {
-      if (mode === 'outgoing' && !isCancelled) {
+      if (mode === 'outgoing' && !isCancelled && pc && pc.signalingState === 'stable') {
         await sendOffer();
       }
     });
 
     // When caller receives answer from receiver
     channel.on('broadcast', { event: 'call-accept' }, async ({ payload }) => {
-      if (payload.answer && pc && pc.signalingState !== 'closed' && !isCancelled) {
+      if (payload.answer && pc && pc.signalingState === 'have-local-offer' && !isCancelled) {
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(payload.answer));
+
+          // Flush queued candidates
+          while (pendingCandidates.length > 0) {
+            const cand = pendingCandidates.shift();
+            try {
+              await pc.addIceCandidate(new RTCIceCandidate(cand));
+            } catch {}
+          }
+
           stopRingtone();
           playConnectedSound();
           setCallState('connected');
@@ -219,9 +241,13 @@ export default function VoiceCallModal({
     });
 
     channel.on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
-      if (payload.senderId !== currentUserId && payload.candidate && pc && pc.remoteDescription && pc.signalingState !== 'closed' && !isCancelled) {
+      if (payload.senderId !== currentUserId && payload.candidate && pc && pc.signalingState !== 'closed' && !isCancelled) {
         try {
-          await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+          if (pc.remoteDescription && pc.remoteDescription.type) {
+            await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+          } else {
+            pendingCandidates.push(payload.candidate);
+          }
         } catch (e) {
           console.error('[WebRTC] addIceCandidate error:', e);
         }
@@ -380,15 +406,36 @@ export default function VoiceCallModal({
     }
   };
 
-  // ── Fully functional Speaker Toggle ────────────────────────────────────────
-  const toggleSpeaker = () => {
-    const nextSpeaker = !isSpeaker;
-    setIsSpeaker(nextSpeaker);
+  // ── Hardware Earpiece / Loudspeaker Audio Output Switching ───────────────
+  const toggleSpeakerEarpiece = async () => {
+    const nextMode = audioOutput === 'speaker' ? 'earpiece' : 'speaker';
+    setAudioOutput(nextMode);
 
     if (remoteAudioRef.current) {
-      remoteAudioRef.current.muted = !nextSpeaker;
-      remoteAudioRef.current.volume = nextSpeaker ? 1.0 : 0.0;
+      // 1. Hardware audio routing via setSinkId if supported by device browser
+      if (typeof remoteAudioRef.current.setSinkId === 'function') {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+
+          const targetDevice = nextMode === 'speaker'
+            ? audioOutputs.find(d => d.label.toLowerCase().includes('speaker') || d.deviceId.includes('speaker'))
+            : audioOutputs.find(d => d.label.toLowerCase().includes('earpiece') || d.label.toLowerCase().includes('receiver') || d.deviceId === 'default');
+
+          if (targetDevice?.deviceId) {
+            await remoteAudioRef.current.setSinkId(targetDevice.deviceId);
+          }
+        } catch (err) {
+          console.warn('[WebRTC AudioSink]', err.message);
+        }
+      }
+
+      // 2. Adjust acoustic output levels (full volume for loud speaker, comfortable level for ear)
+      remoteAudioRef.current.muted = false;
+      remoteAudioRef.current.volume = nextMode === 'speaker' ? 1.0 : 0.55;
     }
+
+    toast.success(nextMode === 'speaker' ? 'Speaker: Loudspeaker' : 'Speaker: Earpiece');
   };
 
   const formatDuration = (secs) => {
@@ -562,21 +609,21 @@ export default function VoiceCallModal({
               <span className="text-[11px] font-bold text-zinc-300">{isMuted ? 'Unmute' : 'Mute'}</span>
             </div>
 
-            {/* Speaker Toggle */}
+            {/* Speaker / Earpiece Toggle */}
             <div className="flex flex-col items-center gap-1.5">
               <button
                 type="button"
-                onClick={toggleSpeaker}
+                onClick={toggleSpeakerEarpiece}
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                  !isSpeaker 
-                    ? 'bg-rose-600/80 text-white shadow-lg shadow-rose-600/30 ring-2 ring-rose-400' 
-                    : 'bg-white/20 text-white border border-white/20 shadow-md ring-2 ring-white/30'
+                  audioOutput === 'speaker'
+                    ? 'bg-[#F05A00] text-white shadow-lg shadow-orange-500/40 ring-2 ring-orange-400/50'
+                    : 'bg-white/15 text-white border border-white/20 hover:bg-white/25 shadow-md'
                 }`}
-                title={isSpeaker ? 'Mute Speaker' : 'Turn On Speaker'}
+                title={audioOutput === 'speaker' ? 'Switch to Earpiece' : 'Switch to Loudspeaker'}
               >
-                {isSpeaker ? <Volume2 size={22} /> : <VolumeX size={22} />}
+                {audioOutput === 'speaker' ? <Volume2 size={22} /> : <Volume1 size={22} />}
               </button>
-              <span className="text-[11px] font-bold text-zinc-300">{isSpeaker ? 'Speaker' : 'Muted'}</span>
+              <span className="text-[11px] font-bold text-zinc-300">{audioOutput === 'speaker' ? 'Speaker' : 'Earpiece'}</span>
             </div>
 
             {/* End Call Button */}

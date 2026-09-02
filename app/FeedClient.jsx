@@ -75,10 +75,10 @@ export default function FeedClient() {
     isValidating,
     mutate: mutatePosts,
   } = useSWRInfinite(getPostsKey, fetcher, {
-    revalidateFirstPage: false,
+    revalidateFirstPage: true,
     persistSize: true,
-    dedupingInterval: 8000,
-    revalidateOnFocus: false,
+    dedupingInterval: 2000,
+    revalidateOnFocus: true,
   });
 
   const { data: gigsData } = useSWR('/api/gigs', fetcher, {
@@ -102,6 +102,8 @@ export default function FeedClient() {
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'peers' | 'gigs'
   const [showPostModal, setShowPostModal] = useState(false);
   const [selectedPostPhoto, setSelectedPostPhoto] = useState(null);
+  const [deletingPostId, setDeletingPostId] = useState(null);
+  const [isDeletingPost, setIsDeletingPost] = useState(false);
 
   // Sentinel ref for infinite scroll
   const observerTarget = useRef(null);
@@ -239,6 +241,24 @@ export default function FeedClient() {
       setShowPostModal(false);
       setPostCaption('');
       setPostFilePreview('');
+
+      // Instantly inject the newly published post into feed cache
+      if (data.post) {
+        mutatePosts((currentPages) => {
+          if (!currentPages || currentPages.length === 0) {
+            return [{ posts: [data.post], hasMore: false, nextCursor: null }];
+          }
+          const firstPage = currentPages[0] || { posts: [] };
+          const existingPosts = (firstPage.posts || []).filter(p => p.id !== data.post.id);
+          return [
+            {
+              ...firstPage,
+              posts: [data.post, ...existingPosts],
+            },
+            ...currentPages.slice(1),
+          ];
+        }, false);
+      }
       mutatePosts();
     } catch {
       toast.error('Network error publishing post');
@@ -247,16 +267,27 @@ export default function FeedClient() {
     }
   };
 
-  const handleDeletePost = async (postId) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+  const confirmDeletePost = async () => {
+    if (!deletingPostId) return;
+    setIsDeletingPost(true);
     try {
-      const res = await fetch(`/api/feed/${postId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/feed/${deletingPostId}`, { method: 'DELETE' });
       const json = await res.json();
       if (!res.ok) { toast.error(json.error || 'Failed to delete post'); return; }
       toast.success('Post deleted successfully');
+      setDeletingPostId(null);
+      mutatePosts((currentPages) => {
+        if (!currentPages) return [];
+        return currentPages.map((page) => ({
+          ...page,
+          posts: (page.posts || []).filter((p) => p.id !== deletingPostId),
+        }));
+      }, false);
       mutatePosts();
     } catch {
-      toast.error('Network error.');
+      toast.error('Network error deleting post.');
+    } finally {
+      setIsDeletingPost(false);
     }
   };
 
@@ -578,8 +609,15 @@ export default function FeedClient() {
                   timeAgo: rawPost.created_at ? new Date(rawPost.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Just now',
                 };
 
-                const isLiked = likedPosts[post.id];
-                const currentLikes = post.likes + (isLiked ? 1 : 0);
+                const initialLiked = Boolean(rawPost.isLiked);
+                const userLikedState = likedPosts[post.id];
+                const isLiked = userLikedState !== undefined ? userLikedState : initialLiked;
+
+                let currentLikes = post.likes;
+                if (userLikedState !== undefined) {
+                  if (userLikedState && !initialLiked) currentLikes = post.likes + 1;
+                  else if (!userLikedState && initialLiked) currentLikes = Math.max(0, post.likes - 1);
+                }
 
                 return (
                   <div
@@ -658,12 +696,18 @@ export default function FeedClient() {
                           {/* Like Button */}
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={async () => {
                               const nextLiked = !isLiked;
                               setLikedPosts((prev) => ({ ...prev, [post.id]: nextLiked }));
 
-                              if (nextLiked) {
-                                fetch(`/api/posts/${post.id}/like`, { method: 'POST' }).catch(() => {});
+                              try {
+                                const res = await fetch(`/api/posts/${post.id}/like`, { method: 'POST' });
+                                if (!res.ok) {
+                                  // Revert on error
+                                  setLikedPosts((prev) => ({ ...prev, [post.id]: isLiked }));
+                                }
+                              } catch {
+                                setLikedPosts((prev) => ({ ...prev, [post.id]: isLiked }));
                               }
                             }}
                             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
@@ -694,9 +738,9 @@ export default function FeedClient() {
                           {post.authorId === currentUser?.id && (
                             <button
                               type="button"
-                              onClick={() => handleDeletePost(post.id)}
+                              onClick={() => setDeletingPostId(post.id)}
                               className="p-1 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors cursor-pointer"
-                              title="Delete"
+                              title="Delete Post"
                             >
                               <X size={14} />
                             </button>
@@ -914,25 +958,51 @@ export default function FeedClient() {
         </div>
       )}
 
-      {/* ── PHOTO FULL SCREEN PREVIEW MODAL ────────────────────── */}
-      {selectedPostPhoto && (
-        <div
-          onClick={() => setSelectedPostPhoto(null)}
-          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 anim-fade-in cursor-pointer"
+      {/* ── DELETE POST CONFIRMATION MODAL ────────────────────── */}
+      {deletingPostId && (
+        <div 
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm anim-fade-in"
+          onClick={() => !isDeletingPost && setDeletingPostId(null)}
         >
-          <div className="relative max-w-2xl w-full bg-zinc-950 rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <img src={selectedPostPhoto.photoUrl} alt="" className="w-full max-h-[70vh] object-contain bg-black" />
-            <div className="p-4 bg-zinc-900 border-t border-zinc-800 flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-black text-white">{selectedPostPhoto.authorName}</h4>
-                <p className="text-xs text-zinc-400">{selectedPostPhoto.caption}</p>
-              </div>
-              <button
+          <div 
+            className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-zinc-100 space-y-4 anim-scale-in"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-black text-zinc-950">Delete Campus Moment?</h3>
+              <button 
                 type="button"
-                onClick={() => setSelectedPostPhoto(null)}
-                className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20"
+                onClick={() => !isDeletingPost && setDeletingPostId(null)}
+                className="p-1 text-zinc-400 hover:text-zinc-600 rounded-full hover:bg-zinc-100 cursor-pointer"
               >
                 <X size={16} />
+              </button>
+            </div>
+
+            <p className="text-xs text-zinc-600 font-medium">
+              Are you sure you want to delete this moment? This cannot be undone.
+            </p>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                disabled={isDeletingPost}
+                onClick={() => setDeletingPostId(null)}
+                className="flex-1 py-2.5 rounded-2xl border border-zinc-200 text-zinc-700 text-xs font-black uppercase tracking-wider hover:bg-zinc-50 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeletingPost}
+                onClick={confirmDeletePost}
+                className="flex-1 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-rose-600/20 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {isDeletingPost ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <span>Delete</span>
+                )}
               </button>
             </div>
           </div>

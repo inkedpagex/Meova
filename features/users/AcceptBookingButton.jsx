@@ -19,7 +19,7 @@ export default function AcceptBookingButton({ booking, className = "" }) {
       });
       const data = await res.json();
       if (data.success || data.ok) {
-        toast.success(`Booking accepted! 🎉`);
+        toast.success('Booking accepted successfully');
         router.refresh();
         router.push('/bookings');
       } else {

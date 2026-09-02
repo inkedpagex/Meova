@@ -4,6 +4,8 @@ import { rateLimit, getClientIp } from '../../../lib/rateLimit';
 import { requireAuth } from '../../../lib/getAdminUser';
 import { sendPushToUser } from '../../../lib/pushNotifications';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const user = await requireAuth();
@@ -38,7 +40,14 @@ export async function GET() {
       }));
 
     const unreadCount = formatted.filter(n => !n.read).length;
-    return NextResponse.json({ notifications: formatted, unreadCount });
+    return NextResponse.json(
+      { notifications: formatted, unreadCount },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        },
+      }
+    );
   } catch (err) {
     console.error('[GET /api/notifications]', err.message);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });

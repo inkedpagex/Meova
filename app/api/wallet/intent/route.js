@@ -23,7 +23,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid spark amount' }, { status: 400 });
     }
 
-    // 1. Fetch active requests for this pack_key
+    // 1. Fetch active decimal allocations
     const { data: activeRequests } = await supabaseAdmin
       .from('payment_requests')
       .select('*')
@@ -32,24 +32,18 @@ export async function POST(request) {
 
     const activeDocs = activeRequests || [];
 
-    // 2. Check user's limit (max 3 total active)
-    const userActive = activeDocs.filter(d => d.user_id === user.uid);
-    if (userActive.length >= 3) {
-      return NextResponse.json({ error: 'Limit of 3 pending requests reached.' }, { status: 400 });
+    // 2. Check user limit on submitted pending requests only (max 3 pending)
+    const userSubmittedPending = activeDocs.filter(d => d.user_id === user.uid && d.status === 'pending');
+    if (userSubmittedPending.length >= 3) {
+      return NextResponse.json({ error: 'Limit of 3 pending verification requests reached. Please wait for review.' }, { status: 400 });
     }
 
-    // Reuse recent intent (< 5 mins old)
-    const fiveMinsAgo = Date.now() - 5 * 60 * 1000;
-    const recentIntent = userActive.find(d => {
-      return d.status === 'payment_intent' && new Date(d.created_at).getTime() > fiveMinsAgo;
-    });
-
-    if (recentIntent) {
-      return NextResponse.json({
-        intentId: recentIntent.id,
-        amount_inr: recentIntent.amount_inr
-      });
-    }
+    // Auto-cleanup previous unsubmitted intent rows for this user
+    await supabaseAdmin
+      .from('payment_requests')
+      .delete()
+      .eq('user_id', user.uid)
+      .eq('status', 'payment_intent');
 
     // 3. Auto-expire stale intents (> 10 mins old)
     const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();

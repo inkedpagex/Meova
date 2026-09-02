@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Info, Zap, Plus, HelpCircle, Loader2, CheckCircle, Download, Copy, Check, X } from 'lucide-react';
 import Skeleton from '../../components/Skeleton';
+import { toast } from '../../lib/toast';
 
 function WalletSkeleton() {
   return (
@@ -111,41 +112,42 @@ export default function WalletPage() {
     return () => window.removeEventListener('wallet-updated', onUpdate);
   }, [loadWallet]);
 
-  const openPaymentModal = async (pack = selectedPack) => {
+  const openPaymentModal = (pack = selectedPack) => {
     if (pendingRequests.length >= 3) {
-      setToast('You have reached the limit of 3 pending payment requests. Please wait for verification.');
+      toast.error('Limit reached: You already have 3 pending payment verification requests.');
       return;
     }
     setSelectedPack(pack);
+    setExactAmountInr(pack.inr);
+    setIsModalOpen(true);
     setIntentLoading(true);
     
-    try {
-      const res = await fetch('/api/wallet/intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sparks: pack.sparks,
-          amount_inr: pack.inr,
-          pack_name: `${pack.sparks} Sparks`,
-          pack_key: pack.key
-        }),
+    fetch('/api/wallet/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sparks: pack.sparks,
+        amount_inr: pack.inr,
+        pack_name: `${pack.sparks} Sparks`,
+        pack_key: pack.key
+      }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.intentId && data.amount_inr) {
+          setIntentId(data.intentId);
+          setExactAmountInr(data.amount_inr);
+        }
+      })
+      .catch((err) => {
+        console.warn('[WalletIntent] fallback to standard pack price:', err);
+      })
+      .finally(() => {
+        setIntentLoading(false);
       });
-      const data = await res.json();
-      if (res.ok) {
-        setIntentId(data.intentId);
-        setExactAmountInr(data.amount_inr);
-        setIsModalOpen(true);
-      } else {
-        setToast(data.error || 'Failed to generate payment intent');
-      }
-    } catch (err) {
-      setToast('Network error');
-    } finally {
-      setIntentLoading(false);
-    }
   };
 
-  const closeModal = async () => {
+  const closeModal = () => {
     setIsModalOpen(false);
   };
 
@@ -162,34 +164,47 @@ export default function WalletPage() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
-    } catch (err) {
+    } catch {
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meova&am=${exactAmountInr}&cu=INR`)}`;
       window.open(qrUrl, '_blank');
     }
   };
 
   const submitPaymentRequest = async () => {
-    if (requestLoading) return; // Guard against double-clicks
+    if (requestLoading) return;
     setRequestLoading(true);
     try {
-      const res = await fetch('/api/wallet/intent', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ intentId }),
-      });
+      let res;
+      if (intentId) {
+        res = await fetch('/api/wallet/intent', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ intentId }),
+        });
+      } else {
+        res = await fetch('/api/wallet/request-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sparks: selectedPack.sparks,
+            amount_inr: exactAmountInr,
+            pack_name: `${selectedPack.sparks} Sparks`,
+            pack_key: selectedPack.key,
+          }),
+        });
+      }
       const data = await res.json();
       if (res.ok) {
-        setToast(`Payment request submitted for ₹${exactAmountInr}. We will verify it shortly.`);
-        loadWallet(); // Reload to show in pending requests
+        toast.success(`Payment request submitted for ₹${exactAmountInr}. Verification in progress.`);
+        loadWallet();
         setIsModalOpen(false);
       } else {
-        setToast(data.error || 'Something went wrong. Try again.');
+        toast.error(data.error || 'Something went wrong. Try again.');
       }
     } catch {
-      setToast('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     } finally {
       setRequestLoading(false);
-      setTimeout(() => setToast(''), 6000);
     }
   };
 
@@ -201,16 +216,14 @@ export default function WalletPage() {
         body: JSON.stringify({ intentId: id }),
       });
       if (res.ok) {
-        setToast('Request cancelled successfully.');
+        toast.success('Request cancelled successfully.');
         loadWallet();
       } else {
         const data = await res.json();
-        setToast(data.error || 'Failed to cancel request.');
+        toast.error(data.error || 'Failed to cancel request.');
       }
-    } catch (err) {
-      setToast('Network error while cancelling.');
-    } finally {
-      setTimeout(() => setToast(''), 4000);
+    } catch {
+      toast.error('Network error while cancelling.');
     }
   };
 
@@ -456,45 +469,85 @@ export default function WalletPage() {
       {isModalOpen && (
         <div 
           onClick={closeModal}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm anim-fade-in cursor-pointer"
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md anim-fade-in cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl w-full max-w-[360px] overflow-hidden shadow-2xl relative cursor-default border border-zinc-100"
+            className="bg-white rounded-3xl w-full max-w-[370px] overflow-hidden shadow-2xl relative cursor-default border border-zinc-100 anim-scale-in"
           >
             <div className="p-6 text-center">
-              <h2 className="text-lg font-black text-zinc-900 mb-1">Pay with UPI</h2>
-              <p className="text-[13px] text-zinc-600 font-medium mb-1">Please pay the <b className="text-[#D94F00]">exact amount</b> below</p>
-              <p className="text-[26px] font-black text-zinc-900 tracking-tight mb-6">₹{exactAmountInr}</p>
-              
-              <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center justify-center mb-6">
-                <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meova&am=${exactAmountInr}&cu=INR`)}`} 
-                  alt="UPI QR Code" 
-                  className="w-[180px] h-[180px] rounded-lg mb-3"
-                />
-                <button 
-                  onClick={downloadQRCode}
-                  className="flex items-center gap-1.5 text-[11px] font-black text-[#F05A00] bg-orange-50 hover:bg-orange-100 px-3.5 py-1.5 rounded-full transition-all cursor-pointer border border-orange-100"
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-base font-black text-zinc-900">Add Sparks via UPI</h2>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="p-1 text-zinc-400 hover:text-zinc-600 rounded-full hover:bg-zinc-100 transition-colors cursor-pointer"
                 >
-                  <Download size={12} />
-                  Download QR Image
+                  <X size={18} />
                 </button>
               </div>
 
-              <div className="bg-orange-50/60 border border-orange-100 rounded-2xl p-4 mb-6 text-left">
+              <p className="text-xs text-zinc-500 font-medium mb-1">
+                Pay the <strong className="text-[#D94F00]">exact amount</strong> below
+              </p>
+              <p className="text-3xl font-black text-zinc-950 tracking-tight mb-4">
+                ₹{exactAmountInr}
+              </p>
+              
+              <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center justify-center mb-4">
+                <div className="w-[180px] h-[180px] bg-white p-2 rounded-xl shadow-xs border border-zinc-200/80 flex items-center justify-center mb-3">
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meova&am=${exactAmountInr}&cu=INR`)}`} 
+                    alt="UPI QR Code" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 w-full">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText('chirag2006chak@oksbi');
+                      toast.success('UPI ID copied to clipboard');
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-black text-zinc-700 bg-white hover:bg-zinc-100 py-2 rounded-xl transition-all cursor-pointer border border-zinc-200 shadow-2xs"
+                  >
+                    <Copy size={12} />
+                    <span>Copy UPI ID</span>
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={downloadQRCode}
+                    className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-black text-[#F05A00] bg-orange-50 hover:bg-orange-100 py-2 rounded-xl transition-all cursor-pointer border border-orange-200"
+                  >
+                    <Download size={12} />
+                    <span>Save QR</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-orange-50/70 border border-orange-100 rounded-2xl p-3 mb-5 text-left flex items-start gap-2">
+                <Info size={14} className="text-[#F05A00] flex-shrink-0 mt-0.5" />
                 <p className="text-[11px] text-[#D94F00] font-bold leading-relaxed">
-                  Please pay the exact amount shown above to verify your payment automatically.
+                  Pay with Google Pay, PhonePe, or Paytm, then tap "I have paid" below.
                 </p>
               </div>
 
-              <div className="flex gap-3">
-                <button onClick={closeModal} disabled={requestLoading}
-                  className="flex-1 py-3.5 rounded-xl font-bold text-xs text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-all">
+              <div className="flex gap-2.5">
+                <button 
+                  type="button"
+                  onClick={closeModal} 
+                  disabled={requestLoading}
+                  className="flex-1 py-3 rounded-2xl font-bold text-xs text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-all cursor-pointer"
+                >
                   Cancel
                 </button>
-                <button onClick={submitPaymentRequest} disabled={requestLoading}
-                  className="flex-1 py-3.5 rounded-xl font-black text-xs text-white bg-[#F05A00] hover:bg-[#D94F00] transition-all flex items-center justify-center gap-2">
+                <button 
+                  type="button"
+                  onClick={submitPaymentRequest} 
+                  disabled={requestLoading}
+                  className="flex-1 py-3 rounded-2xl font-black text-xs text-white bg-[#F05A00] hover:bg-[#D94F00] transition-all flex items-center justify-center gap-2 shadow-md shadow-orange-500/25 cursor-pointer disabled:opacity-60"
+                >
                   {requestLoading ? <Loader2 size={14} className="animate-spin" /> : 'I have paid'}
                 </button>
               </div>
