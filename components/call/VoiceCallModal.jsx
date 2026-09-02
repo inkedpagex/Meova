@@ -6,23 +6,31 @@ import { getUserAvatarUrl } from '../../utils/avatar';
 import { startIncomingRingtone, startOutgoingRingtone, playConnectedSound, stopRingtone } from '../../lib/ringtone';
 import { toast } from '../../lib/toast';
 
-// TURN + STUN — required for audio behind NAT/college WiFi
+// TURN + STUN — required for audio behind NAT / college WiFi
 const ICE_SERVERS = {
   iceServers: [
+    // STUN (public IP discovery)
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    // OpenRelay TURN (correct hostname: openrelay.metered.ca)
     {
-      urls: 'turn:a.relay.metered.ca:80',
+      urls: 'turn:openrelay.metered.ca:80',
       username: 'openrelayproject',
       credential: 'openrelayproject',
     },
     {
-      urls: 'turn:a.relay.metered.ca:443',
+      urls: 'turn:openrelay.metered.ca:80?transport=tcp',
       username: 'openrelayproject',
       credential: 'openrelayproject',
     },
     {
-      urls: 'turn:a.relay.metered.ca:443?transport=tcp',
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
       username: 'openrelayproject',
       credential: 'openrelayproject',
     },
@@ -147,192 +155,209 @@ export default function VoiceCallModal({
     isCancelledRef.current = false;
     pendingCandidatesRef.current = [];
 
-    const pc = new RTCPeerConnection(ICE_SERVERS);
-    pcRef.current = pc;
+    let pc;
+    const offerCreatedRef = { current: false }; // mutex — prevent double offer
 
-    // ── ontrack: remote audio received ──────────────────────────
-    pc.ontrack = (event) => {
-      if (isCancelledRef.current) return;
-      console.log('[WebRTC] ontrack fired, streams:', event.streams?.length);
-      const stream = event.streams?.[0] ?? new MediaStream([event.track]);
-      attachAudio(stream);
-      stopRingtone();
-      playConnectedSound();
-      setCallState('connected');
-    };
-
-    // ── onicecandidate: send to peer ─────────────────────────────
-    pc.onicecandidate = ({ candidate }) => {
-      if (candidate && channel && !isCancelledRef.current) {
-        channel.send({
-          type: 'broadcast',
-          event: 'ice-candidate',
-          payload: { candidate, senderId: currentUserId },
-        }).catch(() => {});
-      }
-    };
-
-    // ── connectionstatechange ────────────────────────────────────
-    pc.onconnectionstatechange = () => {
-      console.log('[WebRTC] connectionState:', pc.connectionState);
-      if (pc.connectionState === 'connected') {
-        // Re-attach audio if ontrack fired before element was ready
-        if (remoteStreamRef.current && remoteAudioRef.current) {
-          attachAudio(remoteStreamRef.current);
+    const initPeerConnection = async () => {
+      // Fetch ICE servers from API
+      let iceConfig = ICE_SERVERS;
+      try {
+        const r = await fetch('/api/calls/ice-servers');
+        if (r.ok) {
+          const d = await r.json();
+          if (d.iceServers?.length > 0) {
+            iceConfig = { iceServers: d.iceServers, iceCandidatePoolSize: 10 };
+          }
         }
+      } catch (e) {
+        console.warn('[ICE] Using fallback config:', e.message);
+      }
+
+      if (isCancelledRef.current) return;
+
+      console.log('[WebRTC] ICE servers loaded:', iceConfig.iceServers.length);
+      pc = new RTCPeerConnection(iceConfig);
+      pcRef.current = pc;
+
+      // ── ontrack ──────────────────────────────────────────────
+      pc.ontrack = (event) => {
+        if (isCancelledRef.current) return;
+        console.log('[WebRTC] ontrack fired');
+        const stream = event.streams?.[0] ?? new MediaStream([event.track]);
+        attachAudio(stream);
         stopRingtone();
         playConnectedSound();
         setCallState('connected');
-      } else if (pc.connectionState === 'failed') {
-        console.error('[WebRTC] Connection failed — check network/TURN');
-        endCall();
-      }
-    };
+      };
 
-    pc.oniceconnectionstatechange = () => {
-      console.log('[WebRTC] iceConnectionState:', pc.iceConnectionState);
-    };
-
-    // ── CALLER FLOW ──────────────────────────────────────────────
-    // Step 1: Get mic, add track, create offer, wait for call-ready then resend
-    const runCaller = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
-        if (isCancelledRef.current) { stream.getTracks().forEach(t => t.stop()); return; }
-        localStreamRef.current = stream;
-        addLocalTrack(stream, pc);
-
-        // Create initial offer
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        console.log('[WebRTC] Caller: offer created, waiting for call-ready');
-      } catch (err) {
-        console.error('[WebRTC] Caller setup failed:', err);
-        toast.error('Microphone permission required');
-        endCall();
-      }
-    };
-
-    // ── RECEIVER FLOW ────────────────────────────────────────────
-    const handleOffer = async (offerSDP) => {
-      try {
-        if (isCancelledRef.current || pc.signalingState === 'closed') return;
-        console.log('[WebRTC] Receiver: got offer, signalingState=', pc.signalingState);
-
-        // Get mic first before setRemoteDescription to ensure tracks are ready
-        if (!localStreamRef.current) {
-          const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
-          if (isCancelledRef.current) { stream.getTracks().forEach(t => t.stop()); return; }
-          localStreamRef.current = stream;
-          addLocalTrack(stream, pc);
-        } else {
-          addLocalTrack(localStreamRef.current, pc);
+      // ── onicecandidate ───────────────────────────────────────
+      pc.onicecandidate = ({ candidate }) => {
+        if (candidate && channel && !isCancelledRef.current) {
+          channel.send({
+            type: 'broadcast',
+            event: 'ice-candidate',
+            payload: { candidate, senderId: currentUserId },
+          }).catch(() => {});
         }
+      };
 
-        // Set remote description (offer) — only if in valid state
-        if (pc.signalingState === 'stable' || pc.signalingState === 'have-local-offer') {
-          // If we already set a local desc (race), rollback first
-          if (pc.signalingState === 'have-local-offer') {
-            await pc.setLocalDescription({ type: 'rollback' });
+      // ── connectionstatechange ────────────────────────────────
+      pc.onconnectionstatechange = () => {
+        console.log('[WebRTC] connectionState:', pc.connectionState);
+        if (pc.connectionState === 'connected') {
+          if (remoteStreamRef.current && remoteAudioRef.current) {
+            attachAudio(remoteStreamRef.current);
           }
-          await pc.setRemoteDescription(new RTCSessionDescription(offerSDP));
-        } else {
-          await pc.setRemoteDescription(new RTCSessionDescription(offerSDP));
+          stopRingtone();
+          playConnectedSound();
+          setCallState('connected');
+        } else if (pc.connectionState === 'failed') {
+          console.error('[WebRTC] Connection failed — ICE failed. Check TURN server.');
+          endCall();
         }
+      };
 
-        await flushPendingCandidates(pc);
+      pc.oniceconnectionstatechange = () => {
+        console.log('[WebRTC] iceState:', pc.iceConnectionState);
+      };
 
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
+      // ── Helper: create & send offer (with mutex) ─────────────
+      const createAndSendOffer = async () => {
+        if (offerCreatedRef.current) {
+          // Offer already exists — just resend it
+          if (pc.localDescription) {
+            console.log('[WebRTC] Caller: resending existing offer');
+            channel.send({
+              type: 'broadcast',
+              event: 'call-offer',
+              payload: { offer: pc.localDescription, callerId: currentUserId, roomId },
+            }).catch(() => {});
+          }
+          return;
+        }
+        if (isCancelledRef.current || pc.signalingState === 'closed') return;
 
-        console.log('[WebRTC] Receiver: answer sent');
-        channel.send({
-          type: 'broadcast',
-          event: 'call-accept',
-          payload: { answer, responderId: currentUserId, roomId },
-        }).catch(() => {});
-      } catch (err) {
-        console.error('[WebRTC] handleOffer error:', err.message);
-      }
-    };
-
-    // ── Signaling event listeners ────────────────────────────────
-
-    // Receiver says "I'm ready" → Caller sends offer
-    channel.on('broadcast', { event: 'call-ready' }, async () => {
-      if (mode !== 'outgoing' || isCancelledRef.current) return;
-      console.log('[WebRTC] Caller: received call-ready, sending offer');
-      if (pc.localDescription) {
-        // Offer already created, resend it
-        channel.send({
-          type: 'broadcast',
-          event: 'call-offer',
-          payload: { offer: pc.localDescription, callerId: currentUserId, roomId },
-        }).catch(() => {});
-      } else {
-        // Offer not ready yet, create it now
+        offerCreatedRef.current = true;
         try {
-          const offer = await pc.createOffer();
+          const offer = await pc.createOffer({ offerToReceiveAudio: true });
+          if (isCancelledRef.current || pc.signalingState === 'closed') return;
           await pc.setLocalDescription(offer);
+          console.log('[WebRTC] Caller: offer created & set, sending...');
           channel.send({
             type: 'broadcast',
             event: 'call-offer',
             payload: { offer: pc.localDescription, callerId: currentUserId, roomId },
           }).catch(() => {});
         } catch (err) {
-          console.error('[WebRTC] Offer on call-ready failed:', err);
+          offerCreatedRef.current = false; // reset so retry is possible
+          console.error('[WebRTC] createOffer error:', err.message);
+        }
+      };
+
+      // ── CALLER: get mic now so it's ready when call-ready arrives ──
+      if (mode === 'outgoing') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
+          if (isCancelledRef.current) { stream.getTracks().forEach(t => t.stop()); return; }
+          localStreamRef.current = stream;
+          addLocalTrack(stream, pc);
+          console.log('[WebRTC] Caller: mic ready, waiting for call-ready signal');
+        } catch (err) {
+          console.error('[WebRTC] Mic error:', err.message);
+          toast.error('Microphone permission required');
+          endCall();
+          return;
         }
       }
-    });
 
-    // Caller receives answer from receiver
-    channel.on('broadcast', { event: 'call-accept' }, async ({ payload }) => {
-      if (mode !== 'outgoing' || !payload?.answer || isCancelledRef.current) return;
-      if (pc.signalingState !== 'have-local-offer') {
-        console.warn('[WebRTC] Ignoring call-accept, signalingState=', pc.signalingState);
-        return;
-      }
-      try {
-        console.log('[WebRTC] Caller: setting remote answer');
-        await pc.setRemoteDescription(new RTCSessionDescription(payload.answer));
-        await flushPendingCandidates(pc);
-        stopRingtone();
-        playConnectedSound();
-        setCallState('connected');
-      } catch (e) {
-        console.error('[WebRTC] set answer error:', e.message);
-      }
-    });
+      // ── RECEIVER: handle offer ────────────────────────────────
+      const handleOffer = async (offerSDP) => {
+        try {
+          if (isCancelledRef.current || pc.signalingState === 'closed') return;
+          console.log('[WebRTC] Receiver: handling offer, state=', pc.signalingState);
 
-    // Receiver gets offer from caller
-    channel.on('broadcast', { event: 'call-offer' }, async ({ payload }) => {
-      if (mode !== 'incoming' || !payload?.offer || isCancelledRef.current) return;
-      console.log('[WebRTC] Receiver: got call-offer');
-      await handleOffer(payload.offer);
-    });
+          if (!localStreamRef.current) {
+            const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
+            if (isCancelledRef.current) { stream.getTracks().forEach(t => t.stop()); return; }
+            localStreamRef.current = stream;
+            addLocalTrack(stream, pc);
+          } else {
+            addLocalTrack(localStreamRef.current, pc);
+          }
 
-    // ICE candidates
-    channel.on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
-      if (payload?.senderId === currentUserId || isCancelledRef.current) return;
-      if (!payload?.candidate) return;
-      if (pc.remoteDescription?.type) {
-        try { await pc.addIceCandidate(new RTCIceCandidate(payload.candidate)); } catch {}
-      } else {
-        pendingCandidatesRef.current.push(payload.candidate);
-      }
-    });
+          if (isCancelledRef.current || pc.signalingState === 'closed') return;
+          await pc.setRemoteDescription(new RTCSessionDescription(offerSDP));
+          await flushPendingCandidates(pc);
 
-    channel.on('broadcast', { event: 'call-reject' }, () => endCall());
-    channel.on('broadcast', { event: 'call-end' }, () => endCall());
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
 
-    channel.on('broadcast', { event: 'peer-mute' }, ({ payload }) => {
-      if (payload?.senderId !== currentUserId) setIsPeerMuted(!!payload.muted);
-    });
+          console.log('[WebRTC] Receiver: answer sent');
+          channel.send({
+            type: 'broadcast',
+            event: 'call-accept',
+            payload: { answer, responderId: currentUserId, roomId },
+          }).catch(() => {});
+        } catch (err) {
+          console.error('[WebRTC] handleOffer error:', err.message);
+        }
+      };
 
-    // Start caller flow
-    if (mode === 'outgoing') {
-      runCaller();
-    }
+      // ── Signaling listeners ───────────────────────────────────
+
+      // call-ready → caller creates/resends offer
+      channel.on('broadcast', { event: 'call-ready' }, async () => {
+        if (mode !== 'outgoing' || isCancelledRef.current) return;
+        console.log('[WebRTC] Caller: call-ready received → createAndSendOffer');
+        await createAndSendOffer();
+      });
+
+      // call-accept → caller sets remote answer
+      channel.on('broadcast', { event: 'call-accept' }, async ({ payload }) => {
+        if (mode !== 'outgoing' || !payload?.answer || isCancelledRef.current) return;
+        const state = pc.signalingState;
+        if (state !== 'have-local-offer') {
+          console.warn('[WebRTC] call-accept ignored, unexpected signalingState=', state);
+          return;
+        }
+        try {
+          console.log('[WebRTC] Caller: setting remote answer');
+          await pc.setRemoteDescription(new RTCSessionDescription(payload.answer));
+          await flushPendingCandidates(pc);
+          stopRingtone();
+          playConnectedSound();
+          setCallState('connected');
+        } catch (e) {
+          console.error('[WebRTC] setRemoteDescription (answer) error:', e.message);
+        }
+      });
+
+      // call-offer → receiver handles it
+      channel.on('broadcast', { event: 'call-offer' }, async ({ payload }) => {
+        if (mode !== 'incoming' || !payload?.offer || isCancelledRef.current) return;
+        console.log('[WebRTC] Receiver: got call-offer');
+        await handleOffer(payload.offer);
+      });
+
+      // ICE candidates
+      channel.on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
+        if (payload?.senderId === currentUserId || isCancelledRef.current || !payload?.candidate) return;
+        if (pc.remoteDescription?.type) {
+          try { await pc.addIceCandidate(new RTCIceCandidate(payload.candidate)); } catch {}
+        } else {
+          pendingCandidatesRef.current.push(payload.candidate);
+        }
+      });
+
+      channel.on('broadcast', { event: 'call-reject' }, () => endCall());
+      channel.on('broadcast', { event: 'call-end' }, () => endCall());
+      channel.on('broadcast', { event: 'peer-mute' }, ({ payload }) => {
+        if (payload?.senderId !== currentUserId) setIsPeerMuted(!!payload.muted);
+      });
+
+    }; // end initPeerConnection
+
+    initPeerConnection();
 
     return () => {
       isCancelledRef.current = true;
