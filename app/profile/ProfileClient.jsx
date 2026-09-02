@@ -90,7 +90,6 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
   // Phone verification
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
-  const [isTestingPush, setIsTestingPush] = useState(false);
   const [phoneInput, setPhoneInput] = useState('');
   const [phoneOtp, setPhoneOtp] = useState('');
   const [phoneStep, setPhoneStep] = useState('input'); // 'input' | 'otp'
@@ -169,50 +168,6 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
       } catch (err) {
         console.warn('Notification permission error:', err);
       }
-    }
-  };
-
-  const handleTestPush = async () => {
-    if (isTestingPush) return;
-    setIsTestingPush(true);
-    try {
-      // 1. Register push token if not registered
-      if (profile?.id) {
-        const { registerPushToken } = await import('../../lib/useFCM');
-        await registerPushToken(profile.id);
-      }
-
-      // 2. Immediate local Service Worker notification
-      if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-        const reg = await navigator.serviceWorker.ready;
-        if (reg && reg.showNotification) {
-          reg.showNotification('Meova Campus Life', {
-            body: 'Push notifications are active and ready on your device!',
-            icon: '/notif-icon.png',
-            badge: '/badge.png',
-            vibrate: [150, 80, 150],
-            tag: `test-push-${Date.now()}`,
-            data: { url: '/profile' },
-            actions: [
-              { action: 'open', title: 'Open Meova' },
-            ],
-          });
-        }
-      }
-
-      // 3. Dispatch backend Web Push
-      await fetch('/api/notifications/test-push', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: profile?.id }),
-      });
-
-      toast.success('Test notification sent!');
-    } catch (err) {
-      console.warn('Test push error:', err);
-      toast.error('Failed to send test push');
-    } finally {
-      setIsTestingPush(false);
     }
   };
 
@@ -744,17 +699,9 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                       </div>
                     </div>
                     {notifStatus === 'granted' ? (
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={handleTestPush}
-                          disabled={isTestingPush}
-                          className="text-[9px] font-black text-[#F05A00] bg-orange-50 hover:bg-orange-100 disabled:opacity-50 border border-orange-200 px-2.5 py-1 rounded-lg uppercase tracking-wider transition-colors active:scale-95 cursor-pointer flex items-center gap-1"
-                        >
-                          {isTestingPush ? 'Sending...' : 'Test Push'}
-                        </button>
-                        <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Enabled</span>
-                      </div>
+                      <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100">
+                        <Check size={12} /> Enabled
+                      </span>
                     ) : notifStatus === 'denied' ? (
                       <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (

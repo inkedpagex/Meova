@@ -72,15 +72,34 @@ export const metadata = {
     locale: 'en_IN',
     url: 'https://meova.in',
     siteName: 'Meova',
-    title: 'Meova — Campus Social & Meetup Platform',
-    description: 'Connect with college peers, book 1-on-1 study & coffee meetups, earn Sparks on campus gigs, and join student circles on Meova.',
-    images: [{ url: '/icon-512.png', width: 512, height: 512, alt: 'Meova Campus Logo' }],
+    title: 'Meova — #1 Campus Social & Student Meetup Platform | GLA University',
+    description: 'Connect with GLA University peers, book verified 1-on-1 coffee meets, and join student circles on Meova.',
+    images: [
+      {
+        url: 'https://meova.in/og-image.png',
+        secureUrl: 'https://meova.in/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Meova — GLA University Campus Social & Meetup Platform',
+        type: 'image/png',
+      },
+      {
+        url: 'https://meova.in/icon-512.png',
+        secureUrl: 'https://meova.in/icon-512.png',
+        width: 512,
+        height: 512,
+        alt: 'Meova Campus Logo',
+        type: 'image/png',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Meova — Campus Social & Meetup Platform',
-    description: 'Connect with college peers, book 1-on-1 study & coffee meetups, earn Sparks on campus gigs, and join student circles on Meova.',
-    images: ['/icon-512.png'],
+    site: '@meovaapp',
+    creator: '@meovaapp',
+    title: 'Meova — #1 Campus Social & Student Meetup Platform | GLA University',
+    description: 'Connect with GLA University peers, book verified 1-on-1 coffee meets, and join student circles on Meova.',
+    images: ['https://meova.in/og-image.png'],
   },
   icons: {
     icon: [
@@ -169,11 +188,30 @@ export default async function RootLayout({ children }) {
           <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
           <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
           <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+          <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
           <link rel="preconnect" href="https://dvqsosbeh.supabase.co" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://dvqsosbeh.supabase.co" />
           <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://res.cloudinary.com" />
           <link rel="preconnect" href="https://api.dicebear.com" crossOrigin="anonymous" />
+          
+          {/* ── Open Graph & Social Share Preview Meta Tags (WhatsApp, Telegram, Twitter, LinkedIn) ── */}
+          <meta property="og:type" content="website" />
+          <meta property="og:site_name" content="Meova" />
+          <meta property="og:url" content="https://meova.in" />
+          <meta property="og:title" content="Meova — #1 Campus Social & Student Meetup Platform | GLA University" />
+          <meta property="og:description" content="Connect with GLA University peers, book verified 1-on-1 coffee meets, and join student circles on Meova." />
+          <meta property="og:image" content="https://meova.in/og-image.png" />
+          <meta property="og:image:secure_url" content="https://meova.in/og-image.png" />
+          <meta property="og:image:type" content="image/png" />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content="Meova — GLA University Campus Social Network" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:site" content="@meovaapp" />
+          <meta name="twitter:title" content="Meova — #1 Campus Social & Student Meetup Platform | GLA University" />
+          <meta name="twitter:description" content="Connect with GLA University peers, book verified 1-on-1 coffee meets, and join student circles on Meova." />
+          <meta name="twitter:image" content="https://meova.in/og-image.png" />
           
           {/* ── Google Search Rich Snippets & Sitelinks Structured Data (JSON-LD) ── */}
           <script
