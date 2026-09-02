@@ -10,7 +10,6 @@ import {
 import useSWR from 'swr';
 import { useUserContext } from '../../components/providers/UserProvider';
 import { getCartoonAvatar, getUserAvatarUrl } from '../../utils/avatar';
-import confetti from 'canvas-confetti';
 import { useCampusPresence } from '../../lib/useCampusPresence';
 import Skeleton from '../../components/Skeleton';
 import BookCoffeeButton from '../../features/users/BookCoffeeButton';
@@ -164,7 +163,6 @@ export default function DiscoverClient() {
   }, [currentUser, contextPeople, usersData]);
 
   const handleConnect = async (person) => {
-    confetti({ particleCount: 40, spread: 40, origin: { y: 0.6 } });
     setConnectedIds(prev => new Set([...prev, person.id]));
     try {
       const res = await fetch('/api/chats', {
@@ -419,7 +417,7 @@ export default function DiscoverClient() {
   };
 
   return (
-    <div className="space-y-5 pt-[68px] md:pt-4 px-4 max-w-[640px] mx-auto pb-24">
+    <div className="space-y-5 pt-2 px-4 max-w-[640px] mx-auto pb-20">
       {/* Search */}
       <div className="relative">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400" />

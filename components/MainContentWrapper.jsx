@@ -70,7 +70,7 @@ export default function MainContentWrapper({ children }) {
         className={`w-full mx-auto ${
           isMessagesPath 
             ? 'p-0 md:p-6 md:!pt-8 md:!pb-6 max-w-full' 
-            : 'max-w-4xl lg:max-w-5xl px-2 sm:px-4 md:px-8 pt-16 md:!pt-8 pb-16 md:!pb-6 pb-safe'
+            : 'max-w-4xl lg:max-w-5xl px-2 sm:px-4 md:px-8 pt-[62px] md:!pt-4 pb-16 md:!pb-6 pb-safe'
         }`}
       >
         {children}

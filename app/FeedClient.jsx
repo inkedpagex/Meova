@@ -14,7 +14,6 @@ import useSWRInfinite from 'swr/infinite';
 import imageCompression from 'browser-image-compression';
 import { useUserContext } from '../components/providers/UserProvider';
 import { supabase } from '../lib/supabase/client';
-import confetti from 'canvas-confetti';
 import { toast } from '../lib/toast';
 import { getUserAvatarUrl, getCartoonAvatar } from '@/utils/avatar';
 import { optimizeCloudinaryUrl, optimizeAvatarUrl } from '@/utils/imageOptimizer';
@@ -314,7 +313,30 @@ export default function FeedClient() {
       )}
 
       {/* ── 1. CAMPUS STORIES (INSTAGRAM / BEREAL STYLE) ────────── */}
-      <div className="bg-white border border-zinc-200/80 rounded-3xl p-3 shadow-xs">
+      <div className="bg-white border border-zinc-200/80 rounded-3xl p-3.5 shadow-xs space-y-2.5">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-800">
+              Campus Stories
+            </span>
+            <span className="text-[10px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
+              {campusPeers.length || 0} Online
+            </span>
+          </div>
+          <Link
+            href="/discover"
+            prefetch={true}
+            className="text-[11px] font-black text-[#F05A00] hover:text-[#D94F00] transition-colors flex items-center gap-0.5 active:scale-95"
+          >
+            <span>Explore</span>
+            <ChevronRight size={13} strokeWidth={2.5} />
+          </Link>
+        </div>
+
         <div className="flex gap-3.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 scroll-smooth">
           
           {/* User's Story Button */}
@@ -430,70 +452,92 @@ export default function FeedClient() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5">
-            {campusPeers.slice(0, 20).map((peer) => {
-              const cleanYr = (peer.year || '1st').toString().replace(/\s*year\s*/i, '').trim();
-              const cleanBranch = (peer.branch || 'CSE').replace(/COMPUTER SCIENCE/i, 'CSE');
-
-              return (
+          {campusPeers.length === 0 ? (
+            <div className="bg-white rounded-3xl border border-zinc-200/80 p-7 text-center space-y-3.5 shadow-xs">
+              <div className="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 text-[#F05A00] flex items-center justify-center mx-auto shadow-2xs">
+                <Users size={24} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-black text-zinc-950">No Active Peers Right Now</h3>
+                <p className="text-xs text-zinc-500 font-medium max-w-xs mx-auto leading-relaxed">
+                  Discover classmates across different branches, years, and skills on campus!
+                </p>
+              </div>
+              <div className="pt-1">
                 <Link
-                  key={peer.id}
-                  href={`/users/${peer.id}`}
-                  prefetch={true}
-                  className="bg-white border border-zinc-200/80 hover:border-orange-300 rounded-3xl p-3.5 flex flex-col items-center text-center shadow-xs hover:shadow-md transition-all cursor-pointer group"
+                  href="/discover"
+                  className="px-5 py-2.5 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white text-xs font-black shadow-md shadow-orange-500/20 active:scale-95 transition-all inline-flex items-center gap-1.5"
                 >
-                  <div className="relative w-14 h-14 rounded-full p-[1.5px] bg-gradient-to-tr from-[#F05A00] to-amber-400 mb-2 group-hover:scale-105 transition-transform">
-                    <div className="w-full h-full rounded-full overflow-hidden bg-white">
-                      <img
-                        src={optimizeAvatarUrl(getUserAvatarUrl(peer))}
-                        alt=""
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = getCartoonAvatar(peer.full_name || 'user');
-                        }}
+                  <Search size={13} />
+                  <span>Explore Discover</span>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2.5">
+              {campusPeers.slice(0, 20).map((peer) => {
+                const cleanYr = (peer.year || '1st').toString().replace(/\s*year\s*/i, '').trim();
+                const cleanBranch = (peer.branch || 'CSE').replace(/COMPUTER SCIENCE/i, 'CSE');
+
+                return (
+                  <Link
+                    key={peer.id}
+                    href={`/users/${peer.id}`}
+                    prefetch={true}
+                    className="bg-white border border-zinc-200/80 hover:border-orange-300 rounded-3xl p-3.5 flex flex-col items-center text-center shadow-xs hover:shadow-md transition-all cursor-pointer group"
+                  >
+                    <div className="relative w-14 h-14 rounded-full p-[1.5px] bg-gradient-to-tr from-[#F05A00] to-amber-400 mb-2 group-hover:scale-105 transition-transform">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-white">
+                        <img
+                          src={optimizeAvatarUrl(getUserAvatarUrl(peer))}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = getCartoonAvatar(peer.full_name || 'user');
+                          }}
+                        />
+                      </div>
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
+                    </div>
+
+                    <h4 className="text-xs font-black text-zinc-950 truncate max-w-full group-hover:text-[#F05A00]">
+                      {peer.full_name}
+                    </h4>
+                    <span className="text-[9.5px] font-bold text-[#F05A00] bg-orange-50 px-2 py-0.5 rounded-full mt-0.5 truncate max-w-full">
+                      {cleanYr} Yr · {cleanBranch}
+                    </span>
+
+                    <div className="w-full mt-3">
+                      <BookCoffeeButton
+                        targetUserId={peer.id}
+                        targetName={peer.full_name}
+                        targetPhoto={getUserAvatarUrl(peer)}
+                        isLoggedIn={!!currentUser}
+                        accentColor="#F05A00"
+                        renderButton={({ onClick }) => (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              onClick(e);
+                            }}
+                            className="w-full py-1.5 rounded-xl bg-[#F05A00] text-white text-[10.5px] font-black flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
+                          >
+                            <span>Meet {peer.spark_charge || 25}</span>
+                            <Zap size={10} className="fill-current" />
+                          </button>
+                        )}
                       />
                     </div>
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
-                  </div>
-
-                  <h4 className="text-xs font-black text-zinc-950 truncate max-w-full group-hover:text-[#F05A00]">
-                    {peer.full_name}
-                  </h4>
-                  <span className="text-[9.5px] font-bold text-[#F05A00] bg-orange-50 px-2 py-0.5 rounded-full mt-0.5 truncate max-w-full">
-                    {cleanYr} Yr · {cleanBranch}
-                  </span>
-
-                  <div className="w-full mt-3">
-                    <BookCoffeeButton
-                      targetUserId={peer.id}
-                      targetName={peer.full_name}
-                      targetPhoto={getUserAvatarUrl(peer)}
-                      isLoggedIn={!!currentUser}
-                      accentColor="#F05A00"
-                      renderButton={({ onClick }) => (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } });
-                            onClick(e);
-                          }}
-                          className="w-full py-1.5 rounded-xl bg-[#F05A00] text-white text-[10.5px] font-black flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
-                        >
-                          <span>Meet {peer.spark_charge || 25}</span>
-                          <Zap size={10} className="fill-current" />
-                        </button>
-                      )}
-                    />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -619,7 +663,6 @@ export default function FeedClient() {
                               setLikedPosts((prev) => ({ ...prev, [post.id]: nextLiked }));
 
                               if (nextLiked) {
-                                confetti({ particleCount: 40, spread: 50, origin: { y: 0.65 } });
                                 fetch(`/api/posts/${post.id}/like`, { method: 'POST' }).catch(() => {});
                               }
                             }}
@@ -719,40 +762,69 @@ export default function FeedClient() {
             </Link>
           </div>
 
-          {gigs.map((gig) => (
-            <div
-              key={gig.id}
-              onClick={() => router.push('/gigs')}
-              className="bg-white border border-zinc-200/80 hover:border-orange-300 rounded-3xl p-4.5 shadow-xs transition-all duration-200 cursor-pointer space-y-2.5 group"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[9.5px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-orange-50 text-[#F05A00] border border-orange-200">
-                  {gig.category}
-                </span>
-                <span className="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
-                  {gig.budget} <Zap size={11} className="fill-current text-amber-500" />
-                </span>
+          {gigs.length === 0 ? (
+            <div className="bg-white rounded-3xl border border-zinc-200/80 p-7 text-center space-y-3.5 shadow-xs">
+              <div className="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 text-[#F05A00] flex items-center justify-center mx-auto shadow-2xs">
+                <Briefcase size={24} />
               </div>
-
-              <div>
-                <h4 className="text-xs sm:text-sm font-black text-zinc-950 group-hover:text-[#F05A00] transition-colors">
-                  {gig.title}
-                </h4>
-                <p className="text-xs text-zinc-500 font-medium line-clamp-2 mt-1 leading-relaxed">
-                  {gig.desc}
+              <div className="space-y-1">
+                <h3 className="text-sm font-black text-zinc-950">No Campus Gigs Active Yet</h3>
+                <p className="text-xs text-zinc-500 font-medium max-w-xs mx-auto leading-relaxed">
+                  Be the first student to post a task, project, or freelance gig on campus and earn Sparks!
                 </p>
               </div>
-
-              <div className="flex items-center justify-between border-t border-zinc-100 pt-2.5">
-                <span className="text-[11px] font-bold text-zinc-400">
-                  by {gig.company} · {gig.duration}
-                </span>
-                <span className="text-xs font-black text-[#F05A00] flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
-                  Apply Now <ChevronRight size={12} strokeWidth={3} />
-                </span>
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <Link
+                  href="/gigs?action=post"
+                  className="px-5 py-2.5 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white text-xs font-black shadow-md shadow-orange-500/20 active:scale-95 transition-all inline-flex items-center gap-1.5"
+                >
+                  <Plus size={13} />
+                  <span>Post a Gig</span>
+                </Link>
+                <Link
+                  href="/gigs"
+                  className="px-4 py-2.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-black active:scale-95 transition-all inline-flex items-center gap-1"
+                >
+                  <span>Browse Gigs</span>
+                </Link>
               </div>
             </div>
-          ))}
+          ) : (
+            gigs.map((gig) => (
+              <div
+                key={gig.id}
+                onClick={() => router.push('/gigs')}
+                className="bg-white border border-zinc-200/80 hover:border-orange-300 rounded-3xl p-4.5 shadow-xs transition-all duration-200 cursor-pointer space-y-2.5 group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[9.5px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-orange-50 text-[#F05A00] border border-orange-200">
+                    {gig.category}
+                  </span>
+                  <span className="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+                    {gig.budget} <Zap size={11} className="fill-current text-amber-500" />
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="text-xs sm:text-sm font-black text-zinc-950 group-hover:text-[#F05A00] transition-colors">
+                    {gig.title}
+                  </h4>
+                  <p className="text-xs text-zinc-500 font-medium line-clamp-2 mt-1 leading-relaxed">
+                    {gig.desc}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-zinc-100 pt-2.5">
+                  <span className="text-[11px] font-bold text-zinc-400">
+                    by {gig.company} · {gig.duration}
+                  </span>
+                  <span className="text-xs font-black text-[#F05A00] flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                    Apply Now <ChevronRight size={12} strokeWidth={3} />
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       )}
 

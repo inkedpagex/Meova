@@ -120,20 +120,20 @@ function Step1({ data, onChange, onNext }) {
   const canNext = data.full_name.trim() && data.username && usernameStatus === 'ok' && data.photo_url && data.gender;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Set your identity</h2>
-        <p className="text-sm text-zinc-400 mt-1 font-medium">How the campus will know you</p>
+        <h2 className="text-xl font-black text-zinc-950 tracking-tight">Set your identity</h2>
+        <p className="text-xs text-zinc-400 font-medium">How other students will see you on campus</p>
       </div>
 
       {/* Photo Upload */}
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-zinc-50 border border-zinc-200/80">
         <div
           onClick={() => !uploading && fileRef.current?.click()}
-          className={`relative w-24 h-24 rounded-3xl overflow-hidden group transition-all hover:scale-105 active:scale-95 bg-orange-50/50 ${
+          className={`relative w-16 h-16 rounded-2xl overflow-hidden group transition-all hover:scale-105 active:scale-95 shrink-0 bg-white ${
             uploading ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'
           }`}
-          style={{ border: data.photo_url ? '3px solid #F05A00' : '2px dashed #fed7aa' }}
+          style={{ border: data.photo_url ? '2.5px solid #F05A00' : '2px dashed #fed7aa' }}
         >
           {data.photo_url ? (
             <img 
@@ -144,94 +144,89 @@ function Step1({ data, onChange, onNext }) {
               onError={() => onChange('photo_url', '')}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-              <Camera size={24} className="text-[#F05A00]"/>
+            <div className="w-full h-full flex flex-col items-center justify-center text-[#F05A00]">
+              <Camera size={20} />
             </div>
           )}
 
-          {/* In-box glassmorphic upload loader */}
+          {/* In-box upload loader */}
           {uploading && (
-            <div className="absolute inset-0 bg-black/65 backdrop-blur-xs flex flex-col items-center justify-center gap-1 z-20 text-white animate-in fade-in duration-200">
-              <Loader2 size={24} className="text-[#F05A00] animate-spin" />
-              <span className="text-[9px] font-extrabold uppercase tracking-wider text-white/90 text-center px-1">
-                {uploadStage || 'Uploading'}
-              </span>
-            </div>
-          )}
-
-          {!uploading && (
-            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Camera size={20} className="text-white"/>
+            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-1 z-20 text-white">
+              <Loader2 size={16} className="text-[#F05A00] animate-spin" />
             </div>
           )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} disabled={uploading}/>
-        <div className="text-center">
-          {uploading ? (
-            <p className="text-xs font-bold text-[#F05A00] flex items-center justify-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#F05A00] animate-ping" />
-              <span>{uploadStage || 'Uploading...'}</span>
-            </p>
-          ) : (
-            <>
-              <p className="text-xs font-bold text-zinc-700">{data.photo_url ? 'Tap to change' : 'Upload profile photo'}</p>
-              <p className="text-[10px] text-zinc-400 mt-0.5">Required · Max 8MB</p>
-            </>
-          )}
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-black text-zinc-900 truncate">
+            {data.photo_url ? 'Profile Photo Added' : 'Upload Profile Photo *'}
+          </p>
+          <button
+            type="button"
+            onClick={() => !uploading && fileRef.current?.click()}
+            className="text-[11px] font-black text-[#F05A00] hover:underline mt-0.5 block"
+          >
+            {uploading ? (uploadStage || 'Uploading...') : (data.photo_url ? 'Tap to change photo' : 'Choose photo from gallery')}
+          </button>
+          {uploadErr && <p className="text-[10px] text-rose-500 font-bold mt-0.5">{uploadErr}</p>}
         </div>
-        {uploadErr && <p className="text-[11px] text-red-500 font-semibold">{uploadErr}</p>}
       </div>
 
       {/* Full Name */}
       <div>
-        <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">Full Name *</label>
+        <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-600 mb-1">
+          Full Name *
+        </label>
         <div className="relative">
-          <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"/>
+          <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"/>
           <input
-            type="text" value={data.full_name}
+            type="text" 
+            value={data.full_name}
             onChange={e => onChange('full_name', e.target.value)}
             placeholder="e.g. Chirag Sharma"
-            className="w-full pl-10 pr-4 py-3.5 rounded-2xl border-2 text-sm font-medium outline-none transition-all"
-            style={{ borderColor: data.full_name ? '#F05A00' : '#e5e7eb', background: '#fafafa', color: '#111' }}
+            className="w-full pl-10 pr-3.5 py-2.5 sm:py-3 rounded-xl border border-zinc-200 text-xs font-bold outline-none transition-all focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 focus:bg-white text-zinc-950"
           />
         </div>
       </div>
 
       {/* Username */}
       <div>
-        <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">Username *</label>
+        <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-600 mb-1">
+          Username *
+        </label>
         <div className="relative">
-          <AtSign size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"/>
+          <AtSign size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"/>
           <input
-            type="text" value={data.username} maxLength={20}
+            type="text" 
+            value={data.username} 
+            maxLength={20}
             onChange={handleUsernameChange}
             placeholder="chirag_04"
-            className="w-full pl-10 pr-10 py-3.5 rounded-2xl border-2 text-sm font-medium outline-none transition-all"
+            className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl border border-zinc-200 text-xs font-bold outline-none transition-all focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 focus:bg-white text-zinc-950"
             style={{
-              borderColor: usernameStatus === 'ok' ? '#10b981' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#f43f5e' : data.username ? '#F05A00' : '#e5e7eb',
-              background: '#fafafa', color: '#111'
+              borderColor: usernameStatus === 'ok' ? '#10b981' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#f43f5e' : undefined,
             }}
           />
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-            {usernameStatus === 'checking' && <Loader2 size={16} className="text-zinc-400 animate-spin"/>}
-            {usernameStatus === 'ok' && <CheckCircle2 size={16} className="text-emerald-500"/>}
-            {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <XCircle size={16} className="text-rose-500"/>}
+            {usernameStatus === 'checking' && <Loader2 size={15} className="text-zinc-400 animate-spin"/>}
+            {usernameStatus === 'ok' && <CheckCircle2 size={15} className="text-emerald-500"/>}
+            {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <XCircle size={15} className="text-rose-500"/>}
           </div>
         </div>
         {usernameMsg && (
-          <p suppressHydrationWarning className={`text-[11px] font-semibold mt-1.5 ${usernameStatus === 'ok' ? 'text-emerald-600' : 'text-rose-500'}`}>
+          <p suppressHydrationWarning className={`text-[10.5px] font-bold mt-1 ${usernameStatus === 'ok' ? 'text-emerald-600' : 'text-rose-500'}`}>
             {usernameMsg}
           </p>
         )}
-        <p suppressHydrationWarning className="text-[10px] text-zinc-400 mt-1">Start with a letter · at least 2 numbers (e.g. chirag_04) · 5-20 chars</p>
+        <p suppressHydrationWarning className="text-[9.5px] text-zinc-400 mt-0.5">Start with a letter · 2+ digits (e.g. chirag_04)</p>
       </div>
 
       {/* Gender Selection */}
       <div>
-        <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">
-          Gender * <span className="text-zinc-400 font-medium normal-case tracking-normal">(Private)</span>
+        <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-600 mb-1">
+          Gender * <span className="text-zinc-400 font-medium normal-case">(Private)</span>
         </label>
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-3 gap-2">
           {[
             { id: 'male', label: 'Male' },
             { id: 'female', label: 'Female' },
@@ -241,10 +236,10 @@ function Step1({ data, onChange, onNext }) {
               key={g.id}
               type="button"
               onClick={() => onChange('gender', g.id)}
-              className={`py-3 px-2 rounded-2xl border-2 text-xs font-black transition-all cursor-pointer ${
+              className={`py-2 px-2 rounded-xl border text-xs font-black transition-all cursor-pointer ${
                 data.gender === g.id
-                  ? 'border-[#F05A00] bg-orange-50/50 text-[#F05A00] shadow-xs'
-                  : 'border-zinc-200 bg-zinc-50/50 text-zinc-600 hover:border-zinc-300'
+                  ? 'border-[#F05A00] bg-orange-50 text-[#F05A00] shadow-xs'
+                  : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-zinc-300'
               }`}
             >
               {g.label}
@@ -254,11 +249,14 @@ function Step1({ data, onChange, onNext }) {
       </div>
 
       <button
-        onClick={onNext} disabled={!canNext}
-        className="w-full py-4 rounded-2xl font-black text-sm text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        style={{ background: canNext ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canNext ? '#fff' : '#9ca3af', boxShadow: canNext ? '0 8px 24px rgba(240,90,0,0.25)' : 'none' }}
+        type="button"
+        onClick={onNext} 
+        disabled={!canNext}
+        className="w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 mt-2"
+        style={{ background: canNext ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canNext ? '#fff' : '#9ca3af' }}
       >
-        Continue <ArrowRight size={16}/>
+        <span>Continue to Academic Info</span>
+        <ArrowRight size={14}/>
       </button>
     </div>
   );

@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Star, X, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { toast } from '../lib/toast';
 import { getCartoonAvatar } from '../utils/avatar';
 
@@ -96,7 +95,6 @@ export default function RatingReviewModal({
       }
 
       setSubmitted(true);
-      confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
       toast.success('Thank you for rating!');
 
       // Store in localStorage as well to immediately reflect on the UI

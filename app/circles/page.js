@@ -39,7 +39,7 @@ export default async function CirclesPage() {
   }
 
   return (
-    <div className="w-full max-w-[640px] mx-auto pt-[68px] md:pt-6 pb-24 anim-fade-in px-0">
+    <div className="w-full max-w-[640px] mx-auto pt-2 pb-20 anim-fade-in px-0">
       <CirclesList circles={circles} joinedCircleIds={joinedCircleIds} userId={user?.id} />
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Search, ShieldAlert, GraduationCap, Sparkles, UserCheck, Loader2, Ban, CheckCircle2, Star, Award } from 'lucide-react';
+import { Search, ShieldAlert, GraduationCap, Sparkles, UserCheck, Loader2, Ban, CheckCircle2, Star, Award, Trash2, X, AlertTriangle } from 'lucide-react';
 
 const ROLES = [
   { value: 'user', label: 'Student (Normal)', icon: GraduationCap },
@@ -16,6 +16,8 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [updatingId, setUpdatingId] = useState(null);
   const [blockingId, setBlockingId] = useState(null);
+  const [deletingUser, setDeletingUser] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadUsers = useCallback(async () => {
     try {
@@ -77,6 +79,30 @@ export default function AdminUsersPage() {
       alert('Network error while toggling block status');
     } finally {
       setBlockingId(null);
+    }
+  }
+
+  async function confirmDeleteUser() {
+    if (!deletingUser) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetUid: deletingUser.id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUsers(prev => prev.filter(u => u.id !== deletingUser.id));
+        setDeletingUser(null);
+        alert(data.message || 'User deleted successfully.');
+      } else {
+        alert(data.error || 'Failed to delete user.');
+      }
+    } catch {
+      alert('Network error while deleting user.');
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -268,40 +294,118 @@ export default function AdminUsersPage() {
                     </span>
                   </div>
 
-                  {/* Block / Unblock Button or Protected Badge */}
+                  {/* Block / Unblock & Delete Actions */}
                   {isUserAdmin || (u.email || '').toLowerCase() === 'chirag2006chak@gmail.com' ? (
                     <span className="text-[10.5px] font-extrabold text-[#D94F00] bg-[#fcf6fa] px-2.5 py-1.5 rounded-lg border border-[#eac5e0] flex items-center gap-1 select-none">
                       <ShieldAlert size={12} /> Protected Admin
                     </span>
                   ) : (
-                    <button
-                      onClick={() => handleToggleBlock(u.id, isBlocked)}
-                      disabled={blockingId === u.id}
-                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold border transition-all cursor-pointer shadow-2xs ${
-                        isBlocked
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                          : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
-                      }`}
-                    >
-                      {blockingId === u.id ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : isBlocked ? (
-                        <>
-                          <CheckCircle2 size={12} />
-                          <span>Unblock</span>
-                        </>
-                      ) : (
-                        <>
-                          <Ban size={12} />
-                          <span>Block</span>
-                        </>
-                      )}
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleBlock(u.id, isBlocked)}
+                        disabled={blockingId === u.id}
+                        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold border transition-all cursor-pointer shadow-2xs ${
+                          isBlocked
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                        }`}
+                        title={isBlocked ? 'Unblock user' : 'Block user'}
+                      >
+                        {blockingId === u.id ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : isBlocked ? (
+                          <>
+                            <CheckCircle2 size={12} />
+                            <span>Unblock</span>
+                          </>
+                        ) : (
+                          <>
+                            <Ban size={12} />
+                            <span>Block</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setDeletingUser(u)}
+                        className="flex items-center gap-1 p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-lg transition-all cursor-pointer"
+                        title="Permanently Delete User & All Data"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* ── DELETE USER CONFIRMATION MODAL ── */}
+      {deletingUser && (
+        <div 
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm anim-fade-in"
+          onClick={() => !isDeleting && setDeletingUser(null)}
+        >
+          <div 
+            className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4 anim-scale-in"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-black border border-rose-100">
+                  <AlertTriangle size={20} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-950">Delete User Account?</h3>
+                  <p className="text-[11px] font-semibold text-slate-400">Irreversible Action</p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => !isDeleting && setDeletingUser(null)}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-rose-50/60 border border-rose-200 text-xs space-y-1 text-rose-900 font-semibold leading-relaxed">
+              <p className="font-bold">Are you sure you want to permanently delete this student?</p>
+              <p className="text-[11px] text-rose-700">
+                • <strong className="font-black">{deletingUser.full_name || 'Student'}</strong> ({deletingUser.email})
+              </p>
+              <p className="text-[10.5px] text-rose-600 pt-1">
+                All their posts, moments, applications, gigs, reviews, chat history, and wallet records will be permanently purged from database & auth.
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setDeletingUser(null)}
+                className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-wider hover:bg-slate-50 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={confirmDeleteUser}
+                className="flex-1 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-rose-600/25 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <><Loader2 size={13} className="animate-spin" /> Purging...</>
+                ) : (
+                  <><Trash2 size={13} /> Delete Forever</>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

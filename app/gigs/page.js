@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Search, Briefcase, CheckCircle2, Plus, X, Sparkles, Users, Zap
+  Search, Briefcase, CheckCircle2, Plus, X, Sparkles, Users, Zap,
+  ArrowRight, ArrowLeft, Clock, Palette, Code, FileText, Camera, Video, Music, BookOpen, Layers
 } from 'lucide-react';
 import { toast } from '../../lib/toast';
 import useSWR from 'swr';
@@ -34,6 +35,7 @@ export default function CampusGigsPage() {
 
   // Create gig modal state
   const [showModal, setShowModal] = useState(false);
+  const [modalStep, setModalStep] = useState(1); // 1 = Basics, 2 = Rewards & Scope
   const [gigTitle, setGigTitle] = useState('');
   const [gigCompany, setGigCompany] = useState('');
   const [gigCategory, setGigCategory] = useState('Design');
@@ -132,9 +134,9 @@ export default function CampusGigsPage() {
   });
 
   return (
-    <div className="anim-fade-in w-full max-w-4xl mx-auto space-y-6 pt-[68px] md:pt-6 pb-16 px-4">
+    <div className="anim-fade-in w-full max-w-4xl mx-auto space-y-6 pt-2 pb-16 px-4">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200/80 pb-5 pt-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200/80 pb-5 pt-2">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl md:text-3xl font-black text-zinc-950 tracking-tight">Campus Gigs</h1>
@@ -359,57 +361,269 @@ export default function CampusGigsPage() {
         </div>
       )}
 
-      {/* ── POST A GIG MODAL ── */}
+      {/* ── POST A GIG MULTI-STEP MOBILE-FIRST MODAL ── */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }} onClick={() => setShowModal(false)}>
-          <div className="w-full max-w-md bg-white rounded-2xl p-6 space-y-4 shadow-2xl border border-zinc-100 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-              <div>
-                <h3 className="text-sm font-black text-zinc-900">Post a Campus Gig</h3>
-                <p className="text-[10px] font-semibold text-zinc-400">Hire student freelancers & creators</p>
-              </div>
-              <button onClick={() => setShowModal(false)} className="p-1 rounded-full text-zinc-400 hover:bg-zinc-100 cursor-pointer"><X size={16} /></button>
+        <div 
+          className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-md anim-fade-in"
+          onClick={() => { setShowModal(false); setModalStep(1); }}
+        >
+          <div 
+            className="w-full max-w-lg bg-white rounded-t-3xl md:rounded-3xl shadow-2xl border border-zinc-100 max-h-[92dvh] flex flex-col overflow-hidden anim-slide-up md:anim-scale-in"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Mobile Drag Pill */}
+            <div className="md:hidden pt-3 pb-1 flex justify-center">
+              <div className="w-10 h-1 rounded-full bg-zinc-200" />
             </div>
-            <form noValidate onSubmit={handleCreateGig} className="space-y-3.5">
-              <div>
-                <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Gig Title</label>
-                <input type="text" required value={gigTitle} onChange={e => setGigTitle(e.target.value)} placeholder="e.g. Figma Designer for Campus Startup App" className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-extrabold text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50" />
-              </div>
-              <div>
-                <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Host / Club Name</label>
-                <input type="text" value={gigCompany} onChange={e => setGigCompany(e.target.value)} placeholder="e.g. Coding Club or Your Name" className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50" />
-              </div>
-              <div>
-                <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1.5">Category</label>
-                <div className="flex gap-2 flex-wrap">
-                  {['Design', 'Development', 'Writing', 'Marketing', 'Photography', 'Video/Reels', 'Music', 'Research', 'Craft/Art'].map(cat => (
-                    <button key={cat} type="button" onClick={() => setGigCategory(cat)} className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all border cursor-pointer ${gigCategory === cat ? 'bg-[#F05A00] text-white border-[#F05A00]' : 'bg-zinc-50 border-zinc-200 text-zinc-600'}`}>
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Reward (Sparks)</label>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" value={gigBudget} onChange={handleBudgetChange} placeholder="300" className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-black text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50" />
+
+            {/* Header */}
+            <div className="px-5 pt-3 pb-3.5 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-orange-50 border border-orange-100 text-[#F05A00] flex items-center justify-center shadow-2xs font-black">
+                  <Briefcase size={17} />
                 </div>
                 <div>
-                  <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Duration</label>
-                  <input type="text" value={gigDuration} onChange={e => setGigDuration(e.target.value)} placeholder="3 Days" className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50" />
+                  <h3 className="text-sm font-black text-zinc-950 leading-tight">Post a Campus Gig</h3>
+                  <p className="text-[11px] font-bold text-zinc-400">
+                    Step {modalStep} of 2: {modalStep === 1 ? 'Gig Basics' : 'Rewards & Scope'}
+                  </p>
                 </div>
               </div>
-              <div>
-                <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1">Description</label>
-                <textarea required value={gigDesc} onChange={e => setGigDesc(e.target.value)} placeholder="Describe tasks, deliverables, and skill requirements…" className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50 min-h-[80px]" />
-              </div>
-              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3 flex items-center gap-2">
-                <Zap size={14} className="fill-amber-500 text-amber-500 flex-shrink-0" />
-                <p className="text-[11px] text-amber-800 font-bold">{gigBudget || '0'} Sparks will be held in escrow when you accept an applicant.</p>
-              </div>
-              <button type="submit" disabled={isSubmitting} className="w-full py-3.5 rounded-2xl text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] shadow-md transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50">
-                <Sparkles size={15} />{isSubmitting ? 'Publishing…' : 'Publish Gig to Campus'}
+              <button 
+                type="button"
+                onClick={() => { setShowModal(false); setModalStep(1); }}
+                className="p-1.5 rounded-full text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200/60 cursor-pointer transition-colors"
+              >
+                <X size={17} />
               </button>
+            </div>
+
+            {/* Step Progress Bar */}
+            <div className="w-full bg-zinc-100 h-1 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-[#F05A00] to-amber-500 transition-all duration-300 ease-out"
+                style={{ width: modalStep === 1 ? '50%' : '100%' }}
+              />
+            </div>
+
+            {/* Form Scroll Body */}
+            <form noValidate onSubmit={handleCreateGig} className="flex-1 overflow-y-auto p-5 space-y-4">
+              
+              {/* ── STEP 1: BASICS ── */}
+              {modalStep === 1 && (
+                <div className="space-y-4 anim-fade-in">
+                  {/* Gig Title */}
+                  <div>
+                    <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700 block mb-1.5">
+                      Gig Title *
+                    </label>
+                    <input 
+                      type="text" 
+                      required 
+                      autoFocus
+                      value={gigTitle} 
+                      onChange={e => setGigTitle(e.target.value)} 
+                      placeholder="e.g. Figma Designer for Campus App UI" 
+                      className="w-full px-3.5 py-3 rounded-2xl border border-zinc-200 text-xs font-bold text-zinc-950 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 placeholder-zinc-400 transition-all" 
+                    />
+                  </div>
+
+                  {/* Horizontal Scrollable Category Pills */}
+                  <div>
+                    <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700 block mb-1.5">
+                      Category
+                    </label>
+                    <div className="flex gap-2 overflow-x-auto pb-2 pt-0.5 -mx-1 px-1 select-none" style={{ scrollbarWidth: 'none' }}>
+                      {[
+                        { name: 'Design', icon: Palette },
+                        { name: 'Development', icon: Code },
+                        { name: 'Writing', icon: FileText },
+                        { name: 'Marketing', icon: Sparkles },
+                        { name: 'Photography', icon: Camera },
+                        { name: 'Video/Reels', icon: Video },
+                        { name: 'Music', icon: Music },
+                        { name: 'Research', icon: BookOpen },
+                        { name: 'Craft/Art', icon: Layers },
+                      ].map(cat => {
+                        const IconComp = cat.icon;
+                        const isSelected = gigCategory === cat.name;
+                        return (
+                          <button
+                            key={cat.name}
+                            type="button"
+                            onClick={() => setGigCategory(cat.name)}
+                            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border whitespace-nowrap cursor-pointer shrink-0 active:scale-95 ${
+                              isSelected
+                                ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-md shadow-orange-500/20'
+                                : 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
+                            }`}
+                          >
+                            <IconComp size={13} className={isSelected ? 'text-white' : 'text-zinc-400'} />
+                            <span>{cat.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Host / Club Name */}
+                  <div>
+                    <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700 block mb-1.5">
+                      Host / Club Name
+                    </label>
+                    <input 
+                      type="text" 
+                      value={gigCompany} 
+                      onChange={e => setGigCompany(e.target.value)} 
+                      placeholder={user?.full_name || 'e.g. Coding Club or Your Name'} 
+                      className="w-full px-3.5 py-3 rounded-2xl border border-zinc-200 text-xs font-bold text-zinc-900 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 placeholder-zinc-400 transition-all" 
+                    />
+                    <p className="text-[10.5px] font-semibold text-zinc-400 mt-1">
+                      Students will see who is offering this gig.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── STEP 2: REWARDS & SCOPE ── */}
+              {modalStep === 2 && (
+                <div className="space-y-4 anim-fade-in">
+                  {/* Reward (Sparks) with quick presets */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700">
+                        Reward (Sparks) *
+                      </label>
+                      <span className="text-[10.5px] font-black text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Zap size={10} className="fill-amber-500 text-amber-500" />
+                        <span>Wallet: {(wallet?.purchased || 0) + (wallet?.bonus || 0) + (wallet?.creator || 0)}</span>
+                      </span>
+                    </div>
+
+                    <div className="flex gap-1.5 mb-2">
+                      {['150', '300', '500', '1000'].map(val => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setGigBudget(val)}
+                          className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all border cursor-pointer ${
+                            gigBudget === val
+                              ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                              : 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100'
+                          }`}
+                        >
+                          {val} ⚡
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="relative">
+                      <input 
+                        type="text" 
+                        inputMode="numeric" 
+                        pattern="[0-9]*" 
+                        value={gigBudget} 
+                        onChange={handleBudgetChange} 
+                        placeholder="Custom amount (e.g. 350)" 
+                        className="w-full px-3.5 py-3 pl-9 rounded-2xl border border-zinc-200 text-xs font-black text-zinc-950 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50" 
+                      />
+                      <Zap size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 fill-amber-500" />
+                    </div>
+                  </div>
+
+                  {/* Duration with quick presets */}
+                  <div>
+                    <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700 block mb-1.5">
+                      Estimated Duration
+                    </label>
+                    <div className="flex gap-1.5 mb-2">
+                      {['24 Hours', '3 Days', '1 Week', 'Flexible'].map(dur => (
+                        <button
+                          key={dur}
+                          type="button"
+                          onClick={() => setGigDuration(dur)}
+                          className={`flex-1 py-1.5 rounded-xl text-[11px] font-black transition-all border cursor-pointer whitespace-nowrap ${
+                            gigDuration === dur
+                              ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-xs'
+                              : 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100'
+                          }`}
+                        >
+                          {dur}
+                        </button>
+                      ))}
+                    </div>
+                    <input 
+                      type="text" 
+                      value={gigDuration} 
+                      onChange={e => setGigDuration(e.target.value)} 
+                      placeholder="e.g. 3 Days" 
+                      className="w-full px-3.5 py-2.5 rounded-2xl border border-zinc-200 text-xs font-bold text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50" 
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700 block mb-1.5">
+                      Task Description *
+                    </label>
+                    <textarea 
+                      required 
+                      value={gigDesc} 
+                      onChange={e => setGigDesc(e.target.value)} 
+                      placeholder="Describe what deliverables are needed, skills required, or any helpful context…" 
+                      rows={3}
+                      className="w-full p-3.5 rounded-2xl border border-zinc-200 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 resize-none placeholder-zinc-400" 
+                    />
+                  </div>
+
+                  {/* Escrow Badge */}
+                  <div className="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-3 flex items-start gap-2.5 text-amber-900">
+                    <Zap size={15} className="fill-amber-500 text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-[11px] font-bold leading-relaxed">
+                      <span className="font-black">{gigBudget || '0'} Sparks</span> will be held safely in escrow only when you accept a student applicant.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── STICKY BOTTOM BUTTONS ── */}
+              <div className="pt-2 border-t border-zinc-100 flex items-center gap-2.5">
+                {modalStep === 2 ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setModalStep(1)}
+                      className="px-4 py-3.5 rounded-2xl border border-zinc-200 text-zinc-700 text-xs font-black uppercase tracking-wider hover:bg-zinc-50 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <ArrowLeft size={14} />
+                      <span>Back</span>
+                    </button>
+                    <button 
+                      type="submit" 
+                      disabled={isSubmitting || !gigTitle.trim() || !gigDesc.trim()} 
+                      className="flex-1 py-3.5 rounded-2xl text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] shadow-lg shadow-orange-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50"
+                    >
+                      <Sparkles size={15} />
+                      <span>{isSubmitting ? 'Publishing…' : 'Publish to Campus'}</span>
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!gigTitle.trim()) {
+                        toast.error('Please enter a gig title to continue.');
+                        return;
+                      }
+                      setModalStep(2);
+                    }}
+                    className="w-full py-3.5 rounded-2xl text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] shadow-lg shadow-orange-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer"
+                  >
+                    <span>Continue to Rewards & Scope</span>
+                    <ArrowRight size={14} />
+                  </button>
+                )}
+              </div>
             </form>
           </div>
         </div>

@@ -379,7 +379,42 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
 
       {/* Community cards list */}
       <div className="space-y-3">
-        {displayed.map(circle => {
+        {displayed.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-zinc-200/80 p-8 text-center space-y-3.5 shadow-xs">
+            <div className="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 text-[#F05A00] flex items-center justify-center mx-auto shadow-2xs">
+              <Users size={24} />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-black text-zinc-950">No Communities Found</h3>
+              <p className="text-xs text-zinc-500 font-medium max-w-xs mx-auto leading-relaxed">
+                {search || selectedCategory !== 'All' 
+                  ? 'No circles match your current search or filter. Try a different term!' 
+                  : 'Be the first student to create a campus circle or community!'}
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2 pt-1">
+              {search || selectedCategory !== 'All' ? (
+                <button
+                  type="button"
+                  onClick={() => { setSearch(''); setSelectedCategory('All'); }}
+                  className="px-5 py-2.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-black active:scale-95 transition-all cursor-pointer"
+                >
+                  Clear Filters
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(true)}
+                  className="px-5 py-2.5 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white text-xs font-black shadow-md shadow-orange-500/20 active:scale-95 transition-all cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <Rocket size={13} />
+                  <span>Create Circle</span>
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          displayed.map(circle => {
           const isJoined = joinedMap[circle.id];
           const isHost = circle.host_id && circle.host_id === userId;
           const CategoryIcon = CATEGORY_ICONS[circle.category] || CATEGORY_ICONS.default;
@@ -505,17 +540,9 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
               </div>
             </div>
           );
-        })}
-      </div>
-
-      {displayed.length === 0 && (
-        <div className="text-center py-16">
-          <Users size={28} className="mx-auto mb-3 text-zinc-300" />
-          <p className="text-sm font-bold text-zinc-400">No communities found</p>
-          <button onClick={() => { setSearch(''); setActiveFilter('All'); }}
-            className="mt-3 text-[11px] font-black text-[#F05A00] cursor-pointer">Clear filters</button>
-        </div>
+        })
       )}
+      </div>
 
       {/* ── CREATE COMMUNITY MODAL ────────────────────────── */}
       <CreateCircleModal

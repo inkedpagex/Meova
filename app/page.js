@@ -30,7 +30,7 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="w-full max-w-[640px] mx-auto anim-fade-in pt-[68px] md:pt-6 pb-24 px-4">
+    <div className="w-full max-w-[640px] mx-auto anim-fade-in pt-2 pb-20 px-2 sm:px-4">
       {/* ── DYNAMIC INFINITE FEED CLIENT ─────────────────── */}
       <FeedClient />
     </div>
