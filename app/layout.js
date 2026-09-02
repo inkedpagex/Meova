@@ -154,9 +154,13 @@ export default async function RootLayout({ children }) {
           <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
           <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
           <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
-          <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link rel="preconnect" href="https://dvqsosbeh.supabase.co" crossOrigin="anonymous" />
+          <link rel="dns-prefetch" href="https://dvqsosbeh.supabase.co" />
+          <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+          <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+          <link rel="preconnect" href="https://api.dicebear.com" crossOrigin="anonymous" />
           <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800" rel="stylesheet" />
           
           {/* ── Google Search Rich Snippets & Sitelinks Structured Data (JSON-LD) ── */}

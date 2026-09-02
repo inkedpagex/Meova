@@ -2,9 +2,10 @@
 // Strategy: Network-first for API routes, Cache-first for static assets
 // FCM & WebPush: Background push notifications support with dynamic category theming
 
-const CACHE_VERSION = '2026-09-02T10:45'; // ← updated on deploy
+const CACHE_VERSION = '2026-09-02T10:55'; // ← updated on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
+  '/',
   '/manifest.json',
   '/icon-512.png',
   '/icon-192.png',
@@ -172,14 +173,40 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigation / Page routes: Network-first, offline fallback
+  // Navigation / Page routes: Instant Stale-While-Revalidate with offline fallback
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(async () => {
-        const cached = await caches.match(request);
-        if (cached) return cached;
-        return caches.match('/offline');
-      })
+      (async () => {
+        try {
+          // 1. Check if cached shell exists
+          const cachedResponse = await caches.match(request);
+          if (cachedResponse) {
+            // Revalidate in background to keep data fresh
+            fetch(request)
+              .then(async (networkRes) => {
+                if (networkRes && networkRes.ok) {
+                  const cache = await caches.open(CACHE_NAME);
+                  cache.put(request, networkRes.clone());
+                }
+              })
+              .catch(() => {});
+            return cachedResponse;
+          }
+
+          // 2. If no cache yet, fetch from network and store in cache
+          const networkResponse = await fetch(request);
+          if (networkResponse && networkResponse.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch (error) {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          return caches.match('/offline');
+        }
+      })()
     );
+    return;
   }
 });
