@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import { GraduationCap, Building2, BookOpen, PenLine, AtSign, ArrowRight, ArrowLeft, ChevronDown } from 'lucide-react';
+import UniversitySelector from '../../components/UniversitySelector';
 
 const YEARS = ['1st', '2nd', '3rd', '4th', '5th'];
 
@@ -128,16 +129,11 @@ export function Step2({ data, onChange, onNext, onBack }) {
         <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-600 mb-1">
           University / College
         </label>
-        <div className="relative">
-          <Building2 size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"/>
-          <input
-            type="text" 
-            value={data.university}
-            onChange={e => onChange('university', e.target.value)}
-            placeholder="e.g. GLA University, Mathura"
-            className="w-full pl-10 pr-3.5 py-2.5 sm:py-3 rounded-xl border border-zinc-200 text-xs font-bold outline-none transition-all focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 focus:bg-white text-zinc-950"
-          />
-        </div>
+        <UniversitySelector
+          value={data.university}
+          onChange={(val) => onChange('university', val)}
+          placeholder="Search college (e.g. GLA University, IIT, DU...)"
+        />
       </div>
 
       {/* Bio */}

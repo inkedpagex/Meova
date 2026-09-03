@@ -7,6 +7,7 @@ import {
 import { Linkedin, Github, Instagram } from '../../components/ui/SocialIcons';
 import { useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
+import UniversitySelector from '../../components/UniversitySelector';
 
 const INTEREST_TAGS = [
   'Coding & Tech', 'Music & Bands', 'Dance', 'Photography & Film',
@@ -39,6 +40,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   const [fullName, setFullName] = useState(initialProfile?.full_name || '');
   const [year, setYear] = useState(initialProfile?.year?.replace(/\s+Year$/i, '') || '1st');
   const [branch, setBranch] = useState(initialProfile?.branch || '');
+  const [university, setUniversity] = useState(initialProfile?.university || 'GLA University, Mathura');
   const [instagram, setInstagram] = useState(initialProfile?.instagram || '');
   const [linkedin, setLinkedin] = useState(initialProfile?.linkedin || '');
   const [github, setGithub] = useState(initialProfile?.github || '');
@@ -168,6 +170,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         full_name: fullName.trim(),
         year,
         branch: branch.trim(),
+        university: (university || 'GLA University, Mathura').trim(),
         bio: bio.trim(),
         interests: selectedInterests,
         instagram: cleanInstagram,
@@ -189,6 +192,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
           full_name: fullName.trim(),
           year,
           branch: branch.trim(),
+          university: (university || 'GLA University, Mathura').trim(),
           bio: bio.trim(),
           interests: selectedInterests,
           instagram: cleanInstagram,
@@ -331,6 +335,16 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* University / College */}
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">University / College *</label>
+            <UniversitySelector
+              value={university}
+              onChange={(val) => setUniversity(val)}
+              placeholder="Search campus..."
+            />
+          </div>
+
           {/* Year of Study */}
           <div className="relative" ref={yearDropdownRef}>
             <label className="block text-xs font-semibold text-zinc-700 mb-1.5">Year of Study *</label>
@@ -367,29 +381,29 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
               </div>
             )}
           </div>
+        </div>
 
-          {/* Meetup Hourly Rate */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
-              Meetup Rate <span className="text-zinc-400 font-normal">(Sparks / Hour)</span>
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#F05A00]">
-                <Zap size={16} className="fill-current" />
-              </span>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={rate}
-                onChange={(e) => setRate(e.target.value.replace(/[^0-9]/g, ''))}
-                placeholder="100"
-                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
-                required
-              />
-            </div>
-            <p className="text-[11px] text-zinc-400 mt-1 font-medium">10 - 500 Sparks for 1-on-1 sessions</p>
+        {/* Meetup Hourly Rate */}
+        <div>
+          <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
+            Meetup Rate <span className="text-zinc-400 font-normal">(Sparks / Hour)</span>
+          </label>
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#F05A00]">
+              <Zap size={16} className="fill-current" />
+            </span>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={rate}
+              onChange={(e) => setRate(e.target.value.replace(/[^0-9]/g, ''))}
+              placeholder="100"
+              className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+              required
+            />
           </div>
+          <p className="text-[11px] text-zinc-400 mt-1 font-medium">10 - 500 Sparks for 1-on-1 sessions</p>
         </div>
 
         {/* Bio */}

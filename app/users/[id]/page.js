@@ -7,7 +7,7 @@ import {
   ArrowLeft, GraduationCap, Users, Star,
   Code, Music, Dumbbell, Camera, Rocket, Palette, Gamepad2,
   BookOpen, Coffee, MessageCircle, Zap, Calendar, MapPin,
-  CheckCircle, Layers, Heart
+  CheckCircle, Layers, Heart, Building2
 } from 'lucide-react';
 import { Linkedin, Github } from '../../../components/ui/SocialIcons';
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
@@ -215,6 +215,11 @@ export default async function UserProfilePage({ params }) {
           <p className="text-xs font-bold text-[#F05A00] flex items-center gap-1">
             <GraduationCap className="w-3.5 h-3.5" />
             {profile.year || '1st'} Year · {profile.branch || 'General'}
+          </p>
+
+          <p className="text-[11px] font-bold text-zinc-500 flex items-center gap-1">
+            <Building2 className="w-3 h-3 text-zinc-400" />
+            <span>{profile.university || 'GLA University, Mathura'}</span>
           </p>
 
           <p className="text-xs text-zinc-700 font-medium leading-relaxed pt-1 whitespace-pre-line">

@@ -460,6 +460,13 @@ function MessagesContent() {
     if (!targetParam || !currentUid || loadingChats) return;
     if (initialProcessedRef.current) return;
 
+    if (targetParam === currentUid) {
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '/messages');
+      }
+      return;
+    }
+
     initialProcessedRef.current = true;
 
     const existingById = chats.find(c => c.id === targetParam);

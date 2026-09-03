@@ -2,7 +2,7 @@
 // Strategy: Network-first for API routes, Cache-first for static assets
 // FCM & WebPush: Background push notifications support with dynamic category theming
 
-const CACHE_VERSION = '2026-09-02T19:43'; // ← updated on deploy
+const CACHE_VERSION = '2026-09-03T09:18'; // ← updated on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
@@ -136,9 +136,10 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests and browser extensions
+  // Skip non-GET requests, browser extensions, and localhost development (prevents HMR reload loops)
   if (request.method !== 'GET') return;
   if (!url.protocol.startsWith('http')) return;
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return;
 
   // Never cache API routes, auth endpoints, or Supabase calls
   if (

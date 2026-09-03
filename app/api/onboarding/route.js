@@ -97,6 +97,7 @@ export async function POST(request) {
       gender,
       year: cleanYear,
       branch: branch.trim(),
+      university: (university || 'GLA University, Mathura').trim(),
       bio: bio?.trim() || '',
       interests: interests || [],
       instagram: instagram?.trim() || '',

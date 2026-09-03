@@ -11,7 +11,7 @@ const INITIAL = {
   photo_url: '',
   year: '',
   branch: '',
-  university: '',
+  university: 'GLA University, Mathura',
   bio: '',
   instagram: '',
   interests: [],

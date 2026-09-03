@@ -7,7 +7,7 @@ import Skeleton from '../components/Skeleton';
 import {
   Heart, MessageCircle, Share2, Plus, Sparkles, Zap,
   Camera, X, Loader2, Send, MapPin, Search, ChevronRight,
-  Briefcase, Users, MessageSquare, ArrowUpRight, ArrowUp
+  Briefcase, Users, ArrowUpRight, ArrowUp
 } from 'lucide-react';
 import useSWR from 'swr';
 import useSWRInfinite from 'swr/infinite';
@@ -106,12 +106,46 @@ export default function FeedClient() {
   const [newIncomingPostsCount, setNewIncomingPostsCount] = useState(0);
 
   const [likedPosts, setLikedPosts] = useState({});
+  const [animatingHearts, setAnimatingHearts] = useState({});
+  const [floatingHearts, setFloatingHearts] = useState({});
+  const lastTapRef = useRef({});
   const likingPostIdsRef = useRef(new Set());
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'peers' | 'gigs'
   const [showPostModal, setShowPostModal] = useState(false);
   const [selectedPostPhoto, setSelectedPostPhoto] = useState(null);
   const [deletingPostId, setDeletingPostId] = useState(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
+
+  // Instant 0ms Optimistic Like Handler
+  const handleToggleLike = useCallback(async (postId, currentLikedState, forceLike = false) => {
+    if (forceLike && currentLikedState) {
+      setFloatingHearts((prev) => ({ ...prev, [postId]: true }));
+      setTimeout(() => setFloatingHearts((prev) => ({ ...prev, [postId]: false })), 800);
+      return;
+    }
+
+    const nextLiked = forceLike ? true : !currentLikedState;
+
+    // 1. Instant 0ms UI update
+    setLikedPosts((prev) => ({ ...prev, [postId]: nextLiked }));
+    setAnimatingHearts((prev) => ({ ...prev, [postId]: true }));
+    setTimeout(() => setAnimatingHearts((prev) => ({ ...prev, [postId]: false })), 350);
+
+    if (forceLike) {
+      setFloatingHearts((prev) => ({ ...prev, [postId]: true }));
+      setTimeout(() => setFloatingHearts((prev) => ({ ...prev, [postId]: false })), 800);
+    }
+
+    // 2. Non-blocking background sync
+    try {
+      const res = await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+      if (!res.ok) {
+        setLikedPosts((prev) => ({ ...prev, [postId]: currentLikedState }));
+      }
+    } catch {
+      setLikedPosts((prev) => ({ ...prev, [postId]: currentLikedState }));
+    }
+  }, []);
 
   // Sentinel ref for infinite scroll
   const observerTarget = useRef(null);
@@ -638,6 +672,8 @@ export default function FeedClient() {
                   else if (!userLikedState && initialLiked) currentLikes = Math.max(0, post.likes - 1);
                 }
 
+                const isOwnPost = currentUser && (post.authorId === currentUser.id || post.authorId === currentUser.uid);
+
                 return (
                   <div
                     key={post.id}
@@ -647,7 +683,10 @@ export default function FeedClient() {
                     {/* Post Header */}
                     <div className="flex items-center justify-between p-3.5 pb-2.5">
                       <div
-                        onClick={() => post.authorId && router.push(`/users/${post.authorId}`)}
+                        onClick={() => {
+                          if (isOwnPost) router.push('/profile');
+                          else if (post.authorId) router.push(`/users/${post.authorId}`);
+                        }}
                         className="flex items-center gap-2.5 cursor-pointer group"
                       >
                         <div className="w-9 h-9 rounded-full overflow-hidden bg-zinc-100 ring-2 ring-[#F05A00]/20 flex-shrink-0">
@@ -678,25 +717,47 @@ export default function FeedClient() {
                         </div>
                       </div>
 
-                      {/* Quick Message CTA */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (post.authorId) router.push(`/messages?uid=${post.authorId}`);
-                          else router.push('/messages');
-                        }}
-                        className="text-[11px] font-black text-[#F05A00] hover:text-white bg-orange-50 hover:bg-[#F05A00] border border-orange-200 px-3 py-1 rounded-full transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1"
-                      >
-                        <MessageCircle size={12} />
-                        <span>Message</span>
-                      </button>
+                      {/* Quick Message CTA (hidden on own posts) */}
+                      {isOwnPost ? (
+                        <span className="text-[10px] font-black text-zinc-400 bg-zinc-100 px-2.5 py-1 rounded-full border border-zinc-200/60">
+                          You
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (post.authorId) router.push(`/messages?uid=${post.authorId}`);
+                            else router.push('/messages');
+                          }}
+                          className="text-[11px] font-black text-[#F05A00] hover:text-white bg-orange-50 hover:bg-[#F05A00] border border-orange-200 px-3 py-1 rounded-full transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1"
+                        >
+                          <MessageCircle size={12} />
+                          <span>Message</span>
+                        </button>
+                      )}
                     </div>
 
-                    {/* Photo Container */}
+                    {/* Photo Container with Double Tap to Like */}
                     {post.photoUrl && (
                       <div
-                        onClick={() => setSelectedPostPhoto(post)}
-                        className="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-zinc-950 overflow-hidden cursor-pointer"
+                        onClick={() => {
+                          const now = Date.now();
+                          const lastTap = lastTapRef.current[post.id] || 0;
+                          if (now - lastTap < 300) {
+                            // Double Tap detected: trigger instant heart burst + like
+                            handleToggleLike(post.id, isLiked, true);
+                            lastTapRef.current[post.id] = 0;
+                          } else {
+                            lastTapRef.current[post.id] = now;
+                            // Open preview on single tap if no second tap within 300ms
+                            setTimeout(() => {
+                              if (Date.now() - (lastTapRef.current[post.id] || 0) >= 290 && lastTapRef.current[post.id] !== 0) {
+                                setSelectedPostPhoto(post);
+                              }
+                            }, 300);
+                          }
+                        }}
+                        className="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-zinc-950 overflow-hidden cursor-pointer select-none"
                       >
                         <img
                           src={optimizeCloudinaryUrl(post.photoUrl, { width: 900 })}
@@ -705,6 +766,19 @@ export default function FeedClient() {
                           loading="lazy"
                           decoding="async"
                         />
+
+                        {/* Floating Instagram-style Heart Burst */}
+                        {floatingHearts[post.id] && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                            <Heart
+                              size={80}
+                              className="fill-rose-500 text-white drop-shadow-2xl animate-in zoom-in-50 fade-in duration-200"
+                              style={{
+                                filter: 'drop-shadow(0 10px 25px rgba(244,63,94,0.65))',
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -712,51 +786,26 @@ export default function FeedClient() {
                     <div className="p-3.5 pt-2.5 space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          {/* Like Button */}
+                          {/* Instant 0ms Like Button */}
                           <button
                             type="button"
-                            onClick={async () => {
-                              if (likingPostIdsRef.current.has(post.id)) return;
-                              likingPostIdsRef.current.add(post.id);
-
-                              const nextLiked = !isLiked;
-                              setLikedPosts((prev) => ({ ...prev, [post.id]: nextLiked }));
-
-                              try {
-                                const res = await fetch(`/api/posts/${post.id}/like`, { method: 'POST' });
-                                if (!res.ok) {
-                                  // Revert on error
-                                  setLikedPosts((prev) => ({ ...prev, [post.id]: isLiked }));
-                                }
-                              } catch {
-                                setLikedPosts((prev) => ({ ...prev, [post.id]: isLiked }));
-                              } finally {
-                                setTimeout(() => {
-                                  likingPostIdsRef.current.delete(post.id);
-                                }, 500);
-                              }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleLike(post.id, isLiked);
                             }}
-                            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer select-none active:scale-90 ${
                               isLiked
-                                ? 'bg-rose-50 text-rose-600 border border-rose-200'
-                                : 'bg-zinc-100 text-zinc-600 hover:bg-rose-50 hover:text-rose-600'
+                                ? 'bg-rose-50 text-rose-600 border border-rose-200 shadow-2xs'
+                                : 'bg-zinc-100 text-zinc-600 hover:bg-rose-50 hover:text-rose-600 border border-transparent'
                             }`}
                           >
-                            <Heart size={13} className={isLiked ? 'fill-current text-rose-600' : ''} />
-                            <span>{currentLikes}</span>
-                          </button>
-
-                          {/* Direct Chat */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (post.authorId) router.push(`/messages?uid=${post.authorId}`);
-                              else router.push('/messages');
-                            }}
-                            className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition-all cursor-pointer"
-                          >
-                            <MessageSquare size={13} />
-                            <span>Chat</span>
+                            <Heart
+                              size={14}
+                              className={`transition-transform duration-150 ${
+                                isLiked ? 'fill-current text-rose-600' : 'text-zinc-600'
+                              } ${animatingHearts[post.id] ? 'scale-130' : 'scale-100'}`}
+                            />
+                            <span className="tabular-nums font-black">{currentLikes}</span>
                           </button>
                         </div>
 
