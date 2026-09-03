@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Skeleton from '../components/Skeleton';
 import {
-  Heart, MessageCircle, Share2, Plus, Sparkles, Zap,
+  Heart, MessageCircle, MessageSquare, Share2, Plus, Sparkles, Zap,
   Camera, X, Loader2, Send, MapPin, Search, ChevronRight,
   Briefcase, Users, ArrowUpRight, ArrowUp, MoreHorizontal, Trash2, Copy,
   ShieldAlert, ShieldCheck
