@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, Volume1, Loader2, Lock } from 'lucide-react';
+import { Phone, PhoneOff, Mic, MicOff, Volume2, Volume1, Loader2, Lock } from '@/lib/icons';
 import { getUserAvatarUrl } from '../../utils/avatar';
 import { startIncomingRingtone, startOutgoingRingtone, playConnectedSound, stopRingtone } from '../../lib/ringtone';
 import { toast } from '../../lib/toast';

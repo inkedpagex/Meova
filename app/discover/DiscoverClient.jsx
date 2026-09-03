@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Search, Check, MapPin, Zap, Coffee, BookOpen, Activity,
   Star, AlertTriangle, X, MessageSquare, Calendar
-} from 'lucide-react';
+} from '@/lib/icons';
 import useSWR from 'swr';
 import { useUserContext } from '../../components/providers/UserProvider';
 import { getCartoonAvatar, getUserAvatarUrl } from '../../utils/avatar';
@@ -183,10 +183,10 @@ export default function DiscoverClient() {
 
   const chip = (label) => (
     <button key={label} onClick={() => setActiveFilter(label)}
-      className="flex-shrink-0 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
+      className="flex-shrink-0 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 shadow-xs"
       style={activeFilter === label
-        ? { background: 'linear-gradient(to right, #F05A00, #F05A00)', color: '#ffffff', border: '1px solid transparent' }
-        : { background: '#f0f0f3', color: '#71717a', border: '1px solid #e4e4e7' }}>
+        ? { background: '#F05A00', color: '#ffffff', border: '1px solid #F05A00' }
+        : { background: '#ffffff', color: '#171717', border: '1px solid rgba(0, 0, 0, 0.12)' }}>
       {label}
     </button>
   );
@@ -279,7 +279,7 @@ export default function DiscoverClient() {
                   key={person.id}
                   href={`/users/${person.id}`}
                   prefetch={true}
-                  className="rounded-2xl p-4 flex flex-col items-center text-center cursor-pointer transition-all bg-white border border-zinc-200/80 hover:border-orange-300 hover:shadow-md active:scale-[0.99] relative overflow-hidden group shadow-xs"
+                  className="rounded-[26px] p-4 flex flex-col items-center text-center cursor-pointer transition-all bg-white border border-black/[0.06] hover:border-[#F05A00] hover:shadow-md active:scale-[0.99] relative overflow-hidden group shadow-xs"
                 >
                   <div className="relative mb-2.5">
                     <div
@@ -317,15 +317,15 @@ export default function DiscoverClient() {
                   </div>
 
                   <div className="flex-1 w-full flex flex-col items-center">
-                    <span className="text-xs sm:text-sm font-black text-zinc-900 group-hover:text-[#F05A00] transition-colors leading-tight line-clamp-1">
+                    <span className="text-xs sm:text-sm font-black text-black group-hover:text-[#F05A00] transition-colors leading-tight line-clamp-1">
                       {person.full_name}
                     </span>
                     {person._affinityReason ? (
-                      <span className="text-[10px] font-black text-[#F05A00] bg-orange-50 border border-orange-100/80 px-2 py-0.5 rounded-full mt-1 line-clamp-1">
+                      <span className="text-[10px] font-black text-[#F05A00] bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full mt-1 line-clamp-1">
                         {person._affinityReason}
                       </span>
                     ) : (
-                      <span className="text-[10.5px] font-semibold text-zinc-500 mt-0.5 line-clamp-1">
+                      <span className="text-[11px] font-bold text-black/65 mt-0.5 line-clamp-1">
                         {person.year ? (person.year.toLowerCase().includes('year') ? person.year : `${person.year} Year`) : ''} {person.branch ? `· ${person.branch}` : ''}
                       </span>
                     )}
@@ -346,7 +346,7 @@ export default function DiscoverClient() {
                     </div>
                   </div>
 
-                  <div className="mt-3 w-full flex items-center gap-1.5 pt-1 border-t border-zinc-100">
+                  <div className="mt-3 w-full flex items-center gap-2 pt-2 border-t border-black/5">
                     <BookCoffeeButton
                       targetUserId={person.id}
                       targetName={person.full_name}
@@ -361,10 +361,10 @@ export default function DiscoverClient() {
                             e.stopPropagation();
                             onClick();
                           }}
-                          className="flex-1 py-2 px-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-orange-50 hover:bg-orange-100 text-[#F05A00] border border-orange-200 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-2xs"
+                          className="flex-1 py-2 px-2 rounded-xl text-[10.5px] font-black uppercase tracking-wider bg-orange-50 hover:bg-orange-100 text-[#F05A00] border border-orange-200 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-2xs"
                           title={`Book Meetup with ${person.full_name}`}
                         >
-                          <Calendar size={11} />
+                          <Calendar size={12} />
                           <span>Meet</span>
                         </button>
                       )}
@@ -377,11 +377,10 @@ export default function DiscoverClient() {
                         e.stopPropagation();
                         handleConnect(person);
                       }}
-                      className="flex-1 py-2 px-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-[#F05A00] hover:bg-[#D94F00] text-white flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-xs whitespace-nowrap"
+                      className="w-8 h-8 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#F05A00] border border-orange-200/80 flex items-center justify-center transition-colors active:scale-95 cursor-pointer shadow-2xs flex-shrink-0"
                       title={`Chat with ${person.full_name}`}
                     >
-                      <MessageSquare size={11} />
-                      <span>Chat</span>
+                      <MessageSquare size={13} />
                     </button>
                   </div>
                 </Link>
@@ -394,20 +393,20 @@ export default function DiscoverClient() {
                 <button
                   type="button"
                   onClick={() => setVisiblePeopleLimit(prev => prev + 12)}
-                  className="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-white hover:bg-orange-50 text-[#F05A00] border border-orange-200 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-wider bg-white hover:bg-orange-50 text-[#F05A00] border border-orange-200 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-2"
                 >
                   <span>Load More Classmates</span>
-                  <span className="text-[10px] bg-orange-100 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] bg-orange-100 px-2 py-0.5 rounded-full font-black">
                     +{fullList.length - visiblePeopleLimit}
                   </span>
                 </button>
-                <span className="text-[10px] font-semibold text-zinc-400">
+                <span className="text-[11px] font-bold text-black/60">
                   Showing {list.length} of {fullList.length} classmates
                 </span>
               </div>
             ) : (
               fullList.length > 0 && (
-                <div className="text-center py-6 text-zinc-400 text-[11px] font-bold">
+                <div className="text-center py-6 text-black/60 text-[11px] font-bold">
                   Showing all {fullList.length} campus peers
                 </div>
               )
@@ -416,25 +415,25 @@ export default function DiscoverClient() {
         )}
         {/* Algolia attribution */}
         {isAlgoliaSearch && ALGOLIA_APP_ID && (
-          <p className="text-center text-[9px] text-zinc-300 font-medium mt-1">Search powered by Algolia</p>
+          <p className="text-center text-[9px] text-black/40 font-bold mt-1">Search powered by Algolia</p>
         )}
       </div>
     );
   };
 
   return (
-    <div className="space-y-5 pt-2 px-4 max-w-[640px] mx-auto pb-20">
+    <div className="space-y-5 pt-2 px-4 max-w-[640px] mx-auto pb-32">
       {/* Search */}
       <div className="relative">
-        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400" />
+        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black/40" />
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Search students by name, branch, skills..."
-          className="w-full pl-11 pr-10 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all bg-zinc-50 border border-zinc-200 text-zinc-900 focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 focus:bg-white" />
+          className="w-full pl-11 pr-10 py-3.5 rounded-2xl text-[13px] font-bold outline-none transition-all bg-white border border-black/10 text-black placeholder:text-black/40 focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 shadow-xs" />
         {search && (
           <button 
             type="button" 
             onClick={() => setSearch('')}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-zinc-400 hover:text-zinc-600 cursor-pointer"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-black/40 hover:text-black cursor-pointer"
             title="Clear search"
           >
             <X size={15} />

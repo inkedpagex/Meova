@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Sparkles, ShieldCheck, CheckCircle2, MessageSquare, Image as ImageIcon, Link as LinkIcon, Camera, Loader2 } from 'lucide-react';
+import { X, Sparkles, ShieldCheck, CheckCircle2, MessageSquare, Image as ImageIcon, Link as LinkIcon, Camera, Loader2 } from '@/lib/icons';
 import toast from 'react-hot-toast';
 import imageCompression from 'browser-image-compression';
 import { useUserContext } from '../../components/providers/UserProvider';

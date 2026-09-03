@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, Loader2, UserCheck } from 'lucide-react';
+import { ShieldCheck, Loader2, UserCheck } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 
 export default function GenderPromptModal({ user }) {

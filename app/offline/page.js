@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { WifiOff, RefreshCw, Radio, Sparkles, ShieldCheck, Home } from 'lucide-react';
+import { WifiOff, RefreshCw, Radio, Sparkles, ShieldCheck, Home } from '@/lib/icons';
 
 export default function OfflinePage() {
   const [isRetrying, setIsRetrying] = useState(false);

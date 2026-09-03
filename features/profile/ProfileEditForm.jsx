@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { updateProfileAdmin } from './profile.actions';
 import {
   User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine,
   CheckCircle2, AlertCircle, Camera, Zap, Globe, Sparkles, ChevronDown, Check
-} from 'lucide-react';
+} from '@/lib/icons';
 import { Linkedin, Github, Instagram } from '../../components/ui/SocialIcons';
 import { useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';

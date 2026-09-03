@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 /**
  * PWAInstallBanner.jsx
  * Smart, mobile-first "Install App" banner.
@@ -8,7 +8,7 @@
  * - Renders nothing on desktop browsers that don't support PWA install
  */
 import { useEffect, useState } from 'react';
-import { X, Download, Share } from 'lucide-react';
+import { X, Download, Share } from '@/lib/icons';
 
 const DISMISSED_KEY = 'Meova_pwa_dismissed';
 

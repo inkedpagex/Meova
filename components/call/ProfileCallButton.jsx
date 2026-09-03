@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
-import { Phone } from 'lucide-react';
+import { Phone } from '@/lib/icons';
 import { useVoiceCall } from '@/components/providers/VoiceCallProvider';
 
 export default function ProfileCallButton({ targetUserId, targetName, targetPhoto, bookingId, location }) {

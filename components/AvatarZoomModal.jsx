@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowLeft } from 'lucide-react';
+import { X, ArrowLeft } from '@/lib/icons';
 
 export default function AvatarZoomModal({ isOpen, onClose, src, name, username }) {
   const [mounted, setMounted] = useState(false);

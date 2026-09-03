@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   ArrowLeft, Zap, Bell, CheckCircle2, MessageSquare,
   BookOpen, Briefcase, AlertTriangle, Users, Sparkles, Compass, Star
-} from 'lucide-react';
+} from '@/lib/icons';
 import Skeleton from '../../components/Skeleton';
 import { getCartoonAvatar } from '../../utils/avatar';
 

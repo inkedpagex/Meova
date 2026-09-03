@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { CheckCircle, XCircle, Users, Loader2, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { CheckCircle, XCircle, Users, Loader2, ArrowLeft, ShieldCheck } from '@/lib/icons';
 import { toast } from '../../../lib/toast';
 
 export default function PendingCommunitiesClient() {

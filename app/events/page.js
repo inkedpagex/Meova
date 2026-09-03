@@ -1,7 +1,7 @@
-import { getUserAdmin } from '../../lib/getAdminUser';
+﻿import { getUserAdmin } from '../../lib/getAdminUser';
 import { fetchUpcomingEventsAdmin } from '../../lib/supabaseQueries';
 import Link from 'next/link';
-import { Calendar, MapPin, Users, Clock, Zap, Music, Code, Trophy, BookOpen, Palette, Mic } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Zap, Music, Code, Trophy, BookOpen, Palette, Mic } from '@/lib/icons';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
@@ -20,7 +20,7 @@ import {
   Compass, 
   Clock, 
   Check
-} from 'lucide-react';
+} from '@/lib/icons';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 

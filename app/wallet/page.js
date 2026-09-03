@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Info, Zap, Plus, HelpCircle, Loader2, CheckCircle, Download, Copy, Check, X } from 'lucide-react';
+import { ArrowLeft, Info, Zap, Plus, HelpCircle, Loader2, CheckCircle, Download, Copy, Check, X } from '@/lib/icons';
 import Skeleton from '../../components/Skeleton';
 import { toast } from '../../lib/toast';
 import StoryCampaignBanner from '../../components/StoryCampaignBanner';
@@ -54,10 +54,10 @@ function WalletSkeleton() {
 }
 
 const PACKS = [
-  { sparks: 100,  inr: 100,  key: 'pack_100' },
-  { sparks: 250,  inr: 250,  key: 'pack_250' },
-  { sparks: 500,  inr: 500,  key: 'pack_500' },
-  { sparks: 1000, inr: 1000, key: 'pack_1000' },
+  { sparks: 100,  inr: 49,  label: 'Starter',  key: 'starter' },
+  { sparks: 250,  inr: 99,  label: 'Popular',  key: 'popular' },
+  { sparks: 500,  inr: 249, label: 'Growth',   key: 'growth' },
+  { sparks: 1000, inr: 499, label: 'Pro (Max)', key: 'pro' },
 ];
 
 

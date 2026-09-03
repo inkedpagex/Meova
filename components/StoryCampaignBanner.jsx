@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Zap, CheckCircle, Clock, X, Loader2, ChevronRight, Sparkles } from 'lucide-react';
+import { Zap, CheckCircle, Clock, X, Loader2, ChevronRight, Sparkles } from '@/lib/icons';
 import { toast } from '../lib/toast';
 
 function InstagramIcon({ size = 18, className = '' }) {
@@ -73,52 +73,52 @@ export default function StoryCampaignBanner({ className = '' }) {
 
   return (
     <>
-      {/* Clean, Compact Native Spotlight Card */}
+      {/* Clean, Minimal Native Spotlight Card */}
       <div 
         onClick={() => !userClaim && setIsOpen(true)}
-        className={`group bg-white border border-zinc-200/90 hover:border-orange-300/80 rounded-2xl p-3 shadow-2xs hover:shadow-xs transition-all flex items-center justify-between gap-3 cursor-pointer select-none ${className}`}
+        className={`group bg-[#fffbf9] border border-orange-100/90 hover:border-orange-200 rounded-2xl p-2.5 px-3.5 transition-all flex items-center justify-between gap-3 cursor-pointer select-none ${className}`}
       >
-        {/* Left: Instagram Gradient Avatar Ring */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="relative w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-[#FCB045] via-[#FD1D1D] to-[#833AB4] flex-shrink-0 group-hover:scale-105 transition-transform">
+        {/* Left: Instagram Gradient Icon & Info */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="relative w-8 h-8 rounded-full p-[1.5px] bg-gradient-to-tr from-[#FCB045] via-[#FD1D1D] to-[#833AB4] flex-shrink-0 group-hover:scale-105 transition-transform">
             <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[#FD1D1D]">
-              <InstagramIcon size={18} />
+              <InstagramIcon size={14} />
             </div>
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h4 className="text-xs font-black text-zinc-900 truncate group-hover:text-[#F05A00] transition-colors">
-                Tag @meova.in on Instagram Story
+              <h4 className="text-[12px] font-semibold text-neutral-800 truncate group-hover:text-[#F05A00] transition-colors leading-tight">
+                Tag @meova.in on your Story
               </h4>
             </div>
-            <p className="text-[11px] text-zinc-500 font-medium truncate flex items-center gap-1 mt-0.5">
-              <span>Get 100 free Sparks in your wallet</span>
-              <span className="text-zinc-300">·</span>
-              <span className="text-[#F05A00] font-bold">1 hr reward</span>
+            <p className="text-[10.5px] text-neutral-400 font-medium truncate flex items-center gap-1 mt-0.5">
+              <span>Earn 100 free Sparks</span>
+              <span className="text-neutral-200">·</span>
+              <span className="text-[#F05A00] font-semibold">1 hr reward</span>
             </p>
           </div>
         </div>
 
-        {/* Right: Compact Action Pill */}
+        {/* Right: Action / Status */}
         <div className="flex-shrink-0">
           {userClaim ? (
-            <div className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-zinc-100 text-[11px] font-bold text-zinc-700">
+            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 border border-orange-100 text-[11px] font-semibold text-[#F05A00]">
               {userClaim.status === 'approved' ? (
                 <>
-                  <CheckCircle size={13} className="text-emerald-500" />
-                  <span className="text-emerald-700 font-black">+100 Claimed</span>
+                  <CheckCircle size={12} className="text-emerald-500" />
+                  <span className="text-emerald-700 font-bold">+100 Claimed</span>
                 </>
               ) : userClaim.status === 'pending' ? (
                 <>
-                  <Clock size={12} className="animate-spin text-amber-500" />
-                  <span className="text-amber-700 font-bold">In Review</span>
+                  <Clock size={11} className="animate-spin text-amber-500" />
+                  <span className="text-amber-700 font-medium">In Review</span>
                 </>
               ) : (
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
-                  className="text-[#F05A00] font-black underline cursor-pointer"
+                  className="text-[#F05A00] font-bold underline cursor-pointer"
                 >
                   Resubmit
                 </button>
@@ -128,10 +128,10 @@ export default function StoryCampaignBanner({ className = '' }) {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
-              className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-zinc-950 hover:bg-[#F05A00] text-white text-xs font-black transition-colors shadow-2xs cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#F05A00] hover:bg-[#D94F00] text-white text-[11px] font-bold transition-all shadow-xs cursor-pointer active:scale-95"
             >
               <span>Claim</span>
-              <Zap size={11} className="fill-amber-300 text-amber-300" />
+              <Zap size={10} className="fill-white text-white" />
             </button>
           )}
         </div>

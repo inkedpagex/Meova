@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, Clock, AlertCircle, Zap } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, AlertCircle, Zap } from '@/lib/icons';
 import Link from 'next/link';
 
 export default function WithdrawPage() {

@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect } from 'react';
-import { WifiOff, RefreshCw } from 'lucide-react';
+import { WifiOff, RefreshCw } from '@/lib/icons';
 
 export default function NetworkWrapper({ children }) {
   const [isOnline, setIsOnline] = useState(true);

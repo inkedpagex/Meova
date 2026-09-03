@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Users, Sparkles, Search, Link as LinkIcon, Edit3, Settings, Check, Loader2, Save } from 'lucide-react';
+import { X, Users, Sparkles, Search, Link as LinkIcon, Edit3, Settings, Check, Loader2, Save } from '@/lib/icons';
 import { getUserAvatarUrl, getCartoonAvatar } from '../../utils/avatar';
 import { toast } from '../../lib/toast';
 

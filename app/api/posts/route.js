@@ -95,14 +95,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Valid photo URL is required (under 1000 chars)' }, { status: 400 });
     }
 
-    let finalContent = (caption || '').trim();
-    const metaTags = [];
-    if (location && location.trim()) metaTags.push(location.trim());
-    if (category && category.trim()) metaTags.push(category.trim());
-    
-    if (metaTags.length > 0) {
-      finalContent = finalContent ? `${finalContent}\n\n${metaTags.join(' · ')}` : metaTags.join(' · ');
-    }
+    const finalContent = (caption || '').trim();
 
     const newPost = {
       user_id: user.uid,

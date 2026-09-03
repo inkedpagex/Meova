@@ -9,7 +9,7 @@ import {
   ArrowLeft, Send, Loader2, MessageSquare,
   SquarePen, CheckCheck, Zap, Search,
   User, Sparkles, Compass, Info, Smile, Phone, Radio, X
-} from 'lucide-react';
+} from '@/lib/icons';
 import useSWR from 'swr';
 import { supabase } from '@/lib/supabase/client';
 import { getUserAvatarUrl, getCartoonAvatar } from '@/utils/avatar';
@@ -196,9 +196,9 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
         >
           {msg.text}
         </div>
-        <div className={`flex items-center gap-1 mt-1 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
-          <span className="text-[9px] text-zinc-400 font-semibold">{formatTime(msg.timestamp || msg.created_at)}</span>
-          {isMe && <CheckCheck className="w-3 h-3 text-[#F05A00] opacity-80" />}
+        <div className={`flex items-center gap-1.5 mt-1 px-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+          <span className="text-[10px] text-neutral-400 font-medium">{formatTime(msg.timestamp || msg.created_at)}</span>
+          {isMe && <CheckCheck size={14} className="text-[#F05A00] opacity-90 flex-shrink-0" />}
         </div>
       </div>
     </motion.div>

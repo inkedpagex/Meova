@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Zap, Clock, RefreshCw, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Zap, Clock, RefreshCw, Loader2 } from '@/lib/icons';
 
 function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
 function fmtDate(s) {
@@ -153,28 +153,55 @@ export default function AdminPaymentsPage() {
             return (
               <div
                 key={p.id}
-                className="bg-white border border-slate-200 p-4 md:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all shadow-xs"
+                className="bg-white border border-black/[0.06] p-4 md:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all shadow-xs"
               >
-                <div className="flex-1 min-w-0 space-y-1.5">
+                <div className="flex-1 min-w-0 space-y-2">
+                  {/* User Identity */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-orange-100 border border-orange-200 text-[#F05A00] flex items-center justify-center font-black text-xs flex-shrink-0">
+                      {(p.user_name || 'C')[0]?.toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-black truncate">
+                          {p.user_name || 'Classmate'}
+                        </span>
+                        {p.branch && (
+                          <span className="text-[10px] font-bold text-black/50 bg-black/5 px-2 py-0.5 rounded">
+                            {p.branch} {p.year ? `Y${p.year}` : ''}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-black/60 font-bold truncate">
+                        {p.user_email || p.email || 'No email provided'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Pack & Status */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-black text-slate-900">
+                    <p className="text-sm font-black text-black">
                       {p.pack_name || `${p.sparks} Sparks`} — {fmt(p.sparks)} ⚡
                     </p>
-                    <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md border ${st.color} ${st.bg} ${st.border}`}>
+                    <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${st.color} ${st.bg} ${st.border}`}>
                       {st.label}
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-600 font-bold">{p.email}</p>
-
-                  <div className="flex items-center gap-3 flex-wrap text-xs font-bold text-slate-500 pt-1">
+                  {/* Amount & Ref */}
+                  <div className="flex items-center gap-2.5 flex-wrap text-xs font-bold text-black/60 pt-0.5">
                     <span className="text-xs text-emerald-700 font-black px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg">
-                      ₹{p.amount_inr}
+                      ₹{Number(p.amount_inr || p.rupees || 0).toFixed(2)}
                     </span>
-                    {p.reference_code && (
-                      <span>Ref: <code className="font-mono text-amber-700 font-black px-1.5 py-0.5 bg-amber-50 rounded border border-amber-200">{p.reference_code}</code></span>
+                    {p.unique_decimal && (
+                      <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-orange-50 text-[#F05A00] border border-orange-200">
+                        Paise: .{p.unique_decimal}
+                      </span>
                     )}
-                    <span className="text-slate-400">• {fmtDate(p.created_at)}</span>
+                    {(p.reference_code || p.utr_number) && (
+                      <span>Ref/UTR: <code className="font-mono text-amber-700 font-black px-1.5 py-0.5 bg-amber-50 rounded border border-amber-200">{p.reference_code || p.utr_number}</code></span>
+                    )}
+                    <span className="text-black/40">• {fmtDate(p.created_at)}</span>
                   </div>
                 </div>
 

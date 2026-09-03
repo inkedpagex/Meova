@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, ArrowUpRight } from '@/lib/icons';
 
 const DUMMY_WORDS = [
   'random', 'test', 'temp', 'demo', 'asdf', 'qwerty', 'dummy', 'fake',
@@ -37,6 +37,14 @@ export function isValidInstagram(input) {
   return true;
 }
 
+function InstagramGlyph({ className = 'w-5 h-5' }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+    </svg>
+  );
+}
+
 export default function InstagramEmbed({ instagramInput }) {
   const [hasError, setHasError] = useState(false);
 
@@ -56,23 +64,37 @@ export default function InstagramEmbed({ instagramInput }) {
 
   if (!isPost) {
     return (
-      <div className="rounded-2xl p-4 bg-gradient-to-r from-pink-50 via-purple-50 to-orange-50 border border-pink-100 flex items-center justify-between gap-3 mb-6">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white text-xs font-black shadow-xs flex-shrink-0">
-            IG
+      <div className="group relative overflow-hidden bg-white border border-zinc-200/90 rounded-[28px] p-3.5 sm:p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.07)] hover:border-zinc-300 transition-all duration-300 flex items-center justify-between gap-3 mb-6">
+        {/* Subtle top brand accent line */}
+        <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] opacity-80 group-hover:opacity-100 transition-opacity" />
+
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Vibrant Instagram Squircle Badge */}
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[16px] bg-gradient-to-tr from-[#f09433] via-[#e6683c] via-[#dc2743] via-[#cc2366] to-[#bc1888] flex items-center justify-center text-white shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+            <InstagramGlyph className="w-5 h-5 text-white drop-shadow-xs" />
           </div>
+
           <div className="min-w-0">
-            <p className="text-xs font-black text-zinc-900 truncate">@{handle}</p>
-            <p className="text-[10px] text-zinc-500 font-semibold">Instagram Profile</p>
+            <p className="text-[13px] sm:text-sm font-black text-zinc-950 truncate tracking-tight group-hover:text-zinc-900 transition-colors">
+              @{handle}
+            </p>
+            <p className="text-[10px] sm:text-[10.5px] font-bold text-zinc-400 mt-0.5 flex items-center gap-1.5">
+              <span>Instagram</span>
+              <span>•</span>
+              <span>Student Profile</span>
+            </p>
           </div>
         </div>
+
+        {/* High-Contrast Action Button */}
         <a
           href={`https://instagram.com/${handle}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white text-[11px] font-black hover:opacity-95 active:scale-95 transition-all shadow-2xs whitespace-nowrap flex-shrink-0"
+          className="inline-flex items-center gap-1.5 px-4 py-2 sm:py-2.5 rounded-full bg-zinc-950 hover:bg-gradient-to-r hover:from-[#e1306c] hover:to-[#c13584] text-white text-[11px] sm:text-xs font-black tracking-wide shadow-xs hover:shadow-md active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer"
         >
-          View on Instagram ↗
+          <span>View on Instagram</span>
+          <ArrowUpRight size={14} strokeWidth={2.5} />
         </a>
       </div>
     );
@@ -81,18 +103,22 @@ export default function InstagramEmbed({ instagramInput }) {
   const embedUrl = `${raw.replace(/\/$/, '')}/embed/`;
 
   return (
-    <div className="rounded-2xl p-5 mb-6 bg-white border border-zinc-100 shadow-xs space-y-3">
+    <div className="rounded-[28px] p-5 mb-6 bg-white border border-zinc-200/90 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-black uppercase tracking-wider text-zinc-700 flex items-center gap-1.5">
-          <Camera size={14} className="text-[#e1306c]" /> Instagram Vibe
+        <h3 className="text-xs font-black uppercase tracking-wider text-zinc-800 flex items-center gap-2">
+          <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center text-white">
+            <InstagramGlyph className="w-3.5 h-3.5 text-white" />
+          </div>
+          <span>Instagram Vibe</span>
         </h3>
         <a 
           href={raw} 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="text-[10px] font-black text-pink-600 hover:text-pink-700"
+          className="inline-flex items-center gap-1 text-[11px] font-black text-zinc-700 hover:text-[#e1306c] transition-colors"
         >
-          Open in App ↗
+          <span>Open in App</span>
+          <ArrowUpRight size={13} strokeWidth={2.5} />
         </a>
       </div>
       <div className="relative rounded-2xl overflow-hidden border border-zinc-100 bg-zinc-50 h-[480px]">

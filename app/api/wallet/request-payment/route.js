@@ -4,13 +4,12 @@ import { supabaseAdmin } from '../../../../lib/supabase/admin';
 import { rateLimit, getClientIp } from '../../../../lib/rateLimit';
 import { logger } from '../../../../utils/logger';
 import { sendAdminAlert } from '../../../../utils/alerts';
-import { sanitizeText } from '../../../../lib/validations';
 
 const PACKS = {
   starter: { sparks: 100,  amount_inr: 49,  name: 'Starter' },
   popular: { sparks: 250,  amount_inr: 99,  name: 'Popular' },
-  growth:  { sparks: 700,  amount_inr: 249, name: 'Growth' },
-  pro:     { sparks: 1600, amount_inr: 499, name: 'Pro' },
+  growth:  { sparks: 500,  amount_inr: 249, name: 'Growth' },
+  pro:     { sparks: 1000, amount_inr: 499, name: 'Pro (Max)' },
 };
 
 function generate5CharAlphanumeric() {
@@ -33,7 +32,7 @@ async function generateUnique5CharRefCode() {
         .eq('reference_code', code)
         .eq('status', 'pending')
         .maybeSingle();
-      if (!data) return code; // No existing match — this code is unique
+      if (!data) return code;
     } catch (err) {
       logger.warn('Supabase unique code check failed. Returning generated code:', { error: err.message });
       return code;
@@ -56,77 +55,115 @@ export async function POST(request) {
   const user = await requireAuth();
   if (!user) return NextResponse.json({ error: 'Login required' }, { status: 401 });
 
-  let sparks, amount_inr, pack_name, pack_key;
+  let sparks, baseAmount, pack_name, pack_key;
   try {
     const body = await request.json();
-    pack_key = body.pack_key || body.packKey || 'pack_custom';
+    pack_key = body.pack_key || body.packKey || 'pro';
     sparks = Number(body.sparks || PACKS[pack_key]?.sparks || 100);
-    amount_inr = Number(body.amount_inr || PACKS[pack_key]?.amount_inr || sparks);
-    pack_name = body.pack_name || `${sparks} Sparks`;
+    baseAmount = Number(body.amount_inr || PACKS[pack_key]?.amount_inr || 49);
+    pack_name = body.pack_name || PACKS[pack_key]?.name || `${sparks} Sparks`;
   } catch (err) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  if (!sparks || sparks <= 0 || !amount_inr) {
+  if (!sparks || sparks <= 0 || !baseAmount) {
     return NextResponse.json({ error: 'Invalid spark amount' }, { status: 400 });
   }
 
   try {
     const reference_code = await generateUnique5CharRefCode();
 
-    const basePayload = {
+    // 1. Allocate active unique decimal slot (1 to 99) for automated UPI matching
+    const { data: activeDocs } = await supabaseAdmin
+      .from('payment_requests')
+      .select('unique_decimal')
+      .eq('status', 'pending');
+
+    const usedDecimals = new Set((activeDocs || []).map(d => Number(d.unique_decimal)).filter(Boolean));
+    let selectedDecimal = null;
+    for (let i = 0; i < 30; i++) {
+      const rand = Math.floor(Math.random() * 99) + 1;
+      if (!usedDecimals.has(rand)) {
+        selectedDecimal = rand;
+        break;
+      }
+    }
+    if (!selectedDecimal) {
+      for (let s = 1; s <= 99; s++) {
+        if (!usedDecimals.has(s)) {
+          selectedDecimal = s;
+          break;
+        }
+      }
+    }
+    if (!selectedDecimal) selectedDecimal = Math.floor(Math.random() * 99) + 1;
+
+    const uniqueDecimalStr = String(selectedDecimal).padStart(2, '0');
+    const finalAmount = Number((Math.floor(baseAmount) + (selectedDecimal / 100)).toFixed(2));
+
+    const payload = {
       user_id: user.uid,
       sparks,
       status: 'pending',
       created_at: new Date().toISOString(),
+      reference_code,
+      pack_key,
+      pack_name,
+      rupees: finalAmount,
+      amount_inr: finalAmount,
+      unique_decimal: uniqueDecimalStr,
+      user_email: user.email || '',
+      user_name: user.full_name || '',
+      email: user.email || '',
     };
 
-    // Try standard schema first (rupees, unique_decimal, user_email)
-    const dec = Math.round((amount_inr - Math.floor(amount_inr)) * 100);
-    const { error: primaryErr } = await supabaseAdmin
+    const { error: insertErr } = await supabaseAdmin
       .from('payment_requests')
-      .insert({
-        ...basePayload,
-        user_email: user.email || '',
-        user_name: user.full_name || '',
-        rupees: amount_inr,
-        unique_decimal: dec > 0 ? String(dec) : '',
-      });
+      .insert(payload);
 
-    if (primaryErr) {
-      // Fallback to alternate schema columns
+    if (insertErr) {
+      logger.warn('[request-payment] primary insert failed, trying minimal:', insertErr.message);
       await supabaseAdmin
         .from('payment_requests')
         .insert({
-          ...basePayload,
-          email: user.email,
-          pack_key,
-          pack_name,
-          amount_inr,
-          reference_code,
+          user_id: user.uid,
+          sparks,
+          status: 'pending',
+          created_at: payload.created_at,
+          rupees: finalAmount,
+          unique_decimal: uniqueDecimalStr,
+          user_email: user.email || '',
+          user_name: user.full_name || '',
         });
     }
 
     logger.audit('PAYMENT_REQUEST_CREATED', user.uid, {
       reference_code,
       pack_key,
-      amount: amount_inr,
+      amount: finalAmount,
+      decimal: uniqueDecimalStr,
     });
 
     sendAdminAlert({
       title: 'New Payment Recharge Request',
-      message: `User ${user.email} requested ${sparks} Sparks (₹${amount_inr})`,
+      message: `Student ${user.full_name || user.email} requested ${sparks} Sparks (₹${finalAmount})`,
       fields: [
         { name: 'Ref Code', value: reference_code },
-        { name: 'Amount', value: `₹${amount_inr}` },
+        { name: 'Amount', value: `₹${finalAmount}` },
         { name: 'User', value: user.email },
       ],
     }).catch(() => {});
 
-    return NextResponse.json({ ok: true, reference_code });
+    return NextResponse.json({
+      ok: true,
+      reference_code,
+      amount_inr: finalAmount,
+      unique_decimal: uniqueDecimalStr,
+      sparks,
+    });
   } catch (err) {
     logger.error('Payment request creation failed', err, { userId: user.uid });
     const reference_code = generate5CharAlphanumeric();
-    return NextResponse.json({ ok: true, reference_code, fallback: true });
+    return NextResponse.json({ ok: true, reference_code, amount_inr: baseAmount, fallback: true });
   }
 }

@@ -78,7 +78,7 @@ export async function POST(request) {
         user_id: reqData.user_id,
         sender_id: admin.uid,
         title: `${reqData.sparks} Sparks Added!`,
-        message: `Your payment of ₹${reqData.amount_inr || reqData.sparks} was approved. Sparks are now in your wallet!`,
+        message: `Your payment of ₹${reqData.amount_inr || reqData.rupees || reqData.sparks} was approved. Sparks are now in your wallet!`,
         type: 'sparks',
         read: false,
         created_at: now,

@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Search, ShieldAlert, GraduationCap, Sparkles, UserCheck, Loader2, Ban, CheckCircle2, Star, Award, Trash2, X, AlertTriangle } from 'lucide-react';
+import { Search, ShieldAlert, GraduationCap, Sparkles, UserCheck, Loader2, Ban, CheckCircle2, Star, Award, Trash2, X, AlertTriangle } from '@/lib/icons';
 
 const ROLES = [
   { value: 'user', label: 'Student (Normal)', icon: GraduationCap },

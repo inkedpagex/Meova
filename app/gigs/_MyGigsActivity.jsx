@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect } from 'react';
-import { Briefcase, Clock, CheckCircle2, XCircle, Hourglass, FileText, Send, Users, Zap, RefreshCw, MessageCircle, Phone, Star, Trash2, X } from 'lucide-react';
+import { Briefcase, Clock, CheckCircle2, XCircle, Hourglass, FileText, Send, Users, Zap, RefreshCw, MessageCircle, Phone, Star, Trash2, X } from '@/lib/icons';
 import Link from 'next/link';
 import useSWR from 'swr';
 import { toast } from '../../lib/toast';

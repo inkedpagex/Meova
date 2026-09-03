@@ -88,6 +88,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'All payment slots are currently active. Please try again in 2 minutes.' }, { status: 429 });
     }
 
+    const uniqueAmount = Number((Number(amount_inr) + (selectedDecimal / 100)).toFixed(2));
+
     const basePayload = {
       user_id: user.uid,
       sparks,

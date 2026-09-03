@@ -1,5 +1,5 @@
 import './globals.css';
-import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import Sidebar from '../components/Sidebar';
 import RightPanel from '../components/RightPanel';
 import { getUserWithRole } from '../lib/getAdminUser';
@@ -9,18 +9,11 @@ import Script from 'next/script';
 import GoogleAuthProviderWrapper from '../components/GoogleAuthProviderWrapper';
 import { headers } from 'next/headers';
 
-const outfit = Outfit({
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-outfit',
+  variable: '--font-inter',
   weight: ['400', '500', '600', '700', '800', '900'],
-});
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-plus-jakarta',
-  weight: ['400', '500', '600', '700', '800'],
 });
 import { UserProvider } from '../components/providers/UserProvider';
 import { VoiceCallProvider } from '../components/providers/VoiceCallProvider';
@@ -174,7 +167,7 @@ export default async function RootLayout({ children }) {
   }
 
   return (
-    <html lang="en" className={`${outfit.variable} ${plusJakarta.variable}`} data-theme="light" style={{ colorScheme: 'light' }}>
+    <html lang="en" className={inter.variable} data-theme="light" style={{ colorScheme: 'light' }}>
         <head>
           <meta name="google-site-verification" content="69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
@@ -194,6 +187,8 @@ export default async function RootLayout({ children }) {
           <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://res.cloudinary.com" />
           <link rel="preconnect" href="https://api.dicebear.com" crossOrigin="anonymous" />
+          {/* ── Remix Icons — Premium icon library ── */}
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
           
           {/* ── Open Graph & Social Share Preview Meta Tags (WhatsApp, Telegram, Twitter, LinkedIn) ── */}
           <meta property="og:type" content="website" />
@@ -346,7 +341,7 @@ export default async function RootLayout({ children }) {
             }}
           />
         </head>
-        <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh', fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif" }}>
+        <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh', fontFamily: "var(--font-inter), 'Inter', sans-serif" }}>
           <TopProgressBar />
           <GoogleAuthProviderWrapper>
             <UserProvider initialUser={user} initialWallet={user?.wallet} initialPeople={people}>

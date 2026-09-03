@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 /**
  * NotificationPermissionPrompt.jsx
  * User-friendly notification permission request.
@@ -8,7 +8,7 @@
  * Shown only once per device, after user has been logged in for 3 seconds.
  */
 import { useEffect, useState } from 'react';
-import { Bell, X, Zap, MessageSquare, Briefcase } from 'lucide-react';
+import { Bell, X, Zap, MessageSquare, Briefcase } from '@/lib/icons';
 
 const PROMPT_KEY = 'Meova_notif_prompted';
 

@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }) {
   return (
     <div className="space-y-4 md:space-y-6 min-w-0 overflow-x-hidden">
       {/* ── TOP HEADER BAR ────────────────────────── */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-3 md:p-4 shadow-2xs space-y-3 min-w-0">
+      <div className="bg-white border border-black/[0.06] rounded-[24px] p-3.5 md:p-4 shadow-xs min-w-0">
         <AdminHeaderClient admin={admin} />
       </div>
 

@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import React, { useState } from 'react';
-import { Zap, Loader2 } from 'lucide-react';
+import { Zap, Loader2 } from '@/lib/icons';
 import { toast } from '../../lib/toast';
 import { useUserContext } from '../../components/providers/UserProvider';
 

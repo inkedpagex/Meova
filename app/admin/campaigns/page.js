@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Zap, Clock, RefreshCw, Loader2, ExternalLink, ShieldCheck } from 'lucide-react';
+import { CheckCircle, XCircle, Zap, Clock, RefreshCw, Loader2, ExternalLink, ShieldCheck } from '@/lib/icons';
 
 function InstagramIcon({ size = 18, className = '' }) {
   return (

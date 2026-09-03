@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Download, Share, MoreVertical, Smartphone, Laptop, Check, Apple } from 'lucide-react';
+import { X, Download, Share, MoreVertical, Smartphone, Laptop, Check, Apple } from '@/lib/icons';
 
 export default function PWAInstallModal({ isOpen, onClose }) {
   const [deviceTab, setDeviceTab] = useState('android'); // 'android' | 'ios' | 'desktop'

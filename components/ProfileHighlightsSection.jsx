@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { 
   Code, Music, Dumbbell, Camera, Rocket, Palette, Gamepad2, 
   BookOpen, Star, Sparkles, X, ChevronRight, Zap
-} from 'lucide-react';
+} from '@/lib/icons';
 import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import BookCoffeeButton from '../features/users/BookCoffeeButton';
 

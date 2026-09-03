@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Zap, CheckCircle, Copy, ArrowLeft, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
+import { Zap, CheckCircle, Copy, ArrowLeft, Loader2, ArrowRight, AlertCircle } from '@/lib/icons';
 import Link from 'next/link';
 import { SlideButton } from '@/components/ui/slide-button';
 
 const PACKS = [
   { key: 'starter', sparks: 100,  inr: 49,  label: 'Starter',  popular: false, bonus: 0 },
-  { key: 'popular', sparks: 250,  inr: 99,  label: 'Popular',  popular: true,  bonus: 10 },
-  { key: 'growth',  sparks: 700,  inr: 249, label: 'Growth',   popular: false, bonus: 50 },
-  { key: 'pro',     sparks: 1600, inr: 499, label: 'Pro',      popular: false, bonus: 150 },
+  { key: 'popular', sparks: 250,  inr: 99,  label: 'Popular',  popular: true,  bonus: 15 },
+  { key: 'growth',  sparks: 500,  inr: 249, label: 'Growth',   popular: false, bonus: 50 },
+  { key: 'pro',     sparks: 1000, inr: 499, label: 'Pro (Max)', popular: false, bonus: 100 },
 ];
 
 const ADMIN_UPI = 'chirag2006chak-1@okicici';
@@ -18,6 +18,8 @@ export default function BuyPage() {
   const [selected, setSelected] = useState(null);
   const [step, setStep] = useState('select'); // 'select' | 'pay' | 'done'
   const [refCode, setRefCode] = useState('');
+  const [exactAmountInr, setExactAmountInr] = useState(null);
+  const [uniqueDecimal, setUniqueDecimal] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -29,14 +31,14 @@ export default function BuyPage() {
       .catch(() => {});
   }, []);
 
-  const qrData = selected ? `upi://pay?pa=${ADMIN_UPI}&pn=Meova&am=${selected.inr.toFixed(2)}&tn=${refCode}&cu=INR` : '';
+  const payAmount = exactAmountInr || selected?.inr || 0;
+  const qrData = selected ? `upi://pay?pa=${ADMIN_UPI}&pn=Meova&am=${payAmount.toFixed(2)}&tn=${refCode}&cu=INR` : '';
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
 
   async function handleProceed() {
     if (!selected) return;
     setLoading(true);
     try {
-      // Generate reference code server-side (or fallback client-side)
       let code = '';
       try {
         const res = await fetch('/api/wallet/request-payment', {
@@ -46,6 +48,8 @@ export default function BuyPage() {
         });
         const data = await res.json().catch(() => ({}));
         code = data.reference_code || '';
+        if (data.amount_inr) setExactAmountInr(Number(data.amount_inr));
+        if (data.unique_decimal) setUniqueDecimal(data.unique_decimal);
       } catch (e) {}
 
       // Fallback: generate code client-side
@@ -179,18 +183,26 @@ export default function BuyPage() {
               Scan QR & Pay
             </h2>
             <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto leading-relaxed font-semibold">
-              Open any UPI app (GPay, PhonePe, Paytm), scan the QR code below, and pay <strong className="text-[var(--text-primary)]">₹{selected.inr}</strong>.
+              Open any UPI app (GPay, PhonePe, Paytm), scan the QR code below, and pay exact amount <strong className="text-[#F05A00] font-black">₹{payAmount.toFixed(2)}</strong>.
             </p>
           </div>
 
           {/* QR Code Container */}
-          <div className="relative overflow-hidden mx-auto w-52 h-52 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] flex items-center justify-center p-3 mb-6 shadow-2xl">
+          <div className="relative overflow-hidden mx-auto w-52 h-52 rounded-2xl bg-white border border-black/[0.08] flex items-center justify-center p-3 mb-4 shadow-xl">
             <img src={qrCodeUrl} alt="Scan to pay" className="w-full h-full rounded-lg" />
           </div>
 
-          <div className="space-y-1.5 mb-6 text-xs text-[var(--text-secondary)] font-bold">
-            <p>UPI ID: <strong className="text-[var(--text-primary)] font-black">{ADMIN_UPI}</strong></p>
-            <p>Amount: <strong className="text-[var(--text-primary)] font-black">₹{selected.inr}</strong></p>
+          {/* Exact Paise Highlight */}
+          <div className="rounded-2xl border border-orange-200/80 bg-orange-50/60 p-3.5 text-center mb-6 shadow-2xs">
+            <p className="text-[10px] font-black uppercase tracking-wider text-orange-800">
+              ⚡ Exact Amount with Decimal Paise
+            </p>
+            <p className="text-2xl font-black text-black my-0.5">
+              ₹{payAmount.toFixed(2)}
+            </p>
+            <p className="text-[11px] font-bold text-black/60">
+              Pay exact paise (.{uniqueDecimal || '00'}) so your payment is automatically verified in seconds!
+            </p>
           </div>
 
           {/* Reference code copy widget */}
@@ -216,7 +228,7 @@ export default function BuyPage() {
           <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 text-left mb-8 space-y-3 shadow-sm">
             <h4 className="text-[10px] font-black text-[var(--text-muted)] tracking-wider uppercase">Instructions</h4>
             {[
-              `Scan and pay ₹${selected.inr} to ${ADMIN_UPI}`,
+              `Scan and pay exact ₹${payAmount.toFixed(2)} to ${ADMIN_UPI}`,
               `Copy and paste the reference code "${refCode}" in the remarks note`,
               `Slide the button below once payment is successfully submitted!`
             ].map((text, idx) => (

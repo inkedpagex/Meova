@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { rsvpToEventAction, cancelRsvpAction } from './events.actions';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/lib/icons';
 import { useRouter } from 'next/navigation';
 
 export default function RsvpButton({ eventId, userId, isInitialRsvp }) {

@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MessageCircle, Loader2 } from 'lucide-react';
+import { MessageCircle, Loader2 } from '@/lib/icons';
 import { toast } from '../../lib/toast';
 import { useUserContext } from '../../components/providers/UserProvider';
 

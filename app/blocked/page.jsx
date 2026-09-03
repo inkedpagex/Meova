@@ -1,5 +1,5 @@
-import React from 'react';
-import { Ban } from 'lucide-react';
+﻿import React from 'react';
+import { Ban } from '@/lib/icons';
 
 export const metadata = {
   title: 'Access Restricted | Meova',

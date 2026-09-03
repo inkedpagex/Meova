@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Zap } from 'lucide-react';
+import { Zap } from '@/lib/icons';
 
 export default function HomeSparksBadge({ userId, initialSparks }) {
   const [sparks, setSparks] = useState(initialSparks || 0);

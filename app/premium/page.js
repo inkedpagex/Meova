@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import React, { useState } from 'react';
-import { Crown, CheckCircle2, ShieldCheck, Zap, ArrowRight, Star, Sparkles, MessageSquare, Award } from 'lucide-react';
+import { Crown, CheckCircle2, ShieldCheck, Zap, ArrowRight, Star, Sparkles, MessageSquare, Award } from '@/lib/icons';
 
 const PREMIUM_FEATURES = [
   {

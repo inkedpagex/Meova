@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
-import { Ban, Loader2, ShieldAlert, X } from 'lucide-react';
+import { Ban, Loader2, ShieldAlert, X } from '@/lib/icons';
 import { useRouter } from 'next/navigation';
 import { toast } from '../../lib/toast';
 

@@ -6,7 +6,7 @@ import {
   Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert, ShieldCheck,
   Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink, Phone, CheckCircle2, Loader2, Download,
   Trash2, Heart, Plus
-} from 'lucide-react';
+} from '@/lib/icons';
 import { Linkedin, Github } from '../../components/ui/SocialIcons';
 import { QRCodeCanvas } from 'qrcode.react';
 import ProfileEditForm from '../../features/profile/ProfileEditForm';
@@ -16,6 +16,8 @@ import { updateProfileAdmin } from '../../features/profile/profile.actions';
 import { toast } from '../../lib/toast';
 import PWAInstallModal from '../../components/PWAInstallModal';
 import ZoomableProfileAvatar from '../../components/ZoomableProfileAvatar';
+import { formatPostDate } from '../../utils/dateFormatter';
+import HostBadge from '../../components/HostBadge';
 
 const InstagramIcon = ({ size = 14 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -309,6 +311,29 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
         ) : (
           <div className="space-y-4">
 
+          {/* ── CAMPUS HOST HUB ACCESS CARD ───────────────────────── */}
+          {/* ── CAMPUS HOST WORKSPACE SHORTCUT (FOR HOSTS/ADMINS) ── */}
+          {(profile?.role === 'verified_host' || profile?.role === 'campus_lead' || profile?.role === 'admin') && (
+            <button
+              onClick={() => router.push('/host')}
+              className="w-full rounded-[24px] p-4 flex items-center justify-between cursor-pointer transition-all active:scale-95 shadow-xs bg-white border border-black/[0.06] hover:border-orange-200 text-black group"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#F05A00] flex-shrink-0 shadow-2xs">
+                  <ShieldCheck size={20} />
+                </div>
+                <div className="text-left min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-xs font-black tracking-tight text-black">Campus Host Workspace</p>
+                    <HostBadge role={profile?.role} size="xs" />
+                  </div>
+                  <p className="text-[11px] text-black/65 font-bold truncate">Campus moderation, feed safety & circle tools</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-black/40 group-hover:text-[#F05A00] transition-colors flex-shrink-0" />
+            </button>
+          )}
+
           {/* ── ADMIN ACCESS CARD (Mobile Admin Button) ────────────────── */}
           {profile?.role === 'admin' && (
             <button
@@ -351,12 +376,15 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
               {profile?.full_name || 'Your Name'}
             </h2>
 
-            {/* Username badge */}
-            {profile?.username && (
-              <span className="relative z-10 inline-flex items-center gap-1 mt-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-[#fcf6fa] text-[#F05A00]">
-                @{profile.username}
-              </span>
-            )}
+            {/* Username and Host Badge */}
+            <div className="relative z-10 flex flex-wrap items-center justify-center gap-1.5 mt-1.5">
+              {profile?.username && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-[#fcf6fa] text-[#F05A00]">
+                  @{profile.username}
+                </span>
+              )}
+              <HostBadge role={profile?.role} size="sm" />
+            </div>
 
             {/* Year · Branch */}
             {(yearLabel || branchLabel) && (
@@ -504,46 +532,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             </div>
           </button>
 
-          {/* ── My Recent Gigs ────────────────────────── */}
-          <div className="rounded-[24px] p-5 bg-white border border-zinc-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-black uppercase tracking-[0.15em] text-zinc-400 flex items-center gap-2">
-                <Briefcase size={14} className="text-[#F05A00]" /> My Gigs
-              </span>
-              <button onClick={() => router.push('/gigs')} className="text-[10px] font-black uppercase tracking-wider text-[#F05A00] cursor-pointer hover:underline">View All</button>
-            </div>
-            
-            {initialGigs?.length > 0 ? (
-              <div className="space-y-3">
-                {initialGigs.map(gig => (
-                  <div key={gig.id} onClick={() => router.push(`/gigs/${gig.id}`)} className="flex items-center justify-between p-3 rounded-2xl border border-zinc-100 hover:border-zinc-200 hover:bg-zinc-50 cursor-pointer transition-all group">
-                    <div className="max-w-[70%]">
-                      <p className="text-[12px] font-black text-zinc-900 group-hover:text-[#F05A00] transition-colors truncate">{gig.title || 'Untitled Gig'}</p>
-                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
-                        {gig.role === 'host' ? 'Posted by you' : 'Accepted job'}
-                      </p>
-                    </div>
-                    <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider ${
-                      gig.status === 'open' ? 'bg-emerald-50 text-emerald-600' :
-                      gig.status === 'in_progress' ? 'bg-amber-50 text-amber-600' :
-                      gig.status === 'completed' ? 'bg-indigo-50 text-indigo-600' :
-                      'bg-zinc-100 text-zinc-500'
-                    }`}>
-                      {gig.status.replace('_', ' ')}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                icon={Briefcase}
-                title="Wow, such empty!"
-                subtitle="Time to host your first campus gig or accept one to earn sparks."
-                action="Explore Gigs"
-                onAction={() => router.push('/gigs')}
-              />
-            )}
-          </div>
+
 
           {/* ── My Moments & Campus Posts ──────────────── */}
           <div className="rounded-[24px] p-5 bg-white border border-zinc-100 shadow-sm">
@@ -614,7 +603,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                           <span>{post.likes_count || 0}</span>
                         </span>
                         <span className="text-[9px] opacity-80 font-medium">
-                          {post.created_at ? new Date(post.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}
+                          {formatPostDate(post.created_at)}
                         </span>
                       </div>
                     </div>

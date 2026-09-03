@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search, SlidersHorizontal, Check, Zap, Users, Rocket,
   Gamepad2, Music2, Code2, Palette, Trophy, Star, MessageSquare, Share2, LogOut
-} from 'lucide-react';
+} from '@/lib/icons';
 import { getCartoonAvatar } from '../../utils/avatar';
 import { toast } from 'react-hot-toast';
 import CreateCircleModal from './CreateCircleModal';
@@ -310,11 +310,9 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search communities..."
-          className="w-full pl-11 pr-12 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all"
-          style={{ background: '#f4f4f6', border: '1px solid #ebebed', color: '#09090b' }}
+          className="w-full pl-11 pr-12 py-3.5 rounded-2xl text-[13px] font-medium outline-none transition-all bg-white border border-neutral-200 text-neutral-900 focus:border-[#F05A00]"
         />
-        <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl flex items-center justify-center"
-          style={{ background: '#ebebed', color: '#71717a' }}>
+        <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl flex items-center justify-center bg-white border border-neutral-200 text-neutral-600 hover:text-[#F05A00] hover:border-[#F05A00]/40 transition-colors">
           <SlidersHorizontal size={14} />
         </button>
       </div>
@@ -323,10 +321,10 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
       <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
         {FILTERS.map(f => (
           <button key={f} onClick={() => setActiveFilter(f)}
-            className="flex-shrink-0 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95"
+            className="flex-shrink-0 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 shadow-xs"
             style={activeFilter === f
-              ? { background: '#F05A00', color: 'white', border: '1px solid transparent' }
-              : { background: '#f4f4f6', color: '#71717a', border: '1px solid #ebebed' }}>
+              ? { background: '#F05A00', color: '#ffffff', border: '1px solid #F05A00' }
+              : { background: '#ffffff', color: '#171717', border: '1px solid rgba(0, 0, 0, 0.12)' }}>
             {f}
           </button>
         ))}
@@ -424,39 +422,35 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
             <div
               key={circle.id}
               onClick={() => handleJoinClick(circle)}
-              className="rounded-2xl p-4 sm:p-4.5 flex items-center justify-between gap-3 transition-all cursor-pointer group"
-              style={{
-                background: '#ffffff',
-                border: '1px solid #f0f0f0',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-              }}>
+              className="bg-white border border-black/10 hover:border-[#F05A00] rounded-[26px] p-4 sm:p-4.5 flex items-center justify-between gap-3 transition-all cursor-pointer group shadow-xs hover:shadow-md"
+            >
               <div className="flex items-center gap-3.5 min-w-0">
                 {/* Category Icon */}
-                <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105"
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105"
                   style={{ background: categoryStyle.bg, border: `1px solid ${categoryStyle.border}` }}>
                   <CategoryIcon size={20} style={{ color: categoryStyle.color }} />
                 </div>
 
                 <div className="min-w-0 space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-[13px] font-black text-zinc-900 truncate">{circle.name}</h4>
+                    <h4 className="text-[13.5px] font-black text-black truncate">{circle.name}</h4>
                     <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider flex-shrink-0"
                       style={{ background: categoryStyle.bg, color: categoryStyle.color, border: `1px solid ${categoryStyle.border}` }}>
                       {circle.category}
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-zinc-400 font-medium truncate">{circle.desc || 'Campus Community'}</p>
+                  <p className="text-[11px] text-black/65 font-bold truncate">{circle.desc || 'Campus Community'}</p>
 
-                  <div className="flex items-center gap-1.5 pt-0.5 pb-1">
+                  <div className="flex items-center gap-1.5 pt-0.5 pb-0.5">
                     {circle.host_name ? (
                       <div className="flex items-center gap-1.5">
                         {circle.host_photo ? (
-                          <img src={circle.host_photo} alt={circle.host_name} className="w-3.5 h-3.5 rounded-full object-cover border border-zinc-200" />
+                          <img src={circle.host_photo} alt={circle.host_name} className="w-4 h-4 rounded-full object-cover border border-black/10" />
                         ) : (
-                          <div className="w-3.5 h-3.5 rounded-full bg-zinc-200" />
+                          <div className="w-4 h-4 rounded-full bg-orange-100" />
                         )}
-                        <span className="text-[9.5px] font-black text-zinc-500 uppercase tracking-wide">by {circle.host_name.split(' ')[0]}</span>
+                        <span className="text-[10px] font-black text-black/70 uppercase tracking-wide">by {circle.host_name.split(' ')[0]}</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-1">
@@ -468,18 +462,18 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                   </div>
 
                   <div className="flex items-center gap-2 pt-0.5">
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-500">
-                      <Users size={11} className="text-zinc-400" />
+                    <div className="flex items-center gap-1 text-[10.5px] font-bold text-black/70">
+                      <Users size={12} className="text-black/50" />
                       <span>{circle.member_count} members</span>
                     </div>
 
                     {circle.isPaid ? (
-                      <span className="text-[9.5px] font-black text-[#F05A00] px-2 py-0.5 rounded-full bg-orange-50 border border-orange-100 flex items-center gap-0.5">
+                      <span className="text-[9.5px] font-black text-[#F05A00] px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200 flex items-center gap-0.5">
                         <Zap size={9} className="fill-[#F05A00] text-[#F05A00]" />
                         {circle.price} Sparks
                       </span>
                     ) : (
-                      <span className="text-[9.5px] font-black text-emerald-600 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                      <span className="text-[9.5px] font-black text-emerald-700 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
                         Free
                       </span>
                     )}
@@ -505,7 +499,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                       toast.success('Community link copied!');
                     }
                   }}
-                  className="p-2 rounded-xl text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors cursor-pointer"
+                  className="p-2 rounded-xl text-black/50 hover:text-black hover:bg-orange-50 transition-colors cursor-pointer"
                   title="Share Community"
                 >
                   <Share2 size={15} />
@@ -514,14 +508,14 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                 {isHost ? (
                   <button
                     onClick={(e) => { e.stopPropagation(); setManageCircle(circle); }}
-                    className="px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-orange-50 text-[#F05A00] border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer"
+                    className="px-3 py-2 rounded-xl text-[10.5px] font-black uppercase tracking-wider bg-orange-50 text-[#F05A00] border border-orange-200 hover:bg-orange-100 transition-colors cursor-pointer"
                   >
                     Manage
                   </button>
                 ) : isJoined ? (
                   <button
                     onClick={(e) => handleLeaveCircle(circle, e)}
-                    className="p-2 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
+                    className="p-2 rounded-xl text-black/40 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
                     title="Leave Community"
                   >
                     <LogOut size={14} />
@@ -531,11 +525,13 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                 <button
                   onClick={(e) => { e.stopPropagation(); handleJoinClick(circle); }}
                   disabled={joiningId === circle.id}
-                  className="px-3.5 py-2 rounded-xl text-[11px] font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95 flex-shrink-0 flex items-center gap-1.5"
-                  style={isJoined
-                    ? { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }
-                    : { background: '#F05A00', color: 'white' }}>
-                  {joiningId === circle.id ? 'Joining...' : (isJoined ? 'OPEN' : (circle.isPaid ? `${circle.price} JOIN` : 'JOIN'))}
+                  className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-wide cursor-pointer transition-all active:scale-95 flex-shrink-0 flex items-center gap-1.5 shadow-xs ${
+                    isJoined
+                      ? 'bg-black text-white hover:bg-black/90'
+                      : 'bg-[#F05A00] text-white hover:bg-[#D94F00]'
+                  }`}
+                >
+                  {joiningId === circle.id ? 'Joining...' : (isJoined ? 'Open' : 'Join')}
                 </button>
               </div>
             </div>

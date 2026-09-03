@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import React, { useState } from 'react';
-import { X, CheckCircle2, XCircle, MessageCircle, User, Phone, Star } from 'lucide-react';
+import { X, CheckCircle2, XCircle, MessageCircle, User, Phone, Star } from '@/lib/icons';
 import Link from 'next/link';
 import { toast } from '../../lib/toast';
 import useSWR from 'swr';

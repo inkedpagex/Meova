@@ -7,8 +7,9 @@ import Skeleton from '../components/Skeleton';
 import {
   Heart, MessageCircle, Share2, Plus, Sparkles, Zap,
   Camera, X, Loader2, Send, MapPin, Search, ChevronRight,
-  Briefcase, Users, ArrowUpRight, ArrowUp
-} from 'lucide-react';
+  Briefcase, Users, ArrowUpRight, ArrowUp, MoreHorizontal, Trash2, Copy,
+  ShieldAlert, ShieldCheck
+} from '@/lib/icons';
 import useSWR from 'swr';
 import useSWRInfinite from 'swr/infinite';
 import imageCompression from 'browser-image-compression';
@@ -19,6 +20,9 @@ import { getUserAvatarUrl, getCartoonAvatar } from '@/utils/avatar';
 import { optimizeCloudinaryUrl, optimizeAvatarUrl } from '@/utils/imageOptimizer';
 import BookCoffeeButton from '@/features/users/BookCoffeeButton';
 import StoryCampaignBanner from '../components/StoryCampaignBanner';
+import { formatPostDate } from '@/utils/dateFormatter';
+import HostBadge from '@/components/HostBadge';
+import CustomSelect from '@/components/CustomSelect';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -82,17 +86,6 @@ export default function FeedClient() {
     revalidateOnFocus: true,
   });
 
-  const { data: flagsData } = useSWR('/api/feature-flags', fetcher, {
-    dedupingInterval: 15000,
-    revalidateOnFocus: false,
-  });
-  const isGigsEnabled = flagsData?.flags?.gigs === true;
-
-  const { data: gigsData } = useSWR(isGigsEnabled ? '/api/gigs' : null, fetcher, {
-    dedupingInterval: 12000,
-    revalidateOnFocus: false,
-  });
-
   const campusPosts = useMemo(() => {
     return postsPages ? postsPages.flatMap((page) => page.posts || []) : [];
   }, [postsPages]);
@@ -113,8 +106,45 @@ export default function FeedClient() {
   const [activeTab, setActiveTab] = useState('feed'); // 'feed' | 'peers' | 'gigs'
   const [showPostModal, setShowPostModal] = useState(false);
   const [selectedPostPhoto, setSelectedPostPhoto] = useState(null);
+  const [openMenuPostId, setOpenMenuPostId] = useState(null);
   const [deletingPostId, setDeletingPostId] = useState(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
+
+  // Campus Host Moderation State
+  const [hostModeratingPost, setHostModeratingPost] = useState(null);
+  const [hostDeleteReason, setHostDeleteReason] = useState('Spam / Fake Content');
+  const [isHostDeleting, setIsHostDeleting] = useState(false);
+
+  const isHostOrAdmin = currentUser && (
+    currentUser.role === 'verified_host' ||
+    currentUser.role === 'campus_lead' ||
+    currentUser.role === 'admin'
+  );
+
+  const handleHostModeratePost = async () => {
+    if (!hostModeratingPost) return;
+    setIsHostDeleting(true);
+    try {
+      const res = await fetch('/api/host/moderate-post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postId: hostModeratingPost.id,
+          action: 'delete',
+          reason: hostDeleteReason,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to moderate post');
+      toast.success('Post removed by Host moderation!');
+      mutate();
+      setHostModeratingPost(null);
+    } catch (err) {
+      toast.error(err.message || 'Error moderating post');
+    } finally {
+      setIsHostDeleting(false);
+    }
+  };
 
   // Instant 0ms Optimistic Like Handler
   const handleToggleLike = useCallback(async (postId, currentLikedState, forceLike = false) => {
@@ -338,35 +368,6 @@ export default function FeedClient() {
   }
 
   const campusPeers = people?.filter(u => u.id !== currentUser?.id) || [];
-  const gigs = gigsData?.gigs || [
-    {
-      id: 'gig-1',
-      title: 'UI/UX Designer for Campus App',
-      category: 'Design',
-      budget: '500',
-      duration: '3 Days',
-      company: 'Fest Team',
-      desc: 'Looking for a student designer to create dark-mode UI mockups for our campus app.'
-    },
-    {
-      id: 'gig-2',
-      title: 'Frontend Next.js Optimization',
-      category: 'Coding',
-      budget: '750',
-      duration: '1 Week',
-      company: 'Coding Club',
-      desc: 'Help integrate Tailwind CSS components and optimize mobile performance.'
-    },
-    {
-      id: 'gig-3',
-      title: 'Event Photography & Video Reels',
-      category: 'Creative',
-      budget: '400',
-      duration: '2 Days',
-      company: 'Media Circle',
-      desc: 'Shoot engaging Instagram reels during the university hackathon.'
-    }
-  ];
 
   return (
     <div className="max-w-[580px] mx-auto space-y-4 select-none animate-in fade-in duration-300">
@@ -385,40 +386,61 @@ export default function FeedClient() {
         </div>
       )}
 
-      {/* ── 1. CAMPUS STORIES (INSTAGRAM / BEREAL STYLE) ────────── */}
-      <div className="bg-white border border-zinc-200/80 rounded-3xl p-3.5 shadow-xs space-y-2.5">
-        <div className="flex items-center justify-between px-1">
+      {/* ── CAMPUS HOST WORKSPACE SHORTCUT (ONLY FOR HOSTS/ADMINS) ── */}
+      {isHostOrAdmin && (
+        <div className="bg-white border border-black/[0.06] rounded-[24px] p-3.5 px-4 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex items-center justify-between gap-3 anim-fade-in">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#F05A00] flex-shrink-0 shadow-2xs">
+              <ShieldCheck size={18} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs font-black text-black tracking-tight whitespace-nowrap">Host Workspace</span>
+                <HostBadge role={currentUser?.role} size="xs" />
+              </div>
+              <p className="text-[10.5px] text-black/65 font-bold truncate">Community & moderation tools</p>
+            </div>
+          </div>
+          <Link
+            href="/host"
+            className="whitespace-nowrap flex-shrink-0 px-4 py-2 rounded-full bg-[#F05A00] hover:bg-[#D94F00] text-white text-[11px] font-black uppercase tracking-wider shadow-xs shadow-orange-500/20 transition-all active:scale-95 cursor-pointer"
+          >
+            Open Hub
+          </Link>
+        </div>
+      )}
+
+      {/* ── 1. CAMPUS STORIES ────────── */}
+      <div className="bg-white border border-black/[0.06] rounded-[24px] py-3 px-4 space-y-2.5 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        <div className="flex items-center justify-between px-0.5">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-800">
-              Campus Stories
-            </span>
-            <span className="text-[10px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
-              {campusPeers.length || 0} Online
+            <span className="text-xs font-black text-black tracking-tight">
+              Stories
             </span>
           </div>
           <Link
             href="/discover"
             prefetch={true}
-            className="text-[11px] font-black text-[#F05A00] hover:text-[#D94F00] transition-colors flex items-center gap-0.5 active:scale-95"
+            className="text-[11px] font-bold text-[#F05A00] hover:text-[#D94F00] transition-colors active:scale-95 flex items-center gap-0.5"
           >
             <span>Explore</span>
-            <ChevronRight size={13} strokeWidth={2.5} />
+            <ChevronRight size={11} strokeWidth={2.5} />
           </Link>
         </div>
 
-        <div className="flex gap-3.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 scroll-smooth">
+        <div className="flex gap-3.5 overflow-x-auto no-scrollbar py-0.5 scroll-smooth">
           
           {/* User's Story Button */}
           <div 
             onClick={() => setShowPostModal(true)}
             className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group"
           >
-            <div className="relative w-14 h-14 rounded-full p-[2px] border-2 border-dashed border-[#F05A00] group-hover:scale-105 transition-transform">
-              <div className="w-full h-full rounded-full overflow-hidden bg-zinc-100">
+            <div className="relative w-[56px] h-[56px] rounded-full p-[2px] bg-orange-100 group-hover:bg-[#F05A00] transition-colors">
+              <div className="w-full h-full rounded-full overflow-hidden bg-neutral-100 ring-2 ring-white">
                 <img
                   src={optimizeAvatarUrl(getUserAvatarUrl(currentUser))}
                   alt=""
@@ -431,16 +453,16 @@ export default function FeedClient() {
                   }}
                 />
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-4.5 h-4.5 rounded-full bg-[#F05A00] text-white flex items-center justify-center border-2 border-white shadow-xs">
-                <Plus size={10} strokeWidth={3} />
+              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#F05A00] text-white flex items-center justify-center ring-2 ring-white shadow-xs">
+                <Plus size={11} strokeWidth={3} />
               </div>
             </div>
-            <span className="text-[10.5px] font-bold text-zinc-700 truncate max-w-[58px]">
+            <span className="text-[10.5px] font-medium text-neutral-700 truncate max-w-[56px] text-center">
               You
             </span>
           </div>
 
-          {/* Peer Stories (Top 15 Active Peers for performance) */}
+          {/* Peer Stories */}
           {campusPeers.slice(0, 15).map((peer) => {
             const firstName = peer.full_name?.split(' ')[0] || 'Student';
             return (
@@ -450,8 +472,8 @@ export default function FeedClient() {
                 prefetch={true}
                 className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group"
               >
-                <div className="relative w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-[#F05A00] via-orange-400 to-amber-400 group-hover:scale-105 transition-transform shadow-2xs">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-white p-[1px]">
+                <div className="relative w-[56px] h-[56px] rounded-full p-[2px] bg-gradient-to-tr from-[#F05A00] via-orange-400 to-amber-400 group-hover:scale-105 transition-transform shadow-2xs">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-white p-[1.5px]">
                     <img
                       src={optimizeAvatarUrl(getUserAvatarUrl(peer))}
                       alt=""
@@ -464,9 +486,9 @@ export default function FeedClient() {
                       }}
                     />
                   </div>
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-2xs" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white" />
                 </div>
-                <span className="text-[10.5px] font-bold text-zinc-800 truncate max-w-[58px]">
+                <span className="text-[10.5px] font-medium text-neutral-700 truncate max-w-[56px] text-center">
                   {firstName}
                 </span>
               </Link>
@@ -475,53 +497,36 @@ export default function FeedClient() {
         </div>
       </div>
 
-      {/* ── TOP 100 INSTAGRAM STORY CAMPAIGN BANNER (AUTO-HIDES ONCE 100 SLOTS FILLED) ── */}
-      <StoryCampaignBanner className="mb-3" />
-
-      {/* ── 2. QUICK SEGMENT TABS ────────────────────────────────── */}
-      <div className="flex items-center gap-2 px-0.5">
-        <button
-          type="button"
-          onClick={() => setActiveTab('feed')}
-          className={`flex-1 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
-            activeTab === 'feed'
-              ? 'bg-zinc-950 text-white shadow-md'
-              : 'bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-50'
-          }`}
-        >
-          Moments
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('peers')}
-          className={`flex-1 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
-            activeTab === 'peers'
-              ? 'bg-zinc-950 text-white shadow-md'
-              : 'bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-50'
-          }`}
-        >
-          Active Peers
-        </button>
-        {isGigsEnabled && (
+      {/* ── 2. TAB SWITCHER (ZERO GRAY — PURE WHITE & ORANGE) ────────── */}
+      <div className="flex gap-2.5">
+        {[
+          { key: 'feed', label: 'Moments' },
+          { key: 'peers', label: 'Active Peers' },
+        ].map(({ key, label }) => (
           <button
+            key={key}
             type="button"
-            onClick={() => setActiveTab('gigs')}
-            className={`flex-1 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
-              activeTab === 'gigs'
-                ? 'bg-zinc-950 text-white shadow-md'
-                : 'bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-50'
+            onMouseDown={(e) => { try { e.currentTarget.blur(); } catch {} }}
+            onClick={(e) => {
+              try { e.currentTarget.blur(); } catch {}
+              setActiveTab(key);
+            }}
+            className={`flex-1 py-2.5 rounded-2xl text-[12.5px] font-black outline-none focus:outline-none active:outline-none transition-all cursor-pointer active:scale-95 shadow-2xs ${
+              activeTab === key
+                ? 'bg-[#F05A00] text-white shadow-xs'
+                : 'bg-white text-black/75 border border-black/[0.07] hover:border-[#F05A00] hover:text-[#F05A00] hover:bg-orange-50/50'
             }`}
           >
-            Gigs
+            {label}
           </button>
-        )}
+        ))}
       </div>
 
       {/* ── 3. FEATURED ACTIVE STUDENTS (PEERS TAB) ─────────────── */}
       {activeTab === 'peers' && (
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-black text-zinc-500 uppercase tracking-wider">
+            <span className="text-xs font-black text-black/60 uppercase tracking-wider">
               Students on Campus
             </span>
             <Link href="/discover" className="text-xs font-black text-[#F05A00] flex items-center gap-0.5">
@@ -655,11 +660,14 @@ export default function FeedClient() {
                   authorPhoto: rawPost.author_photo || rawPost.authorPhoto,
                   authorBranch: rawPost.author_branch || rawPost.authorBranch || 'Student',
                   photoUrl: rawPost.media_urls?.[0] || rawPost.photoUrl || rawPost.image || '',
-                  caption: rawPost.content || rawPost.caption || '',
+                  caption: (rawPost.content || rawPost.caption || '')
+                    .replace(/[📍🏷️][^]*$/gu, '')
+                    .replace(/[\u{1F300}-\u{1FAD6}\u{2000}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '')
+                    .trim(),
                   category: rawPost.category || 'Showcase',
                   location: rawPost.location || 'Campus',
                   likes: rawPost.likes_count ?? rawPost.likes ?? 0,
-                  timeAgo: rawPost.created_at ? new Date(rawPost.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Just now',
+                  timeAgo: formatPostDate(rawPost.created_at),
                 };
 
                 const initialLiked = Boolean(rawPost.isLiked);
@@ -678,78 +686,116 @@ export default function FeedClient() {
                   <div
                     key={post.id}
                     style={{ contentVisibility: 'auto', containIntrinsicSize: '0 520px' }}
-                    className="bg-white border border-zinc-200/80 rounded-3xl overflow-hidden shadow-xs hover:border-zinc-300 transition-all duration-200"
+                    className="bg-white border border-neutral-100/90 rounded-3xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all"
                   >
-                    {/* Post Header */}
-                    <div className="flex items-center justify-between p-3.5 pb-2.5">
+                    {/* ── Card Header ───────────────────────────────── */}
+                    <div className="flex items-center justify-between px-4.5 py-3.5">
                       <div
                         onClick={() => {
                           if (isOwnPost) router.push('/profile');
                           else if (post.authorId) router.push(`/users/${post.authorId}`);
                         }}
-                        className="flex items-center gap-2.5 cursor-pointer group"
+                        className="flex items-center gap-3 cursor-pointer min-w-0 flex-1 group/author"
                       >
-                        <div className="w-9 h-9 rounded-full overflow-hidden bg-zinc-100 ring-2 ring-[#F05A00]/20 flex-shrink-0">
-                          <img
-                            src={optimizeAvatarUrl(post.authorPhoto || getCartoonAvatar(post.authorName))}
-                            alt=""
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            loading="lazy"
-                            decoding="async"
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src = getCartoonAvatar(post.authorName);
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <h4 className="text-xs font-black text-zinc-950 group-hover:text-[#F05A00] transition-colors">
-                              {post.authorName}
-                            </h4>
-                            <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-orange-50 text-[#F05A00] border border-orange-100">
-                              {post.authorBranch}
-                            </span>
+                        {/* Avatar with online dot */}
+                        <div className="relative flex-shrink-0">
+                          <div className="w-10 h-10 rounded-full overflow-hidden p-[1px] ring-1 ring-neutral-200/80 group-hover/author:ring-[#F05A00]/50 transition-all">
+                            <img
+                              src={optimizeAvatarUrl(post.authorPhoto || getCartoonAvatar(post.authorName))}
+                              alt=""
+                              className="w-full h-full rounded-full object-cover"
+                              loading="lazy"
+                              decoding="async"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = getCartoonAvatar(post.authorName);
+                              }}
+                            />
                           </div>
-                          <p className="text-[10px] font-semibold text-zinc-400">
-                            {post.location} · {post.timeAgo}
+                          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                        </div>
+
+                        {/* Name + meta */}
+                        <div className="min-w-0">
+                          <h4 className="text-[14px] font-bold text-neutral-900 group-hover/author:text-[#F05A00] transition-colors leading-tight truncate">
+                            {post.authorName}
+                          </h4>
+                          <p className="text-[11px] text-neutral-400 font-medium mt-0.5 flex items-center gap-1.5 leading-none truncate">
+                            <span>{post.authorBranch?.split('(')?.[0]?.trim() || 'Student'}</span>
+                            <span className="text-neutral-300">·</span>
+                            <span>{post.location || 'Campus'}</span>
+                            <span className="text-neutral-300">·</span>
+                            <span>{post.timeAgo}</span>
                           </p>
                         </div>
                       </div>
 
-                      {/* Quick Message CTA (hidden on own posts) */}
-                      {isOwnPost ? (
-                        <span className="text-[10px] font-black text-zinc-400 bg-zinc-100 px-2.5 py-1 rounded-full border border-zinc-200/60">
-                          You
-                        </span>
-                      ) : (
+                      {/* 3-dot menu */}
+                      <div className="relative flex-shrink-0 ml-2">
                         <button
                           type="button"
-                          onClick={() => {
-                            if (post.authorId) router.push(`/messages?uid=${post.authorId}`);
-                            else router.push('/messages');
-                          }}
-                          className="text-[11px] font-black text-[#F05A00] hover:text-white bg-orange-50 hover:bg-[#F05A00] border border-orange-200 px-3 py-1 rounded-full transition-all cursor-pointer shadow-2xs active:scale-95 flex items-center gap-1"
+                          onClick={() => setOpenMenuPostId(openMenuPostId === post.id ? null : post.id)}
+                          className="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer"
                         >
-                          <MessageCircle size={12} />
-                          <span>Message</span>
+                          <MoreHorizontal size={18} />
                         </button>
-                      )}
+
+                        {openMenuPostId === post.id && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-30"
+                              onClick={(e) => { e.stopPropagation(); setOpenMenuPostId(null); }}
+                            />
+                            <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-xl rounded-2xl p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150 border border-neutral-100">
+                              {isOwnPost ? (
+                                <button
+                                  type="button"
+                                  onClick={() => { setOpenMenuPostId(null); setDeletingPostId(post.id); }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12.5px] font-medium text-rose-500 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                                >
+                                  <Trash2 size={14} />
+                                  <span>Delete post</span>
+                                </button>
+                              ) : isHostOrAdmin ? (
+                                <button
+                                  type="button"
+                                  onClick={() => { setOpenMenuPostId(null); setHostModeratingPost(post); }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12.5px] font-medium text-rose-500 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                                >
+                                  <ShieldAlert size={14} />
+                                  <span>Moderate</span>
+                                </button>
+                              ) : null}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenMenuPostId(null);
+                                  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://meova.in';
+                                  navigator.clipboard.writeText(`${origin}/posts/${post.id}`);
+                                  toast.success('Link copied!');
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12.5px] font-medium text-neutral-600 hover:bg-neutral-50 rounded-xl transition-colors cursor-pointer"
+                              >
+                                <Copy size={14} />
+                                <span>Copy link</span>
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Photo Container with Double Tap to Like */}
+                    {/* ── Photo ───────────────────────────── */}
                     {post.photoUrl && (
                       <div
                         onClick={() => {
                           const now = Date.now();
                           const lastTap = lastTapRef.current[post.id] || 0;
                           if (now - lastTap < 300) {
-                            // Double Tap detected: trigger instant heart burst + like
                             handleToggleLike(post.id, isLiked, true);
                             lastTapRef.current[post.id] = 0;
                           } else {
                             lastTapRef.current[post.id] = now;
-                            // Open preview on single tap if no second tap within 300ms
                             setTimeout(() => {
                               if (Date.now() - (lastTapRef.current[post.id] || 0) >= 290 && lastTapRef.current[post.id] !== 0) {
                                 setSelectedPostPhoto(post);
@@ -757,91 +803,95 @@ export default function FeedClient() {
                             }, 300);
                           }
                         }}
-                        className="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-zinc-950 overflow-hidden cursor-pointer select-none"
+                        className="relative w-full aspect-[4/3] sm:aspect-[16/10] max-h-[560px] cursor-pointer select-none overflow-hidden bg-neutral-100"
                       >
                         <img
                           src={optimizeCloudinaryUrl(post.photoUrl, { width: 900 })}
                           alt=""
-                          className="w-full h-full object-cover hover:scale-[1.01] transition-transform duration-300"
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.01]"
                           loading="lazy"
                           decoding="async"
                         />
 
-                        {/* Floating Instagram-style Heart Burst */}
+                        {/* Category glass chip */}
+                        <span className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-black/40 text-white backdrop-blur-md border border-white/15 tracking-wide">
+                          {post.category || 'Showcase'}
+                        </span>
+
+                        {/* Double-tap heart burst */}
                         {floatingHearts[post.id] && (
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                             <Heart
-                              size={80}
+                              size={84}
                               className="fill-rose-500 text-white drop-shadow-2xl animate-in zoom-in-50 fade-in duration-200"
-                              style={{
-                                filter: 'drop-shadow(0 10px 25px rgba(244,63,94,0.65))',
-                              }}
+                              style={{ filter: 'drop-shadow(0 12px 35px rgba(244,63,94,0.8))' }}
                             />
                           </div>
                         )}
                       </div>
                     )}
 
-                    {/* Actions & Caption */}
-                    <div className="p-3.5 pt-2.5 space-y-2">
+                    {/* ── Action Bar & Caption ────────────────────────── */}
+                    <div className="px-4.5 pt-3 pb-4 space-y-2.5">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {/* Instant 0ms Like Button */}
+                        <div className="flex items-center gap-4">
+
+                          {/* Like */}
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleLike(post.id, isLiked);
-                            }}
-                            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer select-none active:scale-90 ${
-                              isLiked
-                                ? 'bg-rose-50 text-rose-600 border border-rose-200 shadow-2xs'
-                                : 'bg-zinc-100 text-zinc-600 hover:bg-rose-50 hover:text-rose-600 border border-transparent'
-                            }`}
+                            onClick={(e) => { e.stopPropagation(); handleToggleLike(post.id, isLiked); }}
+                            className="flex items-center gap-1.5 select-none active:scale-90 transition-transform cursor-pointer group/like"
                           >
                             <Heart
-                              size={14}
-                              className={`transition-transform duration-150 ${
-                                isLiked ? 'fill-current text-rose-600' : 'text-zinc-600'
-                              } ${animatingHearts[post.id] ? 'scale-130' : 'scale-100'}`}
+                              size={21}
+                              className={`transition-all duration-150 ${
+                                isLiked
+                                  ? 'fill-rose-500 text-rose-500'
+                                  : 'text-neutral-400 group-hover/like:text-rose-400'
+                              } ${animatingHearts[post.id] ? 'scale-125' : 'scale-100'}`}
                             />
-                            <span className="tabular-nums font-black">{currentLikes}</span>
+                            {currentLikes > 0 && (
+                              <span className={`text-[12.5px] font-bold tabular-nums leading-none ${isLiked ? 'text-rose-500' : 'text-neutral-600'}`}>
+                                {currentLikes}
+                              </span>
+                            )}
                           </button>
-                        </div>
 
-                        <div className="flex items-center gap-1">
-                          {post.authorId === currentUser?.id && (
-                            <button
-                              type="button"
-                              onClick={() => setDeletingPostId(post.id)}
-                              className="p-1 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors cursor-pointer"
-                              title="Delete Post"
-                            >
-                              <X size={14} />
-                            </button>
-                          )}
+                          {/* Share */}
                           <button
                             type="button"
                             onClick={() => {
+                              const origin = typeof window !== 'undefined' ? window.location.origin : 'https://meova.in';
+                              const postUrl = `${origin}/posts/${post.id}`;
                               if (navigator.share) {
-                                navigator.share({ title: post.authorName, text: post.caption, url: window.location.href }).catch(() => {});
+                                navigator.share({
+                                  title: `${post.authorName} on Meova`,
+                                  text: post.caption || `Check out ${post.authorName}'s moment on Meova`,
+                                  url: postUrl,
+                                }).catch(() => {});
                               } else {
-                                navigator.clipboard.writeText(window.location.href);
-                                toast.success('Link copied to clipboard');
+                                navigator.clipboard.writeText(postUrl);
+                                toast.success('Link copied!');
                               }
                             }}
-                            className="p-1 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-full transition-colors cursor-pointer"
+                            className="text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer active:scale-90"
                             title="Share"
                           >
-                            <Share2 size={14} />
+                            <Share2 size={20} />
                           </button>
                         </div>
                       </div>
 
+                      {/* Caption */}
                       {post.caption && (
-                        <p className="text-xs text-zinc-800 leading-relaxed font-medium">
-                          <span className="font-black text-zinc-950 mr-1.5">{post.authorName}</span>
-                          {post.caption}
+                        <p className="text-[13.5px] text-neutral-800 leading-snug">
+                          <span
+                            onClick={() => isOwnPost ? router.push('/profile') : router.push(`/users/${post.authorId}`)}
+                            className="font-bold text-neutral-900 hover:text-[#F05A00] cursor-pointer mr-1.5"
+                          >
+                            {post.authorName}
+                          </span>
+                          <span>{post.caption}</span>
                         </p>
                       )}
                     </div>
@@ -868,100 +918,23 @@ export default function FeedClient() {
         </div>
       )}
 
-      {/* ── 5. GIGS DECK (GIGS TAB) ──────────────────────────────── */}
-      {activeTab === 'gigs' && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-black text-zinc-500 uppercase tracking-wider">
-              Earn Sparks on Campus
-            </span>
-            <Link href="/gigs?action=post" className="text-xs font-black text-[#F05A00] flex items-center gap-0.5">
-              <span>Post a Gig</span>
-              <ChevronRight size={13} />
-            </Link>
-          </div>
 
-          {gigs.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-zinc-200/80 p-7 text-center space-y-3.5 shadow-xs">
-              <div className="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 text-[#F05A00] flex items-center justify-center mx-auto shadow-2xs">
-                <Briefcase size={24} />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-black text-zinc-950">No Campus Gigs Active Yet</h3>
-                <p className="text-xs text-zinc-500 font-medium max-w-xs mx-auto leading-relaxed">
-                  Be the first student to post a task, project, or freelance gig on campus and earn Sparks!
-                </p>
-              </div>
-              <div className="flex items-center justify-center gap-2 pt-1">
-                <Link
-                  href="/gigs?action=post"
-                  className="px-5 py-2.5 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white text-xs font-black shadow-md shadow-orange-500/20 active:scale-95 transition-all inline-flex items-center gap-1.5"
-                >
-                  <Plus size={13} />
-                  <span>Post a Gig</span>
-                </Link>
-                <Link
-                  href="/gigs"
-                  className="px-4 py-2.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-black active:scale-95 transition-all inline-flex items-center gap-1"
-                >
-                  <span>Browse Gigs</span>
-                </Link>
-              </div>
-            </div>
-          ) : (
-            gigs.map((gig) => (
-              <div
-                key={gig.id}
-                onClick={() => router.push('/gigs')}
-                className="bg-white border border-zinc-200/80 hover:border-orange-300 rounded-3xl p-4.5 shadow-xs transition-all duration-200 cursor-pointer space-y-2.5 group"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[9.5px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-orange-50 text-[#F05A00] border border-orange-200">
-                    {gig.category}
-                  </span>
-                  <span className="text-xs font-black text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
-                    {gig.budget} <Zap size={11} className="fill-current text-amber-500" />
-                  </span>
-                </div>
-
-                <div>
-                  <h4 className="text-xs sm:text-sm font-black text-zinc-950 group-hover:text-[#F05A00] transition-colors">
-                    {gig.title}
-                  </h4>
-                  <p className="text-xs text-zinc-500 font-medium line-clamp-2 mt-1 leading-relaxed">
-                    {gig.desc}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between border-t border-zinc-100 pt-2.5">
-                  <span className="text-[11px] font-bold text-zinc-400">
-                    by {gig.company} · {gig.duration}
-                  </span>
-                  <span className="text-xs font-black text-[#F05A00] flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
-                    Apply Now <ChevronRight size={12} strokeWidth={3} />
-                  </span>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
 
       {/* ── CREATE POST MODAL ──────────────────────────────────── */}
       {showPostModal && (
-        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 anim-fade-in">
-          <div className="w-full max-w-md bg-white rounded-3xl border border-zinc-200 p-5 shadow-2xl space-y-3.5 relative">
-            <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-orange-50 text-[#F05A00] flex items-center justify-center font-black">
-                  <Camera size={14} />
-                </div>
-                <h3 className="text-sm font-black text-zinc-950">Share Campus Moment</h3>
-              </div>
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 anim-fade-in">
+          <div className="w-full max-w-md bg-white rounded-[32px] border border-black/10 p-6 shadow-2xl space-y-4 relative">
+            <div className="flex items-center justify-between pb-3 border-b border-black/5">
+              <h3 className="text-base font-black text-black">Share Campus Moment</h3>
               <button
                 type="button"
-                onClick={() => setShowPostModal(false)}
-                className="p-1 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-full transition-colors cursor-pointer"
+                onClick={() => {
+                  setShowPostModal(false);
+                  setPostFilePreview('');
+                  setPostFile(null);
+                  setPostCaption('');
+                }}
+                className="w-8 h-8 rounded-full bg-orange-50 text-black flex items-center justify-center hover:bg-orange-100 transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -976,12 +949,12 @@ export default function FeedClient() {
             />
 
             {postFilePreview ? (
-              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-zinc-950">
+              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-black/5 border border-black/10">
                 <img src={postFilePreview} alt="" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => setPostFilePreview('')}
-                  className="absolute top-2.5 right-2.5 p-1 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                  className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-black/70 text-white hover:bg-black transition-colors"
                 >
                   <X size={13} />
                 </button>
@@ -991,20 +964,20 @@ export default function FeedClient() {
                 type="button"
                 onClick={() => fileInputPostRef.current?.click()}
                 disabled={postFileUploading}
-                className="w-full aspect-[4/3] rounded-2xl border-2 border-dashed border-zinc-200 hover:border-[#F05A00] bg-zinc-50/50 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group"
+                className="w-full aspect-[4/3] rounded-2xl border-2 border-dashed border-black/15 hover:border-[#F05A00] bg-orange-50/20 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group"
               >
                 {postFileUploading ? (
-                  <div className="flex flex-col items-center gap-1.5 text-zinc-500">
+                  <div className="flex flex-col items-center gap-1.5 text-black/70">
                     <Loader2 className="w-5 h-5 animate-spin text-[#F05A00]" />
-                    <span className="text-xs font-bold">Uploading...</span>
+                    <span className="text-xs font-black">Uploading...</span>
                   </div>
                 ) : (
                   <>
-                    <div className="w-10 h-10 rounded-full bg-orange-50 text-[#F05A00] flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <Plus size={18} strokeWidth={2.5} />
+                    <div className="w-11 h-11 rounded-full bg-orange-50 text-[#F05A00] border border-orange-200 flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
+                      <Plus size={20} strokeWidth={2.5} />
                     </div>
-                    <span className="text-xs font-black text-zinc-800">Upload Campus Photo</span>
-                    <span className="text-[10px] font-semibold text-zinc-400">PNG, JPG up to 10MB</span>
+                    <span className="text-xs font-black text-black">Upload Campus Photo</span>
+                    <span className="text-[10.5px] font-bold text-black/60">PNG, JPG up to 10MB</span>
                   </>
                 )}
               </button>
@@ -1016,7 +989,7 @@ export default function FeedClient() {
                 onChange={(e) => setPostCaption(e.target.value)}
                 placeholder="What's happening on campus?"
                 rows={3}
-                className="w-full p-3 rounded-2xl bg-zinc-50 border border-zinc-200 text-xs font-medium text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#F05A00] resize-none"
+                className="w-full p-3.5 rounded-2xl bg-white border border-black/10 text-xs font-bold text-black placeholder:text-black/40 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 resize-none shadow-xs"
               />
             </div>
 
@@ -1024,9 +997,9 @@ export default function FeedClient() {
               type="button"
               onClick={handlePublishPost}
               disabled={postUploading || !postFilePreview}
-              className="w-full py-3 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] disabled:opacity-40 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-orange-500/25 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-full bg-[#F05A00] hover:bg-[#D94F00] disabled:opacity-40 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-orange-500/25 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
             >
-              {postUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send size={13} />}
+              {postUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send size={14} />}
               <span>Publish Post</span>
             </button>
           </div>
@@ -1036,34 +1009,34 @@ export default function FeedClient() {
       {/* ── DELETE POST CONFIRMATION MODAL ────────────────────── */}
       {deletingPostId && (
         <div 
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm anim-fade-in"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm anim-fade-in"
           onClick={() => !isDeletingPost && setDeletingPostId(null)}
         >
           <div 
-            className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-zinc-100 space-y-4 anim-scale-in"
+            className="w-full max-w-sm bg-white rounded-[32px] p-6 shadow-2xl border border-black/10 space-y-4 anim-scale-in"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-black text-zinc-950">Delete Campus Moment?</h3>
+              <h3 className="text-sm sm:text-base font-black text-black">Delete Campus Moment?</h3>
               <button 
                 type="button"
                 onClick={() => !isDeletingPost && setDeletingPostId(null)}
-                className="p-1 text-zinc-400 hover:text-zinc-600 rounded-full hover:bg-zinc-100 cursor-pointer"
+                className="w-8 h-8 rounded-full bg-orange-50 text-black flex items-center justify-center hover:bg-orange-100 cursor-pointer transition-colors"
               >
                 <X size={16} />
               </button>
             </div>
 
-            <p className="text-xs text-zinc-600 font-medium">
+            <p className="text-xs text-black/70 font-medium leading-relaxed">
               Are you sure you want to delete this moment? This cannot be undone.
             </p>
 
-            <div className="flex gap-2 pt-1">
+            <div className="flex gap-2.5 pt-1">
               <button
                 type="button"
                 disabled={isDeletingPost}
                 onClick={() => setDeletingPostId(null)}
-                className="flex-1 py-2.5 rounded-2xl border border-zinc-200 text-zinc-700 text-xs font-black uppercase tracking-wider hover:bg-zinc-50 transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-full border border-black/10 text-black text-xs font-black uppercase tracking-wider hover:bg-orange-50 transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -1071,12 +1044,85 @@ export default function FeedClient() {
                 type="button"
                 disabled={isDeletingPost}
                 onClick={confirmDeletePost}
-                className="flex-1 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-rose-600/20 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-rose-600/20 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isDeletingPost ? (
                   <Loader2 size={13} className="animate-spin" />
                 ) : (
                   <span>Delete</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── HOST MODERATE POST MODAL ───────────────────────── */}
+      {hostModeratingPost && (
+        <div 
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm anim-fade-in"
+          onClick={() => !isHostDeleting && setHostModeratingPost(null)}
+        >
+          <div 
+            className="w-full max-w-sm bg-white border border-black/10 rounded-[32px] p-6 shadow-2xl space-y-4 anim-scale-in text-black"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-rose-600">
+                <ShieldAlert size={20} />
+                <h3 className="text-sm sm:text-base font-black text-black">Moderate Post (Campus Host)</h3>
+              </div>
+              <button 
+                type="button"
+                onClick={() => !isHostDeleting && setHostModeratingPost(null)}
+                className="w-8 h-8 rounded-full bg-orange-50 text-black flex items-center justify-center hover:bg-orange-100 cursor-pointer transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="text-xs text-black/70 font-medium leading-relaxed">
+              Author: <strong className="text-black font-black">{hostModeratingPost.authorName || 'Student'}</strong>
+              <br />
+              This will permanently delete this post from the campus feed and record your action in the audit logs.
+            </p>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-black text-black uppercase tracking-wider">
+                Select Reason
+              </label>
+              <CustomSelect
+                value={hostDeleteReason}
+                onChange={setHostDeleteReason}
+                options={[
+                  'Spam / Fake Content',
+                  'Inappropriate / Adult Media',
+                  'Harassment / Abusive Language',
+                  'Misleading / Scam',
+                  'Community guideline violation',
+                ]}
+              />
+            </div>
+
+            <div className="flex gap-2.5 pt-1">
+              <button
+                type="button"
+                disabled={isHostDeleting}
+                onClick={() => setHostModeratingPost(null)}
+                className="flex-1 py-2.5 rounded-full border border-black/10 text-black text-xs font-black uppercase tracking-wider hover:bg-orange-50 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isHostDeleting}
+                onClick={handleHostModeratePost}
+                className="flex-1 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-rose-600/20 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {isHostDeleting ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <span>Delete (Host)</span>
                 )}
               </button>
             </div>

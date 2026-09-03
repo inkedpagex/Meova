@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { joinCircleAction, leaveCircleAction } from './circles.actions';
-import { Plus, Check, Loader2 } from 'lucide-react';
+import { Plus, Check, Loader2 } from '@/lib/icons';
 import { useRouter } from 'next/navigation';
 
 export default function CircleJoinButton({ circleId, userId, isInitialMember, accentColor }) {

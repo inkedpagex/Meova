@@ -1,10 +1,10 @@
-// Client-side interactive Logout button.
+﻿// Client-side interactive Logout button.
 'use client';
 
 import React from 'react';
 import { useAuth } from './useAuth';
 import { useRouter } from 'next/navigation';
-import { LogOut, Loader2 } from 'lucide-react';
+import { LogOut, Loader2 } from '@/lib/icons';
 
 export default function LogoutButton() {
   const router = useRouter();

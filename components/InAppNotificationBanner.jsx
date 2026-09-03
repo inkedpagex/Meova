@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Zap, MessageSquare, Calendar, Users, Briefcase, X, Phone, PhoneOff, ArrowRight } from 'lucide-react';
+import { Bell, Zap, MessageSquare, Calendar, Users, Briefcase, X, Phone, PhoneOff, ArrowRight } from '@/lib/icons';
 import { supabase } from '../lib/supabase/client';
 import { useUserContext } from './providers/UserProvider';
 import { getCartoonAvatar } from '../utils/avatar';

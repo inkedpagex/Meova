@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { GraduationCap, Building2, BookOpen, PenLine, AtSign, ArrowRight, ArrowLeft, ChevronDown } from 'lucide-react';
+import { GraduationCap, Building2, BookOpen, PenLine, AtSign, ArrowRight, ArrowLeft, ChevronDown } from '@/lib/icons';
 import UniversitySelector from '../../components/UniversitySelector';
 
 const YEARS = ['1st', '2nd', '3rd', '4th', '5th'];

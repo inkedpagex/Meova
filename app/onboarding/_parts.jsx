@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import React, { useState, useRef, useCallback } from 'react';
-import { Camera, User, AtSign, CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
+import { Camera, User, AtSign, CheckCircle2, XCircle, Loader2, ArrowRight } from '@/lib/icons';
 import imageCompression from 'browser-image-compression';
 
 const INTEREST_TAGS = [

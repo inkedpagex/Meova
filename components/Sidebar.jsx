@@ -3,15 +3,16 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-  Home, Search, Users, User, LogIn, Wallet, Shield, Plus, Bell, Zap, MessageSquare,
-  LayoutDashboard, CreditCard, ArrowUpRight, ShieldCheck, FileText, Settings, MoreHorizontal, Calendar, BookOpen,
-  PanelLeftClose, PanelLeftOpen
-} from 'lucide-react';
 import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import { supabase } from '../lib/supabase/client';
 import { useUserContext } from './providers/UserProvider';
 import CreateMenuModal from './CreateMenuModal';
+
+/* Remix Icon helper — renders a single ri-* icon */
+const RiIcon = ({ name, size = 20, className = '' }) => (
+  <i className={`${name} ${className}`} style={{ fontSize: size, lineHeight: 1, display: 'inline-flex', alignItems: 'center' }} />
+);
+
 
 const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy', '/offline', '/gla-university'];
 
@@ -280,24 +281,25 @@ export default function Sidebar({ user: propUser }) {
   };
 
   const NAV = [
-    { href: '/',              label: 'Home',          Icon: Home },
-    { href: '/discover',      label: 'Discover',      Icon: Search },
-    { href: '/messages',      label: 'Messages',      Icon: MessageSquare },
-    { href: '/bookings',      label: 'My Bookings',   Icon: Calendar, badge: pendingBookingsCount },
-    { href: '/notifications', label: 'Notifications', Icon: Bell },
-    { href: '/circles',       label: 'Communities',   Icon: Users },
-    ...(user ? [{ href: '/wallet', label: 'Wallet', Icon: Wallet }] : []),
-    { href: '/profile',       label: 'Profile',       Icon: User },
-    ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin', Icon: Shield }] : []),
+    { href: '/',              label: 'Home',          iconLine: 'ri-home-5-line',          iconFill: 'ri-home-5-fill' },
+    { href: '/discover',      label: 'Discover',      iconLine: 'ri-compass-3-line',        iconFill: 'ri-compass-3-fill' },
+    { href: '/messages',      label: 'Messages',      iconLine: 'ri-chat-3-line',           iconFill: 'ri-chat-3-fill' },
+    { href: '/bookings',      label: 'My Bookings',   iconLine: 'ri-calendar-schedule-line', iconFill: 'ri-calendar-schedule-fill', badge: pendingBookingsCount },
+    { href: '/notifications', label: 'Notifications', iconLine: 'ri-notification-3-line',   iconFill: 'ri-notification-3-fill' },
+    { href: '/circles',       label: 'Communities',   iconLine: 'ri-group-3-line',          iconFill: 'ri-group-3-fill' },
+    ...(user ? [{ href: '/wallet', label: 'Wallet', iconLine: 'ri-wallet-3-line', iconFill: 'ri-wallet-3-fill' }] : []),
+    { href: '/profile',       label: 'Profile',       iconLine: 'ri-user-3-line',           iconFill: 'ri-user-3-fill' },
+    ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin', iconLine: 'ri-shield-star-line', iconFill: 'ri-shield-star-fill' }] : []),
   ];
 
   const MOBILE_NAV = [
-    { href: '/',         label: 'Home',     Icon: Home },
-    { href: '/discover', label: 'Discover', Icon: Search },
-    { href: '/create',   label: 'Plus',     Icon: Plus, isCenter: true },
-    { href: '/bookings', label: 'Bookings', Icon: Calendar, badge: pendingBookingsCount },
-    { href: '/profile',  label: 'Profile',  Icon: User },
+    { href: '/',         label: 'Home',     iconLine: 'ri-home-5-line',    iconFill: 'ri-home-5-fill' },
+    { href: '/discover', label: 'Discover', iconLine: 'ri-compass-3-line',  iconFill: 'ri-compass-3-fill' },
+    { href: '/create',   label: 'Plus',     iconLine: 'ri-add-line',        iconFill: 'ri-add-fill', isCenter: true },
+    { href: '/bookings', label: 'Bookings', iconLine: 'ri-calendar-schedule-line', iconFill: 'ri-calendar-schedule-fill', badge: pendingBookingsCount },
+    { href: '/profile',  label: 'Profile',  iconLine: 'ri-user-3-line',    iconFill: 'ri-user-3-fill' },
   ];
+
 
   const avatarSrc = getUserAvatarUrl(user);
 
@@ -306,7 +308,7 @@ export default function Sidebar({ user: propUser }) {
   return (
     <>
       {/* ── Mobile top header ────────────────── */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[58px] flex items-center justify-between px-4 bg-white/90 backdrop-blur-xl border-b border-zinc-100 shadow-2xs">
+      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[58px] flex items-center justify-between px-4 bg-white/95 backdrop-blur-xl border-b border-neutral-100 shadow-[0_1px_8px_rgba(0,0,0,0.06)]">
         <Link href="/" className="flex items-center gap-2 group">
           <img src="/logo.png" alt="Meova" className="h-9 w-auto object-contain" />
         </Link>
@@ -317,9 +319,9 @@ export default function Sidebar({ user: propUser }) {
               {!isAdminRoute && (
                 <Link 
                   href="/wallet" 
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-orange-50 text-[#F05A00] border border-orange-100 hover:bg-orange-100 transition-all duration-200 active:scale-95 shadow-2xs"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-orange-50 text-[#F05A00] border border-orange-100 hover:bg-orange-100 transition-all duration-200 active:scale-95 shadow-sm"
                 >
-                  <Zap size={13} className="fill-[#F05A00] text-[#F05A00]" />
+                  <i className="ri-flashlight-fill" style={{ fontSize: 13, color: '#F05A00' }} />
                   <span className="tabular-nums font-black">{sparks.toLocaleString()}</span>
                 </Link>
               )}
@@ -330,11 +332,11 @@ export default function Sidebar({ user: propUser }) {
                 className={`relative p-2 rounded-full transition-all ${
                   pathname === '/notifications' 
                     ? 'text-[#F05A00] bg-orange-50' 
-                    : 'text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100/80'
+                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
                 }`}
                 title="Notifications"
               >
-                <Bell size={20} className={unreadCount > 0 ? 'text-[#F05A00] fill-orange-50' : ''} strokeWidth={2} />
+                <i className={`${ unreadCount > 0 ? 'ri-notification-3-fill text-[#F05A00]' : pathname === '/notifications' ? 'ri-notification-3-fill' : 'ri-notification-3-line' }`} style={{ fontSize: 20 }} />
                 {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[#F05A00] text-white text-[8px] font-black border border-white px-0.5">
                     {unreadCount > 9 ? '9+' : unreadCount}
@@ -348,11 +350,11 @@ export default function Sidebar({ user: propUser }) {
                 className={`relative p-2 rounded-full transition-all ${
                   pathname === '/messages' 
                     ? 'text-[#F05A00] bg-orange-50' 
-                    : 'text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100/80'
+                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
                 }`}
                 title="Messages"
               >
-                <MessageSquare size={20} className={unreadMsgCount > 0 ? 'text-[#F05A00] fill-orange-50' : ''} strokeWidth={2} />
+                <i className={`${ unreadMsgCount > 0 ? 'ri-chat-3-fill text-[#F05A00]' : pathname === '/messages' ? 'ri-chat-3-fill' : 'ri-chat-3-line' }`} style={{ fontSize: 20 }} />
                 {unreadMsgCount > 0 && (
                   <span className="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[#F05A00] text-white text-[8px] font-black border border-white px-0.5">
                     {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
@@ -363,7 +365,7 @@ export default function Sidebar({ user: propUser }) {
           ) : (
             <Link 
               href="/login"
-              className="px-4 py-1.5 rounded-full text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] active:scale-95 transition-all shadow-2xs"
+              className="px-4 py-1.5 rounded-full text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] active:scale-95 transition-all shadow-sm"
             >
               Log in
             </Link>
@@ -373,7 +375,7 @@ export default function Sidebar({ user: propUser }) {
 
       {/* ── Desktop sidebar ──────────────────── */}
       <aside 
-        className="hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 transition-all duration-300 select-none bg-white border-r border-zinc-100"
+        className="hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 transition-all duration-300 select-none bg-white border-r border-neutral-100"
         style={{ 
           width: isCollapsed ? 72 : 230, 
           padding: isCollapsed ? '24px 10px' : '24px 16px' 
@@ -388,9 +390,9 @@ export default function Sidebar({ user: propUser }) {
               <button 
                 onClick={toggleCollapse} 
                 title="Expand Sidebar"
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-[#F05A00] hover:bg-orange-50 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-[#F05A00] hover:bg-orange-50 transition-colors cursor-pointer"
               >
-                <PanelLeftOpen size={18} strokeWidth={2} />
+                <i className="ri-layout-left-2-line" style={{ fontSize: 18 }} />
               </button>
             </>
           ) : (
@@ -401,9 +403,9 @@ export default function Sidebar({ user: propUser }) {
               <button 
                 onClick={toggleCollapse} 
                 title="Collapse Sidebar"
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-800 hover:bg-zinc-100 transition-colors cursor-pointer flex-shrink-0"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer flex-shrink-0"
               >
-                <PanelLeftClose size={18} strokeWidth={2} />
+                <i className="ri-layout-left-line" style={{ fontSize: 18 }} />
               </button>
             </>
           )}
@@ -411,7 +413,7 @@ export default function Sidebar({ user: propUser }) {
 
         {/* Navigation Items */}
         <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar">
-          {NAV.map(({ href, label, Icon, badge }) => {
+          {NAV.map(({ href, label, iconLine, iconFill, badge }) => {
             if (href === '/profile' && !user) return null;
             const active = pendingPath ? pendingPath === href : isActive(href);
             const isNotif = label === 'Notifications';
@@ -420,7 +422,8 @@ export default function Sidebar({ user: propUser }) {
             const hasUnreadMsgs = isMessages && unreadMsgCount > 0;
             const hasBadge = badge && badge > 0;
 
-            const handleLinkClick = () => {
+            const handleLinkClick = (e) => {
+              try { e?.currentTarget?.blur(); } catch {}
               setPendingPath(href);
               if (typeof window !== 'undefined' && 'vibrate' in navigator) {
                 try { navigator.vibrate(10); } catch {}
@@ -433,15 +436,16 @@ export default function Sidebar({ user: propUser }) {
                   key={href} 
                   href={href}
                   prefetch={true}
+                  onMouseDown={(e) => { try { e.currentTarget.blur(); } catch {} }}
                   onClick={handleLinkClick}
                   title={label}
-                  className={`relative flex items-center justify-center w-12 h-11 mx-auto rounded-xl transition-all active:scale-90 ${
+                  className={`relative flex items-center justify-center w-12 h-11 mx-auto rounded-xl outline-none focus:outline-none active:outline-none transition-all active:scale-90 ${
                     active 
-                      ? 'bg-orange-50 text-[#F05A00] border border-orange-100 shadow-xs' 
-                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
+                      ? 'bg-orange-50 text-[#F05A00] border border-orange-200/60 shadow-xs' 
+                      : 'text-black/70 hover:text-black hover:bg-orange-50/50'
                   }`}
                 >
-                  <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+                  <i className={active ? iconFill : iconLine} style={{ fontSize: 20 }} />
                   {(hasUnread || hasUnreadMsgs || hasBadge) && (
                     <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-[#F05A00] ring-2 ring-white" />
                   )}
@@ -454,15 +458,16 @@ export default function Sidebar({ user: propUser }) {
                 key={href} 
                 href={href}
                 prefetch={true}
+                onMouseDown={(e) => { try { e.currentTarget.blur(); } catch {} }}
                 onClick={handleLinkClick}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all active:scale-95 ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-bold outline-none focus:outline-none active:outline-none transition-all active:scale-95 ${
                   active 
-                    ? 'bg-orange-50 text-[#F05A00] border border-orange-100 font-black shadow-xs' 
-                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
+                    ? 'bg-orange-50 text-[#F05A00] border border-orange-200/60 font-black shadow-xs' 
+                    : 'text-black/75 hover:text-black hover:bg-orange-50/50'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <Icon size={18} strokeWidth={active ? 2.5 : 2} className={`flex-shrink-0 ${active ? 'text-[#F05A00]' : ''}`} />
+                  <i className={`${active ? iconFill : iconLine} flex-shrink-0`} style={{ fontSize: 18 }} />
                   <span className="truncate">{label}</span>
                 </div>
                 {hasUnread && (
@@ -491,7 +496,7 @@ export default function Sidebar({ user: propUser }) {
         </nav>
 
         {/* Bottom Profile / Login */}
-        <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 16, marginTop: 12 }}>
+        <div style={{ borderTop: '1px solid #f5f5f5', paddingTop: 16, marginTop: 12 }}>
           {user ? (
             <Link 
               href="/profile" 
@@ -515,10 +520,10 @@ export default function Sidebar({ user: propUser }) {
               </div>
               {!isCollapsed && (
                 <div className="min-w-0">
-                  <p className="text-xs font-black truncate text-zinc-900 group-hover:text-[#F05A00] transition-colors">
+                  <p className="text-xs font-black truncate text-neutral-900 group-hover:text-[#F05A00] transition-colors">
                     {user.full_name || (user.email || 'user').split('@')[0]}
                   </p>
-                  <p className="text-[10px] truncate text-zinc-400 font-semibold">
+                  <p className="text-[10px] truncate text-neutral-400 font-semibold">
                     {isAdminRoute ? 'Super Admin' : `${user?.year ? (user.year.includes('Year') ? user.year : `${user.year} Year`) : '1st Year'} · ${user.branch || 'General'}`}
                   </p>
                 </div>
@@ -532,23 +537,23 @@ export default function Sidebar({ user: propUser }) {
                 isCollapsed ? 'px-0' : 'px-4'
               }`}
             >
-              <LogIn size={15} /> {!isCollapsed && <span>Log in</span>}
+              <i className="ri-login-circle-line" style={{ fontSize: 15 }} /> {!isCollapsed && <span>Log in</span>}
             </Link>
           )}
         </div>
       </aside>
 
-      {/* ── Mobile bottom tab bar ───────────── */}
+      {/* ── Mobile bottom tab bar ───────────────── */}
       {!(AUTH_PATHS.includes(pathname) || pathname?.startsWith('/admin') || isKeyboardOpen) && (
         <nav 
           suppressHydrationWarning
-          className="md:hidden hide-on-keyboard fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-white/95 backdrop-blur-xl border-t border-zinc-200/60 shadow-[0_-4px_25px_rgba(0,0,0,0.05)]"
+          className="md:hidden hide-on-keyboard fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-white/95 backdrop-blur-xl border-t border-black/10 shadow-[0_-4px_25px_rgba(0,0,0,0.03)]"
           style={{
             height: 'calc(62px + env(safe-area-inset-bottom))',
             paddingBottom: 'env(safe-area-inset-bottom)',
           }}
         >
-        {MOBILE_NAV.map(({ href, label, Icon, isCenter }) => {
+        {MOBILE_NAV.map(({ href, label, iconLine, iconFill, isCenter }) => {
           if ((href === '/profile') && !user) {
             return (
               <Link
@@ -561,10 +566,10 @@ export default function Sidebar({ user: propUser }) {
                     try { navigator.vibrate(10); } catch {}
                   }
                 }}
-                className="flex-1 flex flex-col items-center justify-center h-full text-zinc-400 hover:text-[#F05A00] transition-colors active:scale-90"
+                className="flex-1 flex flex-col items-center justify-center h-full text-black/65 hover:text-[#F05A00] transition-colors active:scale-90"
               >
-                <LogIn size={20} strokeWidth={2} />
-                <span className="text-[10px] font-black mt-0.5">Login</span>
+                <i className="ri-login-circle-line" style={{ fontSize: 20 }} />
+                <span className="text-[10.5px] font-black mt-0.5">Login</span>
               </Link>
             );
           }
@@ -581,15 +586,14 @@ export default function Sidebar({ user: propUser }) {
                   }
                   setShowCreateModal(true);
                 }}
-                className="flex-1 flex flex-col items-center justify-center relative -top-3.5 h-full select-none outline-none"
+                className="flex-1 flex flex-col items-center justify-center relative -top-3 h-full select-none outline-none cursor-pointer"
                 style={{ zIndex: 60 }}
               >
                 <div 
                   suppressHydrationWarning
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-[0_8px_22px_rgba(240,90,0,0.5)] hover:shadow-[0_12px_28px_rgba(240,90,0,0.6)] active:scale-90 transition-all ring-[3.5px] ring-white"
-                  style={{ background: 'linear-gradient(135deg, #FF6B1A 0%, #D94F00 100%)' }}
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-white bg-[#F05A00] hover:bg-[#D94F00] shadow-[0_6px_20px_rgba(240,90,0,0.4)] active:scale-90 transition-all ring-4 ring-white"
                 >
-                  <Plus size={24} strokeWidth={3} />
+                  <i className="ri-add-line" style={{ fontSize: 24, fontWeight: 900 }} />
                 </div>
               </button>
             );
@@ -600,25 +604,24 @@ export default function Sidebar({ user: propUser }) {
               key={href} 
               href={href}
               prefetch={true}
-              onClick={() => {
+              onMouseDown={(e) => { try { e.currentTarget.blur(); } catch {} }}
+              onClick={(e) => {
+                try { e?.currentTarget?.blur(); } catch {}
                 setPendingPath(href);
                 if (typeof window !== 'undefined' && 'vibrate' in navigator) {
                   try { navigator.vibrate(10); } catch {}
                 }
               }}
-              className={`flex-1 flex flex-col items-center justify-center h-full relative select-none transition-all active:scale-90 ${
-                active ? 'text-[#F05A00]' : 'text-zinc-400 hover:text-zinc-600'
+              className={`flex-1 flex flex-col items-center justify-center h-full relative select-none outline-none focus:outline-none active:outline-none transition-all active:scale-90 ${
+                active ? 'text-[#F05A00]' : 'text-black/65 hover:text-black'
               }`}
             >
-              <div className={`p-1.5 rounded-xl transition-all ${active ? 'bg-orange-50/90 text-[#F05A00] scale-105' : ''}`}>
-                <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+              <div className={`p-1 rounded-xl transition-all ${active ? 'bg-orange-50 text-[#F05A00] scale-105' : ''}`}>
+                <i className={active ? iconFill : iconLine} style={{ fontSize: 20 }} />
               </div>
-              <span className={`text-[10px] font-extrabold -mt-0.5 tracking-tight ${active ? 'text-[#F05A00]' : 'text-zinc-400'}`}>
+              <span className={`text-[10px] font-black tracking-tight mt-0.5 ${active ? 'text-[#F05A00]' : 'text-black/65'}`}>
                 {label}
               </span>
-              {active && (
-                <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-4 h-1 rounded-full bg-[#F05A00] shadow-xs" />
-              )}
             </Link>
           );
         })}

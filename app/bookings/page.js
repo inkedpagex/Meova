@@ -529,61 +529,68 @@ export default function BookingsPage() {
             <div 
               key={booking.id} 
               onClick={() => router.push(`/users/${otherPersonId}`)}
-              className="bg-white rounded-2xl p-4 border border-zinc-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all hover:shadow-[0_8px_30px_rgba(140,53,115,0.08)] cursor-pointer"
+              className="bg-white rounded-[28px] p-4 sm:p-5 border border-zinc-200/90 shadow-[0_4px_25px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.06)] hover:border-zinc-300 transition-all cursor-pointer space-y-3.5"
             >
-              {/* Card Header */}
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${statusColor(booking.status)} mb-2`}>
-                    {statusLabel(booking.status)}
-                  </span>
-                  <h3 className="text-[15px] font-black text-zinc-900 leading-tight">
+              {/* Card Header Row: Status Badge & Sparks Pill */}
+              <div className="flex justify-between items-center">
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-black uppercase tracking-wider border ${statusColor(booking.status)}`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
+                  <span>{statusLabel(booking.status)}</span>
+                </span>
+                
+                <span className="text-xs font-black text-[#F05A00] bg-orange-50 border border-orange-100/80 px-2.5 py-1 rounded-full flex items-center gap-1 shadow-2xs">
+                  <Zap size={13} className="fill-[#F05A00] text-[#F05A00]" />
+                  <span>{booking.price} Sparks</span>
+                </span>
+              </div>
+
+              {/* Person & Title Hero */}
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-[16px] overflow-hidden bg-zinc-100 border border-zinc-200/90 flex-shrink-0">
+                  <img
+                    src={finalAvatar}
+                    alt={otherPerson}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = getCartoonAvatar(otherPerson || 'Student');
+                    }}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm sm:text-base font-black text-zinc-950 truncate tracking-tight">
                     {booking.title}
                   </h3>
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <img src={finalAvatar} alt={otherPerson} className="w-4 h-4 rounded-full border border-zinc-200 object-cover" />
-                    <p className="text-[11px] text-zinc-500 font-bold flex items-center">
-                      {roleLabel} 
-                      <Link 
-                        href={`/users/${otherPersonId}`} 
-                        className="text-zinc-800 hover:text-[#F05A00] hover:underline transition-colors ml-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {otherPerson}
-                      </Link>
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-black text-[#F05A00] flex items-center gap-1 justify-end">
-                    <Zap size={13} className="fill-[#F05A00] text-[#F05A00]" /> {booking.price}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Card Details */}
-              <div className="flex flex-wrap gap-y-2 gap-x-4 mt-4 bg-zinc-50 rounded-xl p-3 border border-zinc-100/50">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600">
-                  <Calendar size={13} className="text-zinc-400" />
-                  {booking.date || "Any Day"}
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600">
-                  <Clock size={13} className="text-zinc-400" />
-                  {booking.time || "Flexible"}
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-600 w-full truncate">
-                  <MapPin size={13} className="text-zinc-400 flex-shrink-0" />
-                  <span className="truncate">{booking.location || "Campus"}</span>
+                  <p className="text-[11px] font-bold text-zinc-400 truncate mt-0.5">
+                    {roleLabel} <span className="text-zinc-700 font-extrabold">{otherPerson}</span>
+                  </p>
                 </div>
               </div>
 
-              {/* Agenda (If exists) */}
-              {booking.agenda && (
-                <div className="mt-3 p-3 bg-zinc-50/50 border border-zinc-100 rounded-xl">
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Meeting Purpose</p>
-                  <p className="text-xs text-zinc-700 font-medium leading-relaxed italic">"{booking.agenda}"</p>
+              {/* Clean Schedule Box */}
+              <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-3 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 text-zinc-800 font-bold">
+                    <Calendar size={14} className="text-[#F05A00]" />
+                    <span>{booking.date || "Any Day"}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-zinc-500 font-semibold text-[11px]">
+                    <Clock size={13} className="text-zinc-400" />
+                    <span>{booking.time || "Flexible"}</span>
+                  </div>
                 </div>
-              )}
+
+                <div className="flex items-center gap-2 text-xs text-zinc-600 font-medium truncate pt-1.5 border-t border-zinc-200/60">
+                  <MapPin size={14} className="text-[#F05A00] flex-shrink-0" />
+                  <span className="truncate font-semibold">{booking.location || "Campus"}</span>
+                </div>
+
+                {booking.agenda && booking.agenda.toLowerCase().trim() !== booking.title?.toLowerCase().trim() && (
+                  <div className="text-[11px] text-zinc-600 italic bg-white rounded-xl px-2.5 py-1.5 border border-zinc-200/70 mt-1">
+                    "{booking.agenda}"
+                  </div>
+                )}
+              </div>
 
               {/* Countdown Timer for Upcoming Bookings */}
               {activeTab === "Active" && booking.status !== "In Progress" && (
@@ -597,9 +604,9 @@ export default function BookingsPage() {
 
               {/* Auto-refund info banner */}
               {booking.status === "AutoRefunded" && (
-                <div className="mt-3 flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
-                  <AlertTriangle size={14} className="text-amber-500 flex-shrink-0" />
-                  <p className="text-[10px] font-bold text-amber-700">
+                <div className="flex items-center gap-2 bg-amber-50 border border-amber-200/80 rounded-2xl px-3 py-2">
+                  <AlertTriangle size={14} className="text-amber-600 flex-shrink-0" />
+                  <p className="text-[10.5px] font-bold text-amber-800">
                     Meeting time passed without QR scan — {booking.price} Sparks auto-refunded.
                   </p>
                 </div>
@@ -607,9 +614,9 @@ export default function BookingsPage() {
 
               {/* Disputed info banner */}
               {booking.status === "Disputed" && (
-                <div className="mt-3 flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2">
-                  <AlertTriangle size={14} className="text-orange-500 flex-shrink-0" />
-                  <p className="text-[10px] font-bold text-orange-700">
+                <div className="flex items-center gap-2 bg-orange-50 border border-orange-200/80 rounded-2xl px-3 py-2">
+                  <AlertTriangle size={14} className="text-orange-600 flex-shrink-0" />
+                  <p className="text-[10.5px] font-bold text-orange-800">
                     Issue reported — Sparks held in escrow pending review.
                   </p>
                 </div>
@@ -617,15 +624,15 @@ export default function BookingsPage() {
 
               {/* Action Buttons (Only for Active tab) */}
               {activeTab === "Active" && (
-                <div className="mt-4 flex gap-2">
+                <div className="pt-1 flex items-center gap-2">
                   {isGuest ? (
                     <>
-                      {/* Cancel button: Available for Requested and Confirmed/Accepted before start, with instant 100% refund */}
+                      {/* Cancel button */}
                       {["Requested", "Confirmed", "Accepted"].includes(booking.status) && (
                         <button
                           onClick={(e) => { e.stopPropagation(); initiateCancel(booking); }}
                           disabled={cancelLoading === booking.id}
-                          className="w-11 h-[46px] bg-zinc-50 text-zinc-500 border border-zinc-200 rounded-xl flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
+                          className="w-10 h-10 bg-zinc-100 hover:bg-rose-50 hover:text-rose-600 text-zinc-500 rounded-xl flex items-center justify-center transition-all cursor-pointer flex-shrink-0 disabled:opacity-50"
                           title="Cancel Meetup (100% Refund)"
                         >
                           {cancelLoading === booking.id
@@ -634,16 +641,16 @@ export default function BookingsPage() {
                         </button>
                       )}
                       
-                      {/* Direct 1-on-1 Chat with Host */}
+                      {/* Chat with Host */}
                       <button
                         onClick={(e) => { e.stopPropagation(); router.push(`/messages?uid=${otherPersonId}`); }}
-                        className="w-11 h-[46px] bg-orange-50 text-[#F05A00] border border-orange-200 hover:bg-orange-100 rounded-xl flex items-center justify-center active:scale-[0.98] transition-all cursor-pointer"
+                        className="w-10 h-10 bg-zinc-100 hover:bg-orange-50 hover:text-[#F05A00] text-zinc-600 rounded-xl flex items-center justify-center transition-all cursor-pointer flex-shrink-0"
                         title="Chat with Host"
                       >
                         <MessageCircle size={16} />
                       </button>
 
-                      {/* Direct 1-on-1 In-App Privacy Voice Call */}
+                      {/* Voice Call */}
                       {["Accepted", "Confirmed"].includes(booking.status) && (
                         <button
                           onClick={(e) => {
@@ -656,75 +663,75 @@ export default function BookingsPage() {
                               location: booking.location,
                             });
                           }}
-                          className="w-11 h-[46px] bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 rounded-xl flex items-center justify-center active:scale-[0.98] transition-all cursor-pointer shadow-sm"
-                          title="Call Host (100% Private)"
+                          className="w-10 h-10 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200/80 rounded-xl flex items-center justify-center transition-all cursor-pointer flex-shrink-0 shadow-2xs"
+                          title="Call Host"
                         >
                           <Phone size={16} />
                         </button>
                       )}
 
+                      {/* Primary Ticket / Finish button */}
                       {booking.status === "In Progress" || booking.status === "in_progress" ? (
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleFinishMeeting(booking); }}
-                          className="flex-1 bg-emerald-600 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-emerald-700 active:scale-[0.98] transition-all cursor-pointer shadow-md shadow-emerald-500/20"
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2.5 text-xs font-black flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
                         >
-                          <CheckCircle2 size={16} /> Finish Meetup
+                          <CheckCircle2 size={15} /> Finish Meetup
                         </button>
                       ) : (
                         <button 
                           onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); setShowQrModal(true); }}
-                          className="flex-1 bg-zinc-900 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-800 active:scale-[0.98] transition-all cursor-pointer"
+                          className="flex-1 bg-zinc-950 hover:bg-black text-white rounded-xl py-2.5 text-xs font-black flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
                         >
-                          <QrCode size={16} /> View Ticket
+                          <QrCode size={15} /> View Ticket
                         </button>
                       )}
 
                       {canReport && (
                         <button
                           onClick={(e) => { e.stopPropagation(); setSelectedBooking(booking); setShowDisputeModal(true); }}
-                          className="w-11 h-[46px] bg-rose-50 text-rose-500 border border-rose-100 rounded-xl flex items-center justify-center hover:bg-rose-100 active:scale-[0.98] transition-all cursor-pointer"
+                          className="w-10 h-10 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl flex items-center justify-center transition-all cursor-pointer flex-shrink-0"
                           title="Report Issue"
                         >
-                          <AlertTriangle size={16} strokeWidth={2.5} />
+                          <AlertTriangle size={15} strokeWidth={2.5} />
                         </button>
                       )}
                     </>
                   ) : (
                     <>
                       {booking.status === "Requested" ? (
-                        <div className="flex gap-2 w-full flex-wrap">
+                        <div className="flex flex-col gap-2 w-full">
                           <button 
                             onClick={(e) => { e.stopPropagation(); router.push(`/messages?uid=${otherPersonId}`); }}
-                            className="w-full bg-zinc-100 text-zinc-600 rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-zinc-200 active:scale-[0.98] transition-all"
+                            className="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl py-2.5 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                           >
-                            <MessageCircle size={16} /> Chat / Propose New Time
+                            <MessageCircle size={15} /> Chat / Propose New Time
                           </button>
                           <div className="flex gap-2 w-full">
                             <button 
                               onClick={(e) => { e.stopPropagation(); handleHostAction(booking.id, 'reject'); }}
                               disabled={actionLoading === `${booking.id}-reject`}
-                              className="flex-1 bg-rose-50 text-rose-600 rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-rose-100 active:scale-[0.98] transition-all disabled:opacity-50"
+                              className="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl py-2.5 text-xs font-black flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
                             >
-                              {actionLoading === `${booking.id}-reject` ? <Loader2 size={16} className="animate-spin" /> : 'Decline'}
+                              {actionLoading === `${booking.id}-reject` ? <Loader2 size={15} className="animate-spin" /> : 'Decline'}
                             </button>
                             <button 
                               onClick={(e) => { e.stopPropagation(); handleHostAction(booking.id, 'accept'); }}
                               disabled={actionLoading === `${booking.id}-accept`}
-                              className="flex-1 bg-emerald-500 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-emerald-600 active:scale-[0.98] transition-all disabled:opacity-50 shadow-[0_4px_15px_rgba(16,185,129,0.3)]"
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2.5 text-xs font-black flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 cursor-pointer"
                             >
-                              {actionLoading === `${booking.id}-accept` ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={16} /> Accept</>}
+                              {actionLoading === `${booking.id}-accept` ? <Loader2 size={15} className="animate-spin" /> : <><CheckCircle2 size={15} /> Accept</>}
                             </button>
                           </div>
                         </div>
                       ) : (
-                        <div className="flex gap-2 w-full">
-                          {/* Host Cancel Button for Confirmed/Accepted meets */}
+                        <div className="flex items-center gap-2 w-full">
                           {["Confirmed", "Accepted"].includes(booking.status) && (
                             <button
                               onClick={(e) => { e.stopPropagation(); initiateCancel(booking); }}
                               disabled={cancelLoading === booking.id}
-                              className="w-11 h-[46px] bg-zinc-50 text-zinc-500 border border-zinc-200 rounded-xl flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
-                              title="Cancel Meetup (Guest will be refunded)"
+                              className="w-10 h-10 bg-zinc-100 hover:bg-rose-50 hover:text-rose-600 text-zinc-500 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 cursor-pointer flex-shrink-0"
+                              title="Cancel Meetup"
                             >
                               {cancelLoading === booking.id
                                 ? <Loader2 size={16} className="animate-spin" />
@@ -734,13 +741,12 @@ export default function BookingsPage() {
 
                           <button
                             onClick={(e) => { e.stopPropagation(); router.push(`/messages?uid=${otherPersonId}`); }}
-                            className="w-11 h-[46px] bg-orange-50 text-[#F05A00] border border-orange-200 hover:bg-orange-100 rounded-xl flex items-center justify-center active:scale-[0.98] transition-all cursor-pointer"
+                            className="w-10 h-10 bg-zinc-100 hover:bg-orange-50 hover:text-[#F05A00] text-zinc-600 rounded-xl flex items-center justify-center transition-all cursor-pointer flex-shrink-0"
                             title="Chat with Guest"
                           >
                             <MessageCircle size={16} />
                           </button>
 
-                          {/* Direct 1-on-1 In-App Privacy Voice Call */}
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -752,8 +758,8 @@ export default function BookingsPage() {
                                 location: booking.location,
                               });
                             }}
-                            className="w-11 h-[46px] bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 rounded-xl flex items-center justify-center active:scale-[0.98] transition-all cursor-pointer shadow-sm"
-                            title="Call Guest (100% Private)"
+                            className="w-10 h-10 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200/80 rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-2xs flex-shrink-0"
+                            title="Call Guest"
                           >
                             <Phone size={16} />
                           </button>
@@ -761,9 +767,9 @@ export default function BookingsPage() {
                           {booking.status === "In Progress" || booking.status === "in_progress" ? (
                             <button 
                               onClick={(e) => { e.stopPropagation(); handleFinishMeeting(booking); }}
-                              className="flex-1 bg-emerald-600 text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-emerald-700 active:scale-[0.98] transition-all cursor-pointer shadow-md shadow-emerald-500/20"
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2.5 text-xs font-black flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
                             >
-                              <CheckCircle2 size={16} /> Complete & Get Sparks
+                              <CheckCircle2 size={15} /> Complete
                             </button>
                           ) : (
                             <button 
@@ -775,9 +781,9 @@ export default function BookingsPage() {
                                 setIsScanning(true);
                                 setManualCode("");
                               }}
-                              className="flex-1 bg-[#F05A00] text-white rounded-xl py-3 text-xs font-black flex items-center justify-center gap-2 hover:bg-[#D94F00] active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(240,90,0,0.3)] cursor-pointer"
+                              className="flex-1 bg-[#F05A00] hover:bg-[#D94F00] text-white rounded-xl py-2.5 text-xs font-black flex items-center justify-center gap-2 shadow-md shadow-orange-500/20 active:scale-[0.98] transition-all cursor-pointer"
                             >
-                              <ScanLine size={16} /> Scan Guest QR / Code
+                              <ScanLine size={15} /> Scan Guest QR
                             </button>
                           )}
                         </div>

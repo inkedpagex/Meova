@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Clock, CheckCircle, XCircle, Search, ArrowUpRight, Loader2 } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Search, ArrowUpRight, Loader2 } from '@/lib/icons';
 
 export default function AdminWithdrawalsPage() {
   const [withdrawals, setWithdrawals] = useState([]);

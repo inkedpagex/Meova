@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Search, Briefcase, CheckCircle2, Plus, X, Sparkles, Users, Zap,
   ArrowRight, ArrowLeft, Clock, Palette, Code, FileText, Camera, Video, Music, BookOpen, Layers
-} from 'lucide-react';
+} from '@/lib/icons';
 import { toast } from '../../lib/toast';
 import useSWR from 'swr';
 import { useUserContext } from '../../components/providers/UserProvider';

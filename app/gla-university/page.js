@@ -1,9 +1,9 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import Image from 'next/image';
 import {
   Coffee, Briefcase, Users, Camera, ChevronDown, Sparkles,
   ShieldCheck, ArrowRight, Zap, CheckCircle2, GraduationCap, MapPin
-} from 'lucide-react';
+} from '@/lib/icons';
 
 export const metadata = {
   title: 'Meova for GLA University Students — Campus Meets, Gigs & Circles | Meova',

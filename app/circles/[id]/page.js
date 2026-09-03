@@ -1,4 +1,4 @@
-// Circle detail page — Server Component. Public access.
+﻿// Circle detail page — Server Component. Public access.
 import { getUserAdmin } from '../../../lib/getUserAdmin';
 import {
   fetchCircleDetailAdmin,
@@ -6,7 +6,7 @@ import {
   fetchCircleEventsAdmin,
 } from '../../../lib/supabaseQueries';
 import CircleJoinButton from '../../../features/circles/CircleJoinButton';
-import { ArrowLeft, Users, Send, Calendar, MapPin } from 'lucide-react';
+import { ArrowLeft, Users, Send, Calendar, MapPin } from '@/lib/icons';
 import Link from 'next/link';
 import { formatEventDate } from '../../../utils/dateFormatter';
 import { CircleAvatar } from '../../../components/CircleAvatar';

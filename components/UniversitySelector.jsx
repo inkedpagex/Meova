@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Building2, Search, Check, Sparkles, ChevronDown, X } from 'lucide-react';
+import { Building2, Search, Check, Sparkles, ChevronDown, X } from '@/lib/icons';
 import { UNIVERSITIES, searchUniversities, DEFAULT_UNIVERSITY } from '../lib/constants/universities';
 
 export default function UniversitySelector({

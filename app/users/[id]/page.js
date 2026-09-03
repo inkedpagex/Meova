@@ -8,17 +8,17 @@ import {
   Code, Music, Dumbbell, Camera, Rocket, Palette, Gamepad2,
   BookOpen, Coffee, MessageCircle, Zap, Calendar, MapPin,
   CheckCircle, Layers, Heart, Building2
-} from 'lucide-react';
+} from '@/lib/icons';
 import { Linkedin, Github } from '../../../components/ui/SocialIcons';
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
 import AcceptBookingButton from '../../../features/users/AcceptBookingButton';
 import BlockUserButton from '../../../features/users/BlockUserButton';
 import MessageButton from '../../../features/users/MessageButton';
-import TipUserButton from '../../../features/users/TipUserButton';
 import ProfileCallButton from '../../../components/call/ProfileCallButton';
 import ProfileHighlightsSection from '../../../components/ProfileHighlightsSection';
 import InstagramEmbed from '../../../components/InstagramEmbed';
 import ZoomableProfileAvatar from '../../../components/ZoomableProfileAvatar';
+import HostBadge from '../../../components/HostBadge';
 import { calculateMeetupRate } from '../../../lib/pricing';
 
 import { getUserAvatarUrl, getCartoonAvatar } from '../../../utils/avatar';
@@ -157,7 +157,7 @@ export default async function UserProfilePage({ params }) {
       </div>
 
       {/* ── PROFILE HERO ─────────────────────── */}
-      <div className="bg-white rounded-3xl p-4 sm:p-6 mb-6 border border-zinc-100 shadow-sm">
+      <div className="bg-white rounded-[28px] p-4 sm:p-6 mb-6 border border-black/10 shadow-sm">
         
         {/* Avatar + Stats Row */}
         <div className="flex items-center justify-between gap-6 mb-4">
@@ -175,56 +175,59 @@ export default async function UserProfilePage({ params }) {
           {/* Right: Stats Counters */}
           <div className="flex-1 flex items-center justify-around text-center">
             <div>
-              <span className="block text-base sm:text-lg font-black text-zinc-900 leading-tight">
+              <span className="block text-base sm:text-lg font-black text-black leading-tight">
                 {reviews.length}
               </span>
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Meets</span>
+              <span className="text-[11px] font-bold text-black/60 uppercase tracking-wide">Meets</span>
             </div>
             <div>
-              <span className="block text-base sm:text-lg font-black text-zinc-900 leading-tight flex items-center justify-center gap-0.5">
+              <span className="block text-base sm:text-lg font-black text-black leading-tight flex items-center justify-center gap-0.5">
                 {avgRating || 'New'} <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 inline" />
               </span>
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Rating</span>
+              <span className="text-[11px] font-bold text-black/60 uppercase tracking-wide">Rating</span>
             </div>
             <div>
               <span className="block text-base sm:text-lg font-black text-[#F05A00] leading-tight flex items-center justify-center gap-0.5">
                 {hostRate} <Zap className="w-3.5 h-3.5 fill-current text-[#F05A00] inline" />
               </span>
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Rate</span>
+              <span className="text-[11px] font-bold text-black/60 uppercase tracking-wide">Rate</span>
             </div>
           </div>
         </div>
 
         {/* Bio & Details Section */}
-        <div className="space-y-1 mb-5">
-          <div className="flex items-center gap-2">
-            <h1 className="text-sm sm:text-base font-black text-zinc-900">
+        <div className="space-y-1.5 mb-5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-base sm:text-lg font-black text-black tracking-tight">
               {profile.full_name || 'Student'}
             </h1>
+            <HostBadge role={profile.role} size="xs" />
             {profile.isBlocked && (
               <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black bg-red-100 text-red-600 border border-red-200">
                 BLOCKED
               </span>
             )}
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-orange-50 text-[#F05A00] border border-orange-100 shadow-2xs">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-orange-50 text-[#F05A00] border border-orange-200 shadow-2xs">
               <CheckCircle className="w-3 h-3 text-[#F05A00] fill-orange-50" />
               <span>{reviews.length || 1} Meets Completed</span>
             </span>
           </div>
 
-          <p className="text-xs font-bold text-[#F05A00] flex items-center gap-1">
-            <GraduationCap className="w-3.5 h-3.5" />
-            {profile.year || '1st'} Year · {profile.branch || 'General'}
+          <p className="text-xs font-black text-[#F05A00] flex items-center gap-1.5">
+            <GraduationCap className="w-4 h-4" />
+            <span>{profile.year || '1st'} Year · {profile.branch || 'General'}</span>
           </p>
 
-          <p className="text-[11px] font-bold text-zinc-500 flex items-center gap-1">
-            <Building2 className="w-3 h-3 text-zinc-400" />
+          <p className="text-[11.5px] font-bold text-black/70 flex items-center gap-1.5">
+            <Building2 className="w-3.5 h-3.5 text-black/50" />
             <span>{profile.university || 'GLA University, Mathura'}</span>
           </p>
 
-          <p className="text-xs text-zinc-700 font-medium leading-relaxed pt-1 whitespace-pre-line">
-            {profile.bio || 'Campus Student · Connecting on Meova'}
-          </p>
+          {profile.bio && (
+            <p className="text-xs sm:text-[13px] text-black font-medium leading-relaxed pt-1 whitespace-pre-line">
+              {profile.bio}
+            </p>
+          )}
         </div>
 
         {/* Social Links Row */}
@@ -318,15 +321,11 @@ export default async function UserProfilePage({ params }) {
 
               <MessageButton targetUid={id} />
             </div>
-            
-            <div className="flex items-center gap-2.5">
-              <TipUserButton targetUid={id} targetName={profile.full_name || 'Student'} />
-            </div>
           </div>
         )}
 
         {isSelf && (
-          <Link href="/profile" className="block w-full text-center py-2.5 rounded-xl text-xs font-bold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 transition-colors">
+          <Link href="/profile" className="block w-full text-center py-2.5 rounded-full text-xs font-black uppercase tracking-wider text-black bg-white hover:bg-orange-50 border border-black/[0.08] transition-colors shadow-2xs">
             Edit Profile
           </Link>
         )}

@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Zap, Layers, X, CheckCircle, Loader2, Calendar, MapPin, Clock, Sparkles } from 'lucide-react';
+import { Zap, Layers, X, CheckCircle, Loader2, Calendar, MapPin, Clock, Sparkles } from '@/lib/icons';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { calculateMeetupRate } from '../../lib/pricing';

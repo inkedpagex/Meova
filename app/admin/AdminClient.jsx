@@ -5,7 +5,7 @@ import {
   Users, Zap, CreditCard, ArrowUpRight, Calendar,
   ShieldCheck, AlertOctagon, Check, X, RefreshCw, Inbox, ChevronRight,
   Clock, MapPin, CheckCircle, XCircle, Loader2
-} from 'lucide-react';
+} from '@/lib/icons';
 
 function fmt(n) {
   return (n || 0).toLocaleString('en-IN');
@@ -443,14 +443,37 @@ export default function AdminClient() {
               return (
                 <div
                   key={p.id}
-                  className="bg-slate-50/70 border border-slate-200 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                  className="bg-white border border-black/[0.06] p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-black text-slate-900">
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    {/* User Identity */}
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-orange-100 border border-orange-200 text-[#F05A00] flex items-center justify-center font-black text-xs flex-shrink-0">
+                        {(p.user_name || 'C')[0]?.toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-black truncate">
+                            {p.user_name || 'Classmate'}
+                          </span>
+                          {p.branch && (
+                            <span className="text-[10px] font-bold text-black/50 bg-black/5 px-1.5 py-0.2 rounded">
+                              {p.branch} {p.year ? `Y${p.year}` : ''}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-black/60 font-bold truncate">
+                          {p.user_email || p.email || 'No email provided'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Pack & Status */}
+                    <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                      <span className="text-xs font-black text-black">
                         {p.pack_name || `${p.sparks} Sparks`} — {fmt(p.sparks)} ⚡
                       </span>
-                      <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
+                      <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
                         isApproved ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                         isPending ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-200'
                       }`}>
@@ -458,21 +481,25 @@ export default function AdminClient() {
                       </span>
                     </div>
 
-                    <p className="text-[11px] text-slate-600 font-bold">{p.email}</p>
-
-                    <div className="flex items-center gap-3 text-[11px] font-bold text-slate-500 flex-wrap pt-0.5">
-                      <span className="text-emerald-700 font-black px-2 py-0.5 bg-emerald-50 border border-emerald-200 rounded-md">
-                        ₹{p.amount_inr}
+                    {/* Amount, Ref & Timestamp */}
+                    <div className="flex items-center gap-2.5 text-[11px] font-bold text-black/60 flex-wrap pt-0.5">
+                      <span className="text-emerald-700 font-black px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 rounded-lg">
+                        ₹{Number(p.amount_inr || p.rupees || 0).toFixed(2)}
                       </span>
-                      {p.reference_code && (
-                        <span>Ref: <code className="font-mono text-amber-700 bg-amber-50 px-1 py-0.5 rounded border border-amber-200">{p.reference_code}</code></span>
+                      {p.unique_decimal && (
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-orange-50 text-[#F05A00] border border-orange-200">
+                          Paise: .{p.unique_decimal}
+                        </span>
                       )}
-                      <span className="text-slate-400">• {fmtDate(p.created_at)}</span>
+                      {(p.reference_code || p.utr_number) && (
+                        <span>Ref/UTR: <code className="font-mono text-amber-700 font-black bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">{p.reference_code || p.utr_number}</code></span>
+                      )}
+                      <span className="text-black/40">• {fmtDate(p.created_at)}</span>
                     </div>
                   </div>
 
                   {isPending && (
-                    <div className="flex gap-2 flex-shrink-0 mt-3 sm:mt-0">
+                    <div className="flex gap-2 flex-shrink-0 mt-2 sm:mt-0">
                       <button
                         onClick={() => handleVerifyPayment(p.id, 'approve')}
                         className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[11px] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs flex-1 sm:flex-none active:scale-95"
