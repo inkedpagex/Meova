@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState } from 'react';
 import { X, CheckCircle2, XCircle, MessageCircle, User, Phone, Star } from '@/lib/icons';
 import Link from 'next/link';
@@ -31,35 +31,35 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
     PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
     ACCEPTED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     REJECTED: 'bg-red-50 text-red-500 border-red-200',
-    COMPLETED: 'bg-orange-50 text-[#F05A00] border-orange-200',
+    COMPLETED: 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]',
   };
 
   return (
-    <div className="flex items-start gap-3 p-4 rounded-2xl border border-zinc-100 bg-zinc-50 hover:bg-white transition-all">
+    <div className="flex items-start gap-3 p-4 rounded-2xl border border-[#E7E5E4] bg-[#FAFAF8] hover:bg-white transition-all">
       {app.applicantPhoto ? (
-        <img src={app.applicantPhoto} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-zinc-200" />
+        <img src={app.applicantPhoto} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-[#E7E5E4]" />
       ) : (
-        <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0 border border-orange-100">
-          <User size={18} className="text-[#F05A00]" />
+        <div className="w-10 h-10 rounded-full bg-[#F3EEFC] flex items-center justify-center flex-shrink-0 border border-[#E4D9F7]">
+          <User size={18} className="text-[#6D28D9]" />
         </div>
       )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-black text-zinc-900">{app.applicantName}</span>
-          {app.applicantUsername && <span className="text-xs text-zinc-400">@{app.applicantUsername}</span>}
-          <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${statusColor[app.status] || ''}`}>
+          <span className="text-sm font-bold text-[#1C1917]">{app.applicantName}</span>
+          {app.applicantUsername && <span className="text-xs text-[#A8A29E]">@{app.applicantUsername}</span>}
+          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${statusColor[app.status] || ''}`}>
             {app.status}
           </span>
         </div>
-        {app.applicantBranch && <p className="text-xs text-zinc-400 mt-0.5">{app.applicantBranch}</p>}
-        {app.pitch && <p className="text-xs text-zinc-600 mt-2 leading-relaxed italic">"{app.pitch}"</p>}
+        {app.applicantBranch && <p className="text-xs text-[#A8A29E] mt-0.5">{app.applicantBranch}</p>}
+        {app.pitch && <p className="text-xs text-[#78716C] mt-2 leading-relaxed italic">"{app.pitch}"</p>}
         
         {app.status === 'PENDING' && (
           <div className="flex gap-2 mt-3">
             <button
               onClick={() => handle('accept')}
               disabled={!!loading}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-black hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
             >
               <CheckCircle2 size={13} />
               {loading === 'accept' ? 'Accepting…' : 'Accept'}
@@ -67,7 +67,7 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
             <button
               onClick={() => handle('reject')}
               disabled={!!loading}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-100 text-zinc-600 text-xs font-black hover:bg-zinc-200 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FAFAF8] text-[#78716C] text-xs font-bold hover:bg-[#E7E5E4] active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
             >
               <XCircle size={13} />
               {loading === 'reject' ? 'Rejecting…' : 'Reject'}
@@ -76,21 +76,21 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
         )}
 
         {app.status === 'ACCEPTED' && (
-          <div className="mt-3 p-3 rounded-xl bg-orange-50 border border-orange-100">
-            <p className="text-[10px] font-black uppercase text-[#F05A00] mb-1">Gig in Progress</p>
-            <p className="text-[11px] font-bold text-orange-900 mb-3">Sparks are held in Escrow. Ask the freelancer for their 6-digit completion code when the work is delivered.</p>
+          <div className="mt-3 p-3 rounded-xl bg-[#F3EEFC] border border-[#E4D9F7]">
+            <p className="text-[10px] font-bold uppercase text-[#6D28D9] mb-1">Gig in Progress</p>
+            <p className="text-[11px] font-bold text-[#1C1917] mb-3">Sparks are held in Escrow. Ask the freelancer for their 6-digit completion code when the work is delivered.</p>
             <div className="flex items-center gap-2">
-              <Link href={`/messages?uid=${app.applicantId}`} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-orange-200 text-[#F05A00] rounded-xl text-xs font-black hover:bg-orange-100 transition-colors">
+              <Link href={`/messages?uid=${app.applicantId}`} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-[#E4D9F7] text-[#6D28D9] rounded-xl text-xs font-bold hover:bg-[#F3EEFC] transition-colors">
                 <MessageCircle size={14} /> Message
               </Link>
               <button onClick={() => {
                 toast.success('Initiating secure private call...');
                 setTimeout(() => window.location.href = `/messages?uid=${app.applicantId}`, 500);
-              }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-500 text-white rounded-xl text-xs font-black hover:bg-emerald-600 transition-colors shadow-sm cursor-pointer">
+              }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 transition-colors shadow-sm cursor-pointer">
                 <Phone size={14} /> Secure Call
               </button>
             </div>
-            <div className="mt-2.5 pt-2 border-t border-orange-200/60 flex justify-end">
+            <div className="mt-2.5 pt-2 border-t border-[#E4D9F7]/60 flex justify-end">
               <button
                 type="button"
                 onClick={() => {
@@ -108,16 +108,16 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
         )}
 
         {app.status === 'COMPLETED' && (
-          <div className="mt-3 pt-2 border-t border-zinc-200/80 flex items-center justify-between gap-2">
+          <div className="mt-3 pt-2 border-t border-[#E7E5E4]/80 flex items-center justify-between gap-2">
             <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1">
               <CheckCircle2 size={13} /> Completed
             </span>
             <button
               onClick={() => onRate(app)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
                 isReviewed
                   ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                  : 'bg-[#F05A00] hover:bg-[#D94F00] text-white shadow-2xs'
+                  : 'bg-[#6D28D9] hover:bg-[#5B21B6] text-white shadow-2xs'
               }`}
             >
               <Star size={12} className={isReviewed ? 'fill-amber-400 text-amber-500' : 'fill-white text-white'} />
@@ -198,27 +198,27 @@ export default function ApplicantsDrawer({ gig, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-zinc-100 max-h-[85vh] flex flex-col"
+        className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-[#E7E5E4] max-h-[85vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-zinc-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#E7E5E4] flex-shrink-0">
           <div>
-            <h3 className="text-sm font-black text-zinc-900">Applicants</h3>
-            <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">{gig.title}</p>
+            <h3 className="text-sm font-bold text-[#1C1917]">Applicants</h3>
+            <p className="text-[11px] text-[#A8A29E] mt-0.5 font-medium">{gig.title}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-zinc-100 text-zinc-400 cursor-pointer">
+          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-[#FAFAF8] text-[#A8A29E] cursor-pointer">
             <X size={16} />
           </button>
         </div>
 
         {/* Applicant list */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-          {!data && <p className="text-xs text-zinc-400 text-center py-8">Loading…</p>}
+          {!data && <p className="text-xs text-[#A8A29E] text-center py-8">Loading…</p>}
           {data && apps.length === 0 && (
             <div className="text-center py-10">
-              <p className="text-sm font-bold text-zinc-400">No applications yet</p>
-              <p className="text-xs text-zinc-300 mt-1">Share this gig to get applicants</p>
+              <p className="text-sm font-bold text-[#A8A29E]">No applications yet</p>
+              <p className="text-xs text-[#A8A29E] mt-1">Share this gig to get applicants</p>
             </div>
           )}
           {apps.map(app => (
@@ -239,27 +239,27 @@ export default function ApplicantsDrawer({ gig, onClose }) {
         {/* Complete gig section */}
         {(gig.status === 'in_progress' || acceptedApp) && (
           <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] flex-shrink-0">
-            <div className="border-t border-zinc-100 pt-4">
+            <div className="border-t border-[#E7E5E4] pt-4">
               {!completing ? (
                 <button
                   onClick={() => setCompleting(true)}
-                  className="w-full py-3 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white text-xs font-black active:scale-95 transition-all cursor-pointer shadow-xs"
+                  className="w-full py-3 rounded-2xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold active:scale-95 transition-all cursor-pointer shadow-xs"
                 >
                   Mark as Completed & Release Sparks
                 </button>
               ) : (
                 <form noValidate onSubmit={handleComplete} className="space-y-3">
-                  <p className="text-[11px] font-bold text-zinc-500">Enter the 6-digit code the freelancer gives you:</p>
+                  <p className="text-[11px] font-bold text-[#78716C]">Enter the 6-digit code the freelancer gives you:</p>
                   <input
                     type="text"
                     value={code}
                     onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
-                    className="w-full p-3 rounded-xl border border-zinc-200 text-center text-2xl font-black tracking-[8px] focus:outline-none focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10"
+                    className="w-full p-3 rounded-xl border border-[#E7E5E4] text-center text-2xl font-bold tracking-[8px] focus:outline-none focus:border-[#6D28D9] focus:ring-4 focus:ring-[#6D28D9]/10"
                   />
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => setCompleting(false)} className="flex-1 py-3 rounded-2xl bg-zinc-100 text-zinc-600 text-xs font-black cursor-pointer hover:bg-zinc-200">Cancel</button>
-                    <button type="submit" disabled={code.length !== 6 || codeLoading} className="flex-2 px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black disabled:opacity-50 cursor-pointer active:scale-95 transition-all shadow-xs">
+                    <button type="button" onClick={() => setCompleting(false)} className="flex-1 py-3 rounded-2xl bg-[#FAFAF8] text-[#78716C] text-xs font-bold cursor-pointer hover:bg-[#E7E5E4]">Cancel</button>
+                    <button type="submit" disabled={code.length !== 6 || codeLoading} className="flex-2 px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold disabled:opacity-50 cursor-pointer active:scale-95 transition-all shadow-xs">
                       {codeLoading ? 'Verifying…' : 'Confirm & Pay'}
                     </button>
                   </div>

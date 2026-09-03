@@ -85,7 +85,7 @@ export default function AdminPaymentsPage() {
       {/* Title Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/80 shadow-xs">
         <div>
-          <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
             Payment Verification
           </h1>
           <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">
@@ -97,7 +97,7 @@ export default function AdminPaymentsPage() {
           onClick={loadPayments}
           className="self-start sm:self-auto flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 transition-all shadow-xs cursor-pointer"
         >
-          <RefreshCw size={14} className={fetching ? 'animate-spin text-[#F05A00]' : 'text-slate-500'} />
+          <RefreshCw size={14} className={fetching ? 'animate-spin text-[#6D28D9]' : 'text-slate-500'} />
           <span>Refresh</span>
         </button>
       </div>
@@ -108,9 +108,9 @@ export default function AdminPaymentsPage() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
               filter === f
-                ? 'bg-[#F05A00] text-white shadow-xs border border-[#F05A00]'
+                ? 'bg-[#6D28D9] text-white shadow-xs border border-[#6D28D9]'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
             }`}
           >
@@ -134,13 +134,13 @@ export default function AdminPaymentsPage() {
       {/* Payments list */}
       {fetching ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
-          <Loader2 size={24} className="animate-spin text-[#F05A00]" />
+          <Loader2 size={24} className="animate-spin text-[#6D28D9]" />
           <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Fetching payment records...</p>
         </div>
       ) : shown.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-xs">
           <Zap size={28} className="text-slate-300 mx-auto mb-3" />
-          <p className="text-sm font-black text-slate-800">
+          <p className="text-sm font-bold text-slate-800">
             {filter === 'pending' ? 'No pending payment requests' : 'No payment records yet'}
           </p>
         </div>
@@ -158,12 +158,12 @@ export default function AdminPaymentsPage() {
                 <div className="flex-1 min-w-0 space-y-2">
                   {/* User Identity */}
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-orange-100 border border-orange-200 text-[#F05A00] flex items-center justify-center font-black text-xs flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center font-bold text-xs flex-shrink-0">
                       {(p.user_name || 'C')[0]?.toUpperCase()}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-black text-black truncate">
+                        <span className="text-sm font-bold text-black truncate">
                           {p.user_name || 'Classmate'}
                         </span>
                         {p.branch && (
@@ -180,26 +180,26 @@ export default function AdminPaymentsPage() {
 
                   {/* Pack & Status */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-black text-black">
+                    <p className="text-sm font-bold text-black">
                       {p.pack_name || `${p.sparks} Sparks`} — {fmt(p.sparks)} ⚡
                     </p>
-                    <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${st.color} ${st.bg} ${st.border}`}>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${st.color} ${st.bg} ${st.border}`}>
                       {st.label}
                     </span>
                   </div>
 
                   {/* Amount & Ref */}
                   <div className="flex items-center gap-2.5 flex-wrap text-xs font-bold text-black/60 pt-0.5">
-                    <span className="text-xs text-emerald-700 font-black px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <span className="text-xs text-emerald-700 font-bold px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg">
                       ₹{Number(p.amount_inr || p.rupees || 0).toFixed(2)}
                     </span>
                     {p.unique_decimal && (
-                      <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-orange-50 text-[#F05A00] border border-orange-200">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]">
                         Paise: .{p.unique_decimal}
                       </span>
                     )}
                     {(p.reference_code || p.utr_number) && (
-                      <span>Ref/UTR: <code className="font-mono text-amber-700 font-black px-1.5 py-0.5 bg-amber-50 rounded border border-amber-200">{p.reference_code || p.utr_number}</code></span>
+                      <span>Ref/UTR: <code className="font-mono text-amber-700 font-bold px-1.5 py-0.5 bg-amber-50 rounded border border-amber-200">{p.reference_code || p.utr_number}</code></span>
                     )}
                     <span className="text-black/40">• {fmtDate(p.created_at)}</span>
                   </div>
@@ -210,14 +210,14 @@ export default function AdminPaymentsPage() {
                     <button
                       onClick={() => handleAction(p.id, true)}
                       disabled={isActing}
-                      className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black uppercase text-[11px] px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
+                      className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold uppercase text-[11px] px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
                     >
                       <CheckCircle size={14} /> Approve
                     </button>
                     <button
                       onClick={() => handleAction(p.id, false)}
                       disabled={isActing}
-                      className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 disabled:opacity-50 font-black uppercase text-[11px] px-4 py-2.5 rounded-xl transition-all cursor-pointer"
+                      className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 disabled:opacity-50 font-bold uppercase text-[11px] px-4 py-2.5 rounded-xl transition-all cursor-pointer"
                     >
                       <XCircle size={14} /> Reject
                     </button>

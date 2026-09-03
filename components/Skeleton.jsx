@@ -1,7 +1,7 @@
 import React from 'react';
 
 export default function Skeleton({ className = '', variant = 'rectangular', ...props }) {
-  const baseClasses = 'animate-pulse bg-zinc-200/80';
+  const baseClasses = 'animate-pulse bg-[#E7E5E4]/80';
   
   let variantClasses = '';
   switch (variant) {

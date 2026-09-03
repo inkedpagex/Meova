@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle, Clock, AlertCircle, Zap } from '@/lib/icons';
 import Link from 'next/link';
@@ -106,7 +106,7 @@ export default function WithdrawPage() {
 
   return (
     <div style={{ maxWidth: 460, margin: '0 auto' }} className="anim-fade-in px-4 pb-12">
-      <Link href="/wallet" className="inline-flex items-center gap-2 text-xs font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all mb-8 uppercase tracking-wider">
+      <Link href="/wallet" className="inline-flex items-center gap-2 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all mb-8 uppercase tracking-wider">
         <ArrowLeft size={14} /> Back to Wallet
       </Link>
 
@@ -126,7 +126,7 @@ export default function WithdrawPage() {
 
           {/* Already pending limit */}
           {pendingCount >= 3 && (
-            <div className="bg-amber-500/5 border border-amber-500/20 p-4 rounded-2xl mb-6 flex items-start gap-3">
+            <div className="bg-amber-500/5 border border-amber-500/20 p-4 rounded-[16px] mb-6 flex items-start gap-3">
               <Clock size={16} className="text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
                 <p style={{ fontSize: 13, color: '#fbbf24', fontWeight: 800 }}>Withdrawal Limit Reached</p>
@@ -138,7 +138,7 @@ export default function WithdrawPage() {
           )}
 
           {creatorBalance < 500 ? (
-            <div className="bg-[var(--bg-elevated)] border border-red-500/20 p-5 rounded-2xl mb-6 shadow-sm flex items-start gap-3">
+            <div className="bg-[var(--bg-elevated)] border border-red-500/20 p-5 rounded-[16px] mb-6 shadow-sm flex items-start gap-3">
               <AlertCircle size={18} className="text-red-400 flex-shrink-0 mt-0.5" />
               <div>
                 <p style={{ fontSize: 13, color: '#f87171', fontWeight: 800 }}>
@@ -152,7 +152,7 @@ export default function WithdrawPage() {
           ) : pendingCount < 3 && (
             <>
               {error && (
-                <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 rounded-xl p-3 mb-5">
+                <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/20 rounded-[12px] p-3 mb-5">
                   <AlertCircle size={14} className="text-red-400 flex-shrink-0 mt-0.5" />
                   <p className="text-xs font-bold text-red-400">{error}</p>
                 </div>
@@ -173,7 +173,7 @@ export default function WithdrawPage() {
                     style={{ width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 12, padding: '12px 14px', color: 'var(--text-primary)', fontSize: 14, outline: 'none' }}
                   />
                   <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
-                    <Zap size={14} className="fill-orange-400 text-orange-400" />
+                    <Zap size={14} className="fill-current text-[#6D28D9]" />
                   </span>
                 </div>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5, fontWeight: '700' }}>
@@ -192,7 +192,7 @@ export default function WithdrawPage() {
                       key={m}
                       type="button"
                       onClick={() => setMethod(m)}
-                      className={`flex-1 py-3 rounded-xl text-center border font-black text-xs transition-all active:scale-95 cursor-pointer ${
+                      className={`flex-1 py-3 rounded-[12px] text-center border font-bold text-xs transition-all active:scale-95 cursor-pointer ${
                         method === m
                           ? 'border-[var(--accent)] bg-[var(--bg-hover)] text-[var(--text-primary)] shadow-sm'
                           : 'border-[var(--border-subtle)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:border-[var(--border-mid)]'

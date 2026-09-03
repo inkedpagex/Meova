@@ -150,7 +150,7 @@ const SlideButton = forwardRef<HTMLButtonElement, SlideButtonProps>(
         )}
         
         {!completed && (
-          <span className="text-xs font-semibold text-neutral-400 select-none z-0">
+          <span className="text-xs font-semibold text-[#A8A29E] select-none z-0">
             {label}
           </span>
         )}

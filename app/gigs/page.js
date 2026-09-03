@@ -145,17 +145,17 @@ export default function CampusGigsPage() {
   return (
     <div className="anim-fade-in w-full max-w-4xl mx-auto space-y-6 pt-2 pb-16 px-4">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200/80 pb-5 pt-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E7E5E4]/80 pb-5 pt-2">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl md:text-3xl font-black text-zinc-950 tracking-tight">Campus Gigs</h1>
-            <span className="text-[10px] font-black uppercase tracking-wider bg-amber-50 border border-amber-200 text-amber-700 px-2.5 py-0.5 rounded-full">Freelance</span>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#1C1917] tracking-tight">Campus Gigs</h1>
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-50 border border-amber-200 text-amber-700 px-2.5 py-0.5 rounded-full">Freelance</span>
           </div>
-          <p className="text-xs text-zinc-500 mt-1 font-semibold">Hire student talent or earn Sparks through campus freelance tasks.</p>
+          <p className="text-xs text-[#78716C] mt-1 font-semibold">Hire student talent or earn Sparks through campus freelance tasks.</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-[#F05A00] to-[#F05A00] hover:from-[#D94F00] hover:to-[#D94F00] shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold text-white bg-gradient-to-r from-[#6D28D9] to-[#6D28D9] hover:from-[#5B21B6] hover:to-[#5B21B6] shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
         >
           <Plus size={16} strokeWidth={3} />
           Post a Gig
@@ -163,7 +163,7 @@ export default function CampusGigsPage() {
       </div>
 
       {/* Main tabs: Browse / My Posted Gigs / Applied Gigs */}
-      <div className="flex gap-6 border-b border-zinc-200/80">
+      <div className="flex gap-6 border-b border-[#E7E5E4]/80">
         {[
           ['browse', 'Browse Gigs'],
           ['mine', 'My Posted Gigs'],
@@ -174,13 +174,13 @@ export default function CampusGigsPage() {
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`relative py-3 text-[11px] font-black tracking-wide uppercase transition-all cursor-pointer ${
-                active ? 'text-[#F05A00]' : 'text-zinc-400 hover:text-zinc-600'
+              className={`relative py-3 text-[11px] font-bold tracking-wide uppercase transition-all cursor-pointer ${
+                active ? 'text-[#6D28D9]' : 'text-[#A8A29E] hover:text-[#78716C]'
               }`}
             >
               {label}
               {active && (
-                <div className="absolute bottom-[-1px] inset-x-0 h-0.5 bg-[#F05A00] rounded-t-full shadow-[0_-2px_8px_rgba(240,90,0,0.4)]" />
+                <div className="absolute bottom-[-1px] inset-x-0 h-0.5 bg-[#6D28D9] rounded-t-full shadow-[0_-2px_8px_rgba(240,90,0,0.4)]" />
               )}
             </button>
           );
@@ -193,13 +193,13 @@ export default function CampusGigsPage() {
           {/* Search + Filter */}
           <div className="flex flex-col md:flex-row gap-3 items-start">
             <div className="relative w-full md:flex-1">
-              <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A8A29E]" />
               <input
                 type="text"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search gigs, skills, clubs…"
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 focus:bg-white text-zinc-900 placeholder-zinc-400 transition-all"
+                className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 focus:bg-white text-[#1C1917] placeholder-zinc-400 transition-all"
               />
             </div>
             <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
@@ -207,10 +207,10 @@ export default function CampusGigsPage() {
                 <button
                   key={cat}
                   onClick={() => setSelectedCat(cat)}
-                  className={`flex-shrink-0 text-[10px] font-black py-2 px-4 rounded-full transition-all active:scale-[0.98] uppercase tracking-wider cursor-pointer ${
+                  className={`flex-shrink-0 text-[10px] font-bold py-2 px-4 rounded-full transition-all active:scale-[0.98] uppercase tracking-wider cursor-pointer ${
                     selectedCat === cat 
-                    ? 'bg-[#F05A00] text-white shadow-md border border-transparent' 
-                    : 'bg-zinc-100 border border-zinc-200 text-zinc-600 hover:bg-zinc-200'
+                    ? 'bg-[#6D28D9] text-white shadow-md border border-transparent' 
+                    : 'bg-[#FAFAF8] border border-[#E7E5E4] text-[#78716C] hover:bg-[#E7E5E4]'
                   }`}
                 >
                   {cat}
@@ -222,17 +222,17 @@ export default function CampusGigsPage() {
           {/* Gig Cards */}
           <div className="grid gap-4">
             {filtered.length === 0 ? (
-              <div className="py-12 flex flex-col items-center justify-center text-center px-4 bg-white rounded-3xl border border-zinc-100 shadow-xs">
-                <div className="w-16 h-16 rounded-3xl bg-orange-50 border border-orange-100 flex items-center justify-center mb-4">
-                  <Briefcase size={24} className="text-[#F05A00]" />
+              <div className="py-12 flex flex-col items-center justify-center text-center px-4 bg-white rounded-3xl border border-[#E7E5E4] shadow-xs">
+                <div className="w-16 h-16 rounded-3xl bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center mb-4">
+                  <Briefcase size={24} className="text-[#6D28D9]" />
                 </div>
-                <h3 className="text-base font-black text-zinc-900 tracking-tight">No Gigs Found</h3>
-                <p className="text-xs font-semibold text-zinc-500 mt-1 max-w-xs leading-relaxed">
+                <h3 className="text-base font-bold text-[#1C1917] tracking-tight">No Gigs Found</h3>
+                <p className="text-xs font-semibold text-[#78716C] mt-1 max-w-xs leading-relaxed">
                   There are no active gigs in this category right now.
                 </p>
                 <button 
                   onClick={() => setShowModal(true)}
-                  className="mt-6 px-6 py-2.5 rounded-xl bg-zinc-900 text-white text-[11px] font-black uppercase tracking-wider hover:bg-zinc-800 transition-all active:scale-95 flex items-center gap-2"
+                  className="mt-6 px-6 py-2.5 rounded-xl bg-[#1C1917] text-white text-[11px] font-bold uppercase tracking-wider hover:bg-[#1C1917] transition-all active:scale-95 flex items-center gap-2"
                 >
                   <Plus size={14} /> Post the first Gig
                 </button>
@@ -244,37 +244,37 @@ export default function CampusGigsPage() {
                 const statusLabel = gig.status === 'in_progress' ? 'In Progress' : null;
 
                 return (
-                  <div key={gig.id} className="bg-white border border-zinc-200/80 rounded-[24px] p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 hover:border-orange-300 hover:shadow-[0_8px_30px_rgba(140,53,115,0.06)] hover:-translate-y-0.5 transition-all group relative overflow-hidden">
-                    <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#F05A00]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div key={gig.id} className="bg-white border border-[#E7E5E4]/80 rounded-[24px] p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 hover:border-[#E4D9F7] hover:shadow-[0_8px_30px_rgba(140,53,115,0.06)] hover:-translate-y-0.5 transition-all group relative overflow-hidden">
+                    <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#6D28D9]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[9px] font-black uppercase tracking-wider bg-orange-50 text-[#F05A00] px-2.5 py-0.5 rounded-full border border-orange-100">{gig.type || 'CAMPUS GIG'}</span>
+                        <span className="text-[9px] font-bold uppercase tracking-wider bg-[#F3EEFC] text-[#6D28D9] px-2.5 py-0.5 rounded-full border border-[#E4D9F7]">{gig.type || 'CAMPUS GIG'}</span>
                         {gig.author_id || gig.authorId ? (
-                          <Link href={`/users/${gig.author_id || gig.authorId}`} onClick={(e) => e.stopPropagation()} className="text-xs text-zinc-700 font-extrabold hover:text-[#F05A00] hover:underline flex items-center gap-1.5 transition-colors">
-                            <div className="w-4 h-4 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200">
-                              <span className="text-[8px] text-[#F05A00] font-bold">{(gig.company || 'U')[0].toUpperCase()}</span>
+                          <Link href={`/users/${gig.author_id || gig.authorId}`} onClick={(e) => e.stopPropagation()} className="text-xs text-[#78716C] font-extrabold hover:text-[#6D28D9] hover:underline flex items-center gap-1.5 transition-colors">
+                            <div className="w-4 h-4 rounded-full bg-[#F3EEFC] flex items-center justify-center border border-[#E4D9F7]">
+                              <span className="text-[8px] text-[#6D28D9] font-bold">{(gig.company || 'U')[0].toUpperCase()}</span>
                             </div>
                             by {gig.company}
                           </Link>
                         ) : (
-                          <span className="text-xs text-zinc-700 font-extrabold flex items-center gap-1.5">
-                            <div className="w-4 h-4 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200">
-                              <span className="text-[8px] text-[#F05A00] font-bold">{(gig.company || 'U')[0].toUpperCase()}</span>
+                          <span className="text-xs text-[#78716C] font-extrabold flex items-center gap-1.5">
+                            <div className="w-4 h-4 rounded-full bg-[#F3EEFC] flex items-center justify-center border border-[#E4D9F7]">
+                              <span className="text-[8px] text-[#6D28D9] font-bold">{(gig.company || 'U')[0].toUpperCase()}</span>
                             </div>
                             by {gig.company}
                           </span>
                         )}
-                        <span className="text-xs text-zinc-400">· {gig.duration}</span>
+                        <span className="text-xs text-[#A8A29E]">· {gig.duration}</span>
                         {statusLabel && <span className="text-[10px] font-bold text-blue-600">{statusLabel}</span>}
                       </div>
-                      <h3 className="text-base font-black text-zinc-950 tracking-tight group-hover:text-[#D94F00] transition-colors">{gig.title}</h3>
-                      <p className="text-xs text-zinc-500 leading-relaxed max-w-2xl">{gig.desc}</p>
+                      <h3 className="text-base font-bold text-[#1C1917] tracking-tight group-hover:text-[#5B21B6] transition-colors">{gig.title}</h3>
+                      <p className="text-xs text-[#78716C] leading-relaxed max-w-2xl">{gig.desc}</p>
                     </div>
 
-                    <div className="flex md:flex-col items-end justify-between md:justify-center gap-3 border-t md:border-t-0 border-zinc-100 pt-4 md:pt-0">
+                    <div className="flex md:flex-col items-end justify-between md:justify-center gap-3 border-t md:border-t-0 border-[#E7E5E4] pt-4 md:pt-0">
                       <div className="text-right">
-                        <div className="flex items-center gap-1 text-zinc-950 font-black text-xl">{gig.budget}<Zap size={16} className="text-amber-500 fill-amber-500" /></div>
-                        <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">Estimated</span>
+                        <div className="flex items-center gap-1 text-[#1C1917] font-bold text-xl">{gig.budget}<Zap size={16} className="text-amber-500 fill-amber-500" /></div>
+                        <span className="text-[9px] text-[#A8A29E] font-bold uppercase tracking-widest">Estimated</span>
                       </div>
 
                       {isOwn ? (
@@ -282,13 +282,13 @@ export default function CampusGigsPage() {
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDeleteGig(gig.id); }}
                             disabled={deletingGig === gig.id}
-                            className="px-3 py-2.5 text-[10px] font-black tracking-wider uppercase rounded-xl bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 cursor-pointer transition-all disabled:opacity-50"
+                            className="px-3 py-2.5 text-[10px] font-bold tracking-wider uppercase rounded-xl bg-red-50 text-red-500 border border-red-100 hover:bg-red-100 cursor-pointer transition-all disabled:opacity-50"
                           >
                             <X size={14} strokeWidth={2.5} />
                           </button>
                           <button
                             onClick={() => setManagingGig(gig)}
-                            className="px-5 py-2.5 text-[10px] font-black tracking-wider uppercase rounded-xl bg-orange-50 text-[#F05A00] border border-orange-200 hover:bg-orange-100 cursor-pointer transition-all flex items-center gap-1.5"
+                            className="px-5 py-2.5 text-[10px] font-bold tracking-wider uppercase rounded-xl bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7] hover:bg-[#F3EEFC] cursor-pointer transition-all flex items-center gap-1.5"
                           >
                             {(gig.applicationsCount || 0) > 0 ? (
                               <>
@@ -304,7 +304,7 @@ export default function CampusGigsPage() {
                         <button
                           onClick={() => { setApplyingToGig(gig); setPitch(''); }}
                           disabled={hasApplied}
-                          className={`px-5 py-2.5 text-[10px] font-black tracking-wider uppercase rounded-xl transition-all cursor-pointer ${hasApplied ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-[#F05A00] text-white hover:bg-[#D94F00] shadow-xs active:scale-95'}`}
+                          className={`px-5 py-2.5 text-[10px] font-bold tracking-wider uppercase rounded-xl transition-all cursor-pointer ${hasApplied ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-[#6D28D9] text-white hover:bg-[#5B21B6] shadow-xs active:scale-95'}`}
                         >
                           {hasApplied ? <span className="flex items-center gap-1"><CheckCircle2 size={12}/>Applied</span> : 'Apply Now'}
                         </button>
@@ -337,31 +337,31 @@ export default function CampusGigsPage() {
       {applyingToGig && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }} onClick={() => setApplyingToGig(null)}>
           <div className="w-full max-w-md bg-white rounded-3xl p-6 space-y-4 shadow-2xl border border-[#f5ebf4] max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+            <div className="flex items-center justify-between border-b border-[#E7E5E4] pb-3">
               <div>
-                <h3 className="text-sm font-black text-zinc-900">Apply to Gig</h3>
-                <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">{applyingToGig.title}</p>
+                <h3 className="text-sm font-bold text-[#1C1917]">Apply to Gig</h3>
+                <p className="text-[11px] text-[#A8A29E] mt-0.5 font-medium">{applyingToGig.title}</p>
               </div>
-              <button onClick={() => setApplyingToGig(null)} className="p-1.5 rounded-full hover:bg-zinc-100 text-zinc-400"><X size={16} /></button>
+              <button onClick={() => setApplyingToGig(null)} className="p-1.5 rounded-full hover:bg-[#FAFAF8] text-[#A8A29E]"><X size={16} /></button>
             </div>
             <div>
-              <label className="text-[10px] font-black uppercase text-zinc-400 block mb-1.5">Pitch <span className="text-zinc-300 normal-case font-semibold">(optional — tell them why you're the one)</span></label>
+              <label className="text-[10px] font-bold uppercase text-[#A8A29E] block mb-1.5">Pitch <span className="text-[#A8A29E] normal-case font-semibold">(optional — tell them why you're the one)</span></label>
               <textarea
                 value={pitch}
                 onChange={e => setPitch(e.target.value.slice(0, 300))}
                 placeholder="e.g. I've built 3 Figma projects for clubs and can deliver in 2 days…"
-                className="w-full p-3 rounded-xl border border-zinc-200 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50 min-h-[90px] resize-none"
+                className="w-full p-3 rounded-xl border border-[#E7E5E4] text-xs font-medium text-[#1C1917] focus:outline-none focus:border-[#6D28D9] bg-[#FAFAF8] min-h-[90px] resize-none"
               />
-              <p className="text-[10px] text-zinc-400 mt-1 text-right">{pitch.length}/300</p>
+              <p className="text-[10px] text-[#A8A29E] mt-1 text-right">{pitch.length}/300</p>
             </div>
             <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3 flex items-center gap-2">
               <Zap size={14} className="text-amber-500 fill-amber-500 shrink-0" />
-              <p className="text-[11px] font-bold text-amber-700">If accepted you'll earn <span className="font-black">{applyingToGig.budget}</span> Sparks on completion.</p>
+              <p className="text-[11px] font-bold text-amber-700">If accepted you'll earn <span className="font-bold">{applyingToGig.budget}</span> Sparks on completion.</p>
             </div>
             <button
               onClick={handleApply}
               disabled={applyLoading}
-              className="w-full py-3.5 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-[#F05A00] to-[#F05A00] hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 rounded-2xl text-xs font-bold text-white bg-gradient-to-r from-[#6D28D9] to-[#6D28D9] hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50"
             >
               <Sparkles size={14} />
               {applyLoading ? 'Submitting…' : 'Submit Application'}
@@ -377,23 +377,23 @@ export default function CampusGigsPage() {
           onClick={() => { setShowModal(false); setModalStep(1); }}
         >
           <div 
-            className="w-full max-w-lg bg-white rounded-t-3xl md:rounded-3xl shadow-2xl border border-zinc-100 max-h-[92dvh] flex flex-col overflow-hidden anim-slide-up md:anim-scale-in"
+            className="w-full max-w-lg bg-white rounded-t-3xl md:rounded-3xl shadow-2xl border border-[#E7E5E4] max-h-[92dvh] flex flex-col overflow-hidden anim-slide-up md:anim-scale-in"
             onClick={e => e.stopPropagation()}
           >
             {/* Mobile Drag Pill */}
             <div className="md:hidden pt-3 pb-1 flex justify-center">
-              <div className="w-10 h-1 rounded-full bg-zinc-200" />
+              <div className="w-10 h-1 rounded-full bg-[#E7E5E4]" />
             </div>
 
             {/* Header */}
-            <div className="px-5 pt-3 pb-3.5 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+            <div className="px-5 pt-3 pb-3.5 border-b border-[#E7E5E4] flex items-center justify-between bg-[#FAFAF8]/50">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-orange-50 border border-orange-100 text-[#F05A00] flex items-center justify-center shadow-2xs font-black">
+                <div className="w-9 h-9 rounded-2xl bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center shadow-2xs font-bold">
                   <Briefcase size={17} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-zinc-950 leading-tight">Post a Campus Gig</h3>
-                  <p className="text-[11px] font-bold text-zinc-400">
+                  <h3 className="text-sm font-bold text-[#1C1917] leading-tight">Post a Campus Gig</h3>
+                  <p className="text-[11px] font-bold text-[#A8A29E]">
                     Step {modalStep} of 2: {modalStep === 1 ? 'Gig Basics' : 'Rewards & Scope'}
                   </p>
                 </div>
@@ -401,16 +401,16 @@ export default function CampusGigsPage() {
               <button 
                 type="button"
                 onClick={() => { setShowModal(false); setModalStep(1); }}
-                className="p-1.5 rounded-full text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200/60 cursor-pointer transition-colors"
+                className="p-1.5 rounded-full text-[#A8A29E] hover:text-[#78716C] hover:bg-[#E7E5E4]/60 cursor-pointer transition-colors"
               >
                 <X size={17} />
               </button>
             </div>
 
             {/* Step Progress Bar */}
-            <div className="w-full bg-zinc-100 h-1 overflow-hidden">
+            <div className="w-full bg-[#FAFAF8] h-1 overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-[#F05A00] to-amber-500 transition-all duration-300 ease-out"
+                className="h-full bg-gradient-to-r from-[#6D28D9] to-amber-500 transition-all duration-300 ease-out"
                 style={{ width: modalStep === 1 ? '50%' : '100%' }}
               />
             </div>
@@ -423,7 +423,7 @@ export default function CampusGigsPage() {
                 <div className="space-y-4 anim-fade-in">
                   {/* Gig Title */}
                   <div>
-                    <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700 block mb-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#78716C] block mb-1.5">
                       Gig Title *
                     </label>
                     <input 
@@ -433,13 +433,13 @@ export default function CampusGigsPage() {
                       value={gigTitle} 
                       onChange={e => setGigTitle(e.target.value)} 
                       placeholder="e.g. Figma Designer for Campus App UI" 
-                      className="w-full px-3.5 py-3 rounded-2xl border border-zinc-200 text-xs font-bold text-zinc-950 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 placeholder-zinc-400 transition-all" 
+                      className="w-full px-3.5 py-3 rounded-2xl border border-[#E7E5E4] text-xs font-bold text-[#1C1917] focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 bg-[#FAFAF8] placeholder-zinc-400 transition-all" 
                     />
                   </div>
 
                   {/* Horizontal Scrollable Category Pills */}
                   <div>
-                    <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700 block mb-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#78716C] block mb-1.5">
                       Category
                     </label>
                     <div className="flex gap-2 overflow-x-auto pb-2 pt-0.5 -mx-1 px-1 select-none" style={{ scrollbarWidth: 'none' }}>
@@ -461,13 +461,13 @@ export default function CampusGigsPage() {
                             key={cat.name}
                             type="button"
                             onClick={() => setGigCategory(cat.name)}
-                            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border whitespace-nowrap cursor-pointer shrink-0 active:scale-95 ${
+                            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border whitespace-nowrap cursor-pointer shrink-0 active:scale-95 ${
                               isSelected
-                                ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-md shadow-orange-500/20'
-                                : 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
+                                ? 'bg-[#6D28D9] text-white border-[#6D28D9] shadow-md shadow-purple-500/20'
+                                : 'bg-[#FAFAF8] border-[#E7E5E4] text-[#78716C] hover:bg-[#FAFAF8] hover:text-[#1C1917]'
                             }`}
                           >
-                            <IconComp size={13} className={isSelected ? 'text-white' : 'text-zinc-400'} />
+                            <IconComp size={13} className={isSelected ? 'text-white' : 'text-[#A8A29E]'} />
                             <span>{cat.name}</span>
                           </button>
                         );
@@ -477,7 +477,7 @@ export default function CampusGigsPage() {
 
                   {/* Host / Club Name */}
                   <div>
-                    <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700 block mb-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#78716C] block mb-1.5">
                       Host / Club Name
                     </label>
                     <input 
@@ -485,9 +485,9 @@ export default function CampusGigsPage() {
                       value={gigCompany} 
                       onChange={e => setGigCompany(e.target.value)} 
                       placeholder={user?.full_name || 'e.g. Coding Club or Your Name'} 
-                      className="w-full px-3.5 py-3 rounded-2xl border border-zinc-200 text-xs font-bold text-zinc-900 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 placeholder-zinc-400 transition-all" 
+                      className="w-full px-3.5 py-3 rounded-2xl border border-[#E7E5E4] text-xs font-bold text-[#1C1917] focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 bg-[#FAFAF8] placeholder-zinc-400 transition-all" 
                     />
-                    <p className="text-[10.5px] font-semibold text-zinc-400 mt-1">
+                    <p className="text-[10.5px] font-semibold text-[#A8A29E] mt-1">
                       Students will see who is offering this gig.
                     </p>
                   </div>
@@ -500,10 +500,10 @@ export default function CampusGigsPage() {
                   {/* Reward (Sparks) with quick presets */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-[#78716C]">
                         Reward (Sparks) *
                       </label>
-                      <span className="text-[10.5px] font-black text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="text-[10.5px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Zap size={10} className="fill-amber-500 text-amber-500" />
                         <span>Wallet: {(wallet?.purchased || 0) + (wallet?.bonus || 0) + (wallet?.creator || 0)}</span>
                       </span>
@@ -515,10 +515,10 @@ export default function CampusGigsPage() {
                           key={val}
                           type="button"
                           onClick={() => setGigBudget(val)}
-                          className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all border cursor-pointer ${
+                          className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                             gigBudget === val
                               ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
-                              : 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100'
+                              : 'bg-[#FAFAF8] border-[#E7E5E4] text-[#78716C] hover:bg-[#FAFAF8]'
                           }`}
                         >
                           {val} ⚡
@@ -534,7 +534,7 @@ export default function CampusGigsPage() {
                         value={gigBudget} 
                         onChange={handleBudgetChange} 
                         placeholder="Custom amount (e.g. 350)" 
-                        className="w-full px-3.5 py-3 pl-9 rounded-2xl border border-zinc-200 text-xs font-black text-zinc-950 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50" 
+                        className="w-full px-3.5 py-3 pl-9 rounded-2xl border border-[#E7E5E4] text-xs font-bold text-[#1C1917] focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 bg-[#FAFAF8]" 
                       />
                       <Zap size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 fill-amber-500" />
                     </div>
@@ -542,7 +542,7 @@ export default function CampusGigsPage() {
 
                   {/* Duration with quick presets */}
                   <div>
-                    <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700 block mb-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#78716C] block mb-1.5">
                       Estimated Duration
                     </label>
                     <div className="flex gap-1.5 mb-2">
@@ -551,10 +551,10 @@ export default function CampusGigsPage() {
                           key={dur}
                           type="button"
                           onClick={() => setGigDuration(dur)}
-                          className={`flex-1 py-1.5 rounded-xl text-[11px] font-black transition-all border cursor-pointer whitespace-nowrap ${
+                          className={`flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer whitespace-nowrap ${
                             gigDuration === dur
-                              ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-xs'
-                              : 'bg-zinc-50 border-zinc-200 text-zinc-700 hover:bg-zinc-100'
+                              ? 'bg-[#6D28D9] text-white border-[#6D28D9] shadow-xs'
+                              : 'bg-[#FAFAF8] border-[#E7E5E4] text-[#78716C] hover:bg-[#FAFAF8]'
                           }`}
                         >
                           {dur}
@@ -566,13 +566,13 @@ export default function CampusGigsPage() {
                       value={gigDuration} 
                       onChange={e => setGigDuration(e.target.value)} 
                       placeholder="e.g. 3 Days" 
-                      className="w-full px-3.5 py-2.5 rounded-2xl border border-zinc-200 text-xs font-bold text-zinc-900 focus:outline-none focus:border-[#F05A00] bg-zinc-50" 
+                      className="w-full px-3.5 py-2.5 rounded-2xl border border-[#E7E5E4] text-xs font-bold text-[#1C1917] focus:outline-none focus:border-[#6D28D9] bg-[#FAFAF8]" 
                     />
                   </div>
 
                   {/* Description */}
                   <div>
-                    <label className="text-[11px] font-black uppercase tracking-wider text-zinc-700 block mb-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#78716C] block mb-1.5">
                       Task Description *
                     </label>
                     <textarea 
@@ -581,7 +581,7 @@ export default function CampusGigsPage() {
                       onChange={e => setGigDesc(e.target.value)} 
                       placeholder="Describe what deliverables are needed, skills required, or any helpful context…" 
                       rows={3}
-                      className="w-full p-3.5 rounded-2xl border border-zinc-200 text-xs font-medium text-zinc-900 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 resize-none placeholder-zinc-400" 
+                      className="w-full p-3.5 rounded-2xl border border-[#E7E5E4] text-xs font-medium text-[#1C1917] focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 bg-[#FAFAF8] resize-none placeholder-zinc-400" 
                     />
                   </div>
 
@@ -589,20 +589,20 @@ export default function CampusGigsPage() {
                   <div className="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-3 flex items-start gap-2.5 text-amber-900">
                     <Zap size={15} className="fill-amber-500 text-amber-500 shrink-0 mt-0.5" />
                     <p className="text-[11px] font-bold leading-relaxed">
-                      <span className="font-black">{gigBudget || '0'} Sparks</span> will be held safely in escrow only when you accept a student applicant.
+                      <span className="font-bold">{gigBudget || '0'} Sparks</span> will be held safely in escrow only when you accept a student applicant.
                     </p>
                   </div>
                 </div>
               )}
 
               {/* ── STICKY BOTTOM BUTTONS ── */}
-              <div className="pt-2 border-t border-zinc-100 flex items-center gap-2.5">
+              <div className="pt-2 border-t border-[#E7E5E4] flex items-center gap-2.5">
                 {modalStep === 2 ? (
                   <>
                     <button
                       type="button"
                       onClick={() => setModalStep(1)}
-                      className="px-4 py-3.5 rounded-2xl border border-zinc-200 text-zinc-700 text-xs font-black uppercase tracking-wider hover:bg-zinc-50 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-3.5 rounded-2xl border border-[#E7E5E4] text-[#78716C] text-xs font-bold uppercase tracking-wider hover:bg-[#FAFAF8] active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
                     >
                       <ArrowLeft size={14} />
                       <span>Back</span>
@@ -610,7 +610,7 @@ export default function CampusGigsPage() {
                     <button 
                       type="submit" 
                       disabled={isSubmitting || !gigTitle.trim() || !gigDesc.trim()} 
-                      className="flex-1 py-3.5 rounded-2xl text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] shadow-lg shadow-orange-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50"
+                      className="flex-1 py-3.5 rounded-2xl text-xs font-bold text-white bg-[#6D28D9] hover:bg-[#5B21B6] shadow-lg shadow-purple-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50"
                     >
                       <Sparkles size={15} />
                       <span>{isSubmitting ? 'Publishing…' : 'Publish to Campus'}</span>
@@ -626,7 +626,7 @@ export default function CampusGigsPage() {
                       }
                       setModalStep(2);
                     }}
-                    className="w-full py-3.5 rounded-2xl text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] shadow-lg shadow-orange-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer"
+                    className="w-full py-3.5 rounded-2xl text-xs font-bold text-white bg-[#6D28D9] hover:bg-[#5B21B6] shadow-lg shadow-purple-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer"
                   >
                     <span>Continue to Rewards & Scope</span>
                     <ArrowRight size={14} />

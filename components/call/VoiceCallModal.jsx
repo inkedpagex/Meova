@@ -500,7 +500,7 @@ export default function VoiceCallModal({
   const avatar = peerUser?.photo || getUserAvatarUrl(peerUser) || fallback;
 
   return (
-    <div className="fixed inset-0 z-[999999] bg-zinc-950 flex flex-col justify-between items-center text-white select-none overflow-hidden pb-8 pt-10 px-6 anim-fade-in">
+    <div className="fixed inset-0 z-[999999] bg-[#1C1917] flex flex-col justify-between items-center text-white select-none overflow-hidden pb-8 pt-10 px-6 anim-fade-in">
 
       {/* Hidden audio element — MUST be in DOM always, not muted */}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
@@ -516,12 +516,12 @@ export default function VoiceCallModal({
         <img src={avatar} alt="" className="w-full h-full object-cover opacity-15 blur-3xl scale-125"
           onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = fallback; }} />
         <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-zinc-950/90 to-zinc-950" />
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#F05A00]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#6D28D9]/15 rounded-full blur-3xl pointer-events-none" />
       </div>
 
       {/* Header */}
       <div className="relative z-10 flex flex-col items-center gap-1.5 pt-2">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-emerald-400 text-[11px] font-black uppercase tracking-wider shadow-sm">
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-emerald-400 text-[11px] font-bold uppercase tracking-wider shadow-sm">
           <Lock size={12} strokeWidth={2.5} />
           <span>End-to-End Encrypted Voice</span>
         </div>
@@ -532,8 +532,8 @@ export default function VoiceCallModal({
         <div className="relative flex items-center justify-center mb-8">
           {(callState === 'calling' || callState === 'incoming') && (
             <>
-              <div className="absolute w-44 h-44 rounded-full bg-[#F05A00]/20 animate-ping opacity-40" />
-              <div className="absolute w-52 h-52 rounded-full border border-[#F05A00]/30 animate-pulse" />
+              <div className="absolute w-44 h-44 rounded-full bg-[#6D28D9]/20 animate-ping opacity-40" />
+              <div className="absolute w-52 h-52 rounded-full border border-[#6D28D9]/30 animate-pulse" />
             </>
           )}
           {callState === 'connected' && (
@@ -542,20 +542,20 @@ export default function VoiceCallModal({
               <div className="absolute w-48 h-48 rounded-full border border-emerald-500/20" />
             </>
           )}
-          <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-white/20 bg-zinc-800 relative z-10 shadow-2xl ring-4 ring-[#F05A00]/20">
+          <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-white/20 bg-[#1C1917] relative z-10 shadow-2xl ring-4 ring-[#6D28D9]/20">
             <img src={avatar} alt="" className="w-full h-full object-cover"
               onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = fallback; }} />
           </div>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2 truncate max-w-[320px]">{peerName}</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2 truncate max-w-[320px]">{peerName}</h2>
 
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10">
-          {callState === 'calling' && <><span className="w-2.5 h-2.5 rounded-full bg-[#F05A00] animate-ping" /><span className="text-sm font-bold text-zinc-300">Calling...</span></>}
+          {callState === 'calling' && <><span className="w-2.5 h-2.5 rounded-full bg-[#6D28D9] animate-ping" /><span className="text-sm font-bold text-[#A8A29E]">Calling...</span></>}
           {callState === 'incoming' && <><span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" /><span className="text-sm font-bold text-emerald-400">Incoming Voice Call</span></>}
-          {callState === 'connecting' && <><Loader2 size={14} className="animate-spin text-[#F05A00]" /><span className="text-sm font-bold text-zinc-300">Connecting Audio...</span></>}
-          {callState === 'connected' && <><span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" /><span className="text-base font-black text-emerald-400 tracking-wider">{formatDuration(duration)}</span></>}
-          {callState === 'ended' && <span className="text-sm font-bold text-zinc-400">Call Ended</span>}
+          {callState === 'connecting' && <><Loader2 size={14} className="animate-spin text-[#6D28D9]" /><span className="text-sm font-bold text-[#A8A29E]">Connecting Audio...</span></>}
+          {callState === 'connected' && <><span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" /><span className="text-base font-bold text-emerald-400 tracking-wider">{formatDuration(duration)}</span></>}
+          {callState === 'ended' && <span className="text-sm font-bold text-[#A8A29E]">Call Ended</span>}
         </div>
 
         {callState === 'connected' && isPeerMuted && (
@@ -574,7 +574,7 @@ export default function VoiceCallModal({
                 className="w-18 h-18 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-2xl shadow-rose-600/40 active:scale-90 transition-all cursor-pointer ring-4 ring-rose-600/30">
                 <PhoneOff size={28} />
               </button>
-              <span className="text-xs font-bold text-zinc-400">Decline</span>
+              <span className="text-xs font-bold text-[#A8A29E]">Decline</span>
             </div>
             <div className="flex flex-col items-center gap-2">
               <button type="button" onClick={handleAcceptCall}
@@ -591,15 +591,15 @@ export default function VoiceCallModal({
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${isMuted ? 'bg-rose-600 text-white ring-2 ring-rose-400' : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'}`}>
                 {isMuted ? <MicOff size={22} /> : <Mic size={22} />}
               </button>
-              <span className="text-[11px] font-bold text-zinc-300">{isMuted ? 'Unmute' : 'Mute'}</span>
+              <span className="text-[11px] font-bold text-[#A8A29E]">{isMuted ? 'Unmute' : 'Mute'}</span>
             </div>
 
             <div className="flex flex-col items-center gap-1.5">
               <button type="button" onClick={toggleSpeaker}
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${audioOutput === 'speaker' ? 'bg-[#F05A00] text-white ring-2 ring-orange-400/50' : 'bg-white/15 text-white border border-white/20 hover:bg-white/25'}`}>
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${audioOutput === 'speaker' ? 'bg-[#6D28D9] text-white ring-2 ring-[#E4D9F7]/50' : 'bg-white/15 text-white border border-white/20 hover:bg-white/25'}`}>
                 {audioOutput === 'speaker' ? <Volume2 size={22} /> : <Volume1 size={22} />}
               </button>
-              <span className="text-[11px] font-bold text-zinc-300">{audioOutput === 'speaker' ? 'Speaker' : 'Earpiece'}</span>
+              <span className="text-[11px] font-bold text-[#A8A29E]">{audioOutput === 'speaker' ? 'Speaker' : 'Earpiece'}</span>
             </div>
 
             <div className="flex flex-col items-center gap-1.5">

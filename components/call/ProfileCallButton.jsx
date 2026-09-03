@@ -19,7 +19,7 @@ export default function ProfileCallButton({ targetUserId, targetName, targetPhot
           location: location || 'Campus Meetup',
         });
       }}
-      className="flex-1 py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer"
+      className="flex-1 py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer"
       title="Call Campus Meetup Peer (100% Private & Free)"
     >
       <Phone size={15} />

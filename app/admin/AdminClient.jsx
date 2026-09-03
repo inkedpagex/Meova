@@ -216,7 +216,7 @@ export default function AdminClient() {
       {/* ── TOP TITLE & REFRESH BAR ─────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/80 shadow-xs">
         <div>
-          <h1 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-xl md:text-3xl font-bold text-slate-900 tracking-tight">
             Meova Control Center
           </h1>
           <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">
@@ -228,7 +228,7 @@ export default function AdminClient() {
           onClick={loadData}
           className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 transition-all shadow-xs cursor-pointer"
         >
-          <RefreshCw size={14} className={fetching ? 'animate-spin text-[#F05A00]' : 'text-slate-500'} />
+          <RefreshCw size={14} className={fetching ? 'animate-spin text-[#6D28D9]' : 'text-slate-500'} />
           <span>Refresh Data</span>
         </button>
       </div>
@@ -237,17 +237,17 @@ export default function AdminClient() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 md:gap-4">
         
         {/* Card 1: Total Users */}
-        <div className="bg-white border border-orange-100 rounded-2xl p-4 shadow-2xs flex flex-col justify-between h-32">
+        <div className="bg-white border border-[#E4D9F7] rounded-2xl p-4 shadow-2xs flex flex-col justify-between h-32">
           <div className="flex items-start justify-between">
             <div>
               <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">
                 Total Students
               </span>
-              <span className="text-2xl font-black text-[#F05A00] mt-1 block">
+              <span className="text-2xl font-bold text-[#6D28D9] mt-1 block">
                 {stats.totalUsers}
               </span>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center text-[#F05A00]">
+            <div className="w-8 h-8 rounded-xl bg-[#F3EEFC] flex items-center justify-center text-[#6D28D9]">
               <Users size={16} />
             </div>
           </div>
@@ -261,7 +261,7 @@ export default function AdminClient() {
               <span className="text-[10px] font-extrabold uppercase text-amber-700 tracking-wider block">
                 Total User Sparks
               </span>
-              <span className="text-2xl font-black text-amber-600 mt-1 flex items-center gap-1">
+              <span className="text-2xl font-bold text-amber-600 mt-1 flex items-center gap-1">
                 <span>{fmt(stats.totalUserSparks)}</span>
                 <span className="text-sm">⚡</span>
               </span>
@@ -280,7 +280,7 @@ export default function AdminClient() {
               <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">
                 Total Meetings
               </span>
-              <span className="text-2xl font-black text-blue-600 mt-1 block">
+              <span className="text-2xl font-bold text-blue-600 mt-1 block">
                 {stats.totalBookings}
               </span>
             </div>
@@ -300,7 +300,7 @@ export default function AdminClient() {
               <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">
                 UPI Payments
               </span>
-              <span className="text-2xl font-black text-slate-800 mt-1 block">
+              <span className="text-2xl font-bold text-slate-800 mt-1 block">
                 {stats.allPaymentsCount}
               </span>
             </div>
@@ -309,7 +309,7 @@ export default function AdminClient() {
             </div>
           </div>
           <p className="text-[10.5px] font-semibold text-slate-400">
-            Pending: <span className="font-bold text-orange-600">{stats.pendingPayments}</span>
+            Pending: <span className="font-bold text-[#6D28D9]">{stats.pendingPayments}</span>
           </p>
         </div>
 
@@ -320,7 +320,7 @@ export default function AdminClient() {
               <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">
                 Payout Requests
               </span>
-              <span className="text-2xl font-black text-rose-600 mt-1 block">
+              <span className="text-2xl font-bold text-rose-600 mt-1 block">
                 {stats.allWithdrawalsCount}
               </span>
             </div>
@@ -340,11 +340,11 @@ export default function AdminClient() {
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <h3 className="text-xs md:text-sm font-black uppercase tracking-wider text-zinc-100">
+              <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-zinc-100">
                 Live App Modules & Launch Switches
               </h3>
             </div>
-            <p className="text-[11px] text-zinc-400 mt-1 font-medium">
+            <p className="text-[11px] text-[#A8A29E] mt-1 font-medium">
               Control feature visibility across the entire student platform in real-time.
             </p>
           </div>
@@ -352,17 +352,17 @@ export default function AdminClient() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
           {/* Switch 1: Campus Gigs */}
-          <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div className="bg-[#1C1917]/90 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-white">Campus Gigs Module</span>
-                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                  featureFlags.gigs ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                <span className="text-xs font-bold text-white">Campus Gigs Module</span>
+                <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                  featureFlags.gigs ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-[#1C1917] text-[#A8A29E] border border-zinc-700'
                 }`}>
                   {featureFlags.gigs ? 'Active on App' : 'Hidden from App'}
                 </span>
               </div>
-              <p className="text-[10.5px] text-zinc-400 leading-relaxed font-medium">
+              <p className="text-[10.5px] text-[#A8A29E] leading-relaxed font-medium">
                 {featureFlags.gigs
                   ? 'Gigs tab, creation menu, and /gigs are visible to all students.'
                   : 'Gigs tab, buttons, and /gigs routes are 100% hidden from the entire website.'}
@@ -374,7 +374,7 @@ export default function AdminClient() {
               onClick={handleToggleGigs}
               disabled={togglingFlag}
               className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                featureFlags.gigs ? 'bg-[#F05A00]' : 'bg-zinc-700'
+                featureFlags.gigs ? 'bg-[#6D28D9]' : 'bg-zinc-700'
               } disabled:opacity-50`}
             >
               <span
@@ -395,7 +395,7 @@ export default function AdminClient() {
               <CreditCard size={16} />
             </div>
             <div>
-              <h3 className="text-xs md:text-sm font-black uppercase tracking-wider text-slate-800">
+              <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-800">
                 All Payments & UPI Recharges ({payments.length})
               </h3>
               <p className="text-[11px] text-slate-500 font-medium">Verify student UPI transactions and manual Spark additions.</p>
@@ -408,9 +408,9 @@ export default function AdminClient() {
                 <button
                   key={f}
                   onClick={() => setPaymentFilter(f)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
                     paymentFilter === f
-                      ? 'bg-[#F05A00] text-white shadow-xs border border-[#F05A00]'
+                      ? 'bg-[#6D28D9] text-white shadow-xs border border-[#6D28D9]'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
                   }`}
                 >
@@ -448,12 +448,12 @@ export default function AdminClient() {
                   <div className="space-y-1.5 flex-1 min-w-0">
                     {/* User Identity */}
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-orange-100 border border-orange-200 text-[#F05A00] flex items-center justify-center font-black text-xs flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center font-bold text-xs flex-shrink-0">
                         {(p.user_name || 'C')[0]?.toUpperCase()}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-black text-black truncate">
+                          <span className="text-xs font-bold text-black truncate">
                             {p.user_name || 'Classmate'}
                           </span>
                           {p.branch && (
@@ -470,10 +470,10 @@ export default function AdminClient() {
 
                     {/* Pack & Status */}
                     <div className="flex items-center gap-2 flex-wrap pt-0.5">
-                      <span className="text-xs font-black text-black">
+                      <span className="text-xs font-bold text-black">
                         {p.pack_name || `${p.sparks} Sparks`} — {fmt(p.sparks)} ⚡
                       </span>
-                      <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
                         isApproved ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                         isPending ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-200'
                       }`}>
@@ -483,16 +483,16 @@ export default function AdminClient() {
 
                     {/* Amount, Ref & Timestamp */}
                     <div className="flex items-center gap-2.5 text-[11px] font-bold text-black/60 flex-wrap pt-0.5">
-                      <span className="text-emerald-700 font-black px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 rounded-lg">
+                      <span className="text-emerald-700 font-bold px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 rounded-lg">
                         ₹{Number(p.amount_inr || p.rupees || 0).toFixed(2)}
                       </span>
                       {p.unique_decimal && (
-                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-orange-50 text-[#F05A00] border border-orange-200">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]">
                           Paise: .{p.unique_decimal}
                         </span>
                       )}
                       {(p.reference_code || p.utr_number) && (
-                        <span>Ref/UTR: <code className="font-mono text-amber-700 font-black bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">{p.reference_code || p.utr_number}</code></span>
+                        <span>Ref/UTR: <code className="font-mono text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">{p.reference_code || p.utr_number}</code></span>
                       )}
                       <span className="text-black/40">• {fmtDate(p.created_at)}</span>
                     </div>
@@ -502,13 +502,13 @@ export default function AdminClient() {
                     <div className="flex gap-2 flex-shrink-0 mt-2 sm:mt-0">
                       <button
                         onClick={() => handleVerifyPayment(p.id, 'approve')}
-                        className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[11px] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs flex-1 sm:flex-none active:scale-95"
+                        className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase text-[11px] px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs flex-1 sm:flex-none active:scale-95"
                       >
                         <Check size={14} /> Approve
                       </button>
                       <button
                         onClick={() => handleVerifyPayment(p.id, 'reject')}
-                        className="flex items-center justify-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-black uppercase text-[11px] px-3.5 py-2 rounded-xl transition-all cursor-pointer flex-1 sm:flex-none active:scale-95"
+                        className="flex items-center justify-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold uppercase text-[11px] px-3.5 py-2 rounded-xl transition-all cursor-pointer flex-1 sm:flex-none active:scale-95"
                       >
                         <X size={14} /> Reject
                       </button>
@@ -529,7 +529,7 @@ export default function AdminClient() {
               <Calendar size={16} />
             </div>
             <div>
-              <h3 className="text-xs md:text-sm font-black uppercase tracking-wider text-slate-800">
+              <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-800">
                 All Campus Meetings & Bookings ({bookings.length})
               </h3>
               <p className="text-[11px] text-slate-500 font-medium">Full log of guest requests, confirmed meets, and escrow state.</p>
@@ -542,9 +542,9 @@ export default function AdminClient() {
               <button
                 key={f}
                 onClick={() => setBookingFilter(f)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
                   bookingFilter === f
-                    ? 'bg-[#F05A00] text-white shadow-xs border border-[#F05A00]'
+                    ? 'bg-[#6D28D9] text-white shadow-xs border border-[#6D28D9]'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
                 }`}
               >
@@ -572,7 +572,7 @@ export default function AdminClient() {
               if (statusLower === 'confirmed') badgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
               if (statusLower === 'requested') badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
               if (statusLower === 'disputed') badgeStyle = 'bg-rose-50 text-rose-700 border-rose-200';
-              if (statusLower === 'completed') badgeStyle = 'bg-orange-50 text-[#F05A00] border-orange-200';
+              if (statusLower === 'completed') badgeStyle = 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]';
 
               return (
                 <div
@@ -581,7 +581,7 @@ export default function AdminClient() {
                 >
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-black text-slate-900">
+                      <span className="text-xs font-bold text-slate-900">
                         {b.guestName || b.guest_email || 'Guest'} ➔ {b.hostName || b.host_email || 'Host'}
                       </span>
                       <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md border ${badgeStyle}`}>
@@ -592,7 +592,7 @@ export default function AdminClient() {
                     <div className="flex items-center gap-3 text-[11px] font-bold text-slate-500 flex-wrap">
                       {b.location && (
                         <span className="flex items-center gap-1 text-slate-700">
-                          <MapPin size={12} className="text-[#F05A00]" />
+                          <MapPin size={12} className="text-[#6D28D9]" />
                           {b.location}
                         </span>
                       )}
@@ -638,7 +638,7 @@ export default function AdminClient() {
               <ArrowUpRight size={16} />
             </div>
             <div>
-              <h3 className="text-xs md:text-sm font-black uppercase tracking-wider text-slate-800">
+              <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-800">
                 All Payout & Withdrawal Requests ({withdrawals.length})
               </h3>
               <p className="text-[11px] text-slate-500 font-medium">Review and process Creator Earnings payouts to student UPI / Bank accounts.</p>
@@ -672,7 +672,7 @@ export default function AdminClient() {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-black text-slate-900">
+                      <span className="text-xs font-bold text-slate-900">
                         ₹{wd.amount_inr || wd.amount} <span className="text-[11px] text-slate-500 font-bold">({wd.sparks_deducted || wd.amount} Sparks)</span>
                       </span>
                       <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md border ${

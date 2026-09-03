@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -10,98 +10,98 @@ import { getCartoonAvatar } from '../utils/avatar';
 const NOTIF_CONFIG = {
   message: {
     icon: MessageSquare,
-    accent: '#F05A00',
+    accent: '#6D28D9',
     tag: 'Message',
-    bg: 'bg-gradient-to-r from-orange-50/95 via-white/98 to-white/95',
-    border: 'border-orange-200/90 shadow-[0_12px_36px_rgba(240,90,0,0.16)]',
+    bg: 'bg-white',
+    border: 'border-black/[0.08] shadow-xs',
     actionText: 'Reply',
   },
   chat: {
     icon: MessageSquare,
-    accent: '#F05A00',
+    accent: '#6D28D9',
     tag: 'Chat',
-    bg: 'bg-gradient-to-r from-orange-50/95 via-white/98 to-white/95',
-    border: 'border-orange-200/90 shadow-[0_12px_36px_rgba(240,90,0,0.16)]',
+    bg: 'bg-white',
+    border: 'border-black/[0.08] shadow-xs',
     actionText: 'Reply',
   },
   incoming_call: {
     icon: Phone,
     accent: '#10b981',
     tag: 'Voice Call',
-    bg: 'bg-gradient-to-r from-emerald-50/95 via-white/98 to-white/95',
-    border: 'border-emerald-300/90 shadow-[0_14px_40px_rgba(16,185,129,0.22)]',
+    bg: 'bg-white',
+    border: 'border-emerald-200 shadow-xs',
     actionText: 'Join',
   },
   call: {
     icon: Phone,
     accent: '#10b981',
     tag: 'Voice Call',
-    bg: 'bg-gradient-to-r from-emerald-50/95 via-white/98 to-white/95',
-    border: 'border-emerald-300/90 shadow-[0_14px_40px_rgba(16,185,129,0.22)]',
+    bg: 'bg-white',
+    border: 'border-emerald-200 shadow-xs',
     actionText: 'Join',
   },
   booking: {
     icon: Calendar,
-    accent: '#6366f1',
+    accent: '#6D28D9',
     tag: 'Meetup',
-    bg: 'bg-gradient-to-r from-indigo-50/95 via-white/98 to-white/95',
-    border: 'border-indigo-200/90 shadow-[0_12px_36px_rgba(99,102,241,0.16)]',
+    bg: 'bg-white',
+    border: 'border-black/[0.08] shadow-xs',
     actionText: 'View Meetup',
   },
   meetup: {
     icon: Calendar,
-    accent: '#6366f1',
+    accent: '#6D28D9',
     tag: 'Meetup',
-    bg: 'bg-gradient-to-r from-indigo-50/95 via-white/98 to-white/95',
-    border: 'border-indigo-200/90 shadow-[0_12px_36px_rgba(99,102,241,0.16)]',
+    bg: 'bg-white',
+    border: 'border-black/[0.08] shadow-xs',
     actionText: 'View Meetup',
   },
   sparks: {
     icon: Zap,
-    accent: '#f59e0b',
+    accent: '#6D28D9',
     tag: 'Sparks',
-    bg: 'bg-gradient-to-r from-amber-50/95 via-white/98 to-white/95',
-    border: 'border-amber-200/90 shadow-[0_12px_36px_rgba(245,158,11,0.16)]',
+    bg: 'bg-white',
+    border: 'border-black/[0.08] shadow-xs',
     actionText: 'View Wallet',
   },
   wallet: {
     icon: Zap,
-    accent: '#f59e0b',
+    accent: '#6D28D9',
     tag: 'Wallet',
-    bg: 'bg-gradient-to-r from-amber-50/95 via-white/98 to-white/95',
-    border: 'border-amber-200/90 shadow-[0_12px_36px_rgba(245,158,11,0.16)]',
+    bg: 'bg-white',
+    border: 'border-black/[0.08] shadow-xs',
     actionText: 'View Wallet',
   },
   tip: {
     icon: Zap,
-    accent: '#f59e0b',
+    accent: '#6D28D9',
     tag: 'Tip Received',
-    bg: 'bg-gradient-to-r from-amber-50/95 via-white/98 to-white/95',
-    border: 'border-amber-200/90 shadow-[0_12px_36px_rgba(245,158,11,0.16)]',
+    bg: 'bg-white',
+    border: 'border-black/[0.08] shadow-xs',
     actionText: 'View Balance',
   },
   gig: {
     icon: Briefcase,
-    accent: '#8b5cf6',
-    tag: 'Campus Gig',
-    bg: 'bg-gradient-to-r from-purple-50/95 via-white/98 to-white/95',
-    border: 'border-purple-200/90 shadow-[0_12px_36px_rgba(139,92,246,0.16)]',
-    actionText: 'View Gig',
+    accent: '#6D28D9',
+    tag: 'Campus Activity',
+    bg: 'bg-white',
+    border: 'border-black/[0.08] shadow-xs',
+    actionText: 'View',
   },
   circle: {
     icon: Users,
-    accent: '#06b6d4',
+    accent: '#6D28D9',
     tag: 'Circle',
-    bg: 'bg-gradient-to-r from-cyan-50/95 via-white/98 to-white/95',
-    border: 'border-cyan-200/90 shadow-[0_12px_36px_rgba(6,182,212,0.16)]',
+    bg: 'bg-white',
+    border: 'border-black/[0.08] shadow-xs',
     actionText: 'View Circle',
   },
   default: {
     icon: Bell,
-    accent: '#F05A00',
+    accent: '#6D28D9',
     tag: 'Meova',
-    bg: 'bg-gradient-to-r from-orange-50/90 via-white/98 to-white/95',
-    border: 'border-orange-200/80 shadow-[0_12px_36px_rgba(240,90,0,0.14)]',
+    bg: 'bg-white',
+    border: 'border-black/[0.08] shadow-xs',
     actionText: 'View',
   },
 };
@@ -197,7 +197,7 @@ export default function InAppNotificationBanner() {
       >
         {/* Avatar or Themed Category Icon — 100% Round Circular DP */}
         {activeNotif.senderPhoto ? (
-          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-200 shadow-xs">
+          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-[#E7E5E4] shadow-xs">
             <img 
               src={activeNotif.senderPhoto} 
               alt="" 
@@ -228,11 +228,11 @@ export default function InAppNotificationBanner() {
         {/* Text Details */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-1.5 mb-0.5">
-            <h4 className="text-xs font-black text-zinc-950 truncate tracking-tight">
+            <h4 className="text-xs font-bold text-[#1C1917] truncate tracking-tight">
               {activeNotif.title}
             </h4>
             <span
-              className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md border flex-shrink-0"
+              className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md border flex-shrink-0"
               style={{ 
                 background: `${cfg.accent}12`, 
                 color: cfg.accent, 
@@ -243,7 +243,7 @@ export default function InAppNotificationBanner() {
             </span>
           </div>
 
-          <p className="text-[11px] font-semibold text-zinc-600 line-clamp-2 leading-snug">
+          <p className="text-[11px] font-semibold text-[#78716C] line-clamp-2 leading-snug">
             {activeNotif.message}
           </p>
 
@@ -257,7 +257,7 @@ export default function InAppNotificationBanner() {
                   dismiss();
                   router.push('/bookings');
                 }}
-                className="flex-1 py-2 rounded-xl text-[11px] font-black text-white flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer shadow-md shadow-emerald-500/20"
+                className="flex-1 py-2 rounded-xl text-[11px] font-bold text-white flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer shadow-md shadow-emerald-500/20"
                 style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
               >
                 <Phone size={12} />
@@ -269,7 +269,7 @@ export default function InAppNotificationBanner() {
                   e.stopPropagation();
                   dismiss();
                 }}
-                className="flex-1 py-2 rounded-xl text-[11px] font-black bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                className="flex-1 py-2 rounded-xl text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
               >
                 <PhoneOff size={12} />
                 <span>Decline</span>
@@ -291,7 +291,7 @@ export default function InAppNotificationBanner() {
               e.stopPropagation();
               dismiss();
             }}
-            className="p-1 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg transition-colors cursor-pointer flex-shrink-0"
+            className="p-1 text-[#A8A29E] hover:text-[#78716C] hover:bg-[#FAFAF8] rounded-lg transition-colors cursor-pointer flex-shrink-0"
             title="Dismiss"
           >
             <X size={14} />

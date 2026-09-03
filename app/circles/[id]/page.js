@@ -30,11 +30,11 @@ export default async function CircleDetailPage({ params }) {
   if (!circle) {
     return (
       <div className="w-full max-w-md mx-auto px-4 py-20 text-center">
-        <h2 className="text-xl font-black text-zinc-900 mb-2">Community Not Found</h2>
-        <p className="text-xs text-zinc-500 mb-6 font-medium">This campus circle does not exist or may have been removed.</p>
+        <h2 className="text-xl font-bold text-[#1C1917] mb-2">Community Not Found</h2>
+        <p className="text-xs text-[#78716C] mb-6 font-medium">This campus circle does not exist or may have been removed.</p>
         <Link
           href="/circles"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#F05A00] text-white text-xs font-black shadow-md hover:bg-[#D94F00] transition-all"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[12px] bg-[#6D28D9] text-white text-xs font-bold shadow-md hover:bg-[#5B21B6] transition-all"
         >
           <ArrowLeft size={14} /> Back to Communities
         </Link>
@@ -56,23 +56,23 @@ export default async function CircleDetailPage({ params }) {
       {/* Back */}
       <Link
         href="/circles"
-        className="inline-flex items-center gap-2 text-[10px] uppercase tracking-widest font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-8 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] px-4 py-2 rounded-full shadow-sm"
+        className="inline-flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-8 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] px-4 py-2 rounded-full shadow-sm"
       >
         <ArrowLeft size={14} /> Back to Circles
       </Link>
 
       {/* Circle Header */}
-      <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[2rem] p-8 md:p-12 mb-10 shadow-lg relative overflow-hidden">
+      <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[16px] p-8 md:p-12 mb-10 shadow-lg relative overflow-hidden">
         {/* Decorative backdrop glow */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--banner-glow-1)]/5 rounded-full blur-[80px] pointer-events-none" />
         
         <div className="flex flex-col items-center text-center relative z-10">
-          <div className="w-24 h-24 rounded-3xl overflow-hidden border border-[var(--border-subtle)] mb-6 shadow-md">
+          <div className="w-24 h-24 rounded-[16px] overflow-hidden border border-[var(--border-subtle)] mb-6 shadow-md">
             <CircleAvatar name={circle.name} size={96} radius="1.5rem" />
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-black text-[var(--text-primary)] mb-2 tracking-tight">{circle.name}</h1>
-          <span className="text-[9px] text-white font-black uppercase tracking-wider bg-[var(--accent)] px-3 py-1 rounded-full mb-6 inline-block">
+          <h1 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-2 tracking-tight">{circle.name}</h1>
+          <span className="text-[9px] text-white font-bold uppercase tracking-wider bg-[var(--accent)] px-3 py-1 rounded-full mb-6 inline-block">
             {circle.category}
           </span>
           <p className="text-xs md:text-sm text-[var(--text-secondary)] max-w-lg mb-8 leading-relaxed font-bold uppercase tracking-wide">{circle.description}</p>
@@ -90,7 +90,7 @@ export default async function CircleDetailPage({ params }) {
                 href={circle.whatsapp_link}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-transparent border border-[var(--border-mid)] hover:border-[var(--text-primary)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] font-black py-3 px-6 rounded-xl text-xs flex items-center justify-center gap-2 transition-all uppercase tracking-widest"
+                className="bg-transparent border border-[var(--border-mid)] hover:border-[var(--text-primary)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] font-bold py-3 px-6 rounded-full text-xs flex items-center justify-center gap-2 transition-all uppercase tracking-widest"
               >
                 <Send size={14} /> WhatsApp
               </a>
@@ -104,25 +104,25 @@ export default async function CircleDetailPage({ params }) {
         {/* Members */}
         <section>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-black text-[var(--text-primary)] flex items-center gap-2">
+            <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
               <Users size={18} className="text-[var(--text-secondary)]" /> Members
             </h2>
-            <span className="text-[10px] font-black text-white bg-[var(--accent)] px-3 py-1 rounded-full">{totalMembers}</span>
+            <span className="text-[10px] font-bold text-white bg-[var(--accent)] px-3 py-1 rounded-full">{totalMembers}</span>
           </div>
           
           {members.length === 0 ? (
-            <div className="bg-[var(--bg-elevated)] rounded-3xl border border-[var(--border-subtle)] p-8 text-center text-[var(--text-muted)] text-sm font-bold">
+            <div className="bg-[var(--bg-elevated)] rounded-[16px] border border-[var(--border-subtle)] p-8 text-center text-[var(--text-muted)] text-sm font-bold">
               No members yet. Be the first!
             </div>
           ) : (
-            <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-3xl p-5 grid grid-cols-1 gap-3 shadow-md">
+            <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[16px] p-5 grid grid-cols-1 gap-3 shadow-md">
               {members.map((member) => (
-                <div key={member.id} className="flex items-center gap-3 bg-[var(--bg-base)] p-3 rounded-2xl border border-[var(--border-subtle)] hover:border-[var(--border-mid)] transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[var(--ring-gradient-from)] to-[var(--ring-gradient-to)] text-white text-xs font-black flex items-center justify-center flex-shrink-0 shadow-md">
+                <div key={member.id} className="flex items-center gap-3 bg-[var(--bg-base)] p-3 rounded-[12px] border border-[var(--border-subtle)] hover:border-[var(--border-mid)] transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--ring-gradient-from)] to-[var(--ring-gradient-to)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-md">
                     {getInitials(member.full_name)}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-black text-[var(--text-primary)] truncate">{member.full_name}</p>
+                    <p className="text-sm font-bold text-[var(--text-primary)] truncate">{member.full_name}</p>
                     <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest block mt-0.5">{member.year} · {member.branch}</span>
                   </div>
                 </div>
@@ -134,14 +134,14 @@ export default async function CircleDetailPage({ params }) {
         {/* Events */}
         <section>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-black text-[var(--text-primary)] flex items-center gap-2">
+            <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
               <Calendar size={18} className="text-[var(--text-secondary)]" /> Events
             </h2>
-            <span className="text-[10px] font-black text-white bg-[var(--accent)] px-3 py-1 rounded-full">{events.length}</span>
+            <span className="text-[10px] font-bold text-white bg-[var(--accent)] px-3 py-1 rounded-full">{events.length}</span>
           </div>
 
           {events.length === 0 ? (
-            <div className="bg-[var(--bg-elevated)] rounded-3xl border border-[var(--border-subtle)] p-8 text-center text-[var(--text-muted)] text-sm font-bold">
+            <div className="bg-[var(--bg-elevated)] rounded-[16px] border border-[var(--border-subtle)] p-8 text-center text-[var(--text-muted)] text-sm font-bold">
               No events for this circle yet.
             </div>
           ) : (
@@ -151,9 +151,9 @@ export default async function CircleDetailPage({ params }) {
                   ? (event.rsvps_list || []).some((r) => r.user_id === user.id)
                   : false;
                 return (
-                  <div key={event.id} className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-3xl p-5 hover:border-[var(--accent)]/30 transition-colors group shadow-md">
+                  <div key={event.id} className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[16px] p-5 hover:border-[var(--accent)]/30 transition-colors group shadow-md">
                     <div className="mb-4">
-                      <h3 className="text-base font-black text-[var(--text-primary)] mb-2 leading-snug group-hover:text-[var(--accent)] transition-colors">{event.title}</h3>
+                      <h3 className="text-base font-bold text-[var(--text-primary)] mb-2 leading-snug group-hover:text-[var(--accent)] transition-colors">{event.title}</h3>
                       <p className="text-xs text-[var(--text-secondary)] mb-4 line-clamp-2 leading-relaxed">{event.description}</p>
                       <div className="space-y-1.5 text-[10px] text-[var(--text-muted)] font-bold border-l-2 border-[var(--border-mid)] pl-3 uppercase tracking-wider">
                         <div className="flex items-center gap-2"><Calendar size={11} className="text-[var(--accent)]" /> {formatEventDate(event.date)}</div>
@@ -161,7 +161,7 @@ export default async function CircleDetailPage({ params }) {
                       </div>
                     </div>
                     <div className="flex items-center justify-between border-t border-[var(--border-subtle)] pt-4">
-                      <span className="text-[9px] text-[var(--accent)] bg-[var(--accent-glow)] border border-[var(--accent-dim)] px-2.5 py-1 rounded-full font-black uppercase tracking-wider">
+                      <span className="text-[9px] text-[var(--accent)] bg-[var(--accent-glow)] border border-[var(--accent-dim)] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
                         Campus Event
                       </span>
                     </div>

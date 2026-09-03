@@ -36,7 +36,7 @@ export default function AcceptBookingButton({ booking, className = "" }) {
     <button
       onClick={handleAccept}
       disabled={loading}
-      className={`bg-emerald-500 text-white font-black rounded-xl py-3.5 flex items-center justify-center gap-2 shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-emerald-600 hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-50 ${className}`}
+      className={`bg-emerald-500 text-white font-bold rounded-xl py-3.5 flex items-center justify-center gap-2 shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:bg-emerald-600 hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-50 ${className}`}
     >
       {loading ? (
         <Loader2 size={16} className="animate-spin" />

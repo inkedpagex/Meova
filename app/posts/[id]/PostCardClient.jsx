@@ -104,16 +104,16 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
   const authorPhoto = post.author_photo || getCartoonAvatar(post.author_name || 'Student');
 
   return (
-    <div className="bg-white border border-black/10 rounded-[28px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.06)] hover:border-black/20 transition-all">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4.5 py-3.5 border-b border-black/5">
+    <div className="bg-white border border-[#E7E5E4] rounded-[16px] overflow-hidden shadow-[0_2px_8px_rgba(28,25,23,0.06)] transition-all mb-4">
+      {/* ── Card Header (56px) ───────────────────────────────── */}
+      <div className="flex items-center justify-between px-4 h-14">
         <Link
           href={isOwnPost ? '/profile' : `/users/${post.user_id}`}
-          className="flex items-center gap-3 cursor-pointer min-w-0 flex-1 group/author"
+          className="flex items-center gap-2.5 cursor-pointer min-w-0 flex-1 group/author"
         >
           {/* Avatar with online dot */}
           <div className="relative flex-shrink-0">
-            <div className="w-10 h-10 rounded-full overflow-hidden p-[1px] ring-1 ring-black/10 group-hover/author:ring-[#F05A00] transition-all">
+            <div className="w-9 h-9 rounded-full overflow-hidden p-[1px] ring-1 ring-black/[0.08] group-hover/author:ring-[#6D28D9] transition-all">
               <img
                 src={authorPhoto}
                 alt=""
@@ -128,14 +128,14 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
           </div>
 
           <div className="min-w-0">
-            <h4 className="text-[14px] font-black text-black group-hover/author:text-[#F05A00] transition-colors leading-tight truncate">
+            <h4 className="text-[14px] font-semibold text-[#1C1917] group-hover/author:text-[#6D28D9] transition-colors leading-tight truncate">
               {post.author_name || 'Campus Student'}
             </h4>
-            <p className="text-[11px] text-black/65 font-bold mt-0.5 flex items-center gap-1.5 leading-none truncate">
+            <p className="text-[12px] text-[#78716C] font-medium mt-0.5 flex items-center gap-1.5 leading-none truncate">
               <span>{post.author_branch?.split('(')?.[0]?.trim() || 'Student'}</span>
-              <span className="text-[#F05A00] font-black">·</span>
+              <span className="text-[#D6D3D1]">·</span>
               <span>{post.location || 'Campus'}</span>
-              <span className="text-[#F05A00] font-black">·</span>
+              <span className="text-[#D6D3D1]">·</span>
               <span>{formatPostDate(post.created_at)}</span>
             </p>
           </div>
@@ -146,7 +146,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
           <button
             type="button"
             onClick={() => setShowMenu(!showMenu)}
-            className="w-8 h-8 flex items-center justify-center text-black/60 hover:text-black hover:bg-orange-50 rounded-full transition-colors cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center text-[#A8A29E] hover:text-[#1C1917] hover:bg-black/5 rounded-full transition-colors cursor-pointer"
           >
             <MoreHorizontal size={18} />
           </button>
@@ -160,7 +160,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
                   setShowMenu(false);
                 }}
               />
-              <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-xl rounded-2xl p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150 border border-black/10">
+              <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-[0_4px_16px_rgba(28,25,23,0.08)] rounded-[16px] p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150 border border-[#E7E5E4]">
                 {isOwnPost ? (
                   <button
                     type="button"
@@ -169,7 +169,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
                       setShowMenu(false);
                       handleDeletePost();
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12.5px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
                   >
                     <Trash2 size={14} />
                     <span>{isDeleting ? 'Deleting...' : 'Delete post'}</span>
@@ -182,7 +182,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
                       setShowMenu(false);
                       handleDeletePost();
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12.5px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
                   >
                     <ShieldAlert size={14} />
                     <span>{isDeleting ? 'Removing...' : 'Moderate'}</span>
@@ -194,7 +194,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
                     setShowMenu(false);
                     handleShare();
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[12.5px] font-bold text-black hover:bg-orange-50 hover:text-[#F05A00] rounded-xl transition-colors cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-[#1C1917] hover:bg-[#F3EEFC] hover:text-[#6D28D9] rounded-xl transition-colors cursor-pointer"
                 >
                   <Copy size={14} />
                   <span>Copy link</span>
@@ -205,90 +205,108 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
         </div>
       </div>
 
-      {/* Photo */}
+      {/* ── Photo (Refined Framed Container) ───────────────────────────── */}
       {post.media_urls?.[0] && (
-        <div
-          onClick={handlePhotoClick}
-          className="relative w-full aspect-[4/3] sm:aspect-[16/10] max-h-[560px] cursor-pointer select-none overflow-hidden bg-black/5"
-        >
-          <img
-            src={post.media_urls[0]}
-            alt=""
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.01]"
-          />
+        <div className="px-3.5 pt-0.5 pb-1">
+          <div
+            onClick={handlePhotoClick}
+            className="relative w-full max-h-[440px] sm:max-h-[480px] rounded-[14px] overflow-hidden bg-[#FAFAF8] border border-[#E7E5E4]/60 cursor-pointer select-none group/media flex items-center justify-center"
+          >
+            <img
+              src={post.media_urls[0]}
+              alt=""
+              className="w-full max-h-[440px] sm:max-h-[480px] object-cover transition-transform duration-300 group-hover/media:scale-[1.01]"
+            />
 
-          {/* Category glass chip */}
-          {post.category && (
-            <span className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black bg-black/60 text-white backdrop-blur-md border border-white/20 tracking-wider uppercase">
-              {post.category}
-            </span>
-          )}
+            {/* Showcase Tag Overlay */}
+            {post.category && (
+              <span className="absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded-full text-[10.5px] font-bold bg-black/60 text-white backdrop-blur-xs tracking-wide">
+                {post.category}
+              </span>
+            )}
 
-          {/* Floating Instagram Heart Burst */}
-          {floatingHeart && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-              <Heart
-                size={84}
-                className="fill-rose-500 text-white drop-shadow-2xl animate-in zoom-in-50 fade-in duration-200"
-                style={{
-                  filter: 'drop-shadow(0 12px 35px rgba(244,63,94,0.8))',
-                }}
-              />
-            </div>
-          )}
+            {/* Floating Heart Burst */}
+            {floatingHeart && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                <Heart
+                  size={84}
+                  className="fill-[#6D28D9] text-white drop-shadow-2xl animate-in zoom-in-50 fade-in duration-200"
+                  style={{
+                    filter: 'drop-shadow(0 12px 35px rgba(109,40,217,0.8))',
+                  }}
+                />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Action Bar & Caption */}
-      <div className="px-4.5 pt-3 pb-4 space-y-2.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      {/* ── Action Bar (44px) & Caption ────────────────────────── */}
+      <div className="px-4 pt-1 pb-4 space-y-2">
+        <div className="flex items-center justify-between h-10">
+          <div className="flex items-center gap-3">
             {/* Like */}
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                handleToggleLike(false);
+                handleToggleLike();
               }}
-              className="flex items-center gap-1.5 select-none active:scale-90 transition-transform cursor-pointer group/like"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full hover:bg-[#FAFAF8] select-none active:scale-90 transition-all cursor-pointer group/like"
             >
               <Heart
-                size={21}
+                size={20}
                 className={`transition-all duration-150 ${
                   isLiked
-                    ? 'fill-rose-500 text-rose-500'
-                    : 'text-black/60 group-hover/like:text-rose-500'
+                    ? 'fill-[#6D28D9] text-[#6D28D9]'
+                    : 'text-[#78716C] group-hover/like:text-[#6D28D9]'
                 } ${animatingHeart ? 'scale-125' : 'scale-100'}`}
               />
               {likesCount > 0 && (
-                <span className={`text-[12.5px] font-black tabular-nums leading-none ${isLiked ? 'text-rose-600' : 'text-black'}`}>
+                <span
+                  className={`text-[13px] font-bold tabular-nums leading-none ${
+                    isLiked ? 'text-[#6D28D9]' : 'text-[#78716C]'
+                  }`}
+                >
                   {likesCount}
                 </span>
               )}
             </button>
 
-            {/* Share Button */}
+            {/* Chat / Message Button */}
+            {post.user_id && (
+              <Link
+                href={`/messages?userId=${post.user_id}`}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full hover:bg-[#F3EEFC] text-[#78716C] hover:text-[#6D28D9] transition-all cursor-pointer active:scale-90"
+                title="Chat with Author"
+              >
+                <MessageCircle size={19} />
+                <span className="text-[12px] font-bold">Chat</span>
+              </Link>
+            )}
+
+            {/* Share */}
             <button
               type="button"
-              onClick={handleShare}
-              className="text-black/60 hover:text-[#F05A00] transition-colors cursor-pointer active:scale-90"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleShare();
+              }}
+              className="p-1.5 rounded-full hover:bg-[#FAFAF8] text-[#78716C] hover:text-[#6D28D9] transition-colors cursor-pointer active:scale-90"
               title="Share"
             >
-              <Share2 size={20} />
+              <Share2 size={19} />
             </button>
           </div>
         </div>
 
         {/* Caption */}
         {post.content && (
-          <p className="text-[13.5px] text-black leading-snug font-medium">
-            <span className="font-black text-black mr-1.5">{post.author_name}</span>
-            <span>
-              {post.content
-                .replace(/[📍🏷️][^]*$/gu, '')
-                .replace(/[\u{1F300}-\u{1FAD6}\u{2000}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '')
-                .trim()}
+          <p className="text-[13.5px] text-[#1C1917] leading-relaxed font-normal">
+            <span className="font-bold text-[#1C1917] mr-1.5">
+              {post.author_name || 'Campus Student'}
             </span>
+            <span>{post.content}</span>
           </p>
         )}
       </div>

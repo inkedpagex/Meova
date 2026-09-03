@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
 import { Ban, Loader2, ShieldAlert, X } from '@/lib/icons';
 import { useRouter } from 'next/navigation';
@@ -47,7 +47,7 @@ export default function BlockUserButton({ targetUid, targetName, isLoggedIn, ico
           onClick={handleOpenBlockModal}
           disabled={loading}
           title="Block User"
-          className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-rose-600 hover:bg-rose-50 border border-zinc-200/60 transition-all active:scale-95 flex-shrink-0 cursor-pointer"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-[#A8A29E] hover:text-rose-600 hover:bg-rose-50 border border-[#E7E5E4]/60 transition-all active:scale-95 flex-shrink-0 cursor-pointer"
         >
           {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />}
         </button>
@@ -55,7 +55,7 @@ export default function BlockUserButton({ targetUid, targetName, isLoggedIn, ico
         <button
           onClick={handleOpenBlockModal}
           disabled={loading}
-          className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs font-black text-rose-500 hover:text-rose-600 transition-all bg-rose-50 border border-rose-200/80 hover:bg-rose-100 active:scale-95 shadow-sm cursor-pointer"
+          className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold text-rose-500 hover:text-rose-600 transition-all bg-rose-50 border border-rose-200/80 hover:bg-rose-100 active:scale-95 shadow-sm cursor-pointer"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />}
           Block
@@ -69,7 +69,7 @@ export default function BlockUserButton({ targetUid, targetName, isLoggedIn, ico
           onClick={() => !loading && setShowModal(false)}
         >
           <div 
-            className="w-full max-w-sm bg-white rounded-2xl p-6 border border-zinc-100 shadow-2xl space-y-4 anim-scale-in"
+            className="w-full max-w-sm bg-white rounded-2xl p-6 border border-[#E7E5E4] shadow-2xl space-y-4 anim-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Icon */}
@@ -79,7 +79,7 @@ export default function BlockUserButton({ targetUid, targetName, isLoggedIn, ico
               </div>
               <button 
                 onClick={() => !loading && setShowModal(false)}
-                className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 flex items-center justify-center transition-all cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[#FAFAF8] hover:bg-[#E7E5E4] text-[#78716C] flex items-center justify-center transition-all cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -87,10 +87,10 @@ export default function BlockUserButton({ targetUid, targetName, isLoggedIn, ico
 
             {/* Modal Text */}
             <div>
-              <h3 className="text-base font-black text-zinc-900 tracking-tight">
+              <h3 className="text-base font-bold text-[#1C1917] tracking-tight">
                 Block {targetName || 'Student'}?
               </h3>
-              <p className="text-xs font-medium text-zinc-500 mt-1.5 leading-relaxed">
+              <p className="text-xs font-medium text-[#78716C] mt-1.5 leading-relaxed">
                 They will no longer be able to message you, view your profile, or appear in your campus feed.
               </p>
             </div>
@@ -101,7 +101,7 @@ export default function BlockUserButton({ targetUid, targetName, isLoggedIn, ico
                 type="button"
                 onClick={() => setShowModal(false)}
                 disabled={loading}
-                className="flex-1 py-3 rounded-2xl text-xs font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 transition-colors cursor-pointer"
+                className="flex-1 py-2.5 px-4 rounded-full font-bold text-xs text-black bg-white hover:bg-[#F3EEFC] border border-black/[0.08] transition-all cursor-pointer shadow-xs"
               >
                 Cancel
               </button>
@@ -110,7 +110,7 @@ export default function BlockUserButton({ targetUid, targetName, isLoggedIn, ico
                 type="button"
                 onClick={handleConfirmBlock}
                 disabled={loading}
-                className="flex-1 py-3 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 transition-all shadow-md shadow-rose-500/20 active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 py-2.5 px-4 rounded-full text-xs font-bold text-white bg-[#DC2626] hover:bg-red-700 transition-all shadow-xs active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Block User'}
               </button>

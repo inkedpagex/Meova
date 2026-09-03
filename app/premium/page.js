@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState } from 'react';
 import { Crown, CheckCircle2, ShieldCheck, Zap, ArrowRight, Star, Sparkles, MessageSquare, Award } from '@/lib/icons';
 
@@ -35,21 +35,18 @@ export default function PremiumPage() {
   const [success, setSuccess] = useState(false);
 
   return (
-    <div className="anim-fade-in w-full max-w-4xl mx-auto space-y-12 pb-16 px-4">
+    <div className="anim-fade-in w-full max-w-4xl mx-auto space-y-12 pb-16 px-4 pt-[68px] md:pt-6">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-[2.5rem] border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-elevated)] to-[var(--bg-base)] p-8 md:p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-xl">
-        {/* Floating gradient glow behind banner */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-[#D94F00]/10 blur-[80px] pointer-events-none" />
-
-        <div className="w-16 h-16 rounded-3xl bg-[#fb923c]/10 border border-[#fb923c]/35 flex items-center justify-center text-[#fb923c] shadow-[0_8px_32px_rgba(251,146,60,0.15)] animate-pulse">
+      <div className="relative overflow-hidden rounded-[20px] border border-[#E7E5E4] bg-white p-8 md:p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-xs">
+        <div className="w-16 h-16 rounded-[16px] bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center text-[#6D28D9] shadow-xs">
           <Crown size={32} className="fill-current" />
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#1C1917] tracking-tight">
             Meova Premium
           </h1>
-          <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest mt-1">
+          <p className="text-xs text-[#78716C] font-bold uppercase tracking-widest mt-1">
             Unlock exclusive features and supercharge your campus life
           </p>
         </div>
@@ -59,8 +56,8 @@ export default function PremiumPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Features List */}
         <div className="space-y-6">
-          <h2 className="text-xs font-black uppercase tracking-wider text-[var(--text-secondary)]">
-            What&apos;s included in Premium
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[#78716C]">
+            What's included in Premium
           </h2>
 
           <div className="space-y-5">
@@ -68,14 +65,14 @@ export default function PremiumPage() {
               const Icon = feat.icon;
               return (
                 <div key={idx} className="flex gap-4 items-start">
-                  <div className="w-9 h-9 rounded-xl bg-[#D94F00]/10 border border-[#D94F00]/20 flex items-center justify-center text-[#F05A00] flex-shrink-0">
+                  <div className="w-9 h-9 rounded-[12px] bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center text-[#6D28D9] flex-shrink-0">
                     <Icon size={16} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-[var(--text-primary)] tracking-wide">
+                    <h3 className="text-sm font-bold text-[#1C1917] tracking-wide">
                       {feat.title}
                     </h3>
-                    <p className="text-xs text-[var(--text-secondary)] mt-0.5 leading-relaxed font-medium">
+                    <p className="text-xs text-[#78716C] mt-0.5 leading-relaxed font-medium">
                       {feat.desc}
                     </p>
                   </div>
@@ -86,8 +83,8 @@ export default function PremiumPage() {
         </div>
 
         {/* Pricing/Checkout Panel */}
-        <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-8 space-y-6 relative shadow-lg">
-          <h2 className="text-xs font-black uppercase tracking-wider text-[var(--text-secondary)]">
+        <div className="bg-white border border-[#E7E5E4] rounded-[20px] p-8 space-y-6 relative shadow-xs">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[#78716C]">
             Select Your Plan
           </h2>
 
@@ -95,63 +92,63 @@ export default function PremiumPage() {
             {/* Monthly Plan */}
             <div
               onClick={() => setSelectedPlan('monthly')}
-              className="border-2 rounded-2xl p-5 cursor-pointer flex justify-between items-center transition-all duration-200"
+              className="border-2 rounded-[16px] p-5 cursor-pointer flex justify-between items-center transition-all duration-200"
               style={selectedPlan === 'monthly'
-                ? { borderColor: 'var(--accent)', background: 'var(--accent-glow)' }
-                : { borderColor: 'var(--border-subtle)', background: 'transparent' }
+                ? { borderColor: '#6D28D9', background: '#F3EEFC' }
+                : { borderColor: '#E7E5E4', background: '#FAFAF8' }
               }
             >
               <div>
-                <p className="text-sm font-black text-[var(--text-primary)]">Monthly Package</p>
-                <p className="text-xs text-[var(--text-muted)] font-bold mt-0.5">Billed every month</p>
+                <p className="text-sm font-bold text-[#1C1917]">Monthly Package</p>
+                <p className="text-xs text-[#78716C] font-bold mt-0.5">Billed every month</p>
               </div>
               <div className="text-right">
-                <p className="text-xl font-black text-[var(--text-primary)]">₹99</p>
-                <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">/ month</p>
+                <p className="text-xl font-bold text-[#1C1917]">₹99</p>
+                <p className="text-[10px] text-[#A8A29E] font-bold uppercase tracking-wider">/ month</p>
               </div>
             </div>
 
             {/* Yearly Plan */}
             <div
               onClick={() => setSelectedPlan('yearly')}
-              className="border-2 rounded-2xl p-5 cursor-pointer flex justify-between items-center transition-all duration-200 relative overflow-hidden"
+              className="border-2 rounded-[16px] p-5 cursor-pointer flex justify-between items-center transition-all duration-200 relative overflow-hidden"
               style={selectedPlan === 'yearly'
-                ? { borderColor: 'var(--accent)', background: 'var(--accent-glow)' }
-                : { borderColor: 'var(--border-subtle)', background: 'transparent' }
+                ? { borderColor: '#6D28D9', background: '#F3EEFC' }
+                : { borderColor: '#E7E5E4', background: '#FAFAF8' }
               }
             >
               {/* Promo Badge */}
-              <div className="absolute right-0 top-0 bg-[#fb923c] text-black text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-lg">
+              <div className="absolute right-0 top-0 bg-[#6D28D9] text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
                 Save 40%
               </div>
 
               <div>
-                <p className="text-sm font-black text-[var(--text-primary)] flex items-center gap-1.5">
+                <p className="text-sm font-bold text-[#1C1917] flex items-center gap-1.5">
                   Yearly Package
                 </p>
-                <p className="text-xs text-[var(--text-muted)] font-bold mt-0.5">Best Value Plan</p>
+                <p className="text-xs text-[#78716C] font-bold mt-0.5">Best Value Plan</p>
               </div>
               <div className="text-right">
-                <p className="text-xl font-black text-[#fb923c]">₹699</p>
-                <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">/ year</p>
+                <p className="text-xl font-bold text-[#6D28D9]">₹699</p>
+                <p className="text-[10px] text-[#A8A29E] font-bold uppercase tracking-wider">/ year</p>
               </div>
             </div>
           </div>
 
           <button
             onClick={() => setSuccess(true)}
-            className="btn btn-primary w-full py-4 text-xs font-black tracking-widest uppercase flex items-center justify-center gap-2 group hover:-translate-y-0.5 shadow-xl transition-all"
+            className="w-full py-3.5 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold tracking-widest uppercase flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
           >
-            Go Premium
-            <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+            <span>Go Premium</span>
+            <ArrowRight size={13} />
           </button>
 
           {success && (
-            <div className="anim-fade-up bg-emerald-500/10 border border-emerald-500/20 text-[#4ade80] rounded-xl p-4 flex gap-2.5 items-start">
-              <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-emerald-400" />
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-[12px] p-4 flex gap-2.5 items-start">
+              <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-emerald-600" />
               <div>
-                <p className="text-xs font-black text-emerald-400">Successfully Subscribed!</p>
-                <p className="text-[10px] text-emerald-400/80 mt-0.5 font-bold">Welcome to the inner circle. Your Premium features are now active.</p>
+                <p className="text-xs font-bold text-emerald-800">Successfully Subscribed!</p>
+                <p className="text-[10px] text-emerald-600 mt-0.5 font-bold">Welcome to the inner circle. Your Premium features are now active.</p>
               </div>
             </div>
           )}

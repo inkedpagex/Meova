@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { updateProfileAdmin } from './profile.actions';
 import {
   User, GraduationCap, BookOpen, Tag, Loader2, Save, PenLine,
@@ -216,21 +216,21 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
     <form onSubmit={handleSave} className="space-y-7">
       {/* Alert Banners */}
       {errorMsg && (
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-700 text-xs font-semibold animate-in fade-in">
+        <div className="flex items-center gap-3 p-4 rounded-[12px] bg-rose-50 border border-rose-200/80 text-rose-700 text-xs font-semibold animate-in fade-in">
           <AlertCircle size={18} className="shrink-0 text-rose-500" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold animate-in fade-in">
+        <div className="flex items-center gap-3 p-4 rounded-[12px] bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold animate-in fade-in">
           <CheckCircle2 size={18} className="shrink-0 text-emerald-500" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {/* ── Avatar Uploader Section ────────────────────────────────── */}
-      <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-gradient-to-b from-orange-50/50 to-zinc-50/80 border border-orange-100/60 text-center">
+      <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-gradient-to-b from-[#F3EEFC]/60 to-white border border-[#E4D9F7]/60 text-center">
         <input
           type="file"
           ref={fileInputRef}
@@ -240,17 +240,17 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         />
 
         <div className="relative group mb-3">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl shadow-orange-500/10 bg-zinc-100 flex items-center justify-center">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl shadow-purple-500/20 bg-[#FAFAF8] flex items-center justify-center">
             {photoUrl ? (
               <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
-              <User size={36} className="text-zinc-400" />
+              <User size={36} className="text-[#A8A29E]" />
             )}
           </div>
 
           {photoUploading && (
             <div className="absolute inset-0 bg-black/60 backdrop-blur-xs rounded-full flex flex-col items-center justify-center text-white">
-              <Loader2 size={20} className="animate-spin text-[#F05A00]" />
+              <Loader2 size={20} className="animate-spin text-[#6D28D9]" />
               <span className="text-[10px] font-bold mt-1">Uploading...</span>
             </div>
           )}
@@ -259,7 +259,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             type="button"
             disabled={photoUploading}
             onClick={() => fileInputRef.current?.click()}
-            className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#F05A00] text-white shadow-md flex items-center justify-center hover:bg-[#D94F00] transition-transform active:scale-90 cursor-pointer disabled:opacity-50"
+            className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#6D28D9] text-white shadow-md flex items-center justify-center hover:bg-[#5B21B6] transition-transform active:scale-90 cursor-pointer disabled:opacity-50"
             title="Change Avatar"
           >
             <Camera size={14} />
@@ -271,37 +271,37 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             type="button"
             disabled={photoUploading}
             onClick={() => fileInputRef.current?.click()}
-            className="text-xs font-bold text-[#F05A00] hover:text-[#D94F00] transition-colors cursor-pointer"
+            className="text-xs font-bold text-[#6D28D9] hover:text-[#5B21B6] transition-colors cursor-pointer"
           >
             {photoUrl ? 'Change Photo' : 'Upload Avatar'}
           </button>
           {photoUrl && (
             <>
-              <span className="text-zinc-300">·</span>
+              <span className="text-[#A8A29E]">·</span>
               <button
                 type="button"
                 disabled={photoUploading}
                 onClick={handleRemovePhoto}
-                className="text-xs font-medium text-zinc-400 hover:text-rose-500 transition-colors cursor-pointer"
+                className="text-xs font-medium text-[#A8A29E] hover:text-rose-500 transition-colors cursor-pointer"
               >
                 Remove
               </button>
             </>
           )}
         </div>
-        <p className="text-[11px] text-zinc-400 mt-1 font-medium">JPEG or PNG under 8MB</p>
+        <p className="text-[11px] text-[#A8A29E] mt-1 font-medium">JPEG or PNG under 8MB</p>
       </div>
 
       {/* ── Basic Info ──────────────────────────────────────────────── */}
       <div className="space-y-4">
-        <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Academic Identity</h3>
+        <h3 className="text-xs font-bold text-[#A8A29E] uppercase tracking-wider">Academic Identity</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Full Name */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">Full Name *</label>
+            <label className="block text-xs font-semibold text-[#78716C] mb-1.5">Full Name *</label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#A8A29E]">
                 <User size={16} />
               </span>
               <input
@@ -309,7 +309,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Your full name"
-                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#6D28D9] focus:ring-4 focus:ring-[#6D28D9]/10 transition-all"
                 required
               />
             </div>
@@ -317,9 +317,9 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
 
           {/* Course / Branch */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">Course / Branch *</label>
+            <label className="block text-xs font-semibold text-[#78716C] mb-1.5">Course / Branch *</label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#A8A29E]">
                 <BookOpen size={16} />
               </span>
               <input
@@ -327,7 +327,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
                 placeholder="e.g. B.Tech Computer Science"
-                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#6D28D9] focus:ring-4 focus:ring-[#6D28D9]/10 transition-all"
                 required
               />
             </div>
@@ -337,7 +337,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* University / College */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">University / College *</label>
+            <label className="block text-xs font-semibold text-[#78716C] mb-1.5">University / College *</label>
             <UniversitySelector
               value={university}
               onChange={(val) => setUniversity(val)}
@@ -347,21 +347,21 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
 
           {/* Year of Study */}
           <div className="relative" ref={yearDropdownRef}>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">Year of Study *</label>
+            <label className="block text-xs font-semibold text-[#78716C] mb-1.5">Year of Study *</label>
             <button
               type="button"
               onClick={() => setShowYearDropdown(!showYearDropdown)}
-              className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 flex items-center justify-between cursor-pointer transition-all"
+              className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 focus:bg-white focus:border-[#6D28D9] focus:ring-4 focus:ring-[#6D28D9]/10 flex items-center justify-between cursor-pointer transition-all"
             >
-              <span className="absolute left-3.5 text-zinc-400 pointer-events-none">
+              <span className="absolute left-3.5 text-[#A8A29E] pointer-events-none">
                 <GraduationCap size={16} />
               </span>
               <span>{year ? `${year} Year` : 'Select Year'}</span>
-              <ChevronDown size={16} className={`text-zinc-400 transition-transform ${showYearDropdown ? 'rotate-180' : ''}`} />
+              <ChevronDown size={16} className={`text-[#A8A29E] transition-transform ${showYearDropdown ? 'rotate-180' : ''}`} />
             </button>
 
             {showYearDropdown && (
-              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-zinc-100 shadow-xl rounded-2xl p-1.5 z-50 animate-in fade-in duration-150">
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-[#E7E5E4] shadow-xl rounded-[12px] p-1.5 z-50 animate-in fade-in duration-150">
                 {STUDY_YEARS.map((y) => (
                   <button
                     key={y}
@@ -370,12 +370,12 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                       setYear(y);
                       setShowYearDropdown(false);
                     }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                      year === y ? 'bg-orange-50 text-[#F05A00]' : 'text-zinc-700 hover:bg-zinc-50'
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[10px] text-xs font-semibold transition-colors cursor-pointer ${
+                      year === y ? 'bg-[#F3EEFC] text-[#6D28D9]' : 'text-[#78716C] hover:bg-[#FAFAF8]'
                     }`}
                   >
                     <span>{y === 'Alumni' ? 'Alumni' : `${y} Year`}</span>
-                    {year === y && <Check size={14} className="text-[#F05A00]" />}
+                    {year === y && <Check size={14} className="text-[#6D28D9]" />}
                   </button>
                 ))}
               </div>
@@ -385,11 +385,11 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
 
         {/* Meetup Hourly Rate */}
         <div>
-          <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
-            Meetup Rate <span className="text-zinc-400 font-normal">(Sparks / Hour)</span>
+          <label className="block text-xs font-semibold text-[#78716C] mb-1.5">
+            Meetup Rate <span className="text-[#A8A29E] font-normal">(Sparks / Hour)</span>
           </label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#F05A00]">
+            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#6D28D9]">
               <Zap size={16} className="fill-current" />
             </span>
             <input
@@ -399,17 +399,17 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
               value={rate}
               onChange={(e) => setRate(e.target.value.replace(/[^0-9]/g, ''))}
               placeholder="100"
-              className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+              className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#6D28D9] focus:ring-4 focus:ring-[#6D28D9]/10 transition-all"
               required
             />
           </div>
-          <p className="text-[11px] text-zinc-400 mt-1 font-medium">10 - 500 Sparks for 1-on-1 sessions</p>
+          <p className="text-[11px] text-[#A8A29E] mt-1 font-medium">10 - 500 Sparks for 1-on-1 sessions</p>
         </div>
 
         {/* Bio */}
         <div>
-          <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
-            Short Bio <span className="text-zinc-400 font-normal">(Optional)</span>
+          <label className="block text-xs font-semibold text-[#78716C] mb-1.5">
+            Short Bio <span className="text-[#A8A29E] font-normal">(Optional)</span>
           </label>
           <div className="relative">
             <textarea
@@ -418,25 +418,25 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
               placeholder="What are you currently learning or building?"
               rows={2}
               maxLength={250}
-              className="w-full rounded-2xl p-3.5 text-sm font-medium text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all resize-none"
+              className="w-full rounded-[12px] p-3 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#6D28D9] focus:ring-4 focus:ring-[#6D28D9]/10 transition-all resize-none"
             />
           </div>
           <div className="flex justify-between items-center mt-1">
-            <span className="text-[11px] text-zinc-400 font-medium">Shown on your campus profile card</span>
-            <span className="text-[11px] text-zinc-400 font-semibold">{bio.length}/250</span>
+            <span className="text-[11px] text-[#A8A29E] font-medium">Shown on your campus profile card</span>
+            <span className="text-[11px] text-[#A8A29E] font-semibold">{bio.length}/250</span>
           </div>
         </div>
       </div>
 
       {/* ── Social Profiles ────────────────────────────────────────── */}
       <div className="space-y-4 pt-2">
-        <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Socials & Portfolio</h3>
+        <h3 className="text-xs font-bold text-[#A8A29E] uppercase tracking-wider">Socials & Portfolio</h3>
 
         <div className="space-y-3">
           {/* Instagram */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
-              Instagram Handle <span className="text-zinc-400 font-normal">(Optional)</span>
+            <label className="block text-xs font-semibold text-[#78716C] mb-1.5">
+              Instagram Handle <span className="text-[#A8A29E] font-normal">(Optional)</span>
             </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-rose-500">
@@ -447,15 +447,15 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 value={instagram}
                 onChange={(e) => setInstagram(e.target.value)}
                 placeholder="e.g. chirag_gla"
-                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-medium text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#6D28D9] focus:ring-4 focus:ring-[#6D28D9]/10 transition-all"
               />
             </div>
           </div>
 
           {/* LinkedIn */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
-              LinkedIn Profile / Username <span className="text-zinc-400 font-normal">(Optional)</span>
+            <label className="block text-xs font-semibold text-[#78716C] mb-1.5">
+              LinkedIn Profile / Username <span className="text-[#A8A29E] font-normal">(Optional)</span>
             </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-blue-600">
@@ -466,18 +466,18 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 value={linkedin}
                 onChange={(e) => setLinkedin(e.target.value)}
                 placeholder="e.g. in/chirag-sharma or username"
-                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-medium text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#6D28D9] focus:ring-4 focus:ring-[#6D28D9]/10 transition-all"
               />
             </div>
           </div>
 
           {/* GitHub / Portfolio */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
-              GitHub Profile <span className="text-zinc-400 font-normal">(Optional)</span>
+            <label className="block text-xs font-semibold text-[#78716C] mb-1.5">
+              GitHub Profile <span className="text-[#A8A29E] font-normal">(Optional)</span>
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-700">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#78716C]">
                 <Github size={16} />
               </span>
               <input
@@ -485,7 +485,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 value={github}
                 onChange={(e) => setGithub(e.target.value)}
                 placeholder="e.g. chirag-dev"
-                className="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-medium text-zinc-900 bg-zinc-50/70 border border-zinc-200/80 placeholder:text-zinc-400 focus:outline-none focus:bg-white focus:border-[#F05A00] focus:ring-4 focus:ring-[#F05A00]/10 transition-all"
+                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#6D28D9] focus:ring-4 focus:ring-[#6D28D9]/10 transition-all"
               />
             </div>
           </div>
@@ -496,21 +496,21 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Campus Interests</h3>
-            <p className="text-xs text-zinc-500 mt-0.5 font-medium">Pick 1 to 5 tags that define your vibe</p>
+            <h3 className="text-xs font-bold text-[#A8A29E] uppercase tracking-wider">Campus Interests</h3>
+            <p className="text-xs text-[#78716C] mt-0.5 font-medium">Pick 1 to 5 tags that define your vibe</p>
           </div>
           <span
             className={`text-xs font-bold px-2.5 py-1 rounded-full ${
               selectedInterests.length >= 1 && selectedInterests.length <= 5
-                ? 'bg-orange-100 text-[#F05A00]'
-                : 'bg-zinc-100 text-zinc-500'
+                ? 'bg-[#F3EEFC] text-[#6D28D9]'
+                : 'bg-[#FAFAF8] text-[#78716C]'
             }`}
           >
             {selectedInterests.length} / 5
           </span>
         </div>
 
-        <div className="flex flex-wrap gap-2 p-4 rounded-3xl bg-zinc-50/80 border border-zinc-200/80">
+        <div className="flex flex-wrap gap-2 p-4 rounded-3xl bg-[#FAFAF8]/80 border border-[#E7E5E4]/80">
           {INTEREST_TAGS.map((tag) => {
             const isSelected = selectedInterests.includes(tag);
             return (
@@ -518,10 +518,10 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 key={tag}
                 type="button"
                 onClick={() => handleInterestToggle(tag)}
-                className={`text-xs font-semibold px-3.5 py-2 rounded-xl transition-all cursor-pointer active:scale-95 border ${
+                className={`text-xs font-semibold px-3.5 py-2 rounded-[10px] transition-all cursor-pointer active:scale-95 border ${
                   isSelected
-                    ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-sm shadow-orange-500/20'
-                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:text-zinc-900'
+                    ? 'bg-[#6D28D9] text-white border-[#6D28D9] shadow-sm shadow-purple-500/20'
+                    : 'bg-white text-[#78716C] border-[#E7E5E4] hover:border-[#E7E5E4] hover:text-[#1C1917]'
                 }`}
               >
                 {tag}
@@ -532,13 +532,13 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       </div>
 
       {/* ── Submit Action ─────────────────────────────────────────── */}
-      <div className="pt-4 border-t border-zinc-100">
+      <div className="pt-4 border-t border-[#E7E5E4]">
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl bg-gradient-to-r from-[#F05A00] to-[#D94F00] text-white font-bold text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:hover:translate-y-0"
+          className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-xs uppercase tracking-wider shadow-xs active:scale-95 transition-all duration-200 cursor-pointer disabled:opacity-60"
         >
-          {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+          {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
           <span>Save Changes</span>
         </button>
       </div>

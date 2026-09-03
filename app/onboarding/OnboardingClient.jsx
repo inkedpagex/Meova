@@ -125,7 +125,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
         {/* Checkmark circle */}
         <div style={{
           width: 80, height: 80, borderRadius: '50%',
-          background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)',
+          background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           animation: 'ob-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both',
           boxShadow: '0 12px 30px rgba(240,90,0,0.3)',
@@ -149,10 +149,10 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
           marginTop: 24, textAlign: 'center', position: 'relative', zIndex: 1,
           animation: 'ob-up 0.45s ease 0.15s both',
         }}>
-          <h2 className="text-2xl md:text-3xl font-black text-zinc-950 tracking-tight">
+          <h2 className="text-2xl md:text-3xl font-bold text-[#1C1917] tracking-tight">
             You&apos;re all set!
           </h2>
-          <p className="text-sm font-bold text-zinc-400 mt-1.5">
+          <p className="text-sm font-bold text-[#A8A29E] mt-1.5">
             Opening Meova for you…
           </p>
         </div>
@@ -165,7 +165,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
         }}>
           <div style={{
             height: '100%', borderRadius: 99,
-            background: 'linear-gradient(90deg, #F05A00, #D94F00)',
+            background: 'linear-gradient(90deg, #6D28D9, #5B21B6)',
             animation: 'ob-bar 0.72s cubic-bezier(0.4,0,0.2,1) 0.05s both',
           }} />
         </div>
@@ -177,28 +177,28 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
   return (
     <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-hidden">
       {/* ── Ultra-Compact Top Header Bar ── */}
-      <header className="flex-shrink-0 px-4 sm:px-6 py-3 border-b border-zinc-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
+      <header className="flex-shrink-0 px-4 sm:px-6 py-3 border-b border-[#E7E5E4] bg-white/95 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           {step > 1 ? (
             <button
               type="button"
               onClick={goBack}
-              className="p-1.5 -ml-1 rounded-xl text-zinc-500 hover:text-zinc-950 hover:bg-zinc-100 transition-all active:scale-95 cursor-pointer"
+              className="p-1.5 -ml-1 rounded-xl text-[#78716C] hover:text-[#1C1917] hover:bg-[#FAFAF8] transition-all active:scale-95 cursor-pointer"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5M12 19l-7-7 7-7"/>
               </svg>
             </button>
           ) : (
-            <div className="w-7 h-7 rounded-xl bg-[#F05A00] text-white flex items-center justify-center font-black text-xs shadow-md shadow-orange-500/20">
+            <div className="w-7 h-7 rounded-xl bg-[#6D28D9] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-purple-500/20">
               M
             </div>
           )}
           <div>
-            <span className="font-black text-xs text-zinc-950 block leading-none">
+            <span className="font-bold text-xs text-[#1C1917] block leading-none">
               {step === 1 ? 'Your Identity' : step === 2 ? 'Academic Info' : 'Vibe & Interests'}
             </span>
-            <span className="text-[10px] font-bold text-zinc-400">Step {step} of 3</span>
+            <span className="text-[10px] font-bold text-[#A8A29E]">Step {step} of 3</span>
           </div>
         </div>
 
@@ -208,7 +208,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
             <div
               key={s}
               className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                step >= s ? 'bg-[#F05A00]' : 'bg-zinc-200'
+                step >= s ? 'bg-[#6D28D9]' : 'bg-[#E7E5E4]'
               }`}
             />
           ))}

@@ -43,22 +43,22 @@ export default function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white border border-black/10 hover:border-[#F05A00] rounded-2xl px-4 py-3 text-xs font-bold text-black flex items-center justify-between shadow-xs transition-all cursor-pointer active:scale-[0.99] focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10"
+        className="w-full bg-white border border-[#E7E5E4] hover:border-[#6D28D9] rounded-[12px] px-4 py-2.5 text-xs font-bold text-[#1C1917] flex items-center justify-between shadow-xs transition-all cursor-pointer active:scale-[0.99] focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10"
       >
-        <span className={selectedOption ? 'text-black' : 'text-black/40'}>
+        <span className={selectedOption ? 'text-[#1C1917]' : 'text-[#1C1917]/40'}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <ChevronDown
           size={16}
-          className={`text-black/60 transition-transform duration-200 flex-shrink-0 ${
-            isOpen ? 'rotate-180 text-[#F05A00]' : ''
+          className={`text-[#1C1917]/60 transition-transform duration-200 flex-shrink-0 ${
+            isOpen ? 'rotate-180 text-[#6D28D9]' : ''
           }`}
         />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white border border-black/10 rounded-2xl p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 max-h-60 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white border border-[#E7E5E4] rounded-[16px] p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 max-h-60 overflow-y-auto">
           {normalizedOptions.map((opt) => {
             const isSelected = opt.value === value;
             return (
@@ -69,14 +69,14 @@ export default function CustomSelect({
                   onChange(opt.value);
                   setIsOpen(false);
                 }}
-                className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer mb-0.5 last:mb-0 ${
+                className={`w-full text-left px-3.5 py-2.5 rounded-[10px] text-xs font-bold transition-all flex items-center justify-between cursor-pointer mb-0.5 last:mb-0 ${
                   isSelected
-                    ? 'bg-orange-50 text-[#F05A00] font-black border border-orange-200/80 shadow-2xs'
-                    : 'text-black hover:bg-orange-50/50 hover:text-black border border-transparent'
+                    ? 'bg-[#F3EEFC] text-[#6D28D9] font-bold border border-[#E4D9F7]/80 shadow-2xs'
+                    : 'text-[#1C1917] hover:bg-[#F3EEFC]/50 hover:text-[#1C1917] border border-transparent'
                 }`}
               >
                 <span>{opt.label}</span>
-                {isSelected && <Check size={14} className="text-[#F05A00] stroke-[2.5]" />}
+                {isSelected && <Check size={14} className="text-[#6D28D9] stroke-[2.5]" />}
               </button>
             );
           })}

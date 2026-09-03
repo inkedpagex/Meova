@@ -18,7 +18,7 @@ import { useVoiceCall } from '@/components/providers/VoiceCallProvider';
 
 const fetcher = (url) => fetch(url).then(res => res.json());
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function timeAgo(ts) {
   if (!ts) return '';
@@ -43,9 +43,10 @@ function avatarUrl(uid, name, photo) {
   return getCartoonAvatar(name || uid || 'user');
 }
 
-// ─── Chat List Item ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Chat List Item (Card Type 1) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
+  const { isUserOnline } = useUserContext();
   const participants = chat.participants || [];
   const unreadCountObj = chat.unread_count || chat.unreadCount || {};
   const participantNamesObj = chat.participant_names || chat.participantNames || {};
@@ -66,43 +67,47 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
     <button
       type="button"
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-3 text-left transition-all cursor-pointer rounded-2xl ${
+      className={`w-full h-[72px] flex items-center gap-3 px-4 py-3 text-left transition-all cursor-pointer border-b border-[#E7E5E4] ${
         isActive 
-          ? 'bg-orange-50/80 font-medium border border-orange-100 shadow-2xs' 
-          : 'hover:bg-zinc-50 border border-transparent'
+          ? 'bg-[#F3EEFC] font-medium' 
+          : 'hover:bg-[#FAFAF8] bg-white'
       }`}
     >
       <div className="relative flex-shrink-0">
-        <div className={`w-12 h-12 rounded-full p-[2px] ${unread > 0 ? 'bg-gradient-to-tr from-[#F05A00] via-orange-500 to-amber-400' : 'bg-transparent'}`}>
+        <div className="w-12 h-12 rounded-full overflow-hidden p-[1px] ring-1 ring-black/[0.08]">
           <img
             src={avatarUrl(otherId, otherName, otherPhoto)}
             alt=""
-            className="w-full h-full rounded-full object-cover border border-zinc-200 bg-zinc-100"
+            className="w-full h-full rounded-full object-cover bg-[#FAFAF8]"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
             }}
           />
         </div>
-        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+        {isUserOnline(otherId) && (
+          <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-xs" />
+        )}
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-0.5">
-          <span className={`text-xs sm:text-sm truncate ${unread > 0 ? 'font-black text-zinc-900' : 'font-extrabold text-zinc-800'}`}>
+          <span className={`text-[15px] truncate ${unread > 0 ? 'font-bold text-[#1C1917]' : 'font-semibold text-[#1C1917]'}`}>
             {otherName}
           </span>
-          <span className="text-[10px] text-zinc-400 font-bold flex-shrink-0 ml-2">
+          <span className="text-[12px] text-[#A8A29E] font-medium flex-shrink-0 ml-2">
             {timeAgo(lastMessageAt)}
           </span>
         </div>
         <div className="flex items-center justify-between gap-1">
-          <p className={`text-xs truncate ${unread > 0 ? 'text-zinc-900 font-black' : 'text-zinc-500 font-medium'}`}>
-            {isMe && <span className="text-zinc-400 font-semibold">You: </span>}
+          <p className={`text-[14px] truncate ${unread > 0 ? 'text-[#1C1917] font-semibold' : 'text-[#78716C] font-normal'}`}>
+            {isMe && <span className="text-[#A8A29E]">You: </span>}
             {lastMessage || 'Sent a message'}
           </p>
           {unread > 0 && (
-            <span className="w-2.5 h-2.5 rounded-full bg-[#F05A00] flex-shrink-0 shadow-xs" />
+            <span className="w-5 h-5 rounded-full bg-[#6D28D9] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 shadow-xs">
+              {unread > 9 ? '9+' : unread}
+            </span>
           )}
         </div>
       </div>
@@ -110,16 +115,16 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
   );
 }
 
-// ─── Suggested Student Item ──────────────────────────────────────────────────
+// â”€â”€â”€ Suggested Student Item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SuggestedStudentItem({ student, currentUid, onSelect }) {
   return (
     <div 
       onClick={() => onSelect(student.id)}
-      className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors cursor-pointer group"
+      className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-[#FAFAF8] transition-colors cursor-pointer group"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="w-12 h-12 rounded-full overflow-hidden border border-zinc-200 flex-shrink-0 bg-zinc-100 shadow-xs">
+        <div className="w-12 h-12 rounded-full overflow-hidden border border-[#E7E5E4] flex-shrink-0 bg-[#F3EEFC] shadow-xs">
           <img 
             src={avatarUrl(student.id, student.full_name, student.photo_url)} 
             alt="" 
@@ -131,17 +136,17 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs sm:text-sm font-black text-zinc-900 truncate group-hover:text-[#F05A00] transition-colors">
+          <p className="text-xs sm:text-sm font-bold text-[#1C1917] truncate group-hover:text-[#6D28D9] transition-colors">
             {student.full_name || 'Student'}
           </p>
-          <p className="text-xs font-semibold text-zinc-400 truncate mt-0.5">
+          <p className="text-xs font-semibold text-[#A8A29E] truncate mt-0.5">
             @{student.username || 'campus_student'} · {student.branch || 'Campus'}
           </p>
         </div>
       </div>
       <button 
         type="button"
-        className="px-4 py-1.5 rounded-xl bg-[#F05A00] text-white text-xs font-black hover:bg-[#D94F00] active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs"
+        className="px-4 py-1.5 rounded-xl bg-[#6D28D9] text-white text-xs font-bold hover:bg-[#5B21B6] active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs"
       >
         Chat
       </button>
@@ -149,7 +154,7 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
   );
 }
 
-// ─── Message Bubble ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Message Bubble â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderId }) {
   const sender = msg.senderId || msg.sender_id;
@@ -158,8 +163,8 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
   if (isSystem) {
     return (
       <div className="flex justify-center my-4">
-        <div className="flex items-center gap-2 bg-zinc-100 text-zinc-700 rounded-full px-4 py-1.5">
-          <Zap className="w-3.5 h-3.5 text-[#F05A00] fill-current" />
+        <div className="flex items-center gap-2 bg-[#F3EEFC] text-[#78716C] rounded-full px-4 py-1.5">
+          <Zap className="w-3.5 h-3.5 text-[#6D28D9] fill-current" />
           <span className="text-[11px] font-bold">{msg.text}</span>
         </div>
       </div>
@@ -179,7 +184,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
               <img
                 src={avatarUrl(senderId, senderName, senderPhoto)}
                 alt={senderName}
-                className="w-7 h-7 rounded-full object-cover border border-zinc-200"
+                className="w-7 h-7 rounded-full object-cover border border-[#E7E5E4]"
               />
             </Link>
           ) : <div className="w-7 h-7" />}
@@ -190,22 +195,22 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
         <div
           className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
             isMe
-              ? 'bg-[#F05A00] text-white rounded-br-xs font-medium'
-              : 'bg-zinc-100 text-zinc-900 rounded-bl-xs font-medium'
+              ? 'bg-[#6D28D9] text-white rounded-br-xs font-medium'
+              : 'bg-[#F3EEFC] text-[#1C1917] rounded-bl-xs font-medium'
           }`}
         >
           {msg.text}
         </div>
         <div className={`flex items-center gap-1.5 mt-1 px-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
-          <span className="text-[10px] text-neutral-400 font-medium">{formatTime(msg.timestamp || msg.created_at)}</span>
-          {isMe && <CheckCheck size={14} className="text-[#F05A00] opacity-90 flex-shrink-0" />}
+          <span className="text-[10px] text-[#A8A29E] font-medium">{formatTime(msg.timestamp || msg.created_at)}</span>
+          {isMe && <CheckCheck size={14} className="text-[#6D28D9] opacity-90 flex-shrink-0" />}
         </div>
       </div>
     </motion.div>
   );
 }
 
-// ─── Main Messages Component ─────────────────────────────────────────────────
+// â”€â”€â”€ Main Messages Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function MessagesContent() {
   const searchParams = useSearchParams();
@@ -262,7 +267,7 @@ function MessagesContent() {
   const chatContainerRef = useRef(null);
   const activeChannelRef = useRef(null);
 
-  // ── Keyboard & Mobile Visual Viewport Handling (Attaches to top of keyboard) ──
+  // â”€â”€ Keyboard & Mobile Visual Viewport Handling (Attaches to top of keyboard) â”€â”€
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -385,7 +390,7 @@ function MessagesContent() {
     };
   }, [activeChatId, currentUid]);
 
-  // ── Open Chat (With Mark As Read) ──────────────────────────────────────────
+  // â”€â”€ Open Chat (With Mark As Read) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const openChat = useCallback(async (chat) => {
     setActiveChatId(chat.id);
     setActiveChat(chat);
@@ -657,14 +662,14 @@ function MessagesContent() {
   if (!loadingChats && !currentUid) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
-        <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mb-4 text-zinc-800">
+        <div className="w-16 h-16 rounded-full bg-[#F3EEFC] flex items-center justify-center mb-4 text-[#1C1917]">
           <MessageSquare className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-black text-zinc-900 mb-1">Sign in to Message</h2>
-        <p className="text-xs text-zinc-500 max-w-xs mb-6">
+        <h2 className="text-xl font-bold text-[#1C1917] mb-1">Sign in to Message</h2>
+        <p className="text-xs text-[#78716C] max-w-xs mb-6">
           Connect with campus students directly.
         </p>
-        <Link href="/" className="px-6 py-2.5 rounded-full bg-[#F05A00] text-white font-black text-xs hover:bg-[#D94F00] transition-all">
+        <Link href="/" className="px-6 py-2.5 rounded-full bg-[#6D28D9] text-white font-bold text-xs hover:bg-[#5B21B6] transition-all">
           Go Home
         </Link>
       </div>
@@ -674,49 +679,49 @@ function MessagesContent() {
   return (
     <div
       ref={chatContainerRef}
-      className={`flex w-full bg-white text-zinc-900 overflow-hidden md:border border-zinc-200/80 md:rounded-3xl shadow-xs ${
+      className={`flex w-full bg-white text-[#1C1917] overflow-hidden md:border border-[#E7E5E4]/80 md:rounded-3xl shadow-xs ${
         !showList
           ? 'fixed inset-x-0 bottom-0 top-[58px] z-[60] md:static md:top-auto md:z-0 md:rounded-3xl md:border rounded-none border-0 h-[calc(100dvh-58px)] md:h-[calc(100vh-80px)] flex-row'
           : 'h-[calc(100dvh-140px)] md:h-[calc(100vh-80px)] rounded-2xl border flex-row relative'
       }`}
     >
-      {/* LEFT SIDEBAR */}
+      {/* LEFT SIDEBAR (320px per Blueprint Section 4) */}
       <div className={`
-        flex flex-col w-full md:w-[340px] lg:w-[380px] md:flex-shrink-0
-        border-r border-zinc-200/80 bg-white
+        flex flex-col w-full md:w-[320px] lg:w-[320px] md:flex-shrink-0
+        border-r border-[#E7E5E4] bg-white
         ${!showList ? 'hidden md:flex' : 'flex'}
       `}>
-        <div className="px-4 py-3.5 flex items-center justify-between border-b border-zinc-100">
-          <span className="font-black text-lg text-zinc-900 tracking-tight">
+        <div className="px-4 py-3.5 flex items-center justify-between border-b border-[#E7E5E4]">
+          <span className="font-bold text-lg text-[#1C1917] tracking-tight">
             @{currentUser?.username || currentUser?.full_name?.toLowerCase().replace(/\s+/g, '') || 'messages'}
           </span>
           <button
             type="button"
             onClick={() => setShowNewMessageModal(true)}
-            className="p-2 rounded-full hover:bg-zinc-100 text-zinc-900 transition-colors cursor-pointer"
+            className="p-2 rounded-full hover:bg-[#F3EEFC] text-[#1C1917] transition-colors cursor-pointer"
             title="New Message"
           >
             <SquarePen className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="px-4 py-2.5">
+        <div className="px-4 py-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#A8A29E] absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search people or chats..."
-              className="w-full pl-10 pr-8 py-2 rounded-xl text-xs bg-zinc-100 text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:bg-zinc-100/80 font-medium transition-all"
+              className="w-full h-11 pl-11 pr-9 rounded-full text-[13px] bg-[#FAFAF8] text-[#1C1917] placeholder:text-[#A8A29E] border border-[#E7E5E4] focus:outline-none focus:border-[#6D28D9] font-medium transition-all"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 hover:text-zinc-600"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#A8A29E] hover:text-[#1C1917]"
               >
-                ✕
+                âœ•
               </button>
             )}
           </div>
@@ -725,13 +730,13 @@ function MessagesContent() {
         <div suppressHydrationWarning className="flex-1 overflow-y-auto no-scrollbar py-2 px-2 space-y-0.5">
           {loadingChats ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-[#A8A29E]" />
             </div>
           ) : (
             <>
               {filteredChats.length > 0 && (
                 <div>
-                  {q && <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider px-4 py-1">Conversations</p>}
+                  {q && <p className="text-[10px] font-bold text-[#A8A29E] uppercase tracking-wider px-4 py-1">Conversations</p>}
                   <div>
                     {filteredChats.map(chat => (
                       <ChatListItem
@@ -750,10 +755,10 @@ function MessagesContent() {
               {(q || chats.length === 0) && filteredSuggested.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between px-4 py-1.5 mt-2">
-                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">
+                    <span className="text-[10px] font-bold text-[#A8A29E] uppercase tracking-wider">
                       {q ? 'Campus Directory' : 'Suggested for you'}
                     </span>
-                    {!q && <Link href="/discover" className="text-[11px] font-bold text-[#F05A00] hover:underline">See all</Link>}
+                    {!q && <Link href="/discover" className="text-[11px] font-bold text-[#6D28D9] hover:underline">See all</Link>}
                   </div>
                   <div>
                     {filteredSuggested.slice(0, q ? 12 : 6).map(student => (
@@ -778,50 +783,50 @@ function MessagesContent() {
         ${showList && !activeChatId ? 'hidden md:flex' : 'flex'}
       `}>
         {!activeChatId ? (
-          <div className="flex flex-col flex-1 h-full min-h-0 overflow-y-auto no-scrollbar p-6 sm:p-8 bg-zinc-50/50">
+          <div className="flex flex-col flex-1 h-full min-h-0 overflow-y-auto no-scrollbar p-6 sm:p-8 bg-[#FAFAF8]/50">
             <div className="max-w-xl mx-auto w-full my-auto py-6 space-y-6">
               
               {/* Top Banner Card */}
               <div className="text-center space-y-3">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-[#F05A00] text-[10px] font-black uppercase tracking-wider">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] text-[10px] font-bold uppercase tracking-wider">
                   <Sparkles size={12} className="fill-current" />
                   <span>Direct Campus Connect</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-bold text-[#1C1917] tracking-tight">
                   Start a Conversation
                 </h2>
-                <p className="text-xs sm:text-sm text-zinc-500 max-w-sm mx-auto leading-relaxed font-medium">
+                <p className="text-xs sm:text-sm text-[#78716C] max-w-sm mx-auto leading-relaxed font-medium">
                   Connect 1-on-1 with verified campus peers to collaborate, study together, or ask questions.
                 </p>
                 <div className="pt-2 flex items-center justify-center gap-3">
                   <button
                     type="button"
                     onClick={() => setShowNewMessageModal(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F05A00] hover:bg-[#D94F00] text-white font-black text-xs transition-all active:scale-95 cursor-pointer shadow-sm hover:shadow-md"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-xs transition-all active:scale-95 cursor-pointer shadow-sm hover:shadow-md"
                   >
                     <SquarePen size={14} />
                     <span>New Message</span>
                   </button>
                   <Link
                     href="/discover"
-                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white border border-zinc-200 hover:bg-zinc-100 text-zinc-700 font-black text-xs transition-all active:scale-95 cursor-pointer"
+                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white border border-[#E7E5E4] hover:bg-[#F3EEFC] text-[#78716C] font-bold text-xs transition-all active:scale-95 cursor-pointer"
                   >
-                    <Compass size={14} className="text-[#F05A00]" />
+                    <Compass size={14} className="text-[#6D28D9]" />
                     <span>Explore Campus</span>
                   </Link>
                 </div>
               </div>
 
               {/* 1-Tap Quick Chat Suggestions Card */}
-              <div className="bg-white rounded-2xl border border-zinc-200/80 p-5 shadow-xs space-y-4">
+              <div className="bg-white rounded-2xl border border-[#E7E5E4]/80 p-5 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[11px] font-black uppercase tracking-wider text-zinc-900">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1C1917]">
                       Suggested Classmates
                     </span>
                   </div>
-                  <Link href="/discover" className="text-[11px] font-bold text-[#F05A00] hover:underline">
+                  <Link href="/discover" className="text-[11px] font-bold text-[#6D28D9] hover:underline">
                     View All
                   </Link>
                 </div>
@@ -839,14 +844,14 @@ function MessagesContent() {
                         return (
                           <div
                             key={student.id}
-                            className="p-3.5 rounded-2xl border border-zinc-100 bg-zinc-50/70 hover:bg-white hover:border-orange-200 hover:shadow-xs transition-all flex items-center justify-between gap-3 group"
+                            className="p-3.5 rounded-2xl border border-[#E7E5E4] bg-[#FAFAF8]/70 hover:bg-white hover:border-[#E4D9F7] hover:shadow-xs transition-all flex items-center justify-between gap-3 group"
                           >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                               <div className="relative flex-shrink-0">
                                 <img
                                   src={avatar}
                                   alt=""
-                                  className="w-11 h-11 rounded-full object-cover border border-zinc-200 bg-white"
+                                  className="w-11 h-11 rounded-full object-cover border border-[#E7E5E4] bg-white"
                                   onError={(e) => {
                                     e.currentTarget.onerror = null;
                                     e.currentTarget.src = getCartoonAvatar(student.full_name || student.id || 'user');
@@ -855,14 +860,14 @@ function MessagesContent() {
                                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs font-black text-zinc-900 truncate group-hover:text-[#F05A00] transition-colors">
+                                <p className="text-xs font-bold text-[#1C1917] truncate group-hover:text-[#6D28D9] transition-colors">
                                   {student.full_name || 'Student'}
                                 </p>
-                                <p className="text-[10px] font-semibold text-zinc-400 truncate mt-0.5">
+                                <p className="text-[10px] font-semibold text-[#A8A29E] truncate mt-0.5">
                                   {branchYear}
                                 </p>
                                 {firstInterest && (
-                                  <span className="inline-block mt-1 text-[9px] font-bold px-2 py-0.2 rounded-full bg-white border border-zinc-200 text-zinc-600">
+                                  <span className="inline-block mt-1 text-[9px] font-bold px-2 py-0.2 rounded-full bg-white border border-[#E7E5E4] text-[#78716C]">
                                     {firstInterest}
                                   </span>
                                 )}
@@ -872,7 +877,7 @@ function MessagesContent() {
                             <button
                               type="button"
                               onClick={() => openChatWithUser(student.id, student.full_name, student.photo_url)}
-                              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-orange-50 text-[#F05A00] hover:bg-[#F05A00] hover:text-white border border-orange-200 text-[11px] font-black transition-all cursor-pointer flex-shrink-0 active:scale-95 shadow-2xs"
+                              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#F3EEFC] text-[#6D28D9] hover:bg-[#6D28D9] hover:text-white border border-[#E4D9F7] text-[11px] font-bold transition-all cursor-pointer flex-shrink-0 active:scale-95 shadow-2xs"
                               title="Start Chat"
                             >
                               <Send size={11} />
@@ -883,8 +888,8 @@ function MessagesContent() {
                       })}
                   </div>
                 ) : (
-                  <div className="text-center py-6 text-zinc-400 text-xs font-medium">
-                    Loading campus students…
+                  <div className="text-center py-6 text-[#A8A29E] text-xs font-medium">
+                    Loading campus studentsâ€¦
                   </div>
                 )}
               </div>
@@ -897,15 +902,15 @@ function MessagesContent() {
             {(() => {
               const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
               return (
-                <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 bg-white flex-shrink-0">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-[#E7E5E4] bg-white flex-shrink-0">
                   <div className="flex items-center gap-3 min-w-0">
                     <button
                       type="button"
                       onClick={handleBack}
-                      className="md:hidden p-2 -ml-2 rounded-full hover:bg-zinc-100 active:bg-zinc-200 transition-colors text-zinc-900 cursor-pointer flex items-center justify-center flex-shrink-0"
+                      className="md:hidden p-2 -ml-2 rounded-full hover:bg-[#F3EEFC] active:bg-[#E7E5E4] transition-colors text-[#1C1917] cursor-pointer flex items-center justify-center flex-shrink-0"
                       title="Back"
                     >
-                      <ArrowLeft className="w-5 h-5 text-zinc-900" strokeWidth={2.5} />
+                      <ArrowLeft className="w-5 h-5 text-[#1C1917]" strokeWidth={2.5} />
                     </button>
 
                     <Link
@@ -917,7 +922,7 @@ function MessagesContent() {
                         <img
                           src={avatarUrl(otherId, otherName, otherPhoto)}
                           alt=""
-                          className="w-10 h-10 rounded-full object-cover border border-zinc-200 group-hover:ring-2 group-hover:ring-[#F05A00]/30 transition-all"
+                          className="w-10 h-10 rounded-full object-cover border border-[#E7E5E4] group-hover:ring-2 group-hover:ring-[#6D28D9]/30 transition-all"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
@@ -927,12 +932,12 @@ function MessagesContent() {
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-sm font-black text-zinc-900 group-hover:text-[#F05A00] truncate transition-colors">
+                        <p className="text-sm font-bold text-[#1C1917] group-hover:text-[#6D28D9] truncate transition-colors">
                           {otherName}
                         </p>
                         {isGroup ? (
-                          <p className="text-[11px] font-bold text-[#F05A00] flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#F05A00] animate-pulse" />
+                          <p className="text-[11px] font-bold text-[#6D28D9] flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#6D28D9] animate-pulse" />
                             Verified Campus Channel
                           </p>
                         ) : (
@@ -950,7 +955,7 @@ function MessagesContent() {
                       href={activeChat?.link || activeChat?.channel_link || activeChat?.invite_link || "https://chat.whatsapp.com/"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-black transition-colors"
+                      className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition-colors"
                       title="WhatsApp Channel"
                     >
                       Channel
@@ -979,7 +984,7 @@ function MessagesContent() {
 
                       <Link
                         href={`/users/${otherId}`}
-                        className="w-9 h-9 rounded-xl hover:bg-zinc-100 text-zinc-700 flex items-center justify-center transition-colors"
+                        className="w-9 h-9 rounded-xl hover:bg-[#F3EEFC] text-[#78716C] flex items-center justify-center transition-colors"
                         title="View Profile"
                       >
                         <Info size={17} />
@@ -993,9 +998,9 @@ function MessagesContent() {
             {/* Messages Scroll Area */}
             <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-1 no-scrollbar bg-white">
               {loadingMessages ? (
-                <div className="flex flex-col items-center justify-center h-full py-12 text-zinc-400 gap-2.5">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#F05A00]" />
-                  <span className="text-xs font-bold text-zinc-400 tracking-tight">Loading conversation...</span>
+                <div className="flex flex-col items-center justify-center h-full py-12 text-[#A8A29E] gap-2.5">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#6D28D9]" />
+                  <span className="text-xs font-bold text-[#A8A29E] tracking-tight">Loading conversation...</span>
                 </div>
               ) : (
                 <>
@@ -1007,7 +1012,7 @@ function MessagesContent() {
                           href={isGroup ? '/circles' : (otherId ? `/users/${otherId}` : '#')}
                           className="group cursor-pointer inline-flex flex-col items-center"
                         >
-                          <div className="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden mb-3 border border-orange-100 shadow-sm group-hover:ring-4 group-hover:ring-orange-100 transition-all">
+                          <div className="w-20 h-20 rounded-full bg-[#F3EEFC] flex items-center justify-center overflow-hidden mb-3 border border-[#E4D9F7] shadow-sm group-hover:ring-4 group-hover:ring-[#F3EEFC] transition-all">
                             <img 
                               src={avatarUrl(otherId, otherName, otherPhoto)} 
                               alt={otherName} 
@@ -1018,8 +1023,8 @@ function MessagesContent() {
                               }}
                             />
                           </div>
-                          <h3 className="text-base font-black text-zinc-900 group-hover:text-[#F05A00] transition-colors">{otherName}</h3>
-                          <p className="text-xs text-zinc-500 mb-4 font-semibold">
+                          <h3 className="text-base font-bold text-[#1C1917] group-hover:text-[#6D28D9] transition-colors">{otherName}</h3>
+                          <p className="text-xs text-[#78716C] mb-4 font-semibold">
                             {isGroup ? 'Verified Campus Community · Official Channel' : 'Campus Student · Meova'}
                           </p>
                         </Link>
@@ -1029,14 +1034,14 @@ function MessagesContent() {
                             href={activeChat?.link || activeChat?.channel_link || activeChat?.invite_link || "https://chat.whatsapp.com/"}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition-all flex items-center gap-2 shadow-xs cursor-pointer active:scale-95"
+                            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-xs cursor-pointer active:scale-95"
                           >
                             Join Official WhatsApp Channel
                           </a>
                         ) : (
                           <Link 
                             href={`/users/${otherId}`}
-                            className="px-4 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-xs font-bold transition-colors"
+                            className="px-4 py-1.5 rounded-xl bg-[#F3EEFC] hover:bg-[#E7E5E4] text-[#1C1917] text-xs font-bold transition-colors"
                           >
                             View profile
                           </Link>
@@ -1076,9 +1081,9 @@ function MessagesContent() {
               const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
               if (isGroup) {
                 return (
-                  <div className="p-3.5 border-t border-zinc-100 bg-zinc-50 flex-shrink-0 flex items-center justify-center gap-2">
-                    <Radio size={14} className="text-[#F05A00]" />
-                    <p className="text-xs font-bold text-zinc-600">
+                  <div className="p-3.5 border-t border-[#E7E5E4] bg-[#FAFAF8] flex-shrink-0 flex items-center justify-center gap-2">
+                    <Radio size={14} className="text-[#6D28D9]" />
+                    <p className="text-xs font-bold text-[#78716C]">
                       Verified Campus Channel · Broadcast updates only
                     </p>
                   </div>
@@ -1088,20 +1093,20 @@ function MessagesContent() {
               const isGenuinelyNewChat = !loadingMessages && (activeChat?.isMock || (messages.length === 0 && !activeChat?.last_message));
 
               return (
-                <div className="border-t border-zinc-100 bg-white flex-shrink-0">
+                <div className="border-t border-[#E7E5E4] bg-white flex-shrink-0">
                   {/* First message spark indicator */}
                   {isGenuinelyNewChat && (
-                    <div className="flex items-center justify-between px-4 py-2 bg-orange-50/80 border-b border-orange-100 text-[11px] font-bold text-orange-950">
+                    <div className="flex items-center justify-between px-4 py-2 bg-[#F3EEFC]/80 border-b border-[#E4D9F7] text-[11px] font-bold text-purple-950">
                       <div className="flex items-center gap-1.5">
-                        <Zap size={13} className="text-[#F05A00] fill-[#F05A00] flex-shrink-0" />
+                        <Zap size={13} className="text-[#6D28D9] fill-[#6D28D9] flex-shrink-0" />
                         <span>First message starts this conversation (5 Sparks)</span>
                       </div>
-                      <span className="font-extrabold text-[#D94F00] flex-shrink-0 ml-2">Balance: {spendableSparks} Sparks</span>
+                      <span className="font-extrabold text-[#5B21B6] flex-shrink-0 ml-2">Balance: {spendableSparks} Sparks</span>
                     </div>
                   )}
 
                   <div className="p-2.5 sm:p-3">
-                    <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[#F05A00] focus-within:border-transparent transition-all">
+                    <div className="flex items-center gap-3 bg-white border border-[#E7E5E4] rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[#6D28D9] focus-within:border-transparent transition-all">
                       <textarea
                         ref={inputRef}
                         value={inputText}
@@ -1109,7 +1114,7 @@ function MessagesContent() {
                         onKeyDown={handleKeyDown}
                         placeholder="Message..."
                         rows={1}
-                        className="flex-1 resize-none bg-transparent text-base sm:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none max-h-28 font-medium"
+                        className="flex-1 resize-none bg-transparent text-base sm:text-sm text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none max-h-28 font-medium"
                         style={{ lineHeight: '1.4' }}
                         onInput={e => {
                           e.target.style.height = 'auto';
@@ -1120,9 +1125,9 @@ function MessagesContent() {
                         type="button"
                         onClick={sendMessage}
                         disabled={!inputText.trim() || sendingMsg}
-                        className="text-[#F05A00] hover:text-[#D94F00] disabled:opacity-30 font-black text-xs transition-all active:scale-95 flex-shrink-0 cursor-pointer"
+                        className="text-[#6D28D9] hover:text-[#5B21B6] disabled:opacity-30 font-bold text-xs transition-all active:scale-95 flex-shrink-0 cursor-pointer"
                       >
-                        {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin text-[#F05A00]" /> : 'Send'}
+                        {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin text-[#6D28D9]" /> : 'Send'}
                       </button>
                     </div>
                   </div>
@@ -1136,32 +1141,32 @@ function MessagesContent() {
       {/* NEW MESSAGE MODAL */}
       {showNewMessageModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-zinc-100 anim-fade-in flex flex-col max-h-[85vh]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
-              <h2 className="text-base font-black text-zinc-900">New Message</h2>
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-[#E7E5E4] anim-fade-in flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
+              <h2 className="text-base font-bold text-[#1C1917]">New Message</h2>
               <button 
                 type="button"
                 onClick={() => { setShowNewMessageModal(false); setNewMsgSearch(''); }}
-                className="text-xs font-bold text-zinc-400 hover:text-zinc-600 cursor-pointer"
+                className="text-xs font-bold text-[#A8A29E] hover:text-[#78716C] cursor-pointer"
               >
                 Cancel
               </button>
             </div>
 
             {/* Quick Search inside Modal */}
-            <div className="p-3 border-b border-zinc-100 bg-zinc-50/60">
-              <div className="flex items-center gap-2 bg-white border border-zinc-200 rounded-xl px-3 py-2">
-                <Search size={14} className="text-zinc-400 flex-shrink-0" />
+            <div className="p-3 border-b border-[#E7E5E4] bg-[#FAFAF8]/60">
+              <div className="flex items-center gap-2 bg-white border border-[#E7E5E4] rounded-xl px-3 py-2">
+                <Search size={14} className="text-[#A8A29E] flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Search classmate by name, branch..."
                   value={newMsgSearch}
                   onChange={e => setNewMsgSearch(e.target.value)}
-                  className="bg-transparent text-xs text-zinc-900 font-semibold focus:outline-none w-full placeholder:text-zinc-400"
+                  className="bg-transparent text-xs text-[#1C1917] font-semibold focus:outline-none w-full placeholder:text-[#A8A29E]"
                   autoFocus
                 />
                 {newMsgSearch && (
-                  <button onClick={() => setNewMsgSearch('')} className="text-zinc-400 hover:text-zinc-600 cursor-pointer">
+                  <button onClick={() => setNewMsgSearch('')} className="text-[#A8A29E] hover:text-[#78716C] cursor-pointer">
                     <X size={13} />
                   </button>
                 )}
@@ -1169,7 +1174,7 @@ function MessagesContent() {
             </div>
 
             <div className="p-2 overflow-y-auto no-scrollbar space-y-1 flex-1">
-              <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider px-3 mb-2">Select a Campus Student</p>
+              <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider px-3 mb-2">Select a Campus Student</p>
               {(() => {
                 const term = newMsgSearch.trim().toLowerCase();
                 const filtered = suggestedStudents.filter(s => {
@@ -1185,7 +1190,7 @@ function MessagesContent() {
 
                 if (filtered.length === 0) {
                   return (
-                    <div className="text-center py-8 text-zinc-400 text-xs font-semibold">
+                    <div className="text-center py-8 text-[#A8A29E] text-xs font-semibold">
                       No classmates found matching &quot;{newMsgSearch}&quot;
                     </div>
                   );
@@ -1212,7 +1217,7 @@ export default function MessagesPage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-[#A8A29E]" />
       </div>
     }>
       <MessagesContent />

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { Star, X, CheckCircle2, Loader2, Sparkles } from '@/lib/icons';
@@ -127,20 +127,20 @@ export default function RatingReviewModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl w-full max-w-[390px] overflow-hidden shadow-2xl anim-scale-in border border-zinc-100 flex flex-col"
+        className="bg-white rounded-[32px] w-full max-w-[390px] overflow-hidden shadow-[0_4px_16px_rgba(28,25,23,0.08)] anim-scale-in border border-[#E7E5E4] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 px-5 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/70">
+        <div className="p-4 px-5 border-b border-[#E7E5E4] flex items-center justify-between bg-[#FAFAF8]/70">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#F05A00]" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-900">
+            <span className="w-2 h-2 rounded-full bg-[#6D28D9]" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#1C1917]">
               {contextType === 'gig' ? 'Rate & Review Gig' : 'Rate Your Meeting'}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-white border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-zinc-800 transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-full bg-white border border-[#E7E5E4] flex items-center justify-center text-[#A8A29E] hover:text-[#1C1917] transition-colors cursor-pointer"
           >
             <X size={14} strokeWidth={2.5} />
           </button>
@@ -148,19 +148,19 @@ export default function RatingReviewModal({
 
         {submitted ? (
           <div className="p-8 flex flex-col items-center justify-center text-center space-y-3">
-            <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center animate-bounce shadow-sm">
+            <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center animate-bounce shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
               <CheckCircle2 size={32} />
             </div>
-            <h4 className="text-base font-black text-zinc-900">Rating Submitted!</h4>
-            <p className="text-xs text-zinc-500 font-medium max-w-[260px]">
+            <h4 className="text-base font-bold text-[#1C1917]">Rating Submitted!</h4>
+            <p className="text-xs text-[#78716C] font-medium max-w-[260px]">
               Your feedback helps keep the Meova campus community trustworthy and awesome.
             </p>
           </div>
         ) : (
           <div className="p-5 space-y-4">
             {/* Target User Info */}
-            <div className="flex items-center gap-3 bg-orange-50/60 border border-orange-100/80 p-3 rounded-2xl">
-              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-orange-200 shadow-2xs">
+            <div className="flex items-center gap-3 bg-[#F3EEFC] border border-[#E4D9F7] p-3 rounded-[16px]">
+              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-[#E4D9F7] shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
                 <img
                   src={targetPhoto || getCartoonAvatar(targetName || 'peer')}
                   alt=""
@@ -172,12 +172,12 @@ export default function RatingReviewModal({
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-black uppercase tracking-wider text-[#F05A00]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#6D28D9]">
                   {contextType === 'gig' ? 'Freelancer / Client' : 'Meeting Partner'}
                 </p>
-                <h4 className="text-sm font-black text-zinc-900 truncate">{targetName}</h4>
+                <h4 className="text-[14px] font-bold text-[#1C1917] truncate">{targetName}</h4>
                 {contextTitle && (
-                  <p className="text-[11px] font-semibold text-zinc-500 truncate mt-0.5">
+                  <p className="text-[12px] font-medium text-[#78716C] truncate mt-0.5">
                     {contextTitle}
                   </p>
                 )}
@@ -201,20 +201,20 @@ export default function RatingReviewModal({
                       className={`transition-colors ${
                         star <= activeRating
                           ? 'text-amber-400 fill-amber-400 filter drop-shadow-[0_2px_8px_rgba(251,191,36,0.5)]'
-                          : 'text-zinc-200 fill-zinc-100'
+                          : 'text-[#E7E5E4] fill-[#FAFAF8]'
                       }`}
                     />
                   </button>
                 ))}
               </div>
-              <p className="text-xs font-black text-zinc-800 mt-2 tracking-tight">
+              <p className="text-xs font-bold text-[#1C1917] mt-2 tracking-tight">
                 {RATING_LABELS[activeRating] || 'Rate your experience'}
               </p>
             </div>
 
             {/* Quick Feedback Tags */}
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#78716C] mb-1.5">
                 What went well?
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -225,10 +225,10 @@ export default function RatingReviewModal({
                       key={tag}
                       type="button"
                       onClick={() => toggleTag(tag)}
-                      className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer border ${
+                      className={`px-3 py-1 rounded-full text-[12px] font-medium transition-all cursor-pointer border ${
                         isSelected
-                          ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-xs'
-                          : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-700 border-zinc-200'
+                          ? 'bg-[#6D28D9] text-white border-[#6D28D9] shadow-[0_2px_8px_rgba(28,25,23,0.06)]'
+                          : 'bg-[#FAFAF8] hover:bg-[#F3EEFC] text-[#1C1917] border-[#E7E5E4]'
                       }`}
                     >
                       {tag}
@@ -245,7 +245,7 @@ export default function RatingReviewModal({
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Write a quick review or appreciation note (optional)..."
                 rows={3}
-                className="w-full text-xs font-medium p-3 rounded-2xl bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-[#F05A00] focus:ring-1 focus:ring-[#F05A00] resize-none"
+                className="w-full text-xs font-medium p-3 rounded-[16px] bg-[#FAFAF8] border border-[#E7E5E4] text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:border-[#6D28D9] resize-none"
               />
             </div>
 
@@ -254,7 +254,7 @@ export default function RatingReviewModal({
               type="button"
               onClick={handleSubmit}
               disabled={submitting}
-              className="w-full py-3.5 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-orange-500/25 active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
             >
               {submitting ? (
                 <>

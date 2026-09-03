@@ -9,7 +9,7 @@ export default function ZoomableProfileAvatar({
   name,
   username,
   sizeClass = 'w-20 h-20 sm:w-24 sm:h-24',
-  ringColor = '#F05A00',
+  ringColor = '#6D28D9',
   isIdOn = false,
   className = '',
 }) {
@@ -19,18 +19,18 @@ export default function ZoomableProfileAvatar({
     <>
       <div
         onClick={() => setIsOpen(true)}
-        className={`relative flex-shrink-0 cursor-pointer group select-none ${className}`}
+        className={`relative inline-flex items-center justify-center flex-shrink-0 cursor-pointer group select-none ${className}`}
         title="Click to zoom profile picture"
       >
         <div
-          className={`${sizeClass} rounded-full p-[3px] transition-transform duration-200 group-hover:scale-105 group-active:scale-95 shadow-sm group-hover:shadow-md`}
+          className={`${sizeClass} rounded-full p-[3px] transition-transform duration-200 group-hover:scale-105 group-active:scale-95 shadow-sm group-hover:shadow-md flex items-center justify-center flex-shrink-0`}
           style={{ background: ringColor }}
         >
-          <div className="w-full h-full rounded-full overflow-hidden border-2 border-white bg-zinc-100">
+          <div className="w-full h-full rounded-full overflow-hidden border-2 border-white bg-[#FAFAF8] flex items-center justify-center">
             <img
               src={src}
               alt={alt || name || 'User'}
-              className="w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-90"
+              className="w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-90 max-w-full max-h-full"
             />
           </div>
         </div>

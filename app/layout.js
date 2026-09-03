@@ -33,7 +33,7 @@ export const viewport = {
   userScalable: false,
   viewportFit: 'cover',
   interactiveWidget: 'resizes-content',
-  themeColor: '#F05A00',
+  themeColor: '#6D28D9',
 };
 
 export const metadata = {
@@ -171,7 +171,7 @@ export default async function RootLayout({ children }) {
         <head>
           <meta name="google-site-verification" content="69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
-          <meta name="theme-color" content="#F05A00" />
+          <meta name="theme-color" content="#6D28D9" />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />

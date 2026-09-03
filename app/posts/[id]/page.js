@@ -1,4 +1,4 @@
-﻿import { notFound } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { supabaseAdmin } from '../../../lib/supabase/admin';
 import { getUserAdmin } from '../../../lib/getUserAdmin';
@@ -62,23 +62,24 @@ export default async function SinglePostPage({ params }) {
   // Check if current user liked it
   let initialIsLiked = false;
   if (user) {
+    const currentUid = user.id || user.uid;
     const { data: likeDoc } = await supabaseAdmin
       .from('post_likes')
       .select('id')
       .eq('post_id', id)
-      .eq('user_id', user.uid)
+      .eq('user_id', currentUid)
       .maybeSingle();
     initialIsLiked = Boolean(likeDoc);
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 pb-20 pt-3 sm:pt-6 px-3 sm:px-4">
+    <div className="min-h-screen bg-[#FAFAF8] pb-20 pt-3 sm:pt-6 px-3 sm:px-4">
       <div className="max-w-lg mx-auto space-y-3.5">
         {/* Navigation Bar */}
         <div className="flex items-center justify-between py-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-zinc-200/80 text-xs font-black text-zinc-700 hover:text-[#F05A00] hover:border-orange-200 transition-all shadow-2xs"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#E7E5E4]/80 text-xs font-bold text-[#78716C] hover:text-[#6D28D9] hover:border-[#E4D9F7] transition-all shadow-2xs"
           >
             <ArrowLeft size={14} />
             <span>Campus Feed</span>
@@ -86,7 +87,7 @@ export default async function SinglePostPage({ params }) {
 
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-black text-[#F05A00]"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#6D28D9]"
           >
             <Sparkles size={14} />
             <span>Meova</span>
@@ -101,15 +102,15 @@ export default async function SinglePostPage({ params }) {
           currentUserRole={user?.role || null}
         />
 
-        {/* Bottom Banner */}
-        <div className="p-4 rounded-3xl bg-gradient-to-br from-orange-500 to-[#D94F00] text-white shadow-lg shadow-orange-500/15 flex items-center justify-between">
+        {/* Bottom Banner (Neo-Minimalist Flat Surface) */}
+        <div className="p-4 rounded-2xl bg-white border border-black/[0.08] text-black shadow-xs flex items-center justify-between">
           <div>
-            <h4 className="text-xs font-black">Join your campus network</h4>
-            <p className="text-[10px] text-white/80 font-medium">Connect, meet, and collaborate with students.</p>
+            <h4 className="text-xs font-bold text-black">Join your campus network</h4>
+            <p className="text-[10.5px] text-black/60 font-bold">Connect, meet, and collaborate with students.</p>
           </div>
           <Link
             href="/"
-            className="px-3.5 py-1.5 rounded-full bg-white text-zinc-950 text-xs font-black hover:bg-orange-50 transition-colors shrink-0 shadow-xs"
+            className="px-4 py-2 rounded-full bg-[#6D28D9] text-white text-xs font-bold hover:bg-[#5B21B6] transition-colors shrink-0 shadow-xs"
           >
             Open Feed
           </Link>

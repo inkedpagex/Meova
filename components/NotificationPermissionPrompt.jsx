@@ -80,12 +80,12 @@ export default function NotificationPermissionPrompt({ user }) {
         `}</style>
 
         <div
-          className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden border border-orange-100/80"
+          className="bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden border border-[#E4D9F7]/80"
         >
           {/* Orange header bar */}
           <div
             className="px-6 pt-6 pb-5 relative"
-            style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
+            style={{ background: '#6D28D9' }}
           >
             <button
               onClick={handleDismiss}
@@ -95,12 +95,12 @@ export default function NotificationPermissionPrompt({ user }) {
             </button>
 
             <div className="flex flex-col items-center text-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center shadow-lg">
+              <div className="w-14 h-14 rounded-[14px] bg-white/20 flex items-center justify-center shadow-lg">
                 <Bell size={28} className="text-white" />
               </div>
               <div>
-                <h3 className="text-white font-black text-lg leading-tight">Stay in the loop</h3>
-                <p className="text-orange-100 text-[12px] font-medium mt-1">
+                <h3 className="text-white font-bold text-lg leading-tight">Stay in the loop</h3>
+                <p className="text-[#F3EEFC] text-[12px] font-medium mt-1">
                   Enable notifications to never miss a moment
                 </p>
               </div>
@@ -122,8 +122,8 @@ export default function NotificationPermissionPrompt({ user }) {
                   <Icon size={16} style={{ color }} />
                 </div>
                 <div>
-                  <p className="text-zinc-900 font-bold text-[13px]">{label}</p>
-                  <p className="text-zinc-400 text-[11px] font-medium">{desc}</p>
+                  <p className="text-[#1C1917] font-bold text-[13px]">{label}</p>
+                  <p className="text-[#A8A29E] text-[11px] font-medium">{desc}</p>
                 </div>
               </div>
             ))}
@@ -133,14 +133,14 @@ export default function NotificationPermissionPrompt({ user }) {
           <div className="px-6 pb-6 pt-1 flex flex-col gap-2">
             <button
               onClick={handleAllow}
-              className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all active:scale-95 shadow-lg cursor-pointer"
-              style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)', boxShadow: '0 8px 24px rgba(240,90,0,0.35)' }}
+              className="w-full py-3.5 rounded-[14px] font-bold text-sm text-white transition-all active:scale-95 shadow-lg cursor-pointer"
+              style={{ background: '#6D28D9', boxShadow: '0 8px 24px rgba(240,90,0,0.35)' }}
             >
               Enable Notifications
             </button>
             <button
               onClick={handleDismiss}
-              className="w-full py-3 rounded-2xl font-bold text-sm text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer"
+              className="w-full py-3 rounded-[14px] font-bold text-sm text-[#A8A29E] hover:text-[#78716C] transition-colors cursor-pointer"
             >
               Not now
             </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../lib/supabase/client';
 
 const UserContext = createContext(null);
@@ -13,6 +13,10 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
   const [user, setUserState] = useState(normalizedInitialUser);
   const [wallet, setWallet] = useState(initialWallet);
   const [people, setPeople] = useState(initialPeople || []);
+
+  // ── Real-Time Presence State ────────────────────────────────────────────────
+  const [onlineUserIds, setOnlineUserIds] = useState(() => new Set());
+  const [onlinePresenceMap, setOnlinePresenceMap] = useState(() => new Map());
 
   const setUser = useCallback((newUser) => {
     if (!newUser) {
@@ -49,16 +53,113 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
     } catch {}
   }, [user]);
 
+  // ── Real-Time Presence Hook via Supabase WebSockets ─────────────────────────
+  useEffect(() => {
+    const uid = user?.id || user?.uid;
+    if (!supabase) return;
+
+    // Join global campus presence room
+    const presenceChannel = supabase.channel('meova_campus_presence', {
+      config: {
+        presence: {
+          key: uid ? String(uid) : `guest_${Math.random().toString(36).substring(2, 9)}`,
+        },
+      },
+    });
+
+    const updatePresenceState = () => {
+      const state = presenceChannel.presenceState();
+      const ids = new Set();
+      const map = new Map();
+
+      Object.entries(state).forEach(([key, presences]) => {
+        if (Array.isArray(presences) && presences.length > 0) {
+          const latest = presences[presences.length - 1];
+          if (latest?.user_id) {
+            ids.add(String(latest.user_id));
+            map.set(String(latest.user_id), latest);
+          } else if (key && !key.startsWith('guest_')) {
+            ids.add(String(key));
+          }
+        }
+      });
+
+      setOnlineUserIds(ids);
+      setOnlinePresenceMap(map);
+    };
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, updatePresenceState)
+      .on('presence', { event: 'join' }, updatePresenceState)
+      .on('presence', { event: 'leave' }, updatePresenceState)
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED' && uid) {
+          try {
+            await presenceChannel.track({
+              user_id: uid,
+              full_name: user.full_name || '',
+              username: user.username || '',
+              photo_url: user.photo_url || user.avatar_url || '',
+              branch: user.branch || '',
+              year: user.year || '',
+              online_at: new Date().toISOString(),
+            });
+          } catch {}
+        }
+      });
+
+    // Instant disconnect / resume on tab visibility change
+    const onVisibilityChange = async () => {
+      if (document.hidden) {
+        try {
+          await presenceChannel.untrack();
+        } catch {}
+      } else if (uid) {
+        try {
+          await presenceChannel.track({
+            user_id: uid,
+            full_name: user.full_name || '',
+            username: user.username || '',
+            photo_url: user.photo_url || user.avatar_url || '',
+            branch: user.branch || '',
+            year: user.year || '',
+            online_at: new Date().toISOString(),
+          });
+        } catch {}
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      if (supabase && presenceChannel) {
+        try {
+          presenceChannel.untrack();
+        } catch {}
+        supabase.removeChannel(presenceChannel);
+      }
+    };
+  }, [user]);
+
+  // Fast helper function to check if a specific user is currently online
+  const isUserOnline = useCallback(
+    (targetUserId) => {
+      if (!targetUserId) return false;
+      return onlineUserIds.has(String(targetUserId));
+    },
+    [onlineUserIds]
+  );
+
+  // Real-time wallet listeners
   useEffect(() => {
     const uid = user?.id || user?.uid;
     if (!uid) return;
 
-    // Window focus & refresh request listeners
     const onFocus = () => refreshWallet();
     window.addEventListener('focus', onFocus);
     window.addEventListener('wallet-refresh-request', onFocus);
 
-    // Supabase Realtime subscription on wallets table
     let channel = null;
     if (supabase) {
       channel = supabase
@@ -95,7 +196,20 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
   }, [user, refreshWallet]);
 
   return (
-    <UserContext.Provider value={{ user, setUser, wallet, setWallet, people, setPeople, refreshWallet }}>
+    <UserContext.Provider
+      value={{
+        user,
+        setUser,
+        wallet,
+        setWallet,
+        people,
+        setPeople,
+        refreshWallet,
+        onlineUserIds,
+        onlinePresenceMap,
+        isUserOnline,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

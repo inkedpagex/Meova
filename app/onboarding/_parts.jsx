@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState, useRef, useCallback } from 'react';
 import { Camera, User, AtSign, CheckCircle2, XCircle, Loader2, ArrowRight } from '@/lib/icons';
 import imageCompression from 'browser-image-compression';
@@ -24,19 +24,19 @@ function StepBar({ step }) {
         return (
           <React.Fragment key={label}>
             <div className="flex flex-col items-center gap-1">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300 ${
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
                 done ? 'bg-emerald-500 text-white' :
-                active ? 'bg-[#F05A00] text-white shadow-lg shadow-orange-200/50' :
-                'bg-zinc-100 text-zinc-400'
+                active ? 'bg-[#6D28D9] text-white shadow-lg shadow-purple-500/20' :
+                'bg-[#FAFAF8] text-[#A8A29E]'
               }`}>
                 {done ? <CheckCircle2 size={16}/> : idx}
               </div>
-              <span className={`text-[9px] font-bold uppercase tracking-wider ${active ? 'text-[#F05A00]' : 'text-zinc-400'}`}>
+              <span className={`text-[9px] font-bold uppercase tracking-wider ${active ? 'text-[#6D28D9]' : 'text-[#A8A29E]'}`}>
                 {label}
               </span>
             </div>
             {i < steps.length - 1 && (
-              <div className={`flex-1 h-0.5 mb-4 rounded-full transition-all duration-500 ${step > idx ? 'bg-emerald-400' : step > i ? 'bg-[#F05A00]' : 'bg-zinc-100'}`}/>
+              <div className={`flex-1 h-0.5 mb-4 rounded-full transition-all duration-500 ${step > idx ? 'bg-emerald-400' : step > i ? 'bg-[#6D28D9]' : 'bg-[#FAFAF8]'}`}/>
             )}
           </React.Fragment>
         );
@@ -122,18 +122,18 @@ function Step1({ data, onChange, onNext }) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-black text-zinc-950 tracking-tight">Set your identity</h2>
-        <p className="text-xs text-zinc-400 font-medium">How other students will see you on campus</p>
+        <h2 className="text-xl font-bold text-[#1C1917] tracking-tight">Set your identity</h2>
+        <p className="text-xs text-[#A8A29E] font-medium">How other students will see you on campus</p>
       </div>
 
       {/* Photo Upload */}
-      <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-zinc-50 border border-zinc-200/80">
+      <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-[#FAFAF8] border border-[#E7E5E4]/80">
         <div
           onClick={() => !uploading && fileRef.current?.click()}
           className={`relative w-16 h-16 rounded-2xl overflow-hidden group transition-all hover:scale-105 active:scale-95 shrink-0 bg-white ${
             uploading ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'
           }`}
-          style={{ border: data.photo_url ? '2.5px solid #F05A00' : '2px dashed #fed7aa' }}
+          style={{ border: data.photo_url ? '2.5px solid #6D28D9' : '2px dashed #fed7aa' }}
         >
           {data.photo_url ? (
             <img 
@@ -144,7 +144,7 @@ function Step1({ data, onChange, onNext }) {
               onError={() => onChange('photo_url', '')}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-[#F05A00]">
+            <div className="w-full h-full flex flex-col items-center justify-center text-[#6D28D9]">
               <Camera size={20} />
             </div>
           )}
@@ -152,19 +152,19 @@ function Step1({ data, onChange, onNext }) {
           {/* In-box upload loader */}
           {uploading && (
             <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-1 z-20 text-white">
-              <Loader2 size={16} className="text-[#F05A00] animate-spin" />
+              <Loader2 size={16} className="text-[#6D28D9] animate-spin" />
             </div>
           )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} disabled={uploading}/>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-black text-zinc-900 truncate">
+          <p className="text-xs font-bold text-[#1C1917] truncate">
             {data.photo_url ? 'Profile Photo Added' : 'Upload Profile Photo *'}
           </p>
           <button
             type="button"
             onClick={() => !uploading && fileRef.current?.click()}
-            className="text-[11px] font-black text-[#F05A00] hover:underline mt-0.5 block"
+            className="text-[11px] font-bold text-[#6D28D9] hover:underline mt-0.5 block"
           >
             {uploading ? (uploadStage || 'Uploading...') : (data.photo_url ? 'Tap to change photo' : 'Choose photo from gallery')}
           </button>
@@ -174,41 +174,41 @@ function Step1({ data, onChange, onNext }) {
 
       {/* Full Name */}
       <div>
-        <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-600 mb-1">
+        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#78716C] mb-1">
           Full Name *
         </label>
         <div className="relative">
-          <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"/>
+          <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A8A29E]"/>
           <input
             type="text" 
             value={data.full_name}
             onChange={e => onChange('full_name', e.target.value)}
             placeholder="e.g. Chirag Sharma"
-            className="w-full pl-10 pr-3.5 py-2.5 sm:py-3 rounded-xl border border-zinc-200 text-xs font-bold outline-none transition-all focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 focus:bg-white text-zinc-950"
+            className="w-full pl-10 pr-3.5 py-2.5 sm:py-3 rounded-xl border border-[#E7E5E4] text-xs font-bold outline-none transition-all focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 bg-[#FAFAF8] focus:bg-white text-[#1C1917]"
           />
         </div>
       </div>
 
       {/* Username */}
       <div>
-        <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-600 mb-1">
+        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#78716C] mb-1">
           Username *
         </label>
         <div className="relative">
-          <AtSign size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"/>
+          <AtSign size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A8A29E]"/>
           <input
             type="text" 
             value={data.username} 
             maxLength={20}
             onChange={handleUsernameChange}
             placeholder="chirag_04"
-            className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl border border-zinc-200 text-xs font-bold outline-none transition-all focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 bg-zinc-50 focus:bg-white text-zinc-950"
+            className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl border border-[#E7E5E4] text-xs font-bold outline-none transition-all focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 bg-[#FAFAF8] focus:bg-white text-[#1C1917]"
             style={{
               borderColor: usernameStatus === 'ok' ? '#10b981' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#f43f5e' : undefined,
             }}
           />
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-            {usernameStatus === 'checking' && <Loader2 size={15} className="text-zinc-400 animate-spin"/>}
+            {usernameStatus === 'checking' && <Loader2 size={15} className="text-[#A8A29E] animate-spin"/>}
             {usernameStatus === 'ok' && <CheckCircle2 size={15} className="text-emerald-500"/>}
             {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <XCircle size={15} className="text-rose-500"/>}
           </div>
@@ -218,13 +218,13 @@ function Step1({ data, onChange, onNext }) {
             {usernameMsg}
           </p>
         )}
-        <p suppressHydrationWarning className="text-[9.5px] text-zinc-400 mt-0.5">Start with a letter · 2+ digits (e.g. chirag_04)</p>
+        <p suppressHydrationWarning className="text-[9.5px] text-[#A8A29E] mt-0.5">Start with a letter · 2+ digits (e.g. chirag_04)</p>
       </div>
 
       {/* Gender Selection */}
       <div>
-        <label className="block text-[10px] font-black uppercase tracking-wider text-zinc-600 mb-1">
-          Gender * <span className="text-zinc-400 font-medium normal-case">(Private)</span>
+        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#78716C] mb-1">
+          Gender * <span className="text-[#A8A29E] font-medium normal-case">(Private)</span>
         </label>
         <div className="grid grid-cols-3 gap-2">
           {[
@@ -236,10 +236,10 @@ function Step1({ data, onChange, onNext }) {
               key={g.id}
               type="button"
               onClick={() => onChange('gender', g.id)}
-              className={`py-2 px-2 rounded-xl border text-xs font-black transition-all cursor-pointer ${
+              className={`py-2 px-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                 data.gender === g.id
-                  ? 'border-[#F05A00] bg-orange-50 text-[#F05A00] shadow-xs'
-                  : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-zinc-300'
+                  ? 'border-[#6D28D9] bg-[#F3EEFC] text-[#6D28D9] shadow-xs'
+                  : 'border-[#E7E5E4] bg-[#FAFAF8] text-[#78716C] hover:border-[#E7E5E4]'
               }`}
             >
               {g.label}
@@ -252,8 +252,7 @@ function Step1({ data, onChange, onNext }) {
         type="button"
         onClick={onNext} 
         disabled={!canNext}
-        className="w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 mt-2"
-        style={{ background: canNext ? 'linear-gradient(135deg,#F05A00,#D94F00)' : '#e5e7eb', color: canNext ? '#fff' : '#9ca3af' }}
+        className="w-full py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xs mt-2 bg-[#6D28D9] hover:bg-[#5B21B6]"
       >
         <span>Continue to Academic Info</span>
         <ArrowRight size={14}/>

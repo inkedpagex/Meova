@@ -176,23 +176,23 @@ export default function HostDashboardClient({
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50/80 text-zinc-900 pb-20 font-sans">
+    <div className="min-h-screen bg-[#FAFAF8]/80 text-[#1C1917] pb-20 font-sans">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-zinc-200/80 px-3.5 sm:px-6 py-2.5 sm:py-3.5">
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-[#E7E5E4]/80 px-3.5 sm:px-6 py-2.5 sm:py-3.5">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <Link
               href="/"
-              className="w-8 h-8 rounded-full bg-zinc-100 border border-zinc-200/80 flex items-center justify-center text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200 transition-colors flex-shrink-0"
+              className="w-8 h-8 rounded-full bg-[#FAFAF8] border border-[#E7E5E4]/80 flex items-center justify-center text-[#78716C] hover:text-[#1C1917] hover:bg-[#E7E5E4] transition-colors flex-shrink-0"
             >
               <ArrowLeft size={16} />
             </Link>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-sm sm:text-base font-black tracking-tight text-zinc-950 truncate">Campus Host Hub</span>
+                <span className="text-sm sm:text-base font-bold tracking-tight text-[#1C1917] truncate">Campus Host Hub</span>
                 <HostBadge role={host.role} size="xs" className="flex-shrink-0" />
               </div>
-              <p className="text-[10px] sm:text-[11px] font-semibold text-zinc-500 truncate">
+              <p className="text-[10px] sm:text-[11px] font-semibold text-[#78716C] truncate">
                 GLA Campus Moderation & Safety
               </p>
             </div>
@@ -201,17 +201,17 @@ export default function HostDashboardClient({
           <div className="flex items-center gap-2 flex-shrink-0">
             <Link
               href="/profile"
-              className="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 border border-zinc-200/80 transition-all cursor-pointer whitespace-nowrap"
+              className="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#FAFAF8] hover:bg-[#E7E5E4] border border-[#E7E5E4]/80 transition-all cursor-pointer whitespace-nowrap"
               title="Go to Profile"
             >
-              <div className="w-6 h-6 rounded-full overflow-hidden bg-zinc-200 flex-shrink-0">
+              <div className="w-6 h-6 rounded-full overflow-hidden bg-[#E7E5E4] flex-shrink-0">
                 <img
                   src={host.photo_url || getCartoonAvatar(host.full_name || 'Host')}
                   alt=""
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span className="text-xs font-bold text-zinc-800 whitespace-nowrap pr-0.5">
+              <span className="text-xs font-bold text-[#1C1917] whitespace-nowrap pr-0.5">
                 Profile
               </span>
             </Link>
@@ -222,33 +222,33 @@ export default function HostDashboardClient({
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
         {/* KPI Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white border border-zinc-200/80 rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
-            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Campus Students</p>
-            <h3 className="text-2xl font-black text-zinc-950 mt-1">{profiles.length}+</h3>
+          <div className="bg-white border border-[#E7E5E4]/80 rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+            <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider">Campus Students</p>
+            <h3 className="text-2xl font-bold text-[#1C1917] mt-1">{profiles.length}+</h3>
             <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full mt-1.5 inline-block">
               Active Roster
             </span>
           </div>
 
-          <div className="bg-white border border-zinc-200/80 rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
-            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Moments Moderated</p>
-            <h3 className="text-2xl font-black text-zinc-950 mt-1">{posts.length}</h3>
-            <span className="text-[10px] text-[#F05A00] font-bold bg-orange-50 px-2 py-0.5 rounded-full mt-1.5 inline-block">
+          <div className="bg-white border border-[#E7E5E4]/80 rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+            <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider">Moments Moderated</p>
+            <h3 className="text-2xl font-bold text-[#1C1917] mt-1">{posts.length}</h3>
+            <span className="text-[10px] text-[#6D28D9] font-bold bg-[#F3EEFC] px-2 py-0.5 rounded-full mt-1.5 inline-block">
               Live Feed Watch
             </span>
           </div>
 
-          <div className="bg-white border border-zinc-200/80 rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
-            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Campus Circles</p>
-            <h3 className="text-2xl font-black text-zinc-950 mt-1">{circles.length}</h3>
+          <div className="bg-white border border-[#E7E5E4]/80 rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+            <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider">Campus Circles</p>
+            <h3 className="text-2xl font-bold text-[#1C1917] mt-1">{circles.length}</h3>
             <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-full mt-1.5 inline-block">
               Communities
             </span>
           </div>
 
-          <div className="bg-white border border-zinc-200/80 rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
-            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Suspended Spammers</p>
-            <h3 className="text-2xl font-black text-rose-600 mt-1">
+          <div className="bg-white border border-[#E7E5E4]/80 rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+            <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider">Suspended Spammers</p>
+            <h3 className="text-2xl font-bold text-rose-600 mt-1">
               {profiles.filter(p => p.is_blocked || p.status === 'blocked').length}
             </h3>
             <span className="text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-full mt-1.5 inline-block">
@@ -258,14 +258,14 @@ export default function HostDashboardClient({
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex items-center gap-1.5 p-1 bg-zinc-200/70 border border-zinc-200/80 rounded-2xl overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-[#E7E5E4]/70 border border-[#E7E5E4]/80 rounded-[16px] overflow-x-auto">
           <button
             type="button"
             onClick={() => handleTabChange('feed')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'feed'
-                ? 'bg-[#F05A00] text-white shadow-sm shadow-orange-500/25'
-                : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/80'
+                ? 'bg-[#6D28D9] text-white shadow-sm shadow-purple-500/20'
+                : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
             <Trash2 size={14} />
@@ -275,10 +275,10 @@ export default function HostDashboardClient({
           <button
             type="button"
             onClick={() => handleTabChange('students')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'students'
-                ? 'bg-[#F05A00] text-white shadow-sm shadow-orange-500/25'
-                : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/80'
+                ? 'bg-[#6D28D9] text-white shadow-sm shadow-purple-500/20'
+                : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
             <Users size={14} />
@@ -288,10 +288,10 @@ export default function HostDashboardClient({
           <button
             type="button"
             onClick={() => handleTabChange('logs')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'logs'
-                ? 'bg-[#F05A00] text-white shadow-sm shadow-orange-500/25'
-                : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/80'
+                ? 'bg-[#6D28D9] text-white shadow-sm shadow-purple-500/20'
+                : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
             <ShieldCheck size={14} />
@@ -301,10 +301,10 @@ export default function HostDashboardClient({
           <button
             type="button"
             onClick={() => handleTabChange('circles')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'circles'
-                ? 'bg-[#F05A00] text-white shadow-sm shadow-orange-500/25'
-                : 'text-zinc-600 hover:text-zinc-950 hover:bg-white/80'
+                ? 'bg-[#6D28D9] text-white shadow-sm shadow-purple-500/20'
+                : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
             <Sparkles size={14} />
@@ -315,19 +315,19 @@ export default function HostDashboardClient({
         {/* TAB 1: FEED MODERATION */}
         {activeTab === 'feed' && (
           <section className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-zinc-200/80 rounded-2xl p-3.5 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-[#E7E5E4]/80 rounded-[16px] p-3.5 shadow-2xs">
               <div className="relative flex-1 max-w-md">
-                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A8A29E]" />
                 <input
                   type="text"
                   placeholder="Filter moments by caption, category, or location..."
                   value={postSearch}
                   onChange={(e) => setPostSearch(e.target.value)}
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl pl-9 pr-4 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#F05A00] focus:bg-white transition-colors"
+                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] pl-9 pr-4 py-2 text-xs text-[#1C1917] placeholder-zinc-400 focus:outline-none focus:border-[#6D28D9] focus:bg-white transition-colors"
                 />
               </div>
-              <p className="text-xs text-zinc-500 font-medium">
-                Showing <strong className="text-zinc-950">{filteredPosts.length}</strong> moments
+              <p className="text-xs text-[#78716C] font-medium">
+                Showing <strong className="text-[#1C1917]">{filteredPosts.length}</strong> moments
               </p>
             </div>
 
@@ -335,26 +335,26 @@ export default function HostDashboardClient({
               {filteredPosts.map((post) => (
                 <div
                   key={post.id}
-                  className="bg-white border border-zinc-200/80 rounded-[28px] p-4.5 flex flex-col justify-between space-y-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md hover:border-zinc-300 transition-all"
+                  className="bg-white border border-[#E7E5E4]/80 rounded-[28px] p-4.5 flex flex-col justify-between space-y-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md hover:border-[#E7E5E4] transition-all"
                 >
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#FAFAF8] text-[#78716C]">
                         {post.category || 'MOMENT'}
                       </span>
-                      <span className="text-[10px] text-zinc-400 font-bold">
+                      <span className="text-[10px] text-[#A8A29E] font-bold">
                         {formatPostDate(post.created_at)}
                       </span>
                     </div>
 
                     {post.content && (
-                      <p className="text-xs text-zinc-800 line-clamp-3 leading-relaxed font-medium">
+                      <p className="text-xs text-[#1C1917] line-clamp-3 leading-relaxed font-medium">
                         {post.content}
                       </p>
                     )}
 
                     {post.media_urls?.[0] && (
-                      <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200/60 mt-2">
+                      <div className="w-full aspect-[16/9] rounded-[16px] overflow-hidden bg-[#FAFAF8] border border-[#E7E5E4]/60 mt-2">
                         <img
                           src={post.media_urls[0]}
                           alt=""
@@ -365,15 +365,15 @@ export default function HostDashboardClient({
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-zinc-100">
-                    <span className="text-[10.5px] text-zinc-500 font-semibold">
+                  <div className="flex items-center justify-between pt-3 border-t border-[#E7E5E4]">
+                    <span className="text-[10.5px] text-[#78716C] font-semibold">
                       Location: {post.location || 'Campus'}
                     </span>
 
                     <button
                       type="button"
                       onClick={() => setModeratingPost(post)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 text-xs font-black transition-all cursor-pointer shadow-2xs"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 text-xs font-bold transition-all cursor-pointer shadow-2xs"
                     >
                       <Trash2 size={13} />
                       <span>Delete (Host)</span>
@@ -388,19 +388,19 @@ export default function HostDashboardClient({
         {/* TAB 2: STUDENT SAFETY DIRECTORY */}
         {activeTab === 'students' && (
           <section className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-zinc-200/80 rounded-2xl p-3.5 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-[#E7E5E4]/80 rounded-[16px] p-3.5 shadow-2xs">
               <div className="relative flex-1 max-w-md">
-                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A8A29E]" />
                 <input
                   type="text"
                   placeholder="Search student by name, email, or branch..."
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl pl-9 pr-4 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#F05A00] focus:bg-white transition-colors"
+                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] pl-9 pr-4 py-2 text-xs text-[#1C1917] placeholder-zinc-400 focus:outline-none focus:border-[#6D28D9] focus:bg-white transition-colors"
                 />
               </div>
-              <p className="text-xs text-zinc-500 font-medium">
-                Found <strong className="text-zinc-950">{filteredProfiles.length}</strong> students
+              <p className="text-xs text-[#78716C] font-medium">
+                Found <strong className="text-[#1C1917]">{filteredProfiles.length}</strong> students
               </p>
             </div>
 
@@ -415,10 +415,10 @@ export default function HostDashboardClient({
                 return (
                   <div
                     key={user.id}
-                    className="bg-white border border-zinc-200/80 rounded-[24px] p-3.5 flex items-center justify-between gap-3 shadow-2xs hover:shadow-sm hover:border-zinc-300 transition-all"
+                    className="bg-white border border-[#E7E5E4]/80 rounded-[24px] p-3.5 flex items-center justify-between gap-3 shadow-2xs hover:shadow-sm hover:border-[#E7E5E4] transition-all"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200/80 flex-shrink-0">
+                      <div className="w-10 h-10 rounded-[16px] overflow-hidden bg-[#FAFAF8] border border-[#E7E5E4]/80 flex-shrink-0">
                         <img
                           src={user.photo_url || getCartoonAvatar(user.full_name || 'Student')}
                           alt=""
@@ -427,17 +427,17 @@ export default function HostDashboardClient({
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <h4 className="text-xs font-black text-zinc-950 truncate">
+                          <h4 className="text-xs font-bold text-[#1C1917] truncate">
                             {user.full_name || 'Student'}
                           </h4>
                           <HostBadge role={user.role} size="xs" />
                           {isBlocked && (
-                            <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded-md bg-rose-50 text-rose-600 border border-rose-200">
+                            <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded-md bg-rose-50 text-rose-600 border border-rose-200">
                               Suspended
                             </span>
                           )}
                         </div>
-                        <p className="text-[10.5px] text-zinc-500 truncate mt-0.5">
+                        <p className="text-[10.5px] text-[#78716C] truncate mt-0.5">
                           {user.email} · {user.branch || 'Campus Student'}
                         </p>
                       </div>
@@ -448,7 +448,7 @@ export default function HostDashboardClient({
                         <button
                           type="button"
                           onClick={() => setSuspendingUser(user)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
+                          className={`px-3 py-1.5 rounded-[12px] text-xs font-bold transition-all cursor-pointer shadow-2xs ${
                             isBlocked
                               ? 'bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white border border-emerald-200'
                               : 'bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200'
@@ -457,7 +457,7 @@ export default function HostDashboardClient({
                           {isBlocked ? 'Reinstate' : 'Suspend'}
                         </button>
                       ) : (
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-zinc-400 bg-zinc-100 px-2.5 py-1 rounded-lg">
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-[#A8A29E] bg-[#FAFAF8] px-2.5 py-1 rounded-lg">
                           <Lock size={10} />
                           <span>Protected</span>
                         </span>
@@ -473,15 +473,15 @@ export default function HostDashboardClient({
         {/* TAB 3: AUDIT HISTORY */}
         {activeTab === 'logs' && (
           <section className="space-y-4">
-            <div className="flex items-center justify-between bg-white border border-zinc-200/80 rounded-2xl p-3.5 shadow-2xs">
-              <p className="text-xs text-zinc-800 font-bold">
+            <div className="flex items-center justify-between bg-white border border-[#E7E5E4]/80 rounded-[16px] p-3.5 shadow-2xs">
+              <p className="text-xs text-[#1C1917] font-bold">
                 Permanent Campus Moderation Audit Trail
               </p>
               <button
                 type="button"
                 onClick={fetchLogs}
                 disabled={loadingLogs}
-                className="flex items-center gap-1.5 text-xs text-zinc-600 hover:text-zinc-950 transition-colors cursor-pointer font-bold"
+                className="flex items-center gap-1.5 text-xs text-[#78716C] hover:text-[#1C1917] transition-colors cursor-pointer font-bold"
               >
                 <RefreshCw size={13} className={loadingLogs ? 'animate-spin' : ''} />
                 <span>Refresh Logs</span>
@@ -489,36 +489,36 @@ export default function HostDashboardClient({
             </div>
 
             {loadingLogs ? (
-              <div className="py-12 text-center text-zinc-400 text-xs font-medium">
+              <div className="py-12 text-center text-[#A8A29E] text-xs font-medium">
                 Loading moderation audit history...
               </div>
             ) : logs.length === 0 ? (
-              <div className="py-12 text-center text-zinc-400 text-xs font-medium bg-white rounded-2xl border border-zinc-200/80">
+              <div className="py-12 text-center text-[#A8A29E] text-xs font-medium bg-white rounded-[16px] border border-[#E7E5E4]/80">
                 No moderation actions recorded yet. Your campus is clean!
               </div>
             ) : (
-              <div className="bg-white border border-zinc-200/80 rounded-[24px] divide-y divide-zinc-100 overflow-hidden shadow-2xs">
+              <div className="bg-white border border-[#E7E5E4]/80 rounded-[24px] divide-y divide-zinc-100 overflow-hidden shadow-2xs">
                 {logs.map((log) => (
                   <div key={log.id} className="p-4 flex items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
+                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${
                           log.action_type?.includes('DELETE') || log.action_type?.includes('SUSPEND')
                             ? 'bg-rose-50 text-rose-600 border border-rose-200'
-                            : 'bg-zinc-100 text-zinc-700'
+                            : 'bg-[#FAFAF8] text-[#78716C]'
                         }`}>
                           {log.action_type}
                         </span>
-                        <span className="text-xs font-bold text-zinc-900">
+                        <span className="text-xs font-bold text-[#1C1917]">
                           Target: {log.metadata?.targetName || log.target_id?.slice(0, 8)}
                         </span>
                       </div>
-                      <p className="text-[11px] text-zinc-500 mt-1">
+                      <p className="text-[11px] text-[#78716C] mt-1">
                         Reason: &quot;{log.reason}&quot;
                       </p>
                     </div>
 
-                    <span className="text-[10px] text-zinc-400 font-semibold whitespace-nowrap">
+                    <span className="text-[10px] text-[#A8A29E] font-semibold whitespace-nowrap">
                       {formatPostDate(log.created_at)}
                     </span>
                   </div>
@@ -531,13 +531,13 @@ export default function HostDashboardClient({
         {/* TAB 4: CIRCLES & COMMUNITIES */}
         {activeTab === 'circles' && (
           <section className="space-y-4">
-            <div className="flex items-center justify-between bg-white border border-zinc-200/80 rounded-2xl p-3.5 shadow-2xs">
-              <p className="text-xs text-zinc-800 font-bold">
+            <div className="flex items-center justify-between bg-white border border-[#E7E5E4]/80 rounded-[16px] p-3.5 shadow-2xs">
+              <p className="text-xs text-[#1C1917] font-bold">
                 Campus Clubs & Student Circles
               </p>
               <Link
                 href="/circles"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#F05A00] text-white text-xs font-bold shadow-md shadow-orange-500/20 hover:bg-[#d94f00] transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-[12px] bg-[#6D28D9] text-white text-xs font-bold shadow-md shadow-purple-500/20 hover:bg-[#5B21B6] transition-colors"
               >
                 <Sparkles size={13} />
                 <span>+ Create Instant Circle</span>
@@ -548,18 +548,18 @@ export default function HostDashboardClient({
               {circles.map((circle) => (
                 <div
                   key={circle.id}
-                  className="bg-white border border-zinc-200/80 rounded-[24px] p-4 flex items-center justify-between gap-3 shadow-2xs hover:shadow-sm transition-shadow"
+                  className="bg-white border border-[#E7E5E4]/80 rounded-[24px] p-4 flex items-center justify-between gap-3 shadow-2xs hover:shadow-sm transition-shadow"
                 >
                   <div>
-                    <h4 className="text-sm font-black text-zinc-950">{circle.name}</h4>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                    <h4 className="text-sm font-bold text-[#1C1917]">{circle.name}</h4>
+                    <p className="text-[11px] text-[#78716C] mt-0.5">
                       {circle.category || 'General'} · {circle.member_count || circle.members_count || 1} members
                     </p>
                   </div>
 
                   <Link
                     href={`/circles/${circle.id}`}
-                    className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors"
+                    className="p-2 rounded-[12px] bg-[#FAFAF8] hover:bg-[#E7E5E4] text-[#78716C] transition-colors"
                     title="View Circle"
                   >
                     <ExternalLink size={15} />
@@ -574,16 +574,16 @@ export default function HostDashboardClient({
       {/* MODAL: DELETE POST CONFIRMATION */}
       {moderatingPost && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-white border border-zinc-200 rounded-[32px] p-6 max-w-md w-full space-y-4 shadow-2xl">
+          <div className="bg-white border border-[#E7E5E4] rounded-[32px] p-6 max-w-md w-full space-y-4 shadow-2xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-rose-600">
                 <AlertTriangle size={20} />
-                <h3 className="text-base font-black text-zinc-950">Moderate Post</h3>
+                <h3 className="text-base font-bold text-[#1C1917]">Moderate Post</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setModeratingPost(null)}
-                className="text-zinc-400 hover:text-zinc-700 p-1 rounded-full hover:bg-zinc-100"
+                className="text-[#A8A29E] hover:text-[#78716C] p-1 rounded-full hover:bg-[#FAFAF8]"
               >
                 <X size={18} />
               </button>
@@ -594,7 +594,7 @@ export default function HostDashboardClient({
             </p>
 
             <div className="space-y-2">
-              <label className="text-[11px] font-black text-black uppercase tracking-wider">
+              <label className="text-[11px] font-bold text-black uppercase tracking-wider">
                 Select Moderation Reason
               </label>
               <CustomSelect
@@ -615,7 +615,7 @@ export default function HostDashboardClient({
                   placeholder="Explain why this post violates guidelines..."
                   value={customPostReason}
                   onChange={(e) => setCustomPostReason(e.target.value)}
-                  className="w-full bg-white border border-black/10 rounded-2xl p-3.5 text-xs font-bold text-black placeholder:text-black/40 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 mt-2 shadow-xs resize-none"
+                  className="w-full bg-white border border-black/10 rounded-[16px] p-3.5 text-xs font-bold text-black placeholder:text-black/40 focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 mt-2 shadow-xs resize-none"
                 />
               )}
             </div>
@@ -624,7 +624,7 @@ export default function HostDashboardClient({
               <button
                 type="button"
                 onClick={() => setModeratingPost(null)}
-                className="flex-1 py-2.5 rounded-full border border-black/10 text-xs font-black uppercase tracking-wider text-black hover:bg-orange-50 transition-colors cursor-pointer"
+                className="flex-1 py-2.5 rounded-full border border-black/10 text-xs font-bold uppercase tracking-wider text-black hover:bg-[#F3EEFC] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -632,7 +632,7 @@ export default function HostDashboardClient({
                 type="button"
                 onClick={handleConfirmDeletePost}
                 disabled={isDeletingPost}
-                className="flex-1 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-rose-600/25 transition-colors cursor-pointer disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-rose-600/25 transition-colors cursor-pointer disabled:opacity-50"
               >
                 {isDeletingPost ? 'Removing...' : 'Confirm Removal'}
               </button>
@@ -648,7 +648,7 @@ export default function HostDashboardClient({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-rose-600">
                 <Ban size={20} />
-                <h3 className="text-base font-black text-black">
+                <h3 className="text-base font-bold text-black">
                   {suspendingUser.is_blocked || suspendingUser.status === 'blocked'
                     ? 'Reinstate Student'
                     : 'Suspend Student Account'}
@@ -657,19 +657,19 @@ export default function HostDashboardClient({
               <button
                 type="button"
                 onClick={() => setSuspendingUser(null)}
-                className="w-8 h-8 rounded-full bg-orange-50 text-black flex items-center justify-center hover:bg-orange-100 cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-full bg-[#F3EEFC] text-black flex items-center justify-center hover:bg-[#F3EEFC] cursor-pointer transition-colors"
               >
                 <X size={16} />
               </button>
             </div>
 
             <p className="text-xs text-black/70 leading-relaxed font-medium">
-              Target: <strong className="text-black font-black">{suspendingUser.full_name || 'Student'}</strong> ({suspendingUser.email})
+              Target: <strong className="text-black font-bold">{suspendingUser.full_name || 'Student'}</strong> ({suspendingUser.email})
             </p>
 
             {!(suspendingUser.is_blocked || suspendingUser.status === 'blocked') && (
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-black uppercase tracking-wider">
+                <label className="text-[11px] font-bold text-black uppercase tracking-wider">
                   Reason for Suspension
                 </label>
                 <CustomSelect
@@ -690,7 +690,7 @@ export default function HostDashboardClient({
                     placeholder="Provide specific details for suspension..."
                     value={customSuspendReason}
                     onChange={(e) => setCustomSuspendReason(e.target.value)}
-                    className="w-full bg-white border border-black/10 rounded-2xl p-3.5 text-xs font-bold text-black placeholder:text-black/40 focus:outline-none focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 mt-2 shadow-xs resize-none"
+                    className="w-full bg-white border border-black/10 rounded-[16px] p-3.5 text-xs font-bold text-black placeholder:text-black/40 focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 mt-2 shadow-xs resize-none"
                   />
                 )}
               </div>
@@ -700,7 +700,7 @@ export default function HostDashboardClient({
               <button
                 type="button"
                 onClick={() => setSuspendingUser(null)}
-                className="flex-1 py-2.5 rounded-full border border-black/10 text-xs font-black uppercase tracking-wider text-black hover:bg-orange-50 transition-colors cursor-pointer"
+                className="flex-1 py-2.5 rounded-full border border-black/10 text-xs font-bold uppercase tracking-wider text-black hover:bg-[#F3EEFC] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -708,7 +708,7 @@ export default function HostDashboardClient({
                 type="button"
                 onClick={handleToggleSuspendUser}
                 disabled={isSuspendingUser}
-                className="flex-1 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-rose-600/25 transition-colors cursor-pointer disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-rose-600/25 transition-colors cursor-pointer disabled:opacity-50"
               >
                 {isSuspendingUser
                   ? 'Processing...'

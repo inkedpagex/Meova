@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Zap, CheckCircle, Clock, X, Loader2, ChevronRight, Sparkles } from '@/lib/icons';
+import { Zap, CheckCircle, Clock, X, Loader2, Sparkles } from '@/lib/icons';
 import { toast } from '../lib/toast';
 
 function InstagramIcon({ size = 18, className = '' }) {
@@ -14,8 +14,27 @@ function InstagramIcon({ size = 18, className = '' }) {
   );
 }
 
+// In-memory module cache for instant zero-lag page/tab transitions
+let memoryCampaignCache = null;
+
+function getCachedClaimData() {
+  if (memoryCampaignCache) return memoryCampaignCache;
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('meova_story_campaign_cache');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        memoryCampaignCache = parsed;
+        return parsed;
+      }
+    } catch {}
+  }
+  return null;
+}
+
 export default function StoryCampaignBanner({ className = '' }) {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(getCachedClaimData);
+  const [isLoading, setIsLoading] = useState(!data);
   const [isOpen, setIsOpen] = useState(false);
   const [handle, setHandle] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -26,8 +45,14 @@ export default function StoryCampaignBanner({ className = '' }) {
       if (res.ok) {
         const json = await res.json();
         setData(json);
+        memoryCampaignCache = json;
+        try {
+          localStorage.setItem('meova_story_campaign_cache', JSON.stringify(json));
+        } catch {}
       }
-    } catch {}
+    } catch {} finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -53,6 +78,13 @@ export default function StoryCampaignBanner({ className = '' }) {
       if (res.ok) {
         toast.success(json.message || 'Story claim submitted successfully!');
         setIsOpen(false);
+        // Optimistically update cache to 'pending'
+        const updated = { ...data, userClaim: { status: 'pending', instagram_handle: handle.trim() } };
+        setData(updated);
+        memoryCampaignCache = updated;
+        try {
+          localStorage.setItem('meova_story_campaign_cache', JSON.stringify(updated));
+        } catch {}
         fetchCampaign();
       } else {
         toast.error(json.error || 'Failed to submit claim.');
@@ -74,51 +106,52 @@ export default function StoryCampaignBanner({ className = '' }) {
   return (
     <>
       {/* Clean, Minimal Native Spotlight Card */}
+      {/* Clean, Minimal Native Spotlight Card */}
       <div 
         onClick={() => !userClaim && setIsOpen(true)}
-        className={`group bg-[#fffbf9] border border-orange-100/90 hover:border-orange-200 rounded-2xl p-2.5 px-3.5 transition-all flex items-center justify-between gap-3 cursor-pointer select-none ${className}`}
+        className={`group bg-white border border-[#E7E5E4] hover:border-[#6D28D9] rounded-[16px] p-2.5 px-3.5 transition-all flex items-center justify-between gap-3 cursor-pointer select-none shadow-[0_2px_8px_rgba(28,25,23,0.06)] ${className}`}
       >
-        {/* Left: Instagram Gradient Icon & Info */}
+        {/* Left: Clean Single-Tone Icon & Info */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="relative w-8 h-8 rounded-full p-[1.5px] bg-gradient-to-tr from-[#FCB045] via-[#FD1D1D] to-[#833AB4] flex-shrink-0 group-hover:scale-105 transition-transform">
-            <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[#FD1D1D]">
-              <InstagramIcon size={14} />
-            </div>
+          <div className="w-8 h-8 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+            <InstagramIcon size={14} />
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h4 className="text-[12px] font-semibold text-neutral-800 truncate group-hover:text-[#F05A00] transition-colors leading-tight">
+              <h4 className="text-[12px] font-bold text-[#1C1917] truncate group-hover:text-[#6D28D9] transition-colors leading-tight">
                 Tag @meova.in on your Story
               </h4>
             </div>
-            <p className="text-[10.5px] text-neutral-400 font-medium truncate flex items-center gap-1 mt-0.5">
+            <p className="text-[11px] text-[#78716C] font-medium truncate flex items-center gap-1 mt-0.5">
               <span>Earn 100 free Sparks</span>
-              <span className="text-neutral-200">·</span>
-              <span className="text-[#F05A00] font-semibold">1 hr reward</span>
+              <span className="text-[#D6D3D1]">·</span>
+              <span className="text-[#6D28D9] font-bold">1 hr reward</span>
             </p>
           </div>
         </div>
 
         {/* Right: Action / Status */}
         <div className="flex-shrink-0">
-          {userClaim ? (
-            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 border border-orange-100 text-[11px] font-semibold text-[#F05A00]">
+          {isLoading && !userClaim ? (
+            <div className="w-20 h-7 rounded-full bg-black/5 animate-pulse" />
+          ) : userClaim ? (
+            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-bold text-emerald-700 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
               {userClaim.status === 'approved' ? (
                 <>
-                  <CheckCircle size={12} className="text-emerald-500" />
-                  <span className="text-emerald-700 font-bold">+100 Claimed</span>
+                  <CheckCircle size={12} className="text-emerald-600 flex-shrink-0" />
+                  <span>+100 Claimed</span>
                 </>
               ) : userClaim.status === 'pending' ? (
                 <>
-                  <Clock size={11} className="animate-spin text-amber-500" />
-                  <span className="text-amber-700 font-medium">In Review</span>
+                  <Clock size={11} className="animate-spin text-amber-600 flex-shrink-0" />
+                  <span className="text-amber-700">In Review</span>
                 </>
               ) : (
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
-                  className="text-[#F05A00] font-bold underline cursor-pointer"
+                  className="text-[#6D28D9] font-bold underline cursor-pointer"
                 >
                   Resubmit
                 </button>
@@ -128,10 +161,10 @@ export default function StoryCampaignBanner({ className = '' }) {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
-              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#F05A00] hover:bg-[#D94F00] text-white text-[11px] font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-[11px] font-bold transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] cursor-pointer active:scale-95 whitespace-nowrap"
             >
               <span>Claim</span>
-              <Zap size={10} className="fill-white text-white" />
+              <Zap size={10} className="fill-white text-white flex-shrink-0" />
             </button>
           )}
         </div>
@@ -141,82 +174,63 @@ export default function StoryCampaignBanner({ className = '' }) {
       {isOpen && (
         <div 
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm anim-fade-in cursor-pointer"
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs anim-fade-in cursor-pointer"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl w-full max-w-[370px] overflow-hidden shadow-2xl relative cursor-default border border-zinc-100 anim-scale-in p-6"
+            className="bg-white rounded-[32px] w-full max-w-[370px] overflow-hidden shadow-[0_4px_16px_rgba(28,25,23,0.08)] relative cursor-default border border-[#E7E5E4] anim-scale-in p-6"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full p-[2px] bg-gradient-to-tr from-[#FCB045] via-[#FD1D1D] to-[#833AB4]">
-                  <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[#FD1D1D]">
-                    <InstagramIcon size={16} />
-                  </div>
+                <div className="w-8 h-8 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+                  <InstagramIcon size={16} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-zinc-900">Claim 100 Free Sparks</h3>
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Instagram Story Tag</p>
+                  <h3 className="text-sm font-bold text-[#1C1917]">Claim 100 Free Sparks</h3>
+                  <p className="text-[10px] text-[#78716C] font-bold uppercase tracking-wider">Instagram Story Tag</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1 text-zinc-400 hover:text-zinc-600 rounded-full hover:bg-zinc-100 transition-colors cursor-pointer"
+                className="p-1.5 text-[#78716C] hover:text-[#1C1917] rounded-full hover:bg-black/5 transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="bg-orange-50/70 border border-orange-200/70 rounded-2xl p-3 mb-4 space-y-1">
-              <p className="text-xs font-black text-orange-950 flex items-center gap-1">
-                <Sparkles size={12} className="text-[#F05A00]" /> 3 Quick Steps:
-              </p>
-              <ol className="text-[11px] text-orange-900/90 font-medium space-y-1 list-decimal list-inside leading-relaxed">
-                <li>Share a story on Instagram promoting Meova.</li>
-                <li>Tag <strong>@meova.in</strong> in your story.</li>
-                <li>Enter your Instagram handle below and tap submit.</li>
-              </ol>
-            </div>
+            <p className="text-xs text-[#78716C] font-medium leading-relaxed mb-4">
+              Post a story tagging <strong className="text-[#6D28D9]">@meova.in</strong> with a link to your Meova profile, then enter your handle below to claim reward.
+            </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-black text-zinc-700 mb-1.5">
-                  Your Instagram Username
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 font-black text-sm">@</span>
-                  <input
-                    type="text"
-                    value={handle}
-                    onChange={(e) => setHandle(e.target.value)}
-                    placeholder="your_instagram_handle"
-                    required
-                    className="w-full pl-8 pr-4 py-2.5 rounded-2xl bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-900 focus:outline-none focus:border-[#F05A00] focus:ring-1 focus:ring-[#F05A00] transition-all"
-                  />
-                </div>
-                <p className="text-[10px] text-zinc-400 mt-1.5 font-medium">
-                  Zero upload friction · We verify your story tag on Instagram directly!
-                </p>
+                <input
+                  type="text"
+                  value={handle}
+                  onChange={(e) => setHandle(e.target.value)}
+                  placeholder="@your_instagram_handle"
+                  className="w-full text-xs font-medium p-3 rounded-full bg-[#FAFAF8] border border-[#E7E5E4] text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:border-[#6D28D9]"
+                />
               </div>
 
-              <div className="flex gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  disabled={submitting}
-                  className="flex-1 py-2.5 rounded-2xl font-bold text-xs text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1 py-2.5 rounded-2xl font-black text-xs text-white bg-[#F05A00] hover:bg-[#D94F00] transition-all flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/25 cursor-pointer disabled:opacity-60"
-                >
-                  {submitting ? <Loader2 size={13} className="animate-spin" /> : 'Submit & Claim'}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3.5 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Submitting Claim...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={14} />
+                    <span>Submit & Claim 100 Sparks</span>
+                  </>
+                )}
+              </button>
             </form>
           </div>
         </div>

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -7,12 +7,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { calculateMeetupRate } from '../../lib/pricing';
 
-export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto, isLoggedIn, accentColor, rate, completedMeets, renderButton }) {
+export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto, isLoggedIn, accentColor, rate, completedMeets, renderButton, buttonClassName, label }) {
   const meetsCount = typeof completedMeets === 'number'
     ? completedMeets
     : (typeof rate === 'number' && rate <= 25 ? rate : 0);
   const COFFEE_COST = calculateMeetupRate(meetsCount);
-  const color = (accentColor && accentColor !== '#ffffff') ? accentColor : '#F05A00';
+  const color = (accentColor && accentColor !== '#ffffff') ? accentColor : '#6D28D9';
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [booked, setBooked] = useState(false);
@@ -53,7 +53,11 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
     return () => { cancelled = true; };
   }, [open, isLoggedIn]);
 
-  function handleClick() {
+  function handleClick(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!isLoggedIn) {
       router.push('/login');
       return;
@@ -120,12 +124,12 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
         renderButton({ onClick: handleClick })
       ) : (
         <button
+          type="button"
           onClick={handleClick}
-          className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 hover:opacity-95 uppercase tracking-wide cursor-pointer shadow-xs whitespace-nowrap"
-          style={{ background: '#F05A00', color: '#ffffff' }}
+          className={buttonClassName || "w-full h-12 flex items-center justify-center gap-2 px-4 rounded-full text-[14px] font-bold bg-[#6D28D9] hover:bg-[#5B21B6] text-white transition-all active:scale-95 uppercase tracking-wider cursor-pointer shadow-xs whitespace-nowrap"}
         >
-          <Calendar className="w-3.5 h-3.5 text-white flex-shrink-0" />
-          <span>Book Meet · {COFFEE_COST} Sparks</span>
+          <Calendar size={16} className="text-white flex-shrink-0" />
+          <span>{label || `Book Meet · ${COFFEE_COST} Sparks`}</span>
         </button>
       )}
 
@@ -137,25 +141,25 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
           onClick={() => !loading && setOpen(false)}
         >
           <div
-            className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden anim-scale-in max-h-[92dvh] flex flex-col"
+            className="relative w-full max-w-md bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden anim-scale-in max-h-[92dvh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div
               className="px-5 py-4 text-white relative flex-shrink-0 flex items-center justify-between"
-              style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
+              style={{ background: '#6D28D9' }}
             >
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full overflow-hidden bg-white/20 border-2 border-white/40 flex-shrink-0 shadow-sm flex items-center justify-center">
                   {targetPhoto ? (
                     <img src={targetPhoto} alt={targetName} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-white font-black text-base">{targetName?.charAt(0) || 'C'}</span>
+                    <span className="text-white font-bold text-base">{targetName?.charAt(0) || 'C'}</span>
                   )}
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-white leading-tight">Campus Meetup</h3>
-                  <p className="text-[11px] text-orange-100 font-medium truncate max-w-[220px]">
+                  <h3 className="text-sm font-bold text-white leading-tight">Campus Meetup</h3>
+                  <p className="text-[11px] text-[#F3EEFC] font-medium truncate max-w-[220px]">
                     with <strong className="text-white">{targetName}</strong>
                   </p>
                 </div>
@@ -178,9 +182,9 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                 <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600 shadow-xs">
                   <CheckCircle className="w-7 h-7" />
                 </div>
-                <h3 className="text-base font-black text-zinc-900">Meetup Requested!</h3>
-                <p className="text-xs text-zinc-600 leading-relaxed font-medium">
-                  Your meetup request has been sent to <strong className="text-zinc-900">{targetName}</strong>. <strong>{COFFEE_COST} Sparks</strong> are held in secure escrow. You will receive an alert as soon as they confirm!
+                <h3 className="text-base font-bold text-[#1C1917]">Meetup Requested!</h3>
+                <p className="text-xs text-[#78716C] leading-relaxed font-medium">
+                  Your meetup request has been sent to <strong className="text-[#1C1917]">{targetName}</strong>. <strong>{COFFEE_COST} Sparks</strong> are held in secure escrow. You will receive an alert as soon as they confirm!
                 </p>
                 <button
                   onClick={() => {
@@ -188,8 +192,8 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                     setBooked(false);
                     router.refresh();
                   }}
-                  className="w-full py-3 rounded-xl text-xs font-black uppercase tracking-wider text-white shadow-md active:scale-95 transition-all cursor-pointer"
-                  style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
+                  className="w-full py-3 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-md active:scale-95 transition-all cursor-pointer"
+                  style={{ background: '#6D28D9' }}
                 >
                   Done
                 </button>
@@ -199,8 +203,8 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
               <div className="p-5 space-y-4 overflow-y-auto flex-1 no-scrollbar">
                 {/* Location Selection */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-wider flex items-center gap-1">
-                    <MapPin size={11} className="text-[#F05A00]" /> Meeting Location
+                  <label className="text-[10px] font-bold text-[#A8A29E] uppercase tracking-wider flex items-center gap-1">
+                    <MapPin size={11} className="text-[#6D28D9]" /> Meeting Location
                   </label>
                   <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                     {[
@@ -211,10 +215,10 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                         key={loc}
                         type="button"
                         onClick={() => setSelectedLocation(loc)}
-                        className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
                           selectedLocation === loc
-                            ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-xs'
-                            : 'bg-zinc-50 text-zinc-600 border-zinc-200 hover:border-orange-300'
+                            ? 'bg-[#6D28D9] text-white border-[#6D28D9] shadow-xs'
+                            : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4] hover:border-[#E4D9F7]'
                         }`}
                       >
                         {loc}
@@ -225,8 +229,8 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
 
                 {/* Date Selector */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-wider flex items-center gap-1">
-                    <Calendar size={11} className="text-[#F05A00]" /> Meeting Day
+                  <label className="text-[10px] font-bold text-[#A8A29E] uppercase tracking-wider flex items-center gap-1">
+                    <Calendar size={11} className="text-[#6D28D9]" /> Meeting Day
                   </label>
                   <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                     {[
@@ -239,10 +243,10 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                         key={d.value}
                         type="button"
                         onClick={() => setSelectedDate(d.value)}
-                        className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
                           selectedDate === d.value
-                            ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-xs'
-                            : 'bg-zinc-50 text-zinc-600 border-zinc-200 hover:border-orange-300'
+                            ? 'bg-[#6D28D9] text-white border-[#6D28D9] shadow-xs'
+                            : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4] hover:border-[#E4D9F7]'
                         }`}
                       >
                         {d.label}
@@ -256,15 +260,15 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                       min={new Date().toISOString().split('T')[0]}
                       value={customDate}
                       onChange={e => setCustomDate(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs font-bold text-zinc-900 focus:outline-none focus:border-[#F05A00] mt-1"
+                      className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-full px-3 py-2 text-xs font-bold text-[#1C1917] focus:outline-none focus:border-[#6D28D9] mt-1"
                     />
                   )}
                 </div>
 
                 {/* Time Slot */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-wider flex items-center gap-1">
-                    <Clock size={11} className="text-[#F05A00]" /> Preferred Time
+                  <label className="text-[10px] font-bold text-[#A8A29E] uppercase tracking-wider flex items-center gap-1">
+                    <Clock size={11} className="text-[#6D28D9]" /> Preferred Time
                   </label>
                   <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                     {[
@@ -277,10 +281,10 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                         key={time.value}
                         type="button"
                         onClick={() => setSelectedTime(time.value)}
-                        className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
                           selectedTime === time.value
-                            ? 'bg-[#F05A00] text-white border-[#F05A00] shadow-xs'
-                            : 'bg-zinc-50 text-zinc-600 border-zinc-200 hover:border-orange-300'
+                            ? 'bg-[#6D28D9] text-white border-[#6D28D9] shadow-xs'
+                            : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4] hover:border-[#E4D9F7]'
                         }`}
                       >
                         {time.label}
@@ -291,33 +295,33 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
 
                 {/* Agenda */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-wider block">
+                  <label className="text-[10px] font-bold text-[#A8A29E] uppercase tracking-wider block">
                     Meeting Purpose (Optional)
                   </label>
                   <textarea
                     value={agenda}
                     onChange={(e) => setAgenda(e.target.value)}
                     placeholder="e.g. Discuss startup ideas, exam notes, campus project..."
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#F05A00] transition-colors resize-none"
+                    className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-full px-3.5 py-2.5 text-xs font-medium text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none focus:border-[#6D28D9] transition-colors resize-none"
                     rows={2}
                   />
                 </div>
 
                 {/* Cost & Balance Summary */}
-                <div className="rounded-2xl bg-orange-50/70 border border-orange-100 p-3.5 space-y-2">
+                <div className="rounded-2xl bg-[#F3EEFC]/70 border border-[#E4D9F7] p-3.5 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-zinc-700">Booking Cost</span>
-                    <span className="font-black text-[#F05A00] flex items-center gap-1">
-                      <Zap size={13} className="fill-[#F05A00]" /> {COFFEE_COST} Sparks
+                    <span className="font-bold text-[#78716C]">Booking Cost</span>
+                    <span className="font-bold text-[#6D28D9] flex items-center gap-1">
+                      <Zap size={13} className="fill-[#6D28D9]" /> {COFFEE_COST} Sparks
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs pt-1.5 border-t border-orange-100">
-                    <span className="font-medium text-zinc-500">Your Wallet Balance</span>
+                  <div className="flex items-center justify-between text-xs pt-1.5 border-t border-[#E4D9F7]">
+                    <span className="font-medium text-[#78716C]">Your Wallet Balance</span>
                     {loadingWallet ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-500" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#6D28D9]" />
                     ) : (
-                      <span className="font-black text-zinc-900">
+                      <span className="font-bold text-[#1C1917]">
                         {spendableSparks} Sparks
                       </span>
                     )}
@@ -326,7 +330,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
 
                 {/* Error Banner */}
                 {error && (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-[11px] font-bold text-center">
+                  <div className="p-3 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[11px] font-bold text-center">
                     {error}
                   </div>
                 )}
@@ -334,14 +338,14 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                 {/* Action Buttons */}
                 {wallet && !hasEnoughSparks && !loadingWallet ? (
                   <div className="space-y-2 pt-1">
-                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-100 text-center">
+                    <div className="p-3 rounded-full bg-rose-50 border border-rose-100 text-center">
                       <p className="text-[11px] font-bold text-rose-600">
                         Short by {COFFEE_COST - spendableSparks} Sparks
                       </p>
                     </div>
                     <Link
                       href="/wallet/buy"
-                      className="w-full py-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md bg-rose-500 hover:bg-rose-600 text-white"
+                      className="w-full py-3 rounded-full text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md bg-rose-500 hover:bg-rose-600 text-white"
                     >
                       <span>Buy Sparks</span>
                       <Zap size={13} className="fill-current" />
@@ -351,8 +355,8 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                   <button
                     onClick={handleConfirm}
                     disabled={loading || loadingWallet || !wallet}
-                    className="w-full py-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-md text-white"
-                    style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
+                    className="w-full py-3 rounded-full text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-md text-white"
+                    style={{ background: '#6D28D9' }}
                   >
                     {loading ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Confirming...</>
@@ -362,7 +366,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                   </button>
                 )}
 
-                <p className="text-[10px] text-zinc-400 text-center font-medium">
+                <p className="text-[10px] text-[#A8A29E] text-center font-medium">
                   Sparks will be held in escrow until meetup is completed.
                 </p>
               </div>

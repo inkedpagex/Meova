@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Building2, Search, Check, Sparkles, ChevronDown, X } from '@/lib/icons';
@@ -43,7 +43,7 @@ export default function UniversitySelector({
         <Building2
           size={16}
           className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors ${
-            isOpen ? 'text-[#F05A00]' : 'text-zinc-400'
+            isOpen ? 'text-[#6D28D9]' : 'text-[#A8A29E]'
           }`}
         />
 
@@ -61,8 +61,8 @@ export default function UniversitySelector({
           }}
           className={`w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl border text-xs font-bold outline-none transition-all ${
             isOpen
-              ? 'border-[#F05A00] ring-2 ring-[#F05A00]/10 bg-white'
-              : 'border-zinc-200 bg-zinc-50 focus:bg-white text-zinc-950'
+              ? 'border-[#6D28D9] ring-2 ring-[#6D28D9]/10 bg-white'
+              : 'border-[#E7E5E4] bg-[#FAFAF8] focus:bg-white text-[#1C1917]'
           }`}
         />
 
@@ -74,7 +74,7 @@ export default function UniversitySelector({
                 e.stopPropagation();
                 setSearchQuery('');
               }}
-              className="p-1 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600"
+              className="p-1 rounded-full hover:bg-[#FAFAF8] text-[#A8A29E] hover:text-[#78716C]"
             >
               <X size={13} />
             </button>
@@ -82,11 +82,11 @@ export default function UniversitySelector({
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="text-zinc-400 hover:text-zinc-600 p-0.5"
+            className="text-[#A8A29E] hover:text-[#78716C] p-0.5"
           >
             <ChevronDown
               size={15}
-              className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#F05A00]' : ''}`}
+              className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#6D28D9]' : ''}`}
             />
           </button>
         </div>
@@ -94,10 +94,10 @@ export default function UniversitySelector({
 
       {/* Floating Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-zinc-100 shadow-2xl rounded-2xl overflow-hidden z-50 max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-150 divide-y divide-zinc-50">
+        <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-[#E7E5E4] shadow-2xl rounded-2xl overflow-hidden z-50 max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-150 divide-y divide-zinc-50">
           
           {/* Quick Suggestion Header */}
-          <div className="px-3.5 py-2 bg-zinc-50/80 flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-zinc-400">
+          <div className="px-3.5 py-2 bg-[#FAFAF8]/80 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#A8A29E]">
             <span>Popular Campus Hubs</span>
             {searchQuery && <span>{filtered.length} found</span>}
           </div>
@@ -107,13 +107,13 @@ export default function UniversitySelector({
             <button
               type="button"
               onClick={() => handleSelect(searchQuery.trim())}
-              className="w-full text-left px-3.5 py-2.5 text-xs font-bold transition-colors bg-orange-50/60 hover:bg-orange-100/70 text-[#F05A00] flex items-center justify-between cursor-pointer"
+              className="w-full text-left px-3.5 py-2.5 text-xs font-bold transition-colors bg-[#F3EEFC]/60 hover:bg-[#F3EEFC]/70 text-[#6D28D9] flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <Sparkles size={14} className="text-[#F05A00]" />
+                <Sparkles size={14} className="text-[#6D28D9]" />
                 <span>Use &quot;{searchQuery.trim()}&quot;</span>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-orange-600 bg-white px-2 py-0.5 rounded-full border border-orange-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#6D28D9] bg-white px-2 py-0.5 rounded-full border border-[#E4D9F7]">
                 Custom
               </span>
             </button>
@@ -131,29 +131,29 @@ export default function UniversitySelector({
                 onClick={() => handleSelect(univ.name)}
                 className={`w-full text-left px-3.5 py-2.5 text-xs transition-colors flex items-center justify-between cursor-pointer ${
                   isSelected
-                    ? 'bg-orange-50 text-[#F05A00] font-black'
+                    ? 'bg-[#F3EEFC] text-[#6D28D9] font-bold'
                     : isGLA
-                    ? 'bg-gradient-to-r from-orange-50/40 to-transparent hover:bg-orange-50/70 text-zinc-900 font-bold'
-                    : 'hover:bg-zinc-50 text-zinc-800 font-medium'
+                    ? 'bg-gradient-to-r from-[#F3EEFC]/40 to-transparent hover:bg-[#F3EEFC]/70 text-[#1C1917] font-bold'
+                    : 'hover:bg-[#FAFAF8] text-[#1C1917] font-medium'
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0 pr-2">
                   <div
                     className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                       isGLA
-                        ? 'bg-[#F05A00] text-white shadow-xs'
+                        ? 'bg-[#6D28D9] text-white shadow-xs'
                         : isSelected
-                        ? 'bg-orange-100 text-[#F05A00]'
-                        : 'bg-zinc-100 text-zinc-500'
+                        ? 'bg-[#F3EEFC] text-[#6D28D9]'
+                        : 'bg-[#FAFAF8] text-[#78716C]'
                     }`}
                   >
                     <Building2 size={13} />
                   </div>
                   <div className="min-w-0">
-                    <p className={`truncate text-xs ${isGLA || isSelected ? 'font-black' : 'font-semibold'}`}>
+                    <p className={`truncate text-xs ${isGLA || isSelected ? 'font-bold' : 'font-semibold'}`}>
                       {univ.name}
                     </p>
-                    <p className="text-[10px] text-zinc-400 font-medium truncate">
+                    <p className="text-[10px] text-[#A8A29E] font-medium truncate">
                       {univ.location}
                     </p>
                   </div>
@@ -161,19 +161,19 @@ export default function UniversitySelector({
 
                 <div className="flex items-center gap-1.5 shrink-0">
                   {isGLA && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-orange-100 text-[#F05A00] border border-orange-200/60">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]/60">
                       <Sparkles size={10} />
                       <span>Featured</span>
                     </span>
                   )}
-                  {isSelected && <Check size={14} className="text-[#F05A00] stroke-[3]" />}
+                  {isSelected && <Check size={14} className="text-[#6D28D9] stroke-[3]" />}
                 </div>
               </button>
             );
           })}
 
           {filtered.length === 0 && !isCustom && (
-            <div className="p-4 text-center text-xs text-zinc-400 font-medium">
+            <div className="p-4 text-center text-xs text-[#A8A29E] font-medium">
               No campus found. Type custom name above to add.
             </div>
           )}

@@ -47,7 +47,7 @@ export default function TopProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-[99999] h-[2.5px] pointer-events-none bg-transparent">
       <div
-        className="h-full bg-gradient-to-r from-[#FF7A00] to-[#F05A00] shadow-[0_0_8px_rgba(240,90,0,0.8)] transition-all duration-200 ease-out"
+        className="h-full bg-gradient-to-r from-[#FF7A00] to-[#6D28D9] shadow-[0_0_8px_rgba(240,90,0,0.8)] transition-all duration-200 ease-out"
         style={{
           width: `${progress}%`,
           opacity: progress === 100 ? 0 : 1,

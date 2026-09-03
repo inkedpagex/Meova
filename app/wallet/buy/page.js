@@ -85,10 +85,10 @@ export default function BuyPage() {
   return (
     <div className="max-w-[480px] mx-auto anim-fade-in relative px-4 pb-12">
       {/* Background ambient glows */}
-      <div className="absolute top-[-50px] left-1/3 w-80 h-80 bg-[#F05A00]/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+      <div className="absolute top-[-50px] left-1/3 w-80 h-80 bg-[#6D28D9]/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
       {step !== 'done' && (
-        <Link href="/wallet" className="inline-flex items-center gap-2 text-xs font-black text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all mb-8 uppercase tracking-wider">
+        <Link href="/wallet" className="inline-flex items-center gap-2 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all mb-8 uppercase tracking-wider">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Wallet
         </Link>
       )}
@@ -97,7 +97,7 @@ export default function BuyPage() {
       {step === 'select' && (
         <>
           <div className="mb-8">
-            <h1 className="text-2xl font-black text-[var(--text-primary)] tracking-tight flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
               Buy Sparks
             </h1>
             <p className="text-xs text-[var(--text-secondary)] mt-2 leading-relaxed font-semibold">
@@ -112,33 +112,33 @@ export default function BuyPage() {
                 <button
                   key={pack.key}
                   onClick={() => setSelected(pack)}
-                  className={`group relative text-left p-5 rounded-2xl transition-all duration-300 active:scale-95 border cursor-pointer shadow-sm ${
+                  className={`group relative text-left p-5 rounded-[16px] transition-all duration-300 active:scale-95 border cursor-pointer shadow-sm ${
                     isSelected 
                       ? 'bg-[var(--bg-hover)] border-[var(--accent)]' 
                       : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] hover:border-[var(--border-mid)] hover:bg-[var(--bg-hover)]'
                   }`}
                 >
                   {pack.popular && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[var(--text-primary)] text-[var(--bg-base)] text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-md">
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[var(--text-primary)] text-[var(--bg-base)] text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-md">
                       Popular
                     </span>
                   )}
                   
                   <div className="flex items-baseline justify-between mb-2">
-                    <span className="text-xl font-black text-[var(--text-primary)] tracking-tight">
+                    <span className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
                       {pack.sparks.toLocaleString()}
                     </span>
                     <Zap size={15} className="fill-amber-400 text-amber-400" />
                   </div>
 
                   {pack.bonus > 0 && (
-                    <p className="text-[10px] text-[#D94F00] font-black mb-3">
+                    <p className="text-[10px] text-[#5B21B6] font-bold mb-3">
                       + {pack.bonus} Bonus Sparks
                     </p>
                   )}
                   
                   <p className="text-[11px] text-[var(--text-secondary)] font-bold mb-1">{pack.label} Pack</p>
-                  <p className="text-base font-black text-[var(--text-primary)]">₹{pack.inr}</p>
+                  <p className="text-base font-bold text-[var(--text-primary)]">₹{pack.inr}</p>
                 </button>
               );
             })}
@@ -149,7 +149,7 @@ export default function BuyPage() {
               <button
                 onClick={handleProceed}
                 disabled={loading}
-                className="btn btn-primary w-full justify-center py-3.5 text-xs font-black shadow-lg flex items-center gap-2 group transition-all duration-300 hover:scale-[1.01] active:scale-95 disabled:opacity-50"
+                className="btn btn-primary w-full justify-center py-3.5 text-xs font-bold shadow-lg flex items-center gap-2 group transition-all duration-300 hover:scale-[1.01] active:scale-95 disabled:opacity-50"
               >
                 {loading ? (
                   <>
@@ -179,25 +179,25 @@ export default function BuyPage() {
       {step === 'pay' && selected && (
         <div className="text-center anim-scale-in">
           <div className="mb-6">
-            <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight mb-2">
+            <h2 className="text-xl font-bold text-[var(--text-primary)] tracking-tight mb-2">
               Scan QR & Pay
             </h2>
             <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto leading-relaxed font-semibold">
-              Open any UPI app (GPay, PhonePe, Paytm), scan the QR code below, and pay exact amount <strong className="text-[#F05A00] font-black">₹{payAmount.toFixed(2)}</strong>.
+              Open any UPI app (GPay, PhonePe, Paytm), scan the QR code below, and pay exact amount <strong className="text-[#6D28D9] font-bold">₹{payAmount.toFixed(2)}</strong>.
             </p>
           </div>
 
           {/* QR Code Container */}
-          <div className="relative overflow-hidden mx-auto w-52 h-52 rounded-2xl bg-white border border-black/[0.08] flex items-center justify-center p-3 mb-4 shadow-xl">
+          <div className="relative overflow-hidden mx-auto w-52 h-52 rounded-[16px] bg-white border border-black/[0.08] flex items-center justify-center p-3 mb-4 shadow-xl">
             <img src={qrCodeUrl} alt="Scan to pay" className="w-full h-full rounded-lg" />
           </div>
 
           {/* Exact Paise Highlight */}
-          <div className="rounded-2xl border border-orange-200/80 bg-orange-50/60 p-3.5 text-center mb-6 shadow-2xs">
-            <p className="text-[10px] font-black uppercase tracking-wider text-orange-800">
+          <div className="rounded-[16px] border border-[#E4D9F7]/80 bg-[#F3EEFC]/60 p-3.5 text-center mb-6 shadow-2xs">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#6D28D9]">
               ⚡ Exact Amount with Decimal Paise
             </p>
-            <p className="text-2xl font-black text-black my-0.5">
+            <p className="text-2xl font-bold text-black my-0.5">
               ₹{payAmount.toFixed(2)}
             </p>
             <p className="text-[11px] font-bold text-black/60">
@@ -206,13 +206,13 @@ export default function BuyPage() {
           </div>
 
           {/* Reference code copy widget */}
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 text-left mb-6 relative overflow-hidden shadow-sm">
-            <p className="text-[9px] font-black text-amber-600 tracking-wider uppercase mb-2 flex items-center gap-1">
+          <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 text-left mb-6 relative overflow-hidden shadow-sm">
+            <p className="text-[9px] font-bold text-amber-600 tracking-wider uppercase mb-2 flex items-center gap-1">
               <AlertCircle size={12} className="text-amber-500" />
               <span>Add this reference code in UPI payment note/remarks</span>
             </p>
             <div className="flex items-center justify-between gap-3">
-              <code className="text-sm font-mono font-black text-[var(--text-primary)] tracking-widest">
+              <code className="text-sm font-mono font-bold text-[var(--text-primary)] tracking-widest">
                 {refCode}
               </code>
               <button 
@@ -225,15 +225,15 @@ export default function BuyPage() {
           </div>
 
           {/* Instructions Box */}
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 text-left mb-8 space-y-3 shadow-sm">
-            <h4 className="text-[10px] font-black text-[var(--text-muted)] tracking-wider uppercase">Instructions</h4>
+          <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 text-left mb-8 space-y-3 shadow-sm">
+            <h4 className="text-[10px] font-bold text-[var(--text-muted)] tracking-wider uppercase">Instructions</h4>
             {[
               `Scan and pay exact ₹${payAmount.toFixed(2)} to ${ADMIN_UPI}`,
               `Copy and paste the reference code "${refCode}" in the remarks note`,
               `Slide the button below once payment is successfully submitted!`
             ].map((text, idx) => (
               <div key={idx} className="flex items-start gap-2.5">
-                <span className="w-4 h-4 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[9px] font-black text-[var(--text-secondary)] flex-shrink-0 mt-0.5">
+                <span className="w-4 h-4 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[9px] font-bold text-[var(--text-secondary)] flex-shrink-0 mt-0.5">
                   {idx + 1}
                 </span>
                 <p className="text-[11px] text-[var(--text-secondary)] leading-normal font-semibold">{text}</p>
@@ -249,7 +249,7 @@ export default function BuyPage() {
             />
             <button 
               onClick={() => setStep('select')} 
-              className="text-[10px] font-black text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all uppercase tracking-wider block mx-auto"
+              className="text-[10px] font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all uppercase tracking-wider block mx-auto"
             >
               Change Package / Go Back
             </button>
@@ -263,7 +263,7 @@ export default function BuyPage() {
           <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 mb-6 shadow-2xl animate-bounce">
             <CheckCircle className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tight mb-3">
+          <h2 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight mb-3">
             Payment Confirmed!
           </h2>
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-8 font-semibold">
@@ -271,7 +271,7 @@ export default function BuyPage() {
           </p>
           <Link 
             href="/wallet" 
-            className="btn btn-primary w-full justify-center py-3.5 text-xs font-black shadow-lg active:scale-95"
+            className="btn btn-primary w-full justify-center py-3.5 text-xs font-bold shadow-lg active:scale-95"
           >
             Back to Wallet Dashboard
           </Link>

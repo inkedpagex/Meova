@@ -87,11 +87,11 @@ export default function AdminCampaignsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-black tracking-tight text-zinc-900 flex items-center gap-2">
+          <h1 className="text-xl font-bold tracking-tight text-[#1C1917] flex items-center gap-2">
             <InstagramIcon className="text-[#E1306C]" size={22} />
             Instagram Story Campaign Claims
           </h1>
-          <p className="text-xs text-zinc-500 mt-1">
+          <p className="text-xs text-[#78716C] mt-1">
             Top 100 students reward offer — Verify Instagram tag @meova.in and credit 100 Sparks.
           </p>
         </div>
@@ -100,9 +100,9 @@ export default function AdminCampaignsPage() {
           <button
             onClick={() => { setFetching(true); loadClaims(); }}
             disabled={fetching}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E7E5E4] bg-white text-xs font-semibold text-[#78716C] hover:bg-[#FAFAF8] transition-all cursor-pointer shadow-2xs"
           >
-            <RefreshCw size={13} className={fetching ? 'animate-spin text-[#F05A00]' : ''} />
+            <RefreshCw size={13} className={fetching ? 'animate-spin text-[#6D28D9]' : ''} />
             Refresh
           </button>
         </div>
@@ -110,26 +110,26 @@ export default function AdminCampaignsPage() {
 
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-2xs">
-          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Approved Slots</p>
-          <p className="text-2xl font-black text-emerald-600 mt-1">{approvedCount} / 100</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E5E4] shadow-2xs">
+          <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider">Approved Slots</p>
+          <p className="text-2xl font-bold text-emerald-600 mt-1">{approvedCount} / 100</p>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-2xs">
-          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Pending Review</p>
-          <p className="text-2xl font-black text-amber-500 mt-1">{pendingCount}</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E5E4] shadow-2xs">
+          <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider">Pending Review</p>
+          <p className="text-2xl font-bold text-amber-500 mt-1">{pendingCount}</p>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-2xs">
-          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Remaining Free Slots</p>
-          <p className="text-2xl font-black text-[#F05A00] mt-1">{Math.max(0, 100 - approvedCount)}</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E5E4] shadow-2xs">
+          <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider">Remaining Free Slots</p>
+          <p className="text-2xl font-bold text-[#6D28D9] mt-1">{Math.max(0, 100 - approvedCount)}</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-xl w-fit border border-zinc-200/80">
+      <div className="flex items-center gap-1.5 bg-[#FAFAF8] p-1 rounded-xl w-fit border border-[#E7E5E4]/80">
         <button
           onClick={() => setFilter('pending')}
           className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-            filter === 'pending' ? 'bg-white text-zinc-900 shadow-2xs' : 'text-zinc-500 hover:text-zinc-900'
+            filter === 'pending' ? 'bg-white text-[#1C1917] shadow-2xs' : 'text-[#78716C] hover:text-[#1C1917]'
           }`}
         >
           Pending Review ({pendingCount})
@@ -137,7 +137,7 @@ export default function AdminCampaignsPage() {
         <button
           onClick={() => setFilter('all')}
           className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-            filter === 'all' ? 'bg-white text-zinc-900 shadow-2xs' : 'text-zinc-500 hover:text-zinc-900'
+            filter === 'all' ? 'bg-white text-[#1C1917] shadow-2xs' : 'text-[#78716C] hover:text-[#1C1917]'
           }`}
         >
           All Claims ({claims.length})
@@ -145,16 +145,16 @@ export default function AdminCampaignsPage() {
       </div>
 
       {/* Claims List */}
-      <div className="bg-white border border-zinc-200 rounded-3xl overflow-hidden shadow-2xs">
+      <div className="bg-white border border-[#E7E5E4] rounded-3xl overflow-hidden shadow-2xs">
         {fetching && claims.length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center justify-center gap-2">
-            <Loader2 className="animate-spin text-[#F05A00]" size={24} />
-            <p className="text-xs text-zinc-500 font-medium">Loading story claims...</p>
+            <Loader2 className="animate-spin text-[#6D28D9]" size={24} />
+            <p className="text-xs text-[#78716C] font-medium">Loading story claims...</p>
           </div>
         ) : displayed.length === 0 ? (
           <div className="p-12 text-center">
-            <p className="text-sm font-bold text-zinc-700">No {filter === 'pending' ? 'pending' : ''} claims found</p>
-            <p className="text-xs text-zinc-400 mt-1">Student submissions will appear here live in real-time.</p>
+            <p className="text-sm font-bold text-[#78716C]">No {filter === 'pending' ? 'pending' : ''} claims found</p>
+            <p className="text-xs text-[#A8A29E] mt-1">Student submissions will appear here live in real-time.</p>
           </div>
         ) : (
           <div className="divide-y divide-zinc-100">
@@ -164,17 +164,17 @@ export default function AdminCampaignsPage() {
               const igProfileUrl = `https://instagram.com/${handleClean}`;
 
               return (
-                <div key={claim.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-zinc-50/50 transition-colors">
+                <div key={claim.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#FAFAF8]/50 transition-colors">
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-black text-sm text-zinc-900">{claim.user_name || 'Student'}</span>
-                      <span className="text-xs text-zinc-400">({claim.user_email || claim.user_id})</span>
+                      <span className="font-bold text-sm text-[#1C1917]">{claim.user_name || 'Student'}</span>
+                      <span className="text-xs text-[#A8A29E]">({claim.user_email || claim.user_id})</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${st.bg} ${st.color} ${st.border}`}>
                         {st.label}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-zinc-600">
+                    <div className="flex items-center gap-3 text-xs text-[#78716C]">
                       <a
                         href={igProfileUrl}
                         target="_blank"
@@ -185,10 +185,10 @@ export default function AdminCampaignsPage() {
                         @{handleClean}
                         <ExternalLink size={10} />
                       </a>
-                      <span className="text-zinc-300">·</span>
-                      <span className="text-zinc-500">{fmtDate(claim.created_at)}</span>
-                      <span className="text-zinc-300">·</span>
-                      <span className="font-bold text-[#F05A00] flex items-center gap-0.5">
+                      <span className="text-[#A8A29E]">·</span>
+                      <span className="text-[#78716C]">{fmtDate(claim.created_at)}</span>
+                      <span className="text-[#A8A29E]">·</span>
+                      <span className="font-bold text-[#6D28D9] flex items-center gap-0.5">
                         <Zap size={11} className="fill-current" /> +{claim.reward_sparks || 100} Sparks
                       </span>
                     </div>
@@ -206,7 +206,7 @@ export default function AdminCampaignsPage() {
                       <button
                         onClick={() => handleAction(claim.id, true)}
                         disabled={Boolean(loadingAction)}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-sm cursor-pointer disabled:opacity-50"
                       >
                         {loadingAction === claim.id + '_approve' ? (
                           <Loader2 size={13} className="animate-spin" />

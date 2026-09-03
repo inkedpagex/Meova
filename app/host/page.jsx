@@ -15,19 +15,19 @@ export default async function HostPage() {
 
   if (!host) {
     return (
-      <div className="min-h-screen bg-zinc-50 text-zinc-900 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white border border-zinc-200 rounded-3xl p-8 text-center space-y-4 shadow-xl">
-          <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center mx-auto text-[#F05A00]">
+      <div className="min-h-screen bg-[#FAFAF8] text-[#1C1917] flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white border border-[#E7E5E4] rounded-[16px] p-8 text-center space-y-4 shadow-xl">
+          <div className="w-16 h-16 rounded-[14px] bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center mx-auto text-[#6D28D9]">
             <ShieldAlert size={32} />
           </div>
-          <h2 className="text-xl font-black text-zinc-950 tracking-tight">Host Privileges Required</h2>
-          <p className="text-sm text-zinc-500 leading-relaxed">
+          <h2 className="text-xl font-bold text-[#1C1917] tracking-tight">Host Privileges Required</h2>
+          <p className="text-sm text-[#78716C] leading-relaxed">
             This workspace is reserved for verified Campus Hosts and Community Leads. Contact a campus administrator to request host promotion.
           </p>
           <div className="pt-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-950 text-white font-bold text-xs hover:bg-zinc-800 transition-all shadow-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1C1917] text-white font-bold text-xs hover:bg-[#1C1917] transition-all shadow-sm"
             >
               <ArrowLeft size={14} />
               <span>Back to Campus Feed</span>

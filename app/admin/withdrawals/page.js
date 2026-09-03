@@ -66,7 +66,7 @@ export default function AdminWithdrawalsPage() {
       
       {/* Title Header */}
       <div className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/80 shadow-xs">
-        <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
           Withdrawal Requests
         </h1>
         <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">
@@ -76,21 +76,21 @@ export default function AdminWithdrawalsPage() {
 
       {loading ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
-          <Loader2 size={24} className="animate-spin text-[#F05A00]" />
+          <Loader2 size={24} className="animate-spin text-[#6D28D9]" />
           <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Loading payout requests...</p>
         </div>
       ) : (
         <>
           {/* Pending Section */}
           <div className="space-y-4">
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>Pending Approvals ({pending.length})</span>
             </h2>
 
             {pending.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-2xl p-10 text-center shadow-xs">
-                <p className="text-sm font-black text-slate-800">No pending payout requests</p>
+                <p className="text-sm font-bold text-slate-800">No pending payout requests</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -101,11 +101,11 @@ export default function AdminWithdrawalsPage() {
                   >
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                       <div className="space-y-1">
-                        <p className="text-lg font-black text-emerald-600">
+                        <p className="text-lg font-bold text-emerald-600">
                           ₹{w.amount_inr || w.amount} <span className="text-xs font-bold text-slate-400">({w.sparks || w.sparks_deducted || w.amount || 0} Sparks)</span>
                         </p>
                         <p className="text-xs font-extrabold text-slate-900">
-                          Requested by: <span className="text-[#F05A00]">{w.email}</span>
+                          Requested by: <span className="text-[#6D28D9]">{w.email}</span>
                         </p>
                         <p className="text-[11px] font-bold text-slate-400">
                           Date: {new Date(w.requested_at || w.created_at || Date.now()).toLocaleString('en-IN')}
@@ -114,7 +114,7 @@ export default function AdminWithdrawalsPage() {
 
                       {/* Payment Destination Details */}
                       <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl min-w-[220px]">
-                        <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                           Payout Target ({w.method || 'UPI'})
                         </p>
                         {w.method === 'bank' ? (
@@ -124,7 +124,7 @@ export default function AdminWithdrawalsPage() {
                             <p>IFSC: {w.bank_details?.ifsc_code || 'N/A'}</p>
                           </div>
                         ) : (
-                          <p className="text-xs font-mono font-black text-slate-900 bg-white border border-slate-200 px-2 py-1 rounded-md">
+                          <p className="text-xs font-mono font-bold text-slate-900 bg-white border border-slate-200 px-2 py-1 rounded-md">
                             {w.upi_id || 'Not provided'}
                           </p>
                         )}
@@ -137,20 +137,20 @@ export default function AdminWithdrawalsPage() {
                         placeholder="Remarks / transaction ref code (optional)..."
                         value={remarks[w.id] || ''}
                         onChange={e => setRemarks({ ...remarks, [w.id]: e.target.value })}
-                        className="w-full sm:flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#F05A00]"
+                        className="w-full sm:flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#6D28D9]"
                       />
                       <div className="flex gap-2 w-full sm:w-auto">
                         <button
                           onClick={() => handleWithdrawal(w.id, 'approve')}
                           disabled={actionLoading === w.id}
-                          className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black uppercase text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
+                          className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold uppercase text-xs px-4 py-2 rounded-xl transition-all cursor-pointer shadow-xs"
                         >
                           Approve & Pay
                         </button>
                         <button
                           onClick={() => handleWithdrawal(w.id, 'reject')}
                           disabled={actionLoading === w.id}
-                          className="flex-1 sm:flex-none bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 disabled:opacity-50 font-black uppercase text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
+                          className="flex-1 sm:flex-none bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 disabled:opacity-50 font-bold uppercase text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
                         >
                           Reject
                         </button>
@@ -164,7 +164,7 @@ export default function AdminWithdrawalsPage() {
 
           {/* History Section */}
           <div className="space-y-4 pt-4">
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
               Processed History ({completed.length})
             </h2>
 
@@ -182,14 +182,14 @@ export default function AdminWithdrawalsPage() {
                       className="bg-white border border-slate-200 p-4 rounded-xl flex items-center justify-between gap-4 shadow-xs"
                     >
                       <div>
-                        <p className="text-xs font-black text-slate-900">
+                        <p className="text-xs font-bold text-slate-900">
                           {w.sparks || w.sparks_deducted || w.amount || 0} Sparks — {w.email}
                         </p>
                         <p className="text-[11px] font-medium text-slate-500 mt-0.5">
                           Remarks: {w.remarks || 'None'}
                         </p>
                       </div>
-                      <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${
                         isApp ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'
                       }`}>
                         {isApp ? <CheckCircle size={12} /> : <XCircle size={12} />}

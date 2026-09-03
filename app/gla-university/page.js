@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import Image from 'next/image';
 import {
   Coffee, Briefcase, Users, Camera, ChevronDown, Sparkles,
@@ -28,28 +28,28 @@ export const metadata = {
 
 export default function GLALandingPage() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-zinc-900 font-sans selection:bg-[#F05A00]/20 selection:text-[#F05A00]">
+    <div className="min-h-screen bg-[#FAFAFA] text-[#1C1917] font-sans selection:bg-[#6D28D9]/20 selection:text-[#6D28D9]">
       {/* ── Top Navigation Bar ───────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200/80">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#E7E5E4]/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-[#F05A00] flex items-center justify-center text-white shadow-md shadow-orange-500/25">
-              <span className="font-black text-lg">M</span>
+            <div className="w-9 h-9 rounded-xl bg-[#6D28D9] flex items-center justify-center text-white shadow-md shadow-purple-500/20">
+              <span className="font-bold text-lg">M</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-lg tracking-tight text-zinc-950 leading-none">Meova</span>
-              <span className="text-[10px] font-bold text-[#F05A00] tracking-wider uppercase">GLA University</span>
+              <span className="font-bold text-lg tracking-tight text-[#1C1917] leading-none">Meova</span>
+              <span className="text-[10px] font-bold text-[#6D28D9] tracking-wider uppercase">GLA University</span>
             </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/discover" className="text-xs font-bold text-zinc-600 hover:text-[#F05A00] transition-colors">
+            <Link href="/discover" className="text-xs font-bold text-[#78716C] hover:text-[#6D28D9] transition-colors">
               Discover Peers
             </Link>
-            <Link href="/gigs" className="text-xs font-bold text-zinc-600 hover:text-[#F05A00] transition-colors">
+            <Link href="/gigs" className="text-xs font-bold text-[#78716C] hover:text-[#6D28D9] transition-colors">
               Campus Gigs
             </Link>
-            <Link href="/circles" className="text-xs font-bold text-zinc-600 hover:text-[#F05A00] transition-colors">
+            <Link href="/circles" className="text-xs font-bold text-[#78716C] hover:text-[#6D28D9] transition-colors">
               Circles
             </Link>
           </nav>
@@ -57,13 +57,13 @@ export default function GLALandingPage() {
           <div className="flex items-center gap-2.5">
             <Link
               href="/login"
-              className="px-4 py-2 text-xs font-black text-zinc-700 hover:text-[#F05A00] transition-colors"
+              className="px-4 py-2 text-xs font-bold text-[#78716C] hover:text-[#6D28D9] transition-colors"
             >
               Log in
             </Link>
             <Link
               href="/login"
-              className="px-4 py-2 rounded-xl bg-[#F05A00] hover:bg-[#D94F00] text-white text-xs font-black shadow-md shadow-orange-500/20 transition-all active:scale-95 flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold shadow-md shadow-purple-500/20 transition-all active:scale-95 flex items-center gap-1.5"
             >
               <span>Join Free</span>
               <ArrowRight size={13} />
@@ -76,20 +76,20 @@ export default function GLALandingPage() {
         {/* ── Hero Section ────────────────────────────────────────────── */}
         <section className="relative overflow-hidden pt-12 pb-16 md:pt-20 md:pb-24 px-4 sm:px-6">
           {/* Subtle Background Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-orange-200/40 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-[#E4D9F7]/40 blur-[100px] rounded-full pointer-events-none" />
 
           <div className="relative max-w-3xl mx-auto text-center space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 border border-orange-200/80 text-[#F05A00] text-xs font-black uppercase tracking-wider shadow-2xs">
-              <MapPin size={13} className="text-[#F05A00]" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F3EEFC] border border-[#E4D9F7]/80 text-[#6D28D9] text-xs font-bold uppercase tracking-wider shadow-2xs">
+              <MapPin size={13} className="text-[#6D28D9]" />
               <span>Built Exclusively for GLA University, Mathura</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-black text-zinc-950 tracking-tight leading-[1.15]">
+            <h1 className="text-3xl sm:text-5xl font-bold text-[#1C1917] tracking-tight leading-[1.15]">
               The Campus Social App Every <br className="hidden sm:inline" />
-              <span className="text-[#F05A00]">GLA Student</span> Needs
+              <span className="text-[#6D28D9]">GLA Student</span> Needs
             </h1>
 
-            <p className="text-sm sm:text-base text-zinc-600 font-medium leading-relaxed max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-[#78716C] font-medium leading-relaxed max-w-xl mx-auto">
               Connect with verified batchmates, book 1-on-1 coffee meets with QR verification,
               earn Sparks on campus freelance gigs, and join active student circles.
             </p>
@@ -97,31 +97,31 @@ export default function GLALandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Link
                 href="/login"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white font-black text-sm shadow-xl shadow-orange-500/25 transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-sm shadow-xl shadow-purple-500/20 transition-all active:scale-95 flex items-center justify-center gap-2"
               >
                 <span>Join with College Email</span>
                 <ArrowRight size={15} />
               </Link>
               <Link
                 href="/discover"
-                className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-white border border-zinc-200 hover:border-[#F05A00] text-zinc-800 font-black text-sm hover:text-[#F05A00] shadow-2xs transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-white border border-[#E7E5E4] hover:border-[#6D28D9] text-[#1C1917] font-bold text-sm hover:text-[#6D28D9] shadow-2xs transition-all flex items-center justify-center gap-2"
               >
                 <span>Explore GLA Peers</span>
               </Link>
             </div>
 
             {/* Micro Social Proof */}
-            <div className="flex items-center justify-center gap-6 pt-4 text-xs font-bold text-zinc-500">
+            <div className="flex items-center justify-center gap-6 pt-4 text-xs font-bold text-[#78716C]">
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-[#F05A00]" />
+                <CheckCircle2 size={15} className="text-[#6D28D9]" />
                 <span>100% Free</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-[#F05A00]" />
+                <CheckCircle2 size={15} className="text-[#6D28D9]" />
                 <span>Verified Students</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-[#F05A00]" />
+                <CheckCircle2 size={15} className="text-[#6D28D9]" />
                 <span>Sparks Wallet</span>
               </div>
             </div>
@@ -131,10 +131,10 @@ export default function GLALandingPage() {
         {/* ── Features Grid ───────────────────────────────────────────── */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-20">
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#1C1917] tracking-tight">
               Everything GLA Students Need in One App
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-500 font-medium mt-1.5">
+            <p className="text-xs sm:text-sm text-[#78716C] font-medium mt-1.5">
               Built by students, for students at GLA University Mathura
             </p>
           </div>
@@ -175,25 +175,25 @@ export default function GLALandingPage() {
                 <Link
                   key={f.title}
                   href={f.href}
-                  className="group p-6 rounded-3xl bg-white border border-zinc-200/90 hover:border-orange-300 hover:shadow-lg hover:shadow-orange-500/5 transition-all flex flex-col justify-between"
+                  className="group p-6 rounded-3xl bg-white border border-[#E7E5E4]/90 hover:border-[#E4D9F7] hover:shadow-lg hover:shadow-purple-500/20 transition-all flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-11 h-11 rounded-2xl bg-orange-50 text-[#F05A00] flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <div className="w-11 h-11 rounded-2xl bg-[#F3EEFC] text-[#6D28D9] flex items-center justify-center group-hover:scale-110 transition-transform">
                         <IconComp size={20} />
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-600 group-hover:bg-orange-100 group-hover:text-[#F05A00] transition-colors">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#FAFAF8] text-[#78716C] group-hover:bg-[#F3EEFC] group-hover:text-[#6D28D9] transition-colors">
                         {f.badge}
                       </span>
                     </div>
-                    <h3 className="font-black text-zinc-950 text-sm mb-1.5 group-hover:text-[#F05A00] transition-colors">
+                    <h3 className="font-bold text-[#1C1917] text-sm mb-1.5 group-hover:text-[#6D28D9] transition-colors">
                       {f.title}
                     </h3>
-                    <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                    <p className="text-xs text-[#78716C] font-medium leading-relaxed">
                       {f.desc}
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center gap-1 text-xs font-bold text-[#F05A00] opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="mt-4 pt-3 border-t border-[#E7E5E4] flex items-center gap-1 text-xs font-bold text-[#6D28D9] opacity-0 group-hover:opacity-100 transition-opacity">
                     <span>Explore</span>
                     <ArrowRight size={12} />
                   </div>
@@ -204,12 +204,12 @@ export default function GLALandingPage() {
         </section>
 
         {/* ── Why Meova Spotlight ─────────────────────────────────────── */}
-        <section className="bg-gradient-to-b from-orange-500 to-[#D94F00] text-white py-16 px-4 sm:px-6">
+        <section className="bg-gradient-to-b from-[#6D28D9] to-[#5B21B6] text-white py-16 px-4 sm:px-6">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-xs flex items-center justify-center mx-auto">
               <Zap size={24} className="text-white" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
               A Complete Social Ecosystem for GLA University
             </h2>
             <p className="text-sm sm:text-base text-white/90 font-medium leading-relaxed max-w-xl mx-auto">
@@ -219,10 +219,10 @@ export default function GLALandingPage() {
             <div className="pt-2">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-white text-zinc-950 font-black text-sm shadow-xl hover:bg-zinc-100 transition-all active:scale-95"
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-white text-[#1C1917] font-bold text-sm shadow-xl hover:bg-[#FAFAF8] transition-all active:scale-95"
               >
                 <span>Get Started Now</span>
-                <ArrowRight size={15} className="text-[#F05A00]" />
+                <ArrowRight size={15} className="text-[#6D28D9]" />
               </Link>
             </div>
           </div>
@@ -231,10 +231,10 @@ export default function GLALandingPage() {
         {/* ── FAQ Section ─────────────────────────────────────────────── */}
         <section className="max-w-2xl mx-auto px-4 sm:px-6 py-20">
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#1C1917] tracking-tight">
               Frequently Asked Questions
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-500 font-medium mt-1">
+            <p className="text-xs sm:text-sm text-[#78716C] font-medium mt-1">
               Common questions from GLA University students
             </p>
           </div>
@@ -260,13 +260,13 @@ export default function GLALandingPage() {
             ].map((item, i) => (
               <details
                 key={i}
-                className="group bg-white border border-zinc-200/90 rounded-2xl overflow-hidden transition-colors"
+                className="group bg-white border border-[#E7E5E4]/90 rounded-2xl overflow-hidden transition-colors"
               >
-                <summary className="p-4 sm:p-5 font-black text-sm text-zinc-950 cursor-pointer group-open:text-[#F05A00] flex justify-between items-center select-none">
+                <summary className="p-4 sm:p-5 font-bold text-sm text-[#1C1917] cursor-pointer group-open:text-[#6D28D9] flex justify-between items-center select-none">
                   <span>{item.q}</span>
-                  <ChevronDown size={16} className="text-zinc-400 group-open:rotate-180 transition-transform shrink-0 ml-2" />
+                  <ChevronDown size={16} className="text-[#A8A29E] group-open:rotate-180 transition-transform shrink-0 ml-2" />
                 </summary>
-                <p className="px-4 sm:px-5 pb-5 text-xs sm:text-sm text-zinc-600 font-medium leading-relaxed">
+                <p className="px-4 sm:px-5 pb-5 text-xs sm:text-sm text-[#78716C] font-medium leading-relaxed">
                   {item.a}
                 </p>
               </details>
@@ -275,18 +275,18 @@ export default function GLALandingPage() {
         </section>
 
         {/* ── Final CTA ───────────────────────────────────────────────── */}
-        <section className="bg-zinc-950 text-white py-16 px-4 sm:px-6">
+        <section className="bg-[#1C1917] text-white py-16 px-4 sm:px-6">
           <div className="max-w-xl mx-auto text-center space-y-5">
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
               Join GLA University on Meova
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-400 font-medium">
+            <p className="text-xs sm:text-sm text-[#A8A29E] font-medium">
               Start connecting with your campus peers today. Free forever.
             </p>
             <div className="pt-2">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white font-black text-sm shadow-xl shadow-orange-500/25 transition-all active:scale-95"
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-sm shadow-xl shadow-purple-500/20 transition-all active:scale-95"
               >
                 <span>Create Free Account</span>
                 <ArrowRight size={15} />
@@ -297,13 +297,13 @@ export default function GLALandingPage() {
       </main>
 
       {/* ── Footer ─────────────────────────────────────────────────── */}
-      <footer className="bg-white border-t border-zinc-200/80 py-8 px-4 sm:px-6 text-center">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500 font-medium">
+      <footer className="bg-white border-t border-[#E7E5E4]/80 py-8 px-4 sm:px-6 text-center">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#78716C] font-medium">
           <p>© {new Date().getFullYear()} Meova.in — Built for GLA University, Mathura.</p>
           <div className="flex items-center gap-5">
-            <Link href="/privacy" className="hover:text-[#F05A00] transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-[#F05A00] transition-colors">Terms of Service</Link>
-            <Link href="/login" className="hover:text-[#F05A00] transition-colors">Log In</Link>
+            <Link href="/privacy" className="hover:text-[#6D28D9] transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-[#6D28D9] transition-colors">Terms of Service</Link>
+            <Link href="/login" className="hover:text-[#6D28D9] transition-colors">Log In</Link>
           </div>
         </div>
       </footer>

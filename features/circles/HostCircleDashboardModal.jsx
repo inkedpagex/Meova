@@ -99,57 +99,57 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl border border-zinc-100 anim-fade-in flex flex-col h-[85vh]">
+      <div className="bg-white rounded-[32px] w-full max-w-2xl overflow-hidden shadow-2xl border border-[#E7E5E4] anim-fade-in flex flex-col h-[85vh]">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/60">
+        <div className="px-6 py-4 border-b border-[#E7E5E4] flex items-center justify-between bg-[#FAFAF8]/60">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#F05A00] bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-100">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#6D28D9] bg-[#F3EEFC] px-2.5 py-0.5 rounded-full border border-[#E4D9F7]">
               Host Channel Dashboard
             </span>
-            <h3 className="text-lg font-black text-zinc-900 tracking-tight mt-0.5">
+            <h3 className="text-lg font-bold text-[#1C1917] tracking-tight mt-0.5">
               {circleName || data?.circleName || 'Community'}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-zinc-200 text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer"
+            className="p-1.5 rounded-full hover:bg-[#E7E5E4] text-[#78716C] hover:text-[#1C1917] transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Overview Stat Cards */}
-        <div className="grid grid-cols-2 gap-4 p-5 bg-orange-50/30 border-b border-zinc-100">
-          <div className="bg-white border border-orange-100 rounded-2xl p-4 shadow-2xs flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-orange-50 text-[#F05A00] flex items-center justify-center flex-shrink-0">
+        <div className="grid grid-cols-2 gap-4 p-5 bg-[#F3EEFC]/30 border-b border-[#E7E5E4]">
+          <div className="bg-white border border-[#E4D9F7] rounded-[16px] p-4 shadow-2xs flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#F3EEFC] text-[#6D28D9] flex items-center justify-center flex-shrink-0">
               <Users size={20} />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Total Joined</p>
-              <p className="text-xl font-black text-zinc-900">{data?.total_members || editMembersCount || 0} <span className="text-xs text-zinc-500 font-bold">Students</span></p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#A8A29E]">Total Joined</p>
+              <p className="text-xl font-bold text-[#1C1917]">{data?.total_members || editMembersCount || 0} <span className="text-xs text-[#78716C] font-bold">Students</span></p>
             </div>
           </div>
 
-          <div className="bg-white border border-amber-100 rounded-2xl p-4 shadow-2xs flex items-center gap-3">
+          <div className="bg-white border border-amber-100 rounded-[16px] p-4 shadow-2xs flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
               <Sparkles size={20} className="fill-current text-amber-500" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Sparks Earned</p>
-              <p className="text-xl font-black text-amber-600">{(data?.total_sparks_earned || 0).toLocaleString()} <span className="text-xs text-zinc-400 font-bold">Sparks</span></p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#A8A29E]">Sparks Earned</p>
+              <p className="text-xl font-bold text-amber-600">{(data?.total_sparks_earned || 0).toLocaleString()} <span className="text-xs text-[#A8A29E] font-bold">Sparks</span></p>
             </div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-zinc-100 bg-zinc-50/50 px-6">
+        <div className="flex border-b border-[#E7E5E4] bg-[#FAFAF8]/50 px-6">
           <button
             onClick={() => setActiveTab('roster')}
-            className={`py-3 px-4 text-xs font-black uppercase tracking-wider border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            className={`py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'roster'
-                ? 'border-[#F05A00] text-[#F05A00]'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800'
+                ? 'border-[#6D28D9] text-[#6D28D9]'
+                : 'border-transparent text-[#78716C] hover:text-[#1C1917]'
             }`}
           >
             <Users size={14} />
@@ -157,10 +157,10 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
           </button>
           <button
             onClick={() => setActiveTab('settings')}
-            className={`py-3 px-4 text-xs font-black uppercase tracking-wider border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+            className={`py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'settings'
-                ? 'border-[#F05A00] text-[#F05A00]'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800'
+                ? 'border-[#6D28D9] text-[#6D28D9]'
+                : 'border-transparent text-[#78716C] hover:text-[#1C1917]'
             }`}
           >
             <Settings size={14} />
@@ -172,18 +172,18 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
         {activeTab === 'roster' && (
           <div className="flex flex-col flex-1 min-h-0">
             {/* Member Search Bar */}
-            <div className="px-6 py-3 border-b border-zinc-100 flex items-center justify-between">
+            <div className="px-6 py-3 border-b border-[#E7E5E4] flex items-center justify-between">
               <div className="relative flex-1 max-w-sm">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A8A29E]" />
                 <input
                   type="text"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search members by name or branch..."
-                  className="w-full bg-zinc-50 border border-zinc-200/80 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#F05A00]"
+                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4]/80 rounded-[12px] pl-9 pr-3 py-2 text-xs font-bold text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none focus:border-[#6D28D9]"
                 />
               </div>
-              <span className="text-xs font-bold text-zinc-500">
+              <span className="text-xs font-bold text-[#78716C]">
                 Showing {filteredRoster.length} of {roster.length}
               </span>
             </div>
@@ -191,12 +191,12 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
             {/* Member Roster List */}
             <div className="flex-1 overflow-y-auto p-6 space-y-3 no-scrollbar">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
-                  <Loader2 className="w-8 h-8 animate-spin text-[#F05A00] mb-2" />
+                <div className="flex flex-col items-center justify-center py-16 text-[#A8A29E]">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#6D28D9] mb-2" />
                   <p className="text-xs font-bold">Loading member directory...</p>
                 </div>
               ) : filteredRoster.length === 0 ? (
-                <div className="text-center py-14 text-zinc-400 font-semibold">
+                <div className="text-center py-14 text-[#A8A29E] font-semibold">
                   <p className="text-xs">No members found matching your search.</p>
                 </div>
               ) : (
@@ -207,10 +207,10 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
                   return (
                     <div
                       key={m.user_id || idx}
-                      className="flex items-center justify-between p-3.5 rounded-2xl border border-zinc-100 hover:border-orange-200 hover:bg-orange-50/20 transition-all"
+                      className="flex items-center justify-between p-3.5 rounded-[16px] border border-[#E7E5E4] hover:border-[#E4D9F7] hover:bg-[#F3EEFC]/20 transition-all"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-full overflow-hidden border border-zinc-200 flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full overflow-hidden border border-[#E7E5E4] flex-shrink-0">
                           <img
                             src={getUserAvatarUrl(student)}
                             alt={student?.full_name || ''}
@@ -222,26 +222,26 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <h4 className="text-xs font-black text-zinc-900 truncate">
+                            <h4 className="text-xs font-bold text-[#1C1917] truncate">
                               {student?.full_name || 'Student Member'}
                             </h4>
                             {isHost && (
-                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-50 text-[#F05A00]">
+                              <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#F3EEFC] text-[#6D28D9]">
                                 Host
                               </span>
                             )}
                           </div>
-                          <p className="text-[10px] font-bold text-zinc-400 truncate mt-0.5">
+                          <p className="text-[10px] font-bold text-[#A8A29E] truncate mt-0.5">
                             {student?.college || student?.university || 'Campus'} · {student?.year || ''} {student?.branch ? `(${student.branch})` : ''}
                           </p>
                         </div>
                       </div>
 
                       <div className="text-right flex-shrink-0">
-                        <span className="text-[11px] font-black text-[#F05A00] block">
+                        <span className="text-[11px] font-bold text-[#6D28D9] block">
                           {isHost ? 'Owner' : `+${m.sparks_paid || 0} Sparks`}
                         </span>
-                        <span className="text-[9.5px] font-semibold text-zinc-400 block mt-0.5">
+                        <span className="text-[9.5px] font-semibold text-[#A8A29E] block mt-0.5">
                           {m.joined_at ? new Date(m.joined_at).toLocaleDateString() : 'Joined'}
                         </span>
                       </div>
@@ -258,7 +258,7 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
           <form onSubmit={handleSaveSettings} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs font-semibold">
             {/* WhatsApp / Telegram Invite Link */}
             <div>
-              <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-bold text-[#78716C] uppercase tracking-wider mb-1">
                 Private Invite Link (WhatsApp Group / Telegram Link) *
               </label>
               <div className="relative">
@@ -268,18 +268,18 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
                   value={editLink}
                   onChange={e => setEditLink(e.target.value)}
                   placeholder="https://chat.whatsapp.com/..."
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#F05A00] font-bold pl-9"
+                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[#6D28D9] font-bold pl-9"
                 />
-                <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A8A29E]" />
               </div>
-              <p className="text-[10px] text-zinc-400 mt-1">
+              <p className="text-[10px] text-[#A8A29E] mt-1">
                 Members unlock this link immediately after joining or paying entry Sparks.
               </p>
             </div>
 
             {/* Base / Initial Member Count */}
             <div>
-              <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-bold text-[#78716C] uppercase tracking-wider mb-1">
                 Existing Group Member Count
               </label>
               <input
@@ -289,16 +289,16 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
                 value={editMembersCount}
                 onChange={e => setEditMembersCount(e.target.value.replace(/[^0-9]/g, ''))}
                 placeholder="e.g. 127"
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#F05A00] font-bold"
+                className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[#6D28D9] font-bold"
               />
-              <p className="text-[10px] text-zinc-400 mt-1">
+              <p className="text-[10px] text-[#A8A29E] mt-1">
                 If your WhatsApp group already has 127 members, set 127 so the displayed counter is accurate.
               </p>
             </div>
 
             {/* Entry Fee (Sparks) */}
             <div>
-              <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-bold text-[#78716C] uppercase tracking-wider mb-1">
                 Entry Fee (Sparks)
               </label>
               <input
@@ -308,16 +308,16 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
                 value={editPrice}
                 onChange={e => setEditPrice(e.target.value.replace(/[^0-9]/g, ''))}
                 placeholder="0 for Free"
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#F05A00] font-bold"
+                className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[#6D28D9] font-bold"
               />
-              <p className="text-[10px] text-zinc-400 mt-1">
+              <p className="text-[10px] text-[#A8A29E] mt-1">
                 Set 0 for free community, or any amount to monetize your channel.
               </p>
             </div>
 
             {/* Description */}
             <div>
-              <label className="block text-[11px] font-black text-zinc-700 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-bold text-[#78716C] uppercase tracking-wider mb-1">
                 Description & Rules
               </label>
               <textarea
@@ -325,7 +325,7 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
                 value={editDesc}
                 onChange={e => setEditDesc(e.target.value)}
                 placeholder="Community goals, rules, and value proposition..."
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-[#F05A00] font-medium"
+                className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[#6D28D9] font-medium"
               />
             </div>
 
@@ -333,7 +333,7 @@ export default function HostCircleDashboardModal({ circleId, circleName, isOpen,
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full py-3 rounded-2xl bg-[#F05A00] hover:bg-[#D94F00] text-white font-black text-xs transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full py-3 rounded-[16px] bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-xs transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {saving ? (
                   <>

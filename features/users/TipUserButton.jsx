@@ -46,8 +46,8 @@ export default function TipUserButton({ targetUid, targetName }) {
     <button
       onClick={handleTip}
       disabled={loading}
-      className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-black text-white transition-all active:scale-95 shadow-md whitespace-nowrap cursor-pointer disabled:opacity-50"
-      style={{ background: '#F05A00' }}
+      className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-bold text-white transition-all active:scale-95 shadow-md whitespace-nowrap cursor-pointer disabled:opacity-50"
+      style={{ background: '#6D28D9' }}
     >
       {loading ? (
         <Loader2 className="w-4 h-4 flex-shrink-0 animate-spin" />

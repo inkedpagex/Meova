@@ -1,46 +1,46 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import {
-  Search, Check, MapPin, Zap, Coffee, BookOpen, Activity,
-  Star, AlertTriangle, X, MessageSquare, Calendar
+import { useRouter, useSearchParams } from 'next/navigation';
+import { 
+  Search, 
+  Sparkles, 
+  MapPin, 
+  Calendar, 
+  Tag, 
+  Briefcase, 
+  Check, 
+  Zap, 
+  ChevronRight, 
+  X,
+  Users,
+  Compass
 } from '@/lib/icons';
+import { getUserAvatarUrl, getCartoonAvatar } from '@/utils/avatar';
+import Skeleton from '@/components/Skeleton';
+import BookCoffeeButton from '@/features/users/BookCoffeeButton';
 import useSWR from 'swr';
-import { useUserContext } from '../../components/providers/UserProvider';
-import { getCartoonAvatar, getUserAvatarUrl } from '../../utils/avatar';
-import { useCampusPresence } from '../../lib/useCampusPresence';
-import Skeleton from '../../components/Skeleton';
-import BookCoffeeButton from '../../features/users/BookCoffeeButton';
+import { useUserContext } from '@/components/providers/UserProvider';
+import { useCampusPresence } from '@/lib/useCampusPresence';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-const INTEREST_COLORS = {
-  'Coding': '#F05A00', 'Tech': '#F05A00', 'AI': '#F05A00', 'AI/ML': '#F05A00',
-  'Gaming': '#3b82f6', 'Music': '#ec4899', 'Art': '#f97316',
-  'Startups': '#10b981', 'Design': '#06b6d4', 'Sports': '#f59e0b',
-  'Travel': '#8b5cf6', 'Photography': '#ef4444', 'Dance': '#f43f5e',
-  'default': '#F05A00',
-};
+const FILTERS = ['All', 'Live on Campus', 'CSE', 'BBA', 'BCA', 'ECE', 'MBA', 'Design', 'Coding'];
 
-const FILTERS = ['All', 'Live on Campus', 'Engineering', 'Management', 'Design', 'AI & Tech'];
-
-// ── Algolia Search Hook ───────────────────────────────────────────────────────
-// Gracefully falls back to local data if Algolia is not configured
-const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
-const ALGOLIA_SEARCH_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY;
+const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '';
+const ALGOLIA_SEARCH_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || '';
 
 function useAlgoliaSearch(query) {
   const [peopleResults, setPeopleResults] = useState(null);
-  const [experienceResults, setExperienceResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const debounceRef = useRef(null);
 
-  const search = useCallback(async (q) => {
-    if (!q || q.length < 2 || !ALGOLIA_APP_ID || !ALGOLIA_SEARCH_KEY) {
+  const search = useCallback((q) => {
+    if (!ALGOLIA_APP_ID || !ALGOLIA_SEARCH_KEY) return;
+    if (!q || q.trim().length < 2) {
       setPeopleResults(null);
-      setExperienceResults(null);
+      setIsSearching(false);
       return;
     }
 
@@ -49,42 +49,32 @@ function useAlgoliaSearch(query) {
 
     debounceRef.current = setTimeout(async () => {
       try {
-        // Use Algolia's search API directly (no heavy SDK needed)
-        const [usersRes, expRes] = await Promise.all([
-          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/Meova_users/query`, {
-            method: 'POST',
-            headers: {
-              'X-Algolia-Application-Id': ALGOLIA_APP_ID,
-              'X-Algolia-API-Key': ALGOLIA_SEARCH_KEY,
-              'Content-Type': 'application/json',
+        const url = `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/*/queries`;
+        const body = {
+          requests: [
+            {
+              indexName: 'dev_PEOPLE',
+              params: `query=${encodeURIComponent(q)}&hitsPerPage=20`,
             },
-            body: JSON.stringify({ query: q, hitsPerPage: 12, attributesToRetrieve: ['objectID', 'full_name', 'year', 'branch', 'interests', 'photo_url', 'isLiveOnCampus', 'isIdOn'] }),
-          }),
-          fetch(`https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/Meova_experiences/query`, {
-            method: 'POST',
-            headers: {
-              'X-Algolia-Application-Id': ALGOLIA_APP_ID,
-              'X-Algolia-API-Key': ALGOLIA_SEARCH_KEY,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query: q, hitsPerPage: 8, attributesToRetrieve: ['objectID', 'title', 'category', 'price', 'location', 'days', 'slots', 'hostId'] }),
-          }),
-        ]);
+          ],
+        };
 
-        if (usersRes.ok) {
-          const ud = await usersRes.json();
-          // Hide users who have Signal Live turned off (isIdOn = false)
-          const validUsers = (ud.hits || []).filter(h => h.isIdOn !== false).map(h => ({ ...h, id: h.objectID }));
-          setPeopleResults(validUsers);
-        }
-        if (expRes.ok) {
-          const ed = await expRes.json();
-          setExperienceResults((ed.hits || []).map(h => ({ ...h, id: h.objectID })));
-        }
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-Algolia-Application-Id': ALGOLIA_APP_ID,
+            'X-Algolia-API-Key': ALGOLIA_SEARCH_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) throw new Error('Algolia request failed');
+        const data = await res.json();
+        const hits = data.results?.[0]?.hits || [];
+        setPeopleResults(hits.map((h) => ({ ...h, id: h.objectID })));
       } catch {
-        // Algolia unavailable — fall back to local filtering
         setPeopleResults(null);
-        setExperienceResults(null);
       } finally {
         setIsSearching(false);
       }
@@ -92,28 +82,25 @@ function useAlgoliaSearch(query) {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     search(query);
     return () => clearTimeout(debounceRef.current);
   }, [query, search]);
 
-  return { peopleResults, experienceResults, isSearching };
+  return { peopleResults, isSearching };
 }
 
-// ── Main Component ────────────────────────────────────────────────────────────
 export default function DiscoverClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const interestParam = searchParams ? searchParams.get('interest') || searchParams.get('category') : null;
-  const { user: currentUser, people: contextPeople } = useUserContext();
+  const { user: currentUser, people: contextPeople, isUserOnline } = useUserContext();
   
+  const [activeTab, setActiveTab] = useState('people'); // 'people' | 'events'
   const [activeFilter, setActiveFilter] = useState('All');
   const [search, setSearch] = useState(interestParam || '');
-  const [connectedIds, setConnectedIds] = useState(new Set());
 
   useEffect(() => {
     if (interestParam) {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearch(interestParam);
       setActiveFilter('All');
     }
@@ -121,8 +108,6 @@ export default function DiscoverClient() {
   
   const [people, setPeople] = useState(contextPeople || []);
   const [visiblePeopleLimit, setVisiblePeopleLimit] = useState(12);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const loadMoreRef = useRef(null);
 
   // Reset pagination limit on search or filter change
   useEffect(() => {
@@ -145,10 +130,10 @@ export default function DiscoverClient() {
   const isPeopleLoading = usersData === undefined;
   
   // Algolia search
-  const { peopleResults, experienceResults, isSearching } = useAlgoliaSearch(search);
+  const { peopleResults, isSearching } = useAlgoliaSearch(search);
   const isAlgoliaSearch = search.length >= 2 && !!ALGOLIA_APP_ID;
 
-  // Campus presence hook — marks user as "Live on Campus" when nearby
+  // Campus presence hook
   const { isOnCampus } = useCampusPresence(currentUser);
 
   useEffect(() => {
@@ -162,41 +147,22 @@ export default function DiscoverClient() {
     }
   }, [currentUser, contextPeople, usersData]);
 
-  const handleConnect = async (person) => {
-    setConnectedIds(prev => new Set([...prev, person.id]));
-    try {
-      const res = await fetch('/api/chats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ otherUserId: person.id }),
-      });
-      const data = await res.json();
-      if (data?.chatId) {
-        router.push(`/messages?chatId=${data.chatId}`);
-        return;
-      }
-    } catch {}
-    router.push(`/messages?uid=${person.id}`);
-  };
-
   const getAvatar = (p) => getUserAvatarUrl(p) || getCartoonAvatar(p.full_name || p.id);
 
   const chip = (label) => (
     <button key={label} onClick={() => setActiveFilter(label)}
-      className="flex-shrink-0 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 shadow-xs"
+      className="flex-shrink-0 px-4 py-2 rounded-full text-[12px] font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 shadow-xs"
       style={activeFilter === label
-        ? { background: '#F05A00', color: '#ffffff', border: '1px solid #F05A00' }
-        : { background: '#ffffff', color: '#171717', border: '1px solid rgba(0, 0, 0, 0.12)' }}>
+        ? { background: '#6D28D9', color: '#ffffff', border: '1px solid #6D28D9' }
+        : { background: '#ffffff', color: '#1C1917', border: '1px solid #E7E5E4' }}>
       {label}
     </button>
   );
 
   /* ─── People Section ─── */
   const renderPeopleSection = () => {
-    // Use Algolia results if searching, else local data
     const rawList = isAlgoliaSearch && peopleResults !== null ? peopleResults : people;
     
-    // Sort: isLiveOnCampus first, then rest
     const sorted = [...rawList].sort((a, b) => {
       const aLive = a.isLiveOnCampus ? 1 : 0;
       const bLive = b.isLiveOnCampus ? 1 : 0;
@@ -228,8 +194,8 @@ export default function DiscoverClient() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-[15px] font-black" style={{ color: '#09090b' }}>
-            People nearby
+          <h2 className="text-[16px] font-bold text-[#1C1917]">
+            Students nearby
           </h2>
           <div className="flex items-center gap-2">
             {liveCount > 0 && (
@@ -238,13 +204,16 @@ export default function DiscoverClient() {
                 {liveCount} Live on Campus
               </span>
             )}
-            <span className="text-[11px] font-bold" style={{ color: '#F05A00' }}>{fullList.length} online</span>
+            <span className="text-[12px] font-medium text-[#78716C] flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              {fullList.length} online
+            </span>
           </div>
         </div>
 
         {isSearching && (
-          <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-medium px-1">
-            <div className="w-3 h-3 border-2 border-[#F05A00] border-t-transparent rounded-full animate-spin" />
+          <div className="flex items-center gap-2 text-[12px] text-[#78716C] font-medium px-1">
+            <div className="w-3 h-3 border-2 border-[#6D28D9] border-t-transparent rounded-full animate-spin" />
             Searching...
           </div>
         )}
@@ -252,44 +221,37 @@ export default function DiscoverClient() {
         {isPeopleLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="bg-white rounded-2xl overflow-hidden border border-zinc-100 flex flex-col relative">
+              <div key={i} className="bg-white rounded-[16px] overflow-hidden border border-[#E7E5E4] flex flex-col relative">
                 <Skeleton variant="rectangular" className="w-full h-[180px]" />
                 <div className="p-3">
                   <Skeleton variant="text" className="w-24 h-4 mb-1" />
-                  <Skeleton variant="text" className="w-16 h-3 mb-3" />
+                  <Skeleton variant="text" className="w-16 h-3 mb-2" />
                   <Skeleton variant="rectangular" className="w-full h-9 rounded-2xl" />
                 </div>
               </div>
             ))}
           </div>
         ) : list.length === 0 ? (
-          <div className="rounded-2xl p-10 text-center font-bold text-zinc-400 bg-white border border-zinc-100 flex flex-col items-center gap-2">
+          <div className="rounded-[16px] p-10 text-center font-medium text-[#78716C] bg-white border border-[#E7E5E4] flex flex-col items-center gap-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
             <span>No classmates found matching your query.</span>
             {search && (
-              <button onClick={() => setSearch('')} className="px-4 py-2 mt-2 bg-zinc-100 text-zinc-900 text-[10px] font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer">
+              <button onClick={() => setSearch('')} className="px-4 py-2 mt-2 bg-[#FAFAF8] text-[#1C1917] text-[11px] font-bold uppercase tracking-wider rounded-full hover:bg-[#E7E5E4] transition-colors cursor-pointer border border-[#E7E5E4]">
                 Clear Search
               </button>
             )}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {list.map(person => (
                 <Link
                   key={person.id}
                   href={`/users/${person.id}`}
                   prefetch={true}
-                  className="rounded-[26px] p-4 flex flex-col items-center text-center cursor-pointer transition-all bg-white border border-black/[0.06] hover:border-[#F05A00] hover:shadow-md active:scale-[0.99] relative overflow-hidden group shadow-xs"
+                  className="rounded-[16px] p-5 flex flex-col items-center text-center cursor-pointer transition-all bg-white border border-[#E7E5E4] hover:border-[#6D28D9] hover:shadow-[0_4px_16px_rgba(28,25,23,0.08)] active:scale-[0.99] relative overflow-hidden group shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
                 >
-                  <div className="relative mb-2.5">
-                    <div
-                      className="w-16 h-16 rounded-full overflow-hidden p-0.5 transition-transform group-hover:scale-105"
-                      style={{
-                        background: person.isLiveOnCampus
-                          ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                          : 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)',
-                      }}
-                    >
+                  <div className="relative mb-3">
+                    <div className="w-16 h-16 rounded-full overflow-hidden p-[2px] border-2 border-[#E4D9F7] group-hover:border-[#6D28D9] transition-all">
                       <div className="w-full h-full rounded-full overflow-hidden bg-white">
                         <img
                           src={getAvatar(person)}
@@ -303,42 +265,39 @@ export default function DiscoverClient() {
                       </div>
                     </div>
 
-                    {/* Live on Campus indicator */}
+                    {/* Live on Campus / Live Online indicator */}
                     {person.isLiveOnCampus ? (
-                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-emerald-600 text-white text-[8px] font-black px-2 py-0.5 rounded-full whitespace-nowrap shadow-xs">
+                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shadow-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                         Live Near You
                       </span>
                     ) : (
-                      person.online !== false && (
+                      isUserOnline(person.id) && (
                         <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-xs" />
                       )
                     )}
                   </div>
 
                   <div className="flex-1 w-full flex flex-col items-center">
-                    <span className="text-xs sm:text-sm font-black text-black group-hover:text-[#F05A00] transition-colors leading-tight line-clamp-1">
+                    <span className="text-[15px] sm:text-[16px] font-bold text-[#1C1917] group-hover:text-[#6D28D9] transition-colors leading-tight line-clamp-1">
                       {person.full_name}
                     </span>
                     {person._affinityReason ? (
-                      <span className="text-[10px] font-black text-[#F05A00] bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full mt-1 line-clamp-1">
+                      <span className="text-[11px] font-bold text-[#6D28D9] bg-[#F3EEFC] border border-[#E4D9F7] px-2.5 py-0.5 rounded-full mt-1.5 line-clamp-1">
                         {person._affinityReason}
                       </span>
                     ) : (
-                      <span className="text-[11px] font-bold text-black/65 mt-0.5 line-clamp-1">
+                      <span className="text-[12px] font-medium text-[#78716C] mt-1 line-clamp-1">
                         {person.year ? (person.year.toLowerCase().includes('year') ? person.year : `${person.year} Year`) : ''} {person.branch ? `· ${person.branch}` : ''}
                       </span>
                     )}
 
-                    <div className="flex flex-wrap gap-1 mt-2 justify-center" style={{ minHeight: 22 }}>
-                      {(person.interests || []).slice(0, 2).map((tag, idx) => (
+                    {/* ONE Tag Max per Fresh Blueprint (Section 3 & 8) */}
+                    <div className="flex flex-wrap gap-1.5 mt-2.5 justify-center" style={{ minHeight: 22 }}>
+                      {(person.interests || []).slice(0, 1).map((tag, idx) => (
                         <span
                           key={`${tag}-${idx}`}
-                          className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider"
-                          style={{
-                            background: `${INTEREST_COLORS[tag] || INTEREST_COLORS.default}15`,
-                            color: INTEREST_COLORS[tag] || INTEREST_COLORS.default,
-                          }}
+                          className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]"
                         >
                           {tag}
                         </span>
@@ -346,7 +305,8 @@ export default function DiscoverClient() {
                     </div>
                   </div>
 
-                  <div className="mt-3 w-full flex items-center gap-2 pt-2 border-t border-black/5">
+                  {/* ONE Primary Button: MEET (Full width 44px pill) */}
+                  <div className="mt-4 w-full pt-3 border-t border-[#E7E5E4]">
                     <BookCoffeeButton
                       targetUserId={person.id}
                       targetName={person.full_name}
@@ -361,27 +321,14 @@ export default function DiscoverClient() {
                             e.stopPropagation();
                             onClick();
                           }}
-                          className="flex-1 py-2 px-2 rounded-xl text-[10.5px] font-black uppercase tracking-wider bg-orange-50 hover:bg-orange-100 text-[#F05A00] border border-orange-200 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-2xs"
-                          title={`Book Meetup with ${person.full_name}`}
+                          className="w-full h-11 rounded-full text-[13px] font-bold bg-[#6D28D9] hover:bg-[#5B21B6] text-white flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-xs"
+                          title={`Meet ${person.full_name}`}
                         >
-                          <Calendar size={12} />
+                          <Calendar size={14} />
                           <span>Meet</span>
                         </button>
                       )}
                     />
-
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleConnect(person);
-                      }}
-                      className="w-8 h-8 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#F05A00] border border-orange-200/80 flex items-center justify-center transition-colors active:scale-95 cursor-pointer shadow-2xs flex-shrink-0"
-                      title={`Chat with ${person.full_name}`}
-                    >
-                      <MessageSquare size={13} />
-                    </button>
                   </div>
                 </Link>
               ))}
@@ -393,20 +340,20 @@ export default function DiscoverClient() {
                 <button
                   type="button"
                   onClick={() => setVisiblePeopleLimit(prev => prev + 12)}
-                  className="px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-wider bg-white hover:bg-orange-50 text-[#F05A00] border border-orange-200 shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-white hover:bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7] shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-2"
                 >
                   <span>Load More Classmates</span>
-                  <span className="text-[10px] bg-orange-100 px-2 py-0.5 rounded-full font-black">
+                  <span className="text-[10px] bg-[#F3EEFC] px-2 py-0.5 rounded-full font-bold">
                     +{fullList.length - visiblePeopleLimit}
                   </span>
                 </button>
-                <span className="text-[11px] font-bold text-black/60">
+                <span className="text-[11px] font-bold text-[#78716C]">
                   Showing {list.length} of {fullList.length} classmates
                 </span>
               </div>
             ) : (
               fullList.length > 0 && (
-                <div className="text-center py-6 text-black/60 text-[11px] font-bold">
+                <div className="text-center py-6 text-[#78716C] text-[11px] font-bold">
                   Showing all {fullList.length} campus peers
                 </div>
               )
@@ -415,7 +362,7 @@ export default function DiscoverClient() {
         )}
         {/* Algolia attribution */}
         {isAlgoliaSearch && ALGOLIA_APP_ID && (
-          <p className="text-center text-[9px] text-black/40 font-bold mt-1">Search powered by Algolia</p>
+          <p className="text-center text-[9px] text-[#A8A29E] font-bold mt-1">Search powered by Algolia</p>
         )}
       </div>
     );
@@ -423,17 +370,20 @@ export default function DiscoverClient() {
 
   return (
     <div className="space-y-5 pt-2 px-4 max-w-[640px] mx-auto pb-32">
-      {/* Search */}
+      {/* Search Input */}
       <div className="relative">
-        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-black/40" />
-        <input value={search} onChange={e => setSearch(e.target.value)}
+        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#A8A29E]" />
+        <input 
+          value={search} 
+          onChange={e => setSearch(e.target.value)}
           placeholder="Search students by name, branch, skills..."
-          className="w-full pl-11 pr-10 py-3.5 rounded-2xl text-[13px] font-bold outline-none transition-all bg-white border border-black/10 text-black placeholder:text-black/40 focus:border-[#F05A00] focus:ring-2 focus:ring-[#F05A00]/10 shadow-xs" />
+          className="w-full pl-11 pr-10 py-3.5 rounded-[12px] text-[13px] font-bold outline-none transition-all bg-white border border-[#E7E5E4] text-[#1C1917] placeholder:text-[#A8A29E] focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 shadow-[0_2px_8px_rgba(28,25,23,0.06)]" 
+        />
         {search && (
           <button 
             type="button" 
             onClick={() => setSearch('')}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-black/40 hover:text-black cursor-pointer"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-[#A8A29E] hover:text-[#1C1917] cursor-pointer"
             title="Clear search"
           >
             <X size={15} />
@@ -441,25 +391,55 @@ export default function DiscoverClient() {
         )}
         {isSearching && (
           <div className="absolute right-10 top-1/2 -translate-y-1/2">
-            <div className="w-4 h-4 border-2 border-[#F05A00] border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-[#6D28D9] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </div>
 
       {/* Campus presence banner */}
       {isOnCampus && (
-        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-2xl px-3 py-2.5">
+        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-[14px] px-3.5 py-2.5">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
           <p className="text-[11px] font-bold text-emerald-700">You&apos;re Live on Campus! Others can see you nearby.</p>
         </div>
       )}
 
-      {/* Filters */}
-      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-        {FILTERS.map(f => chip(f))}
+      {/* 2-Way Toggle: People • Events per Blueprint Section 3 */}
+      <div className="flex p-1 bg-white border border-[#E7E5E4] rounded-full shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+        <button
+          type="button"
+          onClick={() => setActiveTab('people')}
+          className={`flex-1 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+            activeTab === 'people'
+              ? 'bg-[#6D28D9] text-white shadow-xs'
+              : 'text-[#78716C] hover:text-[#1C1917]'
+          }`}
+        >
+          People
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            router.push('/events');
+          }}
+          className={`flex-1 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+            activeTab === 'events'
+              ? 'bg-[#6D28D9] text-white shadow-xs'
+              : 'text-[#78716C] hover:text-[#1C1917]'
+          }`}
+        >
+          Events
+        </button>
       </div>
 
-      {/* Student List */}
+      {/* Filter Chips */}
+      {activeTab === 'people' && (
+        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          {FILTERS.map(f => chip(f))}
+        </div>
+      )}
+
+      {/* Content */}
       {renderPeopleSection()}
     </div>
   );

@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { Search, ShieldAlert, GraduationCap, Sparkles, UserCheck, Loader2, Ban, CheckCircle2, Star, Award, Trash2, X, AlertTriangle } from '@/lib/icons';
+import CustomSelect from '../../../components/CustomSelect';
 
 const ROLES = [
   { value: 'user', label: 'Student (Normal)', icon: GraduationCap },
@@ -129,9 +130,9 @@ export default function AdminUsersPage() {
       {/* Title Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 md:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
         <div>
-          <h1 className="text-lg md:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <span>User & Access Control</span>
-            <span className="text-xs font-black bg-orange-50 text-[#F05A00] border border-orange-200 px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-bold bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7] px-2.5 py-0.5 rounded-full">
               {users.length} Total
             </span>
           </h1>
@@ -154,9 +155,9 @@ export default function AdminUsersPage() {
               <button
                 key={tab.id}
                 onClick={() => setRoleFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#F05A00] text-white shadow-xs border border-[#F05A00]'
+                    ? 'bg-[#6D28D9] text-white shadow-xs border border-[#6D28D9]'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
                 }`}
               >
@@ -175,7 +176,7 @@ export default function AdminUsersPage() {
           placeholder="Quick search by name, email, or branch..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#F05A00] transition-all shadow-xs"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#6D28D9] transition-all shadow-xs"
         />
         {search && (
           <button
@@ -190,7 +191,7 @@ export default function AdminUsersPage() {
       {/* Compact High-Density Users List */}
       {loading ? (
         <div className="bg-white border border-slate-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-xs">
-          <Loader2 size={20} className="animate-spin text-[#F05A00]" />
+          <Loader2 size={20} className="animate-spin text-[#6D28D9]" />
           <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Loading campus users...</p>
         </div>
       ) : filtered.length === 0 ? (
@@ -209,7 +210,7 @@ export default function AdminUsersPage() {
             let roleLabel = 'Student';
 
             if (isUserAdmin) {
-              roleBadgeBg = 'bg-orange-50 text-[#F05A00] border-orange-200 font-bold';
+              roleBadgeBg = 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7] font-bold';
               roleLabel = 'Admin';
             } else if (isHost) {
               roleBadgeBg = 'bg-amber-50 text-amber-700 border-amber-200 font-bold';
@@ -231,9 +232,9 @@ export default function AdminUsersPage() {
               >
                 {/* Left: Compact Details */}
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black border ${
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold border ${
                     isBlocked ? 'bg-rose-100 text-rose-600 border-rose-200' :
-                    isUserAdmin ? 'bg-orange-50 text-[#F05A00] border-orange-200' :
+                    isUserAdmin ? 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' :
                     isHost ? 'bg-amber-50 text-amber-600 border-amber-200' :
                     isLead ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
                     'bg-slate-100 text-slate-600 border-slate-200'
@@ -243,7 +244,7 @@ export default function AdminUsersPage() {
 
                   <div className="min-w-0 space-y-0.5">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-xs font-black text-slate-900 truncate">
+                      <h3 className="text-xs font-bold text-slate-900 truncate">
                         {u.full_name || 'Anonymous Student'}
                       </h3>
 
@@ -276,27 +277,18 @@ export default function AdminUsersPage() {
                 <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-center pt-1 sm:pt-0">
                   
                   {/* Role Selector */}
-                  <div className="relative">
-                    <select
+                  <div className="w-[160px]">
+                    <CustomSelect
                       value={u.role || 'user'}
                       disabled={updatingId === u.id}
-                      onChange={e => handleRoleChange(u.id, e.target.value)}
-                      className="appearance-none bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-[11px] px-2.5 py-1.5 pr-6 rounded-lg outline-none focus:border-[#F05A00] cursor-pointer transition-all disabled:opacity-50"
-                    >
-                      {ROLES.map(r => (
-                        <option key={r.value} value={r.value} className="bg-white text-slate-900 font-medium">
-                          {r.label}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none font-bold">
-                      ▼
-                    </span>
+                      onChange={val => handleRoleChange(u.id, val)}
+                      options={ROLES.map(r => ({ value: r.value, label: r.label }))}
+                    />
                   </div>
 
                   {/* Block / Unblock & Delete Actions */}
                   {isUserAdmin || (u.email || '').toLowerCase() === 'chirag2006chak@gmail.com' ? (
-                    <span className="text-[10.5px] font-extrabold text-[#D94F00] bg-[#fcf6fa] px-2.5 py-1.5 rounded-lg border border-[#eac5e0] flex items-center gap-1 select-none">
+                    <span className="text-[10.5px] font-extrabold text-[#5B21B6] bg-[#fcf6fa] px-2.5 py-1.5 rounded-lg border border-[#eac5e0] flex items-center gap-1 select-none">
                       <ShieldAlert size={12} /> Protected Admin
                     </span>
                   ) : (
@@ -356,11 +348,11 @@ export default function AdminUsersPage() {
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-black border border-rose-100">
+                <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold border border-rose-100">
                   <AlertTriangle size={20} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-slate-950">Delete User Account?</h3>
+                  <h3 className="text-sm font-bold text-slate-950">Delete User Account?</h3>
                   <p className="text-[11px] font-semibold text-slate-400">Irreversible Action</p>
                 </div>
               </div>
@@ -376,7 +368,7 @@ export default function AdminUsersPage() {
             <div className="p-3.5 rounded-2xl bg-rose-50/60 border border-rose-200 text-xs space-y-1 text-rose-900 font-semibold leading-relaxed">
               <p className="font-bold">Are you sure you want to permanently delete this student?</p>
               <p className="text-[11px] text-rose-700">
-                • <strong className="font-black">{deletingUser.full_name || 'Student'}</strong> ({deletingUser.email})
+                • <strong className="font-bold">{deletingUser.full_name || 'Student'}</strong> ({deletingUser.email})
               </p>
               <p className="text-[10.5px] text-rose-600 pt-1">
                 All their posts, moments, applications, gigs, reviews, chat history, and wallet records will be permanently purged from database & auth.
@@ -388,7 +380,7 @@ export default function AdminUsersPage() {
                 type="button"
                 disabled={isDeleting}
                 onClick={() => setDeletingUser(null)}
-                className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-wider hover:bg-slate-50 transition-all cursor-pointer"
+                className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider hover:bg-slate-50 transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -396,7 +388,7 @@ export default function AdminUsersPage() {
                 type="button"
                 disabled={isDeleting}
                 onClick={confirmDeleteUser}
-                className="flex-1 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-rose-600/25 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="flex-1 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-rose-600/25 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isDeleting ? (
                   <><Loader2 size={13} className="animate-spin" /> Purging...</>

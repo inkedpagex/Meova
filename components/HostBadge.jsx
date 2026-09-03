@@ -13,12 +13,12 @@ export default function HostBadge({ role, size = 'sm', className = '' }) {
     return (
       <span
         title={isAdmin ? 'Administrator' : isLead ? 'Campus Lead' : 'Verified Campus Host'}
-        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8.5px] font-black uppercase tracking-wider ${
+        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8.5px] font-bold uppercase tracking-wider ${
           isAdmin
             ? 'bg-purple-50 text-purple-700 border border-purple-200'
             : isLead
             ? 'bg-blue-50 text-blue-700 border border-blue-200'
-            : 'bg-orange-50 text-[#F05A00] border border-orange-200'
+            : 'bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]'
         } ${className}`}
       >
         {isAdmin ? <Crown size={9} /> : isLead ? <Sparkles size={9} /> : <ShieldCheck size={9} />}
@@ -30,12 +30,12 @@ export default function HostBadge({ role, size = 'sm', className = '' }) {
   return (
     <span
       title={isAdmin ? 'Administrator' : isLead ? 'Campus Lead' : 'Verified Campus Host'}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-2xs ${
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-2xs ${
         isAdmin
           ? 'bg-purple-50 text-purple-700 border border-purple-200'
           : isLead
           ? 'bg-blue-50 text-blue-700 border border-blue-200'
-          : 'bg-orange-50 text-[#F05A00] border border-orange-200'
+          : 'bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]'
       } ${className}`}
     >
       {isAdmin ? (
@@ -43,7 +43,7 @@ export default function HostBadge({ role, size = 'sm', className = '' }) {
       ) : isLead ? (
         <Sparkles size={11} className="text-blue-600" />
       ) : (
-        <ShieldCheck size={11} className="text-[#F05A00]" />
+        <ShieldCheck size={11} className="text-[#6D28D9]" />
       )}
       <span>{isAdmin ? 'Admin' : isLead ? 'Campus Lead' : 'Verified Host'}</span>
     </span>

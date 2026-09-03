@@ -27,13 +27,13 @@ export default function PWAInstallModal({ isOpen, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden anim-scale-in border border-orange-100"
+        className="w-full max-w-md bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden anim-scale-in border border-[#E4D9F7]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Bar */}
         <div
           className="px-6 pt-6 pb-5 relative text-white"
-          style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
+          style={{ background: '#6D28D9' }}
         >
           <button
             type="button"
@@ -44,25 +44,25 @@ export default function PWAInstallModal({ isOpen, onClose }) {
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center flex-shrink-0 shadow-md">
+            <div className="w-12 h-12 rounded-[16px] bg-white/20 backdrop-blur-xs flex items-center justify-center flex-shrink-0 shadow-md">
               <Download size={24} className="text-white" />
             </div>
             <div>
-              <h3 className="font-black text-lg text-white leading-tight">Install Meova</h3>
-              <p className="text-orange-100 text-xs font-medium mt-0.5">Faster access &amp; instant notifications</p>
+              <h3 className="font-bold text-lg text-white leading-tight">Install Meova</h3>
+              <p className="text-[#F3EEFC] text-xs font-medium mt-0.5">Faster access &amp; instant notifications</p>
             </div>
           </div>
         </div>
 
         {/* Device Switcher Tabs */}
-        <div className="p-4 bg-zinc-50 border-b border-zinc-100 flex gap-2">
+        <div className="p-4 bg-[#FAFAF8] border-b border-[#E7E5E4] flex gap-2">
           <button
             type="button"
             onClick={() => setDeviceTab('android')}
-            className={`flex-1 py-2 px-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-2 rounded-[12px] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               deviceTab === 'android'
-                ? 'bg-white text-[#F05A00] shadow-xs border border-orange-200'
-                : 'text-zinc-500 hover:text-zinc-800'
+                ? 'bg-white text-[#6D28D9] shadow-xs border border-[#E4D9F7]'
+                : 'text-[#78716C] hover:text-[#1C1917]'
             }`}
           >
             <Smartphone size={14} />
@@ -72,10 +72,10 @@ export default function PWAInstallModal({ isOpen, onClose }) {
           <button
             type="button"
             onClick={() => setDeviceTab('ios')}
-            className={`flex-1 py-2 px-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-2 rounded-[12px] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               deviceTab === 'ios'
-                ? 'bg-white text-[#F05A00] shadow-xs border border-orange-200'
-                : 'text-zinc-500 hover:text-zinc-800'
+                ? 'bg-white text-[#6D28D9] shadow-xs border border-[#E4D9F7]'
+                : 'text-[#78716C] hover:text-[#1C1917]'
             }`}
           >
             <Apple size={14} />
@@ -85,10 +85,10 @@ export default function PWAInstallModal({ isOpen, onClose }) {
           <button
             type="button"
             onClick={() => setDeviceTab('desktop')}
-            className={`flex-1 py-2 px-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-2 rounded-[12px] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               deviceTab === 'desktop'
-                ? 'bg-white text-[#F05A00] shadow-xs border border-orange-200'
-                : 'text-zinc-500 hover:text-zinc-800'
+                ? 'bg-white text-[#6D28D9] shadow-xs border border-[#E4D9F7]'
+                : 'text-[#78716C] hover:text-[#1C1917]'
             }`}
           >
             <Laptop size={14} />
@@ -100,41 +100,41 @@ export default function PWAInstallModal({ isOpen, onClose }) {
         <div className="p-6 space-y-4">
           {deviceTab === 'android' && (
             <div className="space-y-3">
-              <p className="text-xs font-bold text-zinc-700">Follow these quick steps in Chrome:</p>
+              <p className="text-xs font-bold text-[#78716C]">Follow these quick steps in Chrome:</p>
 
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-orange-50/60 border border-orange-100">
-                <span className="w-6 h-6 rounded-full bg-[#F05A00] text-white text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
+                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   1
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-zinc-900 flex items-center gap-1">
-                    Tap the <strong>3 dots menu</strong> <MoreVertical size={14} className="inline text-[#F05A00]" />
+                  <p className="text-xs font-bold text-[#1C1917] flex items-center gap-1">
+                    Tap the <strong>3 dots menu</strong> <MoreVertical size={14} className="inline text-[#6D28D9]" />
                   </p>
-                  <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Located at the top right of your browser</p>
+                  <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Located at the top right of your browser</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-orange-50/60 border border-orange-100">
-                <span className="w-6 h-6 rounded-full bg-[#F05A00] text-white text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
+                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   2
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-zinc-900">
+                  <p className="text-xs font-bold text-[#1C1917]">
                     Tap <strong>&ldquo;Install app&rdquo;</strong> or <strong>&ldquo;Add to Home screen&rdquo;</strong>
                   </p>
-                  <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Choose the install option in the menu list</p>
+                  <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Choose the install option in the menu list</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-orange-50/60 border border-orange-100">
-                <span className="w-6 h-6 rounded-full bg-[#F05A00] text-white text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
+                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   3
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-zinc-900">
+                  <p className="text-xs font-bold text-[#1C1917]">
                     Tap <strong>&ldquo;Install&rdquo;</strong>
                   </p>
-                  <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Meova icon will appear on your home screen</p>
+                  <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Meova icon will appear on your home screen</p>
                 </div>
               </div>
             </div>
@@ -142,41 +142,41 @@ export default function PWAInstallModal({ isOpen, onClose }) {
 
           {deviceTab === 'ios' && (
             <div className="space-y-3">
-              <p className="text-xs font-bold text-zinc-700">Follow these quick steps in Safari:</p>
+              <p className="text-xs font-bold text-[#78716C]">Follow these quick steps in Safari:</p>
 
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-orange-50/60 border border-orange-100">
-                <span className="w-6 h-6 rounded-full bg-[#F05A00] text-white text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
+                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   1
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-zinc-900 flex items-center gap-1">
-                    Tap the <strong>Share</strong> button <Share size={14} className="inline text-[#F05A00]" />
+                  <p className="text-xs font-bold text-[#1C1917] flex items-center gap-1">
+                    Tap the <strong>Share</strong> button <Share size={14} className="inline text-[#6D28D9]" />
                   </p>
-                  <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Located in the bottom toolbar in Safari</p>
+                  <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Located in the bottom toolbar in Safari</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-orange-50/60 border border-orange-100">
-                <span className="w-6 h-6 rounded-full bg-[#F05A00] text-white text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
+                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   2
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-zinc-900">
+                  <p className="text-xs font-bold text-[#1C1917]">
                     Scroll down and tap <strong>&ldquo;Add to Home Screen&rdquo;</strong>
                   </p>
-                  <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Look for the plus (+) square icon</p>
+                  <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Look for the plus (+) square icon</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-orange-50/60 border border-orange-100">
-                <span className="w-6 h-6 rounded-full bg-[#F05A00] text-white text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
+                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   3
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-zinc-900">
+                  <p className="text-xs font-bold text-[#1C1917]">
                     Tap <strong>&ldquo;Add&rdquo;</strong> in the top right
                   </p>
-                  <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Meova will launch full-screen from your Home Screen</p>
+                  <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Meova will launch full-screen from your Home Screen</p>
                 </div>
               </div>
             </div>
@@ -184,29 +184,29 @@ export default function PWAInstallModal({ isOpen, onClose }) {
 
           {deviceTab === 'desktop' && (
             <div className="space-y-3">
-              <p className="text-xs font-bold text-zinc-700">Follow these steps in Chrome / Edge:</p>
+              <p className="text-xs font-bold text-[#78716C]">Follow these steps in Chrome / Edge:</p>
 
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-orange-50/60 border border-orange-100">
-                <span className="w-6 h-6 rounded-full bg-[#F05A00] text-white text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
+                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   1
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-zinc-900 flex items-center gap-1">
-                    Click the <strong>Install icon</strong> <Download size={14} className="inline text-[#F05A00]" />
+                  <p className="text-xs font-bold text-[#1C1917] flex items-center gap-1">
+                    Click the <strong>Install icon</strong> <Download size={14} className="inline text-[#6D28D9]" />
                   </p>
-                  <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Found at the right end of the address bar</p>
+                  <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Found at the right end of the address bar</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-2xl bg-orange-50/60 border border-orange-100">
-                <span className="w-6 h-6 rounded-full bg-[#F05A00] text-white text-xs font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
+                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   2
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-zinc-900">
+                  <p className="text-xs font-bold text-[#1C1917]">
                     Click <strong>&ldquo;Install&rdquo;</strong> in the popup
                   </p>
-                  <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Adds Meova to your Desktop and Taskbar</p>
+                  <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Adds Meova to your Desktop and Taskbar</p>
                 </div>
               </div>
             </div>
@@ -214,12 +214,12 @@ export default function PWAInstallModal({ isOpen, onClose }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 bg-zinc-50 border-t border-zinc-100">
+        <div className="p-4 bg-[#FAFAF8] border-t border-[#E7E5E4]">
           <button
             type="button"
             onClick={onClose}
-            className="w-full py-3 rounded-2xl font-black text-xs uppercase tracking-wider text-white transition-all active:scale-95 shadow-md cursor-pointer flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg, #F05A00 0%, #D94F00 100%)' }}
+            className="w-full py-3 rounded-[16px] font-bold text-xs uppercase tracking-wider text-white transition-all active:scale-95 shadow-md cursor-pointer flex items-center justify-center gap-2"
+            style={{ background: '#6D28D9' }}
           >
             <Check size={14} />
             <span>Got it</span>

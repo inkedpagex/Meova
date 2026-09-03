@@ -62,15 +62,15 @@ export default function MainContentWrapper({ children }) {
     );
   }
 
-  const leftPlClass = isCollapsed ? 'md:pl-[72px]' : 'md:pl-[230px]';
+  const leftPlClass = isCollapsed ? 'md:pl-[72px]' : 'md:pl-[240px]';
 
   return (
     <div className={`flex-1 ${leftPlClass} ${isMessagesPath ? '' : 'xl:pr-[320px]'} min-w-0 transition-all duration-300`}>
       <main
         className={`w-full mx-auto ${
           isMessagesPath 
-            ? 'p-0 md:p-6 md:!pt-8 md:!pb-6 max-w-full' 
-            : 'max-w-4xl lg:max-w-5xl px-2 sm:px-4 md:px-8 pt-[62px] md:!pt-4 pb-16 md:!pb-6 pb-safe'
+            ? 'p-0 md:p-6 md:!pt-6 md:!pb-12 max-w-full' 
+            : 'max-w-[720px] px-4 pt-6 pb-12 pb-safe'
         }`}
       >
         {children}

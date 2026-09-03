@@ -283,21 +283,18 @@ export default function Sidebar({ user: propUser }) {
   const NAV = [
     { href: '/',              label: 'Home',          iconLine: 'ri-home-5-line',          iconFill: 'ri-home-5-fill' },
     { href: '/discover',      label: 'Discover',      iconLine: 'ri-compass-3-line',        iconFill: 'ri-compass-3-fill' },
-    { href: '/messages',      label: 'Messages',      iconLine: 'ri-chat-3-line',           iconFill: 'ri-chat-3-fill' },
-    { href: '/bookings',      label: 'My Bookings',   iconLine: 'ri-calendar-schedule-line', iconFill: 'ri-calendar-schedule-fill', badge: pendingBookingsCount },
-    { href: '/notifications', label: 'Notifications', iconLine: 'ri-notification-3-line',   iconFill: 'ri-notification-3-fill' },
-    { href: '/circles',       label: 'Communities',   iconLine: 'ri-group-3-line',          iconFill: 'ri-group-3-fill' },
-    ...(user ? [{ href: '/wallet', label: 'Wallet', iconLine: 'ri-wallet-3-line', iconFill: 'ri-wallet-3-fill' }] : []),
+    { href: '/messages',      label: 'Messages',      iconLine: 'ri-chat-3-line',           iconFill: 'ri-chat-3-fill', badge: unreadMsgCount },
+    { href: '/notifications', label: 'Notifications', iconLine: 'ri-notification-3-line',   iconFill: 'ri-notification-3-fill', badge: unreadCount },
     { href: '/profile',       label: 'Profile',       iconLine: 'ri-user-3-line',           iconFill: 'ri-user-3-fill' },
     ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin', iconLine: 'ri-shield-star-line', iconFill: 'ri-shield-star-fill' }] : []),
   ];
 
   const MOBILE_NAV = [
-    { href: '/',         label: 'Home',     iconLine: 'ri-home-5-line',    iconFill: 'ri-home-5-fill' },
-    { href: '/discover', label: 'Discover', iconLine: 'ri-compass-3-line',  iconFill: 'ri-compass-3-fill' },
-    { href: '/create',   label: 'Plus',     iconLine: 'ri-add-line',        iconFill: 'ri-add-fill', isCenter: true },
-    { href: '/bookings', label: 'Bookings', iconLine: 'ri-calendar-schedule-line', iconFill: 'ri-calendar-schedule-fill', badge: pendingBookingsCount },
-    { href: '/profile',  label: 'Profile',  iconLine: 'ri-user-3-line',    iconFill: 'ri-user-3-fill' },
+    { href: '/',              label: 'Home',          iconLine: 'ri-home-5-line',          iconFill: 'ri-home-5-fill' },
+    { href: '/discover',      label: 'Discover',      iconLine: 'ri-compass-3-line',        iconFill: 'ri-compass-3-fill' },
+    { href: '/messages',      label: 'Messages',      iconLine: 'ri-chat-3-line',           iconFill: 'ri-chat-3-fill', badge: unreadMsgCount },
+    { href: '/notifications', label: 'Notifications', iconLine: 'ri-notification-3-line',   iconFill: 'ri-notification-3-fill', badge: unreadCount },
+    { href: '/profile',       label: 'Profile',       iconLine: 'ri-user-3-line',           iconFill: 'ri-user-3-fill' },
   ];
 
 
@@ -307,65 +304,54 @@ export default function Sidebar({ user: propUser }) {
 
   return (
     <>
-      {/* ── Mobile top header ────────────────── */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[58px] flex items-center justify-between px-4 bg-white/95 backdrop-blur-xl border-b border-neutral-100 shadow-[0_1px_8px_rgba(0,0,0,0.06)]">
+      {/* ── Mobile top header (Blueprint Section 2) ────────────────── */}
+      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[56px] flex items-center justify-between px-4 bg-white border-b border-[#E7E5E4] shadow-xs">
         <Link href="/" className="flex items-center gap-2 group">
-          <img src="/logo.png" alt="Meova" className="h-9 w-auto object-contain" />
+          <img src="/logo.png" alt="Meova" className="h-8 w-auto object-contain" />
         </Link>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           {user ? (
             <>
-              {!isAdminRoute && (
-                <Link 
-                  href="/wallet" 
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-orange-50 text-[#F05A00] border border-orange-100 hover:bg-orange-100 transition-all duration-200 active:scale-95 shadow-sm"
-                >
-                  <i className="ri-flashlight-fill" style={{ fontSize: 13, color: '#F05A00' }} />
-                  <span className="tabular-nums font-black">{sparks.toLocaleString()}</span>
-                </Link>
-              )}
-
-              {/* Notifications */}
-              <Link 
-                href="/notifications" 
-                className={`relative p-2 rounded-full transition-all ${
-                  pathname === '/notifications' 
-                    ? 'text-[#F05A00] bg-orange-50' 
-                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
-                }`}
-                title="Notifications"
+              {/* Top-Right Create Post / Plus CTA */}
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="w-9 h-9 rounded-full bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7] flex items-center justify-center hover:bg-[#E4D9F7] active:scale-95 transition-all cursor-pointer shadow-2xs"
+                title="Create Post / Story"
               >
-                <i className={`${ unreadCount > 0 ? 'ri-notification-3-fill text-[#F05A00]' : pathname === '/notifications' ? 'ri-notification-3-fill' : 'ri-notification-3-line' }`} style={{ fontSize: 20 }} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[#F05A00] text-white text-[8px] font-black border border-white px-0.5">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
+                <i className="ri-add-line" style={{ fontSize: 18, fontWeight: 700 }} />
+              </button>
+
+              {/* Wallet Pill */}
+              <Link 
+                href="/wallet" 
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-[#FAFAF8] text-[#1C1917] border border-[#E7E5E4] hover:bg-[#F3EEFC] transition-all active:scale-95 shadow-2xs"
+              >
+                <i className="ri-flashlight-fill" style={{ fontSize: 13, color: '#6D28D9' }} />
+                <span className="tabular-nums font-bold">{sparks.toLocaleString()}</span>
               </Link>
 
-              {/* Messages */}
-              <Link 
-                href="/messages" 
-                className={`relative p-2 rounded-full transition-all ${
-                  pathname === '/messages' 
-                    ? 'text-[#F05A00] bg-orange-50' 
-                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
-                }`}
-                title="Messages"
+              {/* Own Avatar */}
+              <Link
+                href="/profile"
+                className="w-9 h-9 rounded-full overflow-hidden p-[1px] border border-[#E4D9F7] flex-shrink-0 relative active:scale-95 transition-transform bg-white"
               >
-                <i className={`${ unreadMsgCount > 0 ? 'ri-chat-3-fill text-[#F05A00]' : pathname === '/messages' ? 'ri-chat-3-fill' : 'ri-chat-3-line' }`} style={{ fontSize: 20 }} />
-                {unreadMsgCount > 0 && (
-                  <span className="absolute top-1 right-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-[#F05A00] text-white text-[8px] font-black border border-white px-0.5">
-                    {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
-                  </span>
-                )}
+                <img
+                  src={avatarSrc}
+                  alt={user.full_name || 'Profile'}
+                  className="w-full h-full rounded-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = getCartoonAvatar(user.full_name || user.id || 'user');
+                  }}
+                />
               </Link>
             </>
           ) : (
             <Link 
               href="/login"
-              className="px-4 py-1.5 rounded-full text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] active:scale-95 transition-all shadow-sm"
+              className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#6D28D9] hover:bg-[#5B21B6] active:scale-95 transition-all shadow-xs"
             >
               Log in
             </Link>
@@ -375,9 +361,9 @@ export default function Sidebar({ user: propUser }) {
 
       {/* ── Desktop sidebar ──────────────────── */}
       <aside 
-        className="hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 transition-all duration-300 select-none bg-white border-r border-neutral-100"
+        className="hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 transition-all duration-300 select-none bg-white border-r border-[#E7E5E4]"
         style={{ 
-          width: isCollapsed ? 72 : 230, 
+          width: isCollapsed ? 72 : 240, 
           padding: isCollapsed ? '24px 10px' : '24px 16px' 
         }}
       >
@@ -390,7 +376,7 @@ export default function Sidebar({ user: propUser }) {
               <button 
                 onClick={toggleCollapse} 
                 title="Expand Sidebar"
-                className="p-1.5 rounded-lg text-neutral-400 hover:text-[#F05A00] hover:bg-orange-50 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[#A8A29E] hover:text-[#6D28D9] hover:bg-purple-50 transition-colors cursor-pointer"
               >
                 <i className="ri-layout-left-2-line" style={{ fontSize: 18 }} />
               </button>
@@ -403,7 +389,7 @@ export default function Sidebar({ user: propUser }) {
               <button 
                 onClick={toggleCollapse} 
                 title="Collapse Sidebar"
-                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer flex-shrink-0"
+                className="p-1.5 rounded-lg text-[#A8A29E] hover:text-[#78716C] hover:bg-[#FAFAF8] transition-colors cursor-pointer flex-shrink-0"
               >
                 <i className="ri-layout-left-line" style={{ fontSize: 18 }} />
               </button>
@@ -439,15 +425,15 @@ export default function Sidebar({ user: propUser }) {
                   onMouseDown={(e) => { try { e.currentTarget.blur(); } catch {} }}
                   onClick={handleLinkClick}
                   title={label}
-                  className={`relative flex items-center justify-center w-12 h-11 mx-auto rounded-xl outline-none focus:outline-none active:outline-none transition-all active:scale-90 ${
+                  className={`relative flex items-center justify-center w-12 h-11 mx-auto rounded-[10px] outline-none focus:outline-none active:outline-none transition-all active:scale-90 ${
                     active 
-                      ? 'bg-orange-50 text-[#F05A00] border border-orange-200/60 shadow-xs' 
-                      : 'text-black/70 hover:text-black hover:bg-orange-50/50'
+                      ? 'bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]/60 shadow-xs' 
+                      : 'text-black/70 hover:text-black hover:bg-[#F3EEFC]/50'
                   }`}
                 >
                   <i className={active ? iconFill : iconLine} style={{ fontSize: 20 }} />
                   {(hasUnread || hasUnreadMsgs || hasBadge) && (
-                    <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-[#F05A00] ring-2 ring-white" />
+                    <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-[#6D28D9] ring-2 ring-white" />
                   )}
                 </Link>
               );
@@ -460,10 +446,10 @@ export default function Sidebar({ user: propUser }) {
                 prefetch={true}
                 onMouseDown={(e) => { try { e.currentTarget.blur(); } catch {} }}
                 onClick={handleLinkClick}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-bold outline-none focus:outline-none active:outline-none transition-all active:scale-95 ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-[10px] text-[13px] font-bold outline-none focus:outline-none active:outline-none transition-all active:scale-95 ${
                   active 
-                    ? 'bg-orange-50 text-[#F05A00] border border-orange-200/60 font-black shadow-xs' 
-                    : 'text-black/75 hover:text-black hover:bg-orange-50/50'
+                    ? 'bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]/60 font-semibold' 
+                    : 'text-black/75 hover:text-black hover:bg-[#F3EEFC]/50'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -471,22 +457,22 @@ export default function Sidebar({ user: propUser }) {
                   <span className="truncate">{label}</span>
                 </div>
                 {hasUnread && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#F05A00] text-white text-[10px] font-black flex items-center justify-center px-1">
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#6D28D9] text-white text-[10px] font-semibold flex items-center justify-center px-1">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
                 {hasUnreadMsgs && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#F05A00] text-white text-[10px] font-black flex items-center justify-center px-1">
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#6D28D9] text-white text-[10px] font-semibold flex items-center justify-center px-1">
                     {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
                   </span>
                 )}
                 {hasBadge && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#F05A00] text-white text-[10px] font-black flex items-center justify-center px-1">
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#6D28D9] text-white text-[10px] font-semibold flex items-center justify-center px-1">
                     {badge > 99 ? '99+' : badge}
                   </span>
                 )}
                 {label === 'Wallet' && sparks > 0 && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-[#F05A00] border border-orange-100">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]">
                     {sparks.toLocaleString()}
                   </span>
                 )}
@@ -501,11 +487,11 @@ export default function Sidebar({ user: propUser }) {
             <Link 
               href="/profile" 
               title={user.full_name || 'Profile'}
-              className={`flex items-center gap-2.5 p-2 rounded-xl transition-all hover:bg-orange-50/50 group ${
+              className={`flex items-center gap-2.5 p-2 rounded-[10px] transition-all hover:bg-[#F3EEFC]/50 group ${
                 isCollapsed ? 'justify-center' : ''
               }`}
             >
-              <div className="w-9 h-9 rounded-full p-[1.5px] bg-[#F05A00] flex-shrink-0">
+              <div className="w-9 h-9 rounded-full p-[1.5px] bg-[#6D28D9] flex-shrink-0">
                 <div className="w-full h-full rounded-full overflow-hidden relative border border-white">
                   <img 
                     src={avatarSrc} 
@@ -520,10 +506,10 @@ export default function Sidebar({ user: propUser }) {
               </div>
               {!isCollapsed && (
                 <div className="min-w-0">
-                  <p className="text-xs font-black truncate text-neutral-900 group-hover:text-[#F05A00] transition-colors">
+                  <p className="text-xs font-semibold truncate text-[#1C1917] group-hover:text-[#6D28D9] transition-colors">
                     {user.full_name || (user.email || 'user').split('@')[0]}
                   </p>
-                  <p className="text-[10px] truncate text-neutral-400 font-semibold">
+                  <p className="text-[10px] truncate text-[#A8A29E] font-semibold">
                     {isAdminRoute ? 'Super Admin' : `${user?.year ? (user.year.includes('Year') ? user.year : `${user.year} Year`) : '1st Year'} · ${user.branch || 'General'}`}
                   </p>
                 </div>
@@ -533,7 +519,7 @@ export default function Sidebar({ user: propUser }) {
             <Link 
               href="/login" 
               title="Log in"
-              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black text-white bg-[#F05A00] hover:bg-[#D94F00] transition-all ${
+              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-[10px] text-xs font-semibold text-white bg-[#6D28D9] hover:bg-[#5B21B6] transition-all ${
                 isCollapsed ? 'px-0' : 'px-4'
               }`}
             >
@@ -543,13 +529,13 @@ export default function Sidebar({ user: propUser }) {
         </div>
       </aside>
 
-      {/* ── Mobile bottom tab bar ───────────────── */}
+      {/* ── Mobile bottom tab bar (Screen 1.23-1.28) ───────────────── */}
       {!(AUTH_PATHS.includes(pathname) || pathname?.startsWith('/admin') || isKeyboardOpen) && (
         <nav 
           suppressHydrationWarning
-          className="md:hidden hide-on-keyboard fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-white/95 backdrop-blur-xl border-t border-black/10 shadow-[0_-4px_25px_rgba(0,0,0,0.03)]"
+          className="md:hidden hide-on-keyboard fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-white border-t border-[#E7E5E4] shadow-xs"
           style={{
-            height: 'calc(62px + env(safe-area-inset-bottom))',
+            height: 'calc(64px + env(safe-area-inset-bottom))',
             paddingBottom: 'env(safe-area-inset-bottom)',
           }}
         >
@@ -566,10 +552,10 @@ export default function Sidebar({ user: propUser }) {
                     try { navigator.vibrate(10); } catch {}
                   }
                 }}
-                className="flex-1 flex flex-col items-center justify-center h-full text-black/65 hover:text-[#F05A00] transition-colors active:scale-90"
+                className="flex-1 flex flex-col items-center justify-center h-full text-[#A8A29E] hover:text-[#6D28D9] transition-colors active:scale-90"
               >
                 <i className="ri-login-circle-line" style={{ fontSize: 20 }} />
-                <span className="text-[10.5px] font-black mt-0.5">Login</span>
+                <span className="text-[11px] font-medium mt-0.5">Login</span>
               </Link>
             );
           }
@@ -591,7 +577,7 @@ export default function Sidebar({ user: propUser }) {
               >
                 <div 
                   suppressHydrationWarning
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-white bg-[#F05A00] hover:bg-[#D94F00] shadow-[0_6px_20px_rgba(240,90,0,0.4)] active:scale-90 transition-all ring-4 ring-white"
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-white bg-[#6D28D9] hover:bg-[#5B21B6] shadow-[0_4px_12px_rgba(109,40,217,0.35)] active:scale-90 transition-all ring-4 ring-white"
                 >
                   <i className="ri-add-line" style={{ fontSize: 24, fontWeight: 900 }} />
                 </div>
@@ -613,13 +599,13 @@ export default function Sidebar({ user: propUser }) {
                 }
               }}
               className={`flex-1 flex flex-col items-center justify-center h-full relative select-none outline-none focus:outline-none active:outline-none transition-all active:scale-90 ${
-                active ? 'text-[#F05A00]' : 'text-black/65 hover:text-black'
+                active ? 'text-[#6D28D9]' : 'text-[#A8A29E] hover:text-[#1C1917]'
               }`}
             >
-              <div className={`p-1 rounded-xl transition-all ${active ? 'bg-orange-50 text-[#F05A00] scale-105' : ''}`}>
+              <div className={`p-1 rounded-[10px] transition-all ${active ? 'bg-[#F3EEFC] text-[#6D28D9] scale-105' : ''}`}>
                 <i className={active ? iconFill : iconLine} style={{ fontSize: 20 }} />
               </div>
-              <span className={`text-[10px] font-black tracking-tight mt-0.5 ${active ? 'text-[#F05A00]' : 'text-black/65'}`}>
+              <span className={`text-[11px] tracking-tight mt-0.5 ${active ? 'text-[#6D28D9] font-semibold' : 'text-[#A8A29E] font-normal'}`}>
                 {label}
               </span>
             </Link>
