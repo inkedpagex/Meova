@@ -147,6 +147,7 @@ create table if not exists public.audit_logs (
 create index if not exists idx_phone_otps_user_id on public.phone_otps(user_id);
 create index if not exists idx_post_likes_post_id on public.post_likes(post_id);
 create index if not exists idx_post_likes_user_id on public.post_likes(user_id);
+create index if not exists idx_post_likes_user_post on public.post_likes(user_id, post_id);
 create index if not exists idx_audit_logs_admin_id on public.audit_logs(admin_id);
 create index if not exists idx_circles_host_id on public.circles(creator_id);
 create index if not exists idx_circles_status on public.circles(status);

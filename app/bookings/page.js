@@ -820,7 +820,7 @@ export default function BookingsPage() {
                       size={13}
                       className={reviewedBookings.has(booking.id) ? 'fill-amber-400 text-amber-500' : 'fill-white text-white'}
                     />
-                    <span>{reviewedBookings.has(booking.id) ? 'Rated ★' : `Rate ${isGuest ? 'Host' : 'Guest'}`}</span>
+                    <span>{reviewedBookings.has(booking.id) ? 'Rated' : `Rate ${isGuest ? 'Host' : 'Guest'}`}</span>
                   </button>
                 </div>
               )}

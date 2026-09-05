@@ -14,7 +14,7 @@ export const metadata = {
   alternates: { canonical: 'https://meova.in/login' },
   openGraph: {
     title: 'Join Meova — GLA University Campus Social App',
-    description: 'Book meetups, earn Sparks on gigs, and join student circles at GLA University. Free to join.',
+    description: 'Book meetups, earn Sparks, and join student circles at GLA University. Free to join.',
     url: 'https://meova.in/login',
     siteName: 'Meova',
     images: [{ url: '/icon-512.png', width: 512, height: 512 }],

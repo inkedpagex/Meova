@@ -4,49 +4,13 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 
 export const ACCENTS = [
   {
-    id: 'orange',
-    name: 'Electric Orange',
-    hex: '#F05A00',
-    hover: '#D94E00',
-    tint10: 'rgba(240, 90, 0, 0.10)',
-    tint20: 'rgba(240, 90, 0, 0.20)',
-    badge: 'Classic',
-  },
-  {
-    id: 'pink',
-    name: 'Hot Pink',
-    hex: '#FF2E63',
-    hover: '#E02656',
-    tint10: 'rgba(255, 46, 99, 0.12)',
-    tint20: 'rgba(255, 46, 99, 0.22)',
-    badge: 'Gen-Z',
-  },
-  {
     id: 'purple',
     name: 'Royal Purple',
     hex: '#7C3AED',
     hover: '#6D28D9',
     tint10: 'rgba(124, 58, 237, 0.12)',
     tint20: 'rgba(124, 58, 237, 0.22)',
-    badge: 'Vibrant',
-  },
-  {
-    id: 'emerald',
-    name: 'Cyber Emerald',
-    hex: '#10B981',
-    hover: '#059669',
-    tint10: 'rgba(16, 185, 129, 0.12)',
-    tint20: 'rgba(16, 185, 129, 0.22)',
-    badge: 'Fresh',
-  },
-  {
-    id: 'blue',
-    name: 'Electric Blue',
-    hex: '#2563EB',
-    hover: '#1D4ED8',
-    tint10: 'rgba(37, 99, 235, 0.12)',
-    tint20: 'rgba(37, 99, 235, 0.22)',
-    badge: 'Tech',
+    badge: 'Permanent',
   },
 ];
 
@@ -57,11 +21,11 @@ export const MODES = [
 
 const ThemeContext = createContext({
   mode: 'light',
-  accent: 'orange',
+  accent: 'purple',
   setMode: () => {},
   setAccent: () => {},
   setTheme: () => {},
-  themePreset: 'light-orange',
+  themePreset: 'light-purple',
   setThemePreset: () => {},
   currentAccent: ACCENTS[0],
   isThemeModalOpen: false,
@@ -70,7 +34,7 @@ const ThemeContext = createContext({
   mounted: false,
 });
 
-export function ThemeProvider({ children, initialMode = 'light', initialAccent = 'orange' }) {
+export function ThemeProvider({ children, initialMode = 'light', initialAccent = 'purple' }) {
   const [mode, setModeState] = useState(initialMode);
   const [accent, setAccentState] = useState(initialAccent);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
@@ -106,7 +70,9 @@ export function ThemeProvider({ children, initialMode = 'light', initialAccent =
     setMounted(true);
     try {
       const savedMode = localStorage.getItem('meova_mode') || 'light';
-      const savedAccent = localStorage.getItem('meova_accent') || 'orange';
+      const savedAccent = 'purple';
+      localStorage.setItem('meova_accent', 'purple');
+      document.cookie = 'meova_accent=purple; path=/; max-age=31536000';
       setModeState(savedMode);
       setAccentState(savedAccent);
       applyThemeToDom(savedMode, savedAccent);

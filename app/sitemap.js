@@ -17,12 +17,6 @@ export default async function sitemap() {
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/gigs`,
-      lastModified: now,
-      changeFrequency: 'hourly',
-      priority: 0.95,
-    },
-    {
       url: `${baseUrl}/discover`,
       lastModified: now,
       changeFrequency: 'hourly',

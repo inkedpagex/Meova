@@ -46,10 +46,10 @@ button, button:focus, button:active,
 /* ── Default / Light Base Mode ──────────────── */
 :root, [data-mode="light"] {
   /* Backgrounds */
-  --bg-base:          #FAFAF8;
+  --bg-base:          #FFFFFF;
   --bg-surface:       #FFFFFF;
   --bg-elevated:      #FFFFFF;
-  --bg-secondary:     #FAFAF8;
+  --bg-secondary:     #FFFFFF;
   --bg-overlay:       #FFFFFF;
   --bg-hover:         var(--accent-tint-10);
   --bg-active:        var(--accent-tint-20);
@@ -59,17 +59,17 @@ button, button:focus, button:active,
   --skeleton-shimmer: rgba(0, 0, 0, 0.08);
 
   /* Hairline Borders */
-  --border-hairline:  #E7E5E4;
-  --border-subtle:    #F5F5F4;
-  --border-mid:       #D6D3D1;
-  --border-strong:    #A8A29E;
+  --border-hairline:  rgba(0, 0, 0, 0.10);
+  --border-subtle:    rgba(0, 0, 0, 0.05);
+  --border-mid:       rgba(0, 0, 0, 0.15);
+  --border-strong:    rgba(0, 0, 0, 0.25);
 
   /* Text Scale */
-  --text-primary:     #1C1917;
-  --text-secondary:   #78716C;
-  --text-tertiary:    #A8A29E;
-  --text-muted:       #A8A29E;
-  --text-faint:       #D6D3D1;
+  --text-primary:     #000000;
+  --text-secondary:   rgba(0, 0, 0, 0.70);
+  --text-tertiary:    rgba(0, 0, 0, 0.55);
+  --text-muted:       rgba(0, 0, 0, 0.55);
+  --text-faint:       rgba(0, 0, 0, 0.40);
 
   /* Status Tokens */
   --status-online:    #10B981;
@@ -121,13 +121,13 @@ button, button:focus, button:active,
 }
 
 /* ── Accents (1-Click Color Engine) ─────────── */
-:root, [data-accent="orange"] {
-  --accent:           #F05A00;
-  --accent-hover:     #D94E00;
-  --accent-tint-10:   rgba(240, 90, 0, 0.10);
-  --accent-tint-20:   rgba(240, 90, 0, 0.20);
-  --accent-dim:       rgba(240, 90, 0, 0.08);
-  --accent-glow:      rgba(240, 90, 0, 0.25);
+:root, [data-accent="purple"], [data-accent="orange"] {
+  --accent:           #7C3AED;
+  --accent-hover:     #6D28D9;
+  --accent-tint-10:   rgba(124, 58, 237, 0.10);
+  --accent-tint-20:   rgba(124, 58, 237, 0.20);
+  --accent-dim:       rgba(124, 58, 237, 0.08);
+  --accent-glow:      rgba(124, 58, 237, 0.25);
 }
 
 [data-accent="pink"] {
@@ -537,5 +537,30 @@ body {
 /* ── Divide ─────────────────────────────────── */
 .divide-zinc-100 > * + *, .divide-gray-100 > * + * { border-color: var(--border-hairline) !important; }
 .divide-zinc-200 > * + *, .divide-gray-200 > * + * { border-color: var(--border-hairline) !important; }
+
+/* ── High-Contrast Message Pill Button (Exact Reference Styling) ── */
+.meova-message-pill,
+[data-mode="dark"] .meova-message-pill,
+[data-mode="light"] .meova-message-pill {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+.meova-message-pill span,
+[data-mode="dark"] .meova-message-pill span,
+[data-mode="light"] .meova-message-pill span {
+  color: #000000 !important;
+}
+
+.meova-message-pill:hover,
+[data-mode="dark"] .meova-message-pill:hover,
+[data-mode="light"] .meova-message-pill:hover {
+  background-color: #FAF5FF !important;
+  border-color: rgba(124, 58, 237, 0.35) !important;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.18) !important;
+}
+
 
 

@@ -2,14 +2,15 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { MessageSquare } from '@/lib/icons';
+import { MessageDotsIcon } from '@/lib/icons';
 import { toast } from '@/lib/toast';
 
 /**
- * MessagePillButton — Exact-styled rounded pill button:
- * - Pure white background with hairline border & subtle elevation
- * - Vibrant purple/violet icon with 2 dots (RemixIcon ri-chat-3-line / MessageSquare)
- * - Bold black typography in Inter
+ * MessagePillButton — High-contrast rounded pill action button matching exact reference:
+ * - Pure white background (#FFFFFF) with subtle hairline border and elevation
+ * - Vibrant purple speech bubble icon with 2 dots (#7C3AED)
+ * - Deep pitch black bold Inter typography
+ * - Generous inset padding so the icon never clips or touches the curved edge
  * - Tactile active scale & zero text wrapping for mobile responsiveness
  */
 export default function MessagePillButton({
@@ -46,17 +47,17 @@ export default function MessagePillButton({
       type="button"
       onClick={handleClick}
       aria-label={`Message ${targetName || 'user'}`}
-      className={`inline-flex items-center gap-1.5 rounded-full bg-white border border-black/10 text-black font-bold shadow-xs hover:shadow-sm hover:border-purple-300 hover:bg-purple-50/40 active:scale-95 transition-all cursor-pointer whitespace-nowrap flex-shrink-0 select-none ${
+      className={`meova-message-pill inline-flex items-center rounded-full font-bold select-none cursor-pointer whitespace-nowrap flex-shrink-0 active:scale-95 transition-all ${
         isSmall
-          ? 'px-3 py-1 text-[11.5px]'
-          : 'px-3.5 py-1.5 text-[12px]'
+          ? 'pl-3.5 pr-3.5 py-1 text-[11.5px] gap-1.5'
+          : 'pl-4 pr-4 py-1.5 text-[12px] gap-2'
       } ${className}`.trim()}
     >
-      <MessageSquare
+      <MessageDotsIcon
         size={isSmall ? 14 : 15}
         className="text-[#7C3AED] flex-shrink-0"
       />
-      <span className="leading-none text-black">Message</span>
+      <span className="leading-none font-bold tracking-tight">Message</span>
     </button>
   );
 }

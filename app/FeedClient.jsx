@@ -50,9 +50,9 @@ function FeedSkeleton() {
         ))}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {[1, 2].map((i) => (
-          <div key={i} className="bg-white border border-[#E7E5E4] rounded-3xl p-4 space-y-3 shadow-xs">
+          <div key={i} className="bg-white border border-black/10 rounded-[28px] p-4 sm:p-5 space-y-3 shadow-[0_4px_25px_rgba(0,0,0,0.03)]">
             <div className="flex items-center gap-3">
               <Skeleton variant="circular" className="w-10 h-10 rounded-full" />
               <div>
@@ -60,7 +60,7 @@ function FeedSkeleton() {
                 <Skeleton variant="text" className="w-16 h-3" />
               </div>
             </div>
-            <Skeleton variant="rectangular" className="w-full aspect-[4/3] rounded-2xl" />
+            <Skeleton variant="rectangular" className="w-full aspect-[4/3] rounded-[22px]" />
           </div>
         ))}
       </div>
@@ -157,7 +157,7 @@ export default function FeedClient() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to moderate post');
       toast.success('Post removed by Host moderation!');
-      mutate();
+      if (typeof mutatePosts === 'function') mutatePosts();
       setHostModeratingPost(null);
     } catch (err) {
       toast.error(err.message || 'Error moderating post');
@@ -487,11 +487,6 @@ export default function FeedClient() {
               <span className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
                 Active Students
               </span>
-              {onlineCount > 0 && (
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                  {onlineCount} Online
-                </span>
-              )}
             </div>
             <Link
               href="/discover"
@@ -580,18 +575,18 @@ export default function FeedClient() {
       {/* ── SINGLE SOCIAL POST FEED ────────────────────────── */}
       <div className="space-y-4">
           {displayPosts.length === 0 && !isValidating ? (
-            <div className="bg-white rounded-[16px] border border-[#E7E5E4] p-6 text-center space-y-3 shadow-xs">
+            <div className="bg-white rounded-[28px] border border-black/10 p-6 text-center space-y-3 shadow-[0_4px_25px_rgba(0,0,0,0.03)]">
               <div className="w-12 h-12 rounded-2xl bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center mx-auto">
                 <Camera size={22} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-[#1C1917]">Share the first campus moment</h3>
-                <p className="text-xs text-[#78716C] mt-0.5">Post a photo, project, or highlight with students!</p>
+                <h3 className="text-sm font-bold text-black">Share the first campus moment</h3>
+                <p className="text-xs text-black/70 mt-0.5">Post a photo, project, or highlight with students!</p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowPostModal(true)}
-                className="px-5 py-2.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold shadow-md shadow-xs active:scale-95 cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold shadow-md active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0"
               >
                 Share Photo Now
               </button>
@@ -635,7 +630,7 @@ export default function FeedClient() {
                   <div
                     key={post.id}
                     style={{ contentVisibility: 'auto', containIntrinsicSize: '0 520px' }}
-                    className="bg-white border border-[#E7E5E4] rounded-[16px] overflow-hidden shadow-xs transition-all mb-4"
+                    className="bg-white border border-black/10 rounded-[28px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] transition-all mb-4"
                   >
                     {/* ── Card Header (56px) ───────────────────────────────── */}
                     <div className="flex items-center justify-between px-4 h-14">
@@ -668,14 +663,14 @@ export default function FeedClient() {
 
                         {/* Name + meta */}
                         <div className="min-w-0">
-                          <h4 className="text-[14px] font-bold text-[#1C1917] group-hover/author:text-[var(--accent)] transition-colors leading-tight truncate">
+                          <h4 className="text-[14px] font-bold text-black group-hover/author:text-[var(--accent)] transition-colors leading-tight truncate">
                             {post.authorName}
                           </h4>
-                          <p className="text-[12px] text-[#78716C] font-medium mt-0.5 flex items-center gap-1.5 leading-none truncate">
+                          <p className="text-[12px] text-black/70 font-semibold mt-0.5 flex items-center gap-1.5 leading-none truncate">
                             <span>{post.authorBranch?.split('(')?.[0]?.trim() || 'Student'}</span>
-                            <span className="text-[#525252]">·</span>
+                            <span className="text-black/35">·</span>
                             <span>{post.location || 'Campus'}</span>
-                            <span className="text-[#525252]">·</span>
+                            <span className="text-black/35">·</span>
                             <span>{post.timeAgo}</span>
                           </p>
                         </div>
@@ -697,7 +692,7 @@ export default function FeedClient() {
                           <button
                             type="button"
                             onClick={() => setOpenMenuPostId(openMenuPostId === post.id ? null : post.id)}
-                            className="w-8 h-8 flex items-center justify-center text-[#A8A29E] hover:text-[#1C1917] hover:bg-white/5 rounded-full transition-colors cursor-pointer"
+                            className="w-8 h-8 flex items-center justify-center text-black/60 hover:text-black hover:bg-black/5 rounded-full transition-colors cursor-pointer"
                           >
                             <MoreHorizontal size={18} />
                           </button>
@@ -708,7 +703,7 @@ export default function FeedClient() {
                                 className="fixed inset-0 z-30"
                                 onClick={(e) => { e.stopPropagation(); setOpenMenuPostId(null); }}
                               />
-                              <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-xl rounded-2xl p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150 border border-[#E7E5E4]">
+                              <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-xl rounded-2xl p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150 border border-black/10">
                                 {isOwnPost ? (
                                   <button
                                     type="button"
@@ -736,7 +731,7 @@ export default function FeedClient() {
                                     navigator.clipboard.writeText(`${origin}/posts/${post.id}`);
                                     toast.success('Link copied!');
                                   }}
-                                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-[#1C1917] hover:bg-[var(--accent-tint-10)] hover:text-[var(--accent)] rounded-xl transition-colors cursor-pointer"
+                                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-black hover:bg-[var(--accent-tint-10)] hover:text-[var(--accent)] rounded-xl transition-colors cursor-pointer"
                                 >
                                   <Copy size={14} />
                                   <span>Copy link</span>
@@ -792,18 +787,18 @@ export default function FeedClient() {
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleToggleLike(post.id, isLiked); }}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full hover:bg-[#FAFAF8] select-none active:scale-90 transition-all cursor-pointer group/like"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full hover:bg-black/5 select-none active:scale-90 transition-all cursor-pointer group/like whitespace-nowrap flex-shrink-0"
                           >
                             <Heart
                               size={20}
                               className={`transition-all duration-150 ${
                                 isLiked
                                   ? 'fill-[var(--accent)] text-[var(--accent)]'
-                                  : 'text-[#78716C] group-hover/like:text-[var(--accent)]'
+                                  : 'text-black/70 group-hover/like:text-[var(--accent)]'
                               } ${animatingHearts[post.id] ? 'scale-125' : 'scale-100'}`}
                             />
                             {currentLikes > 0 && (
-                              <span className={`text-[13px] font-bold tabular-nums leading-none ${isLiked ? 'text-[var(--accent)]' : 'text-[#78716C]'}`}>
+                              <span className={`text-[13px] font-bold tabular-nums leading-none ${isLiked ? 'text-[var(--accent)]' : 'text-black/70'}`}>
                                 {currentLikes}
                               </span>
                             )}
@@ -837,7 +832,7 @@ export default function FeedClient() {
                                 toast.success('Link copied!');
                               }
                             }}
-                            className="p-1.5 rounded-full hover:bg-[#FAFAF8] text-[#78716C] hover:text-[var(--accent)] transition-colors cursor-pointer active:scale-90"
+                            className="p-1.5 rounded-full hover:bg-black/5 text-black/70 hover:text-[var(--accent)] transition-colors cursor-pointer active:scale-90 whitespace-nowrap flex-shrink-0"
                             title="Share"
                           >
                             <Share2 size={19} />
@@ -847,8 +842,8 @@ export default function FeedClient() {
 
                       {/* Caption */}
                       {post.caption && (
-                        <p className="text-[13.5px] text-[#1C1917] leading-relaxed font-normal">
-                          <span className="font-bold text-[#1C1917] mr-1.5">{post.authorName}</span>
+                        <p className="text-[13.5px] text-black leading-relaxed font-normal">
+                          <span className="font-bold text-black mr-1.5">{post.authorName}</span>
                           <span>{post.caption}</span>
                         </p>
                       )}

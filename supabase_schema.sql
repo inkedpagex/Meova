@@ -313,8 +313,10 @@ create index if not exists idx_bookings_host_id on public.bookings(host_id);
 create index if not exists idx_bookings_host_status on public.bookings(host_id, status);
 create index if not exists idx_notifications_user_unread on public.notifications(user_id, read, created_at desc);
 create index if not exists idx_transactions_user_date on public.transactions(user_id, created_at desc);
-create index if not exists idx_posts_category_date on public.posts(category, created_at desc);
-create index if not exists idx_chat_messages_chat_id on public.chat_messages(chat_id);
+create index if not exists idx_posts_created_at_desc on public.posts(created_at desc);
+create index if not exists idx_post_likes_user_post on public.post_likes(user_id, post_id);
+create index if not exists idx_chat_messages_chat_created on public.chat_messages(chat_id, created_at desc);
+create index if not exists idx_device_tokens_user_platform on public.device_tokens(user_id, platform);
 create index if not exists idx_blocks_blocker on public.blocks(blocker_id);
 create index if not exists idx_blocks_blocked on public.blocks(blocked_id);
 

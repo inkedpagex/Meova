@@ -118,6 +118,8 @@ export default function AdminUsersPage() {
     if (!matchesSearch) return false;
 
     if (roleFilter === 'blocked') return u.isBlocked || u.status === 'blocked';
+    if (roleFilter === 'verified') return u.tier === 'verified';
+    if (roleFilter === 'unverified') return u.tier !== 'verified';
     if (roleFilter === 'admin') return u.role === 'admin';
     if (roleFilter === 'verified_host') return u.role === 'verified_host';
     if (roleFilter === 'campus_lead') return u.role === 'campus_lead';
@@ -137,7 +139,7 @@ export default function AdminUsersPage() {
             </span>
           </h1>
           <p className="text-xs font-medium text-slate-500 mt-0.5">
-            Manage student roles, permissions, and instant account block status.
+            Manage student verification tiers, permissions, and account statuses.
           </p>
         </div>
 
@@ -145,6 +147,8 @@ export default function AdminUsersPage() {
         <div className="flex items-center gap-1.5 overflow-x-auto p-1 bg-slate-100/90 rounded-xl border border-slate-200/60">
           {[
             { id: 'all', label: 'All Users' },
+            { id: 'verified', label: 'Verified' },
+            { id: 'unverified', label: 'Unverified' },
             { id: 'blocked', label: 'Blocked' },
             { id: 'admin', label: 'Admins' },
             { id: 'verified_host', label: 'Hosts' },
@@ -251,6 +255,17 @@ export default function AdminUsersPage() {
                       <span className={`text-[9.5px] uppercase tracking-wider px-1.5 py-0.2 rounded border ${roleBadgeBg}`}>
                         {roleLabel}
                       </span>
+
+                      {/* Verified / Not Verified Tag */}
+                      {u.tier === 'verified' ? (
+                        <span className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded border bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1 shadow-2xs">
+                          <CheckCircle2 size={10} /> Verified
+                        </span>
+                      ) : (
+                        <span className="text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded border bg-slate-50 text-slate-500 border-slate-200 flex items-center gap-1 shadow-2xs">
+                          Not Verified
+                        </span>
+                      )}
 
                       <span className="text-[10px] font-extrabold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded flex items-center gap-1 shadow-xs">
                         <Sparkles size={10} className="fill-current" />

@@ -19,6 +19,7 @@ import ProfileHighlightsSection from '../../../components/ProfileHighlightsSecti
 import ZoomableProfileAvatar from '../../../components/ZoomableProfileAvatar';
 import HostBadge from '../../../components/HostBadge';
 import LiveUserStatusBadge from '../../../components/LiveUserStatusBadge';
+import CampusMomentsGallery from '../../../components/CampusMomentsGallery';
 import { calculateMeetupRate } from '../../../lib/pricing';
 import { getUserAvatarUrl, getCartoonAvatar } from '../../../utils/avatar';
 
@@ -124,8 +125,10 @@ export default async function UserProfilePage({ params }) {
     ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
     : null;
 
-  const completedMeets = (reviews && reviews.length > 0) ? reviews.length : (profile.completed_meets_count || 0);
-  const hostRate = calculateMeetupRate(completedMeets);
+  const completedMeets = (reviews && reviews.length > 0) ? reviews.length : (profile.completed_meeting_count ?? profile.completed_meets_count ?? 0);
+  const isTargetVerified = profile.tier === 'verified';
+  const isCallerVerified = currentUser?.tier === 'verified';
+  const hostRate = isTargetVerified ? calculateMeetupRate(completedMeets) : 0;
 
   const yearLabel = profile.year ? (profile.year.toLowerCase().includes('year') ? profile.year : `${profile.year} Year`) : '1st Year';
   const branchLabel = profile.branch || 'General';
@@ -272,8 +275,8 @@ export default async function UserProfilePage({ params }) {
         {/* Actions Row */}
         {!isSelf ? (
           <div className="w-full space-y-2.5">
-            {/* Direct Privacy Call if active booking exists */}
-            {hasActiveMeeting && (
+            {/* Direct Privacy Call if active booking exists and both users are verified */}
+            {hasActiveMeeting && isCallerVerified && isTargetVerified && (
               <ProfileCallButton
                 targetUserId={id}
                 targetName={profile.full_name}
@@ -296,6 +299,8 @@ export default async function UserProfilePage({ params }) {
                     targetPhoto={avatarUrl(profile)}
                     isLoggedIn={isLoggedIn}
                     completedMeets={completedMeets}
+                    targetTier={profile.tier || 'not_verified'}
+                    currentTier={currentUser?.tier || 'not_verified'}
                   />
                 </div>
               ) : (
@@ -326,7 +331,7 @@ export default async function UserProfilePage({ params }) {
         currentUserId={id} 
       />
 
-      {/* ── CAMPUS MOMENTS GALLERY ───────────────── */}
+      {/* ── CAMPUS MOMENTS GALLERY (INSTAGRAM-STYLE INTERACTIVE LIGHTBOX) ── */}
       <section className="bg-[var(--bg-surface)] rounded-[28px] p-5 border border-[var(--border-hairline)] shadow-xs">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[11px] font-bold text-[var(--text-secondary)] tracking-[0.14em] uppercase flex items-center gap-2">
@@ -335,54 +340,11 @@ export default async function UserProfilePage({ params }) {
           </h2>
         </div>
 
-        {userPosts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {userPosts.map(post => {
-              const hasImage = post.media_urls && post.media_urls.length > 0;
-              const firstImg = hasImage ? post.media_urls[0] : null;
-
-              return (
-                <div
-                  key={post.id}
-                  className="group relative rounded-[16px] overflow-hidden border border-[#E7E5E4] bg-[#FAFAF8] flex flex-col justify-between aspect-square transition-all duration-200 hover:shadow-[0_4px_16px_rgba(28,25,23,0.08)] hover:border-[var(--accent-tint-20)]"
-                >
-                  {hasImage ? (
-                    <>
-                      <img
-                        src={firstImg}
-                        alt="Moment"
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-                    </>
-                  ) : (
-                    <div className="p-3.5 flex-1 flex flex-col justify-center">
-                      <p className="text-xs font-semibold text-[#1C1917] line-clamp-4 leading-relaxed">
-                        {post.content}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="relative z-10 p-2.5 mt-auto flex items-center justify-between text-[10px] font-bold text-white">
-                    <span className="flex items-center gap-1 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full">
-                      <Heart size={10} className="fill-rose-500 text-rose-500" />
-                      <span>{post.likes_count || 0}</span>
-                    </span>
-                    <span className="text-[9px] opacity-80 font-medium">
-                      {timeAgo(post.created_at)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-8 rounded-[16px] bg-[#FAFAF8] border border-dashed border-[#E7E5E4]">
-            <Camera className="w-6 h-6 text-[#A8A29E] mx-auto mb-2" />
-            <p className="text-xs font-bold text-[#78716C]">No moments shared yet</p>
-            <p className="text-[10px] text-[#A8A29E] mt-0.5">Moments posted on the campus feed will appear here</p>
-          </div>
-        )}
+        <CampusMomentsGallery
+          posts={userPosts}
+          currentUserId={currentUser?.id}
+          author={profile}
+        />
       </section>
 
     </div>

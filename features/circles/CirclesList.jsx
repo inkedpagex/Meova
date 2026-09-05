@@ -4,39 +4,48 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search, SlidersHorizontal, Check, Zap, Users, Rocket,
-  Gamepad2, Music2, Code2, Palette, Trophy, Star, MessageSquare, Share2, LogOut
+  Gamepad2, Music2, Code2, Palette, Trophy, Star, Share2, LogOut,
+  ShieldCheck
 } from '@/lib/icons';
-import { getCartoonAvatar } from '../../utils/avatar';
 import { toast } from 'react-hot-toast';
 import CreateCircleModal from './CreateCircleModal';
 import HostCircleDashboardModal from './HostCircleDashboardModal';
 
 const CATEGORY_ICONS = {
-  Tech: Code2, Gaming: Gamepad2, Music: Music2, Design: Palette,
-  Startup: Rocket, Sports: Trophy, Creators: Star, Entertainment: Star, General: Users,
+  Tech: Code2,
+  Gaming: Gamepad2,
+  Music: Music2,
+  Design: Palette,
+  Startup: Rocket,
+  Sports: Trophy,
+  Creators: Star,
+  Entertainment: Star,
+  General: Users,
 };
 
+// Unified Royal Purple aesthetic across all categories
 const CATEGORY_COLORS = {
-  Tech: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
-  Gaming: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
-  Music: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
-  Design: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
-  Startup: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
-  Sports: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
-  Creators: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
-  Entertainment: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
-  default: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
+  Tech: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
+  Gaming: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
+  Music: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
+  Design: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
+  Startup: { bg: 'rgba(124, 58, 237, 0.12)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.25)' },
+  Sports: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
+  Creators: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
+  Entertainment: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
+  default: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
 };
 
-const MOCK_COMMUNITIES = [
+// Initial database mirror for instant rendering before SWR finishes
+const OFFICIAL_CAMPUS_CIRCLES = [
   {
     id: 'startup_circle',
     name: 'Startup Circle',
     category: 'Startup',
-    member_count: 1200,
-    online: 12,
-    desc: 'Build ideas. Find teammates. Meet ambitious students.',
-    nextMeetup: '24 May · 4:00 PM',
+    member_count: 1240,
+    online: 18,
+    desc: 'Official campus startup & founder network. Build ideas, pitch decks, and find co-founders.',
+    nextMeetup: 'Thursday · 4:00 PM',
     isPaid: false,
     price: 0,
     isVerified: true,
@@ -47,8 +56,8 @@ const MOCK_COMMUNITIES = [
     id: 'gdsc',
     name: 'Google Developer Club',
     category: 'Tech',
-    member_count: 181,
-    desc: 'Build · Learn · Grow',
+    member_count: 380,
+    desc: 'Open-source builders, web & app developers, AI hackathons, and DSA workshops.',
     isPaid: false,
     price: 0,
     isVerified: true,
@@ -58,28 +67,30 @@ const MOCK_COMMUNITIES = [
     id: 'creators_club',
     name: 'Creators Club VIP',
     category: 'Creators',
-    member_count: 92,
-    desc: 'Create. Share. Inspire.',
+    member_count: 195,
+    desc: 'Campus content creators, video editors, podcasters, photographers, and visual artists.',
     isPaid: true,
     price: 50,
+    isVerified: true,
     whatsapp_link: 'https://chat.whatsapp.com/',
   },
   {
     id: 'anime_circle',
     name: 'Anime & Manga Society',
     category: 'Entertainment',
-    member_count: 240,
-    desc: 'Anime talks, watch parties & cosplay meets!',
+    member_count: 290,
+    desc: 'Weekly anime watch parties, manga discussions, art contests, and campus cosplay meetups.',
     isPaid: false,
     price: 0,
+    isVerified: true,
     whatsapp_link: 'https://chat.whatsapp.com/',
   },
   {
     id: 'music_circle',
     name: 'Campus Jam & Music',
     category: 'Music',
-    member_count: 157,
-    desc: 'Make jams, vibe, share playlist links.',
+    member_count: 215,
+    desc: 'Acoustic jam sessions, beatmakers, vocalists, campus open-mic nights, and music collabs.',
     isPaid: true,
     price: 50,
     isVerified: true,
@@ -89,33 +100,59 @@ const MOCK_COMMUNITIES = [
     id: 'gaming_arena',
     name: 'Campus Esports & Gaming',
     category: 'Gaming',
-    member_count: 320,
-    desc: 'BGMI, Valorant, FIFA tournaments & rooms.',
+    member_count: 460,
+    desc: 'Daily BGMI, Valorant, FIFA, and Rocket League campus scrims, tournaments & custom rooms.',
     isPaid: true,
     price: 100,
+    isVerified: true,
     whatsapp_link: 'https://chat.whatsapp.com/',
   },
   {
     id: 'design_lab',
     name: 'UI/UX & Design Lab',
     category: 'Design',
-    member_count: 74,
-    desc: 'UI · UX · Figma · Portfolio Reviews',
+    member_count: 140,
+    desc: 'Figma jams, design systems, portfolio reviews, product teardowns, and campus redesigns.',
     isPaid: false,
     price: 0,
+    isVerified: true,
     whatsapp_link: 'https://chat.whatsapp.com/',
   },
 ];
 
 const FILTERS = ['All', 'Joined', 'My Channels', 'Tech', 'Gaming', 'Music', 'Design', 'Startup', 'Creators'];
+const EMPTY_SET = new Set();
 
-export default function CirclesList({ circles = [], joinedCircleIds = new Set(), userId = null }) {
+export default function CirclesList({
+  circles = [],
+  joinedCircleIds = EMPTY_SET,
+  userId = null,
+  externalSearch = '',
+  hideSearch = false
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
-  const [joinedMap, setJoinedMap] = useState({});
+  
+  // Lazy state init reads localStorage once without infinite re-render loop
+  const [joinedMap, setJoinedMap] = useState(() => {
+    const initial = {};
+    if (joinedCircleIds && typeof joinedCircleIds.forEach === 'function') {
+      joinedCircleIds.forEach(id => { initial[id] = true; });
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        const ls = localStorage.getItem('Meova_joined_circles');
+        if (ls) Object.assign(initial, JSON.parse(ls));
+      } catch {}
+    }
+    return initial;
+  });
+
   const [sparks, setSparks] = useState(0);
+
+  const effectiveSearch = hideSearch ? externalSearch : search;
 
   // Modal states
   const [rulesCircle, setRulesCircle] = useState(null);
@@ -123,61 +160,79 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
   const [manageCircle, setManageCircle] = useState(null);
   const [joiningId, setJoiningId] = useState(null);
 
+  const circleIdParam = searchParams?.get('id');
   useEffect(() => {
-    const circleIdParam = searchParams?.get('id');
-    if (circleIdParam) {
-      const found = (circles || []).find(c => c.id === circleIdParam) || MOCK_COMMUNITIES.find(c => c.id === circleIdParam);
-      if (found) {
-        setRulesCircle(found);
-      }
+    if (!circleIdParam) return;
+    const found = (circles || []).find(c => c.id === circleIdParam) || OFFICIAL_CAMPUS_CIRCLES.find(c => c.id === circleIdParam);
+    if (found) {
+      setRulesCircle(found);
     }
-  }, [searchParams, circles]);
+  }, [circleIdParam, circles]);
+
+  // Sync external joinedCircleIds changes safely
+  const joinedKey = joinedCircleIds && typeof joinedCircleIds.forEach === 'function'
+    ? Array.from(joinedCircleIds).sort().join(',')
+    : '';
 
   useEffect(() => {
+    if (!joinedKey) return;
+    setJoinedMap(prev => {
+      let hasNew = false;
+      const next = { ...prev };
+      joinedCircleIds.forEach(id => {
+        if (!next[id]) {
+          next[id] = true;
+          hasNew = true;
+        }
+      });
+      return hasNew ? next : prev;
+    });
+  }, [joinedKey]);
+
+  // Fetch wallet balance once per user
+  useEffect(() => {
+    if (!userId || typeof window === 'undefined') return;
     let cancelled = false;
-    const initial = {};
-    if (joinedCircleIds) joinedCircleIds.forEach(id => { initial[id] = true; });
-    const ls = typeof window !== 'undefined' ? localStorage.getItem('Meova_joined_circles') : null;
-    if (ls) try { Object.assign(initial, JSON.parse(ls)); } catch {}
-    if (!cancelled) setJoinedMap(initial);
-
-    if (userId && typeof window !== 'undefined') {
-      fetch('/api/wallet')
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (cancelled) return;
-          if (data?.wallet) {
-            const total = (data.wallet.purchased || 0) + (data.wallet.bonus || 0) + (data.wallet.creator || 0);
-            setSparks(total);
-          }
-        })
-        .catch(() => {});
-    }
+    fetch('/api/wallet')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (cancelled) return;
+        if (data?.wallet) {
+          const total = (data.wallet.purchased || 0) + (data.wallet.bonus || 0) + (data.wallet.creator || 0);
+          setSparks(total);
+        }
+      })
+      .catch(() => {});
     return () => { cancelled = true; };
-  }, [joinedCircleIds, userId]);
+  }, [userId]);
 
-  // Merge DB circles
-  const dbMapped = (circles || []).map(c => ({
+  // Primary data source: Live Supabase circles, with official campus mirror
+  const sourceCircles = circles && circles.length > 0 ? circles : OFFICIAL_CAMPUS_CIRCLES;
+  
+  const allCircles = sourceCircles.map(c => ({
     id: c.id, 
     name: c.name, 
     category: c.category || 'General',
     member_count: c.member_count || c.members_count || 1, 
     desc: c.desc || c.description || '',
-    isPaid: c.isPaid || c.is_paid || false, 
+    isPaid: c.isPaid || c.is_paid || (c.price > 0) || false, 
     price: c.price || 0,
     host_id: c.creator_id || c.host_id,
     host_name: c.host_name,
     host_photo: c.host_photo,
     whatsapp_link: c.invite_link || c.whatsapp_link || 'https://chat.whatsapp.com/',
+    featured: Boolean(c.featured || c.id === 'startup_circle'),
+    isVerified: c.isVerified !== undefined ? c.isVerified : true,
+    nextMeetup: c.nextMeetup || (c.id === 'startup_circle' ? 'Thursday · 4:00 PM' : null),
+    online: c.online || (c.id === 'startup_circle' ? 18 : 12),
   }));
-  const allCircles = [...MOCK_COMMUNITIES];
-  dbMapped.forEach(c => { if (!allCircles.some(a => a.id === c.id)) allCircles.push(c); });
 
   const featured = allCircles.find(c => c.featured);
   const normalCircles = allCircles.filter(c => !c.featured);
 
   const displayed = normalCircles.filter(c => {
-    const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.category.toLowerCase().includes(search.toLowerCase());
+    const query = (effectiveSearch || '').trim().toLowerCase();
+    const matchSearch = !query || c.name.toLowerCase().includes(query) || c.category.toLowerCase().includes(query) || (c.desc || '').toLowerCase().includes(query);
     
     let matchFilter = true;
     if (activeFilter === 'Joined') {
@@ -194,11 +249,10 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
   const handleJoinClick = (circle) => {
     const isJoined = joinedMap[circle.id];
     if (isJoined) {
-      // Call secure join to retrieve unlocked link
       executeSecureJoin(circle);
       return;
     }
-    // Show Group Rules & Agenda Modal before completing join
+    // Show pre-join rules modal
     setRulesCircle(circle);
   };
 
@@ -271,131 +325,148 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
     }
   };
 
-  // Helper to get avatar mock stack
-  const getAvatarStack = (circleId) => [
-    getCartoonAvatar(`${circleId}_1`),
-    getCartoonAvatar(`${circleId}_2`),
-    getCartoonAvatar(`${circleId}_3`),
-  ];
-
   return (
-    <div className="space-y-5 pb-24 pt-2">
+    <div className="space-y-4 pb-24 pt-1">
 
-      {/* Host a Community CTA Banner (Neo-Minimalist Flat Surface) */}
-      <div className="bg-white rounded-[16px] p-5 text-[#1C1917] shadow-[0_2px_8px_rgba(28,25,23,0.06)] border border-[#E7E5E4] flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]">
+      {/* Host a Community Banner */}
+      <div className="bg-white rounded-[26px] p-5 sm:p-6 text-black shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-black/10 flex items-center justify-between gap-4">
+        <div className="space-y-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] tracking-wider">
               Host Monetization
             </span>
-            <span className="text-[10px] font-bold text-[#78716C] flex items-center gap-1">
+            <span className="text-[10px] font-bold text-black/60 flex items-center gap-1">
               <Zap size={12} className="fill-[var(--accent)] text-[var(--accent)]" /> 100% Sparks Earnings
             </span>
           </div>
-          <h3 className="text-sm sm:text-base font-bold tracking-tight text-[#1C1917]">Create Your Campus Channel</h3>
-          <p className="text-[12px] text-[#78716C] font-medium">Monetize your WhatsApp, Telegram or Insta community.</p>
+          <h3 className="text-sm sm:text-base font-bold tracking-tight text-black">Create Your Campus Channel</h3>
+          <p className="text-[12px] text-black/60 font-medium">Monetize your WhatsApp, Telegram or campus community.</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-5 py-2.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-xs transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-95 flex-shrink-0 cursor-pointer"
+          className="px-5 h-10 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-xs transition-all shadow-[0_2px_10px_rgba(124,58,237,0.25)] active:scale-95 flex-shrink-0 whitespace-nowrap cursor-pointer"
         >
           + Host Channel
         </button>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A8A29E] pointer-events-none" />
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search communities..."
-          className="w-full pl-11 pr-12 py-3.5 rounded-full text-[13px] font-medium outline-none transition-all bg-white border border-[#E7E5E4] text-[#1C1917] focus:border-[var(--accent)]"
-        />
-        <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white border border-[#E7E5E4] text-[#78716C] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors">
-          <SlidersHorizontal size={14} />
-        </button>
-      </div>
-
-      {/* Filter chips */}
-      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-        {FILTERS.map(f => (
-          <button key={f} onClick={() => setActiveFilter(f)}
-            className="flex-shrink-0 px-4 py-2 rounded-full text-[12px] font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
-            style={activeFilter === f
-              ? { background: 'var(--accent)', color: '#ffffff', border: '1px solid var(--accent)' }
-              : { background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border-hairline)' }}>
-            {f}
+      {/* Search (if not controlled externally) */}
+      {!hideSearch && (
+        <div className="relative">
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-black/40 pointer-events-none" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search communities..."
+            className="w-full pl-11 pr-12 py-3.5 rounded-full text-[13px] font-medium outline-none transition-all bg-white border border-black/10 text-black focus:border-[var(--accent)]"
+          />
+          <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white border border-black/10 text-black/60 hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors">
+            <SlidersHorizontal size={14} />
           </button>
-        ))}
+        </div>
+      )}
+
+      {/* Filter Chips */}
+      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+        {FILTERS.map(f => {
+          const isSelected = activeFilter === f;
+          return (
+            <button
+              key={f}
+              onClick={() => setActiveFilter(f)}
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 whitespace-nowrap ${
+                isSelected
+                  ? 'bg-[var(--accent)] text-white shadow-[0_2px_10px_rgba(124,58,237,0.25)] border border-[var(--accent)]'
+                  : 'bg-white text-black/70 hover:text-black border border-black/10'
+              }`}
+            >
+              {f}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Featured community banner */}
-      {featured && !search && activeFilter === 'All' && (
-        <div className="relative rounded-[16px] p-5 overflow-hidden shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
-          style={{ background: 'var(--accent)' }}>
-          <div className="absolute top-0 right-0 w-36 h-36 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2 bg-[var(--accent)]" />
-          <div className="relative z-10">
+      {/* Featured Community Banner (Solid Royal Purple signature) */}
+      {featured && !effectiveSearch && activeFilter === 'All' && (
+        <div 
+          className="relative rounded-[26px] p-5 sm:p-6 overflow-hidden shadow-[0_6px_24px_rgba(124,58,237,0.28)] text-white"
+          style={{ background: 'var(--accent, #7C3AED)' }}
+        >
+          <div className="absolute top-0 right-0 w-44 h-44 rounded-full opacity-20 -translate-y-1/3 translate-x-1/3 bg-white blur-xl pointer-events-none" />
+          <div className="relative z-10 space-y-4">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-[16px] bg-white flex items-center justify-center">
+              <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+                <div className="w-12 h-12 rounded-[20px] bg-white flex items-center justify-center flex-shrink-0 shadow-md">
                   <Rocket size={22} className="text-[var(--accent)]" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-[15px] font-bold text-white">{featured.name}</h3>
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-emerald-400 text-emerald-950">Verified</span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">{featured.name}</h3>
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-emerald-400 text-black tracking-wide">
+                      Verified
+                    </span>
                   </div>
-                  <p className="text-[12px] text-white/80 mt-0.5 font-medium max-w-[200px] leading-snug">{featured.desc}</p>
+                  <p className="text-[12px] text-white/90 mt-1 font-normal line-clamp-2 max-w-md leading-relaxed">
+                    {featured.desc}
+                  </p>
                 </div>
               </div>
-              <button onClick={() => handleJoinClick(featured)}
+
+              <button
+                onClick={() => handleJoinClick(featured)}
                 disabled={joiningId === featured.id}
-                className="px-4 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-wide cursor-pointer active:scale-95 transition-all flex-shrink-0 shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
-                style={joinedMap[featured.id]
-                  ? { background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }
-                  : { background: 'white', color: 'var(--accent)' }}>
+                className={`px-5 h-9 rounded-full text-xs font-bold uppercase tracking-wide cursor-pointer active:scale-95 transition-all flex-shrink-0 whitespace-nowrap shadow-md ${
+                  joinedMap[featured.id]
+                    ? 'bg-white/20 text-white hover:bg-white/30 border border-white/30'
+                    : 'bg-white text-[var(--accent)] hover:bg-white/95'
+                }`}
+              >
                 {joiningId === featured.id ? 'Joining...' : (joinedMap[featured.id] ? 'Open' : 'Join')}
               </button>
             </div>
 
-            <div className="flex items-center gap-4 mt-4">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-white/90">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                {featured.online} online
+            <div className="flex items-center gap-4 pt-1 border-t border-white/20 text-[11px] font-medium text-white/90 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>{featured.online || 18} online</span>
+              </div>
+              <span className="text-white/40">·</span>
+              <div className="flex items-center gap-1.5">
+                <Users size={12} className="text-white/70" />
+                <span>{featured.member_count} members</span>
               </div>
               {featured.nextMeetup && (
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-white/90">
-                  <span className="text-white/50">·</span>
-                  Next meetup: {featured.nextMeetup}
-                </div>
+                <>
+                  <span className="text-white/40">·</span>
+                  <span>Next meetup: {featured.nextMeetup}</span>
+                </>
               )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Community cards list */}
+      {/* Communities List */}
       <div className="space-y-3">
         {displayed.length === 0 ? (
-          <div className="bg-white rounded-[16px] border border-[#E7E5E4] p-8 text-center space-y-3.5 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
-            <div className="w-14 h-14 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center mx-auto shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+          <div className="bg-white rounded-[26px] border border-black/10 p-8 text-center space-y-3.5 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <div className="w-14 h-14 rounded-[20px] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center mx-auto shadow-sm">
               <Users size={24} />
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-[#1C1917]">No Communities Found</h3>
-              <p className="text-xs text-[#78716C] font-medium max-w-xs mx-auto leading-relaxed">
-                {search || selectedCategory !== 'All' 
+              <h3 className="text-sm font-bold text-black">No Communities Found</h3>
+              <p className="text-xs text-black/60 font-medium max-w-xs mx-auto leading-relaxed">
+                {effectiveSearch || activeFilter !== 'All' 
                   ? 'No circles match your current search or filter. Try a different term!' 
                   : 'Be the first student to create a campus circle or community!'}
               </p>
             </div>
             <div className="flex items-center justify-center gap-2 pt-1">
-              {search || selectedCategory !== 'All' ? (
+              {effectiveSearch || activeFilter !== 'All' ? (
                 <button
                   type="button"
-                  onClick={() => { setSearch(''); setSelectedCategory('All'); }}
-                  className="px-5 py-2.5 rounded-full bg-[#FAFAF8] hover:bg-[var(--accent-tint-10)] text-[#1C1917] text-xs font-bold active:scale-95 transition-all cursor-pointer border border-[#E7E5E4]"
+                  onClick={() => { setSearch(''); setActiveFilter('All'); }}
+                  className="px-5 py-2.5 rounded-full bg-black/5 hover:bg-black/10 text-black text-xs font-bold active:scale-95 transition-all cursor-pointer border border-black/10"
                 >
                   Clear Filters
                 </button>
@@ -403,7 +474,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(true)}
-                  className="px-5 py-2.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-95 transition-all cursor-pointer inline-flex items-center gap-1.5"
+                  className="px-5 py-2.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold shadow-[0_2px_10px_rgba(124,58,237,0.25)] active:scale-95 transition-all cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <Rocket size={13} />
                   <span>Create Circle</span>
@@ -413,134 +484,147 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
           </div>
         ) : (
           displayed.map(circle => {
-          const isJoined = joinedMap[circle.id];
-          const isHost = circle.host_id && circle.host_id === userId;
-          const CategoryIcon = CATEGORY_ICONS[circle.category] || CATEGORY_ICONS.default;
-          const categoryStyle = CATEGORY_COLORS[circle.category] || CATEGORY_COLORS.default;
+            const isJoined = joinedMap[circle.id];
+            const isHost = circle.host_id && circle.host_id === userId;
+            const CategoryIcon = CATEGORY_ICONS[circle.category] || CATEGORY_ICONS.default;
+            const categoryStyle = CATEGORY_COLORS[circle.category] || CATEGORY_COLORS.default;
 
-          return (
-            <div
-              key={circle.id}
-              onClick={() => handleJoinClick(circle)}
-              className="bg-white border border-[#E7E5E4] hover:border-[var(--accent)] rounded-[16px] p-4 flex items-center justify-between gap-3 transition-all cursor-pointer group shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
-            >
-              <div className="flex items-center gap-3.5 min-w-0">
-                {/* Category Icon */}
-                <div className="w-12 h-12 rounded-[16px] flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105"
-                  style={{ background: categoryStyle.bg, border: `1px solid ${categoryStyle.border}` }}>
-                  <CategoryIcon size={20} style={{ color: categoryStyle.color }} />
-                </div>
-
-                <div className="min-w-0 space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-[14px] font-bold text-[#1C1917] truncate">{circle.name}</h4>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex-shrink-0"
-                      style={{ background: categoryStyle.bg, color: categoryStyle.color, border: `1px solid ${categoryStyle.border}` }}>
-                      {circle.category}
-                    </span>
+            return (
+              <div
+                key={circle.id}
+                onClick={() => handleJoinClick(circle)}
+                className="bg-white border border-black/10 hover:border-[var(--accent)]/40 rounded-[26px] p-4 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 transition-all duration-150 hover:shadow-[0_4px_16px_rgba(124,58,237,0.06)] active:scale-[0.99] cursor-pointer group"
+              >
+                <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
+                  {/* Category Icon */}
+                  <div
+                    className="w-12 h-12 rounded-[20px] flex items-center justify-center flex-shrink-0 transition-transform duration-150 group-hover:scale-105"
+                    style={{ background: categoryStyle.bg, border: `1px solid ${categoryStyle.border}` }}
+                  >
+                    <CategoryIcon size={22} style={{ color: categoryStyle.color }} />
                   </div>
 
-                  <p className="text-[12px] text-[#78716C] font-normal truncate">{circle.desc || 'Campus Community'}</p>
-
-                  <div className="flex items-center gap-1.5 pt-0.5 pb-0.5">
-                    {circle.host_name ? (
-                      <div className="flex items-center gap-1.5">
-                        {circle.host_photo ? (
-                          <img src={circle.host_photo} alt={circle.host_name} className="w-4 h-4 rounded-full object-cover border border-[#E7E5E4]" />
-                        ) : (
-                          <div className="w-4 h-4 rounded-full bg-purple-100" />
-                        )}
-                        <span className="text-[11px] font-medium text-[#78716C]">by {circle.host_name.split(' ')[0]}</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1">
-                        <span className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-wide bg-[var(--accent-tint-10)] px-1.5 py-0.5 rounded-md border border-[var(--accent-tint-20)]">
-                          by Meova
+                  {/* Info */}
+                  <div className="min-w-0 flex-1">
+                    {/* Category Pill & Verified Badge */}
+                    <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                      <span
+                        className="px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider flex-shrink-0"
+                        style={{ background: categoryStyle.bg, color: categoryStyle.color, border: `1px solid ${categoryStyle.border}` }}
+                      >
+                        {circle.category}
+                      </span>
+                      {circle.isVerified && (
+                        <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 flex-shrink-0">
+                          <Check size={9} className="stroke-[3]" /> Verified
                         </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-0.5">
-                    <div className="flex items-center gap-1 text-[11px] font-medium text-[#78716C]">
-                      <Users size={12} className="text-[#A8A29E]" />
-                      <span>{circle.member_count} members</span>
+                      )}
                     </div>
 
-                    {circle.isPaid ? (
-                      <span className="text-[10px] font-bold text-[var(--accent)] px-2 py-0.5 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center gap-0.5">
-                        <Zap size={10} className="fill-[var(--accent)] text-[var(--accent)]" />
-                        {circle.price} Sparks
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-bold text-emerald-700 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
-                        Free
-                      </span>
-                    )}
+                    {/* Full Title (untruncated) */}
+                    <h4 className="text-[14px] sm:text-[15px] font-bold text-black tracking-tight leading-snug line-clamp-1 group-hover:text-[var(--accent)] transition-colors">
+                      {circle.name}
+                    </h4>
+
+                    {/* Description */}
+                    <p className="text-[12px] text-black/60 font-normal line-clamp-1 mt-0.5 leading-relaxed">
+                      {circle.desc || circle.description || 'Official campus community on Meova.'}
+                    </p>
+
+                    {/* Stats & Pricing */}
+                    <div className="flex items-center gap-2 pt-1.5 text-[11px] font-medium text-black/50 flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <Users size={12} className="text-black/40" />
+                        <span className="font-semibold text-black/80">{circle.member_count} members</span>
+                      </div>
+                      <span className="text-black/20">·</span>
+                      {circle.host_name ? (
+                        <div className="flex items-center gap-1">
+                          {circle.host_photo ? (
+                            <img src={circle.host_photo} alt="" className="w-3.5 h-3.5 rounded-full object-cover border border-black/10" />
+                          ) : null}
+                          <span>by {circle.host_name.split(' ')[0]}</span>
+                        </div>
+                      ) : (
+                        <span className="text-[9.5px] font-bold text-[var(--accent)] uppercase bg-[var(--accent-tint-10)] px-1.5 py-0.5 rounded-md border border-[var(--accent-tint-20)]">
+                          Campus Circle
+                        </span>
+                      )}
+                      <span className="text-black/20">·</span>
+                      {circle.isPaid ? (
+                        <span className="text-[10px] font-bold text-[var(--accent)] px-2 py-0.5 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center gap-0.5">
+                          <Zap size={10} className="fill-[var(--accent)] text-[var(--accent)]" />
+                          {circle.price} Sparks
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-emerald-700 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                          Free
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const circleUrl = `${window.location.origin}/circles?id=${circle.id}`;
-                    if (typeof window !== 'undefined' && navigator.share) {
-                      navigator.share({
-                        title: `${circle.name} on Meova`,
-                        text: circle.desc || `Join the ${circle.name} community on Meova!`,
-                        url: circleUrl
-                      }).catch(() => {});
-                    } else {
-                      navigator.clipboard.writeText(circleUrl);
-                      toast.success('Community link copied!');
-                    }
-                  }}
-                  className="p-2 rounded-xl text-[#78716C] hover:text-[#1C1917] hover:bg-[var(--accent-tint-10)] transition-colors cursor-pointer"
-                  title="Share Community"
-                >
-                  <Share2 size={15} />
-                </button>
-
-                {isHost ? (
+                {/* Actions */}
+                <div className="flex items-center gap-1.5 flex-shrink-0">
                   <button
-                    onClick={(e) => { e.stopPropagation(); setManageCircle(circle); }}
-                    className="px-3 py-2 rounded-xl text-[10.5px] font-bold uppercase tracking-wider bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] hover:bg-[var(--accent-tint-10)] transition-colors cursor-pointer"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const circleUrl = `${window.location.origin}/discover?tab=circles&id=${circle.id}`;
+                      if (typeof window !== 'undefined' && navigator.share) {
+                        navigator.share({
+                          title: `${circle.name} on Meova`,
+                          text: circle.desc || `Join the ${circle.name} community on Meova!`,
+                          url: circleUrl
+                        }).catch(() => {});
+                      } else {
+                        navigator.clipboard.writeText(circleUrl);
+                        toast.success('Community link copied!');
+                      }
+                    }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-black/60 hover:text-black hover:bg-black/5 border border-black/10 transition-all active:scale-95 cursor-pointer"
+                    title="Share Community"
                   >
-                    Manage
+                    <Share2 size={14} />
                   </button>
-                ) : isJoined ? (
-                  <button
-                    onClick={(e) => handleLeaveCircle(circle, e)}
-                    className="p-2 rounded-xl text-[#A8A29E] hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all cursor-pointer"
-                    title="Leave Community"
-                  >
-                    <LogOut size={14} />
-                  </button>
-                ) : null}
 
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleJoinClick(circle); }}
-                  disabled={joiningId === circle.id}
-                  className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 flex-shrink-0 flex items-center gap-1.5 shadow-[0_2px_8px_rgba(28,25,23,0.06)] ${
-                    isJoined
-                      ? 'bg-black text-white hover:bg-black/90'
-                      : 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]'
-                  }`}
-                >
-                  {joiningId === circle.id ? 'Joining...' : (isJoined ? 'Open' : 'Join')}
-                </button>
+                  {isHost ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setManageCircle(circle); }}
+                      className="px-3 h-9 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] hover:bg-[var(--accent-tint-20)] transition-all cursor-pointer whitespace-nowrap"
+                    >
+                      Manage
+                    </button>
+                  ) : isJoined ? (
+                    <button
+                      onClick={(e) => handleLeaveCircle(circle, e)}
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-black/40 hover:text-rose-600 hover:bg-rose-50 border border-black/10 hover:border-rose-200 transition-all cursor-pointer"
+                      title="Leave Community"
+                    >
+                      <LogOut size={13} />
+                    </button>
+                  ) : null}
+
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleJoinClick(circle); }}
+                    disabled={joiningId === circle.id}
+                    className={`h-9 px-4 rounded-full text-xs font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 flex-shrink-0 whitespace-nowrap flex items-center gap-1.5 ${
+                      isJoined
+                        ? 'bg-black text-white hover:bg-black/90 shadow-sm'
+                        : 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] shadow-[0_2px_10px_rgba(124,58,237,0.25)]'
+                    }`}
+                  >
+                    {joiningId === circle.id ? 'Joining...' : (isJoined ? 'Open' : 'Join')}
+                  </button>
+                </div>
               </div>
-            </div>
-          );
-        })
-      )}
+            );
+          })
+        )}
       </div>
 
-      {/* ── CREATE COMMUNITY MODAL ────────────────────────── */}
+      {/* Create Community Modal */}
       <CreateCircleModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
@@ -549,7 +633,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
         }}
       />
 
-      {/* ── HOST COMMUNITY DASHBOARD MODAL ────────────────── */}
+      {/* Host Community Dashboard Modal */}
       {manageCircle && (
         <HostCircleDashboardModal
           isOpen={Boolean(manageCircle)}
@@ -559,30 +643,30 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
         />
       )}
 
-      {/* ── GROUP RULES & MEETING AGENDA PRE-JOIN MODAL ───────── */}
+      {/* Group Rules & Guidelines Pre-Join Modal */}
       {rulesCircle && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
           onClick={() => setRulesCircle(null)}
         >
           <div 
-            className="w-full max-w-sm bg-white rounded-[16px] p-6 space-y-4 animate-in fade-in zoom-in duration-200 shadow-2xl border border-[#E7E5E4]"
+            className="w-full max-w-sm bg-white rounded-[28px] p-6 space-y-4 shadow-2xl border border-black/10 anim-scale-in"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 border-b border-[#E7E5E4] pb-3">
-              <div className="w-10 h-10 rounded-[16px] bg-[var(--accent-tint-10)] flex items-center justify-center flex-shrink-0 border border-[var(--accent-tint-20)]">
-                <Users size={18} className="text-[var(--accent)]" />
+            <div className="flex items-center gap-3 border-b border-black/10 pb-3">
+              <div className="w-11 h-11 rounded-[20px] bg-[var(--accent-tint-10)] flex items-center justify-center flex-shrink-0 border border-[var(--accent-tint-20)]">
+                <Users size={20} className="text-[var(--accent)]" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold text-[#1C1917] truncate">{rulesCircle.name}</h3>
+                <h3 className="text-sm font-bold text-black truncate">{rulesCircle.name}</h3>
                 <p className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-wider">{rulesCircle.category} Community</p>
               </div>
             </div>
 
             <div className="space-y-3 py-1 text-left">
-              <h4 className="text-xs font-bold text-[#1C1917] uppercase tracking-wider">Community Guidelines & Rules:</h4>
-              <ul className="space-y-2 text-xs font-medium text-[#78716C]">
+              <h4 className="text-xs font-bold text-black uppercase tracking-wider">Community Guidelines & Rules:</h4>
+              <ul className="space-y-2 text-xs font-medium text-black/70">
                 <li className="flex items-start gap-2">
                   <span className="w-4 h-4 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
                   <span><strong>Respect & Kindness:</strong> Maintain constructive, friendly discussions with campus peers.</span>
@@ -601,15 +685,15 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => setRulesCircle(null)}
-                className="flex-1 py-3 rounded-[16px] text-xs font-bold text-[#78716C] bg-[var(--accent-tint-10)] hover:bg-[var(--accent-tint-10)] transition-colors"
+                className="flex-1 py-2.5 rounded-full text-xs font-bold text-black/70 bg-black/5 hover:bg-black/10 transition-colors cursor-pointer"
               >
                 Decline
               </button>
               <button
                 onClick={confirmJoinCircle}
-                className="flex-1 py-3 rounded-[16px] text-xs font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 rounded-full text-xs font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all shadow-[0_2px_10px_rgba(124,58,237,0.25)] flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                {rulesCircle.isPaid ? `Agree & Join (${rulesCircle.price} Sparks)` : 'Agree & Join Group'}
+                {rulesCircle.isPaid ? `Agree & Join (${rulesCircle.price} Sparks)` : 'Agree & Join'}
               </button>
             </div>
           </div>

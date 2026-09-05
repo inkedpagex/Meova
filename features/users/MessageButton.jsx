@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MessageSquare, Loader2 } from '@/lib/icons';
+import { MessageDotsIcon, Loader2 } from '@/lib/icons';
 import { toast } from '../../lib/toast';
 import { useUserContext } from '../../components/providers/UserProvider';
 
@@ -46,14 +46,14 @@ export default function MessageButton({ targetUid }) {
     <button
       onClick={handleMessage}
       disabled={loading}
-      className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-full text-xs font-bold text-black bg-white border border-black/10 hover:border-purple-300 hover:bg-purple-50/40 transition-all active:scale-95 shadow-xs hover:shadow-sm whitespace-nowrap cursor-pointer disabled:opacity-50"
+      className="meova-message-pill flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-full text-xs font-bold transition-all active:scale-95 whitespace-nowrap cursor-pointer disabled:opacity-50 select-none"
     >
       {loading ? (
         <Loader2 className="w-4 h-4 text-[#7C3AED] flex-shrink-0 animate-spin" />
       ) : (
-        <MessageSquare className="w-4 h-4 text-[#7C3AED] flex-shrink-0" />
+        <MessageDotsIcon size={16} className="text-[#7C3AED] flex-shrink-0" />
       )}
-      {loading ? 'Connecting...' : 'Message'}
+      <span className="leading-none font-bold tracking-tight">{loading ? 'Connecting...' : 'Message'}</span>
     </button>
   );
 }

@@ -9,6 +9,7 @@ import { supabaseAdmin } from '../../../lib/supabase/admin';
 import { spendSparks, creditSparks } from '../../../lib/wallet';
 import { sendPushToUser } from '../../../lib/pushNotifications';
 import { rateLimit, getClientIp } from '../../../lib/rateLimit';
+import { calculateMeetupRate } from '../../../lib/pricing';
 
 export async function GET() {
   try {
@@ -126,14 +127,35 @@ export async function POST(request) {
       }, { status: 429 });
     }
 
-    // Dynamic Pricing: Compute rate based on host's verified completed meetups
-    const { count: hostCompletedMeets } = await supabaseAdmin
-      .from('bookings')
-      .select('*', { count: 'exact', head: true })
-      .eq('host_id', meetTargetId)
-      .in('status', ['Meeting Completed', 'Completed', 'completed']);
+    // Tier Verification & Matching Gating
+    const { data: peerProfiles, error: profErr } = await supabaseAdmin
+      .from('profiles')
+      .select('id, tier, current_meeting_rate, completed_meeting_count, completed_meets_count')
+      .in('id', [user.uid, meetTargetId]);
 
-    const priceAmount = calculateMeetupRate(hostCompletedMeets || 0);
+    const guestProfile = peerProfiles?.find((p) => p.id === user.uid);
+    const hostProfile = peerProfiles?.find((p) => p.id === meetTargetId);
+
+    const guestTier = guestProfile?.tier || 'not_verified';
+    const hostTier = hostProfile?.tier || 'not_verified';
+
+    // Enforcement: Verified peers only meet Verified peers; Unverified only meet Unverified
+    if (guestTier !== hostTier) {
+      return NextResponse.json(
+        { error: 'Meetups can only be scheduled between peers of the same tier.' },
+        { status: 403 }
+      );
+    }
+
+    // Dynamic Pricing:
+    // If unverified: Meeting is 100% Free (0 Sparks)
+    // If verified: Paid at host's current tier rate
+    let priceAmount = 0;
+    if (hostTier === 'verified') {
+      const hostMeetsCount = hostProfile?.completed_meeting_count ?? hostProfile?.completed_meets_count ?? 0;
+      priceAmount = hostProfile?.current_meeting_rate || calculateMeetupRate(hostMeetsCount);
+    }
+
     let sparksDeducted = false;
 
     if (priceAmount > 0) {
@@ -163,6 +185,9 @@ export async function POST(request) {
       location: location?.trim() || 'Campus',
       time_slot: formattedTimeSlot,
       agenda: `[CODE:${generatedCode}] ${formattedAgenda}`,
+      confirmed_by_initiator: false,
+      confirmed_by_recipient: false,
+      counted_for_tier: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -373,18 +398,63 @@ export async function PATCH(request) {
     }
 
     if (action === 'complete') {
-      if (booking.status === 'Meeting Completed') {
-        return NextResponse.json({ error: 'Already completed' }, { status: 400 });
+      if (booking.status === 'Meeting Completed' && booking.counted_for_tier) {
+        return NextResponse.json({ error: 'Already completed and counted' }, { status: 400 });
       }
 
-      const hostShare = Math.floor(price * 0.9);
       const now = new Date().toISOString();
+      const isInitiator = user.uid === booking.guest_id;
+      const newConfirmedByInitiator = isInitiator ? true : Boolean(booking.confirmed_by_initiator);
+      const newConfirmedByRecipient = !isInitiator ? true : Boolean(booking.confirmed_by_recipient);
+      const mutuallyConfirmed = newConfirmedByInitiator && newConfirmedByRecipient;
+
+      // ── Step 1: If only one side confirmed, record their confirmation & notify peer
+      if (!mutuallyConfirmed) {
+        await supabaseAdmin
+          .from('bookings')
+          .update({
+            confirmed_by_initiator: newConfirmedByInitiator,
+            confirmed_by_recipient: newConfirmedByRecipient,
+            updated_at: now,
+          })
+          .eq('id', bookingId);
+
+        const otherUserId = isInitiator ? booking.host_id : booking.guest_id;
+        await supabaseAdmin.from('notifications').insert({
+          user_id: otherUserId,
+          sender_id: user.uid,
+          title: 'Confirm Meetup Completion',
+          message: `${user.full_name || 'Your peer'} marked the meetup as completed. Please confirm to finalize!`,
+          type: 'accepted',
+          read: false,
+          created_at: now,
+        });
+
+        return NextResponse.json({
+          success: true,
+          status: 'Awaiting Peer Confirmation',
+          mutually_confirmed: false,
+          confirmed_by_initiator: newConfirmedByInitiator,
+          confirmed_by_recipient: newConfirmedByRecipient,
+        });
+      }
+
+      // ── Step 2: Mutual Confirmation Complete (both participants confirmed)
+      const hostShare = Math.floor(price * 0.9);
 
       await supabaseAdmin
         .from('bookings')
-        .update({ status: 'Meeting Completed', completed_at: now, updated_at: now })
+        .update({
+          status: 'Meeting Completed',
+          confirmed_by_initiator: true,
+          confirmed_by_recipient: true,
+          completed_at: now,
+          updated_at: now,
+          counted_for_tier: true,
+        })
         .eq('id', bookingId);
 
+      // Release escrow payout to host if paid
       if (hostShare > 0) {
         await creditSparks(
           booking.host_id,
@@ -396,17 +466,110 @@ export async function PATCH(request) {
         );
       }
 
+      // ── Step 3: Anti-Fraud Cross-Checks before incrementing tier count
+      // Check for shared device tokens (multi-account self-dealing)
+      const { data: tokens } = await supabaseAdmin
+        .from('device_tokens')
+        .select('user_id, token')
+        .in('user_id', [booking.guest_id, booking.host_id]);
+
+      const guestTokens = new Set(tokens?.filter((t) => t.user_id === booking.guest_id).map((t) => t.token));
+      const hostTokens = new Set(tokens?.filter((t) => t.user_id === booking.host_id).map((t) => t.token));
+      let isSharedDevice = false;
+      for (const t of guestTokens) {
+        if (hostTokens.has(t)) {
+          isSharedDevice = true;
+          break;
+        }
+      }
+
+      // Check frequency of repeat meetings between this exact pair in the past 7 days
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { count: repeatCount } = await supabaseAdmin
+        .from('bookings')
+        .select('*', { count: 'exact', head: true })
+        .eq('guest_id', booking.guest_id)
+        .eq('host_id', booking.host_id)
+        .in('status', ['Meeting Completed', 'Completed'])
+        .gt('completed_at', sevenDaysAgo);
+
+      const isSuspicious = isSharedDevice || (repeatCount || 0) >= 4;
+
+      if (isSuspicious) {
+        // Flag both accounts for review and pause tier progression
+        await supabaseAdmin.from('user_reports').insert([
+          {
+            reported_user_id: booking.host_id,
+            reporter_id: user.uid,
+            reason: 'Self-dealing meeting pattern: shared device or abnormal repeat meetup frequency.',
+            created_at: now,
+          },
+          {
+            reported_user_id: booking.guest_id,
+            reporter_id: user.uid,
+            reason: 'Self-dealing meeting pattern: shared device or abnormal repeat meetup frequency.',
+            created_at: now,
+          },
+        ]).catch(() => {});
+      } else {
+        // Increment tier progression count & update dynamic meeting rate
+        const { data: hostProf } = await supabaseAdmin
+          .from('profiles')
+          .select('id, completed_meeting_count, completed_meets_count, tier')
+          .eq('id', booking.host_id)
+          .maybeSingle();
+
+        if (hostProf) {
+          const nextHostCount = (hostProf.completed_meeting_count ?? hostProf.completed_meets_count ?? 0) + 1;
+          const nextRate = calculateMeetupRate(nextHostCount);
+          await supabaseAdmin
+            .from('profiles')
+            .update({
+              completed_meeting_count: nextHostCount,
+              completed_meets_count: nextHostCount,
+              current_meeting_rate: nextRate,
+              updated_at: now,
+            })
+            .eq('id', booking.host_id);
+        }
+
+        const { data: guestProf } = await supabaseAdmin
+          .from('profiles')
+          .select('id, completed_meeting_count, completed_meets_count, tier')
+          .eq('id', booking.guest_id)
+          .maybeSingle();
+
+        if (guestProf) {
+          const nextGuestCount = (guestProf.completed_meeting_count ?? guestProf.completed_meets_count ?? 0) + 1;
+          const nextGuestRate = calculateMeetupRate(nextGuestCount);
+          await supabaseAdmin
+            .from('profiles')
+            .update({
+              completed_meeting_count: nextGuestCount,
+              completed_meets_count: nextGuestCount,
+              current_meeting_rate: nextGuestRate,
+              updated_at: now,
+            })
+            .eq('id', booking.guest_id);
+        }
+      }
+
       await supabaseAdmin.from('notifications').insert({
         user_id: booking.host_id,
         sender_id: booking.guest_id,
         title: 'Meetup Completed',
-        message: `Your meetup was marked completed. +${hostShare} Sparks added to your Creator Balance!`,
+        message: `Your meetup was mutually confirmed completed.${hostShare > 0 ? ` +${hostShare} Sparks added to your Creator Balance!` : ''}`,
         type: 'sparks',
         read: false,
         created_at: now,
       });
 
-      return NextResponse.json({ success: true, status: 'Meeting Completed' });
+      return NextResponse.json({
+        success: true,
+        status: 'Meeting Completed',
+        mutually_confirmed: true,
+        counted_for_tier: !isSuspicious,
+      });
     }
 
     if (action === 'cancel') {

@@ -5,12 +5,13 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, CreditCard, ArrowUpRight, Users, Radio, Sparkles, ShieldCheck, ArrowLeft } from '@/lib/icons';
 
 const ADMIN_TABS = [
-  { href: '/admin',             label: 'Dashboard',   Icon: LayoutDashboard },
-  { href: '/admin/payments',    label: 'Payments',    Icon: CreditCard },
-  { href: '/admin/withdrawals', label: 'Withdrawals', Icon: ArrowUpRight },
-  { href: '/admin/campaigns',   label: 'Stories',     Icon: Sparkles },
-  { href: '/admin/communities', label: 'Circles',     Icon: Radio },
-  { href: '/admin/users',       label: 'Users',       Icon: Users },
+  { href: '/admin',               label: 'Dashboard',     Icon: LayoutDashboard },
+  { href: '/admin/verifications', label: 'Verifications', Icon: ShieldCheck },
+  { href: '/admin/payments',      label: 'Payments',      Icon: CreditCard },
+  { href: '/admin/withdrawals',   label: 'Withdrawals',   Icon: ArrowUpRight },
+  { href: '/admin/campaigns',     label: 'Stories',       Icon: Sparkles },
+  { href: '/admin/communities',   label: 'Circles',       Icon: Radio },
+  { href: '/admin/users',         label: 'Users',         Icon: Users },
 ];
 
 export default function AdminHeaderClient() {

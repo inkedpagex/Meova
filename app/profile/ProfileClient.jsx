@@ -18,8 +18,10 @@ import { updateProfileAdmin } from '../../features/profile/profile.actions';
 import { toast } from '../../lib/toast';
 import PWAInstallModal from '../../components/PWAInstallModal';
 import ZoomableProfileAvatar from '../../components/ZoomableProfileAvatar';
+import CampusMomentsGallery from '../../components/CampusMomentsGallery';
 import { formatPostDate } from '../../utils/dateFormatter';
 import HostBadge from '../../components/HostBadge';
+import VerificationModal from '../../components/verification/VerificationModal';
 
 const InstagramIcon = ({ size = 14 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -71,6 +73,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
   const [isEditing, setIsEditing] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [isIdOn, setIsIdOn] = useState(resolvedProfile?.isIdOn !== undefined ? resolvedProfile.isIdOn : true);
   const [copied, setCopied] = useState(false);
 
@@ -443,6 +446,36 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
 
           {/* ── PROFILE HUB MENU (Blueprint Section 6) ────────────────── */}
           <div className="bg-white border border-[#E7E5E4] rounded-[16px] overflow-hidden divide-y divide-[var(--border-hairline)] shadow-xs">
+            {/* 0. Campus Trust Verification */}
+            <button
+              onClick={() => setShowVerifyModal(true)}
+              className="w-full flex items-center justify-between p-4 hover:bg-[#F5F5F4] transition-colors group cursor-pointer text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center">
+                  <ShieldCheck size={16} />
+                </div>
+                <div>
+                  <span className="text-[14px] font-bold text-[#1C1917] group-hover:text-[var(--accent)] transition-colors">Campus Verification</span>
+                  <span className="text-[11px] text-[#78716C] block">
+                    {profile?.tier === 'verified'
+                      ? 'Verified campus account · Peer calling unlocked'
+                      : 'Free Meet tier · Verify student ID to unlock calling'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                  profile?.tier === 'verified'
+                    ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
+                    : 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]'
+                }`}>
+                  {profile?.tier === 'verified' ? 'Verified' : 'Get Verified'}
+                </span>
+                <ChevronRight size={16} className="text-[#A8A29E] group-hover:text-[var(--accent)]" />
+              </div>
+            </button>
+
             {/* 1. Wallet */}
             <button
               onClick={() => router.push('/wallet')}
@@ -458,7 +491,10 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                 </div>
               </div>
               <div className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--accent)]">
-                <span>{sparksBalance.toLocaleString()} ⚡</span>
+                <span className="flex items-center gap-1">
+                  <span>{sparksBalance.toLocaleString()}</span>
+                  <Zap size={13} className="fill-[var(--accent)] text-[var(--accent)]" />
+                </span>
                 <ChevronRight size={16} className="text-[#A8A29E] group-hover:text-[var(--accent)]" />
               </div>
             </button>
@@ -557,76 +593,13 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
               </button>
             </div>
 
-            {posts.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {posts.map((post) => {
-                  const hasImage = post.media_urls && post.media_urls.length > 0;
-                  const firstImg = hasImage ? post.media_urls[0] : null;
-
-                  return (
-                    <div 
-                      key={post.id}
-                      className="group relative rounded-2xl overflow-hidden border border-[#E7E5E4] bg-[#FAFAF8] flex flex-col justify-between aspect-square transition-all duration-200 hover:shadow-md hover:border-[var(--accent-tint-20)]"
-                    >
-                      {hasImage ? (
-                        <>
-                          <img 
-                            src={firstImg} 
-                            alt="Campus Moment" 
-                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-                        </>
-                      ) : (
-                        <div className="p-3.5 flex-1 flex flex-col justify-center">
-                          <p className="text-xs font-semibold text-[#1C1917] line-clamp-4 leading-relaxed">
-                            {post.content}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Top Action / Delete */}
-                      <div className="relative z-10 p-2 flex justify-end">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeletePost(post.id);
-                          }}
-                          disabled={deletingPostId === post.id}
-                          className="w-7 h-7 rounded-full bg-white/90 backdrop-blur-md text-[#78716C] hover:text-rose-600 hover:bg-white shadow-sm flex items-center justify-center transition-all cursor-pointer active:scale-90"
-                          title="Delete Moment"
-                        >
-                          {deletingPostId === post.id ? (
-                            <Loader2 size={12} className="animate-spin text-rose-500" />
-                          ) : (
-                            <Trash2 size={12} />
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Bottom Info Bar */}
-                      <div className="relative z-10 p-2.5 flex items-center justify-between text-[10px] font-bold text-white">
-                        <span className="flex items-center gap-1 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full">
-                          <Heart size={10} className="fill-rose-500 text-rose-500" />
-                          <span>{post.likes_count || 0}</span>
-                        </span>
-                        <span className="text-[9px] opacity-80 font-medium">
-                          {formatPostDate(post.created_at)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <EmptyState
-                icon={Camera}
-                title="No Moments Shared Yet"
-                subtitle="Share coffee meets, campus vibes, or food photos on the live feed."
-                action="Share a Moment"
-                onAction={() => router.push('/?action=create-post')}
-              />
-            )}
+            <CampusMomentsGallery
+              posts={posts}
+              currentUserId={profile?.id}
+              author={profile}
+              canDelete={true}
+              onDeletePost={handleDeletePost}
+            />
           </div>
 
         </div>
@@ -949,6 +922,16 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
       <PWAInstallModal
         isOpen={showInstallGuide}
         onClose={() => setShowInstallGuide(false)}
+      />
+
+      {/* ── Campus Trust Verification Modal ────────────────────── */}
+      <VerificationModal
+        isOpen={showVerifyModal}
+        onClose={() => setShowVerifyModal(false)}
+        onVerified={() => {
+          setProfile(prev => ({ ...prev, tier: 'verified' }));
+          router.refresh();
+        }}
       />
     </>
   );

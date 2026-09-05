@@ -28,18 +28,21 @@ export async function GET() {
     // Use derived ledger balance with fallback to cached wallet
     const wallet = {
       ...cachedWallet,
-      purchased: derivedInfo.purchased || cachedWallet.purchased || 0,
-      bonus: derivedInfo.bonus || cachedWallet.bonus || 0,
-      creator: derivedInfo.creator || cachedWallet.creator || 0,
+      purchased: derivedInfo.purchased ?? (cachedWallet.purchased || 0),
+      earned: derivedInfo.earned ?? (cachedWallet.creator || 0),
+      withdrawable: derivedInfo.withdrawable ?? (cachedWallet.creator || 0),
+      creator: derivedInfo.earned ?? (cachedWallet.creator || 0),
+      bonus: derivedInfo.bonus ?? (cachedWallet.bonus || 0),
       total_balance: derivedInfo.balance,
       ledger_entries: derivedInfo.ledgerEntryCount || 0,
     };
 
-    // Format transactions list
+    // Format transactions list with bucket tags
     const transactions = (ledgerHistory || []).map(tx => ({
       id: tx.id,
       amount: Number(tx.amount || 0),
       type: tx.type,
+      bucket: tx.bucket || (tx.spark_type === 'creator' || tx.spark_type === 'earned' ? 'earned' : 'purchased'),
       description: tx.description || tx.title || 'Transaction',
       created_at: tx.created_at,
       status: tx.status || 'completed',
@@ -109,3 +112,4 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+

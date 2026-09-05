@@ -87,12 +87,12 @@ export default function ThemeSelectorModal() {
             </div>
           </div>
 
-          {/* ── Accent Color Swatches (5 Colors) ── */}
+          {/* ── Accent Color (Permanent Royal Purple) ── */}
           <div>
             <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] block mb-2.5">
-              Accent Color (1-Click Switch)
+              Permanent Signature Color
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2">
               {ACCENTS.map((acc) => {
                 const isSelected = accent === acc.id;
                 return (

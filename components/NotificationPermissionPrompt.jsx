@@ -14,10 +14,10 @@ const PROMPT_KEY = 'Meova_notif_prompted';
 
 export default function NotificationPermissionPrompt({ user }) {
   const [show, setShow] = useState(false);
+  const userId = user?.uid || user?.id;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const userId = user?.uid || user?.id;
     if (!userId) return;
     if (!('Notification' in window)) return;
     if (Notification.permission !== 'default') return; // already granted or denied

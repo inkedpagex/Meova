@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '../../lib/supabase/client';
 
 const UserContext = createContext(null);
@@ -18,40 +18,93 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
   const [onlineUserIds, setOnlineUserIds] = useState(() => new Set());
   const [onlinePresenceMap, setOnlinePresenceMap] = useState(() => new Map());
 
+  // Deduplication & throttle refs
+  const isRefreshingWalletRef = useRef(false);
+  const lastWalletFetchTimeRef = useRef(0);
+
   const setUser = useCallback((newUser) => {
     if (!newUser) {
       setUserState(null);
       return;
     }
     const normalized = { ...newUser, id: newUser.id || newUser.uid, uid: newUser.id || newUser.uid };
-    setUserState(normalized);
+    setUserState((prev) => {
+      if (
+        prev &&
+        prev.id === normalized.id &&
+        prev.role === normalized.role &&
+        prev.full_name === normalized.full_name &&
+        prev.photo_url === (normalized.photo_url || normalized.avatar_url) &&
+        prev.profile_complete === normalized.profile_complete
+      ) {
+        return prev;
+      }
+      return normalized;
+    });
   }, []);
 
   useEffect(() => {
-    if (initialUser !== undefined) {
+    if (initialUser) {
       setUser(initialUser);
     }
-    if (initialWallet !== undefined) setWallet(initialWallet);
-    if (initialPeople !== undefined) setPeople(initialPeople);
-  }, [initialUser, initialWallet, initialPeople, setUser]);
+    if (initialWallet) {
+      setWallet((prev) => {
+        if (
+          prev &&
+          prev.purchased === initialWallet.purchased &&
+          prev.bonus === initialWallet.bonus &&
+          prev.creator === initialWallet.creator &&
+          prev.total_balance === initialWallet.total_balance
+        ) {
+          return prev;
+        }
+        return initialWallet;
+      });
+    }
+    if (initialPeople) setPeople(initialPeople);
+  }, [initialUser?.id, initialUser?.uid, initialWallet?.updated_at, initialPeople, setUser]);
 
-  // Real-time wallet sync
-  const refreshWallet = useCallback(async () => {
+  // Real-time wallet sync with concurrency guard & 4s throttling
+  const refreshWallet = useCallback(async (force = false) => {
     const uid = user?.id || user?.uid;
     if (!uid) return;
+
+    const now = Date.now();
+    if (!force && now - lastWalletFetchTimeRef.current < 4000) {
+      return;
+    }
+    if (isRefreshingWalletRef.current) return;
+
+    isRefreshingWalletRef.current = true;
+    lastWalletFetchTimeRef.current = now;
+
     try {
       const res = await fetch('/api/wallet', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         if (data.wallet) {
-          setWallet(data.wallet);
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('wallet-updated', { detail: data.wallet }));
-          }
+          setWallet((prev) => {
+            const nw = data.wallet;
+            const hasChanged =
+              !prev ||
+              prev.purchased !== nw.purchased ||
+              prev.bonus !== nw.bonus ||
+              prev.creator !== nw.creator ||
+              prev.total_balance !== nw.total_balance;
+
+            if (hasChanged && typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('wallet-updated', { detail: nw }));
+            }
+            return hasChanged ? nw : prev;
+          });
         }
       }
-    } catch {}
-  }, [user]);
+    } catch {
+      // silent
+    } finally {
+      isRefreshingWalletRef.current = false;
+    }
+  }, [user?.id, user?.uid]);
 
   // ── Real-Time Presence Hook via Supabase WebSockets ─────────────────────────
   useEffect(() => {
@@ -193,9 +246,10 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
     const uid = user?.id || user?.uid;
     if (!uid) return;
 
-    const onFocus = () => refreshWallet();
+    const onFocus = () => refreshWallet(false);
     window.addEventListener('focus', onFocus);
-    window.addEventListener('wallet-refresh-request', onFocus);
+    const onRefreshRequest = () => refreshWallet(true);
+    window.addEventListener('wallet-refresh-request', onRefreshRequest);
 
     let channel = null;
     if (supabase) {
@@ -210,13 +264,23 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
             filter: `user_id=eq.${uid}`,
           },
           (payload) => {
-            if (payload.new) {
-              setWallet(payload.new);
-              if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('wallet-updated', { detail: payload.new }));
-              }
+            if (payload.new && typeof payload.new === 'object' && Object.keys(payload.new).length > 0) {
+              setWallet((prev) => {
+                const nw = payload.new;
+                const hasChanged =
+                  !prev ||
+                  prev.purchased !== nw.purchased ||
+                  prev.bonus !== nw.bonus ||
+                  prev.creator !== nw.creator ||
+                  prev.total_balance !== nw.total_balance;
+
+                if (hasChanged && typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('wallet-updated', { detail: nw }));
+                }
+                return hasChanged ? nw : prev;
+              });
             } else {
-              refreshWallet();
+              refreshWallet(true);
             }
           }
         )
@@ -225,30 +289,43 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
 
     return () => {
       window.removeEventListener('focus', onFocus);
-      window.removeEventListener('wallet-refresh-request', onFocus);
+      window.removeEventListener('wallet-refresh-request', onRefreshRequest);
       if (channel && supabase) {
         supabase.removeChannel(channel);
       }
     };
-  }, [user, refreshWallet]);
+  }, [user?.id, user?.uid, refreshWallet]);
+
+  const contextValue = useMemo(() => ({
+    user,
+    setUser,
+    wallet,
+    setWallet,
+    people,
+    setPeople,
+    refreshWallet,
+    onlineUserIds,
+    onlinePresenceMap,
+    onlineUsers,
+    onlineCount,
+    isUserOnline,
+  }), [
+    user,
+    setUser,
+    wallet,
+    setWallet,
+    people,
+    setPeople,
+    refreshWallet,
+    onlineUserIds,
+    onlinePresenceMap,
+    onlineUsers,
+    onlineCount,
+    isUserOnline,
+  ]);
 
   return (
-    <UserContext.Provider
-      value={{
-        user,
-        setUser,
-        wallet,
-        setWallet,
-        people,
-        setPeople,
-        refreshWallet,
-        onlineUserIds,
-        onlinePresenceMap,
-        onlineUsers,
-        onlineCount,
-        isUserOnline,
-      }}
-    >
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );

@@ -137,6 +137,65 @@ export async function POST(request, { params }) {
     const otherId = participants.find(p => String(p) !== String(user.uid) && String(p) !== String(user.id));
     const nowIso = new Date().toISOString();
 
+    // ── Unverified Tier Messaging Cap: Max 5 distinct recipients per calendar day ──
+    const { data: senderProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('tier')
+      .eq('id', user.uid)
+      .maybeSingle();
+
+    const isUnverified = (senderProfile?.tier || 'not_verified') === 'not_verified';
+
+    if (isUnverified && otherId) {
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      const todayStartIso = todayStart.toISOString();
+
+      const { data: todayMessages } = await supabaseAdmin
+        .from('chat_messages')
+        .select('chat_id')
+        .eq('sender_id', user.uid)
+        .gte('created_at', todayStartIso);
+
+      const distinctRecipients = new Set();
+      const chatIds = Array.from(new Set(todayMessages?.map(m => m.chat_id) || []));
+
+      // Resolve recipient IDs from today's chats
+      for (const cId of chatIds) {
+        if (cId === chatId) {
+          distinctRecipients.add(otherId);
+          continue;
+        }
+        const parts = cId.split('_');
+        if (parts.length === 2 && parts.includes(user.uid)) {
+          const rec = parts.find(p => p !== user.uid);
+          if (rec) distinctRecipients.add(rec);
+        }
+      }
+
+      // If other chats weren't simple direct IDs, query their participants
+      const unresolvedChatIds = chatIds.filter(cId => !cId.includes('_') && cId !== chatId);
+      if (unresolvedChatIds.length > 0) {
+        const { data: moreChats } = await supabaseAdmin
+          .from('chats')
+          .select('participants')
+          .in('id', unresolvedChatIds);
+        
+        moreChats?.forEach(c => {
+          c.participants?.forEach(p => {
+            if (p !== user.uid) distinctRecipients.add(p);
+          });
+        });
+      }
+
+      if (!distinctRecipients.has(otherId) && distinctRecipients.size >= 5) {
+        return NextResponse.json(
+          { error: 'Daily new recipient limit reached (5 distinct peers/day). Verify your account to start unlimited conversations.' },
+          { status: 429 }
+        );
+      }
+    }
+
     const currentUnread = chatData?.unread_count || {};
     const updatedUnread = {
       ...currentUnread,

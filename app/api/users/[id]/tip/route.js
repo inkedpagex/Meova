@@ -69,11 +69,11 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: spendRes.error || 'Insufficient Sparks to send a tip' }, { status: 400 });
     }
 
-    // 2. Credit to receiver wallet (creator bucket)
+    // 2. Credit to receiver wallet (purchased bucket — Option A: Anti-Loophole Protection)
     const creditRes = await creditSparks(
       receiverId,
       TIP_AMOUNT,
-      'creator',
+      'purchased',
       'tip_received',
       `Received ${TIP_AMOUNT} Sparks tip from ${senderName}`,
       sender.uid

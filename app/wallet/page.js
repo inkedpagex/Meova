@@ -4,7 +4,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, Info, Zap, Plus, HelpCircle, Loader2, CheckCircle,
-  Download, Copy, Check, X, Clock, AlertCircle, RefreshCw, ShieldCheck
+  Download, Copy, Check, X, Clock, AlertCircle, RefreshCw, ShieldCheck,
+  ChevronDown, ChevronUp
 } from '@/lib/icons';
 import Skeleton from '../../components/Skeleton';
 import { toast } from '../../lib/toast';
@@ -59,6 +60,7 @@ export default function WalletPage() {
   const [selectedPack, setSelectedPack] = useState(PACKS[1]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [activeReservation, setActiveReservation] = useState(null);
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
 
   // Modal & Reservation State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -125,7 +127,6 @@ export default function WalletPage() {
 
   const openPaymentModal = async (pack = selectedPack) => {
     setSelectedPack(pack);
-    setIsModalOpen(true);
     setResLoading(true);
 
     try {
@@ -139,21 +140,29 @@ export default function WalletPage() {
         }),
       });
 
-      const data = await res.json();
-      if (res.ok && data.reservation) {
-        setCurrentReservation(data.reservation);
-        setTimeLeft(data.reservation.seconds_remaining || 300);
-      } else if (data.activeReservation) {
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        console.error('[openPaymentModal] JSON parse error:', jsonErr);
+      }
+
+      if (res.ok && (data?.reservation || data?.activeReservation)) {
+        const activeRes = data.reservation || data.activeReservation;
+        setCurrentReservation(activeRes);
+        setTimeLeft(activeRes.seconds_remaining || 300);
+        setIsModalOpen(true);
+      } else if (data?.activeReservation) {
         setCurrentReservation(data.activeReservation);
         setTimeLeft(data.activeReservation.seconds_remaining || 300);
-        toast('Resuming your active reservation.');
+        setIsModalOpen(true);
       } else {
-        toast.error(data.error || 'Failed to create reservation slot');
-        setIsModalOpen(false);
+        const errorMsg = data?.error || (res.status === 401 ? 'Please log in to recharge sparks.' : 'Failed to create reservation slot. Please try again.');
+        toast.error(errorMsg);
       }
     } catch (err) {
-      toast.error('Network error. Please try again.');
-      setIsModalOpen(false);
+      console.error('[openPaymentModal] network error:', err);
+      toast.error('Network connection issue. Please check your connection and try again.');
     } finally {
       setResLoading(false);
     }
@@ -262,7 +271,7 @@ export default function WalletPage() {
       ))}
 
       {/* Hero Balance Card (Derived Ledger Source) */}
-      <div className="relative rounded-[20px] p-6 mb-5 bg-white border border-[#E7E5E4] shadow-[0_2px_8px_rgba(28,25,23,0.06)] text-[#1C1917]">
+      <div className="relative rounded-[24px] p-6 mb-5 bg-white border border-[#E7E5E4] shadow-[0_2px_8px_rgba(28,25,23,0.06)] text-[#1C1917]">
         <div className="relative z-10">
           <div className="flex items-center justify-between gap-2 mb-1">
             <span className="text-[11px] font-bold uppercase tracking-widest text-[#78716C]">Your Balance</span>
@@ -278,37 +287,43 @@ export default function WalletPage() {
 
           {/* Breakdown */}
           {wallet && (
-            <div className="flex gap-6 mt-4 pt-4 border-t border-[#E7E5E4]">
-              {[
-                { label: 'Purchased', val: wallet.purchased || 0 },
-                { label: 'Bonus',     val: wallet.bonus || 0 },
-              ].map(({ label, val }) => (
-                <div key={label}>
-                  <p className="text-[10px] uppercase tracking-wider text-[#78716C] font-bold">{label}</p>
-                  <p className="text-sm font-bold text-[#1C1917]">{val} ⚡</p>
-                </div>
-              ))}
+            <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-[#E7E5E4]">
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-[#78716C] font-bold">Purchased</p>
+                <p className="text-sm font-bold text-[#1C1917] flex items-center gap-1 mt-0.5">
+                  <span>{(wallet.purchased || 0).toLocaleString()}</span>
+                  <Zap size={12} className="fill-[var(--accent)] text-[var(--accent)]" />
+                </p>
+                <span className="text-[9px] font-semibold text-[#78716C] block mt-0.5">In-app spend</span>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-emerald-700 font-bold">Earned</p>
+                <p className="text-sm font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
+                  <span>{(wallet.earned ?? wallet.creator ?? 0).toLocaleString()}</span>
+                  <Zap size={12} className="fill-emerald-500 text-emerald-500" />
+                </p>
+                <span className="text-[9px] font-bold text-emerald-700 block mt-0.5">Withdrawable</span>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-[#78716C] font-bold">Bonus</p>
+                <p className="text-sm font-bold text-[#1C1917] flex items-center gap-1 mt-0.5">
+                  <span>{(wallet.bonus || 0).toLocaleString()}</span>
+                  <Zap size={12} className="fill-amber-500 text-amber-500" />
+                </p>
+                <span className="text-[9px] font-semibold text-[#78716C] block mt-0.5">Promo sparks</span>
+              </div>
             </div>
           )}
-
-          <div className="flex gap-3 mt-5">
-            <button onClick={() => openPaymentModal(selectedPack)}
-              className="flex-1 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-xs uppercase tracking-wider py-3 px-5 rounded-full cursor-pointer active:scale-95 transition-all shadow-xs flex items-center justify-center gap-2">
-              <Plus size={15} strokeWidth={2.5} />
-              <span>Add Sparks</span>
-            </button>
-            <button onClick={() => router.push('/wallet/withdraw')}
-              className="flex-1 bg-white hover:bg-[var(--accent-tint-10)] text-[#1C1917] border border-[#E7E5E4] font-bold text-xs uppercase tracking-wider py-3 px-5 rounded-full cursor-pointer active:scale-95 transition-all shadow-xs">
-              Withdraw
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Quick Add (1:1 Ratio: 100 = ₹100, 250 = ₹250, 500 = ₹500, 1000 = ₹1000) */}
-      <div className="mb-5">
-        <span className="text-[10px] font-bold uppercase tracking-widest block mb-3 text-[#78716C]">Select Sparks Pack (1:1 Rate)</span>
-        <div className="grid grid-cols-4 gap-2 mb-3">
+      {/* 1. Recharge Sparks Section (Primary Action) */}
+      <div className="mb-5 bg-white border border-[#E7E5E4] rounded-[24px] p-5 shadow-[0_2px_8px_rgba(28,25,23,0.04)]">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#1C1917]">Recharge Sparks</span>
+          <span className="text-[10px] text-[#78716C] font-bold">1 Spark = ₹1</span>
+        </div>
+        <div className="grid grid-cols-4 gap-2 mb-4">
           {PACKS.map(p => (
             <button key={p.key} onClick={() => setSelectedPack(p)}
               className="py-3.5 rounded-[16px] flex flex-col items-center cursor-pointer transition-all active:scale-95 relative"
@@ -327,9 +342,36 @@ export default function WalletPage() {
             </button>
           ))}
         </div>
-        <button onClick={() => openPaymentModal(selectedPack)}
-          className="w-full py-4 rounded-full text-white font-bold text-[13px] uppercase tracking-wider cursor-pointer active:scale-[0.98] transition-all shadow-xs flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
-          <span>Recharge {selectedPack.sparks} Sparks · ₹{selectedPack.inr}</span>
+        <button 
+          onClick={() => openPaymentModal(selectedPack)}
+          disabled={resLoading}
+          className="w-full py-4 rounded-full text-white font-bold text-[13px] uppercase tracking-wider cursor-pointer active:scale-[0.98] transition-all shadow-xs flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] whitespace-nowrap flex-shrink-0 disabled:opacity-75">
+          {resLoading ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <Plus size={16} strokeWidth={2.5} />
+          )}
+          <span>{resLoading ? 'Opening...' : `Recharge ${selectedPack.sparks} Sparks · ₹${selectedPack.inr}`}</span>
+        </button>
+      </div>
+
+      {/* 2. Withdrawal Section (Secondary Action) */}
+      <div className="mb-5 bg-white border border-[#E7E5E4] rounded-[24px] p-5 shadow-[0_2px_8px_rgba(28,25,23,0.04)] flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#1C1917]">Creator Earnings</span>
+            <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.2 rounded-full">
+              ₹{(wallet?.earned ?? wallet?.creator ?? 0).toLocaleString()} Available
+            </span>
+          </div>
+          <p className="text-[11px] text-[#78716C] mt-0.5 font-medium">
+            Withdraw earned funds directly to your UPI ID (Min. ₹500)
+          </p>
+        </div>
+        <button onClick={() => router.push('/wallet/withdraw')}
+          className="bg-[#FAFAF8] hover:bg-white text-[#1C1917] border border-[#E7E5E4] font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded-full cursor-pointer active:scale-95 transition-all shadow-2xs flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
+          <span>Withdraw</span>
+          <ArrowLeft size={12} className="rotate-180 text-[#78716C]" />
         </button>
       </div>
 
@@ -349,7 +391,7 @@ export default function WalletPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {transactions.map(tx => {
+            {(showAllTransactions ? transactions : transactions.slice(0, 5)).map(tx => {
               const isPositive = tx.amount > 0 && tx.requestStatus !== 'rejected' && tx.requestStatus !== 'cancelled';
               const isPending = tx.requestStatus === 'pending' || tx.requestStatus === 'paid_claimed';
               const isRejected = tx.requestStatus === 'rejected';
@@ -375,13 +417,14 @@ export default function WalletPage() {
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <span className={`text-[12px] font-bold block ${
+                    <span className={`text-[12px] font-bold flex items-center justify-end gap-0.5 ${
                       isPositive ? 'text-emerald-600' :
                       isRejected ? 'text-rose-600 line-through' :
                       isPending ? 'text-amber-600' :
-                      'text-[#1C1917]'
+                      'text-black'
                     }`}>
-                      {isPositive ? '+' : ''}{tx.amount} ⚡
+                      <span>{isPositive ? '+' : ''}{tx.amount}</span>
+                      <Zap size={11} className="fill-current inline-block -mt-0.5" />
                     </span>
                     {tx.requestStatus && (
                       <span className="text-[9px] font-bold uppercase tracking-wider block mt-0.5 text-amber-600">
@@ -392,6 +435,17 @@ export default function WalletPage() {
                 </div>
               );
             })}
+
+            {transactions.length > 5 && (
+              <button
+                type="button"
+                onClick={() => setShowAllTransactions(prev => !prev)}
+                className="w-full mt-2 py-2.5 px-4 bg-white hover:bg-[#FAFAF8] border border-[#E7E5E4] rounded-[14px] text-[11px] font-bold text-[#1C1917] flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-98 shadow-2xs whitespace-nowrap flex-shrink-0"
+              >
+                <span>{showAllTransactions ? 'Show Less' : `View All Activity (${transactions.length})`}</span>
+                {showAllTransactions ? <ChevronUp size={14} className="text-[#78716C]" /> : <ChevronDown size={14} className="text-[#78716C]" />}
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -406,12 +460,7 @@ export default function WalletPage() {
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-[32px] w-full max-w-[390px] overflow-hidden shadow-2xl relative cursor-default border border-[#E7E5E4] anim-scale-in"
           >
-            {resLoading ? (
-              <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
-                <Loader2 size={28} className="animate-spin text-[var(--accent)]" />
-                <p className="text-xs font-bold text-[#78716C] uppercase tracking-wider">Allocating Unique Decimal Slot...</p>
-              </div>
-            ) : currentReservation?.status === 'paid_claimed' ? (
+            {currentReservation?.status === 'paid_claimed' ? (
               <div className="p-8 text-center space-y-4">
                 <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mx-auto shadow-xs">
                   <CheckCircle size={28} />

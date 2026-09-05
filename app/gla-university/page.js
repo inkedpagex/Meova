@@ -320,7 +320,7 @@ export default function GLALandingPage() {
             operatingSystem: 'Web, Android, iOS',
             offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
             description:
-              'Meova is the campus social and meetup platform for GLA University students in Mathura — QR-verified meetups, campus gigs with Sparks escrow, student circles, and a campus moments feed.',
+              'Meova is the campus social and meetup platform for GLA University students in Mathura — QR-verified meetups, Sparks wallet, student circles, and a campus moments feed.',
             url: 'https://meova.in',
             screenshot: 'https://meova.in/icon-512.png',
             aggregateRating: {

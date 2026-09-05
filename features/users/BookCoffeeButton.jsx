@@ -7,11 +7,27 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { calculateMeetupRate } from '../../lib/pricing';
 
-export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto, isLoggedIn, accentColor, rate, completedMeets, renderButton, buttonClassName, label }) {
+export default function BookCoffeeButton({ 
+  targetUserId, 
+  targetName, 
+  targetPhoto, 
+  isLoggedIn, 
+  accentColor, 
+  rate, 
+  completedMeets, 
+  renderButton, 
+  buttonClassName, 
+  label,
+  targetTier = 'not_verified',
+  currentTier = 'not_verified',
+}) {
+  const isTargetVerified = targetTier === 'verified';
   const meetsCount = typeof completedMeets === 'number'
     ? completedMeets
     : (typeof rate === 'number' && rate <= 25 ? rate : 0);
-  const COFFEE_COST = calculateMeetupRate(meetsCount);
+  // Rate: 0 if target is unverified (Free Meet); otherwise dynamic rate based on completed meetings
+  const COFFEE_COST = isTargetVerified ? calculateMeetupRate(meetsCount) : 0;
+  const displayLabel = label || (!isTargetVerified ? 'Free Meet' : `Book Meet · ${COFFEE_COST} Sparks`);
   const color = (accentColor && accentColor !== '#ffffff') ? accentColor : 'var(--accent)';
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -129,7 +145,7 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
           className={buttonClassName || "w-full h-12 flex items-center justify-center gap-2 px-4 rounded-full text-[14px] font-bold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white transition-all active:scale-95 uppercase tracking-wider cursor-pointer shadow-xs whitespace-nowrap"}
         >
           <Calendar size={16} className="text-white flex-shrink-0" />
-          <span>{label || `Book Meet · ${COFFEE_COST} Sparks`}</span>
+          <span>{displayLabel}</span>
         </button>
       )}
 
@@ -354,12 +370,14 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                 ) : (
                   <button
                     onClick={handleConfirm}
-                    disabled={loading || loadingWallet || !wallet}
+                    disabled={loading || (COFFEE_COST > 0 && (loadingWallet || !wallet))}
                     className="w-full py-3 rounded-full text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-md text-white"
                     style={{ background: 'var(--accent)' }}
                   >
                     {loading ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Confirming...</>
+                    ) : COFFEE_COST === 0 ? (
+                      <><Layers className="w-3.5 h-3.5" /> Confirm Free Meet</>
                     ) : (
                       <><Layers className="w-3.5 h-3.5" /> Confirm &amp; Spend {COFFEE_COST} Sparks</>
                     )}
@@ -367,7 +385,9 @@ export default function BookCoffeeButton({ targetUserId, targetName, targetPhoto
                 )}
 
                 <p className="text-[10px] text-[#A8A29E] text-center font-medium">
-                  Sparks will be held in escrow until meetup is completed.
+                  {COFFEE_COST === 0
+                    ? 'Free meetup. Both participants confirm to build campus trust.'
+                    : 'Sparks will be held in escrow until meetup is completed.'}
                 </p>
               </div>
             )}

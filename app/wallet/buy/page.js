@@ -73,7 +73,6 @@ export default function BuyPage() {
         setReservation(data.activeReservation);
         setTimeLeft(data.activeReservation.seconds_remaining || 300);
         setStep('pay');
-        toast('Resuming your active reservation.');
       } else {
         toast.error(data.error || 'Failed to allocate decimal reservation.');
       }
@@ -171,7 +170,7 @@ export default function BuyPage() {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Allocating Unique Decimal Slot...</span>
+                <span>Proceeding...</span>
               </>
             ) : (
               <>
@@ -207,8 +206,9 @@ export default function BuyPage() {
 
           {/* Exact Paise Highlight */}
           <div className="rounded-[20px] border border-[var(--accent-tint-20)] bg-[var(--accent-tint-10)] p-4 text-center mb-5 shadow-2xs">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">
-              ⚡ Exact Matching Amount
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] flex items-center justify-center gap-1">
+              <Zap size={12} className="fill-current" />
+              <span>Exact Matching Amount</span>
             </p>
             <p className="text-3xl font-bold text-[#1C1917] my-0.5">
               ₹{payAmount.toFixed(2)}

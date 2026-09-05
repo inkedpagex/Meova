@@ -36,6 +36,7 @@ export default function StoryCampaignBanner({ className = '' }) {
   const [data, setData] = useState(getCachedClaimData);
   const [isLoading, setIsLoading] = useState(!data);
   const [isOpen, setIsOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [handle, setHandle] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -108,12 +109,12 @@ export default function StoryCampaignBanner({ className = '' }) {
       {/* Clean, Minimal Native Spotlight Card */}
       {/* Clean, Minimal Native Spotlight Card */}
       <div 
-        onClick={() => !userClaim && setIsOpen(true)}
-        className={`group bg-white border border-[#E7E5E4] hover:border-[var(--accent)] rounded-[16px] p-2.5 px-3.5 transition-all flex items-center justify-between gap-3 cursor-pointer select-none shadow-[0_2px_8px_rgba(28,25,23,0.06)] ${className}`}
+        onClick={() => userClaim ? setIsDetailOpen(true) : setIsOpen(true)}
+        className={`group bg-white border border-[#E7E5E4] hover:border-[var(--accent)] rounded-[16px] p-2.5 px-3.5 transition-all duration-200 flex items-center justify-between gap-3 cursor-pointer select-none shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-[0.99] ${className}`}
       >
         {/* Left: Clean Single-Tone Icon & Info */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+          <div className="w-8 h-8 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
             <InstagramIcon size={14} />
           </div>
 
@@ -136,35 +137,39 @@ export default function StoryCampaignBanner({ className = '' }) {
           {isLoading && !userClaim ? (
             <div className="w-20 h-7 rounded-full bg-black/5 animate-pulse" />
           ) : userClaim ? (
-            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-bold text-emerald-700 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setIsDetailOpen(true); }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold shadow-2xs cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap flex-shrink-0 ${
+                userClaim.status === 'approved'
+                  ? 'bg-emerald-50 border border-emerald-200/90 text-emerald-700 hover:bg-emerald-100/70 hover:border-emerald-300'
+                  : userClaim.status === 'pending'
+                  ? 'bg-amber-50 border border-amber-200/90 text-amber-700 hover:bg-amber-100/70 hover:border-amber-300'
+                  : 'bg-rose-50 border border-rose-200/90 text-rose-700 hover:bg-rose-100/70 hover:border-rose-300'
+              }`}
+            >
               {userClaim.status === 'approved' ? (
                 <>
-                  <CheckCircle size={12} className="text-emerald-600 flex-shrink-0" />
+                  <CheckCircle size={13} className="text-emerald-600 flex-shrink-0 animate-bounce" style={{ animationIterationCount: 2 }} />
                   <span>+100 Claimed</span>
                 </>
               ) : userClaim.status === 'pending' ? (
                 <>
-                  <Clock size={11} className="animate-spin text-amber-600 flex-shrink-0" />
-                  <span className="text-amber-700">In Review</span>
+                  <Clock size={12} className="animate-spin text-amber-600 flex-shrink-0" />
+                  <span>In Review</span>
                 </>
               ) : (
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
-                  className="text-[var(--accent)] font-bold underline cursor-pointer"
-                >
-                  Resubmit
-                </button>
+                <span className="underline">Resubmit</span>
               )}
-            </div>
+            </button>
           ) : (
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
-              className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-[11px] font-bold transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] cursor-pointer active:scale-95 whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-[11px] font-bold transition-all duration-200 shadow-[0_2px_10px_rgba(240,90,0,0.35)] hover:shadow-[0_4px_16px_rgba(240,90,0,0.5)] cursor-pointer hover:scale-105 active:scale-90 whitespace-nowrap flex-shrink-0 group-hover:scale-105"
             >
               <span>Claim</span>
-              <Zap size={10} className="fill-white text-white flex-shrink-0" />
+              <Zap size={11} className="fill-white text-white flex-shrink-0 transition-transform group-hover:rotate-12" />
             </button>
           )}
         </div>
@@ -217,7 +222,7 @@ export default function StoryCampaignBanner({ className = '' }) {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-98 transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap flex-shrink-0"
               >
                 {submitting ? (
                   <>
@@ -232,6 +237,90 @@ export default function StoryCampaignBanner({ className = '' }) {
                 )}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Claim Detail / Receipt Modal (Shown when clicking claimed/pending badge) */}
+      {isDetailOpen && userClaim && (
+        <div 
+          onClick={() => setIsDetailOpen(false)}
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs anim-fade-in cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-[32px] w-full max-w-[370px] overflow-hidden shadow-[0_4px_24px_rgba(28,25,23,0.12)] relative cursor-default border border-[#E7E5E4] anim-scale-in p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#78716C]">Story Campaign Receipt</span>
+              <button
+                type="button"
+                onClick={() => setIsDetailOpen(false)}
+                className="p-1.5 text-[#78716C] hover:text-[#1C1917] rounded-full hover:bg-black/5 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Status Hero */}
+            <div className="text-center py-2 mb-4">
+              <div className={`w-14 h-14 mx-auto rounded-full flex items-center justify-center mb-3 shadow-sm ${
+                userClaim.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                userClaim.status === 'pending' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
+                'bg-rose-50 text-rose-600 border border-rose-200'
+              }`}>
+                {userClaim.status === 'approved' ? (
+                  <CheckCircle size={28} className="text-emerald-600" />
+                ) : userClaim.status === 'pending' ? (
+                  <Clock size={28} className="text-amber-600 animate-spin" />
+                ) : (
+                  <X size={28} className="text-rose-600" />
+                )}
+              </div>
+              <h3 className="text-base font-bold text-[#1C1917]">
+                {userClaim.status === 'approved' ? '100 Sparks Credited!' :
+                 userClaim.status === 'pending' ? 'Verification In Review' :
+                 'Claim Rejected'}
+              </h3>
+              <p className="text-xs text-[#78716C] mt-1 font-medium">
+                {userClaim.status === 'approved' ? 'Instagram story reward verified & deposited to your wallet.' :
+                 userClaim.status === 'pending' ? 'Our team is reviewing your Instagram story tag.' :
+                 userClaim.admin_note || 'Story tag could not be verified.'}
+              </p>
+            </div>
+
+            {/* Receipt Details Box */}
+            <div className="p-3.5 bg-[#FAFAF8] rounded-[20px] border border-[#E7E5E4] space-y-2.5 mb-5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[#78716C] font-semibold">Instagram Handle</span>
+                <span className="font-bold text-[#1C1917]">{userClaim.instagram_handle || '—'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#78716C] font-semibold">Reward Amount</span>
+                <span className="font-bold text-emerald-600 flex items-center gap-1">
+                  <span>+{userClaim.reward_sparks || 100} Sparks</span>
+                  <Zap size={12} className="fill-emerald-600 inline-block" />
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#78716C] font-semibold">Status</span>
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                  userClaim.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                  userClaim.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                  'bg-rose-100 text-rose-700'
+                }`}>
+                  {userClaim.status === 'approved' ? 'Verified & Deposited' : userClaim.status}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsDetailOpen(false)}
+              className="w-full py-3 rounded-full bg-[#1C1917] hover:bg-black text-white text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-98 transition-all whitespace-nowrap flex-shrink-0"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

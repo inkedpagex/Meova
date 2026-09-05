@@ -7,7 +7,6 @@ import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import { supabase } from '../lib/supabase/client';
 import { useUserContext } from './providers/UserProvider';
 import CreateMenuModal from './CreateMenuModal';
-import ThemeQuickToggle from './ThemeQuickToggle';
 import Logo from './Logo';
 
 import { 
@@ -16,6 +15,7 @@ import {
   MessageSquare, 
   Bell, 
   User as UserIcon, 
+  Wallet,
   Shield, 
   PanelLeft, 
   PanelLeftClose, 
@@ -232,58 +232,6 @@ export default function Sidebar({ user: propUser }) {
     };
   }, [user?.id]);
 
-  // ── Wallet real-time listener & API fetch ──────────────────────────────────
-  const fetchWalletBalance = useCallback(async () => {
-    if (!currentUserId) return;
-    try {
-      const res = await fetch('/api/wallet');
-      if (!res.ok) return;
-      const data = await res.json();
-      if (data?.wallet) {
-        const w = data.wallet;
-        const total = (w.purchased || 0) + (w.bonus || 0) + (w.creator || 0);
-        setSparks(total);
-      }
-    } catch { /* silent */ }
-  }, [currentUserId]);
-
-  useEffect(() => {
-    if (!currentUserId) return;
-
-    fetchWalletBalance();
-
-    const handleWalletUpdated = () => {
-      fetchWalletBalance();
-    };
-
-    window.addEventListener('wallet-updated', handleWalletUpdated);
-    window.addEventListener('focus', handleWalletUpdated);
-
-    let channel = null;
-    if (supabase) {
-      channel = supabase
-        .channel(`sidebar-wallet-${currentUserId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'wallets',
-            filter: `user_id=eq.${currentUserId}`,
-          },
-          () => {
-            fetchWalletBalance();
-          }
-        )
-        .subscribe();
-    }
-
-    return () => {
-      window.removeEventListener('wallet-updated', handleWalletUpdated);
-      window.removeEventListener('focus', handleWalletUpdated);
-      if (channel && supabase) supabase.removeChannel(channel);
-    };
-  }, [currentUserId, fetchWalletBalance]);
 
   const isActive = (href) => {
     if (href === '/') return pathname === '/';
@@ -296,6 +244,7 @@ export default function Sidebar({ user: propUser }) {
     { href: '/discover',      label: 'Discover',      Icon: Compass },
     { href: '/messages',      label: 'Messages',      Icon: MessageSquare, badge: unreadMsgCount },
     { href: '/notifications', label: 'Notifications', Icon: Bell, badge: unreadCount },
+    { href: '/wallet',        label: 'Wallet',        Icon: Wallet },
     { href: '/profile',       label: 'Profile',       Icon: UserIcon },
     ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin', Icon: Shield }] : []),
   ];
@@ -479,13 +428,8 @@ export default function Sidebar({ user: propUser }) {
           })}
         </nav>
 
-        {/* Quick Theme Switcher & Bottom Profile */}
-        <div className="pt-3 border-t border-[var(--border-hairline)] mt-2 space-y-2">
-          {/* Quick Theme Palette Launcher */}
-          <div className={isCollapsed ? 'flex justify-center' : 'px-1'}>
-            <ThemeQuickToggle iconOnly={isCollapsed} className="w-full p-2 rounded-[12px] hover:bg-[var(--bg-hover)] border border-transparent hover:border-[var(--border-hairline)] transition-all" />
-          </div>
-
+        {/* Bottom Profile */}
+        <div className="pt-3 border-t border-[var(--border-hairline)] mt-2">
           {user ? (
             <Link 
               href="/profile" 

@@ -1005,43 +1005,46 @@ function MessagesContent() {
                     </a>
                   ) : (
                     <div className="flex items-center gap-1.5">
-                      {/* Voice Call button */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          startCall({
-                            targetUserId: otherId,
-                            targetName: otherName,
-                            targetPhoto: otherPhoto,
-                            bookingId: activeMeeting?.id || null,
-                            location: activeMeeting?.location || 'Campus Meetup',
-                            callType: 'voice',
-                          });
-                        }}
-                        className="w-9 h-9 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 flex-shrink-0"
-                        title="Voice Call (100% End-to-End Encrypted)"
-                      >
-                        <Phone size={15} strokeWidth={2.2} />
-                      </button>
+                      {/* Voice and Video Call buttons — only enabled when both users are verified */}
+                      {currentUser?.tier === 'verified' && directoryUser?.tier === 'verified' && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              startCall({
+                                targetUserId: otherId,
+                                targetName: otherName,
+                                targetPhoto: otherPhoto,
+                                bookingId: activeMeeting?.id || null,
+                                location: activeMeeting?.location || 'Campus Meetup',
+                                callType: 'voice',
+                              });
+                            }}
+                            className="w-9 h-9 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 flex-shrink-0"
+                            title="Voice Call (100% End-to-End Encrypted)"
+                          >
+                            <Phone size={15} strokeWidth={2.2} />
+                          </button>
 
-                      {/* Video Call button */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          startCall({
-                            targetUserId: otherId,
-                            targetName: otherName,
-                            targetPhoto: otherPhoto,
-                            bookingId: activeMeeting?.id || null,
-                            location: activeMeeting?.location || 'Campus Meetup',
-                            callType: 'video',
-                          });
-                        }}
-                        className="w-9 h-9 rounded-xl bg-[var(--accent-tint-10)] hover:bg-[var(--accent-tint-20)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 flex-shrink-0"
-                        title="Video Call (100% End-to-End Encrypted)"
-                      >
-                        <Video size={16} strokeWidth={2.2} />
-                      </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              startCall({
+                                targetUserId: otherId,
+                                targetName: otherName,
+                                targetPhoto: otherPhoto,
+                                bookingId: activeMeeting?.id || null,
+                                location: activeMeeting?.location || 'Campus Meetup',
+                                callType: 'video',
+                              });
+                            }}
+                            className="w-9 h-9 rounded-xl bg-[var(--accent-tint-10)] hover:bg-[var(--accent-tint-20)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 flex-shrink-0"
+                            title="Video Call (100% End-to-End Encrypted)"
+                          >
+                            <Video size={16} strokeWidth={2.2} />
+                          </button>
+                        </>
+                      )}
 
                       <Link
                         href={`/users/${otherId}`}

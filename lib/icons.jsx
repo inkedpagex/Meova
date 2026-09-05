@@ -47,8 +47,25 @@ export const Home            = ri('ri-home-5-line',            'ri-home-5-fill')
 export const Search          = ri('ri-search-line',            'ri-search-fill');
 export const Compass         = ri('ri-compass-3-line',         'ri-compass-3-fill');
 export const Bell            = ri('ri-notification-3-line',    'ri-notification-3-fill');
-export const MessageSquare   = ri('ri-chat-3-line',            'ri-chat-3-fill');
+export const MessageSquare   = ri('ri-message-3-line',         'ri-message-3-fill');
 export const MessageCircle   = ri('ri-message-3-line',         'ri-message-3-fill');
+
+export function MessageDotsIcon({ size = 15, className = 'text-[#7C3AED] flex-shrink-0', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M2 8.99374C2 5.68349 4.67654 3 8.00066 3H15.9993C19.3134 3 22 5.69478 22 8.99374V21H8.00066C4.68659 21 2 18.3052 2 15.0063V8.99374ZM20 19V8.99374C20 6.79539 18.2049 5 15.9993 5H8.00066C5.78458 5 4 6.78458 4 8.99374V15.0063C4 17.2046 5.79512 19 8.00066 19H20ZM14 11H16V13H14V11ZM8 11H10V13H8V11Z" />
+    </svg>
+  );
+}
 export const Calendar        = ri('ri-calendar-schedule-line', 'ri-calendar-schedule-fill');
 export const CalendarDays    = ri('ri-calendar-event-line',    'ri-calendar-event-fill');
 export const Wallet          = ri('ri-wallet-3-line',          'ri-wallet-3-fill');
@@ -170,7 +187,40 @@ export const Laptop          = ri('ri-computer-line',           'ri-computer-fil
 export const MicOff          = ri('ri-mic-off-line',            'ri-mic-off-fill');
 export const MoreVertical    = ri('ri-more-fill',               'ri-more-fill');
 export const Music2          = ri('ri-music-2-line',            'ri-music-2-fill');
-export const PhoneOff        = ri('ri-phone-off-line',          'ri-phone-off-fill');
+export function PhoneOff({ size = 20, className = '', strokeWidth = 2.2, ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...props}
+    >
+      <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91" />
+      <line x1="22" x2="2" y1="2" y2="22" />
+    </svg>
+  );
+}
+
+export function PhoneHangup({ size = 20, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      {...props}
+    >
+      <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
+    </svg>
+  );
+}
 export const QrCode          = ri('ri-qr-code-line',            'ri-qr-code-fill');
 export const Rocket          = ri('ri-rocket-line',             'ri-rocket-fill');
 export const Save            = ri('ri-save-line',               'ri-save-fill');

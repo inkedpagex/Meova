@@ -106,7 +106,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
   const authorPhoto = post.author_photo || getCartoonAvatar(post.author_name || 'Student');
 
   return (
-    <div className="bg-white border border-[#E7E5E4] rounded-[16px] overflow-hidden shadow-[0_2px_8px_rgba(28,25,23,0.06)] transition-all mb-4">
+    <div className="bg-white border border-black/10 rounded-[28px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] transition-all mb-4">
       {/* ── Card Header (56px) ───────────────────────────────── */}
       <div className="flex items-center justify-between px-4 h-14">
         <Link
@@ -130,14 +130,14 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
           </div>
 
           <div className="min-w-0">
-            <h4 className="text-[14px] font-semibold text-[#1C1917] group-hover/author:text-[var(--accent)] transition-colors leading-tight truncate">
+            <h4 className="text-[14px] font-bold text-black group-hover/author:text-[var(--accent)] transition-colors leading-tight truncate">
               {post.author_name || 'Campus Student'}
             </h4>
-            <p className="text-[12px] text-[#78716C] font-medium mt-0.5 flex items-center gap-1.5 leading-none truncate">
+            <p className="text-[12px] text-black/70 font-semibold mt-0.5 flex items-center gap-1.5 leading-none truncate">
               <span>{post.author_branch?.split('(')?.[0]?.trim() || 'Student'}</span>
-              <span className="text-[#D6D3D1]">·</span>
+              <span className="text-black/35">·</span>
               <span>{post.location || 'Campus'}</span>
-              <span className="text-[#D6D3D1]">·</span>
+              <span className="text-black/35">·</span>
               <span>{formatPostDate(post.created_at)}</span>
             </p>
           </div>
@@ -159,7 +159,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
             <button
               type="button"
               onClick={() => setShowMenu(!showMenu)}
-              className="w-8 h-8 flex items-center justify-center text-[#A8A29E] hover:text-[#1C1917] hover:bg-black/5 rounded-full transition-colors cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center text-black/60 hover:text-black hover:bg-black/5 rounded-full transition-colors cursor-pointer"
             >
               <MoreHorizontal size={18} />
             </button>
@@ -173,7 +173,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
                     setShowMenu(false);
                   }}
                 />
-                <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-[0_4px_16px_rgba(28,25,23,0.08)] rounded-[16px] p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150 border border-[#E7E5E4]">
+                <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-[0_4px_16px_rgba(28,25,23,0.08)] rounded-[20px] p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150 border border-black/10">
                   {isOwnPost ? (
                     <button
                       type="button"
@@ -207,7 +207,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
                       setShowMenu(false);
                       handleShare();
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-[#1C1917] hover:bg-[var(--accent-tint-10)] hover:text-[var(--accent)] rounded-xl transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-black hover:bg-[var(--accent-tint-10)] hover:text-[var(--accent)] rounded-xl transition-colors cursor-pointer"
                   >
                     <Copy size={14} />
                     <span>Copy link</span>
@@ -253,20 +253,20 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
                 e.stopPropagation();
                 handleToggleLike();
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full hover:bg-[#FAFAF8] select-none active:scale-90 transition-all cursor-pointer group/like"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full hover:bg-black/5 select-none active:scale-90 transition-all cursor-pointer group/like whitespace-nowrap flex-shrink-0"
             >
               <Heart
                 size={20}
                 className={`transition-all duration-150 ${
                   isLiked
                     ? 'fill-[var(--accent)] text-[var(--accent)]'
-                    : 'text-[#78716C] group-hover/like:text-[var(--accent)]'
+                    : 'text-black/70 group-hover/like:text-[var(--accent)]'
                 } ${animatingHeart ? 'scale-125' : 'scale-100'}`}
               />
               {likesCount > 0 && (
                 <span
                   className={`text-[13px] font-bold tabular-nums leading-none ${
-                    isLiked ? 'text-[var(--accent)]' : 'text-[#78716C]'
+                    isLiked ? 'text-[var(--accent)]' : 'text-black/70'
                   }`}
                 >
                   {likesCount}
@@ -291,7 +291,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
                 e.stopPropagation();
                 handleShare();
               }}
-              className="p-1.5 rounded-full hover:bg-[#FAFAF8] text-[#78716C] hover:text-[var(--accent)] transition-colors cursor-pointer active:scale-90"
+              className="p-1.5 rounded-full hover:bg-black/5 text-black/70 hover:text-[var(--accent)] transition-colors cursor-pointer active:scale-90 whitespace-nowrap flex-shrink-0"
               title="Share"
             >
               <Share2 size={19} />
@@ -301,8 +301,8 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
 
         {/* Caption */}
         {post.content && (
-          <p className="text-[13.5px] text-[#1C1917] leading-relaxed font-normal">
-            <span className="font-bold text-[#1C1917] mr-1.5">
+          <p className="text-[13.5px] text-black leading-relaxed font-normal">
+            <span className="font-bold text-black mr-1.5">
               {post.author_name || 'Campus Student'}
             </span>
             <span>{post.content}</span>

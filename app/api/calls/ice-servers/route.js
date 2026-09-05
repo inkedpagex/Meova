@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 
-// Returns ICE servers list — tries Metered.ca API if key is set, else falls back to public OpenRelay TURN
+// Returns ICE servers list — tries Metered.ca API if key is set (with fast 1.5s timeout), else falls back to robust public STUN/TURN
 export async function GET() {
   const apiKey = process.env.METERED_API_KEY;
 
   if (apiKey) {
-    // Metered.ca credentials endpoint — try app-specific URL first, then generic
     const meteredUrls = [
       `https://meova.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`,
       `https://global.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`,
@@ -13,25 +12,30 @@ export async function GET() {
 
     for (const meteredUrl of meteredUrls) {
       try {
-        const res = await fetch(meteredUrl, { cache: 'no-store' });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1200);
+        const res = await fetch(meteredUrl, { cache: 'no-store', signal: controller.signal });
+        clearTimeout(timeoutId);
         if (res.ok) {
           const servers = await res.json();
           if (Array.isArray(servers) && servers.length > 0) {
-            console.log('[ICE] Metered.ca credentials fetched:', servers.length, 'servers');
             return NextResponse.json({ iceServers: servers });
           }
         }
       } catch {}
     }
-    console.warn('[ICE] Metered.ca unreachable, using OpenRelay fallback');
   }
 
-  // Fallback: OpenRelay Project free public TURN servers
+  // Fallback: Comprehensive global STUN & OpenRelay TURN
   return NextResponse.json({
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
       { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun3.l.google.com:19302' },
+      { urls: 'stun:stun4.l.google.com:19302' },
+      { urls: 'stun:stun.cloudflare.com:3478' },
+      { urls: 'stun:stun.services.mozilla.com:3478' },
       {
         urls: 'turn:openrelay.metered.ca:80',
         username: 'openrelayproject',

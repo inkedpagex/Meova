@@ -25,7 +25,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const ip = getClientIp(request);
-    const rl = rateLimit(`res_create:${ip}`, { limit: 12, windowMs: 60_000 });
+    const rl = rateLimit(`res_create:${ip}`, { limit: 60, windowMs: 60_000 });
     if (!rl.ok) {
       return NextResponse.json(
         { error: 'Too many requests. Please slow down.' },
@@ -54,7 +54,16 @@ export async function POST(request) {
     });
 
     if (!result.ok) {
-      return NextResponse.json({ error: result.error, activeReservation: result.activeReservation }, { status: 400 });
+      if (result.activeReservation) {
+        return NextResponse.json({
+          ok: true,
+          resumed: true,
+          reservation: result.activeReservation,
+          activeReservation: result.activeReservation,
+          message: result.error
+        });
+      }
+      return NextResponse.json({ error: result.error || 'Failed to create reservation' }, { status: 400 });
     }
 
     return NextResponse.json({ ok: true, ...result });

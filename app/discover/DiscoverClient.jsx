@@ -22,6 +22,7 @@ import {
 import { getUserAvatarUrl, getCartoonAvatar } from '@/utils/avatar';
 import Skeleton from '@/components/Skeleton';
 import BookCoffeeButton from '@/features/users/BookCoffeeButton';
+import CirclesList from '@/features/circles/CirclesList';
 import useSWR from 'swr';
 import { useUserContext } from '@/components/providers/UserProvider';
 import { useCampusPresence } from '@/lib/useCampusPresence';
@@ -95,11 +96,30 @@ export default function DiscoverClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const interestParam = searchParams ? searchParams.get('interest') || searchParams.get('category') : null;
+  const tabParam = searchParams ? searchParams.get('tab') : null;
   const { user: currentUser, people: contextPeople, isUserOnline } = useUserContext();
   
-  const [activeTab, setActiveTab] = useState('people'); // 'people' | 'events'
+  const [activeTab, setActiveTab] = useState(tabParam === 'circles' ? 'circles' : 'people');
   const [activeFilter, setActiveFilter] = useState('All');
   const [search, setSearch] = useState(interestParam || '');
+
+  useEffect(() => {
+    if (tabParam === 'circles') setActiveTab('circles');
+    else if (tabParam === 'people') setActiveTab('people');
+  }, [tabParam]);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (tab === 'circles') {
+        url.searchParams.set('tab', 'circles');
+      } else {
+        url.searchParams.delete('tab');
+      }
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
 
   useEffect(() => {
     if (interestParam) {
@@ -128,12 +148,19 @@ export default function DiscoverClient() {
   }, []);
   
   // SWR Hook for instant users data fetching
-  const { data: usersData } = useSWR('/api/users', fetcher);
+  const { data: usersData } = useSWR('/api/users', fetcher, {
+    revalidateOnFocus: false,
+    dedupingInterval: 60000,
+  });
   const isPeopleLoading = usersData === undefined;
   
-  // SWR Hook for campus events
-  const { data: eventsData, isLoading: isEventsLoading } = useSWR('/api/events', fetcher);
-  const events = eventsData?.events || [];
+  // SWR Hook for campus circles (cached with 5-minute deduping for super fast switching)
+  const { data: circlesData } = useSWR('/api/circles', fetcher, {
+    revalidateOnFocus: false,
+    revalidateIfStale: false,
+    dedupingInterval: 300000,
+  });
+  const circles = circlesData?.circles || [];
   
   // Algolia search
   const { peopleResults, isSearching } = useAlgoliaSearch(search);
@@ -210,18 +237,14 @@ export default function DiscoverClient() {
           <h2 className="text-[16px] font-bold text-[var(--text-primary)]">
             Students nearby
           </h2>
-          <div className="flex items-center gap-2">
-            {liveCount > 0 && (
+          {liveCount > 0 && (
+            <div className="flex items-center gap-2">
               <span className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full shadow-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 {liveCount} Live on Campus
               </span>
-            )}
-            <span className="text-[12px] font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              {fullList.length} online
-            </span>
-          </div>
+            </div>
+          )}
         </div>
 
         {isSearching && (
@@ -452,112 +475,6 @@ export default function DiscoverClient() {
     );
   };
 
-  /* ─── Events Section ─── */
-  const renderEventsSection = () => {
-    const rawEvents = events || [];
-    const filteredEvents = rawEvents.filter(evt => {
-      if (!search.trim()) return true;
-      const q = search.toLowerCase();
-      return (
-        (evt.title || '').toLowerCase().includes(q) ||
-        (evt.circle_name || '').toLowerCase().includes(q) ||
-        (evt.category || '').toLowerCase().includes(q) ||
-        (evt.location || '').toLowerCase().includes(q)
-      );
-    });
-
-    if (isEventsLoading) {
-      return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-44 rounded-[24px] bg-[var(--bg-surface)] border border-[var(--border-hairline)] animate-pulse" />
-          ))}
-        </div>
-      );
-    }
-
-    if (filteredEvents.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center p-8 rounded-[24px] bg-[var(--bg-surface)] border border-[var(--border-hairline)] text-center space-y-3 shadow-xs">
-          <div className="w-12 h-12 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center">
-            <Calendar size={24} />
-          </div>
-          <h4 className="text-sm font-bold text-[var(--text-primary)]">No upcoming campus events</h4>
-          <p className="text-xs text-[var(--text-secondary)] max-w-xs font-medium">
-            {search ? `No events match "${search}". Try another keyword.` : 'Campus fests, meetups & workshops will appear here.'}
-          </p>
-          <Link
-            href="/circles"
-            className="px-4 py-2 rounded-full text-xs font-bold bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-all active:scale-95 shadow-xs"
-          >
-            Explore Student Circles
-          </Link>
-        </div>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {filteredEvents.map(evt => {
-          const date = evt.date ? new Date(evt.date) : new Date();
-          const day = date.toLocaleDateString('en-US', { day: 'numeric' });
-          const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-          const going = (evt.rsvps_list || []).length;
-
-          return (
-            <div
-              key={evt.id}
-              className="flex flex-col bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-[24px] overflow-hidden shadow-xs hover:border-[var(--accent)] transition-all p-4 space-y-3 group"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]">
-                  {evt.category || evt.circle_name || 'Campus Event'}
-                </span>
-                <div className="px-2.5 py-1 rounded-[10px] bg-[var(--bg-base)] border border-[var(--border-hairline)] text-center">
-                  <span className="text-xs font-bold text-[var(--text-primary)] leading-none block">{day}</span>
-                  <span className="text-[9px] font-bold text-[var(--accent)] uppercase tracking-wider block">{month}</span>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-bold text-[var(--text-primary)] leading-snug group-hover:text-[var(--accent)] transition-colors line-clamp-2">
-                  {evt.title}
-                </h4>
-                {evt.description && (
-                  <p className="text-[11px] text-[var(--text-secondary)] line-clamp-2 mt-1">
-                    {evt.description}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-1 text-[11px] text-[var(--text-secondary)] font-medium pt-1 border-t border-[var(--border-hairline)]">
-                {evt.location && (
-                  <div className="flex items-center gap-1.5">
-                    <MapPin size={12} className="text-[var(--accent)] flex-shrink-0" />
-                    <span className="truncate">{evt.location}</span>
-                  </div>
-                )}
-                {evt.time && (
-                  <div className="flex items-center gap-1.5">
-                    <Calendar size={12} className="text-[var(--text-muted)] flex-shrink-0" />
-                    <span>{evt.time}</span>
-                  </div>
-                )}
-              </div>
-
-              <Link
-                href={evt.link || `/events`}
-                className="w-full py-2 rounded-full text-center text-xs font-bold text-[var(--accent)] bg-[var(--accent-tint-10)] hover:bg-[var(--accent-tint-20)] border border-[var(--accent-tint-20)] transition-all active:scale-95"
-              >
-                View Details
-              </Link>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-5 pt-2 px-4 max-w-[640px] mx-auto pb-32">
       {/* Search Input */}
@@ -566,7 +483,7 @@ export default function DiscoverClient() {
         <input 
           value={search} 
           onChange={e => setSearch(e.target.value)}
-          placeholder={activeTab === 'people' ? "Search students by name, branch, skills..." : "Search events by title, circle, keyword..."}
+          placeholder={activeTab === 'people' ? "Search students by name, branch, skills..." : "Search communities, channels, tags..."}
           className="w-full pl-11 pr-10 py-3.5 rounded-[16px] text-[13px] font-medium outline-none transition-all bg-[var(--bg-surface)] border border-[var(--border-hairline)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 shadow-xs" 
         />
         {search && (
@@ -594,11 +511,11 @@ export default function DiscoverClient() {
         </div>
       )}
 
-      {/* 2-Way Animated Sliding Toggle: People • Events */}
+      {/* 2-Way Animated Sliding Toggle: People • Circles */}
       <div className="relative flex p-1 bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-full shadow-xs">
         <button
           type="button"
-          onClick={() => setActiveTab('people')}
+          onClick={() => handleTabChange('people')}
           className={`relative z-10 flex-1 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer select-none ${
             activeTab === 'people'
               ? 'text-white'
@@ -617,21 +534,21 @@ export default function DiscoverClient() {
 
         <button
           type="button"
-          onClick={() => setActiveTab('events')}
+          onClick={() => handleTabChange('circles')}
           className={`relative z-10 flex-1 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer select-none ${
-            activeTab === 'events'
+            activeTab === 'circles'
               ? 'text-white'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
-          {activeTab === 'events' && (
+          {activeTab === 'circles' && (
             <motion.div
               layoutId="discoverTabGlider"
               className="absolute inset-0 rounded-full bg-[var(--accent)] shadow-xs"
               transition={{ type: 'spring', stiffness: 500, damping: 38 }}
             />
           )}
-          <span className="relative z-10">Events</span>
+          <span className="relative z-10">Circles</span>
         </button>
       </div>
 
@@ -655,14 +572,19 @@ export default function DiscoverClient() {
           </motion.div>
         ) : (
           <motion.div
-            key="events"
+            key="circles"
             initial={{ opacity: 0, x: 8 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -8 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="space-y-5"
+            className="pt-1"
           >
-            {renderEventsSection()}
+            <CirclesList
+              circles={circles}
+              userId={currentUser?.uid || currentUser?.id}
+              externalSearch={search}
+              hideSearch={true}
+            />
           </motion.div>
         )}
       </AnimatePresence>

@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Meova UI & Engineering Rules (MANDATORY)
 Strictly follow `UI_RULES.md` for ALL UI and backend changes:
-1. **NEVER USE GREY**: Strictly avoid `zinc-400`, `zinc-500`, `neutral-400`, `gray-400`, `bg-zinc-100`, `#f0f0f0`, and any dull/washed-out grey tones. Use only pure white (`bg-white`), deep pitch black (`text-black`, `bg-black`), Meova Electric Orange (`#F05A00`), and dark text (`text-black/70`).
+1. **NEVER USE GREY**: Strictly avoid `zinc-400`, `zinc-500`, `neutral-400`, `gray-400`, `bg-zinc-100`, `#f0f0f0`, and any dull/washed-out grey tones. Use only pure white (`bg-white`), deep pitch black (`text-black`, `bg-black`), Meova Royal Purple (`#7C3AED`), and dark text (`text-black/70`).
 2. **BACKEND CONNECTIVITY & MANDATORY SCRIPT VERIFICATION**: Never build "just UI" or superficial mock logic. Whenever ANY function, table query, API route, or backend feature is added or modified, you MUST proactively write and run an automated Node.js test script to execute the function and verify live Supabase responses. Never rely on assumptions or visual checks alone—inspect live database column names, data types, and confirm 100% error-free execution with Exit Code 0.
 3. **CUSTOM SELECT DROPDOWNS**: Never use native browser `<select>` elements which show unstyled OS popups. Always use `components/CustomSelect.jsx`.
 4. **GIGS EXCLUSION**: Gigs are permanently removed from the user interface. Never add gigs cards, tabs, or buttons back into the feed, create modal, or profile.

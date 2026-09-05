@@ -19,10 +19,10 @@ Dull, washed-out, or faded grey makes interfaces look unfinished, cloudy, and lo
 | **Card & Canvas Background** | `bg-white` (`#ffffff`) | Clean, crisp, high-contrast surface. |
 | **Primary Headings & Text** | `text-black` (`#000000`) with `font-black` or `font-bold` | Strong readability, bold streetwear hierarchy. |
 | **Secondary & Metadata Text** | `text-black/70` or `text-black/65` with `font-bold` | Clear, legible dark text — never faded grey. |
-| **Meova Signature Accent** | `#F05A00` (`bg-[#F05A00]`, `text-[#F05A00]`) | Primary CTAs, active highlights, Sparks balances. |
+| **Meova Signature Accent** | `#7C3AED` (`bg-[#7C3AED]`, `text-[#7C3AED]`, `bg-[var(--accent)]`) | Primary CTAs, active highlights, Sparks balances. |
 | **Hairline Subtle Borders** | `border border-black/10` or `border border-black/5` | Clean micro-hairline separation without heavy frames. |
 | **Brand Tinted Surfaces** | `bg-orange-50` with `border-orange-200` | Secondary buttons, subtle info chips, active states. |
-| **High-Contrast Buttons** | `bg-black text-white hover:bg-black/90` or `bg-[#F05A00] text-white` | Tactile, confident action buttons. |
+| **High-Contrast Buttons** | `bg-black text-white hover:bg-black/90` or `bg-[#7C3AED] text-white` | Tactile, confident action buttons. |
 
 ---
 

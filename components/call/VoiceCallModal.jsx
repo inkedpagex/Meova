@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Phone,
   PhoneOff,
+  PhoneHangup,
   Mic,
   MicOff,
   Volume2,
@@ -60,6 +61,7 @@ const AUDIO_CONSTRAINTS = {
 export default function VoiceCallModal({
   isOpen,
   mode, // 'outgoing' | 'incoming'
+  autoAccept = false,
   callType = 'voice', // 'voice' | 'video'
   peerUser,
   currentUserId,
@@ -86,6 +88,10 @@ export default function VoiceCallModal({
   const pendingCandidatesRef = useRef([]);
   const isCancelledRef = useRef(false);
   const remoteStreamRef = useRef(null);
+  const acceptedRef = useRef(mode === 'outgoing');
+  const bufferedOfferRef = useRef(null);
+  const signalingRetryRef = useRef(null);
+  const hasConnectedRef = useRef(false);
 
   const isVideoCall = callType === 'video' || isVideoEnabled;
 
@@ -172,6 +178,10 @@ export default function VoiceCallModal({
   const cleanup = useCallback(() => {
     stopRingtone();
     isCancelledRef.current = true;
+    if (signalingRetryRef.current) {
+      clearInterval(signalingRetryRef.current);
+      signalingRetryRef.current = null;
+    }
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((t) => t.stop());
       localStreamRef.current = null;
@@ -197,159 +207,282 @@ export default function VoiceCallModal({
   };
 
   // ── Media acquisition helper ────────────────────────────────────
-  const getLocalMedia = async (withVideo = isVideoCall, cameraFacing = facingMode) => {
-    const constraints = {
-      audio: AUDIO_CONSTRAINTS,
-      video: withVideo
-        ? {
-            facingMode: cameraFacing,
-            width: { ideal: 1280, max: 1920 },
-            height: { ideal: 720, max: 1080 },
-          }
-        : false,
-    };
-    return navigator.mediaDevices.getUserMedia(constraints);
-  };
+  const getLocalMedia = useCallback(
+    async (withVideo = isVideoCall, cameraFacing = facingMode) => {
+      const constraints = {
+        audio: AUDIO_CONSTRAINTS,
+        video: withVideo
+          ? {
+              facingMode: cameraFacing,
+              width: { ideal: 1280, max: 1920 },
+              height: { ideal: 720, max: 1080 },
+            }
+          : false,
+      };
+      return navigator.mediaDevices.getUserMedia(constraints);
+    },
+    [isVideoCall, facingMode]
+  );
 
-  // ── Main WebRTC + Signaling Effect ──────────────────────────────
-  useEffect(() => {
-    if (!isOpen || !channel) return;
+  const endCall = useCallback(() => {
+    cleanup();
+    setCallState('ended');
+    setTimeout(onClose, 800);
+  }, [cleanup, onClose]);
 
-    isCancelledRef.current = false;
-    pendingCandidatesRef.current = [];
+  const handleDeclineCall = useCallback(() => {
+    stopRingtone();
+    channel
+      ?.send({
+        type: 'broadcast',
+        event: 'call-reject',
+        payload: { responderId: currentUserId, roomId },
+      })
+      .catch(() => {});
+    endCall();
+  }, [channel, currentUserId, roomId, endCall]);
 
-    let pc = null;
-    const offerCreatingRef = { current: false };
-    const offerCreatedRef = { current: false };
-    const answerSetRef = { current: false };
+  const handleEndCall = useCallback(() => {
+    stopRingtone();
+    channel
+      ?.send({
+        type: 'broadcast',
+        event: 'call-end',
+        payload: { senderId: currentUserId, roomId },
+      })
+      .catch(() => {});
+    cleanup();
+    setCallState('ended');
+    setTimeout(onClose, 800);
+  }, [channel, currentUserId, roomId, cleanup, onClose]);
 
-    let bufferedCallReady = false;
-    let bufferedCallOffer = null;
-    let bufferedCallAccept = null;
-
-    const createAndSendOffer = async () => {
-      if (!pc || isCancelledRef.current || pc.signalingState === 'closed') return;
-      if (offerCreatingRef.current || offerCreatedRef.current) {
-        if (offerCreatedRef.current && pc.localDescription) {
-          channel
-            .send({
-              type: 'broadcast',
-              event: 'call-offer',
-              payload: {
-                offer: pc.localDescription,
-                callerId: currentUserId,
-                roomId,
-                callType,
-              },
-            })
-            .catch(() => {});
-        }
-        return;
-      }
-      offerCreatingRef.current = true;
-      try {
+  // ── Send WebRTC Offer (Caller) ───────────────────────────────────
+  const createAndSendOffer = useCallback(async () => {
+    const pc = pcRef.current;
+    if (!pc || isCancelledRef.current || pc.signalingState === 'closed') return;
+    try {
+      if (pc.signalingState === 'stable') {
         const offer = await pc.createOffer({
           offerToReceiveAudio: true,
           offerToReceiveVideo: isVideoCall,
         });
         if (isCancelledRef.current || pc.signalingState === 'closed') return;
         await pc.setLocalDescription(offer);
-        offerCreatedRef.current = true;
+      }
+
+      if (pc.localDescription) {
+        const desc = pc.localDescription;
+        const offerPayload = desc.toJSON ? desc.toJSON() : { type: desc.type, sdp: desc.sdp };
         channel
-          .send({
+          ?.send({
             type: 'broadcast',
             event: 'call-offer',
             payload: {
-              offer: pc.localDescription,
+              offer: offerPayload,
               callerId: currentUserId,
               roomId,
               callType,
             },
           })
           .catch(() => {});
-      } catch (err) {
-        offerCreatingRef.current = false;
-        console.error('[WebRTC] createOffer error:', err.message);
       }
-    };
+    } catch (err) {
+      console.error('[WebRTC] createOffer error:', err.message);
+    }
+  }, [channel, currentUserId, roomId, callType, isVideoCall]);
 
-    const handleOffer = async (offerSDP) => {
-      if (!pc || isCancelledRef.current || pc.signalingState === 'closed') return;
+  // ── Process WebRTC Offer & Send Answer (Receiver) ─────────────────
+  const processOffer = useCallback(
+    async (offerSDP) => {
+      const pc = pcRef.current;
+      if (!pc || isCancelledRef.current || pc.signalingState === 'closed' || !offerSDP) return;
       try {
-        if (!localStreamRef.current) {
-          const stream = await getLocalMedia();
-          if (isCancelledRef.current) {
-            stream.getTracks().forEach((t) => t.stop());
-            return;
-          }
-          attachLocalStream(stream);
-          addLocalTracksToPC(stream, pc);
-        } else {
-          addLocalTracksToPC(localStreamRef.current, pc);
-        }
-        if (isCancelledRef.current || pc.signalingState === 'closed') return;
+        if (pc.signalingState !== 'stable') return;
         await pc.setRemoteDescription(new RTCSessionDescription(offerSDP));
         await flushPendingCandidates(pc);
         const answer = await pc.createAnswer();
+        if (isCancelledRef.current || pc.signalingState === 'closed') return;
         await pc.setLocalDescription(answer);
+
+        const answerPayload = answer.toJSON ? answer.toJSON() : { type: answer.type, sdp: answer.sdp };
         channel
-          .send({
+          ?.send({
             type: 'broadcast',
             event: 'call-accept',
-            payload: { answer, responderId: currentUserId, roomId },
+            payload: { answer: answerPayload, responderId: currentUserId, roomId },
           })
           .catch(() => {});
-      } catch (err) {
-        console.error('[WebRTC] handleOffer error:', err.message);
-      }
-    };
 
-    const processCallAccept = async (answer) => {
-      if (!pc || isCancelledRef.current || answerSetRef.current) return;
-      if (pc.signalingState !== 'have-local-offer') return;
-      answerSetRef.current = true;
-      try {
-        await pc.setRemoteDescription(new RTCSessionDescription(answer));
-        await flushPendingCandidates(pc);
+        hasConnectedRef.current = true;
+        if (signalingRetryRef.current) {
+          clearInterval(signalingRetryRef.current);
+          signalingRetryRef.current = null;
+        }
         stopRingtone();
         playConnectedSound();
         setCallState('connected');
+      } catch (err) {
+        console.error('[WebRTC] processOffer error:', err.message);
+      }
+    },
+    [channel, currentUserId, roomId]
+  );
+
+  // ── Process WebRTC Answer (Caller) ────────────────────────────────
+  const processCallAccept = useCallback(
+    async (answer) => {
+      const pc = pcRef.current;
+      if (!pc || isCancelledRef.current || pc.signalingState === 'closed' || hasConnectedRef.current) return;
+      if (pc.signalingState !== 'have-local-offer') return;
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        await flushPendingCandidates(pc);
+        hasConnectedRef.current = true;
+        if (signalingRetryRef.current) {
+          clearInterval(signalingRetryRef.current);
+          signalingRetryRef.current = null;
+        }
+        stopRingtone();
+        playConnectedSound();
+        setCallState('connected');
+
+        channel
+          ?.send({
+            type: 'broadcast',
+            event: 'call-ack',
+            payload: { callerId: currentUserId, roomId },
+          })
+          .catch(() => {});
       } catch (e) {
-        answerSetRef.current = false;
         console.error('[WebRTC] setRemoteDescription error:', e.message);
       }
-    };
+    },
+    [channel, currentUserId, roomId]
+  );
+
+  // ── Accept incoming call ─────────────────────────────────────────
+  const handleAcceptCall = useCallback(async () => {
+    if (acceptedRef.current && callState !== 'incoming') return;
+    acceptedRef.current = true;
+    setCallState('connecting');
+    stopRingtone();
+
+    try {
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.muted = false;
+        remoteAudioRef.current.volume = 1.0;
+        remoteAudioRef.current.play().catch(() => {});
+      }
+
+      const stream = await getLocalMedia();
+      if (isCancelledRef.current) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      attachLocalStream(stream);
+      const pc = pcRef.current;
+      if (pc && pc.signalingState !== 'closed') {
+        addLocalTracksToPC(stream, pc);
+      }
+
+      // Send call-ready with periodic retry until connected
+      const sendReady = () => {
+        if (hasConnectedRef.current || isCancelledRef.current) return;
+        channel
+          ?.send({
+            type: 'broadcast',
+            event: 'call-ready',
+            payload: { responderId: currentUserId, roomId },
+          })
+          .catch(() => {});
+      };
+
+      sendReady();
+      if (signalingRetryRef.current) clearInterval(signalingRetryRef.current);
+      signalingRetryRef.current = setInterval(() => {
+        if (hasConnectedRef.current || isCancelledRef.current) {
+          clearInterval(signalingRetryRef.current);
+          return;
+        }
+        sendReady();
+      }, 1200);
+
+      // If offer arrived before clicking Accept, process it immediately
+      if (bufferedOfferRef.current) {
+        const buffered = bufferedOfferRef.current;
+        bufferedOfferRef.current = null;
+        await processOffer(buffered);
+      }
+    } catch (err) {
+      console.error('[WebRTC] accept call media error:', err);
+      toast.error('Permissions required to join call');
+      handleDeclineCall();
+    }
+  }, [callState, channel, currentUserId, roomId, getLocalMedia, attachLocalStream, addLocalTracksToPC, processOffer, handleDeclineCall]);
+
+  // ── Auto-Accept Effect (if joined from push notification) ─────────
+  useEffect(() => {
+    if (autoAccept && mode === 'incoming') {
+      const timer = setTimeout(() => {
+        handleAcceptCall();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [autoAccept, mode, handleAcceptCall]);
+
+  // ── Timeout: 45s connection watchdog ─────────────────────────────
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (!hasConnectedRef.current && !isCancelledRef.current) {
+        toast.info('No answer from peer');
+        endCall();
+      }
+    }, 45000);
+    return () => clearTimeout(timeoutId);
+  }, [endCall]);
+
+  // ── Main WebRTC + Signaling Effect ──────────────────────────────
+  useEffect(() => {
+    if (!isOpen || !channel) return;
+
+    isCancelledRef.current = false;
+    hasConnectedRef.current = false;
+    pendingCandidatesRef.current = [];
 
     // ── Synchronous Channel Listeners ─────────────────────────────
     channel.on('broadcast', { event: 'call-ready' }, async () => {
-      if (mode !== 'outgoing' || isCancelledRef.current) return;
-      if (pc) {
-        await createAndSendOffer();
-      } else {
-        bufferedCallReady = true;
-      }
+      if (mode !== 'outgoing' || isCancelledRef.current || hasConnectedRef.current) return;
+      await createAndSendOffer();
     });
 
     channel.on('broadcast', { event: 'call-offer' }, async ({ payload }) => {
       if (mode !== 'incoming' || !payload?.offer || isCancelledRef.current) return;
-      if (pc) {
-        await handleOffer(payload.offer);
+      if (acceptedRef.current) {
+        await processOffer(payload.offer);
       } else {
-        bufferedCallOffer = payload.offer;
+        bufferedOfferRef.current = payload.offer;
       }
     });
 
     channel.on('broadcast', { event: 'call-accept' }, async ({ payload }) => {
       if (mode !== 'outgoing' || !payload?.answer || isCancelledRef.current) return;
-      if (pc && pc.signalingState === 'have-local-offer') {
-        await processCallAccept(payload.answer);
-      } else {
-        bufferedCallAccept = payload.answer;
+      await processCallAccept(payload.answer);
+    });
+
+    channel.on('broadcast', { event: 'call-ack' }, () => {
+      if (isCancelledRef.current) return;
+      hasConnectedRef.current = true;
+      if (signalingRetryRef.current) {
+        clearInterval(signalingRetryRef.current);
+        signalingRetryRef.current = null;
       }
+      stopRingtone();
+      setCallState('connected');
     });
 
     channel.on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
       if (payload?.senderId === currentUserId || isCancelledRef.current || !payload?.candidate) return;
+      const pc = pcRef.current;
       if (pc?.remoteDescription?.type) {
         try {
           await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
@@ -383,13 +516,18 @@ export default function VoiceCallModal({
 
       if (isCancelledRef.current) return;
 
-      pc = new RTCPeerConnection(iceConfig);
+      const pc = new RTCPeerConnection(iceConfig);
       pcRef.current = pc;
 
       pc.ontrack = (event) => {
         if (isCancelledRef.current) return;
         const stream = event.streams?.[0] ?? new MediaStream([event.track]);
         attachRemoteStream(stream);
+        hasConnectedRef.current = true;
+        if (signalingRetryRef.current) {
+          clearInterval(signalingRetryRef.current);
+          signalingRetryRef.current = null;
+        }
         stopRingtone();
         playConnectedSound();
         setCallState('connected');
@@ -397,11 +535,19 @@ export default function VoiceCallModal({
 
       pc.onicecandidate = ({ candidate }) => {
         if (candidate && channel && !isCancelledRef.current) {
+          const plainCand = candidate.toJSON
+            ? candidate.toJSON()
+            : {
+                candidate: candidate.candidate,
+                sdpMid: candidate.sdpMid,
+                sdpMLineIndex: candidate.sdpMLineIndex,
+                usernameFragment: candidate.usernameFragment,
+              };
           channel
             .send({
               type: 'broadcast',
               event: 'ice-candidate',
-              payload: { candidate, senderId: currentUserId },
+              payload: { candidate: plainCand, senderId: currentUserId },
             })
             .catch(() => {});
         }
@@ -410,6 +556,11 @@ export default function VoiceCallModal({
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === 'connected') {
           if (remoteStreamRef.current) attachRemoteStream(remoteStreamRef.current);
+          hasConnectedRef.current = true;
+          if (signalingRetryRef.current) {
+            clearInterval(signalingRetryRef.current);
+            signalingRetryRef.current = null;
+          }
           stopRingtone();
           playConnectedSound();
           setCallState('connected');
@@ -418,7 +569,7 @@ export default function VoiceCallModal({
         }
       };
 
-      // Caller mic + camera acquisition
+      // Caller mic + camera acquisition and immediate offer dispatch
       if (mode === 'outgoing') {
         try {
           const stream = await getLocalMedia();
@@ -428,28 +579,23 @@ export default function VoiceCallModal({
           }
           attachLocalStream(stream);
           addLocalTracksToPC(stream, pc);
+
+          await createAndSendOffer();
+
+          if (signalingRetryRef.current) clearInterval(signalingRetryRef.current);
+          signalingRetryRef.current = setInterval(() => {
+            if (hasConnectedRef.current || isCancelledRef.current) {
+              clearInterval(signalingRetryRef.current);
+              return;
+            }
+            createAndSendOffer();
+          }, 1500);
         } catch (err) {
           console.error('[WebRTC] Media error:', err.message);
           toast.error('Camera & microphone permissions required');
           endCall();
           return;
         }
-      }
-
-      // Process buffered events
-      if (bufferedCallReady && mode === 'outgoing') {
-        bufferedCallReady = false;
-        await createAndSendOffer();
-      }
-      if (bufferedCallOffer && mode === 'incoming') {
-        const offer = bufferedCallOffer;
-        bufferedCallOffer = null;
-        await handleOffer(offer);
-      }
-      if (bufferedCallAccept && mode === 'outgoing' && offerCreatedRef.current) {
-        const answer = bufferedCallAccept;
-        bufferedCallAccept = null;
-        await processCallAccept(answer);
       }
     };
 
@@ -459,79 +605,21 @@ export default function VoiceCallModal({
       isCancelledRef.current = true;
       cleanup();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, channel]);
-
-  // ── Accept incoming call ─────────────────────────────────────────
-  const handleAcceptCall = async () => {
-    setCallState('connecting');
-    stopRingtone();
-
-    try {
-      if (remoteAudioRef.current) {
-        remoteAudioRef.current.muted = false;
-        remoteAudioRef.current.volume = 1.0;
-        remoteAudioRef.current.play().catch(() => {});
-      }
-
-      const stream = await getLocalMedia();
-      attachLocalStream(stream);
-      const pc = pcRef.current;
-      if (pc && pc.signalingState !== 'closed') {
-        addLocalTracksToPC(stream, pc);
-      }
-
-      if (channel) {
-        const sendReady = () =>
-          channel
-            .send({
-              type: 'broadcast',
-              event: 'call-ready',
-              payload: { responderId: currentUserId, roomId },
-            })
-            .catch(() => {});
-
-        sendReady();
-        setTimeout(sendReady, 600);
-        setTimeout(sendReady, 1500);
-      }
-    } catch {
-      toast.error('Permissions required to join call');
-      handleDeclineCall();
-    }
-  };
-
-  const handleDeclineCall = () => {
-    stopRingtone();
-    channel
-      ?.send({
-        type: 'broadcast',
-        event: 'call-reject',
-        payload: { responderId: currentUserId, roomId },
-      })
-      .catch(() => {});
-    endCall();
-  };
-
-  const handleEndCall = () => {
-    stopRingtone();
-    channel
-      ?.send({
-        type: 'broadcast',
-        event: 'call-end',
-        payload: { senderId: currentUserId, roomId },
-      })
-      .catch(() => {});
-    cleanup();
-    setCallState('ended');
-    setTimeout(onClose, 800);
-  };
-
-  const endCall = () => {
-    cleanup();
-    setCallState('ended');
-    setTimeout(onClose, 800);
-  };
+  }, [
+    isOpen,
+    channel,
+    mode,
+    currentUserId,
+    createAndSendOffer,
+    processOffer,
+    processCallAccept,
+    attachRemoteStream,
+    attachLocalStream,
+    addLocalTracksToPC,
+    getLocalMedia,
+    endCall,
+    cleanup,
+  ]);
 
   // ── Toggle Microphone ────────────────────────────────────────────
   const toggleMute = () => {
@@ -636,7 +724,7 @@ export default function VoiceCallModal({
             await videoSender.replaceTrack(newTrack);
           }
         }
-        toast.success(nextFacing === 'user' ? '🤳 Front Camera' : '📷 Rear Camera');
+        toast.success(nextFacing === 'user' ? 'Front Camera' : 'Rear Camera');
       }
     } catch (e) {
       console.warn('[Flip Camera Error]', e.message);
@@ -664,7 +752,7 @@ export default function VoiceCallModal({
     }
     el.muted = false;
     el.volume = next === 'speaker' ? 1.0 : 0.6;
-    toast.success(next === 'speaker' ? '🔊 Loudspeaker' : '🎧 Earpiece');
+    toast.success(next === 'speaker' ? 'Loudspeaker' : 'Earpiece');
   };
 
   const formatDuration = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
@@ -672,7 +760,7 @@ export default function VoiceCallModal({
   if (!isOpen) return null;
 
   const peerName = peerUser?.name || 'Campus Student';
-  const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(peerName)}&background=F05A00&color=ffffff&size=256&bold=true&format=png`;
+  const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(peerName)}&background=7C3AED&color=ffffff&size=256&bold=true&format=png`;
   const avatar = peerUser?.photo || getUserAvatarUrl(peerUser) || fallback;
 
   return (
@@ -869,88 +957,88 @@ export default function VoiceCallModal({
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-[32px] bg-black/60 backdrop-blur-2xl border border-white/15 shadow-2xl">
+          <div className="flex items-center justify-center gap-3.5 sm:gap-4.5 px-5 py-3 sm:px-6 sm:py-3.5 rounded-full bg-black/75 backdrop-blur-2xl border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
             {/* Mic Toggle */}
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1.5">
               <button
                 type="button"
                 onClick={toggleMute}
-                className={`w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center transition-all cursor-pointer active:scale-90 ${
+                className={`w-12 h-12 sm:w-13 sm:h-13 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-90 shadow-md ${
                   isMuted
-                    ? 'bg-rose-600 text-white ring-2 ring-rose-400'
-                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
+                    ? 'bg-white/25 text-rose-400 border border-rose-400/40 ring-2 ring-rose-500/20'
+                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/15'
                 }`}
                 title={isMuted ? 'Unmute' : 'Mute'}
               >
                 {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
               </button>
-              <span className="text-[10px] font-bold text-white/70 whitespace-nowrap">
+              <span className="text-[10px] font-bold text-white/75 whitespace-nowrap">
                 {isMuted ? 'Unmute' : 'Mute'}
               </span>
             </div>
 
             {/* Video Camera Toggle */}
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1.5">
               <button
                 type="button"
                 onClick={toggleCamera}
-                className={`w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center transition-all cursor-pointer active:scale-90 ${
-                  !isVideoEnabled
-                    ? 'bg-rose-600 text-white ring-2 ring-rose-400'
-                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
+                className={`w-12 h-12 sm:w-13 sm:h-13 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-90 shadow-md ${
+                  isVideoEnabled
+                    ? 'bg-white/10 hover:bg-white/20 text-white border border-white/15'
+                    : 'bg-white/10 hover:bg-white/20 text-white/60 border border-white/10'
                 }`}
                 title={isVideoEnabled ? 'Stop Video' : 'Start Video'}
               >
-                {!isVideoEnabled ? <VideoOff size={20} /> : <Video size={20} />}
+                {isVideoEnabled ? <Video size={20} /> : <VideoOff size={20} />}
               </button>
-              <span className="text-[10px] font-bold text-white/70 whitespace-nowrap">
+              <span className="text-[10px] font-bold text-white/75 whitespace-nowrap">
                 {isVideoEnabled ? 'Cam On' : 'Cam Off'}
               </span>
             </div>
 
             {/* Flip Camera (Active when camera is ON) */}
             {isVideoEnabled && (
-              <div className="flex flex-col items-center gap-1">
+              <div className="flex flex-col items-center gap-1.5">
                 <button
                   type="button"
                   onClick={flipCamera}
-                  className="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer active:scale-90"
+                  className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/15 flex items-center justify-center transition-all cursor-pointer active:scale-90 shadow-md"
                   title="Flip Camera"
                 >
                   <SwitchCamera size={20} />
                 </button>
-                <span className="text-[10px] font-bold text-white/70 whitespace-nowrap">Flip</span>
+                <span className="text-[10px] font-bold text-white/75 whitespace-nowrap">Flip</span>
               </div>
             )}
 
             {/* Speaker / Earpiece Toggle */}
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1.5">
               <button
                 type="button"
                 onClick={toggleSpeaker}
-                className={`w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center transition-all cursor-pointer active:scale-90 ${
+                className={`w-12 h-12 sm:w-13 sm:h-13 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-90 shadow-md ${
                   audioOutput === 'speaker'
-                    ? 'bg-[var(--accent)] text-white ring-2 ring-[var(--accent-tint-20)]/50'
-                    : 'bg-white/15 text-white border border-white/20 hover:bg-white/25'
+                    ? 'bg-[#7C3AED] text-white ring-2 ring-[#7C3AED]/40 shadow-lg shadow-[#7C3AED]/30 border border-[#7C3AED]'
+                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/15'
                 }`}
                 title={audioOutput === 'speaker' ? 'Loudspeaker' : 'Earpiece'}
               >
                 {audioOutput === 'speaker' ? <Volume2 size={20} /> : <Volume1 size={20} />}
               </button>
-              <span className="text-[10px] font-bold text-white/70 whitespace-nowrap">
+              <span className="text-[10px] font-bold text-white/75 whitespace-nowrap">
                 {audioOutput === 'speaker' ? 'Speaker' : 'Earpiece'}
               </span>
             </div>
 
             {/* Hangup Button */}
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1.5">
               <button
                 type="button"
                 onClick={handleEndCall}
-                className="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-xl active:scale-90 transition-all cursor-pointer ring-2 ring-rose-500/40"
+                className="w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-[#EF4444] hover:bg-[#DC2626] text-white flex items-center justify-center shadow-lg shadow-rose-600/40 active:scale-90 transition-all cursor-pointer ring-4 ring-rose-500/20"
                 title="End Call"
               >
-                <PhoneOff size={20} />
+                <PhoneHangup size={24} />
               </button>
               <span className="text-[10px] font-bold text-rose-400 whitespace-nowrap">End</span>
             </div>
