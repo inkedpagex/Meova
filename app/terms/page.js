@@ -12,11 +12,11 @@ export default function TermsPage() {
         <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-bold text-[#78716C] hover:text-[#1C1917] transition-all uppercase tracking-wider">
           ← Back
         </Link>
-        <Link href="/login" className="px-5 py-2 rounded-full text-[12px] font-bold text-white transition-all bg-[#6D28D9] hover:bg-[#5B21B6] active:scale-95 shadow-xs">
+        <Link href="/login" className="px-5 py-2 rounded-full text-[12px] font-bold text-white transition-all bg-[var(--accent)] hover:bg-[var(--accent-hover)] active:scale-95 shadow-xs">
           Log In
         </Link>
       </div>
-      <div className="rounded-[20px] bg-white border border-[#E7E5E4] p-8 shadow-xs">
+      <div className="rounded-[16px] bg-white border border-[#E7E5E4] p-8 shadow-xs">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-[#1C1917] mb-2">Terms of Service</h1>
           <p className="text-xs text-[#78716C] font-bold uppercase tracking-wider">Last updated: August 2026</p>
@@ -78,7 +78,7 @@ export default function TermsPage() {
       </div>
 
       <div className="mt-6 text-center">
-        <Link href="/privacy" className="text-xs font-bold text-[#6D28D9] hover:underline">Read our Privacy Policy →</Link>
+        <Link href="/privacy" className="text-xs font-bold text-[var(--accent)] hover:underline">Read our Privacy Policy →</Link>
       </div>
     </div>
   );

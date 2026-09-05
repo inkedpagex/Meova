@@ -34,7 +34,7 @@ export default function MainContentWrapper({ children }) {
 
   if (isAdminPath) {
     return (
-      <div className={`flex-1 ${isCollapsed ? 'md:pl-[72px]' : 'md:pl-[230px]'} min-w-0 bg-[#f8fafc] transition-all duration-300`}>
+      <div className={`flex-1 ${isCollapsed ? 'md:pl-[72px]' : 'md:pl-[230px]'} min-w-0 bg-[#FAFAF8] transition-all duration-300`}>
         <main className="p-4 md:p-8 pt-20 md:pt-8 pb-24 md:pb-8 w-full max-w-7xl mx-auto pb-safe">
           {children}
         </main>
@@ -54,7 +54,7 @@ export default function MainContentWrapper({ children }) {
 
   if (isStandalonePath) {
     return (
-      <div className="flex-1 min-w-0 bg-white">
+      <div className="flex-1 min-w-0 bg-[#FAFAF8]">
         <main className="w-full h-full">
           {children}
         </main>
@@ -69,8 +69,8 @@ export default function MainContentWrapper({ children }) {
       <main
         className={`w-full mx-auto ${
           isMessagesPath 
-            ? 'p-0 md:p-6 md:!pt-6 md:!pb-12 max-w-full' 
-            : 'max-w-[720px] px-4 pt-6 pb-12 pb-safe'
+            ? 'p-0 md:p-4 max-w-full' 
+            : 'max-w-[720px] px-4 pt-[68px] md:pt-6 pb-12 pb-safe'
         }`}
       >
         {children}

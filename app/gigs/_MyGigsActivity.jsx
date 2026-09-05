@@ -12,7 +12,7 @@ const STATUS_STYLE = {
   PENDING:   { icon: <Hourglass size={12}/>,     label: 'Pending',   cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   ACCEPTED:  { icon: <CheckCircle2 size={12}/>,  label: 'Accepted',  cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   REJECTED:  { icon: <XCircle size={12}/>,       label: 'Rejected',  cls: 'bg-red-50 text-red-500 border-red-200' },
-  COMPLETED: { icon: <CheckCircle2 size={12}/>,  label: 'Completed', cls: 'bg-[#F3EEFC] text-[#5B21B6] border-[#E4D9F7]' },
+  COMPLETED: { icon: <CheckCircle2 size={12}/>,  label: 'Completed', cls: 'bg-[var(--accent-tint-10)] text-[var(--accent-hover)] border-[var(--accent-tint-20)]' },
 };
 
 export default function MyGigsActivity({ userId, onManage, initialTab = 'posted' }) {
@@ -122,7 +122,7 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
               tab === key ? 'bg-white text-[#1C1917] shadow-sm border border-[#E7E5E4]/50' : 'text-[#78716C] hover:text-[#78716C]'
             }`}
           >
-            <Icon size={14} className={tab === key ? 'text-[#6D28D9]' : 'text-[#A8A29E]'} />
+            <Icon size={14} className={tab === key ? 'text-[var(--accent)]' : 'text-[#A8A29E]'} />
             <span>{label}</span>
           </button>
         ))}
@@ -139,7 +139,7 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
             </div>
           )}
           {postedGigs.map(gig => (
-            <div key={gig.id} className="p-4 rounded-2xl border border-[#E7E5E4] bg-white space-y-2.5 hover:border-[#E4D9F7] transition-all shadow-xs">
+            <div key={gig.id} className="p-4 rounded-2xl border border-[#E7E5E4] bg-white space-y-2.5 hover:border-[var(--accent-tint-20)] transition-all shadow-xs">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-bold text-[#1C1917]">{gig.title}</p>
@@ -166,7 +166,7 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
                   )}
                   <button
                     onClick={() => onManage(gig)}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#F3EEFC] text-[#5B21B6] border border-[#E4D9F7] text-xs font-bold hover:bg-[#F3EEFC] cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
+                    className="px-3.5 py-1.5 rounded-xl bg-[var(--accent-tint-10)] text-[var(--accent-hover)] border border-[var(--accent-tint-20)] text-xs font-bold hover:bg-[var(--accent-tint-10)] cursor-pointer transition-all flex items-center gap-1.5 active:scale-95"
                   >
                     {(gig.applicationsCount || gig.applications_count || 0) > 0 ? (
                       <>
@@ -200,7 +200,7 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
             const st = STATUS_STYLE[rawStatus] || STATUS_STYLE.PENDING;
 
             return (
-              <div key={app.id || (app.gigId + '-' + (app.appliedAt || ''))} className="p-4 rounded-2xl border border-[#E7E5E4] bg-white space-y-3 shadow-xs hover:border-[#E4D9F7] transition-all">
+              <div key={app.id || (app.gigId + '-' + (app.appliedAt || ''))} className="p-4 rounded-2xl border border-[#E7E5E4] bg-white space-y-3 shadow-xs hover:border-[var(--accent-tint-20)] transition-all">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-[#1C1917] truncate">{app.gigTitle || 'Campus Gig'}</p>
@@ -256,7 +256,7 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
                         </Link>
                         <button onClick={() => {
                           setTimeout(() => window.location.href = `/messages?uid=${app.gigAuthorId}`, 500);
-                        }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#6D28D9] text-white rounded-xl text-xs font-bold hover:bg-[#5B21B6] transition-colors shadow-sm cursor-pointer">
+                        }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[var(--accent)] text-white rounded-xl text-xs font-bold hover:bg-[var(--accent-hover)] transition-colors shadow-sm cursor-pointer">
                           <Phone size={14} /> Secure Call
                         </button>
                       </div>
@@ -265,8 +265,8 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
                 )}
 
                 {rawStatus === 'COMPLETED' && (
-                  <div className="p-3 rounded-2xl bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 text-xs text-[#6D28D9] font-bold">
+                  <div className="p-3 rounded-2xl bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--accent)] font-bold">
                       <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
                       <span>Task Completed</span>
                     </div>
@@ -284,7 +284,7 @@ export default function MyGigsActivity({ userId, onManage, initialTab = 'posted'
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-2xs ${
                         reviewedGigs.has(app.gigId)
                           ? 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
-                          : 'bg-[#6D28D9] hover:bg-[#5B21B6] text-white shadow-xs'
+                          : 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-xs'
                       }`}
                     >
                       <Star size={13} className={reviewedGigs.has(app.gigId) ? 'fill-amber-400 text-amber-500' : 'fill-white text-white'} />

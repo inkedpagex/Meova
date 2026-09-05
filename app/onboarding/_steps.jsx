@@ -69,9 +69,9 @@ export function Step2({ data, onChange, onNext, onBack }) {
                 onClick={() => onChange('year', y)}
                 className="py-2.5 rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer border"
                 style={{
-                  background: isSelected ? '#6D28D9' : '#FAFAF8',
-                  color: isSelected ? '#fff' : '#78716C',
-                  borderColor: isSelected ? '#6D28D9' : '#E7E5E4',
+                  background: isSelected ? 'var(--accent)' : '#141414',
+                  color: isSelected ? '#fff' : '#A3A3A3',
+                  borderColor: isSelected ? 'var(--accent)' : '#2A2A2A',
                 }}
               >
                 {y}
@@ -92,7 +92,7 @@ export function Step2({ data, onChange, onNext, onBack }) {
             type="button"
             onClick={() => setShowBranchDropdown(!showBranchDropdown)}
             className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-full border text-xs font-bold outline-none transition-all flex items-center justify-between text-left cursor-pointer"
-            style={{ borderColor: data.branch ? '#6D28D9' : '#E7E5E4', background: '#FAFAF8', color: data.branch ? '#1C1917' : '#A8A29E' }}
+            style={{ borderColor: data.branch ? 'var(--accent)' : '#2A2A2A', background: '#141414', color: data.branch ? '#FFFFFF' : '#737373' }}
           >
             <span className="truncate">{data.branch || 'Select your course...'}</span>
             <ChevronDown size={15} className={`text-[#A8A29E] transition-transform duration-200 ${showBranchDropdown ? 'rotate-180' : ''}`} />
@@ -109,10 +109,10 @@ export function Step2({ data, onChange, onNext, onBack }) {
                     onChange('branch', b);
                     setShowBranchDropdown(false);
                   }}
-                  className="w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-colors hover:bg-[#F3EEFC] hover:text-[#6D28D9] border-b border-[#E7E5E4]/50 last:border-0 cursor-pointer"
+                  className="w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-colors hover:bg-[var(--accent-tint-10)] hover:text-[var(--accent)] border-b border-[#E7E5E4]/50 last:border-0 cursor-pointer"
                   style={{ 
-                    color: data.branch === b ? '#6D28D9' : '#1C1917', 
-                    background: data.branch === b ? '#F3EEFC' : 'transparent',
+                    color: data.branch === b ? 'var(--accent)' : '#FFFFFF', 
+                    background: data.branch === b ? 'var(--accent-tint-10)' : 'transparent',
                     fontWeight: data.branch === b ? 700 : 500
                   }}
                 >
@@ -148,7 +148,7 @@ export function Step2({ data, onChange, onNext, onBack }) {
             rows={2}
             onChange={e => onChange('bio', e.target.value)}
             placeholder="What are you interested in on campus?"
-            className="w-full pl-10 pr-3.5 py-2.5 rounded-2xl border border-[#E7E5E4] text-xs font-medium outline-none transition-all resize-none focus:border-[#6D28D9] bg-[#FAFAF8] focus:bg-white text-[#1C1917]"
+            className="w-full pl-10 pr-3.5 py-2.5 rounded-2xl border border-[#E7E5E4] text-xs font-medium outline-none transition-all resize-none focus:border-[var(--accent)] bg-[#FAFAF8] focus:bg-white text-[#1C1917]"
           />
         </div>
       </div>
@@ -165,7 +165,7 @@ export function Step2({ data, onChange, onNext, onBack }) {
           type="button"
           onClick={onNext} 
           disabled={!canNext}
-          className="flex-1 py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer shadow-xs bg-[#6D28D9] hover:bg-[#5B21B6]"
+          className="flex-1 py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer shadow-xs bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
         >
           <span>Continue to Interests</span>
           <ArrowRight size={14}/>
@@ -204,7 +204,7 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
             value={data.instagram}
             onChange={e => onChange('instagram', e.target.value.replace('@', ''))}
             placeholder="your_handle"
-            className="w-full pl-10 pr-3.5 py-2.5 sm:py-3 rounded-xl border border-[#E7E5E4] text-xs font-bold outline-none transition-all focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 bg-[#FAFAF8] focus:bg-white text-[#1C1917]"
+            className="w-full pl-10 pr-3.5 py-2.5 sm:py-3 rounded-xl border border-[#E7E5E4] text-xs font-bold outline-none transition-all focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-[#FAFAF8] focus:bg-white text-[#1C1917]"
           />
         </div>
       </div>
@@ -215,7 +215,7 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
           <label className="text-[10px] font-bold uppercase tracking-wider text-[#78716C]">
             Interests *
           </label>
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${data.interests.length >= 1 ? 'bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]' : 'bg-[#FAFAF8] text-[#A8A29E]'}`}>
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${data.interests.length >= 1 ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#A8A29E]'}`}>
             {data.interests.length}/5 selected
           </span>
         </div>
@@ -231,9 +231,9 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
                 disabled={maxed}
                 className="text-[10.5px] uppercase tracking-wider py-1.5 px-3 rounded-full font-bold transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
                 style={{
-                  background: sel ? '#6D28D9' : '#fff',
-                  color: sel ? '#fff' : '#78716C',
-                  border: `1px solid ${sel ? '#6D28D9' : '#E7E5E4'}`,
+                  background: sel ? 'var(--accent)' : '#fff',
+                  color: sel ? '#fff' : '#A3A3A3',
+                  border: `1px solid ${sel ? 'var(--accent)' : '#2A2A2A'}`,
                 }}
               >
                 {tag}
@@ -263,7 +263,7 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
           type="button"
           onClick={onSubmit} 
           disabled={!canSubmit}
-          className="flex-1 py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer shadow-xs bg-[#6D28D9] hover:bg-[#5B21B6]"
+          className="flex-1 py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer shadow-xs bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
         >
           {loading ? (
             <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block"/> Setting up Profile...</>

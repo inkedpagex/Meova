@@ -111,13 +111,13 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
     }
 
-    // Trigger background PWA Web Push notification to user's phone
+    // Trigger background FCM push notification to user's device
     sendPushToUser(targetUserId, {
       title,
       body: notifBody,
       type: notifType,
       url: notifUrl,
-    }).catch(e => console.warn('[WebPush] Dispatch background error:', e.message));
+    }).catch(e => console.warn('[FCM] Dispatch background error:', e.message));
 
     return NextResponse.json({ success: true });
   } catch (err) {

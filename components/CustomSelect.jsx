@@ -43,7 +43,7 @@ export default function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white border border-[#E7E5E4] hover:border-[#6D28D9] rounded-[12px] px-4 py-2.5 text-xs font-bold text-[#1C1917] flex items-center justify-between shadow-xs transition-all cursor-pointer active:scale-[0.99] focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10"
+        className="w-full bg-white border border-[#E7E5E4] hover:border-[var(--accent)] rounded-[12px] px-4 py-2.5 text-xs font-bold text-[#1C1917] flex items-center justify-between shadow-xs transition-all cursor-pointer active:scale-[0.99] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10"
       >
         <span className={selectedOption ? 'text-[#1C1917]' : 'text-[#1C1917]/40'}>
           {selectedOption ? selectedOption.label : placeholder}
@@ -51,7 +51,7 @@ export default function CustomSelect({
         <ChevronDown
           size={16}
           className={`text-[#1C1917]/60 transition-transform duration-200 flex-shrink-0 ${
-            isOpen ? 'rotate-180 text-[#6D28D9]' : ''
+            isOpen ? 'rotate-180 text-[var(--accent)]' : ''
           }`}
         />
       </button>
@@ -71,12 +71,12 @@ export default function CustomSelect({
                 }}
                 className={`w-full text-left px-3.5 py-2.5 rounded-[10px] text-xs font-bold transition-all flex items-center justify-between cursor-pointer mb-0.5 last:mb-0 ${
                   isSelected
-                    ? 'bg-[#F3EEFC] text-[#6D28D9] font-bold border border-[#E4D9F7]/80 shadow-2xs'
-                    : 'text-[#1C1917] hover:bg-[#F3EEFC]/50 hover:text-[#1C1917] border border-transparent'
+                    ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] font-bold border border-[var(--accent-tint-20)]/80 shadow-2xs'
+                    : 'text-[#1C1917] hover:bg-[var(--accent-tint-10)]/50 hover:text-[#1C1917] border border-transparent'
                 }`}
               >
                 <span>{opt.label}</span>
-                {isSelected && <Check size={14} className="text-[#6D28D9] stroke-[2.5]" />}
+                {isSelected && <Check size={14} className="text-[var(--accent)] stroke-[2.5]" />}
               </button>
             );
           })}

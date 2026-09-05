@@ -9,7 +9,7 @@ export default function ZoomableProfileAvatar({
   name,
   username,
   sizeClass = 'w-20 h-20 sm:w-24 sm:h-24',
-  ringColor = '#6D28D9',
+  ringColor = 'var(--accent)',
   isIdOn = false,
   className = '',
 }) {
@@ -19,25 +19,25 @@ export default function ZoomableProfileAvatar({
     <>
       <div
         onClick={() => setIsOpen(true)}
-        className={`relative inline-flex items-center justify-center flex-shrink-0 cursor-pointer group select-none ${className}`}
+        className={`relative inline-flex items-center justify-center flex-shrink-0 cursor-pointer group select-none ${sizeClass} ${className}`}
         title="Click to zoom profile picture"
       >
         <div
-          className={`${sizeClass} rounded-full p-[3px] transition-transform duration-200 group-hover:scale-105 group-active:scale-95 shadow-sm group-hover:shadow-md flex items-center justify-center flex-shrink-0`}
+          className="w-full h-full rounded-full p-[2px] transition-transform duration-200 group-hover:scale-105 group-active:scale-95 shadow-sm group-hover:shadow-md flex items-center justify-center flex-shrink-0 overflow-hidden"
           style={{ background: ringColor }}
         >
-          <div className="w-full h-full rounded-full overflow-hidden border-2 border-white bg-[#FAFAF8] flex items-center justify-center">
+          <div className="w-full h-full rounded-full overflow-hidden border border-[#E7E5E4] bg-[#FAFAF8] flex items-center justify-center">
             <img
               src={src}
               alt={alt || name || 'User'}
-              className="w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-90 max-w-full max-h-full"
+              className="w-full h-full object-cover rounded-full transition-opacity duration-200 group-hover:opacity-90 aspect-square"
             />
           </div>
         </div>
 
         {/* Live Indicator */}
         {isIdOn && (
-          <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
+          <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[var(--bg-surface)] shadow-sm" />
         )}
       </div>
 

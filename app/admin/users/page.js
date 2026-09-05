@@ -132,7 +132,7 @@ export default function AdminUsersPage() {
         <div>
           <h1 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <span>User & Access Control</span>
-            <span className="text-xs font-bold bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7] px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-bold bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] px-2.5 py-0.5 rounded-full">
               {users.length} Total
             </span>
           </h1>
@@ -157,7 +157,7 @@ export default function AdminUsersPage() {
                 onClick={() => setRoleFilter(tab.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#6D28D9] text-white shadow-xs border border-[#6D28D9]'
+                    ? 'bg-[var(--accent)] text-white shadow-xs border border-[var(--accent)]'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
                 }`}
               >
@@ -176,7 +176,7 @@ export default function AdminUsersPage() {
           placeholder="Quick search by name, email, or branch..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#6D28D9] transition-all shadow-xs"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[var(--accent)] transition-all shadow-xs"
         />
         {search && (
           <button
@@ -191,7 +191,7 @@ export default function AdminUsersPage() {
       {/* Compact High-Density Users List */}
       {loading ? (
         <div className="bg-white border border-slate-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-xs">
-          <Loader2 size={20} className="animate-spin text-[#6D28D9]" />
+          <Loader2 size={20} className="animate-spin text-[var(--accent)]" />
           <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Loading campus users...</p>
         </div>
       ) : filtered.length === 0 ? (
@@ -210,7 +210,7 @@ export default function AdminUsersPage() {
             let roleLabel = 'Student';
 
             if (isUserAdmin) {
-              roleBadgeBg = 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7] font-bold';
+              roleBadgeBg = 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)] font-bold';
               roleLabel = 'Admin';
             } else if (isHost) {
               roleBadgeBg = 'bg-amber-50 text-amber-700 border-amber-200 font-bold';
@@ -234,7 +234,7 @@ export default function AdminUsersPage() {
                 <div className="flex items-center gap-3 min-w-0">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold border ${
                     isBlocked ? 'bg-rose-100 text-rose-600 border-rose-200' :
-                    isUserAdmin ? 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' :
+                    isUserAdmin ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' :
                     isHost ? 'bg-amber-50 text-amber-600 border-amber-200' :
                     isLead ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
                     'bg-slate-100 text-slate-600 border-slate-200'
@@ -288,7 +288,7 @@ export default function AdminUsersPage() {
 
                   {/* Block / Unblock & Delete Actions */}
                   {isUserAdmin || (u.email || '').toLowerCase() === 'chirag2006chak@gmail.com' ? (
-                    <span className="text-[10.5px] font-extrabold text-[#5B21B6] bg-[#fcf6fa] px-2.5 py-1.5 rounded-lg border border-[#eac5e0] flex items-center gap-1 select-none">
+                    <span className="text-[10.5px] font-extrabold text-[var(--accent-hover)] bg-[#fcf6fa] px-2.5 py-1.5 rounded-lg border border-[#eac5e0] flex items-center gap-1 select-none">
                       <ShieldAlert size={12} /> Protected Admin
                     </span>
                   ) : (

@@ -64,18 +64,18 @@ export default function InstagramEmbed({ instagramInput }) {
 
   if (!isPost) {
     return (
-      <div className="group relative overflow-hidden bg-white border border-black/[0.06] rounded-2xl p-3.5 sm:p-4 shadow-xs hover:border-black/[0.1] transition-all duration-200 flex items-center justify-between gap-3 mb-6">
+      <div className="group relative overflow-hidden bg-white border border-[#E7E5E4] rounded-2xl p-3.5 sm:p-4 shadow-xs hover:border-black/[0.1] transition-all duration-200 flex items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3 min-w-0">
           {/* Clean Single-Accent Badge */}
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#F3EEFC] border border-[#E4D9F7]/80 text-[#6D28D9] flex items-center justify-center shadow-2xs flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
-            <InstagramGlyph className="w-5 h-5 text-[#6D28D9]" />
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)]/80 text-[var(--accent)] flex items-center justify-center shadow-2xs flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
+            <InstagramGlyph className="w-5 h-5 text-[var(--accent)]" />
           </div>
 
           <div className="min-w-0">
-            <p className="text-[13px] sm:text-sm font-bold text-black truncate tracking-tight">
+            <p className="text-[13px] sm:text-sm font-bold text-[#1C1917] truncate tracking-tight">
               @{handle}
             </p>
-            <p className="text-[10.5px] font-bold text-black/60 mt-0.5 flex items-center gap-1.5">
+            <p className="text-[10.5px] font-bold text-[#1C1917]/60 mt-0.5 flex items-center gap-1.5">
               <span>Instagram</span>
               <span>•</span>
               <span>Student Profile</span>
@@ -88,7 +88,7 @@ export default function InstagramEmbed({ instagramInput }) {
           href={`https://instagram.com/${handle}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-4 py-2 sm:py-2.5 rounded-full bg-white hover:bg-[#F3EEFC] text-black border border-black/[0.08] text-xs font-bold tracking-wide shadow-xs active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-4 py-2 sm:py-2.5 rounded-full bg-white hover:bg-[var(--accent-tint-10)] text-[#1C1917] border border-[#E7E5E4] text-xs font-bold tracking-wide shadow-xs active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer"
         >
           <span>View on Instagram</span>
           <ArrowUpRight size={14} strokeWidth={2.5} />
@@ -100,11 +100,11 @@ export default function InstagramEmbed({ instagramInput }) {
   const embedUrl = `${raw.replace(/\/$/, '')}/embed/`;
 
   return (
-    <div className="rounded-2xl p-5 mb-6 bg-white border border-black/[0.06] shadow-xs space-y-3">
+    <div className="rounded-2xl p-5 mb-6 bg-white border border-[#E7E5E4] shadow-xs space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-black flex items-center gap-2">
-          <div className="w-5 h-5 rounded-md bg-[#F3EEFC] border border-[#E4D9F7]/80 text-[#6D28D9] flex items-center justify-center">
-            <InstagramGlyph className="w-3.5 h-3.5 text-[#6D28D9]" />
+        <h3 className="text-xs font-bold uppercase tracking-wider text-[#1C1917] flex items-center gap-2">
+          <div className="w-5 h-5 rounded-md bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)]/80 text-[var(--accent)] flex items-center justify-center">
+            <InstagramGlyph className="w-3.5 h-3.5 text-[var(--accent)]" />
           </div>
           <span>Instagram Vibe</span>
         </h3>

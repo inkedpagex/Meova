@@ -183,7 +183,7 @@ export default function HostDashboardClient({
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <Link
               href="/"
-              className="w-8 h-8 rounded-full bg-[#FAFAF8] border border-[#E7E5E4]/80 flex items-center justify-center text-[#78716C] hover:text-[#1C1917] hover:bg-[#E7E5E4] transition-colors flex-shrink-0"
+              className="w-8 h-8 rounded-full bg-[#FAFAF8] border border-[#E7E5E4]/80 flex items-center justify-center text-[#78716C] hover:text-[#1C1917] hover:bg-[var(--accent-tint-10)] transition-colors flex-shrink-0"
             >
               <ArrowLeft size={16} />
             </Link>
@@ -201,10 +201,10 @@ export default function HostDashboardClient({
           <div className="flex items-center gap-2 flex-shrink-0">
             <Link
               href="/profile"
-              className="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#FAFAF8] hover:bg-[#E7E5E4] border border-[#E7E5E4]/80 transition-all cursor-pointer whitespace-nowrap"
+              className="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#FAFAF8] hover:bg-[var(--accent-tint-10)] border border-[#E7E5E4]/80 transition-all cursor-pointer whitespace-nowrap"
               title="Go to Profile"
             >
-              <div className="w-6 h-6 rounded-full overflow-hidden bg-[#E7E5E4] flex-shrink-0">
+              <div className="w-6 h-6 rounded-full overflow-hidden bg-[var(--bg-surface)] flex-shrink-0">
                 <img
                   src={host.photo_url || getCartoonAvatar(host.full_name || 'Host')}
                   alt=""
@@ -233,7 +233,7 @@ export default function HostDashboardClient({
           <div className="bg-white border border-[#E7E5E4]/80 rounded-[24px] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
             <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider">Moments Moderated</p>
             <h3 className="text-2xl font-bold text-[#1C1917] mt-1">{posts.length}</h3>
-            <span className="text-[10px] text-[#6D28D9] font-bold bg-[#F3EEFC] px-2 py-0.5 rounded-full mt-1.5 inline-block">
+            <span className="text-[10px] text-[var(--accent)] font-bold bg-[var(--accent-tint-10)] px-2 py-0.5 rounded-full mt-1.5 inline-block">
               Live Feed Watch
             </span>
           </div>
@@ -258,13 +258,13 @@ export default function HostDashboardClient({
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex items-center gap-1.5 p-1 bg-[#E7E5E4]/70 border border-[#E7E5E4]/80 rounded-[16px] overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-[var(--bg-surface)] border border-[#E7E5E4]/80 rounded-[16px] overflow-x-auto">
           <button
             type="button"
             onClick={() => handleTabChange('feed')}
             className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'feed'
-                ? 'bg-[#6D28D9] text-white shadow-sm shadow-purple-500/20'
+                ? 'bg-[var(--accent)] text-white shadow-sm shadow-purple-500/20'
                 : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
@@ -277,7 +277,7 @@ export default function HostDashboardClient({
             onClick={() => handleTabChange('students')}
             className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'students'
-                ? 'bg-[#6D28D9] text-white shadow-sm shadow-purple-500/20'
+                ? 'bg-[var(--accent)] text-white shadow-sm shadow-purple-500/20'
                 : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
@@ -290,7 +290,7 @@ export default function HostDashboardClient({
             onClick={() => handleTabChange('logs')}
             className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'logs'
-                ? 'bg-[#6D28D9] text-white shadow-sm shadow-purple-500/20'
+                ? 'bg-[var(--accent)] text-white shadow-sm shadow-purple-500/20'
                 : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
@@ -303,7 +303,7 @@ export default function HostDashboardClient({
             onClick={() => handleTabChange('circles')}
             className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'circles'
-                ? 'bg-[#6D28D9] text-white shadow-sm shadow-purple-500/20'
+                ? 'bg-[var(--accent)] text-white shadow-sm shadow-purple-500/20'
                 : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
@@ -323,7 +323,7 @@ export default function HostDashboardClient({
                   placeholder="Filter moments by caption, category, or location..."
                   value={postSearch}
                   onChange={(e) => setPostSearch(e.target.value)}
-                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] pl-9 pr-4 py-2 text-xs text-[#1C1917] placeholder-zinc-400 focus:outline-none focus:border-[#6D28D9] focus:bg-white transition-colors"
+                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] pl-9 pr-4 py-2 text-xs text-[#1C1917] placeholder-zinc-400 focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors"
                 />
               </div>
               <p className="text-xs text-[#78716C] font-medium">
@@ -396,7 +396,7 @@ export default function HostDashboardClient({
                   placeholder="Search student by name, email, or branch..."
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
-                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] pl-9 pr-4 py-2 text-xs text-[#1C1917] placeholder-zinc-400 focus:outline-none focus:border-[#6D28D9] focus:bg-white transition-colors"
+                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] pl-9 pr-4 py-2 text-xs text-[#1C1917] placeholder-zinc-400 focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors"
                 />
               </div>
               <p className="text-xs text-[#78716C] font-medium">
@@ -537,7 +537,7 @@ export default function HostDashboardClient({
               </p>
               <Link
                 href="/circles"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-[12px] bg-[#6D28D9] text-white text-xs font-bold shadow-md shadow-purple-500/20 hover:bg-[#5B21B6] transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-[12px] bg-[var(--accent)] text-white text-xs font-bold shadow-md shadow-purple-500/20 hover:bg-[var(--accent-hover)] transition-colors"
               >
                 <Sparkles size={13} />
                 <span>+ Create Instant Circle</span>
@@ -559,7 +559,7 @@ export default function HostDashboardClient({
 
                   <Link
                     href={`/circles/${circle.id}`}
-                    className="p-2 rounded-[12px] bg-[#FAFAF8] hover:bg-[#E7E5E4] text-[#78716C] transition-colors"
+                    className="p-2 rounded-[12px] bg-[#FAFAF8] hover:bg-[var(--accent-tint-10)] text-[#78716C] transition-colors"
                     title="View Circle"
                   >
                     <ExternalLink size={15} />
@@ -589,12 +589,12 @@ export default function HostDashboardClient({
               </button>
             </div>
 
-            <p className="text-xs text-black/70 leading-relaxed font-medium">
+            <p className="text-xs text-[#1C1917]/70 leading-relaxed font-medium">
               As a Verified Campus Host, this post will be immediately removed from the campus feed and logged in the moderation audit trail.
             </p>
 
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-black uppercase tracking-wider">
+              <label className="text-[11px] font-bold text-[#1C1917] uppercase tracking-wider">
                 Select Moderation Reason
               </label>
               <CustomSelect
@@ -615,7 +615,7 @@ export default function HostDashboardClient({
                   placeholder="Explain why this post violates guidelines..."
                   value={customPostReason}
                   onChange={(e) => setCustomPostReason(e.target.value)}
-                  className="w-full bg-white border border-black/10 rounded-[16px] p-3.5 text-xs font-bold text-black placeholder:text-black/40 focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 mt-2 shadow-xs resize-none"
+                  className="w-full bg-white border border-[#E7E5E4]/10 rounded-[16px] p-3.5 text-xs font-bold text-[#1C1917] placeholder:text-[#1C1917]/40 focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 mt-2 shadow-xs resize-none"
                 />
               )}
             </div>
@@ -624,7 +624,7 @@ export default function HostDashboardClient({
               <button
                 type="button"
                 onClick={() => setModeratingPost(null)}
-                className="flex-1 py-2.5 rounded-full border border-black/10 text-xs font-bold uppercase tracking-wider text-black hover:bg-[#F3EEFC] transition-colors cursor-pointer"
+                className="flex-1 py-2.5 rounded-full border border-[#E7E5E4]/10 text-xs font-bold uppercase tracking-wider text-[#1C1917] hover:bg-[var(--accent-tint-10)] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -644,11 +644,11 @@ export default function HostDashboardClient({
       {/* MODAL: SUSPEND USER CONFIRMATION */}
       {suspendingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-white border border-black/10 rounded-[32px] p-6 max-w-md w-full space-y-4 shadow-2xl">
+          <div className="bg-white border border-[#E7E5E4]/10 rounded-[32px] p-6 max-w-md w-full space-y-4 shadow-2xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-rose-600">
                 <Ban size={20} />
-                <h3 className="text-base font-bold text-black">
+                <h3 className="text-base font-bold text-[#1C1917]">
                   {suspendingUser.is_blocked || suspendingUser.status === 'blocked'
                     ? 'Reinstate Student'
                     : 'Suspend Student Account'}
@@ -657,19 +657,19 @@ export default function HostDashboardClient({
               <button
                 type="button"
                 onClick={() => setSuspendingUser(null)}
-                className="w-8 h-8 rounded-full bg-[#F3EEFC] text-black flex items-center justify-center hover:bg-[#F3EEFC] cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-full bg-[var(--accent-tint-10)] text-[#1C1917] flex items-center justify-center hover:bg-[var(--accent-tint-10)] cursor-pointer transition-colors"
               >
                 <X size={16} />
               </button>
             </div>
 
-            <p className="text-xs text-black/70 leading-relaxed font-medium">
-              Target: <strong className="text-black font-bold">{suspendingUser.full_name || 'Student'}</strong> ({suspendingUser.email})
+            <p className="text-xs text-[#1C1917]/70 leading-relaxed font-medium">
+              Target: <strong className="text-[#1C1917] font-bold">{suspendingUser.full_name || 'Student'}</strong> ({suspendingUser.email})
             </p>
 
             {!(suspendingUser.is_blocked || suspendingUser.status === 'blocked') && (
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-black uppercase tracking-wider">
+                <label className="text-[11px] font-bold text-[#1C1917] uppercase tracking-wider">
                   Reason for Suspension
                 </label>
                 <CustomSelect
@@ -690,7 +690,7 @@ export default function HostDashboardClient({
                     placeholder="Provide specific details for suspension..."
                     value={customSuspendReason}
                     onChange={(e) => setCustomSuspendReason(e.target.value)}
-                    className="w-full bg-white border border-black/10 rounded-[16px] p-3.5 text-xs font-bold text-black placeholder:text-black/40 focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 mt-2 shadow-xs resize-none"
+                    className="w-full bg-white border border-[#E7E5E4]/10 rounded-[16px] p-3.5 text-xs font-bold text-[#1C1917] placeholder:text-[#1C1917]/40 focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 mt-2 shadow-xs resize-none"
                   />
                 )}
               </div>
@@ -700,7 +700,7 @@ export default function HostDashboardClient({
               <button
                 type="button"
                 onClick={() => setSuspendingUser(null)}
-                className="flex-1 py-2.5 rounded-full border border-black/10 text-xs font-bold uppercase tracking-wider text-black hover:bg-[#F3EEFC] transition-colors cursor-pointer"
+                className="flex-1 py-2.5 rounded-full border border-[#E7E5E4]/10 text-xs font-bold uppercase tracking-wider text-[#1C1917] hover:bg-[var(--accent-tint-10)] transition-colors cursor-pointer"
               >
                 Cancel
               </button>

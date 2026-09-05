@@ -8,7 +8,7 @@ export async function POST(request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const { targetUserId, bookingId, location, callerName, callerPhoto } = body;
+    const { targetUserId, bookingId, location, callerName, callerPhoto, callType = 'voice' } = body;
 
     if (!targetUserId) {
       return NextResponse.json({ error: 'targetUserId is required' }, { status: 400 });
@@ -17,14 +17,18 @@ export async function POST(request) {
     const name = callerName || user.full_name || 'Campus Student';
     const loc = location || 'Campus Meetup';
     const roomId = `call_${bookingId || `${user.uid}_${targetUserId}`}`;
+    const isVideo = callType === 'video';
 
-    // sendPush handles BOTH in-app notification insert + device web push in one call
+    // sendPush handles BOTH in-app notification insert + device FCM push in one call
     await sendPush(targetUserId, {
-      title: 'Incoming Voice Call',
-      body: `${name} is calling you for your meetup at ${loc}`,
-      url: `/bookings?callRoom=${roomId}&callerId=${user.uid}&autoAnswer=true`,
+      title: isVideo ? 'Incoming Video Call' : 'Incoming Voice Call',
+      body: isVideo
+        ? `${name} is requesting a 1-on-1 video call`
+        : `${name} is calling you for your meetup at ${loc}`,
+      url: `/messages?userId=${user.uid}&callRoom=${roomId}&callType=${callType}&autoAnswer=true`,
       type: 'incoming_call',
       isCall: true,
+      callType,
       bookingId: bookingId || null,
       callerPhoto: callerPhoto || '',
     }).catch(() => {});

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 /**
  * NotificationPermissionPrompt.jsx
  * User-friendly notification permission request.
@@ -33,14 +33,13 @@ export default function NotificationPermissionPrompt({ user }) {
     localStorage.setItem(PROMPT_KEY, '1');
 
     try {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        // Trigger FCM registration now that we have permission
-        // The useFCM hook will pick this up on next render
+      const { requestNativePushPermission } = await import('@/lib/useNativePush');
+      const granted = await requestNativePushPermission(userId);
+      if (granted) {
         window.dispatchEvent(new Event('Meova_notif_granted'));
       }
     } catch {
-      // Permission API not available on this browser
+      // Permission API not available
     }
   };
 
@@ -80,12 +79,12 @@ export default function NotificationPermissionPrompt({ user }) {
         `}</style>
 
         <div
-          className="bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden border border-[#E4D9F7]/80"
+          className="bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden border border-[var(--accent-tint-20)]/80"
         >
           {/* Orange header bar */}
           <div
             className="px-6 pt-6 pb-5 relative"
-            style={{ background: '#6D28D9' }}
+            style={{ background: 'var(--accent)' }}
           >
             <button
               onClick={handleDismiss}
@@ -100,7 +99,7 @@ export default function NotificationPermissionPrompt({ user }) {
               </div>
               <div>
                 <h3 className="text-white font-bold text-lg leading-tight">Stay in the loop</h3>
-                <p className="text-[#F3EEFC] text-[12px] font-medium mt-1">
+                <p className="text-[var(--accent-tint-10)] text-[12px] font-medium mt-1">
                   Enable notifications to never miss a moment
                 </p>
               </div>
@@ -134,7 +133,7 @@ export default function NotificationPermissionPrompt({ user }) {
             <button
               onClick={handleAllow}
               className="w-full py-3.5 rounded-[14px] font-bold text-sm text-white transition-all active:scale-95 shadow-lg cursor-pointer"
-              style={{ background: '#6D28D9', boxShadow: '0 8px 24px rgba(240,90,0,0.35)' }}
+              style={{ background: 'var(--accent)', boxShadow: '0 8px 24px rgba(240,90,0,0.35)' }}
             >
               Enable Notifications
             </button>

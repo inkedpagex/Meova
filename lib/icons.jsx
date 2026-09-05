@@ -185,4 +185,16 @@ export const LayoutGrid      = ri('ri-layout-grid-line',        'ri-layout-grid-
 export const List            = ri('ri-list-unordered',          'ri-list-check');
 export const TrendingUp      = ri('ri-trending-up-line',        'ri-trending-up-fill');
 export const BarChart2       = ri('ri-bar-chart-2-line',        'ri-bar-chart-2-fill');
+export const Sun             = ri('ri-sun-line',                'ri-sun-fill');
+export const Moon            = ri('ri-moon-line',               'ri-moon-fill');
+export const SunMedium       = ri('ri-sun-foggy-line',          'ri-sun-foggy-fill');
+export const MoonStar        = ri('ri-moon-clear-line',         'ri-moon-clear-fill');
+export const Play            = ri('ri-play-fill',               'ri-play-fill');
+export const VolumeX         = ri('ri-volume-mute-line',        'ri-volume-mute-fill');
+export const VideoOff        = ri('ri-video-off-line',          'ri-video-off-fill');
+export const SwitchCamera    = ri('ri-camera-switch-line',      'ri-camera-switch-fill');
+export const RotateCcw       = ri('ri-restart-line',            'ri-restart-fill');
+export const Maximize2       = ri('ri-fullscreen-line',         'ri-fullscreen-fill');
+export const Minimize2       = ri('ri-fullscreen-exit-line',    'ri-fullscreen-exit-fill');
+
 

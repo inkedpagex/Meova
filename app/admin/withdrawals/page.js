@@ -76,7 +76,7 @@ export default function AdminWithdrawalsPage() {
 
       {loading ? (
         <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
-          <Loader2 size={24} className="animate-spin text-[#6D28D9]" />
+          <Loader2 size={24} className="animate-spin text-[var(--accent)]" />
           <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Loading payout requests...</p>
         </div>
       ) : (
@@ -105,7 +105,7 @@ export default function AdminWithdrawalsPage() {
                           ₹{w.amount_inr || w.amount} <span className="text-xs font-bold text-slate-400">({w.sparks || w.sparks_deducted || w.amount || 0} Sparks)</span>
                         </p>
                         <p className="text-xs font-extrabold text-slate-900">
-                          Requested by: <span className="text-[#6D28D9]">{w.email}</span>
+                          Requested by: <span className="text-[var(--accent)]">{w.email}</span>
                         </p>
                         <p className="text-[11px] font-bold text-slate-400">
                           Date: {new Date(w.requested_at || w.created_at || Date.now()).toLocaleString('en-IN')}
@@ -137,7 +137,7 @@ export default function AdminWithdrawalsPage() {
                         placeholder="Remarks / transaction ref code (optional)..."
                         value={remarks[w.id] || ''}
                         onChange={e => setRemarks({ ...remarks, [w.id]: e.target.value })}
-                        className="w-full sm:flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#6D28D9]"
+                        className="w-full sm:flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[var(--accent)]"
                       />
                       <div className="flex gap-2 w-full sm:w-auto">
                         <button

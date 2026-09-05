@@ -1,7 +1,7 @@
 /**
  * POST /api/fcm/register
- * Save a Web Push subscription token for the authenticated user.
- * Called by the client's useFCM hook on first permission grant.
+ * Saves or updates a native FCM device token for the authenticated user.
+ * Upserts into minimal `device_tokens` table keyed by (user_id, platform).
  */
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../../lib/getAdminUser';
@@ -13,23 +13,30 @@ export async function POST(request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json().catch(() => ({}));
-    const { token } = body;
+    const { token, platform = 'android' } = body;
 
     if (!token || typeof token !== 'string' || token.length < 10) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid FCM token' }, { status: 400 });
     }
 
-    // Upsert into fcm_tokens table (unique constraint is on 'token')
+    const cleanPlatform = String(platform || 'android').toLowerCase();
+
+    // Upsert into minimal device_tokens table keyed on (user_id, platform)
     const { data, error: upsertErr } = await supabaseAdmin
-      .from('fcm_tokens')
+      .from('device_tokens')
       .upsert(
-        { user_id: user.uid, token },
-        { onConflict: 'token' }
+        {
+          user_id: user.uid,
+          fcm_token: token,
+          platform: cleanPlatform,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,platform' }
       )
       .select();
 
     if (upsertErr) {
-      console.error('[POST /api/fcm/register] fcm_tokens upsert error:', upsertErr.message);
+      console.error('[POST /api/fcm/register] device_tokens upsert error:', upsertErr.message);
       return NextResponse.json({ error: upsertErr.message }, { status: 500 });
     }
 
@@ -41,20 +48,19 @@ export async function POST(request) {
 }
 
 export async function DELETE(request) {
-  // Unregister a token (called when user logs out)
+  // Unregister token on logout
   try {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json().catch(() => ({}));
-    const { token } = body;
-    if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 });
+    const { platform = 'android' } = body;
 
     const { error } = await supabaseAdmin
-      .from('fcm_tokens')
+      .from('device_tokens')
       .delete()
-      .eq('token', token)
-      .eq('user_id', user.uid);
+      .eq('user_id', user.uid)
+      .eq('platform', String(platform || 'android').toLowerCase());
 
     if (error) {
       console.error('[DELETE /api/fcm/register] delete error:', error.message);

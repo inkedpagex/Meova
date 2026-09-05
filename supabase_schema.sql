@@ -199,8 +199,17 @@ create table if not exists public.notifications (
 );
 
 -- ----------------------------------------------------------------------------
--- 12. FCM Tokens
+-- 12. Device Tokens (Native FCM / Capacitor)
 -- ----------------------------------------------------------------------------
+create table if not exists public.device_tokens (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  fcm_token  text not null,
+  platform   text not null default 'android',
+  updated_at timestamp with time zone default now(),
+  constraint unique_user_platform unique (user_id, platform)
+);
+
 create table if not exists public.fcm_tokens (
   id         text primary key default gen_random_uuid()::text,
   user_id    text not null references public.profiles(id) on delete cascade,

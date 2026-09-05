@@ -47,7 +47,7 @@ export default function AvatarZoomModal({ isOpen, onClose, src, name, username }
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#1C1917]/90 hover:bg-[#1C1917] text-white text-xs font-bold transition-all cursor-pointer border border-white/10 active:scale-95"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-white hover:bg-[#F5F5F4] text-white text-xs font-bold transition-all cursor-pointer border border-[#E7E5E4] active:scale-95"
           >
             <ArrowLeft size={16} strokeWidth={2.5} />
             <span>Back</span>
@@ -56,7 +56,7 @@ export default function AvatarZoomModal({ isOpen, onClose, src, name, username }
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-[#1C1917]/90 hover:bg-[#1C1917] text-white flex items-center justify-center transition-all cursor-pointer border border-white/10 active:scale-95"
+            className="w-10 h-10 rounded-full bg-white hover:bg-[#F5F5F4] text-white flex items-center justify-center transition-all cursor-pointer border border-[#E7E5E4] active:scale-95"
             title="Close"
             aria-label="Close"
           >
@@ -73,15 +73,15 @@ export default function AvatarZoomModal({ isOpen, onClose, src, name, username }
           onClick={(e) => e.stopPropagation()}
           className="my-auto flex flex-col items-center cursor-default"
         >
-          <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full p-1 bg-[#6D28D9] shadow-xl shadow-black/30">
-            <div className="w-full h-full rounded-full overflow-hidden bg-black border-4 border-white shadow-md">
+          <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full p-1 bg-[var(--accent)] shadow-xl shadow-black/50">
+            <div className="w-full h-full rounded-full overflow-hidden bg-black border-4 border-[var(--border-hairline)] shadow-md">
               <img
                 src={src}
                 alt={name || 'Profile Picture'}
                 className="w-full h-full object-cover select-none pointer-events-none"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=6D28D9&color=ffffff&size=512&bold=true`;
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=1C1917&color=ffffff&size=512&bold=true`;
                 }}
               />
             </div>
@@ -96,7 +96,7 @@ export default function AvatarZoomModal({ isOpen, onClose, src, name, username }
             </h3>
           )}
           {username && (
-            <p className="text-xs sm:text-sm font-bold text-[#7C3AED] tracking-widest uppercase mt-1">
+            <p className="text-xs sm:text-sm font-bold text-[var(--accent)] tracking-widest uppercase mt-1">
               @{username.replace(/^@/, '')}
             </p>
           )}

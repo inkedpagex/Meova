@@ -1,0 +1,15 @@
+{
+  "appId": "in.meova.app",
+  "appName": "Meova",
+  "webDir": "out",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    }
+  }
+}

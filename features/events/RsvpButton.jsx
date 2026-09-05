@@ -42,7 +42,7 @@ export default function RsvpButton({ eventId, userId, isInitialRsvp }) {
         border
         ${isRsvp
           ? 'border-[#333] text-[#888] hover:border-[#555] hover:text-white bg-transparent'
-          : 'border-white text-white hover:bg-white hover:text-black bg-transparent'
+          : 'border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white bg-transparent'
         }
       `}
     >

@@ -1,16 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Info, Zap, Plus, HelpCircle, Loader2, CheckCircle, Download, Copy, Check, X } from '@/lib/icons';
+import {
+  ArrowLeft, Info, Zap, Plus, HelpCircle, Loader2, CheckCircle,
+  Download, Copy, Check, X, Clock, AlertCircle, RefreshCw, ShieldCheck
+} from '@/lib/icons';
 import Skeleton from '../../components/Skeleton';
 import { toast } from '../../lib/toast';
 import StoryCampaignBanner from '../../components/StoryCampaignBanner';
 
 function WalletSkeleton() {
   return (
-    <div className="min-h-screen px-4 py-4 max-w-[500px] mx-auto pb-24 anim-fade-in animate-pulse">
-      {/* Header */}
+    <div className="min-h-screen px-4 pt-[68px] md:pt-6 max-w-[500px] mx-auto pb-24 anim-fade-in animate-pulse">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <Skeleton variant="rectangular" className="w-10 h-10 rounded-xl" />
@@ -18,11 +20,7 @@ function WalletSkeleton() {
         </div>
         <Skeleton variant="rectangular" className="w-10 h-10 rounded-xl" />
       </div>
-
-      {/* Hero Balance Card */}
       <Skeleton variant="rectangular" className="w-full h-[220px] rounded-[16px] mb-5" />
-
-      {/* Quick Add */}
       <div className="mb-5">
         <Skeleton variant="text" className="w-24 h-3 mb-3" />
         <div className="grid grid-cols-4 gap-2 mb-3">
@@ -30,37 +28,19 @@ function WalletSkeleton() {
         </div>
         <Skeleton variant="rectangular" className="w-full h-12 rounded-[16px]" />
       </div>
-
-      {/* Transactions */}
-      <div>
-        <Skeleton variant="text" className="w-32 h-3 mb-3 mt-8" />
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="flex items-center justify-between p-4 bg-white border border-[#E7E5E4] rounded-[16px]">
-              <div className="flex items-center gap-3">
-                <Skeleton variant="circular" className="w-10 h-10" />
-                <div>
-                  <Skeleton variant="text" className="w-24 h-3 mb-1" />
-                  <Skeleton variant="text" className="w-16 h-2" />
-                </div>
-              </div>
-              <Skeleton variant="text" className="w-12 h-4" />
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
 
+// 1:1 Sparks-to-INR Packages (1 Spark = ₹1)
 const PACKS = [
-  { sparks: 100,  inr: 49,  label: 'Starter',  key: 'starter' },
-  { sparks: 250,  inr: 99,  label: 'Popular',  key: 'popular' },
-  { sparks: 500,  inr: 249, label: 'Growth',   key: 'growth' },
-  { sparks: 1000, inr: 499, label: 'Pro (Max)', key: 'pro' },
+  { sparks: 100,  inr: 100,  label: 'Starter',  key: 'starter', popular: false },
+  { sparks: 250,  inr: 250,  label: 'Popular',  key: 'popular', popular: true },
+  { sparks: 500,  inr: 500,  label: 'Growth',   key: 'growth',  popular: false },
+  { sparks: 1000, inr: 1000, label: 'Pro (Max)', key: 'pro',     popular: false },
 ];
 
-
+const ADMIN_UPI = 'chirag2006chak@oksbi';
 
 function formatDate(iso) {
   if (!iso) return '';
@@ -77,16 +57,20 @@ export default function WalletPage() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPack, setSelectedPack] = useState(PACKS[1]);
-  const [requestLoading, setRequestLoading] = useState(false);
   const [pendingRequests, setPendingRequests] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [intentId, setIntentId] = useState(null);
-  const [exactAmountInr, setExactAmountInr] = useState(0);
-  const [intentLoading, setIntentLoading] = useState(false);
+  const [activeReservation, setActiveReservation] = useState(null);
 
-  const balance = wallet
-    ? (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0)
-    : 0;
+  // Modal & Reservation State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentReservation, setCurrentReservation] = useState(null);
+  const [resLoading, setResLoading] = useState(false);
+  const [claimLoading, setClaimLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(300);
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const [copiedRef, setCopiedRef] = useState(false);
+  const timerRef = useRef(null);
+
+  const balance = wallet ? (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0) : 0;
 
   const loadWallet = useCallback(async () => {
     try {
@@ -96,139 +80,140 @@ export default function WalletPage() {
       if (data.wallet) setWallet(data.wallet);
       if (data.transactions) setTransactions(data.transactions);
       if (data.pendingRequests) setPendingRequests(data.pendingRequests);
+      if (data.activeReservation) setActiveReservation(data.activeReservation);
     } catch (err) {
       console.error('[WalletPage] load error:', err);
     } finally {
-      await new Promise(r => setTimeout(r, 300));
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadWallet();
     const onUpdate = () => loadWallet();
     window.addEventListener('wallet-updated', onUpdate);
-    return () => window.removeEventListener('wallet-updated', onUpdate);
+    const interval = setInterval(loadWallet, 15000);
+    return () => {
+      window.removeEventListener('wallet-updated', onUpdate);
+      clearInterval(interval);
+    };
   }, [loadWallet]);
 
-  const openPaymentModal = (pack = selectedPack) => {
-    if (pendingRequests.length >= 3) {
-      toast.error('Limit reached: You already have 3 pending payment verification requests.');
+  // Countdown timer handler for modal
+  useEffect(() => {
+    if (!isModalOpen || !currentReservation || currentReservation.status === 'paid_claimed') {
+      if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
-    const randPaise = Math.floor(Math.random() * 88) + 11;
-    const initialDecimalAmount = Number((pack.inr + randPaise / 100).toFixed(2));
 
+    const expTime = currentReservation.expires_at ? new Date(currentReservation.expires_at).getTime() : Date.now() + 300000;
+
+    const tick = () => {
+      const remaining = Math.max(0, Math.floor((expTime - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(timerRef.current);
+        toast.error('Reservation window expired. Please create a new request.');
+        setCurrentReservation(prev => prev ? { ...prev, status: 'expired' } : null);
+      }
+    };
+
+    tick();
+    timerRef.current = setInterval(tick, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [isModalOpen, currentReservation]);
+
+  const openPaymentModal = async (pack = selectedPack) => {
     setSelectedPack(pack);
-    setExactAmountInr(initialDecimalAmount);
     setIsModalOpen(true);
-    setIntentLoading(true);
-    
-    fetch('/api/wallet/intent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sparks: pack.sparks,
-        amount_inr: pack.inr,
-        pack_name: `${pack.sparks} Sparks`,
-        pack_key: pack.key
-      }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.amount_inr) {
-          setIntentId(data.intentId);
-          setExactAmountInr(data.amount_inr);
-        }
-      })
-      .catch((err) => {
-        console.warn('[WalletIntent] server error:', err);
-      })
-      .finally(() => {
-        setIntentLoading(false);
+    setResLoading(true);
+
+    try {
+      const res = await fetch('/api/wallet/reservation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          packKey: pack.key,
+          sparks: pack.sparks,
+          baseAmount: pack.inr,
+        }),
       });
+
+      const data = await res.json();
+      if (res.ok && data.reservation) {
+        setCurrentReservation(data.reservation);
+        setTimeLeft(data.reservation.seconds_remaining || 300);
+      } else if (data.activeReservation) {
+        setCurrentReservation(data.activeReservation);
+        setTimeLeft(data.activeReservation.seconds_remaining || 300);
+        toast('Resuming your active reservation.');
+      } else {
+        toast.error(data.error || 'Failed to create reservation slot');
+        setIsModalOpen(false);
+      }
+    } catch (err) {
+      toast.error('Network error. Please try again.');
+      setIsModalOpen(false);
+    } finally {
+      setResLoading(false);
+    }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
-  const downloadQRCode = async () => {
+  const handleClaimPaid = async () => {
+    if (!currentReservation?.id || claimLoading) return;
+    setClaimLoading(true);
     try {
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meova&am=${exactAmountInr}&cu=INR`)}`;
-      const response = await fetch(qrUrl);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = `Meova-payment-₹${exactAmountInr}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
-    } catch {
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meova&am=${exactAmountInr}&cu=INR`)}`;
-      window.open(qrUrl, '_blank');
-    }
-  };
-
-  const submitPaymentRequest = async () => {
-    if (requestLoading) return;
-    setRequestLoading(true);
-    try {
-      let res;
-      if (intentId) {
-        res = await fetch('/api/wallet/intent', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ intentId }),
-        });
-      } else {
-        res = await fetch('/api/wallet/request-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sparks: selectedPack.sparks,
-            amount_inr: exactAmountInr,
-            pack_name: `${selectedPack.sparks} Sparks`,
-            pack_key: selectedPack.key,
-          }),
-        });
-      }
+      const res = await fetch('/api/wallet/reservation', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reservationId: currentReservation.id }),
+      });
       const data = await res.json();
       if (res.ok) {
-        toast.success(`Payment request submitted for ₹${exactAmountInr}. Verification in progress.`);
+        toast.success('Payment claim registered! Admin will verify against UPI statement.');
+        setCurrentReservation(prev => ({ ...prev, status: 'paid_claimed' }));
         loadWallet();
-        setIsModalOpen(false);
       } else {
-        toast.error(data.error || 'Something went wrong. Try again.');
+        toast.error(data.error || 'Failed to claim payment.');
       }
     } catch {
-      toast.error('Network error. Please try again.');
+      toast.error('Network error while claiming.');
     } finally {
-      setRequestLoading(false);
+      setClaimLoading(false);
     }
   };
 
-  const cancelRequest = async (id) => {
+  const handleCancelReservation = async () => {
+    if (!currentReservation?.id) return;
     try {
-      const res = await fetch('/api/wallet/intent', {
+      await fetch('/api/wallet/reservation', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ intentId: id }),
+        body: JSON.stringify({ reservationId: currentReservation.id }),
       });
-      if (res.ok) {
-        toast.success('Request cancelled successfully.');
-        loadWallet();
-      } else {
-        const data = await res.json();
-        toast.error(data.error || 'Failed to cancel request.');
-      }
+      toast.success('Reservation cancelled.');
+      setIsModalOpen(false);
+      setCurrentReservation(null);
+      loadWallet();
     } catch {
-      toast.error('Network error while cancelling.');
+      toast.error('Failed to cancel.');
     }
   };
+
+  const formatTimer = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
+
+  const payAmount = currentReservation ? Number(currentReservation.final_amount || currentReservation.amount_inr || selectedPack.inr) : selectedPack.inr;
+  const refCode = currentReservation?.reference_code || `SPK-${selectedPack.sparks}`;
+  const qrData = `upi://pay?pa=${ADMIN_UPI}&pn=Meova&am=${payAmount.toFixed(2)}&tn=${refCode}&cu=INR`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
 
   if (loading) return <WalletSkeleton />;
 
@@ -249,24 +234,46 @@ export default function WalletPage() {
           </button>
           <h1 className="text-sm font-bold uppercase tracking-wider text-[#1C1917]">Sparks Wallet</h1>
         </div>
+
+        <button onClick={loadWallet} className="p-2 rounded-xl bg-white border border-[#E7E5E4] text-[#78716C] hover:text-[#1C1917] transition-all cursor-pointer shadow-2xs" title="Refresh Wallet">
+          <RefreshCw size={14} />
+        </button>
       </div>
 
       {/* Instagram Story Campaign Banner */}
       <StoryCampaignBanner className="mb-5" />
 
-      {/* Hero Balance Card (Neo-Minimalist Flat Surface) */}
-      <div className="relative rounded-[16px] p-6 mb-5 bg-white border border-[#E7E5E4] shadow-[0_2px_8px_rgba(28,25,23,0.06)] text-[#1C1917]">
+      {/* Active Claim / Reviewing Banner */}
+      {pendingRequests.filter(r => r.status === 'paid_claimed').map(r => (
+        <div key={r.id} className="mb-5 p-4 rounded-[16px] bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 shadow-xs anim-scale-in">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
+              <Clock size={14} className="animate-spin text-amber-600" />
+              <span>Payment Claimed · Admin Verifying</span>
+            </div>
+            <p className="text-[11px] text-amber-700 mt-0.5 font-medium truncate">
+              {r.pack_name || `${r.sparks} Sparks`} · Amount: <strong className="font-bold">₹{r.final_amount || r.amount_inr}</strong>
+            </p>
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-800 border border-amber-500/30 flex-shrink-0">
+            In Review
+          </span>
+        </div>
+      ))}
+
+      {/* Hero Balance Card (Derived Ledger Source) */}
+      <div className="relative rounded-[20px] p-6 mb-5 bg-white border border-[#E7E5E4] shadow-[0_2px_8px_rgba(28,25,23,0.06)] text-[#1C1917]">
         <div className="relative z-10">
           <div className="flex items-center justify-between gap-2 mb-1">
             <span className="text-[11px] font-bold uppercase tracking-widest text-[#78716C]">Your Balance</span>
-            <span className="text-[10px] font-bold text-[#6D28D9] bg-[#F3EEFC] border border-[#E4D9F7] px-2.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold text-[var(--accent)] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] px-2.5 py-0.5 rounded-full">
               1 Spark = ₹1
             </span>
           </div>
 
           <div className="flex items-center gap-2 mt-1">
             <span className="text-4xl font-bold text-[#1C1917] tracking-tight">{balance.toLocaleString()}</span>
-            <Zap size={24} className="text-[#6D28D9] fill-[#6D28D9]" />
+            <Zap size={24} className="text-[var(--accent)] fill-[var(--accent)]" />
           </div>
 
           {/* Breakdown */}
@@ -285,157 +292,100 @@ export default function WalletPage() {
           )}
 
           <div className="flex gap-3 mt-5">
-            <button onClick={() => openPaymentModal(selectedPack)} disabled={intentLoading}
-              className="flex-1 bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-xs uppercase tracking-wider py-3 px-5 rounded-full cursor-pointer active:scale-95 transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] flex items-center justify-center gap-2 disabled:opacity-50">
-              {intentLoading ? <Loader2 size={14} className="animate-spin" /> : 'Add Sparks'}
+            <button onClick={() => openPaymentModal(selectedPack)}
+              className="flex-1 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-xs uppercase tracking-wider py-3 px-5 rounded-full cursor-pointer active:scale-95 transition-all shadow-xs flex items-center justify-center gap-2">
+              <Plus size={15} strokeWidth={2.5} />
+              <span>Add Sparks</span>
             </button>
             <button onClick={() => router.push('/wallet/withdraw')}
-              className="flex-1 bg-white hover:bg-[#F3EEFC] text-[#1C1917] border border-[#E7E5E4] font-bold text-xs uppercase tracking-wider py-3 px-5 rounded-full cursor-pointer active:scale-95 transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+              className="flex-1 bg-white hover:bg-[var(--accent-tint-10)] text-[#1C1917] border border-[#E7E5E4] font-bold text-xs uppercase tracking-wider py-3 px-5 rounded-full cursor-pointer active:scale-95 transition-all shadow-xs">
               Withdraw
             </button>
           </div>
         </div>
       </div>
 
-      {/* Lifetime Metrics */}
-      {wallet && (
-        <div className="mb-5 grid grid-cols-2 gap-3">
-          <div className="bg-white border border-[#E7E5E4] rounded-[16px] p-4 flex flex-col justify-center shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#78716C] mb-1">Lifetime Earned</span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xl font-bold text-[#1C1917]">{wallet.lifetime_earned || 0}</span>
-              <Zap size={14} className="fill-[#6D28D9] text-[#6D28D9]" />
-            </div>
-          </div>
-          <div className="bg-white border border-[#E7E5E4] rounded-[16px] p-4 flex flex-col justify-center shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#78716C] mb-1">Total Withdrawn</span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xl font-bold text-[#1C1917]">₹{wallet.lifetime_withdrawn || 0}</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Quick Add */}
+      {/* Quick Add (1:1 Ratio: 100 = ₹100, 250 = ₹250, 500 = ₹500, 1000 = ₹1000) */}
       <div className="mb-5">
-        <span className="text-[10px] font-bold uppercase tracking-widest block mb-3 text-[#78716C]">Quick Add</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest block mb-3 text-[#78716C]">Select Sparks Pack (1:1 Rate)</span>
         <div className="grid grid-cols-4 gap-2 mb-3">
           {PACKS.map(p => (
             <button key={p.key} onClick={() => setSelectedPack(p)}
-              className="py-3.5 rounded-[16px] flex flex-col items-center cursor-pointer transition-all active:scale-95"
+              className="py-3.5 rounded-[16px] flex flex-col items-center cursor-pointer transition-all active:scale-95 relative"
               style={{
-                background: selectedPack.key === p.key ? '#F3EEFC' : '#FFFFFF',
-                border: selectedPack.key === p.key ? '2px solid #6D28D9' : '1px solid #E7E5E4',
-                color: selectedPack.key === p.key ? '#6D28D9' : '#1C1917',
+                background: selectedPack.key === p.key ? 'var(--accent-tint-10)' : '#FFFFFF',
+                border: selectedPack.key === p.key ? '2px solid var(--accent)' : '1px solid var(--border-hairline)',
+                color: selectedPack.key === p.key ? 'var(--accent)' : '#1C1917',
               }}>
+              {p.popular && (
+                <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-[var(--accent)] text-white text-[8px] font-bold px-1.5 py-0.2 rounded-full uppercase">
+                  Popular
+                </span>
+              )}
               <span className="text-sm font-bold">{p.sparks}</span>
-              <span className="text-[10px] font-medium mt-0.5 text-[#78716C]">₹{p.inr}</span>
+              <span className="text-[10px] font-bold mt-0.5 text-[#78716C]">₹{p.inr}</span>
             </button>
           ))}
         </div>
-        <button onClick={() => openPaymentModal(selectedPack)} disabled={intentLoading}
-          className="w-full py-4 rounded-full text-white font-bold text-[13px] uppercase tracking-wider cursor-pointer active:scale-[0.98] transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] flex items-center justify-center gap-2 disabled:opacity-80 bg-[#6D28D9] hover:bg-[#5B21B6]">
-          {intentLoading ? <Loader2 size={16} className="animate-spin" /> : `Add ${selectedPack.sparks} Sparks · ₹${selectedPack.inr}`}
+        <button onClick={() => openPaymentModal(selectedPack)}
+          className="w-full py-4 rounded-full text-white font-bold text-[13px] uppercase tracking-wider cursor-pointer active:scale-[0.98] transition-all shadow-xs flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)]">
+          <span>Recharge {selectedPack.sparks} Sparks · ₹{selectedPack.inr}</span>
         </button>
       </div>
 
-      {/* Pending Requests */}
-      {pendingRequests.length > 0 && (
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#d97706]">Pending Verification</span>
-          </div>
-          <div className="space-y-2">
-            {pendingRequests.map(req => (
-              <div key={req.id} className="p-4 rounded-[16px] flex items-center justify-between gap-3 bg-[#fffbeb] border border-[#fde68a]">
-                <div className="min-w-0">
-                  <p className="text-[12px] font-bold text-[#b45309]">
-                    {req.pack_name}
-                  </p>
-                  <p className="text-[10px] text-[#d97706] mt-0.5 font-medium flex items-center gap-1.5">
-                    Requested: <strong className="font-bold">₹{req.amount_inr}</strong>
-                    <span>·</span>
-                    <Loader2 size={10} className="animate-spin inline" />
-                    Reviewing
-                  </p>
-                </div>
-                <button 
-                  onClick={() => cancelRequest(req.id)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#fef3c7] transition-colors flex-shrink-0 cursor-pointer text-[#d97706]"
-                  title="Cancel Request"
-                >
-                  <X size={16} strokeWidth={2.5} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Transactions */}
+      {/* Double-Entry Ledger Transactions */}
       <div className="mb-5">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Recent Transactions</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#78716C]">Ledger Activity</span>
+          <span className="text-[10px] text-[#78716C] font-semibold flex items-center gap-1">
+            <ShieldCheck size={12} className="text-emerald-500" />
+            <span>Secure Ledger</span>
+          </span>
         </div>
         {transactions.length === 0 ? (
-          <div className="py-8 text-center">
-            <p className="text-xs text-[#A8A29E] font-semibold">No transactions yet</p>
-            <p className="text-[10px] text-[#A8A29E] mt-1">Your activity will appear here</p>
+          <div className="py-8 text-center bg-white border border-[#E7E5E4] rounded-[16px]">
+            <p className="text-xs text-[#78716C] font-semibold">No transactions yet</p>
+            <p className="text-[10px] text-[#A8A29E] mt-1">Your ledger activity will appear here</p>
           </div>
         ) : (
           <div className="space-y-2">
             {transactions.map(tx => {
+              const isPositive = tx.amount > 0 && tx.requestStatus !== 'rejected' && tx.requestStatus !== 'cancelled';
+              const isPending = tx.requestStatus === 'pending' || tx.requestStatus === 'paid_claimed';
               const isRejected = tx.requestStatus === 'rejected';
-              const isPending = tx.requestStatus === 'pending';
-              const isCancelled = tx.requestStatus === 'cancelled';
-              const isPositive = tx.amount > 0 && !isRejected && !isPending && !isCancelled;
-              
-              let bgColor = isPositive ? 'rgba(16,185,129,0.1)' : 'var(--bg-surface)';
-              let borderColor = isPositive ? '1px solid rgba(16,185,129,0.3)' : '1px solid var(--border-subtle)';
-              let iconColor = isPositive ? '#10b981' : 'var(--text-muted)';
-              let amountColor = isPositive ? '#10b981' : 'var(--text-primary)';
-              
-              if (isRejected) {
-                bgColor = 'rgba(239,68,68,0.1)';
-                borderColor = '1px solid rgba(239,68,68,0.3)';
-                iconColor = '#ef4444';
-                amountColor = '#ef4444';
-              } else if (isPending) {
-                bgColor = 'rgba(245,158,11,0.1)';
-                borderColor = '1px solid rgba(245,158,11,0.3)';
-                iconColor = '#f59e0b';
-                amountColor = '#f59e0b';
-              } else if (isCancelled) {
-                bgColor = 'rgba(161,161,170,0.1)';
-                borderColor = '1px solid rgba(161,161,170,0.3)';
-                iconColor = '#a1a1aa';
-                amountColor = '#a1a1aa';
-              }
 
               return (
-                <div key={tx.id} className="p-4 rounded-[16px] flex items-center justify-between gap-3 transition-all"
-                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                <div key={tx.id} className="p-4 rounded-[16px] flex items-center justify-between gap-3 bg-white border border-[#E7E5E4] shadow-2xs">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: bgColor, border: borderColor, color: iconColor }}>
-                      {isPositive ? <Plus size={14} strokeWidth={3} /> : <Zap size={14} className="opacity-50" />}
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      isPositive ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                      isRejected ? 'bg-rose-50 text-rose-600 border border-rose-200' :
+                      isPending ? 'bg-amber-50 text-amber-600 border border-amber-200' :
+                      'bg-[#FAFAF8] text-[#78716C] border border-[#E7E5E4]'
+                    }`}>
+                      {isPositive ? <Plus size={14} strokeWidth={3} /> : <Zap size={14} className="opacity-60" />}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[12px] font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                      <p className="text-[12px] font-bold truncate text-[#1C1917]">
                         {tx.description || tx.title || 'Transaction'}
                       </p>
-                      <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      <p className="text-[10px] mt-0.5 text-[#78716C]">
                         {formatDate(tx.created_at)}
                       </p>
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <span className="text-[12px] font-bold block" style={{ color: amountColor }}>
-                      {isPositive ? '+' : ''}{tx.amount}
+                    <span className={`text-[12px] font-bold block ${
+                      isPositive ? 'text-emerald-600' :
+                      isRejected ? 'text-rose-600 line-through' :
+                      isPending ? 'text-amber-600' :
+                      'text-[#1C1917]'
+                    }`}>
+                      {isPositive ? '+' : ''}{tx.amount} ⚡
                     </span>
-                    {(isRejected || isPending || isCancelled) && (
-                      <span className="text-[9px] font-bold uppercase tracking-wider block mt-0.5" style={{ color: iconColor }}>
-                        {tx.requestStatus}
+                    {tx.requestStatus && (
+                      <span className="text-[9px] font-bold uppercase tracking-wider block mt-0.5 text-amber-600">
+                        {tx.requestStatus === 'paid_claimed' ? 'In Review' : tx.requestStatus}
                       </span>
                     )}
                   </div>
@@ -446,27 +396,7 @@ export default function WalletPage() {
         )}
       </div>
 
-      {/* How Sparks Work */}
-      <div className="rounded-[16px] p-5 bg-[#F3EEFC]/40 border border-[#E4D9F7]">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-[#6D28D9] flex items-center gap-1.5 mb-3">
-          <HelpCircle size={14} /> How Sparks work?
-        </h4>
-        <ul className="space-y-2.5">
-          {[
-            'Use Sparks to book campus meets, join circles, and fund gigs.',
-            'Earn Sparks by hosting and participating.',
-            '1 Spark = ₹1 · Minimum withdrawal: 500 Sparks',
-            'Sparks never expire.',
-          ].map((t, i) => (
-            <li key={i} className="flex items-start gap-2 text-[11px] font-medium leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#6D28D9] mt-1.5 flex-shrink-0" />
-              {t}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* QR Code Payment Modal */}
+      {/* Decimal Matching Payment Modal */}
       {isModalOpen && (
         <div 
           onClick={closeModal}
@@ -474,85 +404,136 @@ export default function WalletPage() {
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-[32px] w-full max-w-[370px] overflow-hidden shadow-[0_4px_16px_rgba(28,25,23,0.08)] relative cursor-default border border-[#E7E5E4] anim-scale-in"
+            className="bg-white rounded-[32px] w-full max-w-[390px] overflow-hidden shadow-2xl relative cursor-default border border-[#E7E5E4] anim-scale-in"
           >
-            <div className="p-6 text-center">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-base font-bold text-[#1C1917]">Add Sparks via UPI</h2>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="p-1 text-[#A8A29E] hover:text-[#78716C] rounded-full hover:bg-[#F3EEFC] transition-colors cursor-pointer"
-                >
-                  <X size={18} />
-                </button>
+            {resLoading ? (
+              <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
+                <Loader2 size={28} className="animate-spin text-[var(--accent)]" />
+                <p className="text-xs font-bold text-[#78716C] uppercase tracking-wider">Allocating Unique Decimal Slot...</p>
               </div>
-
-              <p className="text-xs text-[#78716C] font-medium mb-1">
-                Pay the <strong className="text-[#5B21B6]">exact amount</strong> below
-              </p>
-              <p className="text-3xl font-bold text-[#1C1917] tracking-tight mb-4">
-                ₹{Number(exactAmountInr || 0).toFixed(2)}
-              </p>
-              
-              <div className="bg-[#FAFAF8] p-4 rounded-[16px] border border-[#E7E5E4] flex flex-col items-center justify-center mb-4">
-                <div className="w-[180px] h-[180px] bg-white p-2 rounded-xl shadow-[0_2px_8px_rgba(28,25,23,0.06)] border border-[#E7E5E4]/80 flex items-center justify-center mb-3">
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=chirag2006chak@oksbi&pn=Meova&am=${exactAmountInr}&cu=INR`)}`} 
-                    alt="UPI QR Code" 
-                    className="w-full h-full object-contain"
-                  />
+            ) : currentReservation?.status === 'paid_claimed' ? (
+              <div className="p-8 text-center space-y-4">
+                <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mx-auto shadow-xs">
+                  <CheckCircle size={28} />
                 </div>
-
-                <div className="flex items-center gap-2 w-full">
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText('chirag2006chak@oksbi');
-                      toast.success('UPI ID copied to clipboard');
-                    }}
-                    className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-bold text-[#78716C] bg-white hover:bg-[#F3EEFC] py-2 rounded-xl transition-all cursor-pointer border border-[#E7E5E4] shadow-2xs"
-                  >
-                    <Copy size={12} />
-                    <span>Copy UPI ID</span>
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={downloadQRCode}
-                    className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-bold text-[#6D28D9] bg-[#F3EEFC] hover:bg-[#F3EEFC] py-2 rounded-xl transition-all cursor-pointer border border-[#E4D9F7]"
-                  >
-                    <Download size={12} />
-                    <span>Save QR</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-[#F3EEFC]/70 border border-[#E4D9F7] rounded-[16px] p-3 mb-5 text-left flex items-start gap-2">
-                <Info size={14} className="text-[#6D28D9] flex-shrink-0 mt-0.5" />
-                <p className="text-[11px] text-[#5B21B6] font-bold leading-relaxed">
-                  Pay with Google Pay, PhonePe, or Paytm, then tap "I have paid" below.
+                <h3 className="text-lg font-bold text-[#1C1917]">Payment Claim Registered!</h3>
+                <p className="text-xs text-[#78716C] font-medium leading-relaxed">
+                  We have received your claim for <strong className="text-[#1C1917]">₹{payAmount.toFixed(2)}</strong> ({selectedPack.sparks} Sparks). An admin is verifying your payment against the UPI statement.
                 </p>
+                <div className="p-3 bg-[#FAFAF8] rounded-xl border border-[#E7E5E4] text-xs font-mono font-bold text-[#1C1917]">
+                  Ref: {refCode}
+                </div>
+                <button
+                  onClick={closeModal}
+                  className="w-full py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all cursor-pointer shadow-xs"
+                >
+                  Done
+                </button>
               </div>
+            ) : currentReservation?.status === 'expired' ? (
+              <div className="p-8 text-center space-y-4">
+                <div className="w-14 h-14 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 mx-auto shadow-xs">
+                  <AlertCircle size={28} />
+                </div>
+                <h3 className="text-lg font-bold text-[#1C1917]">Reservation Expired</h3>
+                <p className="text-xs text-[#78716C] font-medium leading-relaxed">
+                  The 5-minute reservation window for this decimal amount has expired. Please create a fresh reservation.
+                </p>
+                <button
+                  onClick={() => openPaymentModal(selectedPack)}
+                  className="w-full py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all cursor-pointer shadow-xs"
+                >
+                  Create New Reservation
+                </button>
+              </div>
+            ) : (
+              <div className="p-6 text-center">
+                {/* Header & 5-Minute Timer */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#1C1917]">
+                    <span>UPI Decimal Payment</span>
+                  </div>
+                  <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold font-mono ${
+                    timeLeft < 60 ? 'bg-rose-50 text-rose-600 border border-rose-200 animate-pulse' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                  }`}>
+                    <Clock size={12} />
+                    <span>{formatTimer(timeLeft)}</span>
+                  </div>
+                </div>
 
-              <div className="flex gap-2.5">
-                <button 
-                  type="button"
-                  onClick={closeModal} 
-                  disabled={requestLoading}
-                  className="flex-1 py-3 rounded-full font-semibold text-[13px] text-[#78716C] bg-[#F3EEFC] hover:bg-[#E7E5E4] transition-all cursor-pointer border border-[#E7E5E4]"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="button"
-                  onClick={submitPaymentRequest} 
-                  disabled={requestLoading}
-                  className="flex-1 py-3 rounded-full font-semibold text-[13px] text-white bg-[#6D28D9] hover:bg-[#5B21B6] transition-all flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] cursor-pointer disabled:opacity-60"
-                >
-                  {requestLoading ? <Loader2 size={14} className="animate-spin" /> : 'I have paid'}
-                </button>
+                {/* Exact Decimal Amount */}
+                <p className="text-xs text-[#78716C] font-semibold mb-0.5">Pay EXACT Amount</p>
+                <p className="text-3xl font-bold text-[#1C1917] tracking-tight mb-1">
+                  ₹{payAmount.toFixed(2)}
+                </p>
+                <p className="text-[10.5px] font-bold text-[var(--accent)] mb-4">
+                  (Includes unique paise key for instant automated verification)
+                </p>
+
+                {/* QR Code */}
+                <div className="bg-[#FAFAF8] p-4 rounded-[20px] border border-[#E7E5E4] flex flex-col items-center justify-center mb-4">
+                  <div className="w-[170px] h-[170px] bg-white p-2 rounded-xl shadow-xs border border-[#E7E5E4] flex items-center justify-center mb-3">
+                    <img src={qrUrl} alt="UPI QR Code" className="w-full h-full object-contain" />
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full">
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(ADMIN_UPI);
+                        setCopiedUpi(true);
+                        setTimeout(() => setCopiedUpi(false), 2000);
+                        toast.success('UPI ID copied to clipboard');
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-bold text-[#1C1917] bg-white hover:bg-[#F5F5F4] py-2 rounded-xl transition-all cursor-pointer border border-[#E7E5E4] shadow-2xs"
+                    >
+                      {copiedUpi ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                      <span>{copiedUpi ? 'Copied' : 'Copy UPI'}</span>
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(refCode);
+                        setCopiedRef(true);
+                        setTimeout(() => setCopiedRef(false), 2000);
+                        toast.success('Reference code copied');
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-bold text-[var(--accent)] bg-[var(--accent-tint-10)] hover:bg-[var(--accent-tint-20)] py-2 rounded-xl transition-all cursor-pointer border border-[var(--accent-tint-20)]"
+                    >
+                      {copiedRef ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                      <span>Ref: {refCode}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Warning note */}
+                <div className="bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] rounded-[14px] p-2.5 mb-4 text-left flex items-start gap-2">
+                  <Info size={14} className="text-[var(--accent)] flex-shrink-0 mt-0.5" />
+                  <p className="text-[10.5px] text-[var(--accent-hover)] font-bold leading-relaxed">
+                    Pay exact ₹{payAmount.toFixed(2)} with any UPI app, then tap "I have paid" below before the timer runs out.
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2.5">
+                  <button 
+                    type="button"
+                    onClick={handleCancelReservation}
+                    className="flex-1 py-3 rounded-full font-bold text-xs text-[#78716C] bg-white hover:bg-[#F5F5F4] border border-[#E7E5E4] transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleClaimPaid}
+                    disabled={claimLoading || timeLeft <= 0}
+                    className="flex-1 py-3 rounded-full font-bold text-xs uppercase tracking-wider text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
+                  >
+                    {claimLoading ? <Loader2 size={14} className="animate-spin" /> : 'I Have Paid'}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}

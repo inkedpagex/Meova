@@ -2,25 +2,24 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { 
   Code, Music, Dumbbell, Camera, Rocket, Palette, Gamepad2, 
-  BookOpen, Star, Sparkles, X, ChevronRight, Zap
+  BookOpen, Star, Sparkles, X, ChevronRight, Zap, Users
 } from '@/lib/icons';
 import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import BookCoffeeButton from '../features/users/BookCoffeeButton';
 
 const INTEREST_META = {
-  'Coding & Tech':        { Icon: Code,        color: '#3b82f6' },
-  'Music & Bands':        { Icon: Music,        color: '#5B21B6' },
-  'Sports & Fitness':     { Icon: Dumbbell,     color: '#22c55e' },
-  'Photography & Film':   { Icon: Camera,       color: '#06b6d4' },
-  'Entrepreneurship':     { Icon: Rocket,       color: '#f97316' },
-  'Art & Sketching':      { Icon: Palette,      color: '#ec4899' },
-  'Gaming & E-sports':    { Icon: Gamepad2,     color: '#a78bfa' },
-  'Literature & Poetry':  { Icon: BookOpen,     color: '#3b82f6' },
-  'Dance':                { Icon: Star,         color: '#ec4899' },
+  'Coding & Tech':        { Icon: Code },
+  'Music & Bands':        { Icon: Music },
+  'Sports & Fitness':     { Icon: Dumbbell },
+  'Photography & Film':   { Icon: Camera },
+  'Entrepreneurship':     { Icon: Rocket },
+  'Art & Sketching':      { Icon: Palette },
+  'Gaming & E-sports':    { Icon: Gamepad2 },
+  'Literature & Poetry':  { Icon: BookOpen },
+  'Dance':                { Icon: Star },
 };
 
 function getAvatar(user) {
@@ -44,32 +43,43 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
 
   const handleInterestClick = (interest) => {
     if (selectedInterest === interest) {
-      setSelectedInterest(null); // Toggle off
+      setSelectedInterest(null);
     } else {
       setSelectedInterest(interest);
     }
   };
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between mb-3 px-1">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-[#A8A29E]">
-          Highlights &amp; Interests
-        </p>
-        {selectedInterest && (
+    <div className="rounded-[24px] p-4 sm:p-5 bg-[var(--bg-surface)] border border-[var(--border-hairline)] shadow-xs">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+            Interests &amp; Skills
+          </span>
+          <span className="ml-2 text-[10px] font-bold text-[var(--accent)] bg-[var(--accent-tint-10)] px-2 py-0.5 rounded-full">
+            {interests.length} topics
+          </span>
+        </div>
+        {selectedInterest ? (
           <button 
+            type="button"
             onClick={() => setSelectedInterest(null)}
-            className="text-[10px] font-bold text-[#6D28D9] hover:text-[#5B21B6] flex items-center gap-1 cursor-pointer"
+            className="text-[11px] font-bold text-[var(--accent)] hover:text-[var(--accent-hover)] flex items-center gap-1 cursor-pointer transition-colors"
           >
-            Clear Filter <X className="w-3 h-3" />
+            <span>Clear Filter</span>
+            <X className="w-3.5 h-3.5" />
           </button>
+        ) : (
+          <span className="text-[10.5px] font-medium text-[var(--text-muted)] flex items-center gap-1">
+            <Sparkles size={11} className="text-[var(--accent)]" /> Tap to explore peers
+          </span>
         )}
       </div>
 
-      {/* Interest Circles Row */}
-      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+      {/* Interactive Interest Pill Capsules (No truncation, High contrast) */}
+      <div className="flex flex-wrap gap-2">
         {interests.map(interest => {
-          const meta = INTEREST_META[interest] || { Icon: Star, color: '#6D28D9' };
+          const meta = INTEREST_META[interest] || { Icon: Star };
           const { Icon } = meta;
           const isSelected = selectedInterest === interest;
 
@@ -78,31 +88,17 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
               key={interest}
               type="button"
               onClick={() => handleInterestClick(interest)}
-              className={`flex flex-col items-center flex-shrink-0 cursor-pointer group transition-all outline-none focus:outline-none ${
-                isSelected ? 'scale-105' : 'hover:scale-105'
+              className={`px-3.5 py-2 rounded-full text-[12px] font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-95 shadow-xs select-none border ${
+                isSelected
+                  ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md shadow-[var(--accent)]/20'
+                  : 'bg-[var(--bg-base)] text-[var(--text-secondary)] border-[var(--border-hairline)] hover:border-[var(--accent-tint-20)] hover:text-[var(--accent)]'
               }`}
             >
-              <div 
-                className={`w-14 h-14 rounded-full transition-all ${
-                  isSelected 
-                    ? 'p-[2.5px] bg-[#6D28D9] shadow-md shadow-[#6D28D9]/25' 
-                    : 'p-[2px] border-2 border-[#E7E5E4] group-hover:border-[#E4D9F7]'
-                }`}
-              >
-                <div 
-                  className={`w-full h-full rounded-full flex items-center justify-center transition-colors ${
-                    isSelected ? 'bg-[#F3EEFC]' : 'bg-[#FAFAF8]'
-                  }`}
-                  style={{ color: meta.color }}
-                >
-                  <Icon className="w-6 h-6" />
-                </div>
-              </div>
-              <span className={`text-[10px] font-bold max-w-[70px] truncate text-center mt-1 transition-colors ${
-                isSelected ? 'text-[#5B21B6] font-extrabold' : 'text-[#78716C]'
-              }`}>
-                {interest}
-              </span>
+              <Icon size={14} className={isSelected ? 'text-white' : 'text-[var(--accent)]'} />
+              <span>{interest}</span>
+              {isSelected && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              )}
             </button>
           );
         })}
@@ -110,30 +106,30 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
 
       {/* Suggested Students Drawer / Section */}
       {selectedInterest && (
-        <div className="mt-4 p-4 rounded-2xl bg-[#F3EEFC]/60 border border-[#E4D9F7] anim-fade-in">
+        <div className="mt-4 p-4 rounded-[20px] bg-[var(--accent-tint-10)]/50 border border-[var(--accent-tint-20)] anim-fade-in">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#6D28D9]" />
-              <h3 className="text-xs font-bold text-[#1C1917] tracking-tight">
-                Students into <span className="text-[#6D28D9]">{selectedInterest}</span>
+              <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+              <h3 className="text-[12.5px] font-bold text-[var(--text-primary)] tracking-tight">
+                Peers into <span className="text-[var(--accent)]">{selectedInterest}</span>
               </h3>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F3EEFC] text-[#6D28D9]">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--accent)] text-white shadow-xs">
                 {matchingUsers.length}
               </span>
             </div>
             
             <Link 
               href={`/discover?interest=${encodeURIComponent(selectedInterest)}`}
-              className="text-[10px] font-bold text-[#6D28D9] hover:underline flex items-center gap-0.5"
+              className="text-[11px] font-bold text-[var(--accent)] hover:underline flex items-center gap-0.5"
             >
-              Explore All <ChevronRight className="w-3 h-3" />
+              Explore All <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {matchingUsers.length === 0 ? (
-            <div className="text-center py-6 bg-white/80 rounded-2xl border border-[#E4D9F7]">
-              <p className="text-xs font-semibold text-[#78716C]">
-                No other students tagged with <span className="font-bold text-[#6D28D9]">{selectedInterest}</span> yet.
+            <div className="text-center py-5 bg-[var(--bg-surface)] rounded-[16px] border border-[var(--border-hairline)]">
+              <p className="text-[12px] font-semibold text-[var(--text-secondary)]">
+                No other students tagged with <span className="font-bold text-[var(--accent)]">{selectedInterest}</span> yet.
               </p>
             </div>
           ) : (
@@ -142,19 +138,19 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
                 <div
                   key={student.id}
                   onClick={() => router.push(`/users/${student.id}`)}
-                  className="w-[150px] flex-shrink-0 bg-white rounded-2xl p-3 border border-[#E7E5E4] flex flex-col items-center text-center cursor-pointer hover:border-[#E4D9F7] hover:shadow-md transition-all group"
+                  className="w-[160px] flex-shrink-0 bg-[var(--bg-surface)] rounded-[20px] p-3 border border-[var(--border-hairline)] flex flex-col items-center text-center cursor-pointer hover:border-[var(--accent)] hover:shadow-md transition-all group select-none shadow-xs"
                 >
-                  <div className="w-12 h-12 rounded-full overflow-hidden mb-2 relative border-2 border-[#E4D9F7] group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-full overflow-hidden mb-2 relative ring-2 ring-[var(--accent-tint-20)] group-hover:scale-105 transition-transform bg-[var(--bg-base)]">
                     <img 
                       src={getAvatar(student)} 
                       alt={student.full_name || 'Student'} 
                       className="w-full h-full object-cover" 
                     />
                   </div>
-                  <span className="text-xs font-bold text-[#1C1917] truncate max-w-full group-hover:text-[#6D28D9] transition-colors">
+                  <span className="text-[12px] font-bold text-[var(--text-primary)] truncate max-w-full group-hover:text-[var(--accent)] transition-colors leading-tight">
                     {student.full_name || 'Student'}
                   </span>
-                  <span className="text-[9.5px] font-semibold text-[#A8A29E] mt-0.5 truncate">
+                  <span className="text-[10px] font-semibold text-[var(--text-secondary)] mt-0.5 truncate">
                     {student.year ? `${student.year} Yr` : ''} {student.branch ? `· ${student.branch}` : ''}
                   </span>
                   <BookCoffeeButton 
@@ -162,7 +158,6 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
                     targetName={student.full_name}
                     targetPhoto={getUserAvatarUrl(student)}
                     isLoggedIn={!!currentUserId}
-                    accentColor="#6D28D9"
                     completedMeets={student.completed_meets_count || 0}
                     renderButton={({ onClick }) => (
                       <button
@@ -171,9 +166,10 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
                           e.stopPropagation();
                           onClick(e);
                         }}
-                        className="mt-2 w-full py-1.5 rounded-xl bg-[#6D28D9] hover:bg-[#5B21B6] transition-colors text-white text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm cursor-pointer"
+                        className="mt-2.5 w-full py-1.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-xs cursor-pointer whitespace-nowrap"
                       >
-                        Meet 100 <Zap className="w-3 h-3 text-yellow-300 fill-current" />
+                        <Zap size={11} className="fill-white" />
+                        <span>Meet</span>
                       </button>
                     )}
                   />
@@ -186,3 +182,4 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
     </div>
   );
 }
+

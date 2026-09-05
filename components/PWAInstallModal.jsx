@@ -27,13 +27,13 @@ export default function PWAInstallModal({ isOpen, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden anim-scale-in border border-[#E4D9F7]"
+        className="w-full max-w-md bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden anim-scale-in border border-[var(--accent-tint-20)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Bar */}
         <div
           className="px-6 pt-6 pb-5 relative text-white"
-          style={{ background: '#6D28D9' }}
+          style={{ background: 'var(--accent)' }}
         >
           <button
             type="button"
@@ -49,7 +49,7 @@ export default function PWAInstallModal({ isOpen, onClose }) {
             </div>
             <div>
               <h3 className="font-bold text-lg text-white leading-tight">Install Meova</h3>
-              <p className="text-[#F3EEFC] text-xs font-medium mt-0.5">Faster access &amp; instant notifications</p>
+              <p className="text-[var(--accent-tint-10)] text-xs font-medium mt-0.5">Faster access &amp; instant notifications</p>
             </div>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function PWAInstallModal({ isOpen, onClose }) {
             onClick={() => setDeviceTab('android')}
             className={`flex-1 py-2 px-2 rounded-[12px] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               deviceTab === 'android'
-                ? 'bg-white text-[#6D28D9] shadow-xs border border-[#E4D9F7]'
+                ? 'bg-white text-[var(--accent)] shadow-xs border border-[var(--accent-tint-20)]'
                 : 'text-[#78716C] hover:text-[#1C1917]'
             }`}
           >
@@ -74,7 +74,7 @@ export default function PWAInstallModal({ isOpen, onClose }) {
             onClick={() => setDeviceTab('ios')}
             className={`flex-1 py-2 px-2 rounded-[12px] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               deviceTab === 'ios'
-                ? 'bg-white text-[#6D28D9] shadow-xs border border-[#E4D9F7]'
+                ? 'bg-white text-[var(--accent)] shadow-xs border border-[var(--accent-tint-20)]'
                 : 'text-[#78716C] hover:text-[#1C1917]'
             }`}
           >
@@ -87,7 +87,7 @@ export default function PWAInstallModal({ isOpen, onClose }) {
             onClick={() => setDeviceTab('desktop')}
             className={`flex-1 py-2 px-2 rounded-[12px] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               deviceTab === 'desktop'
-                ? 'bg-white text-[#6D28D9] shadow-xs border border-[#E4D9F7]'
+                ? 'bg-white text-[var(--accent)] shadow-xs border border-[var(--accent-tint-20)]'
                 : 'text-[#78716C] hover:text-[#1C1917]'
             }`}
           >
@@ -102,20 +102,20 @@ export default function PWAInstallModal({ isOpen, onClose }) {
             <div className="space-y-3">
               <p className="text-xs font-bold text-[#78716C]">Follow these quick steps in Chrome:</p>
 
-              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
-                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[var(--accent-tint-10)]/60 border border-[var(--accent-tint-20)]">
+                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   1
                 </span>
                 <div>
                   <p className="text-xs font-bold text-[#1C1917] flex items-center gap-1">
-                    Tap the <strong>3 dots menu</strong> <MoreVertical size={14} className="inline text-[#6D28D9]" />
+                    Tap the <strong>3 dots menu</strong> <MoreVertical size={14} className="inline text-[var(--accent)]" />
                   </p>
                   <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Located at the top right of your browser</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
-                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[var(--accent-tint-10)]/60 border border-[var(--accent-tint-20)]">
+                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   2
                 </span>
                 <div>
@@ -126,8 +126,8 @@ export default function PWAInstallModal({ isOpen, onClose }) {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
-                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[var(--accent-tint-10)]/60 border border-[var(--accent-tint-20)]">
+                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   3
                 </span>
                 <div>
@@ -144,20 +144,20 @@ export default function PWAInstallModal({ isOpen, onClose }) {
             <div className="space-y-3">
               <p className="text-xs font-bold text-[#78716C]">Follow these quick steps in Safari:</p>
 
-              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
-                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[var(--accent-tint-10)]/60 border border-[var(--accent-tint-20)]">
+                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   1
                 </span>
                 <div>
                   <p className="text-xs font-bold text-[#1C1917] flex items-center gap-1">
-                    Tap the <strong>Share</strong> button <Share size={14} className="inline text-[#6D28D9]" />
+                    Tap the <strong>Share</strong> button <Share size={14} className="inline text-[var(--accent)]" />
                   </p>
                   <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Located in the bottom toolbar in Safari</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
-                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[var(--accent-tint-10)]/60 border border-[var(--accent-tint-20)]">
+                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   2
                 </span>
                 <div>
@@ -168,8 +168,8 @@ export default function PWAInstallModal({ isOpen, onClose }) {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
-                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[var(--accent-tint-10)]/60 border border-[var(--accent-tint-20)]">
+                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   3
                 </span>
                 <div>
@@ -186,20 +186,20 @@ export default function PWAInstallModal({ isOpen, onClose }) {
             <div className="space-y-3">
               <p className="text-xs font-bold text-[#78716C]">Follow these steps in Chrome / Edge:</p>
 
-              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
-                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[var(--accent-tint-10)]/60 border border-[var(--accent-tint-20)]">
+                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   1
                 </span>
                 <div>
                   <p className="text-xs font-bold text-[#1C1917] flex items-center gap-1">
-                    Click the <strong>Install icon</strong> <Download size={14} className="inline text-[#6D28D9]" />
+                    Click the <strong>Install icon</strong> <Download size={14} className="inline text-[var(--accent)]" />
                   </p>
                   <p className="text-[11px] text-[#78716C] font-medium mt-0.5">Found at the right end of the address bar</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[#F3EEFC]/60 border border-[#E4D9F7]">
-                <span className="w-6 h-6 rounded-full bg-[#6D28D9] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="flex items-start gap-3 p-3 rounded-[16px] bg-[var(--accent-tint-10)]/60 border border-[var(--accent-tint-20)]">
+                <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                   2
                 </span>
                 <div>
@@ -219,7 +219,7 @@ export default function PWAInstallModal({ isOpen, onClose }) {
             type="button"
             onClick={onClose}
             className="w-full py-3 rounded-[16px] font-bold text-xs uppercase tracking-wider text-white transition-all active:scale-95 shadow-md cursor-pointer flex items-center justify-center gap-2"
-            style={{ background: '#6D28D9' }}
+            style={{ background: 'var(--accent)' }}
           >
             <Check size={14} />
             <span>Got it</span>

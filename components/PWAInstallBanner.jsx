@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 /**
  * PWAInstallBanner.jsx
  * Smart, mobile-first "Install App" banner.
@@ -8,7 +8,8 @@
  * - Renders nothing on desktop browsers that don't support PWA install
  */
 import { useEffect, useState } from 'react';
-import { X, Download, Share } from '@/lib/icons';
+import { Download, X, Share } from '@/lib/icons';
+import Logo from './Logo';
 
 const DISMISSED_KEY = 'Meova_pwa_dismissed';
 
@@ -70,10 +71,8 @@ export default function PWAInstallBanner() {
   if (showIOSTip) {
     return (
       <div
-        className="fixed bottom-20 left-3 right-3 md:left-auto md:right-8 md:bottom-8 md:w-[400px] z-50 rounded-[16px] overflow-hidden shadow-2xl"
+        className="fixed bottom-20 left-3 right-3 md:left-auto md:right-8 md:bottom-8 md:w-[400px] z-50 rounded-[16px] overflow-hidden shadow-2xl bg-[var(--bg-surface)] border border-[var(--border-hairline)]"
         style={{
-          background: '#1a0a00',
-          border: '1px solid #E7E5E4',
           animation: 'slideUpBanner 0.35s cubic-bezier(.22,1,.36,1)',
         }}
       >
@@ -87,30 +86,30 @@ export default function PWAInstallBanner() {
         <div className="p-4">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Meova" className="w-10 h-10 object-contain rounded-xl flex-shrink-0" />
+              <Logo size="sm" />
               <div>
-                <p className="text-white font-bold text-sm">Install Meova</p>
-                <p className="text-[#A8A29E] text-[11px] font-medium">Get the full app experience</p>
+                <p className="text-[var(--text-primary)] font-bold text-sm">Install Meova</p>
+                <p className="text-[var(--text-secondary)] text-[11px] font-medium">Get the full app experience</p>
               </div>
             </div>
-            <button onClick={handleDismiss} className="p-1 text-[#78716C] hover:text-white transition-colors">
+            <button onClick={handleDismiss} className="p-1 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer">
               <X size={18} />
             </button>
           </div>
 
-          <div className="bg-white/5 rounded-xl p-3 space-y-2">
-            <p className="text-[#A8A29E] text-[12px] font-semibold">To install on your iPhone:</p>
-            <div className="flex items-center gap-2 text-[#A8A29E] text-[11px]">
-              <span className="w-5 h-5 rounded-full bg-[#6D28D9] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">1</span>
-              <span>Tap the <Share size={12} className="inline text-[#7C3AED]" /> <strong className="text-white">Share</strong> button in Safari</span>
+          <div className="bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-xl p-3 space-y-2">
+            <p className="text-[var(--text-secondary)] text-[12px] font-semibold">To install on your iPhone:</p>
+            <div className="flex items-center gap-2 text-[var(--text-secondary)] text-[11px]">
+              <span className="w-5 h-5 rounded-full bg-[var(--accent)] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">1</span>
+              <span>Tap the <Share size={12} className="inline text-[var(--accent)]" /> <strong className="text-[var(--text-primary)]">Share</strong> button in Safari</span>
             </div>
-            <div className="flex items-center gap-2 text-[#A8A29E] text-[11px]">
-              <span className="w-5 h-5 rounded-full bg-[#6D28D9] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">2</span>
-              <span>Scroll down and tap <strong className="text-white">&ldquo;Add to Home Screen&rdquo;</strong></span>
+            <div className="flex items-center gap-2 text-[var(--text-secondary)] text-[11px]">
+              <span className="w-5 h-5 rounded-full bg-[var(--accent)] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">2</span>
+              <span>Scroll down and tap <strong className="text-[var(--text-primary)]">&ldquo;Add to Home Screen&rdquo;</strong></span>
             </div>
-            <div className="flex items-center gap-2 text-[#A8A29E] text-[11px]">
-              <span className="w-5 h-5 rounded-full bg-[#6D28D9] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">3</span>
-              <span>Tap <strong className="text-white">Add</strong> — done!</span>
+            <div className="flex items-center gap-2 text-[var(--text-secondary)] text-[11px]">
+              <span className="w-5 h-5 rounded-full bg-[var(--accent)] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">3</span>
+              <span>Tap <strong className="text-[var(--text-primary)]">Add</strong> — done!</span>
             </div>
           </div>
         </div>
@@ -121,10 +120,8 @@ export default function PWAInstallBanner() {
   // Android / Chrome native prompt
   return (
     <div
-      className="fixed bottom-20 left-3 right-3 md:left-auto md:right-8 md:bottom-8 md:w-[400px] z-50 rounded-[16px] overflow-hidden shadow-2xl"
+      className="fixed bottom-20 left-3 right-3 md:left-auto md:right-8 md:bottom-8 md:w-[400px] z-50 rounded-[16px] overflow-hidden shadow-2xl bg-[var(--bg-surface)] border border-[var(--border-hairline)]"
       style={{
-        background: '#1a0800',
-        border: '1px solid #E7E5E4',
         animation: 'slideUpBanner 0.35s cubic-bezier(.22,1,.36,1)',
       }}
     >
@@ -136,24 +133,24 @@ export default function PWAInstallBanner() {
       `}</style>
 
       <div className="p-4 flex items-center gap-3">
-        <img src="/logo.png" alt="Meova" className="w-10 h-10 object-contain rounded-xl flex-shrink-0" />
+        <Logo size="sm" />
 
         <div className="flex-1 min-w-0">
-          <p className="text-white font-bold text-sm">Install Meova</p>
-          <p className="text-[#A8A29E] text-[11px] font-medium truncate">Faster &amp; works offline</p>
+          <p className="text-[var(--text-primary)] font-bold text-sm">Install Meova</p>
+          <p className="text-[var(--text-secondary)] text-[11px] font-medium truncate">Faster &amp; works offline</p>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={handleInstall}
-            className="flex items-center gap-1.5 bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-[11px] uppercase tracking-wider px-3.5 py-2 rounded-xl active:scale-95 transition-all"
+            className="flex items-center gap-1.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-[11px] uppercase tracking-wider px-3.5 py-2 rounded-xl active:scale-95 transition-all cursor-pointer"
           >
             <Download size={12} />
             Install
           </button>
           <button
             onClick={handleDismiss}
-            className="p-1.5 text-[#78716C] hover:text-white transition-colors"
+            className="p-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
             <X size={16} />
           </button>

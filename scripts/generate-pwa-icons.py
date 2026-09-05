@@ -1,15 +1,24 @@
 import os
 from PIL import Image
+import numpy as np
 
 def generate_icons():
     base_dir = r"e:\Main\projects\Meova\public"
     app_dir = r"e:\Main\projects\Meova\app"
-    logo_path = os.path.join(base_dir, "logo.png")
     
-    if not os.path.exists(logo_path):
-        logo_path = os.path.join(base_dir, "icon-512.png")
-        
-    logo = Image.open(logo_path).convert("RGBA")
+    # Load white logo and tint to Electric Orange #F05A00
+    white_logo_path = os.path.join(base_dir, "logo-white.png")
+    if os.path.exists(white_logo_path):
+        w_img = Image.open(white_logo_path).convert("RGBA")
+        arr = np.array(w_img)
+        orange_arr = np.zeros_like(arr)
+        orange_arr[:, :, 0] = 240  # R
+        orange_arr[:, :, 1] = 90   # G
+        orange_arr[:, :, 2] = 0    # B
+        orange_arr[:, :, 3] = arr[:, :, 3]
+        logo = Image.fromarray(orange_arr, "RGBA")
+    else:
+        logo = Image.open(os.path.join(base_dir, "logo.png")).convert("RGBA")
     
     # 1. Generate Crisp White Maskable Icons for Mobile Home Screen (Android PWA + iPhone Home Screen)
     # Background: #ffffff (solid white), Logo: scaled and centered in 72% safe zone

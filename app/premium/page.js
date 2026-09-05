@@ -38,7 +38,7 @@ export default function PremiumPage() {
     <div className="anim-fade-in w-full max-w-4xl mx-auto space-y-12 pb-16 px-4 pt-[68px] md:pt-6">
       {/* Header Banner */}
       <div className="relative overflow-hidden rounded-[20px] border border-[#E7E5E4] bg-white p-8 md:p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-xs">
-        <div className="w-16 h-16 rounded-[16px] bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center text-[#6D28D9] shadow-xs">
+        <div className="w-16 h-16 rounded-[16px] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[var(--accent)] shadow-xs">
           <Crown size={32} className="fill-current" />
         </div>
 
@@ -65,7 +65,7 @@ export default function PremiumPage() {
               const Icon = feat.icon;
               return (
                 <div key={idx} className="flex gap-4 items-start">
-                  <div className="w-9 h-9 rounded-[12px] bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center text-[#6D28D9] flex-shrink-0">
+                  <div className="w-9 h-9 rounded-[12px] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[var(--accent)] flex-shrink-0">
                     <Icon size={16} />
                   </div>
                   <div>
@@ -94,8 +94,8 @@ export default function PremiumPage() {
               onClick={() => setSelectedPlan('monthly')}
               className="border-2 rounded-[16px] p-5 cursor-pointer flex justify-between items-center transition-all duration-200"
               style={selectedPlan === 'monthly'
-                ? { borderColor: '#6D28D9', background: '#F3EEFC' }
-                : { borderColor: '#E7E5E4', background: '#FAFAF8' }
+                ? { borderColor: 'var(--accent)', background: 'var(--accent-tint-10)' }
+                : { borderColor: '#2A2A2A', background: '#141414' }
               }
             >
               <div>
@@ -113,12 +113,12 @@ export default function PremiumPage() {
               onClick={() => setSelectedPlan('yearly')}
               className="border-2 rounded-[16px] p-5 cursor-pointer flex justify-between items-center transition-all duration-200 relative overflow-hidden"
               style={selectedPlan === 'yearly'
-                ? { borderColor: '#6D28D9', background: '#F3EEFC' }
-                : { borderColor: '#E7E5E4', background: '#FAFAF8' }
+                ? { borderColor: 'var(--accent)', background: 'var(--accent-tint-10)' }
+                : { borderColor: '#2A2A2A', background: '#141414' }
               }
             >
               {/* Promo Badge */}
-              <div className="absolute right-0 top-0 bg-[#6D28D9] text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
+              <div className="absolute right-0 top-0 bg-[var(--accent)] text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
                 Save 40%
               </div>
 
@@ -129,7 +129,7 @@ export default function PremiumPage() {
                 <p className="text-xs text-[#78716C] font-bold mt-0.5">Best Value Plan</p>
               </div>
               <div className="text-right">
-                <p className="text-xl font-bold text-[#6D28D9]">₹699</p>
+                <p className="text-xl font-bold text-[var(--accent)]">₹699</p>
                 <p className="text-[10px] text-[#A8A29E] font-bold uppercase tracking-wider">/ year</p>
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function PremiumPage() {
 
           <button
             onClick={() => setSuccess(true)}
-            className="w-full py-3.5 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold tracking-widest uppercase flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
+            className="w-full py-3.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold tracking-widest uppercase flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
           >
             <span>Go Premium</span>
             <ArrowRight size={13} />

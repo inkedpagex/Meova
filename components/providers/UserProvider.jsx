@@ -129,10 +129,37 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
       }
     };
 
+    const onUnload = () => {
+      try {
+        presenceChannel.untrack();
+      } catch {}
+      if (uid && typeof navigator !== 'undefined' && navigator.sendBeacon) {
+        try {
+          navigator.sendBeacon('/api/presence/heartbeat', JSON.stringify({ action: 'leave', userId: uid }));
+        } catch {}
+      }
+    };
+
     document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('beforeunload', onUnload);
+    window.addEventListener('pagehide', onUnload);
+
+    // Periodic heartbeat every 30 seconds to keep DB timestamp synced
+    const heartbeatInterval = setInterval(() => {
+      if (uid && typeof document !== 'undefined' && !document.hidden) {
+        fetch('/api/presence/heartbeat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'ping', userId: uid }),
+        }).catch(() => {});
+      }
+    }, 30000);
 
     return () => {
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('beforeunload', onUnload);
+      window.removeEventListener('pagehide', onUnload);
+      clearInterval(heartbeatInterval);
       if (supabase && presenceChannel) {
         try {
           presenceChannel.untrack();
@@ -150,6 +177,16 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
     },
     [onlineUserIds]
   );
+
+  const onlineUsers = useMemo(() => {
+    return Array.from(onlinePresenceMap.values()).sort((a, b) => {
+      const timeA = new Date(a.online_at || 0).getTime();
+      const timeB = new Date(b.online_at || 0).getTime();
+      return timeB - timeA;
+    });
+  }, [onlinePresenceMap]);
+
+  const onlineCount = useMemo(() => onlineUserIds.size, [onlineUserIds]);
 
   // Real-time wallet listeners
   useEffect(() => {
@@ -207,6 +244,8 @@ export function UserProvider({ children, initialUser, initialWallet, initialPeop
         refreshWallet,
         onlineUserIds,
         onlinePresenceMap,
+        onlineUsers,
+        onlineCount,
         isUserOnline,
       }}
     >

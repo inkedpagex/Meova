@@ -50,12 +50,12 @@ export default function AuthForm({ defaultMode = 'login' }) {
   });
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#faf9f6] text-[#1C1917] overflow-y-auto font-sans selection:bg-[#6D28D9] selection:text-white">
+    <div className="fixed inset-0 z-[100] bg-[#FAFAF8] text-[#1C1917] overflow-y-auto font-sans selection:bg-[var(--accent)] selection:text-white">
       
       {/* ── 1. STICKY TOP NAVIGATION BAR (RESPONSIVE MOBILE + DESKTOP) ────────── */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-white/90 border-b border-[#E7E5E4]/70 px-4 sm:px-6 lg:px-16 py-3 flex items-center justify-between shadow-2xs">
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#6D28D9] p-0.5 shadow-xs flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[var(--accent)] p-0.5 shadow-xs flex items-center justify-center flex-shrink-0">
             <img src="/logo.png" alt="Meova Logo" className="h-4 w-4 sm:h-5 sm:w-5 object-contain filter brightness-0 invert" />
           </div>
           <span className="font-bold text-[20px] sm:text-[22px] tracking-tight text-[#1C1917] whitespace-nowrap">Meova</span>
@@ -64,7 +64,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
         <button
           onClick={() => loginWithGoogleGIS()}
           disabled={loading}
-          className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full border border-[#E7E5E4] bg-white hover:bg-[#FAFAF8] text-[#1C1917] font-bold text-[12px] sm:text-[13px] transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-60 whitespace-nowrap flex-shrink-0"
+          className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-[#1C1917] font-bold text-[12px] sm:text-[13px] transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-60 whitespace-nowrap flex-shrink-0"
         >
           {loading ? (
             <Loader2 size={16} className="animate-spin text-[#A8A29E]" />
@@ -89,7 +89,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
 
             <h1 className="text-[44px] sm:text-[58px] lg:text-[66px] font-bold leading-[1.04] tracking-tight text-[#1C1917] mb-6">
               Make your <br />
-              <span className="text-[#6D28D9]">college count.</span>
+              <span className="text-[var(--accent)]">college count.</span>
             </h1>
 
             <p className="text-[16px] sm:text-[17px] text-[#78716C] font-medium leading-relaxed mb-8 max-w-[480px]">
@@ -107,7 +107,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
               <button
                 onClick={() => loginWithGoogleGIS()}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border border-[#E7E5E4]/90 bg-white hover:bg-[#FAFAF8] transition-all font-bold text-[15px] text-[#1C1917] cursor-pointer active:scale-[0.98] shadow-md shadow-zinc-200/60"
+                className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border border-[#E7E5E4]/90 bg-white hover:bg-[#F5F5F4] transition-all font-bold text-[15px] text-[#1C1917] cursor-pointer active:scale-[0.98] shadow-md shadow-none"
               >
                 {loading ? (
                   <Loader2 size={20} className="animate-spin text-[#A8A29E]" />
@@ -137,7 +137,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
               {/* Header: Campus Radar */}
               <div className="flex items-center justify-between pb-3.5 border-b border-[#E7E5E4]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center">
                     <Compass size={19} />
                   </div>
                   <div>
@@ -157,7 +157,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
                 <p className="text-[10.5px] font-bold uppercase text-[#A8A29E] tracking-wider mb-2.5">LIVE NOW</p>
                 <div className="grid grid-cols-4 gap-2.5">
                   {/* Aarav */}
-                  <div className="flex flex-col items-center text-center p-2.5 rounded-2xl bg-[#F8F9FA] border border-[#E7E5E4]/80">
+                  <div className="flex flex-col items-center text-center p-2.5 rounded-2xl bg-white border border-[#E7E5E4]/80">
                     <div className="relative w-11 h-11 rounded-full mb-1.5 border-2 border-[#10B981] p-0.5 bg-white flex-shrink-0">
                       <img src="https://api.dicebear.com/9.x/micah/svg?seed=Aarav&backgroundColor=b6e3f4" alt="Aarav" className="w-full h-full object-cover rounded-full" />
                       <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#10B981] border-2 border-white" />
@@ -167,7 +167,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
                   </div>
 
                   {/* Diya */}
-                  <div className="flex flex-col items-center text-center p-2.5 rounded-2xl bg-[#F8F9FA] border border-[#E7E5E4]/80">
+                  <div className="flex flex-col items-center text-center p-2.5 rounded-2xl bg-white border border-[#E7E5E4]/80">
                     <div className="relative w-11 h-11 rounded-full mb-1.5 border-2 border-[#10B981] p-0.5 bg-white flex-shrink-0">
                       <img src="https://api.dicebear.com/9.x/micah/svg?seed=Diya&backgroundColor=ffdfbf" alt="Diya" className="w-full h-full object-cover rounded-full" />
                       <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#10B981] border-2 border-white" />
@@ -177,7 +177,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
                   </div>
 
                   {/* Rehan */}
-                  <div className="flex flex-col items-center text-center p-2.5 rounded-2xl bg-[#F8F9FA] border border-[#E7E5E4]/80">
+                  <div className="flex flex-col items-center text-center p-2.5 rounded-2xl bg-white border border-[#E7E5E4]/80">
                     <div className="relative w-11 h-11 rounded-full mb-1.5 border-2 border-[#10B981] p-0.5 bg-white flex-shrink-0">
                       <img src="https://api.dicebear.com/9.x/micah/svg?seed=Rehan&backgroundColor=c0aede" alt="Rehan" className="w-full h-full object-cover rounded-full" />
                       <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#10B981] border-2 border-white" />
@@ -187,7 +187,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
                   </div>
 
                   {/* Kavya */}
-                  <div className="flex flex-col items-center text-center p-2.5 rounded-2xl bg-[#F8F9FA] border border-[#E7E5E4]/80">
+                  <div className="flex flex-col items-center text-center p-2.5 rounded-2xl bg-white border border-[#E7E5E4]/80">
                     <div className="relative w-11 h-11 rounded-full mb-1.5 border-2 border-[#10B981] p-0.5 bg-white flex-shrink-0">
                       <img src="https://api.dicebear.com/9.x/micah/svg?seed=Kavya&backgroundColor=d1d4f9" alt="Kavya" className="w-full h-full object-cover rounded-full" />
                       <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#10B981] border-2 border-white" />
@@ -202,12 +202,12 @@ export default function AuthForm({ defaultMode = 'login' }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-0.5">
                 
                 {/* Coffee Meet Invite */}
-                <div className="p-3.5 rounded-2xl bg-[#FAFAF8] border border-[#E4D9F7]/70 space-y-2.5 flex flex-col justify-between">
+                <div className="p-3.5 rounded-2xl bg-[#FAFAF8] border border-[var(--accent-tint-20)]/70 space-y-2.5 flex flex-col justify-between">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase text-[#6D28D9] tracking-wider">COFFEE MEET INVITE</span>
+                    <span className="text-[10px] font-bold uppercase text-[var(--accent)] tracking-wider">COFFEE MEET INVITE</span>
                   </div>
                   <div className="flex items-start gap-2.5">
-                    <div className="w-7 h-7 rounded-full overflow-hidden bg-white border border-[#E4D9F7] flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full overflow-hidden bg-white border border-[var(--accent-tint-20)] flex-shrink-0">
                       <img src="https://api.dicebear.com/9.x/micah/svg?seed=Diya&backgroundColor=ffdfbf" alt="Diya" className="w-full h-full object-cover" />
                     </div>
                     <div>
@@ -217,14 +217,14 @@ export default function AuthForm({ defaultMode = 'login' }) {
                   </div>
                   <button 
                     onClick={() => loginWithGoogleGIS()}
-                    className="w-full py-2 rounded-xl bg-[#6D28D9] text-white text-[11px] font-bold shadow-2xs hover:bg-[#5B21B6] transition-colors cursor-pointer active:scale-95"
+                    className="w-full py-2 rounded-xl bg-[var(--accent)] text-white text-[11px] font-bold shadow-2xs hover:bg-[var(--accent-hover)] transition-colors cursor-pointer active:scale-95"
                   >
                     Accept Invite
                   </button>
                 </div>
 
                 {/* Gig Reward */}
-                <div className="p-3.5 rounded-2xl bg-[#F8F9FA] border border-[#E7E5E4]/70 space-y-2.5 flex flex-col justify-between">
+                <div className="p-3.5 rounded-2xl bg-white border border-[#E7E5E4]/70 space-y-2.5 flex flex-col justify-between">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase text-[#A8A29E] tracking-wider">GIG REWARD</span>
                   </div>
@@ -246,15 +246,15 @@ export default function AuthForm({ defaultMode = 'login' }) {
 
               {/* Bottom Row Stats Bar */}
               <div className="pt-3 border-t border-[#E7E5E4] grid grid-cols-3 gap-2.5 text-center">
-                <div className="p-2.5 rounded-2xl bg-[#F8F9FA] border border-[#E7E5E4]">
+                <div className="p-2.5 rounded-2xl bg-white border border-[#E7E5E4]">
                   <p className="text-[16px] font-bold text-[#1C1917]">24</p>
                   <p className="text-[10px] font-medium text-[#A8A29E]">Live Now</p>
                 </div>
-                <div className="p-2.5 rounded-2xl bg-[#F8F9FA] border border-[#E7E5E4]">
+                <div className="p-2.5 rounded-2xl bg-white border border-[#E7E5E4]">
                   <p className="text-[16px] font-bold text-[#1C1917]">8</p>
                   <p className="text-[10px] font-medium text-[#A8A29E]">Coffee Meets</p>
                 </div>
-                <div className="p-2.5 rounded-2xl bg-[#F8F9FA] border border-[#E7E5E4]">
+                <div className="p-2.5 rounded-2xl bg-white border border-[#E7E5E4]">
                   <p className="text-[16px] font-bold text-[#059669]">₹1,250</p>
                   <p className="text-[10px] font-medium text-[#A8A29E]">Total Earned</p>
                 </div>
@@ -279,15 +279,15 @@ export default function AuthForm({ defaultMode = 'login' }) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-3 relative">
             
             {/* Step 01 Card */}
-            <div className="bg-white rounded-3xl border border-[#E4D9F7]/80 shadow-xs hover:shadow-md p-6 sm:p-7 flex items-center gap-5 relative w-full md:w-1/3 min-h-[170px] group transition-all">
+            <div className="bg-white rounded-3xl border border-[var(--accent-tint-20)]/80 shadow-xs hover:shadow-md p-6 sm:p-7 flex items-center gap-5 relative w-full md:w-1/3 min-h-[170px] group transition-all">
               {/* Floating Orange Step Circle Badge */}
-              <div className="absolute -top-3.5 -left-3.5 w-8 h-8 rounded-full bg-[#6D28D9] text-white font-bold text-[12px] flex items-center justify-center shadow-md z-20">
+              <div className="absolute -top-3.5 -left-3.5 w-8 h-8 rounded-full bg-[var(--accent)] text-white font-bold text-[12px] flex items-center justify-center shadow-md z-20">
                 01
               </div>
 
               {/* Left Circle Icon Container */}
-              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                <Radio size={32} className="text-[#6D28D9]" />
+              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <Radio size={32} className="text-[var(--accent)]" />
               </div>
 
               {/* Right Text Content */}
@@ -303,24 +303,24 @@ export default function AuthForm({ defaultMode = 'login' }) {
 
             {/* Connecting Arrow 1 (Desktop: Right Arrow, Mobile: Down Arrow) */}
             <div className="flex items-center justify-center z-10 py-1 md:py-0">
-              <div className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-[#E4D9F7] bg-white text-[#6D28D9] shadow-xs hover:scale-110 transition-transform">
+              <div className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-[var(--accent-tint-20)] bg-white text-[var(--accent)] shadow-xs hover:scale-110 transition-transform">
                 <ArrowRight size={18} />
               </div>
-              <div className="flex md:hidden items-center justify-center w-8 h-8 rounded-full border border-[#E4D9F7] bg-white text-[#6D28D9] shadow-xs my-1">
+              <div className="flex md:hidden items-center justify-center w-8 h-8 rounded-full border border-[var(--accent-tint-20)] bg-white text-[var(--accent)] shadow-xs my-1">
                 <ArrowDown size={16} />
               </div>
             </div>
 
             {/* Step 02 Card */}
-            <div className="bg-white rounded-3xl border border-[#E4D9F7]/80 shadow-xs hover:shadow-md p-6 sm:p-7 flex items-center gap-5 relative w-full md:w-1/3 min-h-[170px] group transition-all">
+            <div className="bg-white rounded-3xl border border-[var(--accent-tint-20)]/80 shadow-xs hover:shadow-md p-6 sm:p-7 flex items-center gap-5 relative w-full md:w-1/3 min-h-[170px] group transition-all">
               {/* Floating Step Circle Badge */}
-              <div className="absolute -top-3.5 -left-3.5 w-8 h-8 rounded-full bg-[#6D28D9] text-white font-bold text-[12px] flex items-center justify-center shadow-md z-20">
+              <div className="absolute -top-3.5 -left-3.5 w-8 h-8 rounded-full bg-[var(--accent)] text-white font-bold text-[12px] flex items-center justify-center shadow-md z-20">
                 02
               </div>
 
               {/* Left Circle Icon Container */}
-              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                <Briefcase size={32} className="text-[#6D28D9]" />
+              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <Briefcase size={32} className="text-[var(--accent)]" />
               </div>
 
               {/* Right Text Content */}
@@ -336,24 +336,24 @@ export default function AuthForm({ defaultMode = 'login' }) {
 
             {/* Connecting Arrow 2 (Desktop: Right Arrow, Mobile: Down Arrow) */}
             <div className="flex items-center justify-center z-10 py-1 md:py-0">
-              <div className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-[#E4D9F7] bg-white text-[#6D28D9] shadow-xs hover:scale-110 transition-transform">
+              <div className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-[var(--accent-tint-20)] bg-white text-[var(--accent)] shadow-xs hover:scale-110 transition-transform">
                 <ArrowRight size={18} />
               </div>
-              <div className="flex md:hidden items-center justify-center w-8 h-8 rounded-full border border-[#E4D9F7] bg-white text-[#6D28D9] shadow-xs my-1">
+              <div className="flex md:hidden items-center justify-center w-8 h-8 rounded-full border border-[var(--accent-tint-20)] bg-white text-[var(--accent)] shadow-xs my-1">
                 <ArrowDown size={16} />
               </div>
             </div>
 
             {/* Step 03 Card */}
-            <div className="bg-white rounded-3xl border border-[#E4D9F7]/80 shadow-xs hover:shadow-md p-6 sm:p-7 flex items-center gap-5 relative w-full md:w-1/3 min-h-[170px] group transition-all">
+            <div className="bg-white rounded-3xl border border-[var(--accent-tint-20)]/80 shadow-xs hover:shadow-md p-6 sm:p-7 flex items-center gap-5 relative w-full md:w-1/3 min-h-[170px] group transition-all">
               {/* Floating Step Circle Badge */}
-              <div className="absolute -top-3.5 -left-3.5 w-8 h-8 rounded-full bg-[#6D28D9] text-white font-bold text-[12px] flex items-center justify-center shadow-md z-20">
+              <div className="absolute -top-3.5 -left-3.5 w-8 h-8 rounded-full bg-[var(--accent)] text-white font-bold text-[12px] flex items-center justify-center shadow-md z-20">
                 03
               </div>
 
               {/* Left Circle Icon Container */}
-              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                <Sparkles size={32} className="text-[#6D28D9]" />
+              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <Sparkles size={32} className="text-[var(--accent)]" />
               </div>
 
               {/* Right Text Content */}
@@ -417,10 +417,10 @@ export default function AuthForm({ defaultMode = 'login' }) {
             <div className="bg-white rounded-[32px] border border-[#E7E5E4]/80 shadow-xl p-5 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-5">
               
               {/* Left Sub-card: Campus Map Radar Stage */}
-              <div className="md:col-span-7 bg-[#FFFDF9] rounded-2xl border border-[#E4D9F7]/90 p-4 sm:p-5 flex flex-col justify-between min-h-[220px]">
+              <div className="md:col-span-7 bg-white rounded-2xl border border-[var(--accent-tint-20)]/90 p-4 sm:p-5 flex flex-col justify-between min-h-[220px]">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[12px] font-extrabold text-[#1C1917] flex items-center gap-1.5">
-                    <Compass size={15} className="text-[#6D28D9]" /> Campus Map Radar
+                    <Compass size={15} className="text-[var(--accent)]" /> Campus Map Radar
                   </span>
                   <span className="px-2.5 py-1 bg-[#D1FAE5] text-[#059669] text-[9.5px] font-bold tracking-wider rounded-full flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" /> 3 HOTSPOTS LIVE
@@ -429,7 +429,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
 
                 <div className="space-y-2.5 my-auto">
                   {/* Hotspot Row 1 */}
-                  <div className="bg-white rounded-xl border border-[#E4D9F7] p-2.5 flex items-center justify-between shadow-2xs">
+                  <div className="bg-white rounded-xl border border-[var(--accent-tint-20)] p-2.5 flex items-center justify-between shadow-2xs">
                     <div className="flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-full overflow-hidden border border-emerald-500 p-0.5 bg-white flex-shrink-0">
                         <img src="https://api.dicebear.com/9.x/micah/svg?seed=Aarav" alt="Aarav" className="w-full h-full object-cover rounded-full" />
@@ -441,14 +441,14 @@ export default function AuthForm({ defaultMode = 'login' }) {
                     </div>
                     <button 
                       onClick={() => loginWithGoogleGIS()}
-                      className="px-3 py-1 bg-white border border-[#E4D9F7] text-[#6D28D9] font-extrabold text-[10.5px] rounded-full cursor-pointer hover:bg-[#F3EEFC] active:scale-95 transition-all"
+                      className="px-3 py-1 bg-white border border-[var(--accent-tint-20)] text-[var(--accent)] font-extrabold text-[10.5px] rounded-full cursor-pointer hover:bg-[var(--accent-tint-10)] active:scale-95 transition-all"
                     >
                       Join Coffee
                     </button>
                   </div>
 
                   {/* Hotspot Row 2 */}
-                  <div className="bg-white rounded-xl border border-[#E4D9F7] p-2.5 flex items-center justify-between shadow-2xs">
+                  <div className="bg-white rounded-xl border border-[var(--accent-tint-20)] p-2.5 flex items-center justify-between shadow-2xs">
                     <div className="flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-full overflow-hidden border border-emerald-500 p-0.5 bg-white flex-shrink-0">
                         <img src="https://api.dicebear.com/9.x/micah/svg?seed=Diya" alt="Diya" className="w-full h-full object-cover rounded-full" />
@@ -460,7 +460,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
                     </div>
                     <button 
                       onClick={() => loginWithGoogleGIS()}
-                      className="px-3 py-1 bg-white border border-[#E4D9F7] text-[#6D28D9] font-extrabold text-[10.5px] rounded-full cursor-pointer hover:bg-[#F3EEFC] active:scale-95 transition-all"
+                      className="px-3 py-1 bg-white border border-[var(--accent-tint-20)] text-[var(--accent)] font-extrabold text-[10.5px] rounded-full cursor-pointer hover:bg-[var(--accent-tint-10)] active:scale-95 transition-all"
                     >
                       Study Meet
                     </button>
@@ -477,17 +477,17 @@ export default function AuthForm({ defaultMode = 'login' }) {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="p-2.5 rounded-xl bg-[#F8F9FA] border border-[#E7E5E4] text-[11.5px]">
+                    <div className="p-2.5 rounded-xl bg-white border border-[#E7E5E4] text-[11.5px]">
                       <p className="font-bold text-[#1C1917]">Rohan is live at</p>
-                      <p className="text-[#6D28D9] font-bold">GD Subway <span className="text-[#A8A29E] font-normal">· 3m ago</span></p>
+                      <p className="text-[var(--accent)] font-bold">GD Subway <span className="text-[#A8A29E] font-normal">· 3m ago</span></p>
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-[#F8F9FA] border border-[#E7E5E4] text-[11.5px]">
+                    <div className="p-2.5 rounded-xl bg-white border border-[#E7E5E4] text-[11.5px]">
                       <p className="font-bold text-[#1C1917]">Diya booked a coffee</p>
                       <p className="text-[#059669] font-bold">meet at Canteen <span className="text-[#A8A29E] font-normal">· 5m ago</span></p>
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-[#F8F9FA] border border-[#E7E5E4] text-[11.5px]">
+                    <div className="p-2.5 rounded-xl bg-white border border-[#E7E5E4] text-[11.5px]">
                       <p className="font-bold text-[#1C1917]">Aarav posted a gig</p>
                       <p className="text-[#D97706] font-bold">"Photoshoot" <span className="text-[#A8A29E] font-normal">· 10m ago</span></p>
                     </div>
@@ -541,14 +541,14 @@ export default function AuthForm({ defaultMode = 'login' }) {
       </section>
 
       {/* ── 6. BOTTOM CTA BANNER ────────────────────────────────────────────── */}
-      <footer className="px-6 lg:px-16 pt-16 pb-10 bg-[#6D28D9] text-white text-center relative overflow-hidden mt-10">
+      <footer className="px-6 lg:px-16 pt-16 pb-10 bg-[var(--accent)] text-white text-center relative overflow-hidden mt-10">
         <div className="max-w-4xl mx-auto relative z-10 space-y-6">
           
           <h2 className="text-[34px] sm:text-[46px] font-bold tracking-tight text-white leading-tight">
             Ready to own your campus experience?
           </h2>
           
-          <p className="text-[15px] text-[#F3EEFC] font-medium max-w-xl mx-auto leading-relaxed">
+          <p className="text-[15px] text-[var(--accent-tint-10)] font-medium max-w-xl mx-auto leading-relaxed">
             Join thousands of college students connecting, meeting up, and earning Sparks on Meova today.
           </p>
 
@@ -556,7 +556,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
             <button
               onClick={() => loginWithGoogleGIS()}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-full bg-white hover:bg-[#F3EEFC] transition-all font-bold text-[15px] text-[#1C1917] cursor-pointer active:scale-[0.98] shadow-xl"
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-full bg-white hover:bg-[#F5F5F5] transition-all font-bold text-[15px] text-[#1C1917] cursor-pointer active:scale-[0.98] shadow-xl"
             >
               {loading ? (
                 <Loader2 size={20} className="animate-spin text-[#A8A29E]" />
@@ -572,7 +572,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
             </button>
           </div>
 
-          <div className="pt-10 border-t border-[#6D28D9]/40 text-[12px] text-[#E4D9F7] font-medium flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="pt-10 border-t border-[var(--accent-tint-20)] text-[12px] text-[var(--accent-tint-20)] font-medium flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <img src="/logo.png" alt="Meova" className="h-4 w-4 object-contain filter brightness-0 invert" />
               <span className="font-bold text-white">Meova</span>

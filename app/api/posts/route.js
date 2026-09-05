@@ -82,27 +82,57 @@ export async function POST(request) {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Anti-Spam Rate Limit: 5 posts per 5 minutes per user
-    const rl = rateLimit(`create_post:${user.uid}`, { limit: 5, windowMs: 5 * 60 * 1000 });
+    // Anti-Spam Rate Limit: 3 posts per 5 minutes per user
+    const rl = rateLimit(`create_post:${user.uid}`, { limit: 3, windowMs: 5 * 60 * 1000 });
     if (!rl.ok) {
       return NextResponse.json({
         error: `Posting too quickly. Please wait ${rl.retryAfter}s before posting again.`
       }, { status: 429, headers: { 'Retry-After': rl.retryAfter } });
     }
 
-    const { photoUrl, caption, location, category } = await request.json();
-    if (!photoUrl || typeof photoUrl !== 'string' || !photoUrl.startsWith('http') || photoUrl.length > 1000) {
-      return NextResponse.json({ error: 'Valid photo URL is required (under 1000 chars)' }, { status: 400 });
+    const body = await request.json();
+    const { photoUrl, mediaUrls, media_urls, caption, location, category } = body;
+    
+    // Normalize media array (support single photoUrl or multiple mediaUrls, max 4 items)
+    let rawUrls = [];
+    if (Array.isArray(media_urls) && media_urls.length > 0) {
+      rawUrls = media_urls;
+    } else if (Array.isArray(mediaUrls) && mediaUrls.length > 0) {
+      rawUrls = mediaUrls;
+    } else if (typeof photoUrl === 'string' && photoUrl.trim()) {
+      rawUrls = [photoUrl.trim()];
     }
 
-    const finalContent = (caption || '').trim();
+    const validMediaUrls = rawUrls
+      .filter(url => typeof url === 'string' && url.startsWith('http') && url.length <= 1000)
+      .slice(0, 4);
+
+    if (validMediaUrls.length === 0) {
+      return NextResponse.json({ error: 'At least one valid media URL is required' }, { status: 400 });
+    }
+
+    const finalContent = (caption || '').trim().slice(0, 1000);
+
+    // Duplicate spam check: Prevent identical post by same user in last 60 seconds
+    const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
+    const { data: recentDup } = await supabaseAdmin
+      .from('posts')
+      .select('id')
+      .eq('user_id', user.uid)
+      .eq('content', finalContent)
+      .gte('created_at', oneMinuteAgo)
+      .limit(1);
+
+    if (recentDup && recentDup.length > 0) {
+      return NextResponse.json({ error: 'Duplicate post detected. Please avoid reposting the same content.' }, { status: 429 });
+    }
 
     const newPost = {
       user_id: user.uid,
       author_name: user.full_name || 'Campus Peer',
       author_photo: user.photo_url || null,
-      media_urls: [photoUrl],
-      content: finalContent.slice(0, 1000),
+      media_urls: validMediaUrls,
+      content: finalContent,
       likes_count: 0,
       created_at: new Date().toISOString(),
     };

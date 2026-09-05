@@ -17,15 +17,15 @@ const CATEGORY_ICONS = {
 };
 
 const CATEGORY_COLORS = {
-  Tech: { bg: '#eff6ff', color: '#3b82f6', border: '#bfdbfe' },
-  Gaming: { bg: '#f0f9ff', color: '#0ea5e9', border: '#bae6fd' },
-  Music: { bg: '#F3EEFC', color: '#6D28D9', border: '#E4D9F7' },
-  Design: { bg: '#F3EEFC', color: '#6D28D9', border: '#E4D9F7' },
-  Startup: { bg: '#F3EEFC', color: '#6D28D9', border: '#E4D9F7' },
-  Sports: { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
-  Creators: { bg: '#fff1f2', color: '#e11d48', border: '#fecdd3' },
-  Entertainment: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },
-  default: { bg: '#F3EEFC', color: '#6D28D9', border: '#E4D9F7' },
+  Tech: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
+  Gaming: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
+  Music: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
+  Design: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
+  Startup: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
+  Sports: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
+  Creators: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
+  Entertainment: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
+  default: { bg: 'var(--accent-tint-10)', color: 'var(--accent)', border: 'var(--accent-tint-20)' },
 };
 
 const MOCK_COMMUNITIES = [
@@ -285,11 +285,11 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
       <div className="bg-white rounded-[16px] p-5 text-[#1C1917] shadow-[0_2px_8px_rgba(28,25,23,0.06)] border border-[#E7E5E4] flex items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]">
               Host Monetization
             </span>
             <span className="text-[10px] font-bold text-[#78716C] flex items-center gap-1">
-              <Zap size={12} className="fill-[#6D28D9] text-[#6D28D9]" /> 100% Sparks Earnings
+              <Zap size={12} className="fill-[var(--accent)] text-[var(--accent)]" /> 100% Sparks Earnings
             </span>
           </div>
           <h3 className="text-sm sm:text-base font-bold tracking-tight text-[#1C1917]">Create Your Campus Channel</h3>
@@ -297,7 +297,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-5 py-2.5 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-xs transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-95 flex-shrink-0 cursor-pointer"
+          className="px-5 py-2.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-xs transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-95 flex-shrink-0 cursor-pointer"
         >
           + Host Channel
         </button>
@@ -310,9 +310,9 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search communities..."
-          className="w-full pl-11 pr-12 py-3.5 rounded-full text-[13px] font-medium outline-none transition-all bg-white border border-[#E7E5E4] text-[#1C1917] focus:border-[#6D28D9]"
+          className="w-full pl-11 pr-12 py-3.5 rounded-full text-[13px] font-medium outline-none transition-all bg-white border border-[#E7E5E4] text-[#1C1917] focus:border-[var(--accent)]"
         />
-        <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white border border-[#E7E5E4] text-[#78716C] hover:text-[#6D28D9] hover:border-[#6D28D9] transition-colors">
+        <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white border border-[#E7E5E4] text-[#78716C] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors">
           <SlidersHorizontal size={14} />
         </button>
       </div>
@@ -323,8 +323,8 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
           <button key={f} onClick={() => setActiveFilter(f)}
             className="flex-shrink-0 px-4 py-2 rounded-full text-[12px] font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
             style={activeFilter === f
-              ? { background: '#6D28D9', color: '#ffffff', border: '1px solid #6D28D9' }
-              : { background: '#ffffff', color: '#1C1917', border: '1px solid #E7E5E4' }}>
+              ? { background: 'var(--accent)', color: '#ffffff', border: '1px solid var(--accent)' }
+              : { background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border-hairline)' }}>
             {f}
           </button>
         ))}
@@ -333,13 +333,13 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
       {/* Featured community banner */}
       {featured && !search && activeFilter === 'All' && (
         <div className="relative rounded-[16px] p-5 overflow-hidden shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
-          style={{ background: '#6D28D9' }}>
-          <div className="absolute top-0 right-0 w-36 h-36 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2 bg-white" />
+          style={{ background: 'var(--accent)' }}>
+          <div className="absolute top-0 right-0 w-36 h-36 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2 bg-[var(--accent)]" />
           <div className="relative z-10">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-[16px] bg-white/20 flex items-center justify-center">
-                  <Rocket size={22} className="text-white" />
+                <div className="w-12 h-12 rounded-[16px] bg-white flex items-center justify-center">
+                  <Rocket size={22} className="text-[var(--accent)]" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -354,7 +354,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                 className="px-4 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-wide cursor-pointer active:scale-95 transition-all flex-shrink-0 shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
                 style={joinedMap[featured.id]
                   ? { background: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }
-                  : { background: 'white', color: '#6D28D9' }}>
+                  : { background: 'white', color: 'var(--accent)' }}>
                 {joiningId === featured.id ? 'Joining...' : (joinedMap[featured.id] ? 'Open' : 'Join')}
               </button>
             </div>
@@ -379,7 +379,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
       <div className="space-y-3">
         {displayed.length === 0 ? (
           <div className="bg-white rounded-[16px] border border-[#E7E5E4] p-8 text-center space-y-3.5 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
-            <div className="w-14 h-14 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center mx-auto shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+            <div className="w-14 h-14 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center mx-auto shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
               <Users size={24} />
             </div>
             <div className="space-y-1">
@@ -395,7 +395,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                 <button
                   type="button"
                   onClick={() => { setSearch(''); setSelectedCategory('All'); }}
-                  className="px-5 py-2.5 rounded-full bg-[#FAFAF8] hover:bg-[#E7E5E4] text-[#1C1917] text-xs font-bold active:scale-95 transition-all cursor-pointer border border-[#E7E5E4]"
+                  className="px-5 py-2.5 rounded-full bg-[#FAFAF8] hover:bg-[var(--accent-tint-10)] text-[#1C1917] text-xs font-bold active:scale-95 transition-all cursor-pointer border border-[#E7E5E4]"
                 >
                   Clear Filters
                 </button>
@@ -403,7 +403,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(true)}
-                  className="px-5 py-2.5 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-95 transition-all cursor-pointer inline-flex items-center gap-1.5"
+                  className="px-5 py-2.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-95 transition-all cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <Rocket size={13} />
                   <span>Create Circle</span>
@@ -422,7 +422,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
             <div
               key={circle.id}
               onClick={() => handleJoinClick(circle)}
-              className="bg-white border border-[#E7E5E4] hover:border-[#6D28D9] rounded-[16px] p-4 flex items-center justify-between gap-3 transition-all cursor-pointer group shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
+              className="bg-white border border-[#E7E5E4] hover:border-[var(--accent)] rounded-[16px] p-4 flex items-center justify-between gap-3 transition-all cursor-pointer group shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
             >
               <div className="flex items-center gap-3.5 min-w-0">
                 {/* Category Icon */}
@@ -454,7 +454,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                       </div>
                     ) : (
                       <div className="flex items-center gap-1">
-                        <span className="text-[10px] font-bold text-[#6D28D9] uppercase tracking-wide bg-[#F3EEFC] px-1.5 py-0.5 rounded-md border border-[#E4D9F7]">
+                        <span className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-wide bg-[var(--accent-tint-10)] px-1.5 py-0.5 rounded-md border border-[var(--accent-tint-20)]">
                           by Meova
                         </span>
                       </div>
@@ -468,8 +468,8 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                     </div>
 
                     {circle.isPaid ? (
-                      <span className="text-[10px] font-bold text-[#6D28D9] px-2 py-0.5 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] flex items-center gap-0.5">
-                        <Zap size={10} className="fill-[#6D28D9] text-[#6D28D9]" />
+                      <span className="text-[10px] font-bold text-[var(--accent)] px-2 py-0.5 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center gap-0.5">
+                        <Zap size={10} className="fill-[var(--accent)] text-[var(--accent)]" />
                         {circle.price} Sparks
                       </span>
                     ) : (
@@ -499,7 +499,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                       toast.success('Community link copied!');
                     }
                   }}
-                  className="p-2 rounded-xl text-[#78716C] hover:text-black hover:bg-[#F3EEFC] transition-colors cursor-pointer"
+                  className="p-2 rounded-xl text-[#78716C] hover:text-[#1C1917] hover:bg-[var(--accent-tint-10)] transition-colors cursor-pointer"
                   title="Share Community"
                 >
                   <Share2 size={15} />
@@ -508,7 +508,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                 {isHost ? (
                   <button
                     onClick={(e) => { e.stopPropagation(); setManageCircle(circle); }}
-                    className="px-3 py-2 rounded-xl text-[10.5px] font-bold uppercase tracking-wider bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7] hover:bg-[#F3EEFC] transition-colors cursor-pointer"
+                    className="px-3 py-2 rounded-xl text-[10.5px] font-bold uppercase tracking-wider bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] hover:bg-[var(--accent-tint-10)] transition-colors cursor-pointer"
                   >
                     Manage
                   </button>
@@ -528,7 +528,7 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
                   className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 flex-shrink-0 flex items-center gap-1.5 shadow-[0_2px_8px_rgba(28,25,23,0.06)] ${
                     isJoined
                       ? 'bg-black text-white hover:bg-black/90'
-                      : 'bg-[#6D28D9] text-white hover:bg-[#5B21B6]'
+                      : 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]'
                   }`}
                 >
                   {joiningId === circle.id ? 'Joining...' : (isJoined ? 'Open' : 'Join')}
@@ -571,12 +571,12 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 border-b border-[#E7E5E4] pb-3">
-              <div className="w-10 h-10 rounded-[16px] bg-[#F3EEFC] flex items-center justify-center flex-shrink-0 border border-[#E4D9F7]">
-                <Users size={18} className="text-[#6D28D9]" />
+              <div className="w-10 h-10 rounded-[16px] bg-[var(--accent-tint-10)] flex items-center justify-center flex-shrink-0 border border-[var(--accent-tint-20)]">
+                <Users size={18} className="text-[var(--accent)]" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-bold text-[#1C1917] truncate">{rulesCircle.name}</h3>
-                <p className="text-[10px] font-bold text-[#6D28D9] uppercase tracking-wider">{rulesCircle.category} Community</p>
+                <p className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-wider">{rulesCircle.category} Community</p>
               </div>
             </div>
 
@@ -584,15 +584,15 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
               <h4 className="text-xs font-bold text-[#1C1917] uppercase tracking-wider">Community Guidelines & Rules:</h4>
               <ul className="space-y-2 text-xs font-medium text-[#78716C]">
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
+                  <span className="w-4 h-4 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
                   <span><strong>Respect & Kindness:</strong> Maintain constructive, friendly discussions with campus peers.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
+                  <span className="w-4 h-4 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
                   <span><strong>No Spam or Promo:</strong> Share relevant projects, meets, or notes only.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
+                  <span className="w-4 h-4 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
                   <span><strong>Campus Safety:</strong> Keep meetups in verified public campus spots.</span>
                 </li>
               </ul>
@@ -601,13 +601,13 @@ export default function CirclesList({ circles = [], joinedCircleIds = new Set(),
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => setRulesCircle(null)}
-                className="flex-1 py-3 rounded-[16px] text-xs font-bold text-[#78716C] bg-[#F3EEFC] hover:bg-[#E7E5E4] transition-colors"
+                className="flex-1 py-3 rounded-[16px] text-xs font-bold text-[#78716C] bg-[var(--accent-tint-10)] hover:bg-[var(--accent-tint-10)] transition-colors"
               >
                 Decline
               </button>
               <button
                 onClick={confirmJoinCircle}
-                className="flex-1 py-3 rounded-[16px] text-xs font-bold text-white bg-[#6D28D9] hover:bg-[#5B21B6] transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 rounded-[16px] text-xs font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] flex items-center justify-center gap-1.5"
               >
                 {rulesCircle.isPaid ? `Agree & Join (${rulesCircle.price} Sparks)` : 'Agree & Join Group'}
               </button>

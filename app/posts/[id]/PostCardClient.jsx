@@ -7,6 +7,8 @@ import { Heart, Share2, MessageCircle, Sparkles, MoreHorizontal, Copy, Trash2, S
 import { getCartoonAvatar } from '../../../utils/avatar';
 import { toast } from '../../../lib/toast';
 import { formatPostDate } from '../../../utils/dateFormatter';
+import PostMediaGallery from '@/components/PostMediaGallery';
+import MessagePillButton from '@/components/MessagePillButton';
 
 export default function PostCardClient({ post, initialIsLiked = false, currentUserId = null, currentUserRole = null }) {
   const router = useRouter();
@@ -113,7 +115,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
         >
           {/* Avatar with online dot */}
           <div className="relative flex-shrink-0">
-            <div className="w-9 h-9 rounded-full overflow-hidden p-[1px] ring-1 ring-black/[0.08] group-hover/author:ring-[#6D28D9] transition-all">
+            <div className="w-9 h-9 rounded-full overflow-hidden p-[1px] ring-1 ring-black/[0.08] group-hover/author:ring-[var(--accent)] transition-all">
               <img
                 src={authorPhoto}
                 alt=""
@@ -128,7 +130,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
           </div>
 
           <div className="min-w-0">
-            <h4 className="text-[14px] font-semibold text-[#1C1917] group-hover/author:text-[#6D28D9] transition-colors leading-tight truncate">
+            <h4 className="text-[14px] font-semibold text-[#1C1917] group-hover/author:text-[var(--accent)] transition-colors leading-tight truncate">
               {post.author_name || 'Campus Student'}
             </h4>
             <p className="text-[12px] text-[#78716C] font-medium mt-0.5 flex items-center gap-1.5 leading-none truncate">
@@ -141,103 +143,102 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
           </div>
         </Link>
 
-        {/* 3-dots Menu Button */}
-        <div className="relative flex-shrink-0 ml-2">
-          <button
-            type="button"
-            onClick={() => setShowMenu(!showMenu)}
-            className="w-8 h-8 flex items-center justify-center text-[#A8A29E] hover:text-[#1C1917] hover:bg-black/5 rounded-full transition-colors cursor-pointer"
-          >
-            <MoreHorizontal size={18} />
-          </button>
-
-          {showMenu && (
-            <>
-              <div
-                className="fixed inset-0 z-30"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(false);
-                }}
-              />
-              <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-[0_4px_16px_rgba(28,25,23,0.08)] rounded-[16px] p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150 border border-[#E7E5E4]">
-                {isOwnPost ? (
-                  <button
-                    type="button"
-                    disabled={isDeleting}
-                    onClick={() => {
-                      setShowMenu(false);
-                      handleDeletePost();
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
-                  >
-                    <Trash2 size={14} />
-                    <span>{isDeleting ? 'Deleting...' : 'Delete post'}</span>
-                  </button>
-                ) : isHostOrAdmin ? (
-                  <button
-                    type="button"
-                    disabled={isDeleting}
-                    onClick={() => {
-                      setShowMenu(false);
-                      handleDeletePost();
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
-                  >
-                    <ShieldAlert size={14} />
-                    <span>{isDeleting ? 'Removing...' : 'Moderate'}</span>
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowMenu(false);
-                    handleShare();
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-[#1C1917] hover:bg-[#F3EEFC] hover:text-[#6D28D9] rounded-xl transition-colors cursor-pointer"
-                >
-                  <Copy size={14} />
-                  <span>Copy link</span>
-                </button>
-              </div>
-            </>
+        {/* Header Right Actions */}
+        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+          {!isOwnPost && post.user_id && (
+            <MessagePillButton
+              targetUserId={post.user_id}
+              targetName={post.author_name}
+              currentUserId={currentUserId}
+              size="sm"
+            />
           )}
+
+          {/* 3-dots Menu Button */}
+          <div className="relative flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowMenu(!showMenu)}
+              className="w-8 h-8 flex items-center justify-center text-[#A8A29E] hover:text-[#1C1917] hover:bg-black/5 rounded-full transition-colors cursor-pointer"
+            >
+              <MoreHorizontal size={18} />
+            </button>
+
+            {showMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                  }}
+                />
+                <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-[0_4px_16px_rgba(28,25,23,0.08)] rounded-[16px] p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150 border border-[#E7E5E4]">
+                  {isOwnPost ? (
+                    <button
+                      type="button"
+                      disabled={isDeleting}
+                      onClick={() => {
+                        setShowMenu(false);
+                        handleDeletePost();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                    >
+                      <Trash2 size={14} />
+                      <span>{isDeleting ? 'Deleting...' : 'Delete post'}</span>
+                    </button>
+                  ) : isHostOrAdmin ? (
+                    <button
+                      type="button"
+                      disabled={isDeleting}
+                      onClick={() => {
+                        setShowMenu(false);
+                        handleDeletePost();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                    >
+                      <ShieldAlert size={14} />
+                      <span>{isDeleting ? 'Removing...' : 'Moderate'}</span>
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMenu(false);
+                      handleShare();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-[#1C1917] hover:bg-[var(--accent-tint-10)] hover:text-[var(--accent)] rounded-xl transition-colors cursor-pointer"
+                  >
+                    <Copy size={14} />
+                    <span>Copy link</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ── Photo (Refined Framed Container) ───────────────────────────── */}
-      {post.media_urls?.[0] && (
-        <div className="px-3.5 pt-0.5 pb-1">
-          <div
-            onClick={handlePhotoClick}
-            className="relative w-full max-h-[440px] sm:max-h-[480px] rounded-[14px] overflow-hidden bg-[#FAFAF8] border border-[#E7E5E4]/60 cursor-pointer select-none group/media flex items-center justify-center"
-          >
-            <img
-              src={post.media_urls[0]}
-              alt=""
-              className="w-full max-h-[440px] sm:max-h-[480px] object-cover transition-transform duration-300 group-hover/media:scale-[1.01]"
-            />
+      {/* ── Photo / Media Gallery (Zero-Crop Adaptive Container) ───────────────────────────── */}
+      {(post.media_urls?.length > 0 || post.photoUrl) && (
+        <div className="px-3.5 pt-0.5 pb-1 relative">
+          <PostMediaGallery
+            mediaUrls={post.media_urls || [post.photoUrl]}
+            onMediaClick={handlePhotoClick}
+          />
 
-            {/* Showcase Tag Overlay */}
-            {post.category && (
-              <span className="absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded-full text-[10.5px] font-bold bg-black/60 text-white backdrop-blur-xs tracking-wide">
-                {post.category}
-              </span>
-            )}
-
-            {/* Floating Heart Burst */}
-            {floatingHeart && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-                <Heart
-                  size={84}
-                  className="fill-[#6D28D9] text-white drop-shadow-2xl animate-in zoom-in-50 fade-in duration-200"
-                  style={{
-                    filter: 'drop-shadow(0 12px 35px rgba(109,40,217,0.8))',
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          {/* Floating Heart Burst */}
+          {floatingHeart && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+              <Heart
+                size={84}
+                className="fill-[var(--accent)] text-white drop-shadow-2xl animate-in zoom-in-50 fade-in duration-200"
+                style={{
+                  filter: 'drop-shadow(0 12px 35px rgba(240,90,0,0.8))',
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -258,14 +259,14 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
                 size={20}
                 className={`transition-all duration-150 ${
                   isLiked
-                    ? 'fill-[#6D28D9] text-[#6D28D9]'
-                    : 'text-[#78716C] group-hover/like:text-[#6D28D9]'
+                    ? 'fill-[var(--accent)] text-[var(--accent)]'
+                    : 'text-[#78716C] group-hover/like:text-[var(--accent)]'
                 } ${animatingHeart ? 'scale-125' : 'scale-100'}`}
               />
               {likesCount > 0 && (
                 <span
                   className={`text-[13px] font-bold tabular-nums leading-none ${
-                    isLiked ? 'text-[#6D28D9]' : 'text-[#78716C]'
+                    isLiked ? 'text-[var(--accent)]' : 'text-[#78716C]'
                   }`}
                 >
                   {likesCount}
@@ -273,16 +274,14 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
               )}
             </button>
 
-            {/* Chat / Message Button */}
-            {post.user_id && (
-              <Link
-                href={`/messages?userId=${post.user_id}`}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full hover:bg-[#F3EEFC] text-[#78716C] hover:text-[#6D28D9] transition-all cursor-pointer active:scale-90"
-                title="Chat with Author"
-              >
-                <MessageCircle size={19} />
-                <span className="text-[12px] font-bold">Chat</span>
-              </Link>
+            {/* Message with author */}
+            {!isOwnPost && post.user_id && (
+              <MessagePillButton
+                targetUserId={post.user_id}
+                targetName={post.author_name}
+                currentUserId={currentUserId}
+                size="md"
+              />
             )}
 
             {/* Share */}
@@ -292,7 +291,7 @@ export default function PostCardClient({ post, initialIsLiked = false, currentUs
                 e.stopPropagation();
                 handleShare();
               }}
-              className="p-1.5 rounded-full hover:bg-[#FAFAF8] text-[#78716C] hover:text-[#6D28D9] transition-colors cursor-pointer active:scale-90"
+              className="p-1.5 rounded-full hover:bg-[#FAFAF8] text-[#78716C] hover:text-[var(--accent)] transition-colors cursor-pointer active:scale-90"
               title="Share"
             >
               <Share2 size={19} />

@@ -16,6 +16,8 @@ const inter = Inter({
   weight: ['400', '500', '600', '700', '800', '900'],
 });
 import { UserProvider } from '../components/providers/UserProvider';
+import { ThemeProvider } from '../components/providers/ThemeProvider';
+import ThemeSelectorModal from '../components/ThemeSelectorModal';
 import { VoiceCallProvider } from '../components/providers/VoiceCallProvider';
 import FCMInitializer from '../components/FCMInitializer';
 import PWAInstallBanner from '../components/PWAInstallBanner';
@@ -33,7 +35,7 @@ export const viewport = {
   userScalable: false,
   viewportFit: 'cover',
   interactiveWidget: 'resizes-content',
-  themeColor: '#6D28D9',
+  themeColor: 'var(--accent)',
 };
 
 export const metadata = {
@@ -123,6 +125,8 @@ export default async function RootLayout({ children }) {
 
     const { cookies } = await import('next/headers');
     const cookieStore = await cookies();
+    const initialMode = cookieStore.get('meova_mode')?.value || 'light';
+    const initialAccent = cookieStore.get('meova_accent')?.value || 'orange';
 
     const fetchedUser = await getUserWithRole();
 
@@ -131,14 +135,14 @@ export default async function RootLayout({ children }) {
       if (fetchedUser.isBlocked) {
         // Render blocked UI entirely, overriding the rest of the layout below
         return (
-          <html lang="en">
+          <html lang="en" data-mode={initialMode} data-accent={initialAccent} data-theme={`${initialMode}-${initialAccent}`} suppressHydrationWarning>
             <head>
               <meta name="google-site-verification" content="69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w" />
               <link rel="manifest" href="/manifest.json" />
               <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-content" />
-              <meta name="theme-color" content="#ffffff" />
+              <meta name="theme-color" content={initialMode === 'dark' ? '#0D0D0D' : '#F05A00'} />
             </head>
-            <body style={{ background: '#f8fafc', minHeight: '100dvh', margin: 0, padding: 0 }}>
+            <body style={{ background: 'var(--bg-base)', minHeight: '100dvh', margin: 0, padding: 0 }}>
               <BlockedPage />
             </body>
           </html>
@@ -166,19 +170,53 @@ export default async function RootLayout({ children }) {
     console.error('[RootLayout] Firebase Admin init error:', err?.message);
   }
 
+  const { cookies: nextCookies } = await import('next/headers');
+  const cookieStore = await nextCookies();
+  const initialMode = cookieStore.get('meova_mode')?.value || 'light';
+  const initialAccent = cookieStore.get('meova_accent')?.value || 'orange';
+
   return (
-    <html lang="en" className={inter.variable} data-theme="light" style={{ colorScheme: 'light' }}>
+    <html
+      lang="en"
+      className={inter.variable}
+      data-mode={initialMode}
+      data-accent={initialAccent}
+      data-theme={`${initialMode}-${initialAccent}`}
+      suppressHydrationWarning
+    >
         <head>
+          {/* ── Zero-FOUC Instant Theme Initialization (Runs before body parse) ── */}
+          <script
+            id="theme-zero-fouc"
+            dangerouslySetInnerHTML={{
+              __html: `(function(){
+                try {
+                  var m = localStorage.getItem('meova_mode') || (document.cookie.match(/(?:^|; )meova_mode=([^;]+)/) || [])[1] || 'light';
+                  var a = localStorage.getItem('meova_accent') || (document.cookie.match(/(?:^|; )meova_accent=([^;]+)/) || [])[1] || 'orange';
+                  var doc = document.documentElement;
+                  doc.setAttribute('data-mode', m);
+                  doc.setAttribute('data-accent', a);
+                  doc.setAttribute('data-theme', m + '-' + a);
+                  var links = document.querySelectorAll("link[rel*='icon']");
+                  links.forEach(function(l) {
+                    if (l.getAttribute('sizes') === '48x48' || l.getAttribute('type') === 'image/x-icon') {
+                      l.href = '/favicon-' + a + '.png';
+                    }
+                  });
+                } catch(e) {}
+              })();`,
+            }}
+          />
           <meta name="google-site-verification" content="69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
-          <meta name="theme-color" content="#6D28D9" />
+          <meta name="theme-color" content={initialMode === 'dark' ? '#0D0D0D' : (initialAccent === 'pink' ? '#FF2E63' : initialAccent === 'purple' ? '#7C3AED' : initialAccent === 'emerald' ? '#10B981' : initialAccent === 'blue' ? '#2563EB' : '#F05A00')} />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
           <meta name="apple-mobile-web-app-title" content="Meova" />
           <link rel="manifest" href="/manifest.json" />
-          <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-          <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+          <link rel="icon" type="image/x-icon" href={`/favicon-${initialAccent}.png`} />
+          <link rel="icon" type="image/png" sizes="48x48" href={`/favicon-${initialAccent}.png`} />
           <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
           <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
           <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -343,32 +381,36 @@ export default async function RootLayout({ children }) {
         </head>
         <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh', fontFamily: "var(--font-inter), 'Inter', sans-serif" }}>
           <TopProgressBar />
-          <GoogleAuthProviderWrapper>
-            <UserProvider initialUser={user} initialWallet={user?.wallet} initialPeople={people}>
-              <VoiceCallProvider>
-                {/* FCM Push Notification initializer — client-only, non-rendering */}
-                <FCMInitializer />
-                {/* PWA Install Banner — shows when browser supports it */}
-                <PWAInstallBanner />
-                {/* In-App Realtime Push Banner — custom Meova UI instead of Chrome native alert */}
-                <InAppNotificationBanner />
-                {/* Notification permission — friendly prompt shown once after login */}
-                <NotificationPermissionPrompt user={user} />
-                <div className="flex min-h-screen">
-                  <Sidebar user={user} />
+          <ThemeProvider initialMode={initialMode} initialAccent={initialAccent}>
+            <GoogleAuthProviderWrapper>
+              <UserProvider initialUser={user} initialWallet={user?.wallet} initialPeople={people}>
+                <VoiceCallProvider>
+                  {/* Global 1-Click Theme Customizer Modal */}
+                  <ThemeSelectorModal />
+                  {/* FCM Push Notification initializer — client-only, non-rendering */}
+                  <FCMInitializer />
+                  {/* PWA Install Banner — shows when browser supports it */}
+                  <PWAInstallBanner />
+                  {/* In-App Realtime Push Banner — custom Meova UI instead of Chrome native alert */}
+                  <InAppNotificationBanner />
+                  {/* Notification permission — friendly prompt shown once after login */}
+                  <NotificationPermissionPrompt user={user} />
+                  <div className="flex min-h-screen">
+                    <Sidebar user={user} />
 
-                  {/* Network wrapper shows Offline screen if connection lost */}
-                  <NetworkWrapper>
-                    <MainContentWrapper user={user}>
-                      {children}
-                    </MainContentWrapper>
-                  </NetworkWrapper>
-                  
-                  <RightPanel people={people} upcomingEvents={events} />
-                </div>
-              </VoiceCallProvider>
-            </UserProvider>
-          </GoogleAuthProviderWrapper>
+                    {/* Network wrapper shows Offline screen if connection lost */}
+                    <NetworkWrapper>
+                      <MainContentWrapper user={user}>
+                        {children}
+                      </MainContentWrapper>
+                    </NetworkWrapper>
+                    
+                    <RightPanel people={people} upcomingEvents={events} />
+                  </div>
+                </VoiceCallProvider>
+              </UserProvider>
+            </GoogleAuthProviderWrapper>
+          </ThemeProvider>
 
         <Script id="pwa-install-handler" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
           window.addEventListener('beforeinstallprompt', function(e) {

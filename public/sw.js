@@ -1,8 +1,8 @@
 // Meova Service Worker
-// Strategy: Network-first for API routes, Cache-first for static assets
-// FCM & WebPush: Background push notifications support with dynamic category theming
+// Strategy: Network-first for dynamic routes, Stale-While-Revalidate for static shell assets.
+// Offline Fallback support for PWA / Android WebView.
 
-const CACHE_VERSION = '2026-09-03T20:08'; // ← updated on deploy
+const CACHE_VERSION = '2026-09-05T11:38'; // ← updated on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
@@ -17,101 +17,6 @@ const STATIC_ASSETS = [
   '/logo.png',
   '/offline',
 ];
-
-// ── Standard Web Push: Background Push Notifications ─────────────────────────
-self.addEventListener('push', (event) => {
-  let data = {};
-  try {
-    data = event.data ? event.data.json() : {};
-  } catch (e) {
-    data = { title: 'Meova', body: event.data ? event.data.text() : '' };
-  }
-
-  const notifType = (data.type || '').toLowerCase();
-  const isCall = notifType === 'incoming_call' || notifType === 'call' || !!data.isCall || data.tag?.startsWith('incoming-call');
-  const title = data.title || (isCall ? 'Incoming Campus Voice Call' : 'Meova');
-  const body = data.body || '';
-  const link = data.url || data.link || (isCall ? '/bookings' : '/');
-
-  // Avatar / Thumbnail resolution: prefer real sender photo over app icon
-  const avatarPhoto = data.photo || data.senderPhoto || data.callerPhoto || data.icon || '/icon-192.png';
-
-  // 1. INCOMING CALL NOTIFICATION
-  if (isCall) {
-    const callOptions = {
-      body: body || 'Peer is calling you for your campus meetup...',
-      icon: avatarPhoto,
-      badge: '/badge.png',
-      tag: `call-${data.bookingId || 'active'}`,
-      renotify: true,
-      requireInteraction: true,
-      vibrate: [500, 250, 500, 250, 500, 250, 500, 250, 500],
-      data: { url: link, isCall: true, bookingId: data.bookingId },
-      actions: [
-        { action: 'accept', title: 'Accept Call' },
-        { action: 'decline', title: 'Decline' },
-      ],
-    };
-    event.waitUntil(self.registration.showNotification(title, callOptions));
-    return;
-  }
-
-  // 2. CATEGORY-SPECIFIC NOTIFICATIONS
-  let actions = [{ action: 'open', title: 'Open Meova' }];
-  let vibratePattern = [150, 80, 150];
-
-  if (notifType === 'message' || notifType === 'chat') {
-    actions = [{ action: 'reply', title: 'Open Chat' }];
-    vibratePattern = [200, 100, 200];
-  } else if (notifType === 'booking' || notifType === 'meetup') {
-    actions = [{ action: 'view', title: 'View Meetup' }];
-    vibratePattern = [250, 100, 150];
-  } else if (notifType === 'sparks' || notifType === 'wallet' || notifType === 'tip') {
-    actions = [{ action: 'view', title: 'View Balance' }];
-    vibratePattern = [100, 80, 100, 80, 100];
-  } else if (notifType === 'gig' || notifType === 'job') {
-    actions = [{ action: 'view', title: 'View Gig' }];
-  } else if (notifType === 'circle' || notifType === 'community') {
-    actions = [{ action: 'view', title: 'View Circle' }];
-  }
-
-  const options = {
-    body,
-    icon: avatarPhoto,
-    badge: '/badge.png',
-    tag: data.tag || `meova-${notifType || 'gen'}-${Date.now()}`,
-    renotify: true,
-    vibrate: vibratePattern,
-    data: { url: link, type: notifType },
-    actions,
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-// ── Notification click handler ────────────────────────────────────────────────
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  if (event.action === 'decline' || event.action === 'dismiss') return;
-
-  const url = event.notification.data?.url || '/';
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // If app is already open, focus it and navigate
-      for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
-          client.focus();
-          client.navigate(url);
-          return;
-        }
-      }
-      // Otherwise open a new window
-      if (clients.openWindow) return clients.openWindow(url);
-    })
-  );
-});
 
 // ── Install: pre-cache critical shell assets ─────────────────────────────────
 self.addEventListener('install', (event) => {
@@ -182,7 +87,6 @@ self.addEventListener('fetch', (event) => {
           // 1. Check if cached shell exists
           const cachedResponse = await caches.match(request);
           if (cachedResponse) {
-            // Revalidate in background to keep data fresh
             fetch(request)
               .then(async (networkRes) => {
                 if (networkRes && networkRes.ok) {

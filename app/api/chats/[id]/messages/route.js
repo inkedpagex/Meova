@@ -10,43 +10,55 @@ export async function GET(request, { params }) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { id: chatId } = await params;
+    const { searchParams } = new URL(request.url);
+    const limitParam = parseInt(searchParams.get('limit') || '20', 10);
+    const limit = Math.min(Math.max(limitParam, 5), 50);
     
-    // Authorization check: Verify user is a participant
-    const { data: chatData, error: chatErr } = await supabaseAdmin
-      .from('chats')
-      .select('participants')
-      .eq('id', chatId)
-      .maybeSingle();
+    // Fast Authorization check
+    const directParts = chatId.split('_');
+    const isDirectChat = directParts.length === 2 && directParts.includes(user.uid);
 
-    if (chatErr) {
-      console.error('[GET /api/chats/[id]/messages chat check]', chatErr.message);
-      return NextResponse.json({ messages: [] });
+    if (!isDirectChat) {
+      const { data: chatData, error: chatErr } = await supabaseAdmin
+        .from('chats')
+        .select('participants')
+        .eq('id', chatId)
+        .maybeSingle();
+
+      if (chatErr) {
+        console.error('[GET /api/chats/[id]/messages chat check]', chatErr.message);
+        return NextResponse.json({ messages: [] });
+      }
+
+      if (chatData && Array.isArray(chatData.participants) && !chatData.participants.includes(user.uid)) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
     }
 
-    if (chatData && Array.isArray(chatData.participants) && !chatData.participants.includes(user.uid)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
+    // Fetch the latest N messages quickly
     const { data: messages, error } = await supabaseAdmin
       .from('chat_messages')
-      .select('*')
+      .select('id, sender_id, text, status, created_at')
       .eq('chat_id', chatId)
-      .order('created_at', { ascending: true })
-      .limit(100);
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
     if (error) {
       console.error('[GET /api/chats/[id]/messages]', error.message);
       return NextResponse.json({ messages: [] });
     }
 
-    const formattedMessages = (messages || []).map(msg => ({
-      id: msg.id,
-      senderId: msg.sender_id,
-      text: msg.text,
-      status: msg.status || 'sent',
-      timestamp: msg.created_at ? new Date(msg.created_at).getTime() : Date.now(),
-      created_at: msg.created_at,
-    }));
+    const rawList = messages || [];
+    const formattedMessages = rawList
+      .reverse()
+      .map(msg => ({
+        id: msg.id,
+        senderId: msg.sender_id,
+        text: msg.text,
+        status: msg.status || 'sent',
+        timestamp: msg.created_at ? new Date(msg.created_at).getTime() : Date.now(),
+        created_at: msg.created_at,
+      }));
 
     return NextResponse.json({ messages: formattedMessages });
   } catch (err) {

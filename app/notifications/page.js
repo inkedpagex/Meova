@@ -15,7 +15,7 @@ const FILTERS = ['All', 'Bookings', 'Gigs', 'Sparks', 'Reviews', 'Social'];
 function NotifIcon({ type, photo, name, unread }) {
   if (photo) {
     return (
-      <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-white ring-1 ring-[#E7E5E4] shadow-[0_2px_8px_rgba(28,25,23,0.06)] bg-[#F3EEFC]">
+      <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-[var(--bg-surface)] ring-1 ring-[var(--border-hairline)] shadow-[0_2px_8px_rgba(28,25,23,0.06)] bg-[var(--accent-tint-10)]">
         <img
           src={photo}
           alt=""
@@ -33,24 +33,24 @@ function NotifIcon({ type, photo, name, unread }) {
   const t = (type || '').toLowerCase();
   
   if (t.includes('booking') || t.includes('meet')) {
-    return <div className={`${base} ${unread ? 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><BookOpen size={17} strokeWidth={2.2} /></div>;
+    return <div className={`${base} ${unread ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><BookOpen size={17} strokeWidth={2.2} /></div>;
   }
   if (t.includes('spark') || t.includes('wallet') || t.includes('tip') || t.includes('refund')) {
-    return <div className={`${base} ${unread ? 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Zap size={17} className="fill-current" /></div>;
+    return <div className={`${base} ${unread ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Zap size={17} className="fill-current" /></div>;
   }
   if (t.includes('presence') || t.includes('online')) {
     return <div className={`${base} bg-emerald-50 text-emerald-600 border-emerald-200`}> <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" /> </div>;
   }
   if (t.includes('review') || t.includes('rate') || t.includes('rating')) {
-    return <div className={`${base} ${unread ? 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Star size={17} className="fill-current" /></div>;
+    return <div className={`${base} ${unread ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Star size={17} className="fill-current" /></div>;
   }
   if (t.includes('dispute') || t.includes('flag')) {
     return <div className={`${base} bg-rose-50 text-rose-600 border-rose-200`}><AlertTriangle size={17} strokeWidth={2.2} /></div>;
   }
   if (t.includes('circle') || t.includes('social') || t.includes('community')) {
-    return <div className={`${base} ${unread ? 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Users size={17} strokeWidth={2.2} /></div>;
+    return <div className={`${base} ${unread ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Users size={17} strokeWidth={2.2} /></div>;
   }
-  return <div className={`${base} ${unread ? 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Bell size={17} strokeWidth={2.2} /></div>;
+  return <div className={`${base} ${unread ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Bell size={17} strokeWidth={2.2} /></div>;
 }
 
 function timeAgo(iso) {
@@ -127,10 +127,10 @@ export default function NotificationsPage() {
 
   const getCategoryBadge = (type) => {
     const t = (type || '').toLowerCase();
-    if (t.includes('booking') || t.includes('meet')) return { label: 'Meetup', cls: 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' };
-    if (t.includes('spark') || t.includes('wallet') || t.includes('tip') || t.includes('refund')) return { label: 'Sparks', cls: 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' };
-    if (t.includes('review') || t.includes('rate')) return { label: 'Review', cls: 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' };
-    if (t.includes('circle') || t.includes('community')) return { label: 'Circle', cls: 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' };
+    if (t.includes('booking') || t.includes('meet')) return { label: 'Meetup', cls: 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' };
+    if (t.includes('spark') || t.includes('wallet') || t.includes('tip') || t.includes('refund')) return { label: 'Sparks', cls: 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' };
+    if (t.includes('review') || t.includes('rate')) return { label: 'Review', cls: 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' };
+    if (t.includes('circle') || t.includes('community')) return { label: 'Circle', cls: 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' };
     if (t.includes('dispute') || t.includes('flag')) return { label: 'Alert', cls: 'bg-rose-50 text-rose-700 border-rose-200' };
     return { label: 'Activity', cls: 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]' };
   };
@@ -164,10 +164,10 @@ export default function NotificationsPage() {
     return (
       <div 
         onClick={() => handleNotifClick(n)}
-        className={`p-4 rounded-[16px] flex items-start gap-3.5 transition-all cursor-pointer hover:shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-[0.99] border ${
+        className={`p-4 rounded-[16px] flex items-start gap-3.5 transition-all cursor-pointer hover:shadow-xs active:scale-[0.99] border ${
           isUnread 
-            ? 'bg-[#F3EEFC] border-[#E4D9F7] shadow-[0_2px_8px_rgba(28,25,23,0.06)]' 
-            : 'bg-white border-[#E7E5E4] hover:border-[#6D28D9] shadow-[0_2px_8px_rgba(28,25,23,0.06)]'
+            ? 'bg-[var(--accent-tint-10)] border-[var(--accent-tint-20)] shadow-xs' 
+            : 'bg-white border-[#E7E5E4] hover:border-[var(--accent)] shadow-xs'
         }`}
       >
         <NotifIcon type={n.type} photo={n.sender_photo || n.photo} name={n.sender_name || n.title} unread={isUnread} />
@@ -183,20 +183,20 @@ export default function NotificationsPage() {
           </div>
           <p className="text-[13px] text-[#78716C] font-normal leading-relaxed line-clamp-2">{n.body || n.message}</p>
         </div>
-        {isUnread && <span className="w-2 h-2 rounded-full bg-[#6D28D9] flex-shrink-0 shadow-[0_2px_8px_rgba(28,25,23,0.06)] mt-2" />}
+        {isUnread && <span className="w-2 h-2 rounded-full bg-[var(--accent)] flex-shrink-0 shadow-xs mt-2" />}
       </div>
     );
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen px-4 py-6 max-w-[540px] mx-auto pb-24 space-y-4 select-none">
-        <div className="flex items-center gap-3 mb-5">
-          <Skeleton variant="rectangular" className="w-10 h-10 rounded-[16px]" />
-          <Skeleton variant="text" className="w-36 h-5" />
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} variant="rectangular" className="h-9 w-20 rounded-full flex-shrink-0" />)}
+      <div className="min-h-screen px-4 py-6 max-w-[540px] mx-auto pb-24 space-y-4">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-full bg-[var(--border-hairline)] animate-pulse" />
+          <div className="space-y-1.5">
+            <div className="w-32 h-5 bg-white rounded-md animate-pulse" />
+            <div className="w-48 h-3 bg-white rounded-md animate-pulse" />
+          </div>
         </div>
         <div className="space-y-2.5 pt-2">
           {[1, 2, 3, 4].map(i => (
@@ -224,7 +224,7 @@ export default function NotificationsPage() {
               if (typeof window !== 'undefined' && window.history.length > 1) router.back();
               else router.push('/');
             }}
-            className="p-2.5 rounded-full bg-white border border-[#E7E5E4] text-[#1C1917] hover:bg-[#FAFAF8] cursor-pointer transition-all active:scale-95 shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
+            className="p-2.5 rounded-full bg-white border border-[#E7E5E4] text-[#1C1917] hover:bg-[#F5F5F4] cursor-pointer transition-all active:scale-95 shadow-xs"
           >
             <ArrowLeft size={16} strokeWidth={2.5} />
           </button>
@@ -241,10 +241,10 @@ export default function NotificationsPage() {
           <button 
             key={f} 
             onClick={() => setFilter(f)}
-            className={`flex-shrink-0 px-4 py-2 rounded-full text-[12px] font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-[0_2px_8px_rgba(28,25,23,0.06)] ${
+            className={`flex-shrink-0 px-4 py-2 rounded-full text-[12px] font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-xs ${
               filter === f
-                ? 'bg-[#6D28D9] text-white border border-[#6D28D9]'
-                : 'bg-white text-[#78716C] border border-[#E7E5E4] hover:bg-[#FAFAF8]'
+                ? 'bg-[var(--accent)] text-white border border-[var(--accent)]'
+                : 'bg-white text-[#78716C] border border-[#E7E5E4] hover:bg-[#F5F5F4]'
             }`}
           >
             {f}
@@ -256,8 +256,8 @@ export default function NotificationsPage() {
       {todayNotifs.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-1.5 mb-2.5 px-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#6D28D9]" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#6D28D9]">Today</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--accent)]">Today</span>
           </div>
           <div className="space-y-2">
             {todayNotifs.map(n => <NotifRow key={n.id} n={n} />)}
@@ -287,8 +287,8 @@ export default function NotificationsPage() {
 
       {/* Empty state */}
       {filtered.length === 0 && (
-        <div className="bg-white border border-[#E7E5E4] rounded-[16px] p-8 text-center space-y-4 my-8 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
-          <div className="w-14 h-14 rounded-full bg-[#F3EEFC] text-[#6D28D9] flex items-center justify-center mx-auto border border-[#E4D9F7] shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+        <div className="bg-white border border-[#E7E5E4] rounded-[16px] p-8 text-center space-y-4 my-8 shadow-xs">
+          <div className="w-14 h-14 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center mx-auto border border-[var(--accent-tint-20)] shadow-xs">
             <Bell size={24} strokeWidth={2.2} />
           </div>
           <div>
@@ -299,7 +299,7 @@ export default function NotificationsPage() {
           </div>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#6D28D9] hover:bg-[#5B21B6] text-white rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-95"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-xs active:scale-95"
           >
             <Compass size={14} />
             <span>Explore Campus Feed</span>

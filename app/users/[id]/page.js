@@ -91,7 +91,7 @@ export default async function UserProfilePage({ params }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center p-6">
         <p className="text-[#78716C] mb-4 text-sm font-medium">Profile not found.</p>
-        <Link href="/" className="px-5 py-2.5 rounded-full bg-[#6D28D9] text-white font-bold text-xs uppercase tracking-wider">
+        <Link href="/" className="px-5 py-2.5 rounded-full bg-[var(--accent)] text-white font-bold text-xs uppercase tracking-wider">
           Go Home
         </Link>
       </div>
@@ -135,15 +135,15 @@ export default async function UserProfilePage({ params }) {
     <div className="max-w-[640px] mx-auto px-4 py-2 space-y-4 pb-28">
 
       {/* ── TOP NAV BAR ─────────────────────── */}
-      <div className="flex items-center justify-between py-2 border-b border-[#E7E5E4]">
+      <div className="flex items-center justify-between py-2 border-b border-[var(--border-hairline)]">
         <Link 
           href="/" 
-          className="p-2 -ml-2 rounded-full hover:bg-[#F3EEFC] transition-colors text-[#1C1917] cursor-pointer"
+          className="p-2 -ml-2 rounded-full hover:bg-[var(--accent-tint-10)] transition-colors text-[var(--text-primary)] cursor-pointer"
           title="Back to feed"
         >
           <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
         </Link>
-        <div className="flex items-center gap-1.5 font-bold text-base text-[#1C1917] tracking-tight">
+        <div className="flex items-center gap-1.5 font-bold text-base text-[var(--text-primary)] tracking-tight">
           <span>@{profile.username || profile.full_name?.toLowerCase().replace(/\s+/g, '') || 'student'}</span>
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
         </div>
@@ -154,12 +154,12 @@ export default async function UserProfilePage({ params }) {
         )}
       </div>
 
-      {/* ── PROFILE HEADER CARD (Card Type 3 Spec) ─────────────────────── */}
-      <div className="bg-white rounded-[20px] p-6 border border-[#E7E5E4] shadow-[0_2px_8px_rgba(28,25,23,0.06)] flex flex-col items-center text-center relative overflow-hidden">
+      {/* ── PROFILE HEADER CARD ─────────────────────── */}
+      <div className="bg-[var(--bg-surface)] rounded-[28px] p-6 border border-[var(--border-hairline)] shadow-xs flex flex-col items-center text-center relative overflow-hidden">
         
-        {/* 96px Avatar with 3px Accent Ring */}
+        {/* 96px Avatar with Accent Ring */}
         <div className="relative mb-4 flex items-center justify-center">
-          <div className="w-24 h-24 rounded-full p-1 border-[3px] border-[#6D28D9] bg-white flex items-center justify-center flex-shrink-0">
+          <div className="w-24 h-24 rounded-full p-1 border-[3px] border-[var(--accent)] bg-[var(--bg-surface)] flex items-center justify-center flex-shrink-0 shadow-md">
             <ZoomableProfileAvatar
               src={avatarUrl(profile)}
               alt={profile.full_name || 'User'}
@@ -173,20 +173,20 @@ export default async function UserProfilePage({ params }) {
         </div>
 
         {/* Name */}
-        <h1 className="text-[22px] font-bold text-[#1C1917] tracking-tight">
+        <h1 className="text-[22px] font-bold text-[var(--text-primary)] tracking-tight">
           {profile.full_name || 'Student'}
         </h1>
 
         {/* Handle + Badges */}
         <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
           {profile.username && (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium bg-[#FAFAF8] text-[#78716C] border border-[#E7E5E4]">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium bg-[var(--bg-base)] text-[var(--text-secondary)] border border-[var(--border-hairline)]">
               @{profile.username}
             </span>
           )}
           <HostBadge role={profile.role} size="sm" />
           {profile.isLiveOnCampus && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Live Near You
             </span>
@@ -194,17 +194,17 @@ export default async function UserProfilePage({ params }) {
         </div>
 
         {/* Year · Branch */}
-        <p className="text-[14px] font-medium text-[#78716C] mt-2">
+        <p className="text-[14px] font-semibold text-[var(--text-secondary)] mt-2">
           {yearLabel} · {branchLabel}
         </p>
 
         {/* University */}
-        <p className="text-[14px] font-medium text-[#78716C] mt-0.5">
+        <p className="text-[13px] font-medium text-[var(--text-secondary)] mt-0.5">
           {universityLabel}
         </p>
 
         {/* Bio */}
-        <p className="text-[14px] leading-relaxed mt-3 text-[#78716C] max-w-[90%] italic">
+        <p className="text-[14px] leading-relaxed mt-3 text-[var(--text-secondary)] max-w-[90%] italic">
           {profile.bio || 'No bio yet.'}
         </p>
 
@@ -216,7 +216,7 @@ export default async function UserProfilePage({ params }) {
                 href={`https://instagram.com/${profile.instagram.replace(/^@/, '')}`} 
                 target="_blank" 
                 rel="noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F3EEFC] text-[11px] font-bold text-[#6D28D9] hover:bg-[#E4D9F7] transition-colors border border-[#E4D9F7]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent-tint-10)] text-[11px] font-bold text-[var(--accent)] hover:bg-[var(--accent-tint-20)] transition-colors border border-[var(--accent-tint-20)]"
               >
                 <InstagramIcon size={13} />
                 <span>@{profile.instagram.replace(/^@/, '')}</span>
@@ -227,7 +227,7 @@ export default async function UserProfilePage({ params }) {
                 href={profile.linkedin.startsWith('http') ? profile.linkedin : `https://linkedin.com/in/${profile.linkedin}`} 
                 target="_blank" 
                 rel="noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-[11px] font-bold text-blue-600 hover:bg-blue-100 transition-colors border border-blue-100"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 text-[11px] font-bold text-blue-500 hover:bg-blue-500/20 transition-colors border border-blue-500/20"
               >
                 <Linkedin size={13} />
                 <span>LinkedIn</span>
@@ -238,7 +238,7 @@ export default async function UserProfilePage({ params }) {
                 href={profile.github.startsWith('http') ? profile.github : `https://github.com/${profile.github.replace(/^@/, '')}`} 
                 target="_blank" 
                 rel="noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FAFAF8] text-[11px] font-bold text-[#1C1917] hover:bg-[#E7E5E4] transition-colors border border-[#E7E5E4]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg-base)] text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--accent-tint-10)] transition-colors border border-[var(--border-hairline)]"
               >
                 <Github size={13} />
                 <span>GitHub</span>
@@ -248,24 +248,24 @@ export default async function UserProfilePage({ params }) {
         )}
 
         {/* Stats Counters */}
-        <div className="w-full grid grid-cols-3 gap-2 py-4 my-4 border-y border-[#E7E5E4]">
+        <div className="w-full grid grid-cols-3 gap-2 py-4 my-4 border-y border-[var(--border-hairline)]">
           <div>
-            <span className="block text-lg font-bold text-[#1C1917] leading-tight">
+            <span className="block text-lg font-bold text-[var(--text-primary)] leading-tight">
               {completedMeets}
             </span>
-            <span className="text-[11px] font-bold text-[#78716C] uppercase tracking-wide">Meets</span>
+            <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">Meets</span>
           </div>
           <div>
-            <span className="block text-lg font-bold text-[#1C1917] leading-tight flex items-center justify-center gap-1">
+            <span className="block text-lg font-bold text-[var(--text-primary)] leading-tight flex items-center justify-center gap-1">
               {avgRating || 'New'} <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 inline" />
             </span>
-            <span className="text-[11px] font-bold text-[#78716C] uppercase tracking-wide">Rating</span>
+            <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">Rating</span>
           </div>
           <div>
-            <span className="block text-lg font-bold text-[#6D28D9] leading-tight flex items-center justify-center gap-1">
-              {hostRate} <Zap className="w-3.5 h-3.5 fill-current text-[#6D28D9] inline" />
+            <span className="block text-lg font-bold text-[var(--accent)] leading-tight flex items-center justify-center gap-1">
+              {hostRate} <Zap className="w-3.5 h-3.5 fill-current text-[var(--accent)] inline" />
             </span>
-            <span className="text-[11px] font-bold text-[#78716C] uppercase tracking-wide">Rate</span>
+            <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wide">Rate</span>
           </div>
         </div>
 
@@ -299,7 +299,7 @@ export default async function UserProfilePage({ params }) {
                   />
                 </div>
               ) : (
-                <div className="flex-1 py-3 rounded-full text-xs font-bold text-center text-rose-600 bg-rose-50 border border-rose-100">
+                <div className="flex-1 py-3 rounded-full text-xs font-bold text-center text-rose-600 bg-rose-500/10 border border-rose-500/20">
                   Currently Offline
                 </div>
               )}
@@ -312,40 +312,14 @@ export default async function UserProfilePage({ params }) {
         ) : (
           <Link 
             href="/profile" 
-            className="w-full h-12 rounded-full text-[14px] font-bold bg-[#6D28D9] hover:bg-[#5B21B6] text-white flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer uppercase tracking-wider"
+            className="w-full h-12 rounded-full text-[14px] font-bold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer uppercase tracking-wider"
           >
             Edit Profile
           </Link>
         )}
       </div>
 
-      {/* ── INTERESTS SUB-CARD ─────────────────────── */}
-      <div className="rounded-[14px] p-4 bg-white border border-[#E7E5E4] shadow-xs">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[12px] font-bold uppercase tracking-wider text-[#78716C]">
-            Interests &amp; Skills
-          </span>
-          <span className="text-[11px] font-bold text-[#6D28D9]">
-            {interests.length} topics
-          </span>
-        </div>
-        {interests.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {interests.map((tag) => (
-              <span 
-                key={tag} 
-                className="px-3 py-1 rounded-full text-[13px] font-medium bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <p className="text-xs text-[#A8A29E] italic">No interests listed yet.</p>
-        )}
-      </div>
-
-      {/* ── HIGHLIGHTS (INTERESTS CIRCLES + SUGGESTED STUDENTS) ── */}
+      {/* ── HIGHLIGHTS & INTERESTS INTERACTIVE CAPSULES (WITH PEER EXPLORATION) ── */}
       <ProfileHighlightsSection 
         interests={interests} 
         allUsers={allUsers} 
@@ -353,10 +327,10 @@ export default async function UserProfilePage({ params }) {
       />
 
       {/* ── CAMPUS MOMENTS GALLERY ───────────────── */}
-      <section className="bg-white rounded-[16px] p-5 border border-[#E7E5E4] shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+      <section className="bg-[var(--bg-surface)] rounded-[28px] p-5 border border-[var(--border-hairline)] shadow-xs">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[11px] font-bold text-[#A8A29E] tracking-[0.14em] uppercase flex items-center gap-2">
-            <Camera className="w-3.5 h-3.5 text-[#6D28D9]" />
+          <h2 className="text-[11px] font-bold text-[var(--text-secondary)] tracking-[0.14em] uppercase flex items-center gap-2">
+            <Camera className="w-3.5 h-3.5 text-[var(--accent)]" />
             Campus Moments ({userPosts.length})
           </h2>
         </div>
@@ -370,7 +344,7 @@ export default async function UserProfilePage({ params }) {
               return (
                 <div
                   key={post.id}
-                  className="group relative rounded-[16px] overflow-hidden border border-[#E7E5E4] bg-[#FAFAF8] flex flex-col justify-between aspect-square transition-all duration-200 hover:shadow-[0_4px_16px_rgba(28,25,23,0.08)] hover:border-[#E4D9F7]"
+                  className="group relative rounded-[16px] overflow-hidden border border-[#E7E5E4] bg-[#FAFAF8] flex flex-col justify-between aspect-square transition-all duration-200 hover:shadow-[0_4px_16px_rgba(28,25,23,0.08)] hover:border-[var(--accent-tint-20)]"
                 >
                   {hasImage ? (
                     <>

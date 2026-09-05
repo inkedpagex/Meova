@@ -173,7 +173,7 @@ export default function WithdrawPage() {
                     style={{ width: '100%', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 12, padding: '12px 14px', color: 'var(--text-primary)', fontSize: 14, outline: 'none' }}
                   />
                   <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
-                    <Zap size={14} className="fill-current text-[#6D28D9]" />
+                    <Zap size={14} className="fill-current text-[var(--accent)]" />
                   </span>
                 </div>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5, fontWeight: '700' }}>

@@ -110,7 +110,7 @@ export default function PendingCommunitiesClient() {
                       <span>Host: {c.host_name}</span>
                     </div>
                     <div>Platform: <span className="text-[#1C1917]">{c.platform}</span></div>
-                    <div>Price: <span className={c.isPaid ? 'text-[#6D28D9]' : 'text-emerald-600'}>{c.isPaid ? `${c.price} Sparks` : 'Free'}</span></div>
+                    <div>Price: <span className={c.isPaid ? 'text-[var(--accent)]' : 'text-emerald-600'}>{c.isPaid ? `${c.price} Sparks` : 'Free'}</span></div>
                     <div>Date: {new Date(c.created_at).toLocaleDateString()}</div>
                   </div>
                 </div>

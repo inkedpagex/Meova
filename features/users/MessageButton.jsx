@@ -1,7 +1,7 @@
-﻿'use client';
+'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MessageCircle, Loader2 } from '@/lib/icons';
+import { MessageSquare, Loader2 } from '@/lib/icons';
 import { toast } from '../../lib/toast';
 import { useUserContext } from '../../components/providers/UserProvider';
 
@@ -46,12 +46,12 @@ export default function MessageButton({ targetUid }) {
     <button
       onClick={handleMessage}
       disabled={loading}
-      className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-full text-xs font-bold text-[#1C1917] bg-[#FAFAF8] hover:bg-[#E7E5E4] transition-all active:scale-95 shadow-sm whitespace-nowrap cursor-pointer disabled:opacity-50"
+      className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-full text-xs font-bold text-black bg-white border border-black/10 hover:border-purple-300 hover:bg-purple-50/40 transition-all active:scale-95 shadow-xs hover:shadow-sm whitespace-nowrap cursor-pointer disabled:opacity-50"
     >
       {loading ? (
-        <Loader2 className="w-4 h-4 text-[#6D28D9] flex-shrink-0 animate-spin" />
+        <Loader2 className="w-4 h-4 text-[#7C3AED] flex-shrink-0 animate-spin" />
       ) : (
-        <MessageCircle className="w-4 h-4 text-[#6D28D9] flex-shrink-0" />
+        <MessageSquare className="w-4 h-4 text-[#7C3AED] flex-shrink-0" />
       )}
       {loading ? 'Connecting...' : 'Message'}
     </button>

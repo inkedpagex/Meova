@@ -79,7 +79,7 @@ export default async function SinglePostPage({ params }) {
         <div className="flex items-center justify-between py-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#E7E5E4]/80 text-xs font-bold text-[#78716C] hover:text-[#6D28D9] hover:border-[#E4D9F7] transition-all shadow-2xs"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#E7E5E4]/80 text-xs font-bold text-[#78716C] hover:text-[var(--accent)] hover:border-[var(--accent-tint-20)] transition-all shadow-2xs"
           >
             <ArrowLeft size={14} />
             <span>Campus Feed</span>
@@ -87,7 +87,7 @@ export default async function SinglePostPage({ params }) {
 
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#6D28D9]"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--accent)]"
           >
             <Sparkles size={14} />
             <span>Meova</span>
@@ -103,14 +103,14 @@ export default async function SinglePostPage({ params }) {
         />
 
         {/* Bottom Banner (Neo-Minimalist Flat Surface) */}
-        <div className="p-4 rounded-2xl bg-white border border-black/[0.08] text-black shadow-xs flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white border border-[#E7E5E4]/[0.08] text-[#1C1917] shadow-xs flex items-center justify-between">
           <div>
-            <h4 className="text-xs font-bold text-black">Join your campus network</h4>
-            <p className="text-[10.5px] text-black/60 font-bold">Connect, meet, and collaborate with students.</p>
+            <h4 className="text-xs font-bold text-[#1C1917]">Join your campus network</h4>
+            <p className="text-[10.5px] text-[#1C1917]/60 font-bold">Connect, meet, and collaborate with students.</p>
           </div>
           <Link
             href="/"
-            className="px-4 py-2 rounded-full bg-[#6D28D9] text-white text-xs font-bold hover:bg-[#5B21B6] transition-colors shrink-0 shadow-xs"
+            className="px-4 py-2 rounded-full bg-[var(--accent)] text-white text-xs font-bold hover:bg-[var(--accent-hover)] transition-colors shrink-0 shadow-xs"
           >
             Open Feed
           </Link>

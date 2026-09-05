@@ -17,7 +17,7 @@ export default async function HostPage() {
     return (
       <div className="min-h-screen bg-[#FAFAF8] text-[#1C1917] flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white border border-[#E7E5E4] rounded-[16px] p-8 text-center space-y-4 shadow-xl">
-          <div className="w-16 h-16 rounded-[14px] bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center mx-auto text-[#6D28D9]">
+          <div className="w-16 h-16 rounded-[14px] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center mx-auto text-[var(--accent)]">
             <ShieldAlert size={32} />
           </div>
           <h2 className="text-xl font-bold text-[#1C1917] tracking-tight">Host Privileges Required</h2>

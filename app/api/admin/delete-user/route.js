@@ -63,9 +63,9 @@ export async function POST(request) {
       supabaseAdmin.from('payment_requests').delete().eq('user_id', targetUid),
       supabaseAdmin.from('withdrawals').delete().eq('user_id', targetUid),
 
-      // Notifications, FCM Tokens, OTPs & Blocks
+      // Notifications, Device Tokens, OTPs & Blocks
       supabaseAdmin.from('notifications').delete().eq('user_id', targetUid),
-      supabaseAdmin.from('fcm_tokens').delete().eq('user_id', targetUid),
+      supabaseAdmin.from('device_tokens').delete().eq('user_id', targetUid),
       supabaseAdmin.from('phone_otps').delete().eq('user_id', targetUid),
       supabaseAdmin.from('blocks').delete().eq('blocker_id', targetUid),
       supabaseAdmin.from('blocks').delete().eq('blocked_id', targetUid),

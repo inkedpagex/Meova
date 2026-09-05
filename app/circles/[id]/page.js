@@ -34,7 +34,7 @@ export default async function CircleDetailPage({ params }) {
         <p className="text-xs text-[#78716C] mb-6 font-medium">This campus circle does not exist or may have been removed.</p>
         <Link
           href="/circles"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[12px] bg-[#6D28D9] text-white text-xs font-bold shadow-md hover:bg-[#5B21B6] transition-all"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[12px] bg-[var(--accent)] text-white text-xs font-bold shadow-md hover:bg-[var(--accent-hover)] transition-all"
         >
           <ArrowLeft size={14} /> Back to Communities
         </Link>
@@ -151,7 +151,7 @@ export default async function CircleDetailPage({ params }) {
                   ? (event.rsvps_list || []).some((r) => r.user_id === user.id)
                   : false;
                 return (
-                  <div key={event.id} className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[16px] p-5 hover:border-[var(--accent)]/30 transition-colors group shadow-md">
+                  <div key={event.id} className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-[16px] p-5 hover:border-[var(--accent-tint-20)] transition-colors group shadow-md">
                     <div className="mb-4">
                       <h3 className="text-base font-bold text-[var(--text-primary)] mb-2 leading-snug group-hover:text-[var(--accent)] transition-colors">{event.title}</h3>
                       <p className="text-xs text-[var(--text-secondary)] mb-4 line-clamp-2 leading-relaxed">{event.description}</p>

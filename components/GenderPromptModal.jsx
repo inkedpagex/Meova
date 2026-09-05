@@ -74,8 +74,8 @@ export default function GenderPromptModal({ user }) {
 
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-[#F3EEFC] border border-[#E4D9F7]/80 text-[#6D28D9] flex items-center justify-center mx-auto shadow-2xs">
-            <UserCheck size={24} className="text-[#6D28D9]" />
+          <div className="w-12 h-12 rounded-2xl bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)]/80 text-[var(--accent)] flex items-center justify-center mx-auto shadow-2xs">
+            <UserCheck size={24} className="text-[var(--accent)]" />
           </div>
           <h2 className="text-xl font-bold text-[#1C1917] tracking-tight">
             Quick Profile Update
@@ -87,7 +87,7 @@ export default function GenderPromptModal({ user }) {
 
         {/* Privacy Callout */}
         <div className="p-3.5 rounded-[14px] bg-[#FAFAF8] border border-[#E7E5E4]/80 flex items-start gap-3">
-          <ShieldCheck size={18} className="text-[#6D28D9] flex-shrink-0 mt-0.5" />
+          <ShieldCheck size={18} className="text-[var(--accent)] flex-shrink-0 mt-0.5" />
           <p className="text-[11px] font-semibold text-[#78716C] leading-tight">
             Your gender remains strictly private. It will <strong className="text-[#1C1917]">NEVER</strong> be displayed on your public profile, cards, or shared with other users.
           </p>
@@ -107,7 +107,7 @@ export default function GenderPromptModal({ user }) {
                 onClick={() => { setSelectedGender(g.id); setError(''); }}
                 className={`py-3.5 px-2 rounded-2xl border-2 text-xs font-bold transition-all cursor-pointer ${
                   selectedGender === g.id
-                    ? 'border-[#6D28D9] bg-[#F3EEFC]/60 text-[#6D28D9] shadow-xs scale-[1.02]'
+                    ? 'border-[var(--accent)] bg-[var(--accent-tint-10)]/60 text-[var(--accent)] shadow-xs scale-[1.02]'
                     : 'border-[#E7E5E4] bg-white text-[#78716C] hover:border-[#E7E5E4]'
                 }`}
               >
@@ -123,7 +123,7 @@ export default function GenderPromptModal({ user }) {
           <button
             type="submit"
             disabled={!selectedGender || loading}
-            className="w-full py-4 rounded-2xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-sm transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-4 rounded-2xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-sm transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
           >
             {loading ? (
               <>

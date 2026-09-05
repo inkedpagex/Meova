@@ -1,6 +1,7 @@
 'use client';
+
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Zap, Clock, RefreshCw, Loader2 } from '@/lib/icons';
+import { CheckCircle, XCircle, Zap, Clock, RefreshCw, Loader2, AlertCircle, ShieldCheck } from '@/lib/icons';
 
 function fmt(n) { return (n || 0).toLocaleString('en-IN'); }
 function fmtDate(s) {
@@ -9,17 +10,23 @@ function fmtDate(s) {
 }
 
 const STATUS_STYLE = {
-  pending:  { color: 'text-amber-700',   bg: 'bg-amber-50',   border: 'border-amber-200',   label: 'Pending' },
-  approved: { color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', label: 'Approved' },
-  rejected: { color: 'text-rose-700',    bg: 'bg-rose-50',    border: 'border-rose-200',    label: 'Rejected' },
+  paid_claimed: { color: 'text-amber-800',   bg: 'bg-amber-50',   border: 'border-amber-300',   label: 'Claimed (Review Needed)' },
+  pending:      { color: 'text-blue-800',    bg: 'bg-blue-50',    border: 'border-blue-200',    label: 'Waiting for Payment' },
+  approved:     { color: 'text-emerald-800', bg: 'bg-emerald-50', border: 'border-emerald-200', label: 'Approved' },
+  rejected:     { color: 'text-rose-800',    bg: 'bg-rose-50',    border: 'border-rose-200',    label: 'Rejected' },
+  expired:      { color: 'text-slate-700',   bg: 'bg-slate-100',  border: 'border-slate-300',   label: 'Expired' },
 };
 
 export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState([]);
-  const [filter, setFilter]     = useState('pending'); // 'pending' | 'all'
-  const [loading, setLoading]   = useState('');
-  const [result, setResult]     = useState(null);
+  const [filter, setFilter] = useState('claimed'); // 'claimed' | 'pending' | 'all'
+  const [loading, setLoading] = useState('');
+  const [result, setResult] = useState(null);
   const [fetching, setFetching] = useState(true);
+
+  // Reject modal state
+  const [rejectModalId, setRejectModalId] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const loadPayments = useCallback(async () => {
     try {
@@ -40,81 +47,112 @@ export default function AdminPaymentsPage() {
 
   useEffect(() => {
     loadPayments();
-    const interval = setInterval(loadPayments, 20000);
+    const interval = setInterval(loadPayments, 15000);
     return () => clearInterval(interval);
   }, [loadPayments]);
 
-  async function handleAction(id, approve) {
-    setLoading(id + (approve ? '_approve' : '_reject'));
+  async function handleApprove(id) {
+    setLoading(id + '_approve');
     setResult(null);
-
-    const originalPayments = [...payments];
-    setPayments(prev =>
-      prev.map(p => p.id === id ? { ...p, status: approve ? 'approved' : 'rejected' } : p)
-    );
 
     try {
       const res = await fetch('/api/admin/verify-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, action: approve ? 'approve' : 'reject' })
+        body: JSON.stringify({ id, action: 'approve' })
       });
       const data = await res.json();
       if (res.ok && data.ok) {
-        setResult({ ok: true, message: `Payment ${approve ? 'approved — Sparks credited to user wallet!' : 'rejected — user notified.'}` });
+        setResult({ ok: true, message: 'Payment approved — Sparks credited to user ledger!' });
       } else {
-        setResult({ ok: false, message: data.error || 'Action failed.' });
-        setPayments(originalPayments);
+        setResult({ ok: false, message: data.error || 'Approval failed.' });
       }
       loadPayments();
     } catch (e) {
       setResult({ ok: false, message: e.message });
-      setPayments(originalPayments);
     } finally {
       setLoading('');
     }
   }
 
-  const shown = filter === 'pending'
+  async function submitReject() {
+    if (!rejectModalId) return;
+    const id = rejectModalId;
+    setLoading(id + '_reject');
+    setResult(null);
+
+    try {
+      const res = await fetch('/api/admin/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action: 'reject', reason: rejectReason || 'Amount not found in bank statement' })
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setResult({ ok: true, message: 'Payment rejected — User notified.' });
+        setRejectModalId(null);
+        setRejectReason('');
+      } else {
+        setResult({ ok: false, message: data.error || 'Rejection failed.' });
+      }
+      loadPayments();
+    } catch (e) {
+      setResult({ ok: false, message: e.message });
+    } finally {
+      setLoading('');
+    }
+  }
+
+  const claimedCount = payments.filter(p => p.status === 'paid_claimed').length;
+  const pendingCount = payments.filter(p => p.status === 'pending').length;
+
+  const shown = filter === 'claimed'
+    ? payments.filter(p => p.status === 'paid_claimed')
+    : filter === 'pending'
     ? payments.filter(p => p.status === 'pending')
     : payments;
 
   return (
-    <div className="anim-fade-in space-y-6">
+    <div className="anim-fade-in space-y-6 max-w-5xl mx-auto px-2 sm:px-4 pb-20">
       
       {/* Title Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 md:p-6 rounded-[24px] border border-[#E7E5E4] shadow-xs">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
-            Payment Verification
+          <h1 className="text-xl md:text-2xl font-bold text-[#1C1917] tracking-tight flex items-center gap-2">
+            <span>Decimal Payment Verification</span>
+            <ShieldCheck size={20} className="text-emerald-600" />
           </h1>
-          <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">
-            Verify student UPI payments and credit Sparks directly to their wallets.
+          <p className="text-xs md:text-sm font-medium text-[#78716C] mt-1">
+            Match exact decimal amounts against UPI bank statements and credit Sparks atomically.
           </p>
         </div>
 
         <button
           onClick={loadPayments}
-          className="self-start sm:self-auto flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 transition-all shadow-xs cursor-pointer"
+          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#FAFAF8] border border-[#E7E5E4] text-xs font-bold text-[#1C1917] transition-all shadow-xs cursor-pointer active:scale-95"
         >
-          <RefreshCw size={14} className={fetching ? 'animate-spin text-[#6D28D9]' : 'text-slate-500'} />
+          <RefreshCw size={14} className={fetching ? 'animate-spin text-[var(--accent)]' : 'text-[#78716C]'} />
           <span>Refresh</span>
         </button>
       </div>
 
       {/* Filter tabs */}
-      <div className="flex items-center gap-1.5 overflow-x-auto p-1 bg-slate-100/90 rounded-xl border border-slate-200/60 w-fit">
-        {['pending', 'all'].map(f => (
+      <div className="flex items-center gap-2 overflow-x-auto p-1.5 bg-[#FAFAF8] rounded-2xl border border-[#E7E5E4] w-fit">
+        {[
+          { key: 'claimed', label: `Pending Claims (${claimedCount})` },
+          { key: 'pending', label: `Active Reservations (${pendingCount})` },
+          { key: 'all',     label: `All History (${payments.length})` },
+        ].map(t => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
-              filter === f
-                ? 'bg-[#6D28D9] text-white shadow-xs border border-[#6D28D9]'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
+            key={t.key}
+            onClick={() => setFilter(t.key)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+              filter === t.key
+                ? 'bg-[var(--accent)] text-white shadow-xs'
+                : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white font-semibold'
             }`}
           >
-            {f === 'pending' ? `Pending (${payments.filter(p => p.status === 'pending').length})` : `All (${payments.length})`}
+            {t.label}
           </button>
         ))}
       </div>
@@ -133,93 +171,123 @@ export default function AdminPaymentsPage() {
 
       {/* Payments list */}
       {fetching ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
-          <Loader2 size={24} className="animate-spin text-[#6D28D9]" />
-          <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Fetching payment records...</p>
+        <div className="bg-white border border-[#E7E5E4] rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
+          <Loader2 size={24} className="animate-spin text-[var(--accent)]" />
+          <p className="text-xs font-bold text-[#78716C] uppercase tracking-wider">Fetching payment records...</p>
         </div>
       ) : shown.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-xs">
-          <Zap size={28} className="text-slate-300 mx-auto mb-3" />
-          <p className="text-sm font-bold text-slate-800">
-            {filter === 'pending' ? 'No pending payment requests' : 'No payment records yet'}
+        <div className="bg-white border border-[#E7E5E4] rounded-2xl p-12 text-center shadow-xs">
+          <Zap size={28} className="text-[#A8A29E] mx-auto mb-3" />
+          <p className="text-sm font-bold text-[#1C1917]">
+            {filter === 'claimed' ? 'No pending claims waiting for review' : 'No records found in this category'}
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {shown.map(p => {
             const st = STATUS_STYLE[p.status] || STATUS_STYLE.pending;
             const isActing = loading.startsWith(p.id);
+            const isClaimed = p.status === 'paid_claimed';
+            const isPending = p.status === 'pending';
+            const isExpired = p.status === 'expired';
 
             return (
               <div
                 key={p.id}
-                className="bg-white border border-black/[0.06] p-4 md:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all shadow-xs"
+                className={`bg-white border p-5 rounded-[22px] flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all shadow-xs ${
+                  isClaimed ? 'border-amber-300 ring-2 ring-amber-500/10' : 'border-[#E7E5E4]'
+                }`}
               >
-                <div className="flex-1 min-w-0 space-y-2">
-                  {/* User Identity */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center font-bold text-xs flex-shrink-0">
-                      {(p.user_name || 'C')[0]?.toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-black truncate">
-                          {p.user_name || 'Classmate'}
-                        </span>
-                        {p.branch && (
-                          <span className="text-[10px] font-bold text-black/50 bg-black/5 px-2 py-0.5 rounded">
-                            {p.branch} {p.year ? `Y${p.year}` : ''}
-                          </span>
-                        )}
+                <div className="flex-1 min-w-0 space-y-2.5">
+                  {/* User Identity & Tag */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        {(p.user_name || 'C')[0]?.toUpperCase()}
                       </div>
-                      <p className="text-xs text-black/60 font-bold truncate">
-                        {p.user_email || p.email || 'No email provided'}
-                      </p>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-[#1C1917] truncate">
+                            {p.user_name || 'Classmate'}
+                          </span>
+                          {p.branch && (
+                            <span className="text-[10px] font-bold text-[#78716C] bg-[#FAFAF8] border border-[#E7E5E4] px-2 py-0.5 rounded">
+                              {p.branch} {p.year ? `Y${p.year}` : ''}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-[#78716C] font-semibold truncate">
+                          {p.user_email || 'No email'}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Pack & Status */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-bold text-black">
-                      {p.pack_name || `${p.sparks} Sparks`} — {fmt(p.sparks)} ⚡
-                    </p>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${st.color} ${st.bg} ${st.border}`}>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${st.color} ${st.bg} ${st.border} flex-shrink-0`}>
                       {st.label}
                     </span>
                   </div>
 
-                  {/* Amount & Ref */}
-                  <div className="flex items-center gap-2.5 flex-wrap text-xs font-bold text-black/60 pt-0.5">
-                    <span className="text-xs text-emerald-700 font-bold px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg">
-                      ₹{Number(p.amount_inr || p.rupees || 0).toFixed(2)}
+                  {/* Pack & Exact Matching Decimal */}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-base font-bold text-[#1C1917]">
+                      {p.sparks} Sparks ⚡
+                    </span>
+                    <span className="text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
+                      Exact UPI: ₹{Number(p.final_amount || p.amount_inr || p.sparks).toFixed(2)}
                     </span>
                     {p.unique_decimal && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]">
-                        Paise: .{p.unique_decimal}
+                      <span className="text-xs font-bold text-[var(--accent)] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] px-2.5 py-1 rounded-xl font-mono">
+                        Paise Key: .{p.unique_decimal}
                       </span>
                     )}
-                    {(p.reference_code || p.utr_number) && (
-                      <span>Ref/UTR: <code className="font-mono text-amber-700 font-bold px-1.5 py-0.5 bg-amber-50 rounded border border-amber-200">{p.reference_code || p.utr_number}</code></span>
+                    {p.reference_code && (
+                      <span className="text-xs text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-xl font-mono font-bold">
+                        Ref: {p.reference_code}
+                      </span>
                     )}
-                    <span className="text-black/40">• {fmtDate(p.created_at)}</span>
+                  </div>
+
+                  {/* Timing & Admin Details */}
+                  <div className="text-[11px] font-semibold text-[#78716C] flex items-center gap-2 flex-wrap pt-0.5">
+                    <span>Created: {fmtDate(p.created_at)}</span>
+                    {p.claimed_at && (
+                      <span className="text-amber-700 font-bold">• Claimed: {fmtDate(p.claimed_at)}</span>
+                    )}
+                    {p.approved_at && (
+                      <span className="text-emerald-700 font-bold">• Approved: {fmtDate(p.approved_at)}</span>
+                    )}
+                    {p.rejection_reason && (
+                      <span className="text-rose-700 font-bold">• Reason: {p.rejection_reason}</span>
+                    )}
                   </div>
                 </div>
 
-                {(p.status || '').toLowerCase() === 'pending' && (
-                  <div className="flex gap-2 flex-shrink-0 mt-3 sm:mt-0">
+                {/* Actions */}
+                {(isClaimed || isPending || isExpired) && (
+                  <div className="flex items-center gap-2 flex-shrink-0 pt-2 md:pt-0">
                     <button
-                      onClick={() => handleAction(p.id, true)}
+                      onClick={() => handleApprove(p.id)}
                       disabled={isActing}
-                      className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold uppercase text-[11px] px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
+                      className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold uppercase text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs active:scale-95"
                     >
-                      <CheckCircle size={14} /> Approve
+                      {isActing && loading.endsWith('approve') ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <CheckCircle size={14} />
+                      )}
+                      <span>{isExpired ? 'Override Approve' : 'Approve'}</span>
                     </button>
+
                     <button
-                      onClick={() => handleAction(p.id, false)}
+                      onClick={() => {
+                        setRejectModalId(p.id);
+                        setRejectReason('');
+                      }}
                       disabled={isActing}
-                      className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 disabled:opacity-50 font-bold uppercase text-[11px] px-4 py-2.5 rounded-xl transition-all cursor-pointer"
+                      className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 disabled:opacity-50 font-bold uppercase text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer active:scale-95"
                     >
-                      <XCircle size={14} /> Reject
+                      <XCircle size={14} />
+                      <span>Reject</span>
                     </button>
                   </div>
                 )}
@@ -228,6 +296,41 @@ export default function AdminPaymentsPage() {
           })}
         </div>
       )}
+
+      {/* Rejection Reason Modal */}
+      {rejectModalId && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm anim-fade-in">
+          <div className="bg-white rounded-[24px] max-w-sm w-full p-6 space-y-4 shadow-2xl border border-[#E7E5E4] anim-scale-in">
+            <h3 className="text-base font-bold text-[#1C1917]">Reject Payment Reservation</h3>
+            <p className="text-xs text-[#78716C] font-semibold">
+              Enter reason for rejection (this will be notified to the user):
+            </p>
+            <input
+              type="text"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="e.g. Amount not received in UPI statement"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7E5E4] text-xs font-semibold outline-none focus:border-[var(--accent)]"
+            />
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setRejectModalId(null)}
+                className="flex-1 py-2.5 rounded-xl font-bold text-xs text-[#78716C] bg-[#FAFAF8] border border-[#E7E5E4] hover:bg-[#F5F5F4] transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitReject}
+                disabled={loading.endsWith('reject')}
+                className="flex-1 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-rose-600 hover:bg-rose-700 transition-all cursor-pointer shadow-xs disabled:opacity-50"
+              >
+                {loading.endsWith('reject') ? <Loader2 size={14} className="animate-spin mx-auto" /> : 'Confirm Reject'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

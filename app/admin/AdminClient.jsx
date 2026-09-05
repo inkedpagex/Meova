@@ -228,7 +228,7 @@ export default function AdminClient() {
           onClick={loadData}
           className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 transition-all shadow-xs cursor-pointer"
         >
-          <RefreshCw size={14} className={fetching ? 'animate-spin text-[#6D28D9]' : 'text-slate-500'} />
+          <RefreshCw size={14} className={fetching ? 'animate-spin text-[var(--accent)]' : 'text-slate-500'} />
           <span>Refresh Data</span>
         </button>
       </div>
@@ -237,17 +237,17 @@ export default function AdminClient() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 md:gap-4">
         
         {/* Card 1: Total Users */}
-        <div className="bg-white border border-[#E4D9F7] rounded-2xl p-4 shadow-2xs flex flex-col justify-between h-32">
+        <div className="bg-white border border-[var(--accent-tint-20)] rounded-2xl p-4 shadow-2xs flex flex-col justify-between h-32">
           <div className="flex items-start justify-between">
             <div>
               <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider block">
                 Total Students
               </span>
-              <span className="text-2xl font-bold text-[#6D28D9] mt-1 block">
+              <span className="text-2xl font-bold text-[var(--accent)] mt-1 block">
                 {stats.totalUsers}
               </span>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-[#F3EEFC] flex items-center justify-center text-[#6D28D9]">
+            <div className="w-8 h-8 rounded-xl bg-[var(--accent-tint-10)] flex items-center justify-center text-[var(--accent)]">
               <Users size={16} />
             </div>
           </div>
@@ -309,7 +309,7 @@ export default function AdminClient() {
             </div>
           </div>
           <p className="text-[10.5px] font-semibold text-slate-400">
-            Pending: <span className="font-bold text-[#6D28D9]">{stats.pendingPayments}</span>
+            Pending: <span className="font-bold text-[var(--accent)]">{stats.pendingPayments}</span>
           </p>
         </div>
 
@@ -335,7 +335,7 @@ export default function AdminClient() {
       </div>
 
       {/* ── SECTION: CAMPUS FEATURE LAUNCH CONTROLS ───────────────────── */}
-      <div className="bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-md border border-zinc-800 space-y-4">
+      <div className="bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-md border border-[#E7E5E4] space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -352,12 +352,12 @@ export default function AdminClient() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
           {/* Switch 1: Campus Gigs */}
-          <div className="bg-[#1C1917]/90 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div className="bg-[#1C1917]/90 border border-[#E7E5E4] rounded-2xl p-4 flex items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white">Campus Gigs Module</span>
                 <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                  featureFlags.gigs ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-[#1C1917] text-[#A8A29E] border border-zinc-700'
+                  featureFlags.gigs ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-[#1C1917] text-[#A8A29E] border border-[#E7E5E4]'
                 }`}>
                   {featureFlags.gigs ? 'Active on App' : 'Hidden from App'}
                 </span>
@@ -374,7 +374,7 @@ export default function AdminClient() {
               onClick={handleToggleGigs}
               disabled={togglingFlag}
               className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                featureFlags.gigs ? 'bg-[#6D28D9]' : 'bg-zinc-700'
+                featureFlags.gigs ? 'bg-[var(--accent)]' : 'bg-[#2A2A2A]'
               } disabled:opacity-50`}
             >
               <span
@@ -410,7 +410,7 @@ export default function AdminClient() {
                   onClick={() => setPaymentFilter(f)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
                     paymentFilter === f
-                      ? 'bg-[#6D28D9] text-white shadow-xs border border-[#6D28D9]'
+                      ? 'bg-[var(--accent)] text-white shadow-xs border border-[var(--accent)]'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
                   }`}
                 >
@@ -443,26 +443,26 @@ export default function AdminClient() {
               return (
                 <div
                   key={p.id}
-                  className="bg-white border border-black/[0.06] p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                  className="bg-white border border-[#E7E5E4]/[0.06] p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
                 >
                   <div className="space-y-1.5 flex-1 min-w-0">
                     {/* User Identity */}
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center font-bold text-xs flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center font-bold text-xs flex-shrink-0">
                         {(p.user_name || 'C')[0]?.toUpperCase()}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-black truncate">
+                          <span className="text-xs font-bold text-[#1C1917] truncate">
                             {p.user_name || 'Classmate'}
                           </span>
                           {p.branch && (
-                            <span className="text-[10px] font-bold text-black/50 bg-black/5 px-1.5 py-0.2 rounded">
+                            <span className="text-[10px] font-bold text-[#1C1917]/50 bg-black/5 px-1.5 py-0.2 rounded">
                               {p.branch} {p.year ? `Y${p.year}` : ''}
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-black/60 font-bold truncate">
+                        <p className="text-[11px] text-[#1C1917]/60 font-bold truncate">
                           {p.user_email || p.email || 'No email provided'}
                         </p>
                       </div>
@@ -470,7 +470,7 @@ export default function AdminClient() {
 
                     {/* Pack & Status */}
                     <div className="flex items-center gap-2 flex-wrap pt-0.5">
-                      <span className="text-xs font-bold text-black">
+                      <span className="text-xs font-bold text-[#1C1917]">
                         {p.pack_name || `${p.sparks} Sparks`} — {fmt(p.sparks)} ⚡
                       </span>
                       <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
@@ -482,19 +482,19 @@ export default function AdminClient() {
                     </div>
 
                     {/* Amount, Ref & Timestamp */}
-                    <div className="flex items-center gap-2.5 text-[11px] font-bold text-black/60 flex-wrap pt-0.5">
+                    <div className="flex items-center gap-2.5 text-[11px] font-bold text-[#1C1917]/60 flex-wrap pt-0.5">
                       <span className="text-emerald-700 font-bold px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 rounded-lg">
                         ₹{Number(p.amount_inr || p.rupees || 0).toFixed(2)}
                       </span>
                       {p.unique_decimal && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]">
                           Paise: .{p.unique_decimal}
                         </span>
                       )}
                       {(p.reference_code || p.utr_number) && (
                         <span>Ref/UTR: <code className="font-mono text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">{p.reference_code || p.utr_number}</code></span>
                       )}
-                      <span className="text-black/40">• {fmtDate(p.created_at)}</span>
+                      <span className="text-[#1C1917]/40">• {fmtDate(p.created_at)}</span>
                     </div>
                   </div>
 
@@ -544,7 +544,7 @@ export default function AdminClient() {
                 onClick={() => setBookingFilter(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
                   bookingFilter === f
-                    ? 'bg-[#6D28D9] text-white shadow-xs border border-[#6D28D9]'
+                    ? 'bg-[var(--accent)] text-white shadow-xs border border-[var(--accent)]'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 font-semibold'
                 }`}
               >
@@ -572,7 +572,7 @@ export default function AdminClient() {
               if (statusLower === 'confirmed') badgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
               if (statusLower === 'requested') badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
               if (statusLower === 'disputed') badgeStyle = 'bg-rose-50 text-rose-700 border-rose-200';
-              if (statusLower === 'completed') badgeStyle = 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]';
+              if (statusLower === 'completed') badgeStyle = 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]';
 
               return (
                 <div
@@ -592,7 +592,7 @@ export default function AdminClient() {
                     <div className="flex items-center gap-3 text-[11px] font-bold text-slate-500 flex-wrap">
                       {b.location && (
                         <span className="flex items-center gap-1 text-slate-700">
-                          <MapPin size={12} className="text-[#6D28D9]" />
+                          <MapPin size={12} className="text-[var(--accent)]" />
                           {b.location}
                         </span>
                       )}

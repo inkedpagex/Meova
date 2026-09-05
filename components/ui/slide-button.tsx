@@ -175,7 +175,7 @@ const SlideButton = forwardRef<HTMLButtonElement, SlideButtonProps>(
                 {...props}
                 size="icon"
                 className={cn(
-                  "shadow-button rounded-full drop-shadow-xl bg-white text-black hover:bg-neutral-200",
+                  "shadow-button rounded-full drop-shadow-xl bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]",
                   isDragging && "scale-105 transition-transform",
                   className
                 )}
@@ -199,7 +199,7 @@ const SlideButton = forwardRef<HTMLButtonElement, SlideButtonProps>(
                 disabled={status === "loading"}
                 {...props}
                 className={cn(
-                  "size-full rounded-full transition-all duration-300 bg-white text-black hover:bg-neutral-200",
+                  "size-full rounded-full transition-all duration-300 bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]",
                   className
                 )}
               >

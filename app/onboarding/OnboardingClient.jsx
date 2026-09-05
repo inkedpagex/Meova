@@ -87,7 +87,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
   // ── Success / launch screen ──────────────────────────────────────────────────
   if (done) {
     return (
-      <div className="fixed inset-0 z-[300] bg-white flex flex-col items-center justify-center p-6 anim-fade-in">
+      <div className="fixed inset-0 z-[300] bg-[#FAFAF8] flex flex-col items-center justify-center p-6 anim-fade-in">
         <style>{`
           @keyframes ob-pulse {
             0%   { transform: scale(0.85); opacity: 0.6; }
@@ -125,7 +125,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
         {/* Checkmark circle */}
         <div style={{
           width: 80, height: 80, borderRadius: '50%',
-          background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)',
+          background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           animation: 'ob-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both',
           boxShadow: '0 12px 30px rgba(240,90,0,0.3)',
@@ -160,12 +160,12 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
         {/* Progress bar — fills cleanly in orange */}
         <div style={{
           marginTop: 32, width: 200, height: 5, position: 'relative', zIndex: 1,
-          background: '#f4f4f5', borderRadius: 99, overflow: 'hidden',
+          background: '#2A2A2A', borderRadius: 99, overflow: 'hidden',
           animation: 'ob-up 0.45s ease 0.25s both',
         }}>
           <div style={{
             height: '100%', borderRadius: 99,
-            background: 'linear-gradient(90deg, #6D28D9, #5B21B6)',
+            background: 'linear-gradient(90deg, var(--accent), var(--accent-hover))',
             animation: 'ob-bar 0.72s cubic-bezier(0.4,0,0.2,1) 0.05s both',
           }} />
         </div>
@@ -175,7 +175,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
 
   // ── Onboarding steps ──────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-[200] bg-white flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-[200] bg-[#FAFAF8] flex flex-col overflow-hidden">
       {/* ── Ultra-Compact Top Header Bar ── */}
       <header className="flex-shrink-0 px-4 sm:px-6 py-3 border-b border-[#E7E5E4] bg-white/95 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -190,7 +190,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
               </svg>
             </button>
           ) : (
-            <div className="w-7 h-7 rounded-xl bg-[#6D28D9] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-purple-500/20">
+            <div className="w-7 h-7 rounded-xl bg-[var(--accent)] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-purple-500/20">
               M
             </div>
           )}
@@ -208,7 +208,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
             <div
               key={s}
               className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                step >= s ? 'bg-[#6D28D9]' : 'bg-[#E7E5E4]'
+                step >= s ? 'bg-[var(--accent)]' : 'bg-[#2A2A2A]'
               }`}
             />
           ))}

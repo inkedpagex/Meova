@@ -13,10 +13,10 @@ export async function POST(req) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    // Check if tokens exist in database
+    // Check if tokens exist in device_tokens table
     const { data: tokens, error: tokensErr } = await supabaseAdmin
-      .from('fcm_tokens')
-      .select('token')
+      .from('device_tokens')
+      .select('id, fcm_token, platform')
       .eq('user_id', targetUserId);
 
     if (tokensErr) {
@@ -25,10 +25,10 @@ export async function POST(req) {
 
     const hasTokens = !!(tokens && tokens.length > 0);
 
-    // Send the Web Push alert
+    // Send the Native FCM alert
     await sendPushToUser(targetUserId, {
       title: 'Meova Campus Life',
-      body: 'Push notifications are active and ready on your device!',
+      body: 'Native FCM push notifications are active and ready on your Android device!',
       url: '/profile',
       type: 'system',
     });
@@ -37,7 +37,7 @@ export async function POST(req) {
     await supabaseAdmin.from('notifications').insert({
       user_id: targetUserId,
       title: 'Meova Campus Life',
-      message: 'Push notifications are active and ready on your device!',
+      message: 'Native FCM push notifications are active and ready on your device!',
       type: 'system',
       read: false,
       created_at: new Date().toISOString(),
@@ -48,8 +48,8 @@ export async function POST(req) {
       hasTokens,
       tokenCount: tokens?.length || 0,
       message: hasTokens
-        ? 'Test notification dispatched successfully!'
-        : 'Dispatched, but no registered device tokens were found for this user. Enable notifications in browser first.',
+        ? 'Test native FCM notification dispatched successfully!'
+        : 'Dispatched, but no registered device tokens were found for this user. Enable notifications in the Android app.',
     });
   } catch (err) {
     console.error('[POST /api/notifications/test-push]', err.message);

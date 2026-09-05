@@ -45,7 +45,7 @@ export default function CircleJoinButton({ circleId, userId, isInitialMember, ac
       className={`w-full relative overflow-hidden text-[13px] font-bold py-1.5 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 disabled:opacity-60 ${
         isMember
           ? "bg-transparent text-white border border-white/30 hover:border-white/50"
-          : "bg-white text-black border border-white hover:bg-neutral-200"
+          : "bg-[var(--accent)] text-white border border-[var(--accent)] hover:bg-[var(--accent-hover)]"
       }`}
     >
       {loading ? (

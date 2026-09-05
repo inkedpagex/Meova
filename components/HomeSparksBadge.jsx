@@ -34,7 +34,7 @@ export default function HomeSparksBadge({ userId, initialSparks }) {
   }, [userId]);
 
   return (
-    <Link href="/wallet" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg-overlay)] border border-[var(--border-subtle)] hover:border-[var(--accent)]/30 transition-all">
+    <Link href="/wallet" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg-overlay)] border border-[var(--border-subtle)] hover:border-[var(--accent-tint-20)] transition-all">
       <Zap size={14} className="text-[#fb923c] fill-current" />
       <span className="text-xs font-bold text-[var(--text-primary)]">{sparks.toLocaleString()}</span>
     </Link>

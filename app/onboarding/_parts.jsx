@@ -26,17 +26,17 @@ function StepBar({ step }) {
             <div className="flex flex-col items-center gap-1">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
                 done ? 'bg-emerald-500 text-white' :
-                active ? 'bg-[#6D28D9] text-white shadow-lg shadow-purple-500/20' :
+                active ? 'bg-[var(--accent)] text-white shadow-lg shadow-purple-500/20' :
                 'bg-[#FAFAF8] text-[#A8A29E]'
               }`}>
                 {done ? <CheckCircle2 size={16}/> : idx}
               </div>
-              <span className={`text-[9px] font-bold uppercase tracking-wider ${active ? 'text-[#6D28D9]' : 'text-[#A8A29E]'}`}>
+              <span className={`text-[9px] font-bold uppercase tracking-wider ${active ? 'text-[var(--accent)]' : 'text-[#A8A29E]'}`}>
                 {label}
               </span>
             </div>
             {i < steps.length - 1 && (
-              <div className={`flex-1 h-0.5 mb-4 rounded-full transition-all duration-500 ${step > idx ? 'bg-emerald-400' : step > i ? 'bg-[#6D28D9]' : 'bg-[#FAFAF8]'}`}/>
+              <div className={`flex-1 h-0.5 mb-4 rounded-full transition-all duration-500 ${step > idx ? 'bg-emerald-400' : step > i ? 'bg-[var(--accent)]' : 'bg-[#FAFAF8]'}`}/>
             )}
           </React.Fragment>
         );
@@ -133,7 +133,7 @@ function Step1({ data, onChange, onNext }) {
           className={`relative w-16 h-16 rounded-2xl overflow-hidden group transition-all hover:scale-105 active:scale-95 shrink-0 bg-white ${
             uploading ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'
           }`}
-          style={{ border: data.photo_url ? '2.5px solid #6D28D9' : '2px dashed #fed7aa' }}
+          style={{ border: data.photo_url ? '2.5px solid var(--accent)' : '2px dashed #fed7aa' }}
         >
           {data.photo_url ? (
             <img 
@@ -144,7 +144,7 @@ function Step1({ data, onChange, onNext }) {
               onError={() => onChange('photo_url', '')}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-[#6D28D9]">
+            <div className="w-full h-full flex flex-col items-center justify-center text-[var(--accent)]">
               <Camera size={20} />
             </div>
           )}
@@ -152,7 +152,7 @@ function Step1({ data, onChange, onNext }) {
           {/* In-box upload loader */}
           {uploading && (
             <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-1 z-20 text-white">
-              <Loader2 size={16} className="text-[#6D28D9] animate-spin" />
+              <Loader2 size={16} className="text-[var(--accent)] animate-spin" />
             </div>
           )}
         </div>
@@ -164,7 +164,7 @@ function Step1({ data, onChange, onNext }) {
           <button
             type="button"
             onClick={() => !uploading && fileRef.current?.click()}
-            className="text-[11px] font-bold text-[#6D28D9] hover:underline mt-0.5 block"
+            className="text-[11px] font-bold text-[var(--accent)] hover:underline mt-0.5 block"
           >
             {uploading ? (uploadStage || 'Uploading...') : (data.photo_url ? 'Tap to change photo' : 'Choose photo from gallery')}
           </button>
@@ -184,7 +184,7 @@ function Step1({ data, onChange, onNext }) {
             value={data.full_name}
             onChange={e => onChange('full_name', e.target.value)}
             placeholder="e.g. Chirag Sharma"
-            className="w-full pl-10 pr-3.5 py-2.5 sm:py-3 rounded-xl border border-[#E7E5E4] text-xs font-bold outline-none transition-all focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 bg-[#FAFAF8] focus:bg-white text-[#1C1917]"
+            className="w-full pl-10 pr-3.5 py-2.5 sm:py-3 rounded-xl border border-[#E7E5E4] text-xs font-bold outline-none transition-all focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-white focus:bg-white text-[#1C1917]"
           />
         </div>
       </div>
@@ -202,7 +202,7 @@ function Step1({ data, onChange, onNext }) {
             maxLength={20}
             onChange={handleUsernameChange}
             placeholder="chirag_04"
-            className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl border border-[#E7E5E4] text-xs font-bold outline-none transition-all focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 bg-[#FAFAF8] focus:bg-white text-[#1C1917]"
+            className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl border border-[#E7E5E4] text-xs font-bold outline-none transition-all focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-white focus:bg-white text-[#1C1917]"
             style={{
               borderColor: usernameStatus === 'ok' ? '#10b981' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#f43f5e' : undefined,
             }}
@@ -238,7 +238,7 @@ function Step1({ data, onChange, onNext }) {
               onClick={() => onChange('gender', g.id)}
               className={`py-2 px-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                 data.gender === g.id
-                  ? 'border-[#6D28D9] bg-[#F3EEFC] text-[#6D28D9] shadow-xs'
+                  ? 'border-[var(--accent)] bg-[var(--accent-tint-10)] text-[var(--accent)] shadow-xs'
                   : 'border-[#E7E5E4] bg-[#FAFAF8] text-[#78716C] hover:border-[#E7E5E4]'
               }`}
             >
@@ -252,7 +252,7 @@ function Step1({ data, onChange, onNext }) {
         type="button"
         onClick={onNext} 
         disabled={!canNext}
-        className="w-full py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xs mt-2 bg-[#6D28D9] hover:bg-[#5B21B6]"
+        className="w-full py-3.5 rounded-full font-bold text-xs uppercase tracking-wider text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xs mt-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)]"
       >
         <span>Continue to Academic Info</span>
         <ArrowRight size={14}/>

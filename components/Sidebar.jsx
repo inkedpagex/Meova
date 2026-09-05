@@ -7,11 +7,22 @@ import { getUserAvatarUrl, getCartoonAvatar } from '../utils/avatar';
 import { supabase } from '../lib/supabase/client';
 import { useUserContext } from './providers/UserProvider';
 import CreateMenuModal from './CreateMenuModal';
+import ThemeQuickToggle from './ThemeQuickToggle';
+import Logo from './Logo';
 
-/* Remix Icon helper — renders a single ri-* icon */
-const RiIcon = ({ name, size = 20, className = '' }) => (
-  <i className={`${name} ${className}`} style={{ fontSize: size, lineHeight: 1, display: 'inline-flex', alignItems: 'center' }} />
-);
+import { 
+  Home, 
+  Compass, 
+  MessageSquare, 
+  Bell, 
+  User as UserIcon, 
+  Shield, 
+  PanelLeft, 
+  PanelLeftClose, 
+  Plus, 
+  Zap, 
+  LogIn 
+} from 'lucide-react';
 
 
 const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy', '/offline', '/gla-university'];
@@ -281,22 +292,21 @@ export default function Sidebar({ user: propUser }) {
   };
 
   const NAV = [
-    { href: '/',              label: 'Home',          iconLine: 'ri-home-5-line',          iconFill: 'ri-home-5-fill' },
-    { href: '/discover',      label: 'Discover',      iconLine: 'ri-compass-3-line',        iconFill: 'ri-compass-3-fill' },
-    { href: '/messages',      label: 'Messages',      iconLine: 'ri-chat-3-line',           iconFill: 'ri-chat-3-fill', badge: unreadMsgCount },
-    { href: '/notifications', label: 'Notifications', iconLine: 'ri-notification-3-line',   iconFill: 'ri-notification-3-fill', badge: unreadCount },
-    { href: '/profile',       label: 'Profile',       iconLine: 'ri-user-3-line',           iconFill: 'ri-user-3-fill' },
-    ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin', iconLine: 'ri-shield-star-line', iconFill: 'ri-shield-star-fill' }] : []),
+    { href: '/',              label: 'Home',          Icon: Home },
+    { href: '/discover',      label: 'Discover',      Icon: Compass },
+    { href: '/messages',      label: 'Messages',      Icon: MessageSquare, badge: unreadMsgCount },
+    { href: '/notifications', label: 'Notifications', Icon: Bell, badge: unreadCount },
+    { href: '/profile',       label: 'Profile',       Icon: UserIcon },
+    ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin', Icon: Shield }] : []),
   ];
 
   const MOBILE_NAV = [
-    { href: '/',              label: 'Home',          iconLine: 'ri-home-5-line',          iconFill: 'ri-home-5-fill' },
-    { href: '/discover',      label: 'Discover',      iconLine: 'ri-compass-3-line',        iconFill: 'ri-compass-3-fill' },
-    { href: '/messages',      label: 'Messages',      iconLine: 'ri-chat-3-line',           iconFill: 'ri-chat-3-fill', badge: unreadMsgCount },
-    { href: '/notifications', label: 'Notifications', iconLine: 'ri-notification-3-line',   iconFill: 'ri-notification-3-fill', badge: unreadCount },
-    { href: '/profile',       label: 'Profile',       iconLine: 'ri-user-3-line',           iconFill: 'ri-user-3-fill' },
+    { href: '/',              label: 'Home',          Icon: Home },
+    { href: '/discover',      label: 'Discover',      Icon: Compass },
+    { href: '/messages',      label: 'Messages',      Icon: MessageSquare, badge: unreadMsgCount },
+    { href: '/notifications', label: 'Notifications', Icon: Bell, badge: unreadCount },
+    { href: '/profile',       label: 'Profile',       Icon: UserIcon },
   ];
-
 
   const avatarSrc = getUserAvatarUrl(user);
 
@@ -305,37 +315,37 @@ export default function Sidebar({ user: propUser }) {
   return (
     <>
       {/* ── Mobile top header (Blueprint Section 2) ────────────────── */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[56px] flex items-center justify-between px-4 bg-white border-b border-[#E7E5E4] shadow-xs">
-        <Link href="/" className="flex items-center gap-2 group">
-          <img src="/logo.png" alt="Meova" className="h-8 w-auto object-contain" />
+      <header className="md:hidden fixed top-0 inset-x-0 z-50 h-[56px] flex items-center justify-between px-3.5 bg-[var(--bg-surface)] border-b border-[var(--border-hairline)] shadow-xs">
+        <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
+          <Logo size="sm" />
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {user ? (
             <>
               {/* Top-Right Create Post / Plus CTA */}
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="w-9 h-9 rounded-full bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7] flex items-center justify-center hover:bg-[#E4D9F7] active:scale-95 transition-all cursor-pointer shadow-2xs"
+                className="w-8.5 h-8.5 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center hover:bg-[var(--accent-tint-20)] active:scale-95 transition-all cursor-pointer shadow-2xs flex-shrink-0"
                 title="Create Post / Story"
               >
-                <i className="ri-add-line" style={{ fontSize: 18, fontWeight: 700 }} />
+                <Plus size={17} strokeWidth={2.2} />
               </button>
 
               {/* Wallet Pill */}
               <Link 
                 href="/wallet" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-[#FAFAF8] text-[#1C1917] border border-[#E7E5E4] hover:bg-[#F3EEFC] transition-all active:scale-95 shadow-2xs"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] hover:bg-[var(--accent-tint-10)] hover:border-[var(--accent-tint-20)] transition-all active:scale-95 shadow-2xs whitespace-nowrap flex-shrink-0"
               >
-                <i className="ri-flashlight-fill" style={{ fontSize: 13, color: '#6D28D9' }} />
-                <span className="tabular-nums font-bold">{sparks.toLocaleString()}</span>
+                <Zap size={12} strokeWidth={2} className="fill-[var(--accent)] text-[var(--accent)] flex-shrink-0" />
+                <span className="tabular-nums font-bold leading-none">{sparks.toLocaleString()}</span>
               </Link>
 
               {/* Own Avatar */}
               <Link
                 href="/profile"
-                className="w-9 h-9 rounded-full overflow-hidden p-[1px] border border-[#E4D9F7] flex-shrink-0 relative active:scale-95 transition-transform bg-white"
+                className="w-8.5 h-8.5 rounded-full overflow-hidden p-[1px] border border-[var(--accent-tint-20)] flex-shrink-0 relative active:scale-95 transition-transform bg-[var(--bg-surface)]"
               >
                 <img
                   src={avatarSrc}
@@ -350,8 +360,8 @@ export default function Sidebar({ user: propUser }) {
             </>
           ) : (
             <Link 
-              href="/login"
-              className="px-4 py-1.5 rounded-full text-xs font-bold text-white bg-[#6D28D9] hover:bg-[#5B21B6] active:scale-95 transition-all shadow-xs"
+              href="/login" 
+              className="px-3.5 py-1.5 rounded-full text-xs font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] active:scale-95 transition-all shadow-xs whitespace-nowrap flex-shrink-0"
             >
               Log in
             </Link>
@@ -361,7 +371,7 @@ export default function Sidebar({ user: propUser }) {
 
       {/* ── Desktop sidebar ──────────────────── */}
       <aside 
-        className="hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 transition-all duration-300 select-none bg-white border-r border-[#E7E5E4]"
+        className="hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 transition-all duration-300 select-none bg-[var(--bg-surface)] border-r border-[var(--border-hairline)]"
         style={{ 
           width: isCollapsed ? 72 : 240, 
           padding: isCollapsed ? '24px 10px' : '24px 16px' 
@@ -371,27 +381,27 @@ export default function Sidebar({ user: propUser }) {
           {isCollapsed ? (
             <>
               <Link href="/" className="flex items-center justify-center hover:scale-105 transition-transform" title="Meova">
-                <img src="/logo.png" alt="Meova" className="w-8 h-8 object-contain" />
+                <Logo size="sm" />
               </Link>
               <button 
                 onClick={toggleCollapse} 
                 title="Expand Sidebar"
-                className="p-1.5 rounded-lg text-[#A8A29E] hover:text-[#6D28D9] hover:bg-purple-50 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
               >
-                <i className="ri-layout-left-2-line" style={{ fontSize: 18 }} />
+                <PanelLeft size={18} strokeWidth={1.5} />
               </button>
             </>
           ) : (
             <>
               <Link href="/" className="flex items-center gap-2 min-w-0">
-                <img src="/logo.png" alt="Meova" className="h-11 w-auto object-contain" />
+                <Logo size="md" />
               </Link>
               <button 
                 onClick={toggleCollapse} 
                 title="Collapse Sidebar"
-                className="p-1.5 rounded-lg text-[#A8A29E] hover:text-[#78716C] hover:bg-[#FAFAF8] transition-colors cursor-pointer flex-shrink-0"
+                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer flex-shrink-0"
               >
-                <i className="ri-layout-left-line" style={{ fontSize: 18 }} />
+                <PanelLeft size={18} strokeWidth={1.5} />
               </button>
             </>
           )}
@@ -399,14 +409,12 @@ export default function Sidebar({ user: propUser }) {
 
         {/* Navigation Items */}
         <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar">
-          {NAV.map(({ href, label, iconLine, iconFill, badge }) => {
+          {NAV.map((item) => {
+            const { href, label, Icon, badge } = item;
             if (href === '/profile' && !user) return null;
             const active = pendingPath ? pendingPath === href : isActive(href);
-            const isNotif = label === 'Notifications';
-            const hasUnread = isNotif && unreadCount > 0;
-            const isMessages = label === 'Messages';
-            const hasUnreadMsgs = isMessages && unreadMsgCount > 0;
-            const hasBadge = badge && badge > 0;
+            const badgeCount = typeof badge === 'number' && badge > 0 ? badge : 0;
+            const showBadge = badgeCount > 0;
 
             const handleLinkClick = (e) => {
               try { e?.currentTarget?.blur(); } catch {}
@@ -425,15 +433,15 @@ export default function Sidebar({ user: propUser }) {
                   onMouseDown={(e) => { try { e.currentTarget.blur(); } catch {} }}
                   onClick={handleLinkClick}
                   title={label}
-                  className={`relative flex items-center justify-center w-12 h-11 mx-auto rounded-[10px] outline-none focus:outline-none active:outline-none transition-all active:scale-90 ${
+                  className={`relative flex items-center justify-center w-12 h-11 mx-auto rounded-[12px] outline-none focus:outline-none active:outline-none transition-all active:scale-90 ${
                     active 
-                      ? 'bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]/60 shadow-xs' 
-                      : 'text-black/70 hover:text-black hover:bg-[#F3EEFC]/50'
+                      ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] shadow-xs' 
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
                   }`}
                 >
-                  <i className={active ? iconFill : iconLine} style={{ fontSize: 20 }} />
-                  {(hasUnread || hasUnreadMsgs || hasBadge) && (
-                    <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-[#6D28D9] ring-2 ring-white" />
+                  <Icon size={20} strokeWidth={active ? 2 : 1.5} />
+                  {showBadge && (
+                    <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-[var(--accent)] ring-2 ring-[var(--bg-surface)]" />
                   )}
                 </Link>
               );
@@ -446,33 +454,23 @@ export default function Sidebar({ user: propUser }) {
                 prefetch={true}
                 onMouseDown={(e) => { try { e.currentTarget.blur(); } catch {} }}
                 onClick={handleLinkClick}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-[10px] text-[13px] font-bold outline-none focus:outline-none active:outline-none transition-all active:scale-95 ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-[12px] text-[13.5px] font-bold outline-none focus:outline-none active:outline-none transition-all active:scale-95 ${
                   active 
-                    ? 'bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]/60 font-semibold' 
-                    : 'text-black/75 hover:text-black hover:bg-[#F3EEFC]/50'
+                    ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] font-bold' 
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <i className={`${active ? iconFill : iconLine} flex-shrink-0`} style={{ fontSize: 18 }} />
+                  <Icon size={19} strokeWidth={active ? 2 : 1.5} className="flex-shrink-0" />
                   <span className="truncate">{label}</span>
                 </div>
-                {hasUnread && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#6D28D9] text-white text-[10px] font-semibold flex items-center justify-center px-1">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
-                {hasUnreadMsgs && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#6D28D9] text-white text-[10px] font-semibold flex items-center justify-center px-1">
-                    {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
-                  </span>
-                )}
-                {hasBadge && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-[#6D28D9] text-white text-[10px] font-semibold flex items-center justify-center px-1">
-                    {badge > 99 ? '99+' : badge}
+                {showBadge && (
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-[var(--accent)] text-white text-[10px] font-bold flex items-center justify-center px-1 flex-shrink-0">
+                    {badgeCount > 99 ? '99+' : badgeCount}
                   </span>
                 )}
                 {label === 'Wallet' && sparks > 0 && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex-shrink-0">
                     {sparks.toLocaleString()}
                   </span>
                 )}
@@ -481,18 +479,23 @@ export default function Sidebar({ user: propUser }) {
           })}
         </nav>
 
-        {/* Bottom Profile / Login */}
-        <div style={{ borderTop: '1px solid #f5f5f5', paddingTop: 16, marginTop: 12 }}>
+        {/* Quick Theme Switcher & Bottom Profile */}
+        <div className="pt-3 border-t border-[var(--border-hairline)] mt-2 space-y-2">
+          {/* Quick Theme Palette Launcher */}
+          <div className={isCollapsed ? 'flex justify-center' : 'px-1'}>
+            <ThemeQuickToggle iconOnly={isCollapsed} className="w-full p-2 rounded-[12px] hover:bg-[var(--bg-hover)] border border-transparent hover:border-[var(--border-hairline)] transition-all" />
+          </div>
+
           {user ? (
             <Link 
               href="/profile" 
               title={user.full_name || 'Profile'}
-              className={`flex items-center gap-2.5 p-2 rounded-[10px] transition-all hover:bg-[#F3EEFC]/50 group ${
+              className={`flex items-center gap-2.5 p-2 rounded-[12px] transition-all hover:bg-[var(--bg-hover)] group ${
                 isCollapsed ? 'justify-center' : ''
               }`}
             >
-              <div className="w-9 h-9 rounded-full p-[1.5px] bg-[#6D28D9] flex-shrink-0">
-                <div className="w-full h-full rounded-full overflow-hidden relative border border-white">
+              <div className="w-9 h-9 rounded-full p-[1.5px] bg-[var(--accent)] flex-shrink-0">
+                <div className="w-full h-full rounded-full overflow-hidden relative border border-[var(--bg-surface)]">
                   <img 
                     src={avatarSrc} 
                     alt="me" 
@@ -506,10 +509,10 @@ export default function Sidebar({ user: propUser }) {
               </div>
               {!isCollapsed && (
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold truncate text-[#1C1917] group-hover:text-[#6D28D9] transition-colors">
+                  <p className="text-xs font-bold truncate text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
                     {user.full_name || (user.email || 'user').split('@')[0]}
                   </p>
-                  <p className="text-[10px] truncate text-[#A8A29E] font-semibold">
+                  <p className="text-[10px] truncate text-[var(--text-muted)] font-medium">
                     {isAdminRoute ? 'Super Admin' : `${user?.year ? (user.year.includes('Year') ? user.year : `${user.year} Year`) : '1st Year'} · ${user.branch || 'General'}`}
                   </p>
                 </div>
@@ -519,11 +522,11 @@ export default function Sidebar({ user: propUser }) {
             <Link 
               href="/login" 
               title="Log in"
-              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-[10px] text-xs font-semibold text-white bg-[#6D28D9] hover:bg-[#5B21B6] transition-all ${
+              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all shadow-xs ${
                 isCollapsed ? 'px-0' : 'px-4'
               }`}
             >
-              <i className="ri-login-circle-line" style={{ fontSize: 15 }} /> {!isCollapsed && <span>Log in</span>}
+              <LogIn size={15} strokeWidth={1.75} /> {!isCollapsed && <span>Log in</span>}
             </Link>
           )}
         </div>
@@ -533,13 +536,13 @@ export default function Sidebar({ user: propUser }) {
       {!(AUTH_PATHS.includes(pathname) || pathname?.startsWith('/admin') || isKeyboardOpen) && (
         <nav 
           suppressHydrationWarning
-          className="md:hidden hide-on-keyboard fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-white border-t border-[#E7E5E4] shadow-xs"
+          className="md:hidden hide-on-keyboard fixed bottom-0 inset-x-0 z-50 flex items-center justify-around bg-[var(--bg-surface)] border-t border-[var(--border-hairline)] shadow-[0_-1px_3px_rgba(0,0,0,0.02)]"
           style={{
-            height: 'calc(64px + env(safe-area-inset-bottom))',
-            paddingBottom: 'env(safe-area-inset-bottom)',
+            height: 'calc(58px + env(safe-area-inset-bottom, 0px))',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
           }}
         >
-        {MOBILE_NAV.map(({ href, label, iconLine, iconFill, isCenter }) => {
+        {MOBILE_NAV.map(({ href, label, Icon, badge }) => {
           if ((href === '/profile') && !user) {
             return (
               <Link
@@ -552,38 +555,18 @@ export default function Sidebar({ user: propUser }) {
                     try { navigator.vibrate(10); } catch {}
                   }
                 }}
-                className="flex-1 flex flex-col items-center justify-center h-full text-[#A8A29E] hover:text-[#6D28D9] transition-colors active:scale-90"
+                className="flex-1 flex flex-col items-center justify-center h-full text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors active:scale-95"
               >
-                <i className="ri-login-circle-line" style={{ fontSize: 20 }} />
-                <span className="text-[11px] font-medium mt-0.5">Login</span>
+                <div className="relative flex items-center justify-center">
+                  <LogIn size={21} strokeWidth={1.5} />
+                </div>
+                <span className="text-[10px] font-medium tracking-tight mt-0.5">Login</span>
               </Link>
             );
           }
           const active = pendingPath ? pendingPath === href : isActive(href);
-
-          if (isCenter) {
-            return (
-              <button 
-                key={href} 
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-                    try { navigator.vibrate(15); } catch {}
-                  }
-                  setShowCreateModal(true);
-                }}
-                className="flex-1 flex flex-col items-center justify-center relative -top-3 h-full select-none outline-none cursor-pointer"
-                style={{ zIndex: 60 }}
-              >
-                <div 
-                  suppressHydrationWarning
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-white bg-[#6D28D9] hover:bg-[#5B21B6] shadow-[0_4px_12px_rgba(109,40,217,0.35)] active:scale-90 transition-all ring-4 ring-white"
-                >
-                  <i className="ri-add-line" style={{ fontSize: 24, fontWeight: 900 }} />
-                </div>
-              </button>
-            );
-          }
+          const badgeCount = typeof badge === 'number' && badge > 0 ? badge : 0;
+          const showDot = badgeCount > 0;
 
           return (
             <Link 
@@ -598,14 +581,19 @@ export default function Sidebar({ user: propUser }) {
                   try { navigator.vibrate(10); } catch {}
                 }
               }}
-              className={`flex-1 flex flex-col items-center justify-center h-full relative select-none outline-none focus:outline-none active:outline-none transition-all active:scale-90 ${
-                active ? 'text-[#6D28D9]' : 'text-[#A8A29E] hover:text-[#1C1917]'
+              className={`flex-1 flex flex-col items-center justify-center h-full relative select-none outline-none focus:outline-none active:outline-none transition-all active:scale-95 ${
+                active ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
               }`}
             >
-              <div className={`p-1 rounded-[10px] transition-all ${active ? 'bg-[#F3EEFC] text-[#6D28D9] scale-105' : ''}`}>
-                <i className={active ? iconFill : iconLine} style={{ fontSize: 20 }} />
+              <div className="relative flex items-center justify-center">
+                <Icon size={21} strokeWidth={active ? 2.1 : 1.5} className="transition-all" />
+                {showDot && (
+                  <span className="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-[var(--accent)] ring-2 ring-[var(--bg-surface)]" />
+                )}
               </div>
-              <span className={`text-[11px] tracking-tight mt-0.5 ${active ? 'text-[#6D28D9] font-semibold' : 'text-[#A8A29E] font-normal'}`}>
+              <span className={`text-[10px] tracking-tight mt-0.5 select-none transition-colors ${
+                active ? 'text-[var(--accent)] font-bold' : 'text-[var(--text-muted)] font-medium'
+              }`}>
                 {label}
               </span>
             </Link>

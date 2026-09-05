@@ -31,7 +31,7 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
     PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
     ACCEPTED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     REJECTED: 'bg-red-50 text-red-500 border-red-200',
-    COMPLETED: 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]',
+    COMPLETED: 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]',
   };
 
   return (
@@ -39,8 +39,8 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
       {app.applicantPhoto ? (
         <img src={app.applicantPhoto} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-[#E7E5E4]" />
       ) : (
-        <div className="w-10 h-10 rounded-full bg-[#F3EEFC] flex items-center justify-center flex-shrink-0 border border-[#E4D9F7]">
-          <User size={18} className="text-[#6D28D9]" />
+        <div className="w-10 h-10 rounded-full bg-[var(--accent-tint-10)] flex items-center justify-center flex-shrink-0 border border-[var(--accent-tint-20)]">
+          <User size={18} className="text-[var(--accent)]" />
         </div>
       )}
       <div className="flex-1 min-w-0">
@@ -67,7 +67,7 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
             <button
               onClick={() => handle('reject')}
               disabled={!!loading}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FAFAF8] text-[#78716C] text-xs font-bold hover:bg-[#E7E5E4] active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FAFAF8] text-[#78716C] text-xs font-bold hover:bg-[#2A2A2A] active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
             >
               <XCircle size={13} />
               {loading === 'reject' ? 'Rejecting…' : 'Reject'}
@@ -76,11 +76,11 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
         )}
 
         {app.status === 'ACCEPTED' && (
-          <div className="mt-3 p-3 rounded-xl bg-[#F3EEFC] border border-[#E4D9F7]">
-            <p className="text-[10px] font-bold uppercase text-[#6D28D9] mb-1">Gig in Progress</p>
+          <div className="mt-3 p-3 rounded-xl bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)]">
+            <p className="text-[10px] font-bold uppercase text-[var(--accent)] mb-1">Gig in Progress</p>
             <p className="text-[11px] font-bold text-[#1C1917] mb-3">Sparks are held in Escrow. Ask the freelancer for their 6-digit completion code when the work is delivered.</p>
             <div className="flex items-center gap-2">
-              <Link href={`/messages?uid=${app.applicantId}`} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-[#E4D9F7] text-[#6D28D9] rounded-xl text-xs font-bold hover:bg-[#F3EEFC] transition-colors">
+              <Link href={`/messages?uid=${app.applicantId}`} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-[var(--accent-tint-20)] text-[var(--accent)] rounded-xl text-xs font-bold hover:bg-[var(--accent-tint-10)] transition-colors">
                 <MessageCircle size={14} /> Message
               </Link>
               <button onClick={() => {
@@ -90,7 +90,7 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
                 <Phone size={14} /> Secure Call
               </button>
             </div>
-            <div className="mt-2.5 pt-2 border-t border-[#E4D9F7]/60 flex justify-end">
+            <div className="mt-2.5 pt-2 border-t border-[var(--accent-tint-20)]/60 flex justify-end">
               <button
                 type="button"
                 onClick={() => {
@@ -117,7 +117,7 @@ function ApplicantCard({ app, gigId, onUpdate, onRate, isReviewed }) {
               className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
                 isReviewed
                   ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                  : 'bg-[#6D28D9] hover:bg-[#5B21B6] text-white shadow-2xs'
+                  : 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-2xs'
               }`}
             >
               <Star size={12} className={isReviewed ? 'fill-amber-400 text-amber-500' : 'fill-white text-white'} />
@@ -243,7 +243,7 @@ export default function ApplicantsDrawer({ gig, onClose }) {
               {!completing ? (
                 <button
                   onClick={() => setCompleting(true)}
-                  className="w-full py-3 rounded-2xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold active:scale-95 transition-all cursor-pointer shadow-xs"
+                  className="w-full py-3 rounded-2xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold active:scale-95 transition-all cursor-pointer shadow-xs"
                 >
                   Mark as Completed & Release Sparks
                 </button>
@@ -255,10 +255,10 @@ export default function ApplicantsDrawer({ gig, onClose }) {
                     value={code}
                     onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
-                    className="w-full p-3 rounded-xl border border-[#E7E5E4] text-center text-2xl font-bold tracking-[8px] focus:outline-none focus:border-[#6D28D9] focus:ring-4 focus:ring-[#6D28D9]/10"
+                    className="w-full p-3 rounded-xl border border-[#E7E5E4] text-center text-2xl font-bold tracking-[8px] focus:outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10"
                   />
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => setCompleting(false)} className="flex-1 py-3 rounded-2xl bg-[#FAFAF8] text-[#78716C] text-xs font-bold cursor-pointer hover:bg-[#E7E5E4]">Cancel</button>
+                    <button type="button" onClick={() => setCompleting(false)} className="flex-1 py-3 rounded-2xl bg-[#FAFAF8] text-[#78716C] text-xs font-bold cursor-pointer hover:bg-[#2A2A2A]">Cancel</button>
                     <button type="submit" disabled={code.length !== 6 || codeLoading} className="flex-2 px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold disabled:opacity-50 cursor-pointer active:scale-95 transition-all shadow-xs">
                       {codeLoading ? 'Verifying…' : 'Confirm & Pay'}
                     </button>

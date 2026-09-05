@@ -13,7 +13,7 @@ export function VoiceCallProvider({ children }) {
   const { user } = useUserContext();
   const currentUserId = user?.id || user?.uid;
 
-  const [activeCall, setActiveCall] = useState(null); // { mode, peerUser, roomId }
+  const [activeCall, setActiveCall] = useState(null); // { mode, peerUser, roomId, callType }
   const [activeChannel, setActiveChannel] = useState(null);
   const activeChannelRef = useRef(null);
   // Track whether we're already in a call to prevent double-invites
@@ -39,6 +39,7 @@ export function VoiceCallProvider({ children }) {
 
       setActiveCall({
         mode: 'incoming',
+        callType: payload.callType || 'voice',
         peerUser: {
           id: payload.callerId,
           name: payload.callerName,
@@ -60,7 +61,7 @@ export function VoiceCallProvider({ children }) {
     return () => {
       supabase.removeChannel(userChannel);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserId]);
 
   // ── Cleanup active call channel on unmount ────────────────────────────────
@@ -73,80 +74,99 @@ export function VoiceCallProvider({ children }) {
     };
   }, []);
 
-  const startCall = useCallback(async ({ targetUserId, targetName, targetPhoto, bookingId, location }) => {
-    if (!currentUserId || !targetUserId) return;
-    if (inCallRef.current) return;
+  const startCall = useCallback(
+    async ({
+      targetUserId,
+      targetName,
+      targetPhoto,
+      bookingId,
+      location,
+      callType = 'voice',
+    }) => {
+      if (!currentUserId || !targetUserId) return;
+      if (inCallRef.current) return;
 
-    const roomId = `call_${bookingId || `${currentUserId}_${targetUserId}_${Date.now()}`}`;
-    
-    // 1. Create WebRTC Room Channel — do NOT set self:false, we need broadcasts to reach both sides
-    const roomChannel = supabase.channel(roomId);
+      const roomId = `call_${bookingId || `${currentUserId}_${targetUserId}_${Date.now()}`}`;
 
-    await new Promise((resolve) => {
-      roomChannel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') resolve();
-      });
-      setTimeout(resolve, 3000);
-    });
+      // 1. Create WebRTC Room Channel
+      const roomChannel = supabase.channel(roomId);
 
-    activeChannelRef.current = roomChannel;
-    setActiveChannel(roomChannel);
-    inCallRef.current = true;
-
-    // 2. Broadcast call-invite to target user's personal channel
-    const targetChannel = supabase.channel(`call-user-${targetUserId}`);
-    targetChannel.subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        targetChannel.send({
-          type: 'broadcast',
-          event: 'call-invite',
-          payload: {
-            callerId: currentUserId,
-            callerName: user?.full_name || 'Campus Student',
-            callerPhoto: user?.photo_url || '',
-            roomId,
-            bookingId,
-          },
-        }).then(() => {
-          setTimeout(() => supabase.removeChannel(targetChannel), 2000);
+      await new Promise((resolve) => {
+        roomChannel.subscribe((status) => {
+          if (status === 'SUBSCRIBED') resolve();
         });
-      }
-    });
+        setTimeout(resolve, 3000);
+      });
 
-    // 3. Send Web Push to wake background device
-    fetch('/api/calls/invite', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        targetUserId,
-        bookingId,
-        location,
-        callerName: user?.full_name || 'Campus Student',
-        callerPhoto: user?.photo_url || '',
-      }),
-    }).catch(() => {});
+      activeChannelRef.current = roomChannel;
+      setActiveChannel(roomChannel);
+      inCallRef.current = true;
 
-    setActiveCall({
-      mode: 'outgoing',
-      peerUser: { id: targetUserId, name: targetName || 'Campus Student', photo: targetPhoto || '' },
-      roomId,
-    });
-  }, [currentUserId, user]);
+      // 2. Broadcast call-invite to target user's personal channel
+      const targetChannel = supabase.channel(`call-user-${targetUserId}`);
+      targetChannel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          targetChannel
+            .send({
+              type: 'broadcast',
+              event: 'call-invite',
+              payload: {
+                callerId: currentUserId,
+                callerName: user?.full_name || 'Campus Student',
+                callerPhoto: user?.photo_url || '',
+                roomId,
+                bookingId,
+                callType,
+              },
+            })
+            .then(() => {
+              setTimeout(() => supabase.removeChannel(targetChannel), 2000);
+            });
+        }
+      });
+
+      // 3. Send Web Push / FCM to wake background device
+      fetch('/api/calls/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetUserId,
+          bookingId,
+          location,
+          callType,
+          callerName: user?.full_name || 'Campus Student',
+          callerPhoto: user?.photo_url || '',
+        }),
+      }).catch(() => {});
+
+      setActiveCall({
+        mode: 'outgoing',
+        callType,
+        peerUser: {
+          id: targetUserId,
+          name: targetName || 'Campus Student',
+          photo: targetPhoto || '',
+        },
+        roomId,
+      });
+    },
+    [currentUserId, user]
+  );
 
   const handleCloseCall = useCallback(() => {
     inCallRef.current = false;
 
     if (activeChannelRef.current) {
-      // Send call-end broadcast before closing channel
       try {
-        activeChannelRef.current.send({
-          type: 'broadcast',
-          event: 'call-end',
-          payload: { senderId: currentUserId },
-        }).catch(() => {});
+        activeChannelRef.current
+          .send({
+            type: 'broadcast',
+            event: 'call-end',
+            payload: { senderId: currentUserId },
+          })
+          .catch(() => {});
       } catch {}
-      
-      // Give 500ms for the signal to dispatch before removing the channel
+
       setTimeout(() => {
         if (activeChannelRef.current) {
           supabase.removeChannel(activeChannelRef.current);
@@ -166,6 +186,7 @@ export function VoiceCallProvider({ children }) {
         <VoiceCallModal
           isOpen={Boolean(activeCall)}
           mode={activeCall.mode}
+          callType={activeCall.callType || 'voice'}
           peerUser={activeCall.peerUser}
           currentUserId={currentUserId}
           channel={activeChannel}
@@ -178,5 +199,9 @@ export function VoiceCallProvider({ children }) {
 }
 
 export function useVoiceCall() {
+  return useContext(VoiceCallContext);
+}
+
+export function useCall() {
   return useContext(VoiceCallContext);
 }

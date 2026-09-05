@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Send, Loader2, MessageSquare,
   SquarePen, CheckCheck, Zap, Search,
-  User, Sparkles, Compass, Info, Smile, Phone, Radio, X
+  User, Sparkles, Compass, Info, Smile, Phone, Video, Radio, X
 } from '@/lib/icons';
 import useSWR from 'swr';
 import { supabase } from '@/lib/supabase/client';
@@ -67,18 +67,18 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
     <button
       type="button"
       onClick={onClick}
-      className={`w-full h-[72px] flex items-center gap-3 px-4 py-3 text-left transition-all cursor-pointer border-b border-[#E7E5E4] ${
+      className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all cursor-pointer border-b border-[var(--border-hairline)] ${
         isActive 
-          ? 'bg-[#F3EEFC] font-medium' 
-          : 'hover:bg-[#FAFAF8] bg-white'
+          ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] font-bold' 
+          : 'hover:bg-[var(--bg-base)] bg-[var(--bg-surface)]'
       }`}
     >
       <div className="relative flex-shrink-0">
-        <div className="w-12 h-12 rounded-full overflow-hidden p-[1px] ring-1 ring-black/[0.08]">
+        <div className="w-12 h-12 rounded-full overflow-hidden p-[1px] ring-1 ring-white/10">
           <img
             src={avatarUrl(otherId, otherName, otherPhoto)}
             alt=""
-            className="w-full h-full rounded-full object-cover bg-[#FAFAF8]"
+            className="w-full h-full rounded-full object-cover bg-[var(--bg-surface)]"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
@@ -86,26 +86,26 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
           />
         </div>
         {isUserOnline(otherId) && (
-          <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-xs" />
+          <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[var(--bg-surface)] shadow-xs" />
         )}
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-0.5">
-          <span className={`text-[15px] truncate ${unread > 0 ? 'font-bold text-[#1C1917]' : 'font-semibold text-[#1C1917]'}`}>
+          <span className={`text-[15px] truncate ${unread > 0 ? 'font-bold text-[var(--text-primary)]' : 'font-semibold text-[var(--text-primary)]'}`}>
             {otherName}
           </span>
-          <span className="text-[12px] text-[#A8A29E] font-medium flex-shrink-0 ml-2">
+          <span className="text-[12px] text-[var(--text-muted)] font-medium flex-shrink-0 ml-2">
             {timeAgo(lastMessageAt)}
           </span>
         </div>
         <div className="flex items-center justify-between gap-1">
-          <p className={`text-[14px] truncate ${unread > 0 ? 'text-[#1C1917] font-semibold' : 'text-[#78716C] font-normal'}`}>
-            {isMe && <span className="text-[#A8A29E]">You: </span>}
+          <p className={`text-[14px] truncate ${unread > 0 ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-secondary)] font-normal'}`}>
+            {isMe && <span className="text-[var(--text-muted)]">You: </span>}
             {lastMessage || 'Sent a message'}
           </p>
           {unread > 0 && (
-            <span className="w-5 h-5 rounded-full bg-[#6D28D9] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 shadow-xs">
+            <span className="w-5 h-5 rounded-full bg-[var(--accent)] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 shadow-xs">
               {unread > 9 ? '9+' : unread}
             </span>
           )}
@@ -115,16 +115,16 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
   );
 }
 
-// â”€â”€â”€ Suggested Student Item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Suggested Student Item ──────────────────────────────────────────
 
 function SuggestedStudentItem({ student, currentUid, onSelect }) {
   return (
     <div 
       onClick={() => onSelect(student.id)}
-      className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-[#FAFAF8] transition-colors cursor-pointer group"
+      className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-[var(--bg-surface)] transition-colors cursor-pointer group"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="w-12 h-12 rounded-full overflow-hidden border border-[#E7E5E4] flex-shrink-0 bg-[#F3EEFC] shadow-xs">
+        <div className="w-12 h-12 rounded-full overflow-hidden border border-[var(--border-hairline)] flex-shrink-0 bg-[var(--accent-tint-10)] shadow-xs">
           <img 
             src={avatarUrl(student.id, student.full_name, student.photo_url)} 
             alt="" 
@@ -136,17 +136,17 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs sm:text-sm font-bold text-[#1C1917] truncate group-hover:text-[#6D28D9] transition-colors">
+          <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-[var(--accent)] transition-colors">
             {student.full_name || 'Student'}
           </p>
-          <p className="text-xs font-semibold text-[#A8A29E] truncate mt-0.5">
+          <p className="text-xs font-semibold text-[var(--text-muted)] truncate mt-0.5">
             @{student.username || 'campus_student'} · {student.branch || 'Campus'}
           </p>
         </div>
       </div>
       <button 
         type="button"
-        className="px-4 py-1.5 rounded-xl bg-[#6D28D9] text-white text-xs font-bold hover:bg-[#5B21B6] active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs"
+        className="px-4 py-1.5 rounded-xl bg-[var(--accent)] text-white text-xs font-bold hover:bg-[var(--accent-hover)] active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs"
       >
         Chat
       </button>
@@ -154,7 +154,7 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
   );
 }
 
-// â”€â”€â”€ Message Bubble â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Message Bubble ──────────────────────────────────────────────────
 
 function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderId }) {
   const sender = msg.senderId || msg.sender_id;
@@ -163,8 +163,8 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
   if (isSystem) {
     return (
       <div className="flex justify-center my-4">
-        <div className="flex items-center gap-2 bg-[#F3EEFC] text-[#78716C] rounded-full px-4 py-1.5">
-          <Zap className="w-3.5 h-3.5 text-[#6D28D9] fill-current" />
+        <div className="flex items-center gap-2 bg-[var(--accent-tint-10)] text-[var(--text-secondary)] rounded-full px-4 py-1.5">
+          <Zap className="w-3.5 h-3.5 text-[var(--accent)] fill-current" />
           <span className="text-[11px] font-bold">{msg.text}</span>
         </div>
       </div>
@@ -184,7 +184,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
               <img
                 src={avatarUrl(senderId, senderName, senderPhoto)}
                 alt={senderName}
-                className="w-7 h-7 rounded-full object-cover border border-[#E7E5E4]"
+                className="w-7 h-7 rounded-full object-cover border border-[var(--border-hairline)]"
               />
             </Link>
           ) : <div className="w-7 h-7" />}
@@ -195,15 +195,15 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
         <div
           className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
             isMe
-              ? 'bg-[#6D28D9] text-white rounded-br-xs font-medium'
-              : 'bg-[#F3EEFC] text-[#1C1917] rounded-bl-xs font-medium'
+              ? 'bg-[var(--accent)] text-white rounded-br-xs font-medium shadow-xs'
+              : 'bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] rounded-bl-xs font-medium shadow-xs'
           }`}
         >
           {msg.text}
         </div>
         <div className={`flex items-center gap-1.5 mt-1 px-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
-          <span className="text-[10px] text-[#A8A29E] font-medium">{formatTime(msg.timestamp || msg.created_at)}</span>
-          {isMe && <CheckCheck size={14} className="text-[#6D28D9] opacity-90 flex-shrink-0" />}
+          <span className="text-[10px] text-[var(--text-muted)] font-medium">{formatTime(msg.timestamp || msg.created_at)}</span>
+          {isMe && <CheckCheck size={14} className="text-[var(--accent)] opacity-90 flex-shrink-0" />}
         </div>
       </div>
     </motion.div>
@@ -215,7 +215,7 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
 function MessagesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const targetParam = searchParams.get('uid') || searchParams.get('user') || searchParams.get('group');
+  const targetParam = searchParams.get('uid') || searchParams.get('user') || searchParams.get('userId') || searchParams.get('group');
 
   const { user: globalUser } = useUserContext();
   const currentUid = globalUser?.id || globalUser?.uid || null;
@@ -266,6 +266,7 @@ function MessagesContent() {
   const inputRef = useRef(null);
   const chatContainerRef = useRef(null);
   const activeChannelRef = useRef(null);
+  const messagesCacheRef = useRef({});
 
   // â”€â”€ Keyboard & Mobile Visual Viewport Handling (Attaches to top of keyboard) â”€â”€
   useEffect(() => {
@@ -348,7 +349,9 @@ function MessagesContent() {
           if (newMsg?.senderId === currentUid) return; // skip own broadcast
           setMessages(prev => {
             if (prev.some(m => m.id === newMsg.id || (newMsg.tempId && m.id === newMsg.tempId))) return prev;
-            return [...prev, newMsg];
+            const updated = [...prev, newMsg];
+            messagesCacheRef.current[activeChatId] = updated;
+            return updated;
           });
           setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 30);
         }
@@ -365,17 +368,20 @@ function MessagesContent() {
           const newMsg = payload.new;
           setMessages(prev => {
             if (prev.some(m => m.id === newMsg.id)) return prev;
-            return [
+            const formatted = {
+              id: newMsg.id,
+              senderId: newMsg.sender_id,
+              text: newMsg.text,
+              status: newMsg.status || 'sent',
+              timestamp: newMsg.created_at ? new Date(newMsg.created_at).getTime() : Date.now(),
+              created_at: newMsg.created_at,
+            };
+            const updated = [
               ...prev.filter(m => !m.id?.startsWith('temp-') || m.text !== newMsg.text),
-              {
-                id: newMsg.id,
-                senderId: newMsg.sender_id,
-                text: newMsg.text,
-                status: newMsg.status || 'sent',
-                timestamp: newMsg.created_at ? new Date(newMsg.created_at).getTime() : Date.now(),
-                created_at: newMsg.created_at,
-              }
+              formatted
             ];
+            messagesCacheRef.current[activeChatId] = updated;
+            return updated;
           });
           setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 30);
         }
@@ -390,17 +396,18 @@ function MessagesContent() {
     };
   }, [activeChatId, currentUid]);
 
-  // â”€â”€ Open Chat (With Mark As Read) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const openChat = useCallback(async (chat) => {
-    setActiveChatId(chat.id);
+  // ── Open Chat (Instant 0ms Switch + Client Memory Cache) ───────────────────
+  const openChat = useCallback((chat) => {
+    if (!chat?.id) return;
+    const chatId = chat.id;
+    setActiveChatId(chatId);
     setActiveChat(chat);
     setShowList(false);
-    setLoadingMessages(true);
-    setMessages([]);
+    setLoadingMessages(false);
 
     // Optimistically clear unread badge in state
     setChats(prev => prev.map(c => {
-      if (c.id === chat.id) {
+      if (c.id === chatId) {
         return {
           ...c,
           unread_count: { ...(c.unread_count || {}), [currentUid]: 0 },
@@ -410,22 +417,52 @@ function MessagesContent() {
       return c;
     }));
 
-    // Reset unread count in database
+    // Reset unread count in database in background
     if (!chat.isMock && currentUid) {
-      fetch(`/api/chats/${chat.id}`, { method: 'PATCH' }).catch(() => {});
+      fetch(`/api/chats/${chatId}`, { method: 'PATCH' }).catch(() => {});
     }
 
-    try {
-      const res = await fetch(`/api/chats/${chat.id}/messages`);
-      const data = await res.json();
-      if (data.messages) {
-        setMessages(data.messages);
-        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 50);
+    // 1. Instant Cache Check (0ms switch)
+    const cached = messagesCacheRef.current[chatId];
+    if (cached && Array.isArray(cached) && cached.length > 0) {
+      setMessages(cached);
+      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'instant' }), 20);
+    } else if (chat.isMock || !chat.last_message || chat.last_message.startsWith('Say hi')) {
+      // New conversation with 0 messages: ready immediately with 0 delay
+      setMessages([]);
+    } else {
+      // Show optimistic last message while fetching recent messages in background
+      if (chat.last_message) {
+        setMessages([{
+          id: `opt-${chatId}`,
+          senderId: chat.last_sender_id || 'other',
+          text: chat.last_message,
+          status: 'sent',
+          timestamp: chat.last_message_at ? new Date(chat.last_message_at).getTime() : Date.now(),
+          created_at: chat.last_message_at,
+        }]);
+      } else {
+        setMessages([]);
       }
-    } catch (err) {
-      console.error('Failed to load messages:', err);
-    } finally {
-      setLoadingMessages(false);
+    }
+
+    // 2. Fast background sync (fetches max 25 recent messages)
+    if (!chat.isMock) {
+      fetch(`/api/chats/${chatId}/messages?limit=25`)
+        .then(res => res.json())
+        .then(data => {
+          if (data?.messages) {
+            messagesCacheRef.current[chatId] = data.messages;
+            setActiveChatId(currId => {
+              if (currId === chatId) {
+                setMessages(data.messages);
+                setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'instant' }), 30);
+              }
+              return currId;
+            });
+          }
+        })
+        .catch(err => console.error('Failed to sync messages:', err));
     }
   }, [currentUid]);
 
@@ -486,7 +523,7 @@ function MessagesContent() {
       return;
     }
 
-    const isUidParam = searchParams.has('uid') || searchParams.has('user');
+    const isUidParam = searchParams.has('uid') || searchParams.has('user') || searchParams.has('userId');
     if (isUidParam) {
       openChatWithUser(targetParam);
       return;
@@ -563,7 +600,13 @@ function MessagesContent() {
       status: 'sent'
     };
 
-    setMessages(prev => [...prev, newMsg]);
+    setMessages(prev => {
+      const updated = [...prev, newMsg];
+      if (activeChatId) {
+        messagesCacheRef.current[activeChatId] = updated;
+      }
+      return updated;
+    });
     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 30);
 
     // Instant WebSocket broadcast to active recipient
@@ -662,14 +705,14 @@ function MessagesContent() {
   if (!loadingChats && !currentUid) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
-        <div className="w-16 h-16 rounded-full bg-[#F3EEFC] flex items-center justify-center mb-4 text-[#1C1917]">
+        <div className="w-16 h-16 rounded-full bg-[var(--accent-tint-10)] flex items-center justify-center mb-4 text-[var(--text-primary)]">
           <MessageSquare className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-bold text-[#1C1917] mb-1">Sign in to Message</h2>
-        <p className="text-xs text-[#78716C] max-w-xs mb-6">
+        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-1">Sign in to Message</h2>
+        <p className="text-xs text-[var(--text-secondary)] max-w-xs mb-6">
           Connect with campus students directly.
         </p>
-        <Link href="/" className="px-6 py-2.5 rounded-full bg-[#6D28D9] text-white font-bold text-xs hover:bg-[#5B21B6] transition-all">
+        <Link href="/" className="px-6 py-2.5 rounded-full bg-[var(--accent)] text-white font-bold text-xs hover:bg-[var(--accent-hover)] transition-all">
           Go Home
         </Link>
       </div>
@@ -679,64 +722,64 @@ function MessagesContent() {
   return (
     <div
       ref={chatContainerRef}
-      className={`flex w-full bg-white text-[#1C1917] overflow-hidden md:border border-[#E7E5E4]/80 md:rounded-3xl shadow-xs ${
+      className={`flex w-full bg-[var(--bg-surface)] text-[var(--text-primary)] overflow-hidden md:border border-[var(--border-hairline)] md:rounded-[28px] shadow-xs ${
         !showList
-          ? 'fixed inset-x-0 bottom-0 top-[58px] z-[60] md:static md:top-auto md:z-0 md:rounded-3xl md:border rounded-none border-0 h-[calc(100dvh-58px)] md:h-[calc(100vh-80px)] flex-row'
-          : 'h-[calc(100dvh-140px)] md:h-[calc(100vh-80px)] rounded-2xl border flex-row relative'
+          ? 'fixed inset-x-0 bottom-0 top-[58px] z-[60] md:static md:top-auto md:z-0 md:rounded-[28px] md:border rounded-none border-0 h-[calc(100dvh-58px)] md:h-[calc(100vh-32px)] flex-row'
+          : 'h-[calc(100dvh-70px)] md:h-[calc(100vh-32px)] rounded-none md:rounded-[28px] border-0 md:border flex-row relative'
       }`}
     >
       {/* LEFT SIDEBAR (320px per Blueprint Section 4) */}
       <div className={`
         flex flex-col w-full md:w-[320px] lg:w-[320px] md:flex-shrink-0
-        border-r border-[#E7E5E4] bg-white
+        border-r border-[var(--border-hairline)] bg-[var(--bg-surface)]
         ${!showList ? 'hidden md:flex' : 'flex'}
       `}>
-        <div className="px-4 py-3.5 flex items-center justify-between border-b border-[#E7E5E4]">
-          <span className="font-bold text-lg text-[#1C1917] tracking-tight">
+        <div className="px-4 py-3.5 flex items-center justify-between border-b border-[var(--border-hairline)]">
+          <span className="font-bold text-lg text-[var(--text-primary)] tracking-tight">
             @{currentUser?.username || currentUser?.full_name?.toLowerCase().replace(/\s+/g, '') || 'messages'}
           </span>
           <button
             type="button"
             onClick={() => setShowNewMessageModal(true)}
-            className="p-2 rounded-full hover:bg-[#F3EEFC] text-[#1C1917] transition-colors cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center hover:bg-[var(--accent-tint-20)] active:scale-95 transition-all cursor-pointer shadow-2xs"
             title="New Message"
           >
-            <SquarePen className="w-5 h-5" />
+            <SquarePen size={17} />
           </button>
         </div>
 
-        <div className="px-4 py-3">
-          <div className="relative">
-            <Search className="w-4 h-4 text-[#A8A29E] absolute left-4 top-1/2 -translate-y-1/2" />
+        <div className="p-3 border-b border-[var(--border-hairline)]">
+          <div className="flex items-center gap-2 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-xl px-3 py-2">
+            <Search className="w-4 h-4 text-[var(--text-muted)]" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search people or chats..."
-              className="w-full h-11 pl-11 pr-9 rounded-full text-[13px] bg-[#FAFAF8] text-[#1C1917] placeholder:text-[#A8A29E] border border-[#E7E5E4] focus:outline-none focus:border-[#6D28D9] font-medium transition-all"
+              placeholder="Search chats or peers..."
+              className="w-full text-[13px] bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none font-medium transition-all"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#A8A29E] hover:text-[#1C1917]"
+                className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
-                âœ•
+                ✕
               </button>
             )}
           </div>
         </div>
 
-        <div suppressHydrationWarning className="flex-1 overflow-y-auto no-scrollbar py-2 px-2 space-y-0.5">
+        <div suppressHydrationWarning className="flex-1 overflow-y-auto no-scrollbar py-0 px-0">
           {loadingChats ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-6 h-6 animate-spin text-[#A8A29E]" />
+              <Loader2 className="w-6 h-6 animate-spin text-[var(--text-muted)]" />
             </div>
           ) : (
             <>
               {filteredChats.length > 0 && (
                 <div>
-                  {q && <p className="text-[10px] font-bold text-[#A8A29E] uppercase tracking-wider px-4 py-1">Conversations</p>}
+                  {q && <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider px-4 py-1">Conversations</p>}
                   <div>
                     {filteredChats.map(chat => (
                       <ChatListItem
@@ -755,10 +798,10 @@ function MessagesContent() {
               {(q || chats.length === 0) && filteredSuggested.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between px-4 py-1.5 mt-2">
-                    <span className="text-[10px] font-bold text-[#A8A29E] uppercase tracking-wider">
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
                       {q ? 'Campus Directory' : 'Suggested for you'}
                     </span>
-                    {!q && <Link href="/discover" className="text-[11px] font-bold text-[#6D28D9] hover:underline">See all</Link>}
+                    {!q && <Link href="/discover" className="text-[11px] font-bold text-[var(--accent)] hover:underline">See all</Link>}
                   </div>
                   <div>
                     {filteredSuggested.slice(0, q ? 12 : 6).map(student => (
@@ -779,54 +822,54 @@ function MessagesContent() {
 
       {/* RIGHT MAIN PANEL */}
       <div className={`
-        flex flex-col flex-1 h-full min-h-0 bg-white
+        flex flex-col flex-1 h-full min-h-0 bg-[var(--bg-base)]
         ${showList && !activeChatId ? 'hidden md:flex' : 'flex'}
       `}>
         {!activeChatId ? (
-          <div className="flex flex-col flex-1 h-full min-h-0 overflow-y-auto no-scrollbar p-6 sm:p-8 bg-[#FAFAF8]/50">
+          <div className="flex flex-col flex-1 h-full min-h-0 overflow-y-auto no-scrollbar p-6 sm:p-8 bg-[var(--bg-base)]">
             <div className="max-w-xl mx-auto w-full my-auto py-6 space-y-6">
               
               {/* Top Banner Card */}
               <div className="text-center space-y-3">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] text-[10px] font-bold uppercase tracking-wider">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] text-[10px] font-bold uppercase tracking-wider">
                   <Sparkles size={12} className="fill-current" />
                   <span>Direct Campus Connect</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-[#1C1917] tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
                   Start a Conversation
                 </h2>
-                <p className="text-xs sm:text-sm text-[#78716C] max-w-sm mx-auto leading-relaxed font-medium">
+                <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-sm mx-auto leading-relaxed font-medium">
                   Connect 1-on-1 with verified campus peers to collaborate, study together, or ask questions.
                 </p>
                 <div className="pt-2 flex items-center justify-center gap-3">
                   <button
                     type="button"
                     onClick={() => setShowNewMessageModal(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-xs transition-all active:scale-95 cursor-pointer shadow-sm hover:shadow-md"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-xs transition-all active:scale-95 cursor-pointer shadow-sm hover:shadow-md"
                   >
                     <SquarePen size={14} />
                     <span>New Message</span>
                   </button>
                   <Link
                     href="/discover"
-                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white border border-[#E7E5E4] hover:bg-[#F3EEFC] text-[#78716C] font-bold text-xs transition-all active:scale-95 cursor-pointer"
+                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[var(--bg-surface)] border border-[var(--border-hairline)] hover:bg-[var(--bg-base)] text-[var(--text-secondary)] font-bold text-xs transition-all active:scale-95 cursor-pointer"
                   >
-                    <Compass size={14} className="text-[#6D28D9]" />
+                    <Compass size={14} className="text-[var(--accent)]" />
                     <span>Explore Campus</span>
                   </Link>
                 </div>
               </div>
 
               {/* 1-Tap Quick Chat Suggestions Card */}
-              <div className="bg-white rounded-2xl border border-[#E7E5E4]/80 p-5 shadow-xs space-y-4">
+              <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-hairline)] p-5 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1C1917]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-primary)]">
                       Suggested Classmates
                     </span>
                   </div>
-                  <Link href="/discover" className="text-[11px] font-bold text-[#6D28D9] hover:underline">
+                  <Link href="/discover" className="text-[11px] font-bold text-[var(--accent)] hover:underline">
                     View All
                   </Link>
                 </div>
@@ -844,30 +887,30 @@ function MessagesContent() {
                         return (
                           <div
                             key={student.id}
-                            className="p-3.5 rounded-2xl border border-[#E7E5E4] bg-[#FAFAF8]/70 hover:bg-white hover:border-[#E4D9F7] hover:shadow-xs transition-all flex items-center justify-between gap-3 group"
+                            className="p-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] hover:bg-[var(--bg-base)] hover:border-[var(--accent-tint-20)] hover:shadow-xs transition-all flex items-center justify-between gap-3 group"
                           >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                               <div className="relative flex-shrink-0">
                                 <img
                                   src={avatar}
                                   alt=""
-                                  className="w-11 h-11 rounded-full object-cover border border-[#E7E5E4] bg-white"
+                                  className="w-11 h-11 rounded-full object-cover border border-[var(--border-hairline)] bg-[var(--bg-surface)]"
                                   onError={(e) => {
                                     e.currentTarget.onerror = null;
                                     e.currentTarget.src = getCartoonAvatar(student.full_name || student.id || 'user');
                                   }}
                                 />
-                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
+                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-[var(--bg-surface)]" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs font-bold text-[#1C1917] truncate group-hover:text-[#6D28D9] transition-colors">
+                                <p className="text-xs font-bold text-[var(--text-primary)] truncate group-hover:text-[var(--accent)] transition-colors">
                                   {student.full_name || 'Student'}
                                 </p>
-                                <p className="text-[10px] font-semibold text-[#A8A29E] truncate mt-0.5">
+                                <p className="text-[10px] font-semibold text-[var(--text-muted)] truncate mt-0.5">
                                   {branchYear}
                                 </p>
                                 {firstInterest && (
-                                  <span className="inline-block mt-1 text-[9px] font-bold px-2 py-0.2 rounded-full bg-white border border-[#E7E5E4] text-[#78716C]">
+                                  <span className="inline-block mt-1 text-[9px] font-bold px-2 py-0.2 rounded-full bg-[var(--bg-surface)] border border-[var(--border-hairline)] text-[var(--text-secondary)]">
                                     {firstInterest}
                                   </span>
                                 )}
@@ -877,7 +920,7 @@ function MessagesContent() {
                             <button
                               type="button"
                               onClick={() => openChatWithUser(student.id, student.full_name, student.photo_url)}
-                              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#F3EEFC] text-[#6D28D9] hover:bg-[#6D28D9] hover:text-white border border-[#E4D9F7] text-[11px] font-bold transition-all cursor-pointer flex-shrink-0 active:scale-95 shadow-2xs"
+                              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--accent-tint-10)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white border border-[var(--accent-tint-20)] text-[11px] font-bold transition-all cursor-pointer flex-shrink-0 active:scale-95 shadow-2xs"
                               title="Start Chat"
                             >
                               <Send size={11} />
@@ -888,8 +931,8 @@ function MessagesContent() {
                       })}
                   </div>
                 ) : (
-                  <div className="text-center py-6 text-[#A8A29E] text-xs font-medium">
-                    Loading campus studentsâ€¦
+                  <div className="text-center py-6 text-[var(--text-muted)] text-xs font-medium">
+                    Loading campus students…
                   </div>
                 )}
               </div>
@@ -902,15 +945,15 @@ function MessagesContent() {
             {(() => {
               const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
               return (
-                <div className="flex items-center justify-between px-4 py-3 border-b border-[#E7E5E4] bg-white flex-shrink-0">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-hairline)] bg-[var(--bg-surface)] flex-shrink-0">
                   <div className="flex items-center gap-3 min-w-0">
                     <button
                       type="button"
                       onClick={handleBack}
-                      className="md:hidden p-2 -ml-2 rounded-full hover:bg-[#F3EEFC] active:bg-[#E7E5E4] transition-colors text-[#1C1917] cursor-pointer flex items-center justify-center flex-shrink-0"
+                      className="md:hidden p-2 -ml-2 rounded-full hover:bg-[var(--bg-surface)] active:bg-[var(--accent-tint-10)] transition-colors text-[var(--text-primary)] cursor-pointer flex items-center justify-center flex-shrink-0"
                       title="Back"
                     >
-                      <ArrowLeft className="w-5 h-5 text-[#1C1917]" strokeWidth={2.5} />
+                      <ArrowLeft className="w-5 h-5 text-[var(--text-primary)]" strokeWidth={2.5} />
                     </button>
 
                     <Link
@@ -922,27 +965,27 @@ function MessagesContent() {
                         <img
                           src={avatarUrl(otherId, otherName, otherPhoto)}
                           alt=""
-                          className="w-10 h-10 rounded-full object-cover border border-[#E7E5E4] group-hover:ring-2 group-hover:ring-[#6D28D9]/30 transition-all"
+                          className="w-10 h-10 rounded-full object-cover border border-[var(--border-hairline)] group-hover:ring-2 group-hover:ring-[var(--accent)]/30 transition-all"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
                           }}
                         />
-                        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[var(--bg-surface)]" />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-[#1C1917] group-hover:text-[#6D28D9] truncate transition-colors">
+                        <p className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] truncate transition-colors">
                           {otherName}
                         </p>
                         {isGroup ? (
-                          <p className="text-[11px] font-bold text-[#6D28D9] flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#6D28D9] animate-pulse" />
+                          <p className="text-[11px] font-bold text-[var(--accent)] flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
                             Verified Campus Channel
                           </p>
                         ) : (
-                          <p className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <p className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                             Active on Campus
                           </p>
                         )}
@@ -955,39 +998,57 @@ function MessagesContent() {
                       href={activeChat?.link || activeChat?.channel_link || activeChat?.invite_link || "https://chat.whatsapp.com/"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition-colors"
+                      className="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-colors"
                       title="WhatsApp Channel"
                     >
                       Channel
                     </a>
                   ) : (
                     <div className="flex items-center gap-1.5">
-                      {/* Show Voice Call button ONLY if active meeting is booked between them */}
-                      {hasActiveMeeting && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            startCall({
-                              targetUserId: otherId,
-                              targetName: otherName,
-                              targetPhoto: otherPhoto,
-                              bookingId: activeMeeting?.id,
-                              location: activeMeeting?.location || 'Campus Meetup',
-                            });
-                          }}
-                          className="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95"
-                          title="Call Campus Meetup Peer (100% Private)"
-                        >
-                          <Phone size={15} />
-                        </button>
-                      )}
+                      {/* Voice Call button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          startCall({
+                            targetUserId: otherId,
+                            targetName: otherName,
+                            targetPhoto: otherPhoto,
+                            bookingId: activeMeeting?.id || null,
+                            location: activeMeeting?.location || 'Campus Meetup',
+                            callType: 'voice',
+                          });
+                        }}
+                        className="w-9 h-9 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 flex-shrink-0"
+                        title="Voice Call (100% End-to-End Encrypted)"
+                      >
+                        <Phone size={15} strokeWidth={2.2} />
+                      </button>
+
+                      {/* Video Call button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          startCall({
+                            targetUserId: otherId,
+                            targetName: otherName,
+                            targetPhoto: otherPhoto,
+                            bookingId: activeMeeting?.id || null,
+                            location: activeMeeting?.location || 'Campus Meetup',
+                            callType: 'video',
+                          });
+                        }}
+                        className="w-9 h-9 rounded-xl bg-[var(--accent-tint-10)] hover:bg-[var(--accent-tint-20)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 flex-shrink-0"
+                        title="Video Call (100% End-to-End Encrypted)"
+                      >
+                        <Video size={16} strokeWidth={2.2} />
+                      </button>
 
                       <Link
                         href={`/users/${otherId}`}
-                        className="w-9 h-9 rounded-xl hover:bg-[#F3EEFC] text-[#78716C] flex items-center justify-center transition-colors"
+                        className="w-9 h-9 rounded-xl hover:bg-[var(--accent-tint-10)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent hover:border-[var(--border-hairline)] flex items-center justify-center transition-colors flex-shrink-0"
                         title="View Profile"
                       >
-                        <Info size={17} />
+                        <Info size={17} strokeWidth={2} />
                       </Link>
                     </div>
                   )}
@@ -996,60 +1057,53 @@ function MessagesContent() {
             })()}
 
             {/* Messages Scroll Area */}
-            <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-1 no-scrollbar bg-white">
-              {loadingMessages ? (
-                <div className="flex flex-col items-center justify-center h-full py-12 text-[#A8A29E] gap-2.5">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#6D28D9]" />
-                  <span className="text-xs font-bold text-[#A8A29E] tracking-tight">Loading conversation...</span>
-                </div>
-              ) : (
-                <>
-                  {messages.length === 0 && (() => {
-                    const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
-                    return (
-                      <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                        <Link
-                          href={isGroup ? '/circles' : (otherId ? `/users/${otherId}` : '#')}
-                          className="group cursor-pointer inline-flex flex-col items-center"
-                        >
-                          <div className="w-20 h-20 rounded-full bg-[#F3EEFC] flex items-center justify-center overflow-hidden mb-3 border border-[#E4D9F7] shadow-sm group-hover:ring-4 group-hover:ring-[#F3EEFC] transition-all">
-                            <img 
-                              src={avatarUrl(otherId, otherName, otherPhoto)} 
-                              alt={otherName} 
-                              className="w-full h-full object-cover" 
-                              onError={(e) => {
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
-                              }}
-                            />
-                          </div>
-                          <h3 className="text-base font-bold text-[#1C1917] group-hover:text-[#6D28D9] transition-colors">{otherName}</h3>
-                          <p className="text-xs text-[#78716C] mb-4 font-semibold">
-                            {isGroup ? 'Verified Campus Community · Official Channel' : 'Campus Student · Meova'}
-                          </p>
-                        </Link>
-
-                        {isGroup ? (
-                          <a 
-                            href={activeChat?.link || activeChat?.channel_link || activeChat?.invite_link || "https://chat.whatsapp.com/"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-xs cursor-pointer active:scale-95"
-                          >
-                            Join Official WhatsApp Channel
-                          </a>
-                        ) : (
-                          <Link 
-                            href={`/users/${otherId}`}
-                            className="px-4 py-1.5 rounded-xl bg-[#F3EEFC] hover:bg-[#E7E5E4] text-[#1C1917] text-xs font-bold transition-colors"
-                          >
-                            View profile
-                          </Link>
-                        )}
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-1 no-scrollbar bg-[var(--bg-base)]">
+              {messages.length === 0 ? (() => {
+                const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
+                return (
+                  <div className="flex flex-col items-center justify-center h-full text-center py-10">
+                    <Link
+                      href={isGroup ? '/circles' : (otherId ? `/users/${otherId}` : '#')}
+                      className="group cursor-pointer inline-flex flex-col items-center"
+                    >
+                      <div className="w-20 h-20 rounded-full bg-[var(--bg-surface)] flex items-center justify-center overflow-hidden mb-3 border border-[var(--border-hairline)] shadow-sm group-hover:ring-4 group-hover:ring-[var(--accent)]/20 transition-all">
+                        <img 
+                          src={avatarUrl(otherId, otherName, otherPhoto)} 
+                          alt={otherName} 
+                          className="w-full h-full object-cover" 
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
+                          }}
+                        />
                       </div>
-                    );
-                  })()}
+                      <h3 className="text-base font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">{otherName}</h3>
+                      <p className="text-xs text-[var(--text-secondary)] mb-4 font-semibold">
+                        {isGroup ? 'Verified Campus Community · Official Channel' : 'Campus Student · Meova'}
+                      </p>
+                    </Link>
 
+                    {isGroup ? (
+                      <a 
+                        href={activeChat?.link || activeChat?.channel_link || activeChat?.invite_link || "https://chat.whatsapp.com/"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-xs cursor-pointer active:scale-95"
+                      >
+                        Join Official WhatsApp Channel
+                      </a>
+                    ) : (
+                      <Link 
+                        href={`/users/${otherId}`}
+                        className="px-4 py-1.5 rounded-full bg-[var(--bg-surface)] hover:bg-[var(--bg-base)] text-[var(--text-primary)] text-xs font-bold transition-colors border border-[var(--border-hairline)]"
+                      >
+                        View profile
+                      </Link>
+                    )}
+                  </div>
+                );
+              })() : (
+                <>
                   <AnimatePresence initial={false}>
                     {messages.map((msg, idx) => {
                       const sender = msg.senderId || msg.sender_id;
@@ -1081,9 +1135,9 @@ function MessagesContent() {
               const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
               if (isGroup) {
                 return (
-                  <div className="p-3.5 border-t border-[#E7E5E4] bg-[#FAFAF8] flex-shrink-0 flex items-center justify-center gap-2">
-                    <Radio size={14} className="text-[#6D28D9]" />
-                    <p className="text-xs font-bold text-[#78716C]">
+                  <div className="p-3.5 border-t border-[var(--border-hairline)] bg-[var(--bg-surface)] flex-shrink-0 flex items-center justify-center gap-2">
+                    <Radio size={14} className="text-[var(--accent)]" />
+                    <p className="text-xs font-bold text-[var(--text-secondary)]">
                       Verified Campus Channel · Broadcast updates only
                     </p>
                   </div>
@@ -1093,20 +1147,20 @@ function MessagesContent() {
               const isGenuinelyNewChat = !loadingMessages && (activeChat?.isMock || (messages.length === 0 && !activeChat?.last_message));
 
               return (
-                <div className="border-t border-[#E7E5E4] bg-white flex-shrink-0">
+                <div className="border-t border-[var(--border-hairline)] bg-[var(--bg-surface)] flex-shrink-0">
                   {/* First message spark indicator */}
                   {isGenuinelyNewChat && (
-                    <div className="flex items-center justify-between px-4 py-2 bg-[#F3EEFC]/80 border-b border-[#E4D9F7] text-[11px] font-bold text-purple-950">
+                    <div className="flex items-center justify-between px-4 py-2 bg-[var(--accent-tint-10)] border-b border-[var(--accent-tint-20)] text-[11px] font-bold text-[var(--accent)]">
                       <div className="flex items-center gap-1.5">
-                        <Zap size={13} className="text-[#6D28D9] fill-[#6D28D9] flex-shrink-0" />
+                        <Zap size={13} className="text-[var(--accent)] fill-[var(--accent)] flex-shrink-0" />
                         <span>First message starts this conversation (5 Sparks)</span>
                       </div>
-                      <span className="font-extrabold text-[#5B21B6] flex-shrink-0 ml-2">Balance: {spendableSparks} Sparks</span>
+                      <span className="font-extrabold text-[var(--accent)] flex-shrink-0 ml-2">Balance: {spendableSparks} Sparks</span>
                     </div>
                   )}
 
                   <div className="p-2.5 sm:p-3">
-                    <div className="flex items-center gap-3 bg-white border border-[#E7E5E4] rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[#6D28D9] focus-within:border-transparent transition-all">
+                    <div className="flex items-center gap-3 bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[var(--accent)] focus-within:border-transparent transition-all">
                       <textarea
                         ref={inputRef}
                         value={inputText}
@@ -1114,7 +1168,7 @@ function MessagesContent() {
                         onKeyDown={handleKeyDown}
                         placeholder="Message..."
                         rows={1}
-                        className="flex-1 resize-none bg-transparent text-base sm:text-sm text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none max-h-28 font-medium"
+                        className="flex-1 resize-none bg-transparent text-base sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none max-h-28 font-medium"
                         style={{ lineHeight: '1.4' }}
                         onInput={e => {
                           e.target.style.height = 'auto';
@@ -1125,9 +1179,9 @@ function MessagesContent() {
                         type="button"
                         onClick={sendMessage}
                         disabled={!inputText.trim() || sendingMsg}
-                        className="text-[#6D28D9] hover:text-[#5B21B6] disabled:opacity-30 font-bold text-xs transition-all active:scale-95 flex-shrink-0 cursor-pointer"
+                        className="text-[var(--accent)] hover:text-[var(--accent-hover)] disabled:opacity-30 font-bold text-xs transition-all active:scale-95 flex-shrink-0 cursor-pointer"
                       >
-                        {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin text-[#6D28D9]" /> : 'Send'}
+                        {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin text-[var(--accent)]" /> : 'Send'}
                       </button>
                     </div>
                   </div>
@@ -1140,33 +1194,33 @@ function MessagesContent() {
 
       {/* NEW MESSAGE MODAL */}
       {showNewMessageModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-[#E7E5E4] anim-fade-in flex flex-col max-h-[85vh]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E5E4]">
-              <h2 className="text-base font-bold text-[#1C1917]">New Message</h2>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[var(--bg-surface)] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-[var(--border-hairline)] anim-fade-in flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-hairline)]">
+              <h2 className="text-base font-bold text-[var(--text-primary)]">New Message</h2>
               <button 
                 type="button"
                 onClick={() => { setShowNewMessageModal(false); setNewMsgSearch(''); }}
-                className="text-xs font-bold text-[#A8A29E] hover:text-[#78716C] cursor-pointer"
+                className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
               >
                 Cancel
               </button>
             </div>
 
             {/* Quick Search inside Modal */}
-            <div className="p-3 border-b border-[#E7E5E4] bg-[#FAFAF8]/60">
-              <div className="flex items-center gap-2 bg-white border border-[#E7E5E4] rounded-xl px-3 py-2">
-                <Search size={14} className="text-[#A8A29E] flex-shrink-0" />
+            <div className="p-3 border-b border-[var(--border-hairline)] bg-[var(--bg-surface)]">
+              <div className="flex items-center gap-2 bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl px-3 py-2">
+                <Search size={14} className="text-[var(--text-muted)] flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Search classmate by name, branch..."
                   value={newMsgSearch}
                   onChange={e => setNewMsgSearch(e.target.value)}
-                  className="bg-transparent text-xs text-[#1C1917] font-semibold focus:outline-none w-full placeholder:text-[#A8A29E]"
+                  className="bg-transparent text-xs text-[var(--text-primary)] font-semibold focus:outline-none w-full placeholder:text-[var(--text-muted)]"
                   autoFocus
                 />
                 {newMsgSearch && (
-                  <button onClick={() => setNewMsgSearch('')} className="text-[#A8A29E] hover:text-[#78716C] cursor-pointer">
+                  <button onClick={() => setNewMsgSearch('')} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer">
                     <X size={13} />
                   </button>
                 )}
@@ -1174,7 +1228,7 @@ function MessagesContent() {
             </div>
 
             <div className="p-2 overflow-y-auto no-scrollbar space-y-1 flex-1">
-              <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider px-3 mb-2">Select a Campus Student</p>
+              <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider px-3 mb-2">Select a Campus Student</p>
               {(() => {
                 const term = newMsgSearch.trim().toLowerCase();
                 const filtered = suggestedStudents.filter(s => {
@@ -1190,7 +1244,7 @@ function MessagesContent() {
 
                 if (filtered.length === 0) {
                   return (
-                    <div className="text-center py-8 text-[#A8A29E] text-xs font-semibold">
+                    <div className="text-center py-8 text-[var(--text-muted)] text-xs font-semibold">
                       No classmates found matching &quot;{newMsgSearch}&quot;
                     </div>
                   );
@@ -1217,7 +1271,7 @@ export default function MessagesPage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-6 h-6 animate-spin text-[#A8A29E]" />
+        <Loader2 className="w-6 h-6 animate-spin text-[var(--text-muted)]" />
       </div>
     }>
       <MessagesContent />

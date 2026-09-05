@@ -102,7 +102,7 @@ export default function AdminCampaignsPage() {
             disabled={fetching}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E7E5E4] bg-white text-xs font-semibold text-[#78716C] hover:bg-[#FAFAF8] transition-all cursor-pointer shadow-2xs"
           >
-            <RefreshCw size={13} className={fetching ? 'animate-spin text-[#6D28D9]' : ''} />
+            <RefreshCw size={13} className={fetching ? 'animate-spin text-[var(--accent)]' : ''} />
             Refresh
           </button>
         </div>
@@ -120,7 +120,7 @@ export default function AdminCampaignsPage() {
         </div>
         <div className="p-4 rounded-2xl bg-white border border-[#E7E5E4] shadow-2xs">
           <p className="text-[11px] font-bold text-[#A8A29E] uppercase tracking-wider">Remaining Free Slots</p>
-          <p className="text-2xl font-bold text-[#6D28D9] mt-1">{Math.max(0, 100 - approvedCount)}</p>
+          <p className="text-2xl font-bold text-[var(--accent)] mt-1">{Math.max(0, 100 - approvedCount)}</p>
         </div>
       </div>
 
@@ -148,7 +148,7 @@ export default function AdminCampaignsPage() {
       <div className="bg-white border border-[#E7E5E4] rounded-3xl overflow-hidden shadow-2xs">
         {fetching && claims.length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center justify-center gap-2">
-            <Loader2 className="animate-spin text-[#6D28D9]" size={24} />
+            <Loader2 className="animate-spin text-[var(--accent)]" size={24} />
             <p className="text-xs text-[#78716C] font-medium">Loading story claims...</p>
           </div>
         ) : displayed.length === 0 ? (
@@ -188,7 +188,7 @@ export default function AdminCampaignsPage() {
                       <span className="text-[#A8A29E]">·</span>
                       <span className="text-[#78716C]">{fmtDate(claim.created_at)}</span>
                       <span className="text-[#A8A29E]">·</span>
-                      <span className="font-bold text-[#6D28D9] flex items-center gap-0.5">
+                      <span className="font-bold text-[var(--accent)] flex items-center gap-0.5">
                         <Zap size={11} className="fill-current" /> +{claim.reward_sparks || 100} Sparks
                       </span>
                     </div>

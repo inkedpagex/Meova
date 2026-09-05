@@ -79,7 +79,7 @@ export default function BlockUserButton({ targetUid, targetName, isLoggedIn, ico
               </div>
               <button 
                 onClick={() => !loading && setShowModal(false)}
-                className="w-8 h-8 rounded-full bg-[#FAFAF8] hover:bg-[#E7E5E4] text-[#78716C] flex items-center justify-center transition-all cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[#FAFAF8] hover:bg-[var(--accent-tint-10)] text-[#78716C] flex items-center justify-center transition-all cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -101,7 +101,7 @@ export default function BlockUserButton({ targetUid, targetName, isLoggedIn, ico
                 type="button"
                 onClick={() => setShowModal(false)}
                 disabled={loading}
-                className="flex-1 py-2.5 px-4 rounded-full font-bold text-xs text-black bg-white hover:bg-[#F3EEFC] border border-black/[0.08] transition-all cursor-pointer shadow-xs"
+                className="flex-1 py-2.5 px-4 rounded-full font-bold text-xs text-[#1C1917] bg-white hover:bg-[var(--accent-tint-10)] border border-[#E7E5E4]/[0.08] transition-all cursor-pointer shadow-xs"
               >
                 Cancel
               </button>

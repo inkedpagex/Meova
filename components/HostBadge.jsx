@@ -18,7 +18,7 @@ export default function HostBadge({ role, size = 'sm', className = '' }) {
             ? 'bg-purple-50 text-purple-700 border border-purple-200'
             : isLead
             ? 'bg-blue-50 text-blue-700 border border-blue-200'
-            : 'bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]'
+            : 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]'
         } ${className}`}
       >
         {isAdmin ? <Crown size={9} /> : isLead ? <Sparkles size={9} /> : <ShieldCheck size={9} />}
@@ -35,7 +35,7 @@ export default function HostBadge({ role, size = 'sm', className = '' }) {
           ? 'bg-purple-50 text-purple-700 border border-purple-200'
           : isLead
           ? 'bg-blue-50 text-blue-700 border border-blue-200'
-          : 'bg-[#F3EEFC] text-[#6D28D9] border border-[#E4D9F7]'
+          : 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]'
       } ${className}`}
     >
       {isAdmin ? (
@@ -43,7 +43,7 @@ export default function HostBadge({ role, size = 'sm', className = '' }) {
       ) : isLead ? (
         <Sparkles size={11} className="text-blue-600" />
       ) : (
-        <ShieldCheck size={11} className="text-[#6D28D9]" />
+        <ShieldCheck size={11} className="text-[var(--accent)]" />
       )}
       <span>{isAdmin ? 'Admin' : isLead ? 'Campus Lead' : 'Verified Host'}</span>
     </span>

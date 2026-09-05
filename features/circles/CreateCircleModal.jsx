@@ -20,8 +20,8 @@ const CATEGORIES = [
 
 const PLATFORMS = [
   { id: 'WhatsApp', label: 'WhatsApp Group / Channel', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { id: 'Telegram', label: 'Telegram Channel', color: 'bg-[#F3EEFC] text-[#6D28D9] border-[#E4D9F7]' },
-  { id: 'Instagram', label: 'Instagram Broadcast', color: 'bg-[#F3EEFC] text-pink-700 border-pink-200' },
+  { id: 'Telegram', label: 'Telegram Channel', color: 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' },
+  { id: 'Instagram', label: 'Instagram Broadcast', color: 'bg-[var(--accent-tint-10)] text-pink-700 border-pink-200' },
   { id: 'Discord', label: 'Discord Server', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
 ];
 
@@ -153,7 +153,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#E7E5E4] flex items-center justify-between bg-[#FAFAF8]/50">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#F3EEFC] text-[#6D28D9] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center">
               <Sparkles size={16} />
             </div>
             <div>
@@ -163,7 +163,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-[#E7E5E4] text-[#78716C] hover:text-[#1C1917] transition-colors"
+            className="p-1.5 rounded-full hover:bg-[var(--accent-tint-10)] text-[#78716C] hover:text-[#1C1917] transition-colors"
           >
             <X size={18} />
           </button>
@@ -183,7 +183,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. GLA UI/UX Designers Club"
-              className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/10 font-bold"
+              className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 font-bold"
             />
           </div>
 
@@ -198,7 +198,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat)}
-                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all ${category === cat ? 'bg-[#6D28D9] text-white shadow-md' : 'bg-[#FAFAF8] text-[#78716C] hover:bg-[#E7E5E4]'}`}
+                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all ${category === cat ? 'bg-[var(--accent)] text-white shadow-md' : 'bg-[#FAFAF8] text-[#78716C] hover:bg-[var(--accent-tint-10)]'}`}
                 >
                   {cat}
                 </button>
@@ -217,7 +217,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                   key={p.id}
                   type="button"
                   onClick={() => setPlatform(p.id)}
-                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all border ${platform === p.id ? p.color : 'bg-[#FAFAF8] text-[#78716C] border-transparent hover:bg-[#E7E5E4]'}`}
+                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all border ${platform === p.id ? p.color : 'bg-[#FAFAF8] text-[#78716C] border-transparent hover:bg-[var(--accent-tint-10)]'}`}
                 >
                   {p.label}
                 </button>
@@ -231,7 +231,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
               <label className="block text-[11px] font-bold text-[#78716C] uppercase tracking-wider">
                 Entry Fee (Sparks)
               </label>
-              <span className="text-[10px] text-[#6D28D9] font-bold">
+              <span className="text-[10px] text-[var(--accent)] font-bold">
                 {price === '0' ? 'FREE Group' : `Paid Community (${price} Sparks/join)`}
               </span>
             </div>
@@ -243,9 +243,9 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                 value={price}
                 onChange={handlePriceChange}
                 placeholder="0 for Free, or 50 Sparks"
-                className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[#6D28D9] font-bold pl-9"
+                className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[var(--accent)] font-bold pl-9"
               />
-              <Sparkles size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6D28D9] fill-[#6D28D9]" />
+              <Sparkles size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--accent)] fill-[var(--accent)]" />
             </div>
             <p className="text-[10px] text-[#A8A29E] mt-1">
               You receive 100% of these Sparks instantly whenever a student joins your community.
@@ -272,7 +272,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                 setInitialMembers(val);
               }}
               placeholder="e.g. 127"
-              className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[#6D28D9] font-bold"
+              className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[var(--accent)] font-bold"
             />
             <p className="text-[10px] text-[#A8A29E] mt-1">
               If you already have a running WhatsApp group with 127 members, set 127. New members joining via Meova will count as 128, 129…
@@ -291,7 +291,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                 value={link}
                 onChange={e => setLink(e.target.value)}
                 placeholder="https://chat.whatsapp.com/... or https://t.me/..."
-                className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[#6D28D9] font-bold pl-9"
+                className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2.5 text-xs text-[#1C1917] focus:outline-none focus:border-[var(--accent)] font-bold pl-9"
               />
               <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A8A29E]" />
             </div>
@@ -311,7 +311,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="What will members get in this channel? (e.g. Daily hackathon updates, study notes, portfolio feedback...)"
-              className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2 text-xs text-[#1C1917] focus:outline-none focus:border-[#6D28D9] font-medium"
+              className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] px-3.5 py-2 text-xs text-[#1C1917] focus:outline-none focus:border-[var(--accent)] font-medium"
             />
           </div>
 
@@ -355,18 +355,18 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                 onClick={() => fileInputRef.current?.click()}
                 className={`border-2 border-dashed rounded-[16px] p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 ${
                   imageUploading 
-                    ? 'border-[#E4D9F7] bg-[#F3EEFC]/50' 
-                    : 'border-[#E7E5E4] hover:border-[#6D28D9] hover:bg-[#F3EEFC]/30'
+                    ? 'border-[var(--accent-tint-20)] bg-[var(--accent-tint-10)]/50' 
+                    : 'border-[#E7E5E4] hover:border-[var(--accent)] hover:bg-[var(--accent-tint-10)]/30'
                 }`}
               >
                 {imageUploading ? (
                   <div className="space-y-1 py-2">
-                    <Loader2 size={20} className="animate-spin text-[#6D28D9] mx-auto" />
+                    <Loader2 size={20} className="animate-spin text-[var(--accent)] mx-auto" />
                     <p className="text-xs font-bold text-[#78716C]">Uploading cover...</p>
                   </div>
                 ) : (
                   <>
-                    <div className="w-9 h-9 rounded-[12px] bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-[12px] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center">
                       <Camera size={18} />
                     </div>
                     <div>
@@ -388,8 +388,8 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
                   <p className="text-[10px] font-bold text-[#78716C]">One-time payment</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[12px] font-bold text-[#6D28D9] flex items-center justify-end gap-1">
-                    100 <Sparkles size={12} className="fill-[#6D28D9]" />
+                  <p className="text-[12px] font-bold text-[var(--accent)] flex items-center justify-end gap-1">
+                    100 <Sparkles size={12} className="fill-[var(--accent)]" />
                   </p>
                   <p className={`text-[10px] font-bold ${hasEnoughSparks ? 'text-emerald-600' : 'text-rose-500'}`}>
                     Balance: {totalSparks}
@@ -401,7 +401,7 @@ export default function CreateCircleModal({ isOpen, onClose, onSuccess }) {
             <button
               type="submit"
               disabled={submitting || !hasEnoughSparks}
-              className="w-full py-3 rounded-[16px] bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-xs transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-[16px] bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-xs transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
             >
               {submitting ? 'Submitting Request...' : (
                 isAdmin ? 'Create Official Channel' : (hasEnoughSparks ? 'Pay 100 Sparks & Submit' : 'Insufficient Sparks')

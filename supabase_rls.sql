@@ -65,6 +65,9 @@ create policy "Owner read notifications" on public.notifications for select usin
 create policy "Owner update notifications" on public.notifications for update using (auth.uid()::text = user_id);
 create policy "Service role full access notifications" on public.notifications for all using (auth.role() = 'service_role');
 
+create policy "Owner manage device_tokens" on public.device_tokens for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "Service role full access device_tokens" on public.device_tokens for all using (auth.role() = 'service_role');
+
 create policy "Owner manage fcm_tokens" on public.fcm_tokens for all using (auth.uid()::text = user_id);
 create policy "Service role full access fcm_tokens" on public.fcm_tokens for all using (auth.role() = 'service_role');
 

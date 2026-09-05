@@ -133,7 +133,7 @@ export default function RatingReviewModal({
         {/* Header */}
         <div className="p-4 px-5 border-b border-[#E7E5E4] flex items-center justify-between bg-[#FAFAF8]/70">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#6D28D9]" />
+            <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#1C1917]">
               {contextType === 'gig' ? 'Rate & Review Gig' : 'Rate Your Meeting'}
             </h3>
@@ -159,8 +159,8 @@ export default function RatingReviewModal({
         ) : (
           <div className="p-5 space-y-4">
             {/* Target User Info */}
-            <div className="flex items-center gap-3 bg-[#F3EEFC] border border-[#E4D9F7] p-3 rounded-[16px]">
-              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-[#E4D9F7] shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+            <div className="flex items-center gap-3 bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] p-3 rounded-[16px]">
+              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-[var(--accent-tint-20)] shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
                 <img
                   src={targetPhoto || getCartoonAvatar(targetName || 'peer')}
                   alt=""
@@ -172,7 +172,7 @@ export default function RatingReviewModal({
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#6D28D9]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">
                   {contextType === 'gig' ? 'Freelancer / Client' : 'Meeting Partner'}
                 </p>
                 <h4 className="text-[14px] font-bold text-[#1C1917] truncate">{targetName}</h4>
@@ -201,7 +201,7 @@ export default function RatingReviewModal({
                       className={`transition-colors ${
                         star <= activeRating
                           ? 'text-amber-400 fill-amber-400 filter drop-shadow-[0_2px_8px_rgba(251,191,36,0.5)]'
-                          : 'text-[#E7E5E4] fill-[#FAFAF8]'
+                          : 'text-[#2A2A2A] fill-[#141414]'
                       }`}
                     />
                   </button>
@@ -227,8 +227,8 @@ export default function RatingReviewModal({
                       onClick={() => toggleTag(tag)}
                       className={`px-3 py-1 rounded-full text-[12px] font-medium transition-all cursor-pointer border ${
                         isSelected
-                          ? 'bg-[#6D28D9] text-white border-[#6D28D9] shadow-[0_2px_8px_rgba(28,25,23,0.06)]'
-                          : 'bg-[#FAFAF8] hover:bg-[#F3EEFC] text-[#1C1917] border-[#E7E5E4]'
+                          ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-[0_2px_8px_rgba(28,25,23,0.06)]'
+                          : 'bg-[#FAFAF8] hover:bg-[var(--accent-tint-10)] text-[#1C1917] border-[#E7E5E4]'
                       }`}
                     >
                       {tag}
@@ -245,7 +245,7 @@ export default function RatingReviewModal({
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Write a quick review or appreciation note (optional)..."
                 rows={3}
-                className="w-full text-xs font-medium p-3 rounded-[16px] bg-[#FAFAF8] border border-[#E7E5E4] text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:border-[#6D28D9] resize-none"
+                className="w-full text-xs font-medium p-3 rounded-[16px] bg-[#FAFAF8] border border-[#E7E5E4] text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:border-[var(--accent)] resize-none"
               />
             </div>
 
@@ -254,7 +254,7 @@ export default function RatingReviewModal({
               type="button"
               onClick={handleSubmit}
               disabled={submitting}
-              className="w-full py-3.5 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
             >
               {submitting ? (
                 <>

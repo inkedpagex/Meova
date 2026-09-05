@@ -62,8 +62,8 @@ export function getUserAvatarUrl(user) {
  */
 export function getCartoonAvatar(seed) {
   const cleanSeed = encodeURIComponent((seed || 'default').toString());
-  // Use public Dicebear Adventurer SVG avatar API
-  return `https://api.dicebear.com/7.x/adventurer/svg?seed=${cleanSeed}`;
+  // Use public Dicebear Adventurer SVG avatar API with aesthetic pastel backgrounds
+  return `https://api.dicebear.com/7.x/adventurer/svg?seed=${cleanSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf,c1f2d6,fed7aa`;
 }
 
 /**

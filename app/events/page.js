@@ -9,13 +9,13 @@ export const metadata = { title: 'Events — Meova' };
 
 // Category → premium gradient + icon
 const CATEGORY_THEMES = {
-  tech:        { from: '#6D28D9', to: '#6D28D9', icon: Code,    label: 'Tech' },
+  tech:        { from: 'var(--accent)', to: 'var(--accent)', icon: Code,    label: 'Tech' },
   music:       { from: '#db2777', to: '#ec4899', icon: Music,   label: 'Music' },
-  gaming:      { from: '#0ea5e9', to: '#5B21B6', icon: Trophy,  label: 'Gaming' },
+  gaming:      { from: '#0ea5e9', to: 'var(--accent-hover)', icon: Trophy,  label: 'Gaming' },
   study:       { from: '#10b981', to: '#059669', icon: BookOpen, label: 'Study' },
   art:         { from: '#f97316', to: '#ef4444', icon: Palette, label: 'Art' },
-  talk:        { from: '#8b5cf6', to: '#5B21B6', icon: Mic,     label: 'Talk' },
-  default:     { from: '#6D28D9', to: '#5B21B6', icon: Zap,     label: 'Event' },
+  talk:        { from: '#8b5cf6', to: 'var(--accent-hover)', icon: Mic,     label: 'Talk' },
+  default:     { from: 'var(--accent)', to: 'var(--accent-hover)', icon: Zap,     label: 'Event' },
 };
 
 function getTheme(event) {
@@ -92,7 +92,7 @@ function EventCard({ event, userId }) {
           {weekday}
         </span>
 
-        <h3 className="text-[15px] font-bold text-[#1C1917] leading-snug mb-3 group-hover:text-[#5B21B6] transition-colors line-clamp-2">
+        <h3 className="text-[15px] font-bold text-[#1C1917] leading-snug mb-3 group-hover:text-[var(--accent-hover)] transition-colors line-clamp-2">
           {event.title}
         </h3>
 
@@ -116,7 +116,7 @@ function EventCard({ event, userId }) {
         {/* Clean Event Tag CTA */}
         <div className="mt-auto">
           <div
-            className="w-full py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest text-center text-white transition-all bg-[#6D28D9] hover:bg-[#5B21B6] active:scale-95 shadow-xs"
+            className="w-full py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest text-center text-white transition-all bg-[var(--accent)] hover:bg-[var(--accent-hover)] active:scale-95 shadow-xs"
           >
             Explore Event
           </div>
@@ -149,8 +149,8 @@ export default async function EventsPage() {
                 key={f}
                 className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
                   f === 'All'
-                    ? 'bg-[#6D28D9] text-white border-[#6D28D9]'
-                    : 'bg-white text-[#78716C] border-[#E7E5E4] hover:border-[#6D28D9] hover:text-[#1C1917]'
+                    ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
+                    : 'bg-white text-[#78716C] border-[#E7E5E4] hover:border-[var(--accent)] hover:text-[#1C1917]'
                 }`}
               >
                 {f}
@@ -163,8 +163,8 @@ export default async function EventsPage() {
       {/* ── Grid ── */}
       {events.length === 0 ? (
         <div className="rounded-[12px] bg-white border border-[#E7E5E4] p-16 text-center shadow-sm">
-          <div className="w-16 h-16 rounded-[12px] bg-[#F3EEFC] border border-[#E4D9F7] flex items-center justify-center mx-auto mb-5">
-            <Calendar size={28} className="text-[#6D28D9]" />
+          <div className="w-16 h-16 rounded-[12px] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center mx-auto mb-5">
+            <Calendar size={28} className="text-[var(--accent)]" />
           </div>
           <p className="text-[#1C1917] font-bold text-[16px]">No upcoming events</p>
           <p className="text-[#A8A29E] text-[13px] font-medium mt-2">Check back later or host your own.</p>

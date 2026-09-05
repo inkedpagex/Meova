@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '../../../../lib/getAdminUser';
-import { supabaseAdmin } from '../../../../lib/supabase/admin';
 import { rateLimit, getClientIp } from '../../../../lib/rateLimit';
+import {
+  createPaymentReservation,
+  claimPaymentReservation,
+  cancelPaymentReservation,
+  RECHARGE_PACKS
+} from '../../../../lib/paymentReservations';
 
 export async function POST(request) {
   try {
@@ -17,126 +22,32 @@ export async function POST(request) {
     const user = await requireAuth();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { sparks, amount_inr, pack_name, pack_key } = await request.json();
+    const body = await request.json().catch(() => ({}));
+    const pack_key = body.pack_key || body.packKey || 'popular';
+    const pack = RECHARGE_PACKS[pack_key] || RECHARGE_PACKS.popular;
+    const sparks = Number(body.sparks || pack.sparks);
+    const amount_inr = Number(body.amount_inr || pack.inr);
 
-    if (!sparks || sparks <= 0 || !amount_inr) {
-      return NextResponse.json({ error: 'Invalid spark amount' }, { status: 400 });
-    }
-
-    // 1. Fetch active decimal allocations
-    const { data: activeRequests } = await supabaseAdmin
-      .from('payment_requests')
-      .select('*')
-      .eq('pack_key', pack_key)
-      .in('status', ['pending', 'payment_intent']);
-
-    const activeDocs = activeRequests || [];
-
-    // 2. Check user limit on submitted pending requests only (max 3 pending)
-    const userSubmittedPending = activeDocs.filter(d => d.user_id === user.uid && d.status === 'pending');
-    if (userSubmittedPending.length >= 3) {
-      return NextResponse.json({ error: 'Limit of 3 pending verification requests reached. Please wait for review.' }, { status: 400 });
-    }
-
-    // Auto-cleanup previous unsubmitted intent rows for this user
-    await supabaseAdmin
-      .from('payment_requests')
-      .delete()
-      .eq('user_id', user.uid)
-      .eq('status', 'payment_intent');
-
-    // 3. Auto-expire stale intents (> 10 mins old)
-    const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-    await supabaseAdmin
-      .from('payment_requests')
-      .update({ status: 'expired' })
-      .eq('status', 'payment_intent')
-      .lt('created_at', tenMinsAgo);
-
-    // Extract used decimals from genuinely active intents
-    const usedDecimals = new Set();
-    activeDocs.forEach(d => {
-      if (d.status === 'payment_intent' && new Date(d.created_at).getTime() < (Date.now() - 10 * 60 * 1000)) return;
-      const amt = d.amount_inr;
-      if (amt && !Number.isInteger(amt)) {
-        const dec = Math.round((amt - Math.floor(amt)) * 100);
-        usedDecimals.add(dec);
-      }
+    const result = await createPaymentReservation({
+      userId: user.uid,
+      baseAmount: amount_inr,
+      sparks,
+      packKey: pack_key,
+      packName: pack.label || `${sparks} Sparks`,
+      userEmail: user.email || '',
+      userName: user.full_name || '',
     });
 
-    // 4. Deterministically find an available slot (1 to 99)
-    let selectedDecimal = null;
-    // Try random first for uniform spread
-    for (let i = 0; i < 30; i++) {
-      const rand = Math.floor(Math.random() * 99) + 1;
-      if (!usedDecimals.has(rand)) {
-        selectedDecimal = rand;
-        break;
-      }
-    }
-    // Fallback: Linear search for first free slot
-    if (!selectedDecimal) {
-      for (let slot = 1; slot <= 99; slot++) {
-        if (!usedDecimals.has(slot)) {
-          selectedDecimal = slot;
-          break;
-        }
-      }
-    }
-
-    if (!selectedDecimal) {
-      return NextResponse.json({ error: 'All payment slots are currently active. Please try again in 2 minutes.' }, { status: 429 });
-    }
-
-    const uniqueAmount = Number((Number(amount_inr) + (selectedDecimal / 100)).toFixed(2));
-
-    const basePayload = {
-      user_id: user.uid,
-      sparks,
-      status: 'payment_intent',
-      created_at: new Date().toISOString(),
-    };
-
-    let newIntent = null;
-    // 1. Try standard schema shape (rupees, unique_decimal, user_email)
-    const { data: primaryData, error: primaryErr } = await supabaseAdmin
-      .from('payment_requests')
-      .insert({
-        ...basePayload,
-        user_email: user.email || '',
-        user_name: user.full_name || '',
-        rupees: uniqueAmount,
-        unique_decimal: String(selectedDecimal),
-      })
-      .select('id')
-      .single();
-
-    if (!primaryErr && primaryData) {
-      newIntent = primaryData;
-    } else {
-      // 2. Fallback to extended schema shape if table columns vary
-      const { data: fallbackData, error: fallbackErr } = await supabaseAdmin
-        .from('payment_requests')
-        .insert({
-          ...basePayload,
-          email: user.email,
-          amount_inr: uniqueAmount,
-          pack_name,
-          pack_key,
-        })
-        .select('id')
-        .single();
-
-      if (!fallbackErr && fallbackData) {
-        newIntent = fallbackData;
-      } else {
-        console.warn('[POST /api/wallet/intent insert warning]', primaryErr?.message || fallbackErr?.message);
-      }
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error, activeReservation: result.activeReservation }, { status: 400 });
     }
 
     return NextResponse.json({
-      intentId: newIntent?.id || `intent_${Date.now()}`,
-      amount_inr: uniqueAmount
+      intentId: result.reservation.id,
+      amount_inr: result.reservation.final_amount,
+      unique_decimal: result.reservation.unique_decimal,
+      reference_code: result.reservation.reference_code,
+      expires_at: result.reservation.expires_at,
     });
   } catch (err) {
     console.error('[POST /api/wallet/intent]', err.message);
@@ -152,24 +63,12 @@ export async function PATCH(request) {
     const { intentId } = await request.json();
     if (!intentId) return NextResponse.json({ error: 'Missing intentId' }, { status: 400 });
 
-    const { data: doc } = await supabaseAdmin
-      .from('payment_requests')
-      .select('*')
-      .eq('id', intentId)
-      .maybeSingle();
+    const result = await claimPaymentReservation({
+      reservationId: intentId,
+      userId: user.uid
+    });
 
-    if (!doc || doc.user_id !== user.uid) {
-      return NextResponse.json({ error: 'Intent not found' }, { status: 404 });
-    }
-
-    await supabaseAdmin
-      .from('payment_requests')
-      .update({
-        status: 'pending',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', intentId);
-
+    if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[PATCH /api/wallet/intent]', err.message);
@@ -185,28 +84,11 @@ export async function DELETE(request) {
     const { intentId } = await request.json();
     if (!intentId) return NextResponse.json({ error: 'Missing intentId' }, { status: 400 });
 
-    const { data: doc } = await supabaseAdmin
-      .from('payment_requests')
-      .select('*')
-      .eq('id', intentId)
-      .maybeSingle();
+    await cancelPaymentReservation({
+      reservationId: intentId,
+      userId: user.uid
+    });
 
-    if (doc && doc.user_id === user.uid) {
-      if (doc.status === 'payment_intent') {
-        await supabaseAdmin
-          .from('payment_requests')
-          .delete()
-          .eq('id', intentId);
-      } else if (doc.status === 'pending') {
-        await supabaseAdmin
-          .from('payment_requests')
-          .update({
-            status: 'cancelled',
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', intentId);
-      }
-    }
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[DELETE /api/wallet/intent]', err.message);

@@ -109,24 +109,24 @@ export default function StoryCampaignBanner({ className = '' }) {
       {/* Clean, Minimal Native Spotlight Card */}
       <div 
         onClick={() => !userClaim && setIsOpen(true)}
-        className={`group bg-white border border-[#E7E5E4] hover:border-[#6D28D9] rounded-[16px] p-2.5 px-3.5 transition-all flex items-center justify-between gap-3 cursor-pointer select-none shadow-[0_2px_8px_rgba(28,25,23,0.06)] ${className}`}
+        className={`group bg-white border border-[#E7E5E4] hover:border-[var(--accent)] rounded-[16px] p-2.5 px-3.5 transition-all flex items-center justify-between gap-3 cursor-pointer select-none shadow-[0_2px_8px_rgba(28,25,23,0.06)] ${className}`}
       >
         {/* Left: Clean Single-Tone Icon & Info */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+          <div className="w-8 h-8 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
             <InstagramIcon size={14} />
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h4 className="text-[12px] font-bold text-[#1C1917] truncate group-hover:text-[#6D28D9] transition-colors leading-tight">
+              <h4 className="text-[12px] font-bold text-[#1C1917] truncate group-hover:text-[var(--accent)] transition-colors leading-tight">
                 Tag @meova.in on your Story
               </h4>
             </div>
             <p className="text-[11px] text-[#78716C] font-medium truncate flex items-center gap-1 mt-0.5">
               <span>Earn 100 free Sparks</span>
               <span className="text-[#D6D3D1]">·</span>
-              <span className="text-[#6D28D9] font-bold">1 hr reward</span>
+              <span className="text-[var(--accent)] font-bold">1 hr reward</span>
             </p>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function StoryCampaignBanner({ className = '' }) {
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
-                  className="text-[#6D28D9] font-bold underline cursor-pointer"
+                  className="text-[var(--accent)] font-bold underline cursor-pointer"
                 >
                   Resubmit
                 </button>
@@ -161,7 +161,7 @@ export default function StoryCampaignBanner({ className = '' }) {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
-              className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-[11px] font-bold transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] cursor-pointer active:scale-95 whitespace-nowrap"
+              className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-[11px] font-bold transition-all shadow-[0_2px_8px_rgba(28,25,23,0.06)] cursor-pointer active:scale-95 whitespace-nowrap"
             >
               <span>Claim</span>
               <Zap size={10} className="fill-white text-white flex-shrink-0" />
@@ -182,7 +182,7 @@ export default function StoryCampaignBanner({ className = '' }) {
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[#F3EEFC] border border-[#E4D9F7] text-[#6D28D9] flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+                <div className="w-8 h-8 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
                   <InstagramIcon size={16} />
                 </div>
                 <div>
@@ -200,7 +200,7 @@ export default function StoryCampaignBanner({ className = '' }) {
             </div>
 
             <p className="text-xs text-[#78716C] font-medium leading-relaxed mb-4">
-              Post a story tagging <strong className="text-[#6D28D9]">@meova.in</strong> with a link to your Meova profile, then enter your handle below to claim reward.
+              Post a story tagging <strong className="text-[var(--accent)]">@meova.in</strong> with a link to your Meova profile, then enter your handle below to claim reward.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-3">
@@ -210,14 +210,14 @@ export default function StoryCampaignBanner({ className = '' }) {
                   value={handle}
                   onChange={(e) => setHandle(e.target.value)}
                   placeholder="@your_instagram_handle"
-                  className="w-full text-xs font-medium p-3 rounded-full bg-[#FAFAF8] border border-[#E7E5E4] text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:border-[#6D28D9]"
+                  className="w-full text-xs font-medium p-3 rounded-full bg-[#FAFAF8] border border-[#E7E5E4] text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:border-[var(--accent)]"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3.5 rounded-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
               >
                 {submitting ? (
                   <>
