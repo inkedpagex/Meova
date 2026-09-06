@@ -275,14 +275,14 @@ export default function WalletPage() {
         <div className="relative z-10">
           <div className="flex items-center justify-between gap-2 mb-1">
             <span className="text-[11px] font-bold uppercase tracking-widest text-[#78716C]">Your Balance</span>
-            <span className="text-[10px] font-bold text-[var(--accent)] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] px-2.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
               1 Spark = ₹1
             </span>
           </div>
 
           <div className="flex items-center gap-2 mt-1">
             <span className="text-4xl font-bold text-[#1C1917] tracking-tight">{balance.toLocaleString()}</span>
-            <Zap size={24} className="text-[var(--accent)] fill-[var(--accent)]" />
+            <Zap size={24} className="text-amber-500 fill-amber-500" />
           </div>
 
           {/* Breakdown */}
@@ -292,7 +292,7 @@ export default function WalletPage() {
                 <p className="text-[10px] uppercase tracking-wider text-[#78716C] font-bold">Purchased</p>
                 <p className="text-sm font-bold text-[#1C1917] flex items-center gap-1 mt-0.5">
                   <span>{(wallet.purchased || 0).toLocaleString()}</span>
-                  <Zap size={12} className="fill-[var(--accent)] text-[var(--accent)]" />
+                  <Zap size={12} className="fill-amber-500 text-amber-500" />
                 </p>
                 <span className="text-[9px] font-semibold text-[#78716C] block mt-0.5">In-app spend</span>
               </div>
@@ -515,7 +515,7 @@ export default function WalletPage() {
                 <p className="text-3xl font-bold text-[#1C1917] tracking-tight mb-1">
                   ₹{payAmount.toFixed(2)}
                 </p>
-                <p className="text-[10.5px] font-bold text-[var(--accent)] mb-4">
+                <p className="text-[10.5px] font-bold text-[#78716C] mb-4">
                   (Includes unique paise key for instant automated verification)
                 </p>
 
@@ -547,7 +547,7 @@ export default function WalletPage() {
                         setTimeout(() => setCopiedRef(false), 2000);
                         toast.success('Reference code copied');
                       }}
-                      className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-bold text-[var(--accent)] bg-[var(--accent-tint-10)] hover:bg-[var(--accent-tint-20)] py-2 rounded-xl transition-all cursor-pointer border border-[var(--accent-tint-20)]"
+                      className="flex-1 flex items-center justify-center gap-1.5 text-[11px] font-bold text-[#1C1917] bg-black/5 hover:bg-black/10 py-2 rounded-xl transition-all cursor-pointer border border-black/10"
                     >
                       {copiedRef ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
                       <span>Ref: {refCode}</span>
@@ -556,9 +556,9 @@ export default function WalletPage() {
                 </div>
 
                 {/* Warning note */}
-                <div className="bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] rounded-[14px] p-2.5 mb-4 text-left flex items-start gap-2">
-                  <Info size={14} className="text-[var(--accent)] flex-shrink-0 mt-0.5" />
-                  <p className="text-[10.5px] text-[var(--accent-hover)] font-bold leading-relaxed">
+                <div className="bg-[#FAFAF8] border border-[#E7E5E4] rounded-[14px] p-2.5 mb-4 text-left flex items-start gap-2">
+                  <Info size={14} className="text-[#78716C] flex-shrink-0 mt-0.5" />
+                  <p className="text-[10.5px] text-[#78716C] font-semibold leading-relaxed">
                     Pay exact ₹{payAmount.toFixed(2)} with any UPI app, then tap "I have paid" below before the timer runs out.
                   </p>
                 </div>

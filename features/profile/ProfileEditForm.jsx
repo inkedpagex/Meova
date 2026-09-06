@@ -40,7 +40,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   const [fullName, setFullName] = useState(initialProfile?.full_name || '');
   const [year, setYear] = useState(initialProfile?.year?.replace(/\s+Year$/i, '') || '1st');
   const [branch, setBranch] = useState(initialProfile?.branch || '');
-  const [university, setUniversity] = useState(initialProfile?.university || 'GLA University, Mathura');
+  const [university, setUniversity] = useState(initialProfile?.university || '');
   const [instagram, setInstagram] = useState(initialProfile?.instagram || '');
   const [linkedin, setLinkedin] = useState(initialProfile?.linkedin || '');
   const [github, setGithub] = useState(initialProfile?.github || '');
@@ -170,7 +170,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         full_name: fullName.trim(),
         year,
         branch: branch.trim(),
-        university: (university || 'GLA University, Mathura').trim(),
+        university: (university || '').trim(),
         bio: bio.trim(),
         interests: selectedInterests,
         instagram: cleanInstagram,
@@ -192,7 +192,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
           full_name: fullName.trim(),
           year,
           branch: branch.trim(),
-          university: (university || 'GLA University, Mathura').trim(),
+          university: (university || '').trim(),
           bio: bio.trim(),
           interests: selectedInterests,
           instagram: cleanInstagram,
@@ -213,7 +213,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
   };
 
   return (
-    <form onSubmit={handleSave} className="space-y-7">
+    <form noValidate onSubmit={handleSave} className="space-y-7">
       {/* Alert Banners */}
       {errorMsg && (
         <div className="flex items-center gap-3 p-4 rounded-[12px] bg-rose-50 border border-rose-200/80 text-rose-700 text-xs font-semibold animate-in fade-in">
@@ -230,7 +230,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
       )}
 
       {/* ── Avatar Uploader Section ────────────────────────────────── */}
-      <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-gradient-to-b from-[var(--accent-tint-10)]/60 to-white border border-[var(--accent-tint-20)]/60 text-center">
+      <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-[#FAFAF8] border border-[#E7E5E4] text-center">
         <input
           type="file"
           ref={fileInputRef}
@@ -240,7 +240,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
         />
 
         <div className="relative group mb-3">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl shadow-purple-500/20 bg-[#FAFAF8] flex items-center justify-center">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md bg-[#FAFAF8] flex items-center justify-center">
             {photoUrl ? (
               <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
@@ -259,7 +259,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             type="button"
             disabled={photoUploading}
             onClick={() => fileInputRef.current?.click()}
-            className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[var(--accent)] text-white shadow-md flex items-center justify-center hover:bg-[var(--accent-hover)] transition-transform active:scale-90 cursor-pointer disabled:opacity-50"
+            className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-black text-white shadow-md flex items-center justify-center hover:bg-neutral-800 transition-transform active:scale-90 cursor-pointer disabled:opacity-50"
             title="Change Avatar"
           >
             <Camera size={14} />
@@ -271,7 +271,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             type="button"
             disabled={photoUploading}
             onClick={() => fileInputRef.current?.click()}
-            className="text-xs font-bold text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors cursor-pointer"
+            className="text-xs font-bold text-[#1C1917] hover:underline transition-colors cursor-pointer"
           >
             {photoUrl ? 'Change Photo' : 'Upload Avatar'}
           </button>
@@ -309,7 +309,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Your full name"
-                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 transition-all"
+                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#1C1917] focus:ring-2 focus:ring-black/5 transition-all"
                 required
               />
             </div>
@@ -327,7 +327,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
                 placeholder="e.g. B.Tech Computer Science"
-                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 transition-all"
+                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#1C1917] focus:ring-2 focus:ring-black/5 transition-all"
                 required
               />
             </div>
@@ -351,7 +351,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             <button
               type="button"
               onClick={() => setShowYearDropdown(!showYearDropdown)}
-              className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 focus:bg-white focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 flex items-center justify-between cursor-pointer transition-all"
+              className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 focus:bg-white focus:border-[#1C1917] focus:ring-2 focus:ring-black/5 flex items-center justify-between cursor-pointer transition-all"
             >
               <span className="absolute left-3.5 text-[#A8A29E] pointer-events-none">
                 <GraduationCap size={16} />
@@ -371,11 +371,11 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                       setShowYearDropdown(false);
                     }}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[10px] text-xs font-semibold transition-colors cursor-pointer ${
-                      year === y ? 'bg-[var(--accent-tint-10)] text-[var(--accent)]' : 'text-[#78716C] hover:bg-[#FAFAF8]'
+                      year === y ? 'bg-black text-white' : 'text-[#78716C] hover:bg-[#FAFAF8]'
                     }`}
                   >
                     <span>{y === 'Alumni' ? 'Alumni' : `${y} Year`}</span>
-                    {year === y && <Check size={14} className="text-[var(--accent)]" />}
+                    {year === y && <Check size={14} className="text-white" />}
                   </button>
                 ))}
               </div>
@@ -389,7 +389,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
             Meetup Rate <span className="text-[#A8A29E] font-normal">(Sparks / Hour)</span>
           </label>
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--accent)]">
+            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-amber-500">
               <Zap size={16} className="fill-current" />
             </span>
             <input
@@ -399,7 +399,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
               value={rate}
               onChange={(e) => setRate(e.target.value.replace(/[^0-9]/g, ''))}
               placeholder="100"
-              className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 transition-all"
+              className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-semibold text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#1C1917] focus:ring-2 focus:ring-black/5 transition-all"
               required
             />
           </div>
@@ -418,7 +418,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
               placeholder="What are you currently learning or building?"
               rows={2}
               maxLength={250}
-              className="w-full rounded-[12px] p-3 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 transition-all resize-none"
+              className="w-full rounded-[12px] p-3 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#1C1917] focus:ring-2 focus:ring-black/5 transition-all resize-none"
             />
           </div>
           <div className="flex justify-between items-center mt-1">
@@ -446,8 +446,8 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 type="text"
                 value={instagram}
                 onChange={(e) => setInstagram(e.target.value)}
-                placeholder="e.g. chirag_gla"
-                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 transition-all"
+                placeholder="e.g. your_handle"
+                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#1C1917] focus:ring-2 focus:ring-black/5 transition-all"
               />
             </div>
           </div>
@@ -465,8 +465,8 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 type="text"
                 value={linkedin}
                 onChange={(e) => setLinkedin(e.target.value)}
-                placeholder="e.g. in/chirag-sharma or username"
-                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 transition-all"
+                placeholder="e.g. in/your-handle or username"
+                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#1C1917] focus:ring-2 focus:ring-black/5 transition-all"
               />
             </div>
           </div>
@@ -484,8 +484,8 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 type="text"
                 value={github}
                 onChange={(e) => setGithub(e.target.value)}
-                placeholder="e.g. chirag-dev"
-                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 transition-all"
+                placeholder="e.g. your-github-handle"
+                className="w-full rounded-[12px] py-2.5 pl-10 pr-4 text-sm font-medium text-[#1C1917] bg-[#FAFAF8]/70 border border-[#E7E5E4]/80 placeholder:text-[#A8A29E] focus:outline-none focus:bg-white focus:border-[#1C1917] focus:ring-2 focus:ring-black/5 transition-all"
               />
             </div>
           </div>
@@ -502,7 +502,7 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
           <span
             className={`text-xs font-bold px-2.5 py-1 rounded-full ${
               selectedInterests.length >= 1 && selectedInterests.length <= 5
-                ? 'bg-[var(--accent-tint-10)] text-[var(--accent)]'
+                ? 'bg-black text-white'
                 : 'bg-[#FAFAF8] text-[#78716C]'
             }`}
           >
@@ -520,8 +520,8 @@ export default function ProfileEditForm({ initialProfile, onSaveSuccess }) {
                 onClick={() => handleInterestToggle(tag)}
                 className={`text-xs font-semibold px-3.5 py-2 rounded-[10px] transition-all cursor-pointer active:scale-95 border ${
                   isSelected
-                    ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm shadow-purple-500/20'
-                    : 'bg-white text-[#78716C] border-[#E7E5E4] hover:border-[#E7E5E4] hover:text-[#1C1917]'
+                    ? 'bg-black text-white border-black shadow-xs'
+                    : 'bg-white text-[#78716C] border-[#E7E5E4] hover:border-black/20 hover:text-[#1C1917]'
                 }`}
               >
                 {tag}

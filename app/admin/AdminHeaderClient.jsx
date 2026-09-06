@@ -2,10 +2,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, CreditCard, ArrowUpRight, Users, Radio, Sparkles, ShieldCheck, ArrowLeft } from '@/lib/icons';
+import { LayoutDashboard, CreditCard, ArrowUpRight, Users, Radio, Sparkles, ShieldCheck, ArrowLeft, Award, Building2 } from '@/lib/icons';
 
 const ADMIN_TABS = [
   { href: '/admin',               label: 'Dashboard',     Icon: LayoutDashboard },
+  { href: '/admin/colleges',      label: 'Universities',  Icon: Building2 },
+  { href: '/admin/ambassadors',   label: 'Ambassadors',   Icon: Award },
   { href: '/admin/verifications', label: 'Verifications', Icon: ShieldCheck },
   { href: '/admin/payments',      label: 'Payments',      Icon: CreditCard },
   { href: '/admin/withdrawals',   label: 'Withdrawals',   Icon: ArrowUpRight },

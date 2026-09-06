@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert, ShieldCheck, Crown,
+  Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert, ShieldCheck, Crown, Award,
   Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink, Phone, CheckCircle2, Loader2, Download,
-  Trash2, Heart, Plus, Palette
+  Trash2, Heart, Plus, Palette, LayoutGrid
 } from '@/lib/icons';
 import { useTheme } from '../../components/providers/ThemeProvider';
 import { useUserContext } from '../../components/providers/UserProvider';
@@ -74,6 +74,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('posts');
   const [isIdOn, setIsIdOn] = useState(resolvedProfile?.isIdOn !== undefined ? resolvedProfile.isIdOn : true);
   const [copied, setCopied] = useState(false);
 
@@ -308,7 +309,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
 
   return (
     <>
-      <div className="min-h-screen px-4 py-4 max-w-[500px] mx-auto pb-24 anim-fade-in" style={{ background: 'var(--bg-base)' }}>
+      <div className="min-h-screen px-3 sm:px-4 py-4 max-w-[620px] mx-auto pb-24 anim-fade-in" style={{ background: 'var(--bg-base)' }}>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5 relative">
@@ -346,7 +347,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
           <div className="rounded-[20px] p-6 flex flex-col items-center text-center relative overflow-hidden bg-white border border-[#E7E5E4] shadow-xs">
             {/* 96px Avatar with 3px Accent Ring + Offset */}
             <div className="relative mb-4">
-              <div className="w-24 h-24 rounded-full p-1 border-[3px] border-[var(--accent)] bg-white flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full p-1 border-[3px] border-[#E7E5E4] bg-white flex items-center justify-center">
                 <ZoomableProfileAvatar
                   src={avatarSrc}
                   alt={profile?.full_name}
@@ -396,7 +397,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
                 {profile?.instagram && (
                   <a href={`https://instagram.com/${profile.instagram.replace(/^@/, '')}`} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent-tint-10)] text-[11px] font-bold text-[var(--accent)] hover:bg-[var(--accent-tint-20)] transition-colors border border-[var(--accent-tint-20)]">
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-pink-50 text-[11px] font-bold text-pink-700 hover:bg-pink-100 transition-colors border border-pink-200">
                     <InstagramIcon size={13} />
                     <span>@{profile.instagram.replace(/^@/, '')}</span>
                   </a>
@@ -410,7 +411,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                 )}
                 {profile?.github && (
                   <a href={profile.github.startsWith('http') ? profile.github : `https://github.com/${profile.github.replace(/^@/, '')}`} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-[11px] font-bold text-[#1C1917] hover:bg-[var(--accent-tint-10)] transition-colors border border-[#E7E5E4]">
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-[11px] font-bold text-[#1C1917] hover:bg-black/5 transition-colors border border-[#E7E5E4]">
                     <Github size={13} />
                     <span>GitHub</span>
                   </a>
@@ -429,178 +430,242 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             {/* 44px Secondary Action Row (Public View + QR + Share) */}
             <div className="flex gap-2 w-full mt-3 h-11">
               <button onClick={() => router.push(`/users/${profile.id}`)}
-                className="flex-1 h-11 rounded-full text-[13px] font-bold bg-white border border-[#E7E5E4] text-[#1C1917] hover:bg-[var(--accent-tint-10)] cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-2 shadow-xs">
+                className="flex-1 h-11 rounded-full text-[13px] font-bold bg-white border border-[#E7E5E4] text-[#1C1917] hover:bg-black/5 cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-2 shadow-xs">
                 <ExternalLink size={15} className="text-[#78716C]" /> Public View
               </button>
               <button onClick={() => setShowQrModal(true)}
-                className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center cursor-pointer transition-all active:scale-95 bg-white border border-[#E7E5E4] text-[#78716C] hover:text-[#1C1917] hover:bg-[var(--accent-tint-10)]">
+                className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center cursor-pointer transition-all active:scale-95 bg-white border border-[#E7E5E4] text-[#78716C] hover:text-[#1C1917] hover:bg-black/5">
                 <QrCode size={18} />
               </button>
               <button onClick={handleCopyLink}
-                className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center cursor-pointer transition-all active:scale-95 bg-white border border-[#E7E5E4] text-[#78716C] hover:text-[#1C1917] hover:bg-[var(--accent-tint-10)]"
+                className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center cursor-pointer transition-all active:scale-95 bg-white border border-[#E7E5E4] text-[#78716C] hover:text-[#1C1917] hover:bg-black/5"
                 title="Share Profile">
                 {copied ? <Check size={18} className="text-emerald-500" /> : <Share2 size={18} />}
               </button>
             </div>
           </div>
 
-          {/* ── PROFILE HUB MENU (Blueprint Section 6) ────────────────── */}
-          <div className="bg-white border border-[#E7E5E4] rounded-[16px] overflow-hidden divide-y divide-[var(--border-hairline)] shadow-xs">
-            {/* 0. Campus Trust Verification */}
+          {/* ── Two-Section Tabs (Instagram-Style Navigation) ── */}
+          <div className="flex items-center border-b border-black/10 bg-white rounded-2xl px-2 py-1 shadow-2xs">
+            {/* Tab 1: Posts */}
             <button
-              onClick={() => setShowVerifyModal(true)}
-              className="w-full flex items-center justify-between p-4 hover:bg-[#F5F5F4] transition-colors group cursor-pointer text-left"
+              type="button"
+              onClick={() => setActiveTab('posts')}
+              className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs uppercase tracking-wider font-black transition-all cursor-pointer relative ${
+                activeTab === 'posts'
+                  ? 'text-black'
+                  : 'text-black/40 hover:text-black/70'
+              }`}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center">
-                  <ShieldCheck size={16} />
-                </div>
-                <div>
-                  <span className="text-[14px] font-bold text-[#1C1917] group-hover:text-[var(--accent)] transition-colors">Campus Verification</span>
-                  <span className="text-[11px] text-[#78716C] block">
-                    {profile?.tier === 'verified'
-                      ? 'Verified campus account · Peer calling unlocked'
-                      : 'Free Meet tier · Verify student ID to unlock calling'}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                  profile?.tier === 'verified'
-                    ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
-                    : 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]'
-                }`}>
-                  {profile?.tier === 'verified' ? 'Verified' : 'Get Verified'}
-                </span>
-                <ChevronRight size={16} className="text-[#A8A29E] group-hover:text-[var(--accent)]" />
-              </div>
-            </button>
-
-            {/* 1. Wallet */}
-            <button
-              onClick={() => router.push('/wallet')}
-              className="w-full flex items-center justify-between p-4 hover:bg-[#F5F5F4] transition-colors group cursor-pointer text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center">
-                  <Zap size={16} className="fill-current" />
-                </div>
-                <div>
-                  <span className="text-[14px] font-bold text-[#1C1917] group-hover:text-[var(--accent)] transition-colors">Sparks Wallet</span>
-                  <span className="text-[11px] text-[#78716C] block">Manage balances &amp; withdrawals</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--accent)]">
-                <span className="flex items-center gap-1">
-                  <span>{sparksBalance.toLocaleString()}</span>
-                  <Zap size={13} className="fill-[var(--accent)] text-[var(--accent)]" />
-                </span>
-                <ChevronRight size={16} className="text-[#A8A29E] group-hover:text-[var(--accent)]" />
-              </div>
-            </button>
-
-            {/* 2. Bookings */}
-            <button
-              onClick={() => router.push('/bookings')}
-              className="w-full flex items-center justify-between p-4 hover:bg-[#F5F5F4] transition-colors group cursor-pointer text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center">
-                  <Calendar size={16} />
-                </div>
-                <div>
-                  <span className="text-[14px] font-bold text-[#1C1917] group-hover:text-[var(--accent)] transition-colors">Campus Bookings</span>
-                  <span className="text-[11px] text-[#78716C] block">Upcoming meets &amp; sessions</span>
-                </div>
-              </div>
-              <ChevronRight size={16} className="text-[#A8A29E] group-hover:text-[var(--accent)]" />
-            </button>
-
-            {/* 3. Communities */}
-            <button
-              onClick={() => router.push('/circles')}
-              className="w-full flex items-center justify-between p-4 hover:bg-[#F5F5F4] transition-colors group cursor-pointer text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center">
-                  <Users size={16} />
-                </div>
-                <div>
-                  <span className="text-[14px] font-bold text-[#1C1917] group-hover:text-[var(--accent)] transition-colors">Communities &amp; Clubs</span>
-                  <span className="text-[11px] text-[#78716C] block">Explore campus channels</span>
-                </div>
-              </div>
-              <ChevronRight size={16} className="text-[#A8A29E] group-hover:text-[var(--accent)]" />
-            </button>
-
-            {/* 4. Host Tools (if applicable) */}
-            {(profile?.role === 'verified_host' || profile?.role === 'campus_lead' || profile?.role === 'admin') && (
-              <button
-                onClick={() => router.push('/host')}
-                className="w-full flex items-center justify-between p-4 hover:bg-[#F5F5F4] transition-colors group cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center">
-                    <ShieldCheck size={16} />
-                  </div>
-                  <div>
-                    <span className="text-[14px] font-bold text-[#1C1917] group-hover:text-[var(--accent)] transition-colors">Host Workspace</span>
-                    <span className="text-[11px] text-[#78716C] block">Campus moderation &amp; safety tools</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] px-2 py-0.5 rounded-full">Host</span>
-                  <ChevronRight size={16} className="text-[#A8A29E] group-hover:text-[var(--accent)]" />
-                </div>
-              </button>
-            )}
-
-            {/* 5. Admin Dashboard (if admin) */}
-            {profile?.role === 'admin' && (
-              <button
-                onClick={() => router.push('/admin')}
-                className="w-full flex items-center justify-between p-4 hover:bg-[#F5F5F4] transition-colors group cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[var(--accent)] text-white flex items-center justify-center">
-                    <Crown size={16} />
-                  </div>
-                  <div>
-                    <span className="text-[14px] font-bold text-[#1C1917] group-hover:text-[var(--accent)] transition-colors">Admin Dashboard</span>
-                    <span className="text-[11px] text-[#78716C] block">Manage platform users &amp; approvals</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-[var(--accent)] text-white px-2 py-0.5 rounded-full">Admin</span>
-                  <ChevronRight size={16} className="text-[#A8A29E] group-hover:text-[var(--accent)]" />
-                </div>
-              </button>
-            )}
-          </div>
-
-          {/* ── My Moments & Campus Posts ──────────────── */}
-          <div className="rounded-[16px] p-5 bg-white border border-[#E7E5E4] shadow-xs">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#A8A29E] flex items-center gap-2">
-                <Camera size={14} className="text-[var(--accent)]" /> My Moments ({posts.length})
+              <LayoutGrid size={16} className={activeTab === 'posts' ? 'text-black' : 'text-black/40'} />
+              <span>Posts</span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${
+                activeTab === 'posts' ? 'bg-black text-white' : 'bg-black/5 text-black/50'
+              }`}>
+                {posts.length}
               </span>
-              <button 
-                onClick={() => router.push('/?action=create-post')} 
-                className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] hover:bg-[var(--accent-tint-10)] px-2.5 py-1 rounded-full border border-[var(--accent-tint-20)] transition-colors cursor-pointer"
-              >
-                <Plus size={12} strokeWidth={3} />
-                <span>New Moment</span>
-              </button>
-            </div>
+              {activeTab === 'posts' && (
+                <span className="absolute bottom-0 inset-x-6 h-0.5 bg-black rounded-full" />
+              )}
+            </button>
 
-            <CampusMomentsGallery
-              posts={posts}
-              currentUserId={profile?.id}
-              author={profile}
-              canDelete={true}
-              onDeletePost={handleDeletePost}
-            />
+            {/* Tab 2: Campus Hub / Options */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('options')}
+              className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs uppercase tracking-wider font-black transition-all cursor-pointer relative ${
+                activeTab === 'options'
+                  ? 'text-black'
+                  : 'text-black/40 hover:text-black/70'
+              }`}
+            >
+              <ShieldCheck size={16} className={activeTab === 'options' ? 'text-black' : 'text-black/40'} />
+              <span>Campus Hub</span>
+              {profile?.tier !== 'verified' ? (
+                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  Verify
+                </span>
+              ) : (
+                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  Verified
+                </span>
+              )}
+              {activeTab === 'options' && (
+                <span className="absolute bottom-0 inset-x-6 h-0.5 bg-black rounded-full" />
+              )}
+            </button>
           </div>
+
+          {/* ── TAB 1: Posts (Active by Default) ────────────────────── */}
+          {activeTab === 'posts' && (
+            <div className="rounded-[28px] p-3 sm:p-5 bg-white border border-black/10 shadow-xs space-y-3 anim-fade-in">
+              {/* Header Bar with New Post Button */}
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-bold text-black/60">
+                  {posts.length === 1 ? '1 Moment Shared' : `${posts.length} Moments Shared`}
+                </span>
+
+                <button 
+                  onClick={() => router.push('/?action=create-post')} 
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-black hover:bg-black/85 px-3.5 py-1.5 rounded-full transition-all cursor-pointer active:scale-95 whitespace-nowrap flex-shrink-0 shadow-2xs"
+                >
+                  <Plus size={13} strokeWidth={2.5} className="flex-shrink-0" />
+                  <span className="whitespace-nowrap">New Post</span>
+                </button>
+              </div>
+
+              <CampusMomentsGallery
+                posts={posts}
+                currentUserId={profile?.id}
+                author={profile}
+                canDelete={true}
+                onDeletePost={handleDeletePost}
+              />
+            </div>
+          )}
+
+          {/* ── TAB 2: Campus Hub & Options ─────────────────────────── */}
+          {activeTab === 'options' && (
+            <div className="space-y-3 anim-fade-in">
+              <div className="bg-white border border-black/10 rounded-[28px] overflow-hidden divide-y divide-black/10 shadow-xs">
+                {/* 0. Campus Trust Verification */}
+                <button
+                  onClick={() => setShowVerifyModal(true)}
+                  className="w-full flex items-center justify-between p-4 hover:bg-black/5 transition-colors group cursor-pointer text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-black/5 text-black flex items-center justify-center flex-shrink-0">
+                      <ShieldCheck size={16} />
+                    </div>
+                    <div>
+                      <span className="text-[14px] font-bold text-black group-hover:text-black transition-colors">Campus Verification</span>
+                      <span className="text-[11px] text-black/60 block">
+                        {profile?.tier === 'verified'
+                          ? 'Verified campus account · Peer calling unlocked'
+                          : 'Free Meet tier · Verify student ID to unlock calling'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                      profile?.tier === 'verified'
+                        ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
+                        : 'bg-black/5 text-black/80 border border-black/10'
+                    }`}>
+                      {profile?.tier === 'verified' ? 'Verified' : 'Get Verified'}
+                    </span>
+                    <ChevronRight size={16} className="text-black/40 group-hover:text-black" />
+                  </div>
+                </button>
+
+                {/* 1. Campus Bookings */}
+                <button
+                  onClick={() => router.push('/bookings')}
+                  className="w-full flex items-center justify-between p-4 hover:bg-black/5 transition-colors group cursor-pointer text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-black/5 text-black flex items-center justify-center flex-shrink-0">
+                      <Calendar size={16} />
+                    </div>
+                    <div>
+                      <span className="text-[14px] font-bold text-black group-hover:text-black transition-colors">Campus Bookings</span>
+                      <span className="text-[11px] text-black/60 block">Upcoming meets &amp; sessions</span>
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-black/40 group-hover:text-black" />
+                </button>
+
+                {/* 2. Campus Ambassador (Mobile Version) */}
+                <button
+                  onClick={() => router.push((profile?.is_ambassador || user?.is_ambassador) ? '/ambassador/dashboard' : '/ambassador')}
+                  className="md:hidden w-full flex items-center justify-between p-4 hover:bg-black/5 transition-colors group cursor-pointer text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-black/5 text-black flex items-center justify-center flex-shrink-0">
+                      <Award size={16} />
+                    </div>
+                    <div>
+                      <span className="text-[14px] font-bold text-black group-hover:text-black transition-colors">
+                        {(profile?.is_ambassador || user?.is_ambassador) ? 'Ambassador Dashboard' : 'Campus Ambassador'}
+                      </span>
+                      <span className="text-[11px] text-black/60 block">
+                        {(profile?.is_ambassador || user?.is_ambassador) ? 'Campus recruits, referrals & earnings' : 'Apply & represent your university on Meova'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-black/5 text-black border border-black/10 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                      {(profile?.is_ambassador || user?.is_ambassador) ? 'Active' : 'Apply'}
+                    </span>
+                    <ChevronRight size={16} className="text-black/40 group-hover:text-black flex-shrink-0" />
+                  </div>
+                </button>
+
+                {/* 3. Host Tools (if applicable) */}
+                {(profile?.role === 'verified_host' || profile?.role === 'campus_lead' || profile?.role === 'admin') && (
+                  <button
+                    onClick={() => router.push('/host')}
+                    className="w-full flex items-center justify-between p-4 hover:bg-black/5 transition-colors group cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-black/5 text-black flex items-center justify-center flex-shrink-0">
+                        <ShieldCheck size={16} />
+                      </div>
+                      <div>
+                        <span className="text-[14px] font-bold text-black group-hover:text-black transition-colors">Host Workspace</span>
+                        <span className="text-[11px] text-black/60 block">Campus moderation &amp; safety tools</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-black/5 text-black border border-black/10 px-2 py-0.5 rounded-full">Host</span>
+                      <ChevronRight size={16} className="text-black/40 group-hover:text-black" />
+                    </div>
+                  </button>
+                )}
+
+                {/* 4. Admin Dashboard (if admin) */}
+                {profile?.role === 'admin' && (
+                  <button
+                    onClick={() => router.push('/admin')}
+                    className="w-full flex items-center justify-between p-4 hover:bg-black/5 transition-colors group cursor-pointer text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center flex-shrink-0">
+                        <Crown size={16} />
+                      </div>
+                      <div>
+                        <span className="text-[14px] font-bold text-black group-hover:text-black transition-colors">Admin Dashboard</span>
+                        <span className="text-[11px] text-black/60 block">Manage platform users &amp; approvals</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded-full">Admin</span>
+                      <ChevronRight size={16} className="text-black/40 group-hover:text-black" />
+                    </div>
+                  </button>
+                )}
+              </div>
+
+              {/* Account Settings Shortcut Card */}
+              <div className="bg-white border border-black/10 rounded-[28px] p-4 flex items-center justify-between shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-black/5 text-black flex items-center justify-center flex-shrink-0">
+                    <Settings size={16} />
+                  </div>
+                  <div>
+                    <span className="text-[13px] font-bold text-black block">Account Settings</span>
+                    <span className="text-[10px] text-black/60 block">Theme, permissions, policies &amp; logout</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="px-3.5 py-1.5 rounded-full bg-black text-white text-xs font-bold hover:bg-black/85 transition-all active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0"
+                >
+                  Manage
+                </button>
+              </div>
+            </div>
+          )}
 
         </div>
       )}
@@ -614,7 +679,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-elevated)' }}>
               <h2 className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>Settings</h2>
-              <button onClick={() => setShowSettingsModal(false)} className="p-2 rounded-full cursor-pointer hover:bg-[var(--accent-tint-10)] dark:hover:bg-[#1C1917] transition-colors">
+              <button onClick={() => setShowSettingsModal(false)} className="p-2 rounded-full cursor-pointer hover:bg-black/5 dark:hover:bg-[#1C1917] transition-colors">
                 <X size={20} style={{ color: 'var(--text-primary)' }} />
               </button>
             </div>
@@ -664,7 +729,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                   {/* Location */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#fcf6fa] border border-[#f5ebf4] flex items-center justify-center text-[var(--accent)]">
+                      <div className="w-8 h-8 rounded-full bg-black/5 border border-black/10 flex items-center justify-center text-black">
                         <MapPin size={14} />
                       </div>
                       <div>
@@ -677,14 +742,14 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     ) : locStatus === 'denied' ? (
                       <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
-                      <button onClick={requestLocation} className="text-[10px] font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                      <button onClick={requestLocation} className="text-[10px] font-bold text-white bg-black hover:bg-black/80 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
                     )}
                   </div>
 
                   {/* Notifications */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[var(--accent)]">
+                      <div className="w-8 h-8 rounded-full bg-black/5 border border-black/10 flex items-center justify-center text-black">
                         <Bell size={14} />
                       </div>
                       <div>
@@ -699,14 +764,14 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     ) : notifStatus === 'denied' ? (
                       <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
-                      <button onClick={requestNotifications} className="text-[10px] font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                      <button onClick={requestNotifications} className="text-[10px] font-bold text-white bg-black hover:bg-black/80 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
                     )}
                   </div>
 
                   {/* Camera */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[var(--accent)]">
+                      <div className="w-8 h-8 rounded-full bg-black/5 border border-black/10 flex items-center justify-center text-black">
                         <Camera size={14} />
                       </div>
                       <div>
@@ -719,7 +784,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     ) : camStatus === 'denied' ? (
                       <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">Denied</span>
                     ) : (
-                      <button onClick={requestCamera} className="text-[10px] font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
+                      <button onClick={requestCamera} className="text-[10px] font-bold text-white bg-black hover:bg-black/80 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
                     )}
                   </div>
 
@@ -737,7 +802,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     {isStandalone ? (
                       <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Installed</span>
                     ) : (
-                      <button onClick={handleManualInstall} className="text-[10px] font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Install</button>
+                      <button onClick={handleManualInstall} className="text-[10px] font-bold text-white bg-black hover:bg-black/80 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Install</button>
                     )}
                   </div>
                 </div>
@@ -764,7 +829,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                     {phoneVerified ? (
                       <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded border border-emerald-100"><Check size={12}/> Verified</span>
                     ) : (
-                      <button onClick={() => { setShowSettingsModal(false); setShowPhoneModal(true); }} className="text-[10px] font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Verify</button>
+                      <button onClick={() => { setShowSettingsModal(false); setShowPhoneModal(true); }} className="text-[10px] font-bold text-white bg-black hover:bg-black/80 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Verify</button>
                     )}
                   </div>
 
@@ -777,13 +842,50 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                   <span className="text-[10px] font-bold uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>Admin</span>
                   <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                     <button onClick={() => { router.push('/admin'); setShowSettingsModal(false); }}
-                      className="w-full text-left p-4 text-xs font-bold transition-colors cursor-pointer flex items-center justify-between text-[var(--accent)]">
+                      className="w-full text-left p-4 text-xs font-bold transition-colors cursor-pointer flex items-center justify-between text-black hover:bg-black/5">
                       <div className="flex items-center gap-3"><ShieldCheck size={16} /> Admin Dashboard</div>
-                      <ChevronRight size={14} className="text-[var(--accent)]" />
+                      <ChevronRight size={14} className="text-black" />
                     </button>
                   </div>
                 </div>
               )}
+
+              {/* Legal & Policy */}
+              <div className="space-y-3">
+                <span className="text-[10px] font-bold uppercase tracking-widest ml-1" style={{ color: 'var(--text-secondary)' }}>Legal &amp; Policies</span>
+                <div className="rounded-2xl overflow-hidden divide-y divide-[var(--border-subtle)]" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                  <a href="/terms" target="_blank" rel="noopener noreferrer"
+                    className="w-full text-left p-3.5 text-xs font-bold transition-colors cursor-pointer flex items-center justify-between"
+                    style={{ color: 'var(--text-primary)' }}>
+                    <span>Terms of Service</span>
+                    <ChevronRight size={14} className="text-[#A8A29E]" />
+                  </a>
+                  <a href="/privacy" target="_blank" rel="noopener noreferrer"
+                    className="w-full text-left p-3.5 text-xs font-bold transition-colors cursor-pointer flex items-center justify-between"
+                    style={{ color: 'var(--text-primary)' }}>
+                    <span>Privacy Policy</span>
+                    <ChevronRight size={14} className="text-[#A8A29E]" />
+                  </a>
+                  <a href="/refund-policy" target="_blank" rel="noopener noreferrer"
+                    className="w-full text-left p-3.5 text-xs font-bold transition-colors cursor-pointer flex items-center justify-between"
+                    style={{ color: 'var(--text-primary)' }}>
+                    <span>Refund &amp; Cancellation</span>
+                    <ChevronRight size={14} className="text-[#A8A29E]" />
+                  </a>
+                  <a href="/community-guidelines" target="_blank" rel="noopener noreferrer"
+                    className="w-full text-left p-3.5 text-xs font-bold transition-colors cursor-pointer flex items-center justify-between"
+                    style={{ color: 'var(--text-primary)' }}>
+                    <span>Community Guidelines</span>
+                    <ChevronRight size={14} className="text-[#A8A29E]" />
+                  </a>
+                  <a href="/grievance" target="_blank" rel="noopener noreferrer"
+                    className="w-full text-left p-3.5 text-xs font-bold transition-colors cursor-pointer flex items-center justify-between"
+                    style={{ color: 'var(--text-primary)' }}>
+                    <span>Grievance Redressal</span>
+                    <ChevronRight size={14} className="text-[#A8A29E]" />
+                  </a>
+                </div>
+              </div>
 
               {/* Danger Zone */}
               <div className="space-y-3">
@@ -801,10 +903,10 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
       {showQrModal && (
         <div className="fixed inset-x-0 bottom-0 md:inset-0 z-[9999] flex items-end md:items-center justify-center anim-fade-in" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
           <div className="w-full max-w-sm rounded-t-[32px] md:rounded-[32px] p-8 pb-safe flex flex-col items-center text-center relative overflow-hidden bg-white border border-[#E7E5E4] shadow-2xl anim-slide-up md:anim-scale-in">
-            <button onClick={() => setShowQrModal(false)} className="absolute top-4 right-4 p-2 rounded-full cursor-pointer hover:bg-[var(--accent-tint-10)] transition-colors text-[#A8A29E]">
+            <button onClick={() => setShowQrModal(false)} className="absolute top-4 right-4 p-2 rounded-full cursor-pointer hover:bg-black/5 transition-colors text-[#A8A29E]">
               <X size={20} />
             </button>
-            <div className="w-16 h-16 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-black/5 border border-black/10 text-black flex items-center justify-center mb-4">
               <QrCode size={28} />
             </div>
             <h2 className="text-xl font-bold text-[#1C1917] tracking-tight mb-2">Share Profile</h2>
@@ -821,7 +923,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                 includeMargin={false}
                 style={{ borderRadius: '8px' }}
               />
-              <span className="px-4 py-2 bg-white border border-[#E7E5E4] rounded-xl shadow-md text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] absolute bottom-4">Meova</span>
+              <span className="px-4 py-2 bg-white border border-[#E7E5E4] rounded-xl shadow-md text-[10px] font-bold uppercase tracking-widest text-[#1C1917] absolute bottom-4">Meova</span>
             </div>
             <button onClick={handleCopyLink} className="w-full py-4 mt-6 rounded-2xl text-[12px] font-bold uppercase tracking-[0.1em] bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white cursor-pointer transition-all active:scale-95 shadow-md flex justify-center gap-2">
               <Share2 size={16} /> Send Link
@@ -839,7 +941,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             {/* Header */}
             <div className="p-5 pb-0 flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[var(--accent)]">
+                <div className="w-10 h-10 rounded-2xl bg-black/5 border border-black/10 flex items-center justify-center text-black">
                   <Phone size={18} />
                 </div>
                 <div>
@@ -858,14 +960,14 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                   <div>
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[#78716C] block mb-2">Mobile Number</label>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-[#78716C] bg-[var(--accent-tint-10)] px-3 py-3 rounded-xl">🇮🇳 +91</span>
+                      <span className="text-sm font-bold text-[#78716C] bg-black/5 px-3 py-3 rounded-xl">🇮🇳 +91</span>
                       <input
                         type="tel"
                         maxLength={10}
                         value={phoneInput}
                         onChange={e => setPhoneInput(e.target.value.replace(/\D/g, '').slice(0, 10))}
                         placeholder="98765 43210"
-                        className="flex-1 text-sm font-medium text-[#1C1917] bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition-all"
+                        className="flex-1 text-sm font-medium text-[#1C1917] bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-black/10 focus:border-black transition-all"
                       />
                     </div>
                   </div>

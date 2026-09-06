@@ -1,53 +1,52 @@
 'use client';
-import React, { useState } from 'react';
-import { Crown, CheckCircle2, ShieldCheck, Zap, ArrowRight, Star, Sparkles, MessageSquare, Award } from '@/lib/icons';
+
+import React from 'react';
+import Link from 'next/link';
+import { Crown, Zap, ArrowRight, Star, Sparkles, MessageSquare, Award, Check } from '@/lib/icons';
 
 const PREMIUM_FEATURES = [
   {
     icon: Sparkles,
-    title: 'Access to Premium Communities',
-    desc: 'Join exclusive circles managed by top clubs and enterprise partners.'
+    title: 'Access to Exclusive Campus Circles',
+    desc: 'Join private peer circles hosted by top college clubs, hackathon teams, and student founders.',
   },
   {
-    icon: ShieldCheck,
-    title: 'Priority Event Access',
-    desc: 'Get early RSVPs to high-demand campus conferences, concerts, and hackathons.'
+    icon: Zap,
+    title: 'Priority Meetup Invitations',
+    desc: 'Get fast-tracked coffee & study sessions with verified seniors and campus ambassadors.',
   },
   {
     icon: Star,
-    title: 'Profile Boost & Spotlight',
-    desc: 'Stand out on the Discover feed with a premium tag and higher visibility.'
+    title: 'Profile Spotlight & Discover Boost',
+    desc: 'Stand out on the campus Discover feed with higher visibility and verified status highlight.',
   },
   {
     icon: MessageSquare,
-    title: 'Unlimited Chat History',
-    desc: 'No limits on active chats, historical messages, or shared files/images.'
+    title: 'Direct Campus Chat & Collaboration',
+    desc: 'Chat directly with peers across colleges without restrictions or waitlists.',
   },
   {
     icon: Award,
-    title: 'Exclusive Badges & Rewards',
-    desc: 'Display a premium golden crown badge on your profile and earn extra bonus Sparks.'
-  }
+    title: 'Sparks Perks & Micro-Rewards',
+    desc: 'Receive special platform perks and exclusive participation rewards.',
+  },
 ];
 
 export default function PremiumPage() {
-  const [selectedPlan, setSelectedPlan] = useState('yearly');
-  const [success, setSuccess] = useState(false);
-
   return (
-    <div className="anim-fade-in w-full max-w-4xl mx-auto space-y-12 pb-16 px-4 pt-[68px] md:pt-6">
+    <div className="anim-fade-in w-full max-w-4xl mx-auto space-y-10 pb-16 px-4 pt-[68px] md:pt-6 font-sans">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-[20px] border border-[#E7E5E4] bg-white p-8 md:p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-xs">
-        <div className="w-16 h-16 rounded-[16px] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[var(--accent)] shadow-xs">
-          <Crown size={32} className="fill-current" />
+      <div className="relative overflow-hidden rounded-[28px] border border-black/10 bg-white p-8 md:p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-xs">
+        <div className="w-16 h-16 rounded-[20px] bg-[#7C3AED]/10 border border-[#7C3AED]/20 flex items-center justify-center text-[#7C3AED] shadow-xs">
+          <Crown size={32} />
         </div>
 
-        <div className="space-y-2">
-          <h1 className="text-xl sm:text-2xl font-bold text-[#1C1917] tracking-tight">
-            Meova Premium
+        <div className="space-y-2 max-w-xl">
+          <h1 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
+            Meova VIP & Platform Perks
           </h1>
-          <p className="text-xs text-[#78716C] font-bold uppercase tracking-widest mt-1">
-            Unlock exclusive features and supercharge your campus life
+          <p className="text-xs text-black/70 font-semibold uppercase tracking-widest mt-1">
+            Unlock exclusive college features powered by Sparks
           </p>
         </div>
       </div>
@@ -55,9 +54,9 @@ export default function PremiumPage() {
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Features List */}
-        <div className="space-y-6">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-[#78716C]">
-            What's included in Premium
+        <div className="p-7 sm:p-9 rounded-[28px] bg-white border border-black/10 shadow-xs space-y-6">
+          <h2 className="text-xs font-black uppercase tracking-wider text-black/60">
+            What's included in VIP Access
           </h2>
 
           <div className="space-y-5">
@@ -65,14 +64,14 @@ export default function PremiumPage() {
               const Icon = feat.icon;
               return (
                 <div key={idx} className="flex gap-4 items-start">
-                  <div className="w-9 h-9 rounded-[12px] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[var(--accent)] flex-shrink-0">
+                  <div className="w-9 h-9 rounded-2xl bg-[#7C3AED]/10 border border-[#7C3AED]/20 flex items-center justify-center text-[#7C3AED] flex-shrink-0">
                     <Icon size={16} />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-[#1C1917] tracking-wide">
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-black text-black tracking-tight">
                       {feat.title}
                     </h3>
-                    <p className="text-xs text-[#78716C] mt-0.5 leading-relaxed font-medium">
+                    <p className="text-xs text-black/70 leading-relaxed font-medium">
                       {feat.desc}
                     </p>
                   </div>
@@ -82,76 +81,45 @@ export default function PremiumPage() {
           </div>
         </div>
 
-        {/* Pricing/Checkout Panel */}
-        <div className="bg-white border border-[#E7E5E4] rounded-[20px] p-8 space-y-6 relative shadow-xs">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-[#78716C]">
-            Select Your Plan
-          </h2>
-
-          <div className="space-y-3">
-            {/* Monthly Plan */}
-            <div
-              onClick={() => setSelectedPlan('monthly')}
-              className="border-2 rounded-[16px] p-5 cursor-pointer flex justify-between items-center transition-all duration-200"
-              style={selectedPlan === 'monthly'
-                ? { borderColor: 'var(--accent)', background: 'var(--accent-tint-10)' }
-                : { borderColor: '#2A2A2A', background: '#141414' }
-              }
-            >
-              <div>
-                <p className="text-sm font-bold text-[#1C1917]">Monthly Package</p>
-                <p className="text-xs text-[#78716C] font-bold mt-0.5">Billed every month</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xl font-bold text-[#1C1917]">₹99</p>
-                <p className="text-[10px] text-[#A8A29E] font-bold uppercase tracking-wider">/ month</p>
-              </div>
-            </div>
-
-            {/* Yearly Plan */}
-            <div
-              onClick={() => setSelectedPlan('yearly')}
-              className="border-2 rounded-[16px] p-5 cursor-pointer flex justify-between items-center transition-all duration-200 relative overflow-hidden"
-              style={selectedPlan === 'yearly'
-                ? { borderColor: 'var(--accent)', background: 'var(--accent-tint-10)' }
-                : { borderColor: '#2A2A2A', background: '#141414' }
-              }
-            >
-              {/* Promo Badge */}
-              <div className="absolute right-0 top-0 bg-[var(--accent)] text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
-                Save 40%
-              </div>
-
-              <div>
-                <p className="text-sm font-bold text-[#1C1917] flex items-center gap-1.5">
-                  Yearly Package
-                </p>
-                <p className="text-xs text-[#78716C] font-bold mt-0.5">Best Value Plan</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xl font-bold text-[var(--accent)]">₹699</p>
-                <p className="text-[10px] text-[#A8A29E] font-bold uppercase tracking-wider">/ year</p>
-              </div>
-            </div>
+        {/* Action Panel */}
+        <div className="bg-white border border-black/10 rounded-[28px] p-7 sm:p-9 space-y-6 relative shadow-xs">
+          <div className="space-y-1">
+            <h2 className="text-lg font-black text-black tracking-tight">
+              Powered by Sparks
+            </h2>
+            <p className="text-xs text-black/70 font-medium leading-relaxed">
+              No hidden monthly subscriptions. Unlock meetups, exclusive circles, and tip creators seamlessly with your verified Sparks wallet.
+            </p>
           </div>
 
-          <button
-            onClick={() => setSuccess(true)}
-            className="w-full py-3.5 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold tracking-widest uppercase flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
-          >
-            <span>Go Premium</span>
-            <ArrowRight size={13} />
-          </button>
-
-          {success && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-[12px] p-4 flex gap-2.5 items-start">
-              <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-emerald-600" />
-              <div>
-                <p className="text-xs font-bold text-emerald-800">Successfully Subscribed!</p>
-                <p className="text-[10px] text-emerald-600 mt-0.5 font-bold">Welcome to the inner circle. Your Premium features are now active.</p>
-              </div>
+          <div className="p-5 rounded-2xl bg-black/5 border border-black/10 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-black">100% Student-Friendly</span>
+              <span className="text-[11px] font-black text-[#7C3AED] uppercase tracking-wider">Zero Lock-In</span>
             </div>
-          )}
+            <ul className="space-y-2 text-xs font-medium text-black/80">
+              <li className="flex items-center gap-2">
+                <Check size={14} className="text-emerald-600 flex-shrink-0" />
+                <span>Instant 1:1 Sparks recharge via UPI</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check size={14} className="text-emerald-600 flex-shrink-0" />
+                <span>Safe escrow protection for all bookings</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check size={14} className="text-emerald-600 flex-shrink-0" />
+                <span>Sparks never expire on active accounts</span>
+              </li>
+            </ul>
+          </div>
+
+          <Link
+            href="/wallet/buy"
+            className="w-full py-4 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95 whitespace-nowrap flex-shrink-0"
+          >
+            <span className="whitespace-nowrap">Recharge Sparks in Wallet</span>
+            <ArrowRight size={14} className="flex-shrink-0" />
+          </Link>
         </div>
       </div>
     </div>

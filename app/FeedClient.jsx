@@ -643,7 +643,7 @@ export default function FeedClient() {
                       >
                         {/* Avatar with online dot */}
                         <div className="relative flex-shrink-0">
-                          <div className="w-9 h-9 rounded-full overflow-hidden p-[1px] ring-1 ring-white/10 group-hover/author:ring-[var(--accent)]/50 transition-all bg-white">
+                          <div className="w-9 h-9 rounded-full overflow-hidden p-[1px] ring-1 ring-black/10 group-hover/author:ring-black/30 transition-all bg-white">
                             <img
                               src={optimizeAvatarUrl(post.authorPhoto || getCartoonAvatar(post.authorName))}
                               alt=""
@@ -663,7 +663,7 @@ export default function FeedClient() {
 
                         {/* Name + meta */}
                         <div className="min-w-0">
-                          <h4 className="text-[14px] font-bold text-black group-hover/author:text-[var(--accent)] transition-colors leading-tight truncate">
+                          <h4 className="text-[14px] font-bold text-black group-hover/author:text-black transition-colors leading-tight truncate">
                             {post.authorName}
                           </h4>
                           <p className="text-[12px] text-black/70 font-semibold mt-0.5 flex items-center gap-1.5 leading-none truncate">
@@ -731,7 +731,7 @@ export default function FeedClient() {
                                     navigator.clipboard.writeText(`${origin}/posts/${post.id}`);
                                     toast.success('Link copied!');
                                   }}
-                                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-black hover:bg-[var(--accent-tint-10)] hover:text-[var(--accent)] rounded-xl transition-colors cursor-pointer"
+                                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-bold text-black hover:bg-black/5 hover:text-black rounded-xl transition-colors cursor-pointer"
                                 >
                                   <Copy size={14} />
                                   <span>Copy link</span>
@@ -832,7 +832,7 @@ export default function FeedClient() {
                                 toast.success('Link copied!');
                               }
                             }}
-                            className="p-1.5 rounded-full hover:bg-black/5 text-black/70 hover:text-[var(--accent)] transition-colors cursor-pointer active:scale-90 whitespace-nowrap flex-shrink-0"
+                            className="p-1.5 rounded-full hover:bg-black/5 text-black/70 hover:text-black transition-colors cursor-pointer active:scale-90 whitespace-nowrap flex-shrink-0"
                             title="Share"
                           >
                             <Share2 size={19} />
@@ -888,7 +888,7 @@ export default function FeedClient() {
                   setPostMediaList([]);
                   setPostCaption('');
                 }}
-                className="w-8 h-8 rounded-full bg-[#FAFAF8] text-[#78716C] hover:text-[#1C1917] flex items-center justify-center hover:bg-[var(--accent-tint-10)] transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[#FAFAF8] text-[#78716C] hover:text-[#1C1917] flex items-center justify-center hover:bg-black/5 transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -966,16 +966,16 @@ export default function FeedClient() {
                     type="button"
                     onClick={() => fileInputPostRef.current?.click()}
                     disabled={postFileUploading}
-                    className="w-full py-2.5 rounded-xl border border-dashed border-[#E7E5E4] hover:border-[var(--accent)] hover:bg-[var(--accent-tint-10)]/30 text-xs font-bold text-[#1C1917] flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                    className="w-full py-2.5 rounded-xl border border-dashed border-[#E7E5E4] hover:border-black/30 hover:bg-black/5 text-xs font-bold text-[#1C1917] flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {postFileUploading ? (
                       <>
-                        <Loader2 size={14} className="animate-spin text-[var(--accent)]" />
+                        <Loader2 size={14} className="animate-spin text-black" />
                         <span>Uploading media...</span>
                       </>
                     ) : (
                       <>
-                        <Plus size={14} strokeWidth={2.5} className="text-[var(--accent)]" />
+                        <Plus size={14} strokeWidth={2.5} className="text-black" />
                         <span>Add more photos/videos ({postMediaList.length}/4)</span>
                       </>
                     )}
@@ -987,16 +987,16 @@ export default function FeedClient() {
                 type="button"
                 onClick={() => fileInputPostRef.current?.click()}
                 disabled={postFileUploading}
-                className="w-full h-[180px] rounded-2xl border-2 border-dashed border-[#E7E5E4] hover:border-[var(--accent)] bg-[#FAFAF8] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group"
+                className="w-full h-[180px] rounded-2xl border-2 border-dashed border-[#E7E5E4] hover:border-black/30 bg-[#FAFAF8] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group"
               >
                 {postFileUploading ? (
                   <div className="flex flex-col items-center gap-1.5 text-[#78716C]">
-                    <Loader2 className="w-6 h-6 animate-spin text-[var(--accent)]" />
+                    <Loader2 className="w-6 h-6 animate-spin text-black" />
                     <span className="text-xs font-bold">Uploading media...</span>
                   </div>
                 ) : (
                   <>
-                    <div className="w-12 h-12 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
+                    <div className="w-12 h-12 rounded-full bg-black/5 text-black border border-black/10 flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
                       <Plus size={22} strokeWidth={2.5} />
                     </div>
                     <span className="text-xs font-bold text-[#1C1917]">Upload Photos / Videos (Up to 4)</span>
@@ -1027,7 +1027,7 @@ export default function FeedClient() {
                   value={postLocation}
                   onChange={(e) => setPostLocation(e.target.value)}
                   placeholder="e.g. Campus, Library, Canteen"
-                  className="w-full h-11 px-3.5 rounded-2xl bg-white border border-[#E7E5E4] text-xs font-semibold text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 shadow-xs"
+                  className="w-full h-11 px-3.5 rounded-2xl bg-white border border-[#E7E5E4] text-xs font-semibold text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none focus:border-black focus:ring-1 focus:ring-black/10 shadow-xs"
                 />
               </div>
             </div>
@@ -1047,7 +1047,7 @@ export default function FeedClient() {
                 onChange={(e) => setPostCaption(e.target.value.slice(0, 1000))}
                 placeholder="What's happening on campus?"
                 rows={3}
-                className="w-full p-3.5 rounded-2xl bg-white border border-[#E7E5E4] text-xs font-medium text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 resize-none shadow-xs"
+                className="w-full p-3.5 rounded-2xl bg-white border border-[#E7E5E4] text-xs font-medium text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none focus:border-black focus:ring-1 focus:ring-black/10 resize-none shadow-xs"
               />
             </div>
 
@@ -1083,15 +1083,15 @@ export default function FeedClient() {
           onClick={() => !isDeletingPost && setDeletingPostId(null)}
         >
           <div 
-            className="w-full max-w-sm bg-white rounded-[24px] p-6 shadow-2xl border border-[#E7E5E4] space-y-4 anim-scale-in text-white"
+            className="w-full max-w-sm bg-white rounded-[24px] p-6 shadow-2xl border border-[#E7E5E4] space-y-4 anim-scale-in text-[#1C1917]"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-sm sm:text-base font-bold text-white">Delete Campus Moment?</h3>
+              <h3 className="text-sm sm:text-base font-bold text-[#1C1917]">Delete Campus Moment?</h3>
               <button 
                 type="button"
                 onClick={() => !isDeletingPost && setDeletingPostId(null)}
-                className="w-8 h-8 rounded-full bg-white text-[#78716C] hover:text-white flex items-center justify-center hover:bg-[var(--accent-tint-10)] cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-full bg-white text-[#78716C] hover:text-[#1C1917] flex items-center justify-center hover:bg-black/5 cursor-pointer transition-colors"
               >
                 <X size={16} />
               </button>
@@ -1106,7 +1106,7 @@ export default function FeedClient() {
                 type="button"
                 disabled={isDeletingPost}
                 onClick={() => setDeletingPostId(null)}
-                className="flex-1 py-2.5 rounded-full border border-[#E7E5E4] text-white text-xs font-bold uppercase tracking-wider hover:bg-[var(--accent-tint-10)] transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-full border border-[#E7E5E4] text-[#1C1917] text-xs font-bold uppercase tracking-wider hover:bg-black/5 transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -1134,25 +1134,25 @@ export default function FeedClient() {
           onClick={() => !isHostDeleting && setHostModeratingPost(null)}
         >
           <div 
-            className="w-full max-w-sm bg-white border border-[#E7E5E4] rounded-[24px] p-6 shadow-2xl space-y-4 anim-scale-in text-white"
+            className="w-full max-w-sm bg-white border border-[#E7E5E4] rounded-[24px] p-6 shadow-2xl space-y-4 anim-scale-in text-[#1C1917]"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-rose-500">
                 <ShieldAlert size={20} />
-                <h3 className="text-sm sm:text-base font-bold text-white">Moderate Post (Campus Host)</h3>
+                <h3 className="text-sm sm:text-base font-bold text-[#1C1917]">Moderate Post (Campus Host)</h3>
               </div>
               <button 
                 type="button"
                 onClick={() => !isHostDeleting && setHostModeratingPost(null)}
-                className="w-8 h-8 rounded-full bg-white text-[#78716C] hover:text-white flex items-center justify-center hover:bg-[var(--accent-tint-10)] cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-full bg-white text-[#78716C] hover:text-[#1C1917] flex items-center justify-center hover:bg-black/5 cursor-pointer transition-colors"
               >
                 <X size={16} />
               </button>
             </div>
 
             <p className="text-xs text-[#78716C] font-medium leading-relaxed">
-              Author: <strong className="text-white font-bold">{hostModeratingPost.authorName || 'Student'}</strong>
+              Author: <strong className="text-[#1C1917] font-bold">{hostModeratingPost.authorName || 'Student'}</strong>
               <br />
               This will permanently delete this post from the campus feed and record your action in the audit logs.
             </p>
@@ -1179,7 +1179,7 @@ export default function FeedClient() {
                 type="button"
                 disabled={isHostDeleting}
                 onClick={() => setHostModeratingPost(null)}
-                className="flex-1 py-2.5 rounded-full border border-[#E7E5E4] text-white text-xs font-bold uppercase tracking-wider hover:bg-[var(--accent-tint-10)] transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-full border border-[#E7E5E4] text-[#1C1917] text-xs font-bold uppercase tracking-wider hover:bg-black/5 transition-all cursor-pointer"
               >
                 Cancel
               </button>

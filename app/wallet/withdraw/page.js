@@ -182,8 +182,8 @@ export default function WithdrawPage() {
           {/* Insufficient Balance Notice */}
           {withdrawable < 500 && !loading ? (
             <div className="p-5 rounded-[24px] bg-white border border-[#E7E5E4] mb-6 shadow-xs text-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center mx-auto">
-                <Zap size={22} className="fill-[var(--accent)]" />
+              <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+                <Zap size={22} className="fill-amber-500 text-amber-500" />
               </div>
               <h3 className="text-sm font-bold text-[#1C1917]">Minimum ₹500 Required to Withdraw</h3>
               <p className="text-xs text-[#78716C] font-medium leading-relaxed max-w-[340px] mx-auto">
@@ -220,7 +220,7 @@ export default function WithdrawPage() {
                       value={amount}
                       onChange={e => setAmount(e.target.value)}
                       required
-                      className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-4 py-3 text-base font-bold text-[#1C1917] outline-none focus:border-[var(--accent)] transition-all"
+                      className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-4 py-3 text-base font-bold text-[#1C1917] outline-none focus:border-black focus:ring-1 focus:ring-black/10 transition-all"
                     />
                     <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs font-bold text-[#78716C]">
                       <span>Sparks (₹)</span>
@@ -231,7 +231,7 @@ export default function WithdrawPage() {
                     <button
                       type="button"
                       onClick={() => setAmount(String(withdrawable))}
-                      className="text-[var(--accent)] font-bold hover:underline cursor-pointer"
+                      className="text-[#1C1917] font-bold hover:underline cursor-pointer"
                     >
                       Max ({withdrawable})
                     </button>
@@ -249,7 +249,7 @@ export default function WithdrawPage() {
                       onClick={() => setMethod('upi')}
                       className={`p-3.5 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all ${
                         method === 'upi'
-                          ? 'border-[var(--accent)] bg-[var(--accent-tint-10)] text-[var(--accent)] font-bold shadow-2xs'
+                          ? 'border-black bg-black/5 text-black font-bold shadow-2xs'
                           : 'border-[#E7E5E4] bg-white text-[#1C1917] font-semibold hover:bg-[#FAFAF8]'
                       }`}
                     >
@@ -261,7 +261,7 @@ export default function WithdrawPage() {
                       onClick={() => setMethod('bank')}
                       className={`p-3.5 rounded-xl border flex items-center justify-center gap-2 cursor-pointer transition-all ${
                         method === 'bank'
-                          ? 'border-[var(--accent)] bg-[var(--accent-tint-10)] text-[var(--accent)] font-bold shadow-2xs'
+                          ? 'border-black bg-black/5 text-black font-bold shadow-2xs'
                           : 'border-[#E7E5E4] bg-white text-[#1C1917] font-semibold hover:bg-[#FAFAF8]'
                       }`}
                     >
@@ -281,7 +281,7 @@ export default function WithdrawPage() {
                         value={upiId}
                         onChange={e => setUpiId(e.target.value)}
                         required
-                        className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-4 py-3 text-xs font-bold text-[#1C1917] outline-none focus:border-[var(--accent)]"
+                        className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-4 py-3 text-xs font-bold text-[#1C1917] outline-none focus:border-black focus:ring-1 focus:ring-black/10"
                       />
                     </div>
                   ) : (
@@ -295,7 +295,7 @@ export default function WithdrawPage() {
                           placeholder="Full Legal Name"
                           value={bankDetails.account_name}
                           onChange={e => setBankDetails({ ...bankDetails, account_name: e.target.value })}
-                          className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#1C1917] outline-none focus:border-[var(--accent)]"
+                          className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#1C1917] outline-none focus:border-black focus:ring-1 focus:ring-black/10"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -308,7 +308,7 @@ export default function WithdrawPage() {
                             placeholder="1234567890"
                             value={bankDetails.account_number}
                             onChange={e => setBankDetails({ ...bankDetails, account_number: e.target.value })}
-                            className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#1C1917] outline-none focus:border-[var(--accent)]"
+                            className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#1C1917] outline-none focus:border-black focus:ring-1 focus:ring-black/10"
                           />
                         </div>
                         <div>
@@ -320,7 +320,7 @@ export default function WithdrawPage() {
                             placeholder="SBIN0001234"
                             value={bankDetails.ifsc_code}
                             onChange={e => setBankDetails({ ...bankDetails, ifsc_code: e.target.value.toUpperCase() })}
-                            className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-3.5 py-2.5 text-xs font-semibold uppercase text-[#1C1917] outline-none focus:border-[var(--accent)]"
+                            className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-3.5 py-2.5 text-xs font-semibold uppercase text-[#1C1917] outline-none focus:border-black focus:ring-1 focus:ring-black/10"
                           />
                         </div>
                       </div>
@@ -333,7 +333,7 @@ export default function WithdrawPage() {
                           placeholder="State Bank of India / HDFC"
                           value={bankDetails.bank_name}
                           onChange={e => setBankDetails({ ...bankDetails, bank_name: e.target.value })}
-                          className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#1C1917] outline-none focus:border-[var(--accent)]"
+                          className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#1C1917] outline-none focus:border-black focus:ring-1 focus:ring-black/10"
                         />
                       </div>
                     </div>

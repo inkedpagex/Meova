@@ -140,11 +140,27 @@ export async function POST(request, { params }) {
     // ── Unverified Tier Messaging Cap: Max 5 distinct recipients per calendar day ──
     const { data: senderProfile } = await supabaseAdmin
       .from('profiles')
-      .select('tier')
+      .select('tier, college_id')
       .eq('id', user.uid)
       .maybeSingle();
 
     const isUnverified = (senderProfile?.tier || 'not_verified') === 'not_verified';
+
+    // Cross-college messaging block: users from different colleges cannot message each other
+    if (otherId && senderProfile?.college_id) {
+      const { data: receiverProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('college_id')
+        .eq('id', otherId)
+        .maybeSingle();
+
+      if (receiverProfile?.college_id && senderProfile.college_id !== receiverProfile.college_id) {
+        return NextResponse.json(
+          { error: 'Messaging is only available between students from the same college.' },
+          { status: 403 }
+        );
+      }
+    }
 
     if (isUnverified && otherId) {
       const todayStart = new Date();

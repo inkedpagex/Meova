@@ -1,4 +1,4 @@
-﻿// Client-side interactive Logout button.
+// Client-side interactive Logout button.
 'use client';
 
 import React from 'react';
@@ -13,8 +13,10 @@ export default function LogoutButton() {
   const handleLogOut = async () => {
     const res = await logOut();
     if (res.success) {
-      router.push('/login');
-      router.refresh();
+      const isProd = process.env.NODE_ENV === 'production';
+      const cleanHost = typeof window !== 'undefined' ? window.location.host.replace(/^(app|admin|ambassador)\./, '') : 'localhost:3000';
+      const rootBase = isProd ? 'https://meova.in' : `http://${cleanHost}`;
+      window.location.href = `${rootBase}/login`;
     }
   };
 

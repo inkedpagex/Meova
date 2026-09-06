@@ -1,4 +1,4 @@
-﻿// Route Handler: stores the Firebase ID token in a cookie since firebase-admin is removed.
+// Route Handler: stores the Firebase ID token in a cookie since firebase-admin is removed.
 // Called from AuthForm after successful Firebase Auth sign-in.
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
@@ -61,13 +61,32 @@ export async function POST(request) {
   }
 
   try {
+    const host = request.headers.get('host') || '';
+    const isAdminHost = host.startsWith('admin.');
+    const isProd = process.env.NODE_ENV === 'production';
+
     const cookieStore = await cookies();
+    
+    if (isAdminHost) {
+      // Set isolated host-only cookie for admin domain without wildcard .meova.in
+      cookieStore.set('__Meova_admin_session', idToken, {
+        maxAge: SESSION_DURATION_MS / 1000,
+        httpOnly: true,
+        secure: isProd,
+        path: '/',
+        sameSite: 'lax',
+      });
+    }
+
+    // Set standard product session cookie
     cookieStore.set(SESSION_COOKIE_NAME, idToken, {
       maxAge: SESSION_DURATION_MS / 1000,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProd,
       path: '/',
       sameSite: 'lax',
+      // Share session across root (meova.in) and product app (app.meova.in) in production
+      ...(isProd && { domain: '.meova.in' }),
     });
 
     if (profileOverrides) {
@@ -75,6 +94,7 @@ export async function POST(request) {
         maxAge: SESSION_DURATION_MS / 1000,
         path: '/',
         sameSite: 'lax',
+        ...(isProd && { domain: '.meova.in' }),
       });
     }
 
@@ -85,9 +105,33 @@ export async function POST(request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request) {
   const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE_NAME);
+  const isProd = process.env.NODE_ENV === 'production';
+
+  // Delete both host-only and wildcard domain session cookies
+  cookieStore.delete({
+    name: SESSION_COOKIE_NAME,
+    path: '/',
+    ...(isProd && { domain: '.meova.in' }),
+  });
+  cookieStore.delete({
+    name: SESSION_COOKIE_NAME,
+    path: '/',
+  });
+  cookieStore.delete({
+    name: '__Meova_admin_session',
+    path: '/',
+  });
+  cookieStore.delete({
+    name: '__Meova_profile_overrides',
+    path: '/',
+    ...(isProd && { domain: '.meova.in' }),
+  });
+  cookieStore.delete({
+    name: '__Meova_profile_overrides',
+    path: '/',
+  });
   return NextResponse.json({ success: true });
 }
 

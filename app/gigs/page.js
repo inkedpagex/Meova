@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -199,7 +199,7 @@ export default function CampusGigsPage() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search gigs, skills, clubs…"
-                className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 focus:bg-white text-[#1C1917] placeholder-zinc-400 transition-all"
+                className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 focus:bg-white text-[#1C1917] placeholder-[#A8A29E] transition-all"
               />
             </div>
             <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
@@ -433,7 +433,7 @@ export default function CampusGigsPage() {
                       value={gigTitle} 
                       onChange={e => setGigTitle(e.target.value)} 
                       placeholder="e.g. Figma Designer for Campus App UI" 
-                      className="w-full px-3.5 py-3 rounded-2xl border border-[#E7E5E4] text-xs font-bold text-[#1C1917] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-[#FAFAF8] placeholder-zinc-400 transition-all" 
+                      className="w-full px-3.5 py-3 rounded-2xl border border-[#E7E5E4] text-xs font-bold text-[#1C1917] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-[#FAFAF8] placeholder-[#A8A29E] transition-all" 
                     />
                   </div>
 
@@ -485,7 +485,7 @@ export default function CampusGigsPage() {
                       value={gigCompany} 
                       onChange={e => setGigCompany(e.target.value)} 
                       placeholder={user?.full_name || 'e.g. Coding Club or Your Name'} 
-                      className="w-full px-3.5 py-3 rounded-2xl border border-[#E7E5E4] text-xs font-bold text-[#1C1917] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-[#FAFAF8] placeholder-zinc-400 transition-all" 
+                      className="w-full px-3.5 py-3 rounded-2xl border border-[#E7E5E4] text-xs font-bold text-[#1C1917] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-[#FAFAF8] placeholder-[#A8A29E] transition-all" 
                     />
                     <p className="text-[10.5px] font-semibold text-[#A8A29E] mt-1">
                       Students will see who is offering this gig.
@@ -581,7 +581,7 @@ export default function CampusGigsPage() {
                       onChange={e => setGigDesc(e.target.value)} 
                       placeholder="Describe what deliverables are needed, skills required, or any helpful context…" 
                       rows={3}
-                      className="w-full p-3.5 rounded-2xl border border-[#E7E5E4] text-xs font-medium text-[#1C1917] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-[#FAFAF8] resize-none placeholder-zinc-400" 
+                      className="w-full p-3.5 rounded-2xl border border-[#E7E5E4] text-xs font-medium text-[#1C1917] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-[#FAFAF8] resize-none placeholder-[#A8A29E]" 
                     />
                   </div>
 

@@ -9,6 +9,7 @@ export default function CustomSelect({
   options = [],
   placeholder = 'Select an option',
   className = '',
+  triggerClassName = '',
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
@@ -43,7 +44,7 @@ export default function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white border border-[#E7E5E4] hover:border-[var(--accent)] rounded-[12px] px-4 py-2.5 text-xs font-bold text-[#1C1917] flex items-center justify-between shadow-xs transition-all cursor-pointer active:scale-[0.99] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10"
+        className={triggerClassName || "w-full bg-white border border-[#E7E5E4] hover:border-[var(--accent)] rounded-[12px] px-4 py-2.5 text-xs font-bold text-[#1C1917] flex items-center justify-between shadow-xs transition-all cursor-pointer active:scale-[0.99] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10"}
       >
         <span className={selectedOption ? 'text-[#1C1917]' : 'text-[#1C1917]/40'}>
           {selectedOption ? selectedOption.label : placeholder}

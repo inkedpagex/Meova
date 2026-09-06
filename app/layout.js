@@ -117,6 +117,9 @@ export default async function RootLayout({ children }) {
   let isAdminPath = false;
   let isMessagesPath = false;
 
+  let initialMode = 'light';
+  let initialAccent = 'purple';
+
   try {
     const headersList = await headers();
     const pathname = headersList.get('x-pathname') || '';
@@ -125,8 +128,8 @@ export default async function RootLayout({ children }) {
 
     const { cookies } = await import('next/headers');
     const cookieStore = await cookies();
-    const initialMode = cookieStore.get('meova_mode')?.value || 'light';
-    const initialAccent = cookieStore.get('meova_accent')?.value || 'purple';
+    initialMode = cookieStore.get('meova_mode')?.value || 'light';
+    initialAccent = cookieStore.get('meova_accent')?.value || 'purple';
 
     const fetchedUser = await getUserWithRole();
 
@@ -170,10 +173,15 @@ export default async function RootLayout({ children }) {
     console.error('[RootLayout] Firebase Admin init error:', err?.message);
   }
 
-  const { cookies: nextCookies } = await import('next/headers');
+  const { cookies: nextCookies, headers: nextHeaders } = await import('next/headers');
   const cookieStore = await nextCookies();
-  const initialMode = cookieStore.get('meova_mode')?.value || 'light';
-  const initialAccent = cookieStore.get('meova_accent')?.value || 'purple';
+  const headersList = await nextHeaders();
+  const host = headersList.get('host') || '';
+  const isAmbassadorHost = host.startsWith('ambassador.');
+  const isAdminHost = host.startsWith('admin.');
+  const isStandaloneHost = isAmbassadorHost || isAdminHost;
+  initialMode = initialMode || cookieStore.get('meova_mode')?.value || 'light';
+  initialAccent = initialAccent || cookieStore.get('meova_accent')?.value || 'purple';
 
   return (
     <html
@@ -390,16 +398,16 @@ export default async function RootLayout({ children }) {
                   {/* Notification permission — friendly prompt shown once after login */}
                   <NotificationPermissionPrompt user={user} />
                   <div className="flex min-h-screen">
-                    <Sidebar user={user} />
+                    {!isStandaloneHost && <Sidebar user={user} />}
 
                     {/* Network wrapper shows Offline screen if connection lost */}
                     <NetworkWrapper>
-                      <MainContentWrapper user={user}>
+                      <MainContentWrapper user={user} isAmbassadorHost={isStandaloneHost}>
                         {children}
                       </MainContentWrapper>
                     </NetworkWrapper>
                     
-                    <RightPanel people={people} upcomingEvents={events} />
+                    {!isStandaloneHost && <RightPanel people={people} upcomingEvents={events} />}
                   </div>
                 </VoiceCallProvider>
               </UserProvider>

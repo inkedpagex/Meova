@@ -4,12 +4,22 @@ import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import GenderPromptModal from './GenderPromptModal';
 
-export default function MainContentWrapper({ children }) {
+export default function MainContentWrapper({ children, isAmbassadorHost = false }) {
   const pathname = usePathname();
   const isAdminPath = pathname?.startsWith('/admin');
   const isMessagesPath = pathname?.startsWith('/messages');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isClientAmbassador, setIsClientAmbassador] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isSub = window.location.hostname.startsWith('ambassador.');
+      const isAmbPage = window.location.pathname === '/ambassador';
+      if (isSub || isAmbPage) setIsClientAmbassador(true);
+      else setIsClientAmbassador(false);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     const saved = localStorage.getItem('sidebar_collapsed');
@@ -32,7 +42,19 @@ export default function MainContentWrapper({ children }) {
       .catch(() => {});
   }, []);
 
-  if (isAdminPath) {
+  if (isAmbassadorHost || isClientAmbassador) {
+    return (
+      <div className="flex-1 min-w-0 w-full min-h-screen bg-white">
+        <main className="w-full h-full">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
+  const isAmbassadorDashboard = pathname?.startsWith('/ambassador/dashboard');
+
+  if (isAdminPath || isAmbassadorDashboard) {
     return (
       <div className={`flex-1 ${isCollapsed ? 'md:pl-[72px]' : 'md:pl-[230px]'} min-w-0 bg-[#FAFAF8] transition-all duration-300`}>
         <main className="p-4 md:p-8 pt-20 md:pt-8 pb-24 md:pb-8 w-full max-w-7xl mx-auto pb-safe">
@@ -46,15 +68,26 @@ export default function MainContentWrapper({ children }) {
   const isStandalonePath =
     pathname === '/terms' ||
     pathname === '/privacy' ||
+    pathname === '/refund-policy' ||
+    pathname === '/community-guidelines' ||
+    pathname === '/grievance' ||
+    pathname === '/about' ||
+    pathname === '/contact' ||
     pathname === '/offline' ||
     pathname === '/login' ||
     pathname === '/signup' ||
     pathname === '/gla-university' ||
-    pathname?.startsWith('/gla-university');
+    pathname?.startsWith('/gla-university') ||
+    pathname === '/ambassador' ||
+    pathname?.startsWith('/college/') ||
+    pathname?.startsWith('/blog') ||
+    pathname?.startsWith('/help');
 
-  if (isStandalonePath) {
+  const isMarketingRoot = pathname === '/' && !currentUser;
+
+  if (isStandalonePath || isMarketingRoot) {
     return (
-      <div className="flex-1 min-w-0 bg-[#FAFAF8]">
+      <div className="flex-1 min-w-0 bg-white">
         <main className="w-full h-full">
           {children}
         </main>

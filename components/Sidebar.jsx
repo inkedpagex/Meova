@@ -17,15 +17,32 @@ import {
   User as UserIcon, 
   Wallet,
   Shield, 
+  Award,
   PanelLeft, 
   PanelLeftClose, 
   Plus, 
   Zap, 
   LogIn 
-} from 'lucide-react';
+} from '@/lib/icons';
 
 
-const AUTH_PATHS = ['/login', '/signup', '/onboarding', '/terms', '/privacy', '/offline', '/gla-university'];
+const AUTH_PATHS = [
+  '/login',
+  '/signup',
+  '/onboarding',
+  '/terms',
+  '/privacy',
+  '/refund-policy',
+  '/community-guidelines',
+  '/grievance',
+  '/about',
+  '/contact',
+  '/offline',
+  '/gla-university',
+  '/ambassador',
+  '/help',
+  '/blog',
+];
 
 export default function Sidebar({ user: propUser }) {
   const pathname = usePathname();
@@ -35,6 +52,35 @@ export default function Sidebar({ user: propUser }) {
   const currentUserId = user?.id || user?.uid;
   const isAdminRoute = pathname.startsWith('/admin');
   const [pendingPath, setPendingPath] = useState(null);
+
+  const [isStandaloneHost, setIsStandaloneHost] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const h = window.location.hostname;
+      const isIsolatedSub = h.startsWith('ambassador.') || h.startsWith('admin.');
+      const isPublicAmbassadorPage = window.location.pathname === '/ambassador';
+      const isCollegePage = window.location.pathname.startsWith('/college/');
+      const isContentPage =
+        window.location.pathname.startsWith('/blog') ||
+        window.location.pathname.startsWith('/help') ||
+        AUTH_PATHS.includes(window.location.pathname);
+      const isRootMarketing = window.location.pathname === '/' && !currentUserId;
+      if (isIsolatedSub || isPublicAmbassadorPage || isCollegePage || isContentPage || isRootMarketing) {
+        setIsStandaloneHost(true);
+      } else {
+        setIsStandaloneHost(false);
+      }
+    }
+  }, [pathname, currentUserId]);
+
+  const isPublicStandalone =
+    (pathname === '/' && !currentUserId) ||
+    pathname === '/ambassador' ||
+    pathname.startsWith('/college/') ||
+    pathname.startsWith('/blog') ||
+    pathname.startsWith('/help') ||
+    AUTH_PATHS.includes(pathname);
 
   useEffect(() => {
     setPendingPath(null);
@@ -246,6 +292,7 @@ export default function Sidebar({ user: propUser }) {
     { href: '/notifications', label: 'Notifications', Icon: Bell, badge: unreadCount },
     { href: '/wallet',        label: 'Wallet',        Icon: Wallet },
     { href: '/profile',       label: 'Profile',       Icon: UserIcon },
+    ...(user?.is_ambassador === true ? [{ href: '/ambassador/dashboard', label: 'Ambassador', Icon: Award }] : []),
     ...(user?.role === 'admin' ? [{ href: '/admin', label: 'Admin', Icon: Shield }] : []),
   ];
 
@@ -259,7 +306,7 @@ export default function Sidebar({ user: propUser }) {
 
   const avatarSrc = getUserAvatarUrl(user);
 
-  if (AUTH_PATHS.includes(pathname)) return null;
+  if (isPublicStandalone || isStandaloneHost || AUTH_PATHS.includes(pathname)) return null;
 
   return (
     <>
@@ -276,7 +323,7 @@ export default function Sidebar({ user: propUser }) {
               <button
                 type="button"
                 onClick={() => setShowCreateModal(true)}
-                className="w-8.5 h-8.5 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center hover:bg-[var(--accent-tint-20)] active:scale-95 transition-all cursor-pointer shadow-2xs flex-shrink-0"
+                className="w-8.5 h-8.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] hover:bg-black/5 active:scale-95 transition-all cursor-pointer shadow-2xs flex-shrink-0"
                 title="Create Post / Story"
               >
                 <Plus size={17} strokeWidth={2.2} />
@@ -285,16 +332,16 @@ export default function Sidebar({ user: propUser }) {
               {/* Wallet Pill */}
               <Link 
                 href="/wallet" 
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] hover:bg-[var(--accent-tint-10)] hover:border-[var(--accent-tint-20)] transition-all active:scale-95 shadow-2xs whitespace-nowrap flex-shrink-0"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] hover:bg-black/5 hover:border-black/20 transition-all active:scale-95 shadow-2xs whitespace-nowrap flex-shrink-0"
               >
-                <Zap size={12} strokeWidth={2} className="fill-[var(--accent)] text-[var(--accent)] flex-shrink-0" />
+                <Zap size={12} strokeWidth={2} className="fill-amber-500 text-amber-500 flex-shrink-0" />
                 <span className="tabular-nums font-bold leading-none">{sparks.toLocaleString()}</span>
               </Link>
 
               {/* Own Avatar */}
               <Link
                 href="/profile"
-                className="w-8.5 h-8.5 rounded-full overflow-hidden p-[1px] border border-[var(--accent-tint-20)] flex-shrink-0 relative active:scale-95 transition-transform bg-[var(--bg-surface)]"
+                className="w-8.5 h-8.5 rounded-full overflow-hidden p-[1px] border border-[var(--border-hairline)] flex-shrink-0 relative active:scale-95 transition-transform bg-[var(--bg-surface)]"
               >
                 <img
                   src={avatarSrc}
@@ -335,7 +382,7 @@ export default function Sidebar({ user: propUser }) {
               <button 
                 onClick={toggleCollapse} 
                 title="Expand Sidebar"
-                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
               >
                 <PanelLeft size={18} strokeWidth={1.5} />
               </button>
@@ -403,23 +450,23 @@ export default function Sidebar({ user: propUser }) {
                 prefetch={true}
                 onMouseDown={(e) => { try { e.currentTarget.blur(); } catch {} }}
                 onClick={handleLinkClick}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-[12px] text-[13.5px] font-bold outline-none focus:outline-none active:outline-none transition-all active:scale-95 ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-[12px] text-[13.5px] outline-none focus:outline-none active:outline-none transition-all active:scale-95 ${
                   active 
-                    ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] font-bold' 
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
+                    ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] font-semibold' 
+                    : 'text-[var(--text-secondary)] font-medium hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <Icon size={19} strokeWidth={active ? 2 : 1.5} className="flex-shrink-0" />
+                  <Icon size={19} strokeWidth={active ? 1.8 : 1.5} className="flex-shrink-0" />
                   <span className="truncate">{label}</span>
                 </div>
                 {showBadge && (
-                  <span className="min-w-[20px] h-[20px] rounded-full bg-[var(--accent)] text-white text-[10px] font-bold flex items-center justify-center px-1 flex-shrink-0">
+                  <span className="min-w-[20px] h-[20px] rounded-full bg-[var(--accent)] text-white text-[10px] font-semibold flex items-center justify-center px-1 flex-shrink-0">
                     {badgeCount > 99 ? '99+' : badgeCount}
                   </span>
                 )}
                 {label === 'Wallet' && sparks > 0 && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex-shrink-0">
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 flex-shrink-0">
                     {sparks.toLocaleString()}
                   </span>
                 )}
@@ -438,7 +485,7 @@ export default function Sidebar({ user: propUser }) {
                 isCollapsed ? 'justify-center' : ''
               }`}
             >
-              <div className="w-9 h-9 rounded-full p-[1.5px] bg-[var(--accent)] flex-shrink-0">
+              <div className="w-9 h-9 rounded-full p-[1.5px] bg-[var(--border-hairline)] flex-shrink-0">
                 <div className="w-full h-full rounded-full overflow-hidden relative border border-[var(--bg-surface)]">
                   <img 
                     src={avatarSrc} 
@@ -453,7 +500,7 @@ export default function Sidebar({ user: propUser }) {
               </div>
               {!isCollapsed && (
                 <div className="min-w-0">
-                  <p className="text-xs font-bold truncate text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                  <p className="text-xs font-bold truncate text-[var(--text-primary)] group-hover:text-[var(--text-primary)] transition-colors">
                     {user.full_name || (user.email || 'user').split('@')[0]}
                   </p>
                   <p className="text-[10px] truncate text-[var(--text-muted)] font-medium">
@@ -499,7 +546,7 @@ export default function Sidebar({ user: propUser }) {
                     try { navigator.vibrate(10); } catch {}
                   }
                 }}
-                className="flex-1 flex flex-col items-center justify-center h-full text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors active:scale-95"
+                className="flex-1 flex flex-col items-center justify-center h-full text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors active:scale-95"
               >
                 <div className="relative flex items-center justify-center">
                   <LogIn size={21} strokeWidth={1.5} />

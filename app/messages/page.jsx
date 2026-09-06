@@ -124,7 +124,7 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
       className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-[var(--bg-surface)] transition-colors cursor-pointer group"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="w-12 h-12 rounded-full overflow-hidden border border-[var(--border-hairline)] flex-shrink-0 bg-[var(--accent-tint-10)] shadow-xs">
+        <div className="w-12 h-12 rounded-full overflow-hidden border border-[var(--border-hairline)] flex-shrink-0 bg-[#FAFAF8] shadow-xs">
           <img 
             src={avatarUrl(student.id, student.full_name, student.photo_url)} 
             alt="" 
@@ -136,7 +136,7 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-[var(--accent)] transition-colors">
+          <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-black transition-colors">
             {student.full_name || 'Student'}
           </p>
           <p className="text-xs font-semibold text-[var(--text-muted)] truncate mt-0.5">
@@ -163,8 +163,8 @@ function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderI
   if (isSystem) {
     return (
       <div className="flex justify-center my-4">
-        <div className="flex items-center gap-2 bg-[var(--accent-tint-10)] text-[var(--text-secondary)] rounded-full px-4 py-1.5">
-          <Zap className="w-3.5 h-3.5 text-[var(--accent)] fill-current" />
+        <div className="flex items-center gap-2 bg-amber-50 text-amber-900 border border-amber-200 rounded-full px-4 py-1.5">
+          <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
           <span className="text-[11px] font-bold">{msg.text}</span>
         </div>
       </div>
@@ -741,7 +741,7 @@ function MessagesContent() {
           <button
             type="button"
             onClick={() => setShowNewMessageModal(true)}
-            className="w-9 h-9 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center hover:bg-[var(--accent-tint-20)] active:scale-95 transition-all cursor-pointer shadow-2xs"
+            className="w-9 h-9 rounded-full bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] flex items-center justify-center hover:bg-black/5 active:scale-95 transition-all cursor-pointer shadow-2xs"
             title="New Message"
           >
             <SquarePen size={17} />
@@ -831,7 +831,7 @@ function MessagesContent() {
               
               {/* Top Banner Card */}
               <div className="text-center space-y-3">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] text-[10px] font-bold uppercase tracking-wider">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 border border-black/10 text-black text-[10px] font-bold uppercase tracking-wider">
                   <Sparkles size={12} className="fill-current" />
                   <span>Direct Campus Connect</span>
                 </div>
@@ -854,7 +854,7 @@ function MessagesContent() {
                     href="/discover"
                     className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[var(--bg-surface)] border border-[var(--border-hairline)] hover:bg-[var(--bg-base)] text-[var(--text-secondary)] font-bold text-xs transition-all active:scale-95 cursor-pointer"
                   >
-                    <Compass size={14} className="text-[var(--accent)]" />
+                    <Compass size={14} className="text-[#78716C]" />
                     <span>Explore Campus</span>
                   </Link>
                 </div>
@@ -869,7 +869,7 @@ function MessagesContent() {
                       Suggested Classmates
                     </span>
                   </div>
-                  <Link href="/discover" className="text-[11px] font-bold text-[var(--accent)] hover:underline">
+                  <Link href="/discover" className="text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:underline">
                     View All
                   </Link>
                 </div>
@@ -887,7 +887,7 @@ function MessagesContent() {
                         return (
                           <div
                             key={student.id}
-                            className="p-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] hover:bg-[var(--bg-base)] hover:border-[var(--accent-tint-20)] hover:shadow-xs transition-all flex items-center justify-between gap-3 group"
+                            className="p-3.5 rounded-2xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] hover:bg-[var(--bg-base)] hover:border-black/20 hover:shadow-xs transition-all flex items-center justify-between gap-3 group"
                           >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                               <div className="relative flex-shrink-0">
@@ -903,7 +903,7 @@ function MessagesContent() {
                                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-[var(--bg-surface)]" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs font-bold text-[var(--text-primary)] truncate group-hover:text-[var(--accent)] transition-colors">
+                                <p className="text-xs font-bold text-[var(--text-primary)] truncate group-hover:text-black transition-colors">
                                   {student.full_name || 'Student'}
                                 </p>
                                 <p className="text-[10px] font-semibold text-[var(--text-muted)] truncate mt-0.5">
@@ -920,7 +920,7 @@ function MessagesContent() {
                             <button
                               type="button"
                               onClick={() => openChatWithUser(student.id, student.full_name, student.photo_url)}
-                              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--accent-tint-10)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white border border-[var(--accent-tint-20)] text-[11px] font-bold transition-all cursor-pointer flex-shrink-0 active:scale-95 shadow-2xs"
+                              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-black text-white hover:bg-black/80 border border-transparent text-[11px] font-bold transition-all cursor-pointer flex-shrink-0 active:scale-95 shadow-2xs"
                               title="Start Chat"
                             >
                               <Send size={11} />
@@ -1139,7 +1139,7 @@ function MessagesContent() {
               if (isGroup) {
                 return (
                   <div className="p-3.5 border-t border-[var(--border-hairline)] bg-[var(--bg-surface)] flex-shrink-0 flex items-center justify-center gap-2">
-                    <Radio size={14} className="text-[var(--accent)]" />
+                    <Radio size={14} className="text-emerald-500" />
                     <p className="text-xs font-bold text-[var(--text-secondary)]">
                       Verified Campus Channel · Broadcast updates only
                     </p>
@@ -1153,17 +1153,17 @@ function MessagesContent() {
                 <div className="border-t border-[var(--border-hairline)] bg-[var(--bg-surface)] flex-shrink-0">
                   {/* First message spark indicator */}
                   {isGenuinelyNewChat && (
-                    <div className="flex items-center justify-between px-4 py-2 bg-[var(--accent-tint-10)] border-b border-[var(--accent-tint-20)] text-[11px] font-bold text-[var(--accent)]">
+                    <div className="flex items-center justify-between px-4 py-2 bg-amber-50 border-b border-amber-200 text-[11px] font-bold text-amber-900">
                       <div className="flex items-center gap-1.5">
-                        <Zap size={13} className="text-[var(--accent)] fill-[var(--accent)] flex-shrink-0" />
+                        <Zap size={13} className="text-amber-500 fill-amber-500 flex-shrink-0" />
                         <span>First message starts this conversation (5 Sparks)</span>
                       </div>
-                      <span className="font-extrabold text-[var(--accent)] flex-shrink-0 ml-2">Balance: {spendableSparks} Sparks</span>
+                      <span className="font-extrabold text-amber-900 flex-shrink-0 ml-2">Balance: {spendableSparks} Sparks</span>
                     </div>
                   )}
 
                   <div className="p-2.5 sm:p-3">
-                    <div className="flex items-center gap-3 bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-[var(--accent)] focus-within:border-transparent transition-all">
+                    <div className="flex items-center gap-3 bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-black/20 focus-within:border-transparent transition-all">
                       <textarea
                         ref={inputRef}
                         value={inputText}

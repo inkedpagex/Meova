@@ -40,16 +40,16 @@ button, button:focus, button:active,
 /* ═══════════════════════════════════════════════
    DYNAMIC THEME ENGINE — CSS TOKENS
    Supports Crisp White (Light) & Midnight Black (Dark)
-   + 5 Accents: Orange, Pink, Purple, Emerald, Blue
+   + Primary Accent: Meova Royal Purple (#7C3AED)
    ═══════════════════════════════════════════════ */
 
 /* ── Default / Light Base Mode ──────────────── */
 :root, [data-mode="light"] {
   /* Backgrounds */
-  --bg-base:          #FFFFFF;
+  --bg-base:          #FAFAF8;
   --bg-surface:       #FFFFFF;
   --bg-elevated:      #FFFFFF;
-  --bg-secondary:     #FFFFFF;
+  --bg-secondary:     #FAFAF8;
   --bg-overlay:       #FFFFFF;
   --bg-hover:         var(--accent-tint-10);
   --bg-active:        var(--accent-tint-20);
@@ -59,14 +59,14 @@ button, button:focus, button:active,
   --skeleton-shimmer: rgba(0, 0, 0, 0.08);
 
   /* Hairline Borders */
-  --border-hairline:  rgba(0, 0, 0, 0.10);
+  --border-hairline:  #E7E5E4;
   --border-subtle:    rgba(0, 0, 0, 0.05);
   --border-mid:       rgba(0, 0, 0, 0.15);
   --border-strong:    rgba(0, 0, 0, 0.25);
 
   /* Text Scale */
-  --text-primary:     #000000;
-  --text-secondary:   rgba(0, 0, 0, 0.70);
+  --text-primary:     #1C1917;
+  --text-secondary:   #78716C;
   --text-tertiary:    rgba(0, 0, 0, 0.55);
   --text-muted:       rgba(0, 0, 0, 0.55);
   --text-faint:       rgba(0, 0, 0, 0.40);
@@ -105,13 +105,13 @@ button, button:focus, button:active,
   --skeleton-bg:      rgba(255, 255, 255, 0.07);
   --skeleton-shimmer: rgba(255, 255, 255, 0.12);
 
-  --border-hairline:  rgba(255, 255, 255, 0.08);
+  --border-hairline:  #2A2A2A;
   --border-subtle:    rgba(255, 255, 255, 0.05);
   --border-mid:       rgba(255, 255, 255, 0.14);
   --border-strong:    rgba(255, 255, 255, 0.24);
 
   --text-primary:     #FFFFFF;
-  --text-secondary:   #A1A1AA;
+  --text-secondary:   #A3A3A3;
   --text-tertiary:    #71717A;
   --text-muted:       #71717A;
   --text-faint:       #3F3F46;

@@ -323,7 +323,7 @@ export default function HostDashboardClient({
                   placeholder="Filter moments by caption, category, or location..."
                   value={postSearch}
                   onChange={(e) => setPostSearch(e.target.value)}
-                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] pl-9 pr-4 py-2 text-xs text-[#1C1917] placeholder-zinc-400 focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors"
+                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] pl-9 pr-4 py-2 text-xs text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors"
                 />
               </div>
               <p className="text-xs text-[#78716C] font-medium">
@@ -396,7 +396,7 @@ export default function HostDashboardClient({
                   placeholder="Search student by name, email, or branch..."
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
-                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] pl-9 pr-4 py-2 text-xs text-[#1C1917] placeholder-zinc-400 focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors"
+                  className="w-full bg-[#FAFAF8] border border-[#E7E5E4] rounded-[12px] pl-9 pr-4 py-2 text-xs text-[#1C1917] placeholder-[#A8A29E] focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors"
                 />
               </div>
               <p className="text-xs text-[#78716C] font-medium">
@@ -497,7 +497,7 @@ export default function HostDashboardClient({
                 No moderation actions recorded yet. Your campus is clean!
               </div>
             ) : (
-              <div className="bg-white border border-[#E7E5E4]/80 rounded-[24px] divide-y divide-zinc-100 overflow-hidden shadow-2xs">
+              <div className="bg-white border border-[#E7E5E4]/80 rounded-[24px] divide-y divide-[#E7E5E4] overflow-hidden shadow-2xs">
                 {logs.map((log) => (
                   <div key={log.id} className="p-4 flex items-center justify-between gap-4">
                     <div>

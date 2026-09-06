@@ -35,11 +35,11 @@ export function useAuth() {
     }
   };
 
-  const handleGoogleLogIn = async (idToken = null, accessToken = null) => {
+  const handleGoogleLogIn = async (idToken = null, accessToken = null, termsAccepted = false, termsVersion = '2026.1') => {
     setLoading(true);
     setError(null);
     try {
-      const data = await logInWithGoogle(idToken, accessToken);
+      const data = await logInWithGoogle(idToken, accessToken, termsAccepted, termsVersion);
       return { success: true, data };
     } catch (err) {
       console.error("Google Auth error:", err);

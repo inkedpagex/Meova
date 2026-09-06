@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -94,7 +94,7 @@ export default function GenderPromptModal({ user }) {
         </div>
 
         {/* Form Selection */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form noValidate onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-3 gap-2.5">
             {[
               { id: 'male', label: 'Male' },

@@ -132,7 +132,7 @@ export function Step2({ data, onChange, onNext, onBack }) {
         <UniversitySelector
           value={data.university}
           onChange={(val) => onChange('university', val)}
-          placeholder="Search college (e.g. GLA University, IIT, DU...)"
+          placeholder="Search college (e.g. DTU, Delhi University, IIT, Bennett...)"
         />
       </div>
 

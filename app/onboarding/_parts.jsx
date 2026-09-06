@@ -71,7 +71,7 @@ function Step1({ data, onChange, onNext }) {
     }
     const digitCount = (clean.match(/\d/g) || []).length;
     if (digitCount < 2) {
-      setUsernameStatus('invalid'); setUsernameMsg('Must contain at least 2 digits / numbers (e.g. chirag_04)'); return;
+      setUsernameStatus('invalid'); setUsernameMsg('Must contain at least 2 digits / numbers (e.g. user_01)'); return;
     }
     setUsernameStatus('checking'); setUsernameMsg('Checking...');
     try {
@@ -183,7 +183,7 @@ function Step1({ data, onChange, onNext }) {
             type="text" 
             value={data.full_name}
             onChange={e => onChange('full_name', e.target.value)}
-            placeholder="e.g. Chirag Sharma"
+            placeholder="Enter your full name"
             className="w-full pl-10 pr-3.5 py-2.5 sm:py-3 rounded-xl border border-[#E7E5E4] text-xs font-bold outline-none transition-all focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-white focus:bg-white text-[#1C1917]"
           />
         </div>
@@ -201,7 +201,7 @@ function Step1({ data, onChange, onNext }) {
             value={data.username} 
             maxLength={20}
             onChange={handleUsernameChange}
-            placeholder="chirag_04"
+            placeholder="username_01"
             className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl border border-[#E7E5E4] text-xs font-bold outline-none transition-all focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 bg-white focus:bg-white text-[#1C1917]"
             style={{
               borderColor: usernameStatus === 'ok' ? '#10b981' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#f43f5e' : undefined,
@@ -218,7 +218,7 @@ function Step1({ data, onChange, onNext }) {
             {usernameMsg}
           </p>
         )}
-        <p suppressHydrationWarning className="text-[9.5px] text-[#A8A29E] mt-0.5">Start with a letter · 2+ digits (e.g. chirag_04)</p>
+        <p suppressHydrationWarning className="text-[9.5px] text-[#A8A29E] mt-0.5">Start with a letter · 2+ digits (e.g. user_01)</p>
       </div>
 
       {/* Gender Selection */}

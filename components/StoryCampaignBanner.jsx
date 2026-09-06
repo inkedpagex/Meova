@@ -208,7 +208,7 @@ export default function StoryCampaignBanner({ className = '' }) {
               Post a story tagging <strong className="text-[var(--accent)]">@meova.in</strong> with a link to your Meova profile, then enter your handle below to claim reward.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form noValidate onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <input
                   type="text"

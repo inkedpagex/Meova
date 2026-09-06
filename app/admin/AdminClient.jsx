@@ -335,12 +335,12 @@ export default function AdminClient() {
       </div>
 
       {/* ── SECTION: CAMPUS FEATURE LAUNCH CONTROLS ───────────────────── */}
-      <div className="bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-md border border-[#E7E5E4] space-y-4">
+      <div className="bg-gradient-to-r from-[#0D0D0D] via-[#1C1917] to-[#0D0D0D] text-white rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-md border border-[#E7E5E4] space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-zinc-100">
+              <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-white">
                 Live App Modules & Launch Switches
               </h3>
             </div>

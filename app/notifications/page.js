@@ -15,7 +15,7 @@ const FILTERS = ['All', 'Bookings', 'Gigs', 'Sparks', 'Reviews', 'Social'];
 function NotifIcon({ type, photo, name, unread }) {
   if (photo) {
     return (
-      <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-[var(--bg-surface)] ring-1 ring-[var(--border-hairline)] shadow-[0_2px_8px_rgba(28,25,23,0.06)] bg-[var(--accent-tint-10)]">
+      <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-[var(--bg-surface)] ring-1 ring-[var(--border-hairline)] shadow-[0_2px_8px_rgba(28,25,23,0.06)] bg-[#FAFAF8]">
         <img
           src={photo}
           alt=""
@@ -33,24 +33,24 @@ function NotifIcon({ type, photo, name, unread }) {
   const t = (type || '').toLowerCase();
   
   if (t.includes('booking') || t.includes('meet')) {
-    return <div className={`${base} ${unread ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><BookOpen size={17} strokeWidth={2.2} /></div>;
+    return <div className={`${base} ${unread ? 'bg-black/5 text-black border-black/10' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><BookOpen size={17} strokeWidth={2.2} /></div>;
   }
   if (t.includes('spark') || t.includes('wallet') || t.includes('tip') || t.includes('refund')) {
-    return <div className={`${base} ${unread ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Zap size={17} className="fill-current" /></div>;
+    return <div className={`${base} ${unread ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Zap size={17} className="fill-current" /></div>;
   }
   if (t.includes('presence') || t.includes('online')) {
     return <div className={`${base} bg-emerald-50 text-emerald-600 border-emerald-200`}> <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" /> </div>;
   }
   if (t.includes('review') || t.includes('rate') || t.includes('rating')) {
-    return <div className={`${base} ${unread ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Star size={17} className="fill-current" /></div>;
+    return <div className={`${base} ${unread ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Star size={17} className="fill-current" /></div>;
   }
   if (t.includes('dispute') || t.includes('flag')) {
     return <div className={`${base} bg-rose-50 text-rose-600 border-rose-200`}><AlertTriangle size={17} strokeWidth={2.2} /></div>;
   }
   if (t.includes('circle') || t.includes('social') || t.includes('community')) {
-    return <div className={`${base} ${unread ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Users size={17} strokeWidth={2.2} /></div>;
+    return <div className={`${base} ${unread ? 'bg-black/5 text-black border-black/10' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Users size={17} strokeWidth={2.2} /></div>;
   }
-  return <div className={`${base} ${unread ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Bell size={17} strokeWidth={2.2} /></div>;
+  return <div className={`${base} ${unread ? 'bg-black/5 text-black border-black/10' : 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]'}`}><Bell size={17} strokeWidth={2.2} /></div>;
 }
 
 function timeAgo(iso) {
@@ -127,10 +127,10 @@ export default function NotificationsPage() {
 
   const getCategoryBadge = (type) => {
     const t = (type || '').toLowerCase();
-    if (t.includes('booking') || t.includes('meet')) return { label: 'Meetup', cls: 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' };
-    if (t.includes('spark') || t.includes('wallet') || t.includes('tip') || t.includes('refund')) return { label: 'Sparks', cls: 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' };
-    if (t.includes('review') || t.includes('rate')) return { label: 'Review', cls: 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' };
-    if (t.includes('circle') || t.includes('community')) return { label: 'Circle', cls: 'bg-[var(--accent-tint-10)] text-[var(--accent)] border-[var(--accent-tint-20)]' };
+    if (t.includes('booking') || t.includes('meet')) return { label: 'Meetup', cls: 'bg-black/5 text-[#1C1917] border-black/10' };
+    if (t.includes('spark') || t.includes('wallet') || t.includes('tip') || t.includes('refund')) return { label: 'Sparks', cls: 'bg-amber-50 text-amber-900 border-amber-200' };
+    if (t.includes('review') || t.includes('rate')) return { label: 'Review', cls: 'bg-amber-50 text-amber-900 border-amber-200' };
+    if (t.includes('circle') || t.includes('community')) return { label: 'Circle', cls: 'bg-black/5 text-[#1C1917] border-black/10' };
     if (t.includes('dispute') || t.includes('flag')) return { label: 'Alert', cls: 'bg-rose-50 text-rose-700 border-rose-200' };
     return { label: 'Activity', cls: 'bg-[#FAFAF8] text-[#78716C] border-[#E7E5E4]' };
   };
@@ -166,8 +166,8 @@ export default function NotificationsPage() {
         onClick={() => handleNotifClick(n)}
         className={`p-4 rounded-[16px] flex items-start gap-3.5 transition-all cursor-pointer hover:shadow-xs active:scale-[0.99] border ${
           isUnread 
-            ? 'bg-[var(--accent-tint-10)] border-[var(--accent-tint-20)] shadow-xs' 
-            : 'bg-white border-[#E7E5E4] hover:border-[var(--accent)] shadow-xs'
+            ? 'bg-[#FAFAF8] border-[#E7E5E4] shadow-xs' 
+            : 'bg-white border-[#E7E5E4] hover:border-black/20 shadow-xs'
         }`}
       >
         <NotifIcon type={n.type} photo={n.sender_photo || n.photo} name={n.sender_name || n.title} unread={isUnread} />
@@ -256,8 +256,8 @@ export default function NotificationsPage() {
       {todayNotifs.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-1.5 mb-2.5 px-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--accent)]">Today</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1C1917]" />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#1C1917]">Today</span>
           </div>
           <div className="space-y-2">
             {todayNotifs.map(n => <NotifRow key={n.id} n={n} />)}
@@ -288,7 +288,7 @@ export default function NotificationsPage() {
       {/* Empty state */}
       {filtered.length === 0 && (
         <div className="bg-white border border-[#E7E5E4] rounded-[16px] p-8 text-center space-y-4 my-8 shadow-xs">
-          <div className="w-14 h-14 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] flex items-center justify-center mx-auto border border-[var(--accent-tint-20)] shadow-xs">
+          <div className="w-14 h-14 rounded-full bg-black/5 text-black flex items-center justify-center mx-auto border border-black/10 shadow-xs">
             <Bell size={24} strokeWidth={2.2} />
           </div>
           <div>

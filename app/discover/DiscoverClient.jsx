@@ -285,7 +285,7 @@ export default function DiscoverClient() {
             <span className="text-[14px] font-bold text-[var(--text-primary)]">No classmates found matching your query.</span>
             <span className="text-[12px] text-[var(--text-secondary)]">Try exploring different branches or clearing your search.</span>
             {search && (
-              <button onClick={() => setSearch('')} className="px-5 py-2 mt-2 bg-[var(--accent-tint-10)] text-[var(--accent)] hover:bg-[var(--accent-tint-20)] text-[11px] font-bold uppercase tracking-wider rounded-full transition-colors cursor-pointer border border-[var(--accent-tint-20)]">
+              <button onClick={() => setSearch('')} className="px-5 py-2 mt-2 bg-black/5 text-[#1C1917] hover:bg-black/10 text-[11px] font-bold uppercase tracking-wider rounded-full transition-colors cursor-pointer border border-black/10">
                 Clear Search
               </button>
             )}
@@ -301,7 +301,7 @@ export default function DiscoverClient() {
                   <div
                     key={person.id}
                     onClick={() => router.push(`/users/${person.id}`)}
-                    className="rounded-[26px] bg-[var(--bg-surface)] border border-[var(--border-hairline)] hover:border-[var(--accent)] hover:shadow-md active:scale-[0.99] transition-all duration-300 cursor-pointer p-4 flex flex-col justify-between group shadow-xs relative select-none"
+                    className="rounded-[26px] bg-[var(--bg-surface)] border border-[var(--border-hairline)] hover:border-black/20 hover:shadow-md active:scale-[0.99] transition-all duration-300 cursor-pointer p-4 flex flex-col justify-between group shadow-xs relative select-none"
                   >
                     {/* Top Header Floating Badges */}
                     <div className="flex items-center justify-between gap-2 mb-2">
@@ -317,13 +317,13 @@ export default function DiscoverClient() {
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10.5px] font-medium bg-[var(--bg-base)] text-[var(--text-secondary)] border border-[var(--border-hairline)] flex-shrink-0">
-                          <MapPin size={10} className="text-[var(--accent)]" /> GLA Campus
+                          <MapPin size={10} className="text-[var(--text-secondary)]" /> {person.university ? person.university.split(',')[0] : 'Campus'}
                         </span>
                       )}
 
                       {person.completed_meets_count > 0 ? (
-                        <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[var(--accent)] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] px-2.5 py-1 rounded-full shadow-xs flex-shrink-0">
-                          <Zap size={10} className="fill-[var(--accent)]" />
+                        <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full shadow-xs flex-shrink-0">
+                          <Zap size={10} className="fill-amber-500 text-amber-500" />
                           {person.completed_meets_count} Meets
                         </span>
                       ) : (
@@ -335,7 +335,7 @@ export default function DiscoverClient() {
 
                     {/* Center Big Portrait Photo (100% Uncropped Face Visibility) */}
                     <div className="flex flex-col items-center text-center my-1.5 flex-1">
-                      <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-[26px] overflow-hidden p-[3px] bg-gradient-to-tr from-[var(--accent-tint-20)] via-[var(--border-hairline)] to-[var(--accent)] group-hover:scale-105 transition-all duration-300 shadow-md mb-3 flex-shrink-0">
+                      <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-[26px] overflow-hidden p-[3px] bg-gradient-to-tr from-black/5 via-[var(--border-hairline)] to-black/20 group-hover:scale-105 transition-all duration-300 shadow-md mb-3 flex-shrink-0">
                         <div className="w-full h-full rounded-[23px] overflow-hidden bg-[var(--bg-surface)]">
                           <img
                             src={getAvatar(person)}
@@ -353,17 +353,17 @@ export default function DiscoverClient() {
                       </div>
 
                       {/* Name & Academic Info */}
-                      <h3 className="text-[16px] sm:text-[17px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors leading-tight line-clamp-1">
+                      <h3 className="text-[16px] sm:text-[17px] font-bold text-[var(--text-primary)] group-hover:text-black transition-colors leading-tight line-clamp-1">
                         {person.full_name}
                       </h3>
                       <p className="text-[12px] font-semibold text-[var(--text-secondary)] mt-0.5 line-clamp-1">
-                        {person.branch || 'GLA Student'}{person.year ? ` • Year ${person.year.replace(/[^0-9]/g, '') || person.year}` : ''}
+                        {person.branch || 'Student'}{person.year ? ` • Year ${person.year.replace(/[^0-9]/g, '') || person.year}` : ''}
                       </p>
 
                       {/* Mutual Vibe / Bio */}
                       {mutualText ? (
-                        <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] text-[11px] font-bold flex items-center justify-center gap-1.5 max-w-full">
-                          <Sparkles size={11} className="text-[var(--accent)] flex-shrink-0" />
+                        <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-black/5 border border-black/10 text-black text-[11px] font-bold flex items-center justify-center gap-1.5 max-w-full">
+                          <Sparkles size={11} className="text-[#78716C] flex-shrink-0" />
                           <span className="truncate">{mutualText}</span>
                         </div>
                       ) : person.bio ? (
@@ -372,7 +372,7 @@ export default function DiscoverClient() {
                         </p>
                       ) : (
                         <div className="mt-2 text-[11px] text-[var(--text-muted)] font-medium flex items-center gap-1">
-                          <Users size={11} className="text-[var(--accent)] flex-shrink-0" />
+                          <Users size={11} className="text-[#78716C] flex-shrink-0" />
                           <span>Open to connect &amp; meet</span>
                         </div>
                       )}
@@ -382,7 +382,7 @@ export default function DiscoverClient() {
                         {(person.interests || []).slice(0, 3).map((tag, idx) => (
                           <span
                             key={`${tag}-${idx}`}
-                            className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[var(--bg-base)] text-[var(--text-secondary)] border border-[var(--border-hairline)] group-hover:border-[var(--accent-tint-20)] transition-colors"
+                            className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[var(--bg-base)] text-[var(--text-secondary)] border border-[var(--border-hairline)] group-hover:border-black/20 transition-colors"
                           >
                             #{tag}
                           </span>
@@ -430,7 +430,7 @@ export default function DiscoverClient() {
                             router.push(`/messages?userId=${person.id}`);
                           }
                         }}
-                        className="h-10 w-10 rounded-full bg-[var(--bg-surface)] hover:bg-[var(--accent-tint-10)] text-[var(--text-secondary)] hover:text-[var(--accent)] border border-[var(--border-hairline)] hover:border-[var(--accent-tint-20)] flex items-center justify-center flex-shrink-0 transition-all active:scale-95 cursor-pointer shadow-xs"
+                        className="h-10 w-10 rounded-full bg-[var(--bg-surface)] hover:bg-black/5 text-[var(--text-secondary)] hover:text-black border border-[var(--border-hairline)] hover:border-black/20 flex items-center justify-center flex-shrink-0 transition-all active:scale-95 cursor-pointer shadow-xs"
                         title="Send Direct Message"
                       >
                         <MessageSquare size={15} />
@@ -447,10 +447,10 @@ export default function DiscoverClient() {
                 <button
                   type="button"
                   onClick={() => setVisiblePeopleLimit(prev => prev + 12)}
-                  className="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--bg-surface)] hover:bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[var(--bg-surface)] hover:bg-black/5 text-[#1C1917] border border-[var(--border-hairline)] shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-2"
                 >
                   <span>Load More Classmates</span>
-                  <span className="text-[10px] bg-[var(--accent-tint-10)] px-2 py-0.5 rounded-full font-bold">
+                  <span className="text-[10px] bg-black/5 px-2 py-0.5 rounded-full font-bold">
                     +{fullList.length - visiblePeopleLimit}
                   </span>
                 </button>
@@ -484,7 +484,7 @@ export default function DiscoverClient() {
           value={search} 
           onChange={e => setSearch(e.target.value)}
           placeholder={activeTab === 'people' ? "Search students by name, branch, skills..." : "Search communities, channels, tags..."}
-          className="w-full pl-11 pr-10 py-3.5 rounded-[16px] text-[13px] font-medium outline-none transition-all bg-[var(--bg-surface)] border border-[var(--border-hairline)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 shadow-xs" 
+          className="w-full pl-11 pr-10 py-3.5 rounded-[16px] text-[13px] font-medium outline-none transition-all bg-[var(--bg-surface)] border border-[var(--border-hairline)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-black focus:ring-1 focus:ring-black/10 shadow-xs" 
         />
         {search && (
           <button 

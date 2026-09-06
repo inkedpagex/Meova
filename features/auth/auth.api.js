@@ -93,13 +93,13 @@ export async function logOutUser() {
   await fetch('/api/auth/session', { method: 'DELETE' });
 }
 
-export async function logInWithGoogle(idToken = null, accessToken = null) {
+export async function logInWithGoogle(idToken = null, accessToken = null, termsAccepted = false, termsVersion = '2026.1') {
   try {
     // Authenticate with Google via our backend endpoint which creates/links Supabase profile & sets session cookie
     const res = await fetch('/api/auth/google', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessToken, idToken })
+      body: JSON.stringify({ accessToken, idToken, termsAccepted, termsVersion })
     });
 
     const data = await res.json();

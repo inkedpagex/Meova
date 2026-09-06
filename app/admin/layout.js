@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }) {
   const admin = await requireAdmin();
-  if (!admin) redirect('/');
+  if (!admin) redirect('/login');
 
   return (
     <div className="space-y-4 md:space-y-6 min-w-0 overflow-x-hidden">

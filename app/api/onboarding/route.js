@@ -25,6 +25,8 @@ export async function POST(request) {
       interests,
       instagram,
       photo_url,
+      college_id,
+      referral_code,
     } = body;
 
     const VALID_YEARS = ['1st', '2nd', '3rd', '4th', '5th', 'Alumni'];
@@ -36,7 +38,7 @@ export async function POST(request) {
     const digitCount = (cleanUsername.match(/\d/g) || []).length;
 
     if (!cleanUsername || !USERNAME_REGEX.test(cleanUsername) || digitCount < 2)
-      errors.push('Username must be 5-20 chars, start with a letter, and contain at least 2 digits (e.g. chirag_04).');
+      errors.push('Username must be 5-20 chars, start with a letter, and contain at least 2 digits (e.g. user_01).');
     if (!full_name?.trim() || full_name.trim().length < 2 || full_name.trim().length > 50) 
       errors.push('Full name must be between 2 and 50 characters.');
     if (!gender || !['male', 'female', 'other'].includes(gender))
@@ -106,6 +108,11 @@ export async function POST(request) {
       updated_at: new Date().toISOString(),
     };
 
+    // Set college if provided
+    if (college_id) {
+      profilePayload.college_id = college_id;
+    }
+
     const { error: profileErr } = await supabaseAdmin
       .from('profiles')
       .upsert(profilePayload, { onConflict: 'id' });
@@ -115,11 +122,44 @@ export async function POST(request) {
       return NextResponse.json({ error: profileErr.message || 'Failed to update profile' }, { status: 500 });
     }
 
+    // Handle referral code — record ambassador referral if valid
+    if (referral_code) {
+      const { data: ambassador } = await supabaseAdmin
+        .from('profiles')
+        .select('id, is_ambassador, college_id')
+        .eq('referral_code', referral_code)
+        .maybeSingle();
+
+      if (ambassador && ambassador.is_ambassador && ambassador.id !== uid) {
+        await supabaseAdmin.from('referrals').upsert({
+          ambassador_id: ambassador.id,
+          referred_user_id: uid,
+          referral_code,
+          signup_at: new Date().toISOString(),
+          college_id: ambassador.college_id,
+          is_verified: false,
+        }, { onConflict: 'referred_user_id', ignoreDuplicates: true }).catch(() => {});
+
+        // Record referred_by on profile
+        await supabaseAdmin
+          .from('profiles')
+          .update({ referred_by: ambassador.id })
+          .eq('id', uid)
+          .catch(() => {});
+      }
+    }
+
+    const isProd = process.env.NODE_ENV === 'production';
     const cookieStore = await cookies();
     cookieStore.set(
       '__Meova_profile_overrides',
       JSON.stringify({ full_name: full_name.trim(), username: cleanUsername, photo_url: photo_url || '' }),
-      { maxAge: 60 * 60 * 24 * 30, path: '/' }
+      {
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+        sameSite: 'lax',
+        ...(isProd && { domain: '.meova.in' }),
+      }
     );
 
     cookieStore.set('__Meova_pc', '1', {
@@ -127,6 +167,7 @@ export async function POST(request) {
       path: '/',
       httpOnly: true,
       sameSite: 'lax',
+      ...(isProd && { domain: '.meova.in' }),
     });
 
     return NextResponse.json({ success: true });

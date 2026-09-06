@@ -192,7 +192,7 @@ export default function VerificationModal({ isOpen, onClose, onVerified }) {
           ) : isPending ? (
             /* Pending State */
             <div className="py-6 text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center mx-auto shadow-xs">
+              <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto shadow-xs">
                 <Clock className="w-8 h-8" />
               </div>
               <div>
@@ -286,7 +286,7 @@ export default function VerificationModal({ isOpen, onClose, onVerified }) {
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-[#78716C] flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <Camera size={13} className="text-[var(--accent)]" /> 1. Live Front-Facing Selfie
+                    <Camera size={13} className="text-[#1C1917]" /> 1. Live Front-Facing Selfie
                   </span>
                   {selfieFile && <span className="text-emerald-600 font-bold text-[11px]">Selected</span>}
                 </label>
@@ -302,14 +302,14 @@ export default function VerificationModal({ isOpen, onClose, onVerified }) {
                   onClick={() => selfieInputRef.current?.click()}
                   className={`border-2 border-dashed rounded-2xl p-4 flex items-center gap-4 cursor-pointer transition-all ${
                     selfiePreview
-                      ? 'border-[var(--accent)] bg-[var(--accent-tint-10)]/30'
-                      : 'border-[#E7E5E4] hover:border-[var(--accent-tint-20)] bg-[#FAFAF8]'
+                      ? 'border-black bg-black/5'
+                      : 'border-[#E7E5E4] hover:border-black/20 bg-[#FAFAF8]'
                   }`}
                 >
                   {selfiePreview ? (
                     <img src={selfiePreview} alt="Selfie preview" className="w-16 h-16 rounded-xl object-cover shadow-xs border border-white" />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-white border border-[#E7E5E4] flex items-center justify-center text-[var(--accent)] shadow-2xs">
+                    <div className="w-12 h-12 rounded-xl bg-white border border-[#E7E5E4] flex items-center justify-center text-[#1C1917] shadow-2xs">
                       <Camera size={22} />
                     </div>
                   )}
@@ -328,7 +328,7 @@ export default function VerificationModal({ isOpen, onClose, onVerified }) {
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-[#78716C] flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <FileText size={13} className="text-[var(--accent)]" /> 2. College ID Document
+                    <FileText size={13} className="text-[#1C1917]" /> 2. College ID Document
                   </span>
                   {idFile && <span className="text-emerald-600 font-bold text-[11px]">Selected</span>}
                 </label>
@@ -343,14 +343,14 @@ export default function VerificationModal({ isOpen, onClose, onVerified }) {
                   onClick={() => idInputRef.current?.click()}
                   className={`border-2 border-dashed rounded-2xl p-4 flex items-center gap-4 cursor-pointer transition-all ${
                     idPreview
-                      ? 'border-[var(--accent)] bg-[var(--accent-tint-10)]/30'
-                      : 'border-[#E7E5E4] hover:border-[var(--accent-tint-20)] bg-[#FAFAF8]'
+                      ? 'border-black bg-black/5'
+                      : 'border-[#E7E5E4] hover:border-black/20 bg-[#FAFAF8]'
                   }`}
                 >
                   {idPreview ? (
                     <img src={idPreview} alt="ID preview" className="w-16 h-16 rounded-xl object-cover shadow-xs border border-white" />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-white border border-[#E7E5E4] flex items-center justify-center text-[var(--accent)] shadow-2xs">
+                    <div className="w-12 h-12 rounded-xl bg-white border border-[#E7E5E4] flex items-center justify-center text-[#1C1917] shadow-2xs">
                       <Upload size={22} />
                     </div>
                   )}

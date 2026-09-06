@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Zap, Clock, RefreshCw, Loader2, ExternalLink, ShieldCheck } from '@/lib/icons';
@@ -157,7 +157,7 @@ export default function AdminCampaignsPage() {
             <p className="text-xs text-[#A8A29E] mt-1">Student submissions will appear here live in real-time.</p>
           </div>
         ) : (
-          <div className="divide-y divide-zinc-100">
+          <div className="divide-y divide-[#E7E5E4]">
             {displayed.map((claim) => {
               const st = STATUS_STYLE[claim.status] || STATUS_STYLE.pending;
               const handleClean = (claim.instagram_handle || '').replace(/^@/, '');

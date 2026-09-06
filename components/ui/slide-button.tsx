@@ -138,7 +138,7 @@ const SlideButton = forwardRef<HTMLButtonElement, SlideButtonProps>(
       <motion.div
         animate={completed ? BUTTON_STATES.completed : BUTTON_STATES.initial}
         transition={ANIMATION_CONFIG.spring}
-        className="shadow-button-inset dark:shadow-button-inset-dark relative flex h-10 items-center justify-center rounded-full bg-neutral-900 border border-white/10"
+        className="shadow-button-inset dark:shadow-button-inset-dark relative flex h-10 items-center justify-center rounded-full bg-[#1C1917] border border-white/10"
       >
         {!completed && (
           <motion.div

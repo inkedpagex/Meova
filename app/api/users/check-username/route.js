@@ -22,7 +22,7 @@ export async function GET(request) {
   if (digitCount < 2) {
     return NextResponse.json({
       available: false,
-      error: 'Username must contain at least 2 digits / numbers (e.g. chirag_04).',
+      error: 'Username must contain at least 2 digits / numbers (e.g. user_01).',
     });
   }
 

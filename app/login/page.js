@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 
 export const metadata = {
   title: 'Join Meova — GLA University Campus Social & Meetup App',
-  description: 'Sign up free on Meova — the campus social platform for GLA University students. Book meetups, earn Sparks on gigs, join student circles.',
+  description: 'Sign up free on Meova — the campus social platform for GLA University students. Book meetups, earn Sparks, join student circles.',
   keywords: [
     'GLA University app', 'Meova login', 'GLA meet app', 'campus social platform GLA',
     'meetify GLA alternative', 'meetifyy GLA alternative', 'GLA University social network', 'student meetup app GLA',
@@ -23,11 +23,25 @@ export const metadata = {
 
 export default async function LoginPage() {
   let serverError = null;
+  let isAdminHost = false;
 
   try {
+    const { headers } = await import('next/headers');
+    const headersList = await headers();
+    const host = headersList.get('host') || '';
+    isAdminHost = host.startsWith('admin.');
+
     const user = await getUserWithRole();
     if (user) {
-      redirect('/');
+      if (isAdminHost && user.role === 'admin') {
+        redirect('/admin');
+      }
+      if (host.startsWith('app.')) {
+        redirect('/');
+      }
+      const isProd = process.env.NODE_ENV === 'production';
+      const appUrl = isProd ? 'https://app.meova.in' : '/';
+      redirect(appUrl);
     }
   } catch (error) {
     if (error?.message?.includes('NEXT_REDIRECT')) throw error;
@@ -42,6 +56,12 @@ export default async function LoginPage() {
         <p>{serverError}</p>
       </div>
     );
+  }
+
+  if (isAdminHost) {
+    const isProd = process.env.NODE_ENV === 'production';
+    const mainUrl = isProd ? 'https://meova.in' : 'http://localhost:3000';
+    redirect(mainUrl);
   }
 
   return (

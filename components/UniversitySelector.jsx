@@ -43,7 +43,7 @@ export default function UniversitySelector({
         <Building2
           size={16}
           className={`absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors ${
-            isOpen ? 'text-[var(--accent)]' : 'text-[#A8A29E]'
+            isOpen ? 'text-black' : 'text-[#A8A29E]'
           }`}
         />
 
@@ -61,7 +61,7 @@ export default function UniversitySelector({
           }}
           className={`w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl border text-xs font-bold outline-none transition-all ${
             isOpen
-              ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/10 bg-white'
+              ? 'border-[#1C1917] ring-2 ring-black/5 bg-white text-[#1C1917]'
               : 'border-[#E7E5E4] bg-[#FAFAF8] focus:bg-white text-[#1C1917]'
           }`}
         />
@@ -86,7 +86,7 @@ export default function UniversitySelector({
           >
             <ChevronDown
               size={15}
-              className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-[var(--accent)]' : ''}`}
+              className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-black' : ''}`}
             />
           </button>
         </div>
@@ -107,13 +107,13 @@ export default function UniversitySelector({
             <button
               type="button"
               onClick={() => handleSelect(searchQuery.trim())}
-              className="w-full text-left px-3.5 py-2.5 text-xs font-bold transition-colors bg-[var(--accent-tint-10)]/60 hover:bg-[var(--accent-tint-10)]/70 text-[var(--accent)] flex items-center justify-between cursor-pointer"
+              className="w-full text-left px-3.5 py-2.5 text-xs font-bold transition-colors bg-black/5 hover:bg-black/10 text-[#1C1917] flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <Sparkles size={14} className="text-[var(--accent)]" />
+                <Sparkles size={14} className="text-amber-500" />
                 <span>Use &quot;{searchQuery.trim()}&quot;</span>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] bg-white px-2 py-0.5 rounded-full border border-[var(--accent-tint-20)]">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#1C1917] bg-white px-2 py-0.5 rounded-full border border-black/10">
                 Custom
               </span>
             </button>
@@ -131,19 +131,19 @@ export default function UniversitySelector({
                 onClick={() => handleSelect(univ.name)}
                 className={`w-full text-left px-3.5 py-2.5 text-xs transition-colors flex items-center justify-between cursor-pointer ${
                   isSelected
-                    ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] font-bold'
+                    ? 'bg-black text-white font-bold'
                     : isGLA
-                    ? 'bg-gradient-to-r from-[var(--accent-tint-10)]/40 to-transparent hover:bg-[var(--accent-tint-10)]/70 text-[#1C1917] font-bold'
+                    ? 'bg-[#FAFAF8] hover:bg-black/5 text-[#1C1917] font-bold'
                     : 'hover:bg-[#FAFAF8] text-[#1C1917] font-medium'
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0 pr-2">
                   <div
                     className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                      isGLA
-                        ? 'bg-[var(--accent)] text-white shadow-xs'
-                        : isSelected
-                        ? 'bg-[var(--accent-tint-10)] text-[var(--accent)]'
+                      isSelected
+                        ? 'bg-white text-black'
+                        : isGLA
+                        ? 'bg-black text-white shadow-xs'
                         : 'bg-[#FAFAF8] text-[#78716C]'
                     }`}
                   >
@@ -153,20 +153,20 @@ export default function UniversitySelector({
                     <p className={`truncate text-xs ${isGLA || isSelected ? 'font-bold' : 'font-semibold'}`}>
                       {univ.name}
                     </p>
-                    <p className="text-[10px] text-[#A8A29E] font-medium truncate">
+                    <p className={`text-[10px] font-medium truncate ${isSelected ? 'text-white/70' : 'text-[#A8A29E]'}`}>
                       {univ.location}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {isGLA && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]/60">
-                      <Sparkles size={10} />
+                  {isGLA && !isSelected && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-black/5 text-[#1C1917] border border-black/10">
+                      <Sparkles size={10} className="text-amber-500" />
                       <span>Featured</span>
                     </span>
                   )}
-                  {isSelected && <Check size={14} className="text-[var(--accent)] stroke-[3]" />}
+                  {isSelected && <Check size={14} className="text-white stroke-[3]" />}
                 </div>
               </button>
             );

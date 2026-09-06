@@ -1,102 +1,150 @@
 import Link from 'next/link';
+import LegalFooter from '@/components/LegalFooter';
+import { ShieldCheck, Lock, Eye, Trash2, ArrowLeft } from '@/lib/icons';
 
 export const metadata = {
   title: 'Privacy Policy — Meova',
-  description: 'How Meova collects, uses, and protects your personal information.',
+  description: 'How Meova collects, stores, protects, and retains your data. Learn about our strict student ID privacy and 7-day message deletion policy.',
+  alternates: { canonical: 'https://meova.in/privacy' },
 };
 
 export default function PrivacyPage() {
   return (
-    <div className="max-w-[680px] mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-bold text-[#78716C] hover:text-[#1C1917] transition-all uppercase tracking-wider">
-          ← Back
-        </Link>
-        <Link href="/login" className="px-5 py-2 rounded-full text-[12px] font-bold text-white transition-all bg-[var(--accent)] hover:bg-[var(--accent-hover)] active:scale-95 shadow-xs">
-          Log In
-        </Link>
-      </div>
-      <div className="rounded-[16px] bg-white border border-[#E7E5E4] p-8 shadow-xs">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#1C1917] mb-2">Privacy Policy</h1>
-          <p className="text-xs text-[#78716C] font-bold uppercase tracking-wider">Last updated: August 2026</p>
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+      {/* ── Top Header ─────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="Meova Logo" className="h-7 sm:h-8 w-auto object-contain" />
+            <div className="flex flex-col">
+              <span className="font-black text-lg tracking-tight text-black leading-none">Meova</span>
+              <span className="text-[10px] font-bold text-[#7C3AED] tracking-wider uppercase">Privacy</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-black/70 hover:text-black transition-colors"
+          >
+            <ArrowLeft size={14} />
+            <span>Back to Home</span>
+          </Link>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
+        <div className="mb-10 space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#7C3AED]/10 text-[#7C3AED] text-xs font-bold uppercase tracking-wider">
+            <ShieldCheck size={13} />
+            <span>Privacy &amp; Data Protection</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-black">
+            Privacy Policy
+          </h1>
+          <p className="text-xs font-bold text-black/60 uppercase tracking-wider">
+            Effective Date: September 2026 · Version 2026.1
+          </p>
         </div>
 
-        <div className="space-y-8 text-sm text-[var(--text-secondary)] leading-relaxed">
-          <section>
-            <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">1. Information We Collect</h2>
-            <p className="mb-2">We collect the following information when you use Meova:</p>
-            <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
-              <li><strong>Account Information:</strong> Name, email address, profile photo, year, branch, and interests</li>
-              <li><strong>Transaction Data:</strong> Sparks purchases, booking history, and wallet activity</li>
-              <li><strong>Usage Data:</strong> Pages visited, features used, and interaction patterns (anonymized)</li>
-              <li><strong>Device Data:</strong> Browser type, IP address, and device identifiers for security purposes</li>
+        <div className="space-y-10 text-sm text-black/80 leading-relaxed font-medium">
+          {/* Section 1 */}
+          <section className="space-y-3 p-6 sm:p-7 rounded-[26px] bg-white border border-black/10 shadow-xs">
+            <h2 className="text-base sm:text-lg font-black text-black">1. Information We Collect</h2>
+            <p>
+              To provide a safe, student-verified campus network, Meova collects the following categories of information:
+            </p>
+            <ul className="list-disc list-inside space-y-2 ml-1 text-xs">
+              <li>
+                <strong>Profile &amp; Academic Data:</strong> Full name, university email address, college, branch, year of study, profile photo, bio, and student interests.
+              </li>
+              <li>
+                <strong>Student Verification Credentials:</strong> Institutional email verification tokens, student identity card photos, and verification selfies submitted during the verification badge application process.
+              </li>
+              <li>
+                <strong>Campus Presence &amp; Meetups:</strong> Live campus radar status (e.g. &quot;Free Now at GD Subway&quot;), meetup bookings, QR verification timestamps, and meeting check-in codes.
+              </li>
+              <li>
+                <strong>Communications:</strong> Direct peer-to-peer chats and messages.
+              </li>
+              <li>
+                <strong>Wallet &amp; Payment Data:</strong> Sparks ledger balance, recharge transaction references (UTR/UPI IDs), and withdrawal bank/UPI details.
+              </li>
+              <li>
+                <strong>Device &amp; Security Telemetry:</strong> IP address, device model, operating system, and push notification tokens (FCM) used strictly for account security and anti-fraud enforcement.
+              </li>
             </ul>
           </section>
 
-          <section>
-            <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">2. How We Use Your Information</h2>
-            <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
-              <li>To provide and improve the Meova Platform</li>
-              <li>To facilitate bookings and Sparks transactions</li>
-              <li>To send you notifications about your bookings and account activity</li>
-              <li>To ensure platform safety and prevent fraud</li>
-              <li>To comply with legal obligations</li>
+          {/* Section 2: Storage of Verification Docs */}
+          <section className="space-y-3 p-6 sm:p-7 rounded-[26px] bg-white border border-black/10 shadow-xs">
+            <h2 className="text-base sm:text-lg font-black text-black">2. Private Storage of Student ID Documents</h2>
+            <div className="p-4 rounded-2xl bg-purple-50 border border-[#7C3AED]/20 text-purple-950 text-xs font-medium space-y-1.5">
+              <p className="font-bold text-[#7C3AED] flex items-center gap-1.5">
+                <Lock size={14} /> Bank-Grade Restricted Storage
+              </p>
+              <p>
+                Student ID card images and verification selfies are stored in private, isolated cloud storage buckets with zero public URL access. These documents are accessible exclusively by verified super-administrators during the verification review and are never made visible to peers, campus ambassadors, or third parties.
+              </p>
+            </div>
+          </section>
+
+          {/* Section 3: Data Retention & 7-Day Auto Deletion */}
+          <section className="space-y-3 p-6 sm:p-7 rounded-[26px] bg-white border border-black/10 shadow-xs">
+            <h2 className="text-base sm:text-lg font-black text-black">3. Data Retention &amp; 7-Day Message Auto-Deletion</h2>
+            <p>
+              We believe students shouldn't carry permanent digital baggage from casual campus conversations. Meova operates an automated data expiration protocol:
+            </p>
+            <ul className="list-disc list-inside space-y-2 ml-1 text-xs">
+              <li>
+                <strong>Direct Chat Messages:</strong> All peer-to-peer chat messages and attachments are automatically and permanently deleted from our servers after <strong>7 days</strong>.
+              </li>
+              <li>
+                <strong>Campus Radar Presence:</strong> Live location status broadcasts automatically expire within <strong>2 hours</strong> unless manually refreshed.
+              </li>
+              <li>
+                <strong>Financial Ledger Logs:</strong> Sparks transaction records are retained for a minimum of 5 years to comply with statutory financial record-keeping standards in India.
+              </li>
             </ul>
           </section>
 
-          <section>
-            <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">3. Information Sharing</h2>
-            <p>We do not sell your personal information. We may share information with:</p>
-            <ul className="list-disc list-inside space-y-1 ml-2 text-xs mt-2">
-              <li><strong>Other Users:</strong> Your public profile (name, photo, interests, reviews) is visible to other logged-in users</li>
-              <li><strong>Supabase / Cloud Infrastructure:</strong> Our secure database and authentication infrastructure</li>
-              <li><strong>Cloudinary:</strong> Image hosting for media and profile photos</li>
-              <li><strong>Law Enforcement:</strong> When legally required to do so</li>
+          {/* Section 4: Third-Party Sub-processors */}
+          <section className="space-y-3 p-6 sm:p-7 rounded-[26px] bg-white border border-black/10 shadow-xs">
+            <h2 className="text-base sm:text-lg font-black text-black">4. Third-Party Sub-processors &amp; Partners</h2>
+            <p>
+              We do not sell your personal information. We partner with specialized infrastructure providers under strict confidentiality agreements:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+              <div className="p-3.5 rounded-2xl bg-black/5 border border-black/5 space-y-1">
+                <p className="font-bold text-black">Firebase (Google)</p>
+                <p className="text-black/70">Secure push notification delivery &amp; real-time messaging.</p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-black/5 border border-black/5 space-y-1">
+                <p className="font-bold text-black">Cloudinary</p>
+                <p className="text-black/70">Encrypted image hosting &amp; media content delivery.</p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-black/5 border border-black/5 space-y-1">
+                <p className="font-bold text-black">Metered / WebRTC</p>
+                <p className="text-black/70">Encrypted peer-to-peer voice and audio call routing.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 5: User Rights */}
+          <section className="space-y-3 p-6 sm:p-7 rounded-[26px] bg-white border border-black/10 shadow-xs">
+            <h2 className="text-base sm:text-lg font-black text-black">5. Your Data Rights &amp; Account Deletion</h2>
+            <p>
+              Under Indian information technology standards and the Digital Personal Data Protection (DPDP) Act, you possess the right to:
+            </p>
+            <ul className="list-disc list-inside space-y-1.5 ml-1 text-xs">
+              <li>Request a copy of your personal data stored on Meova.</li>
+              <li>Update or correct inaccurate profile or academic information.</li>
+              <li>Request permanent account deletion and erasure of all associated personal data by emailing support@meova.in.</li>
             </ul>
-          </section>
-
-          <section>
-            <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">4. Data Storage & Security</h2>
-            <p>Your data is stored in Supabase PostgreSQL, which provides enterprise-grade security. We use secure HTTPS connections and HTTP-only session cookies. We never store raw payment details — only Sparks balances and transaction records.</p>
-          </section>
-
-          <section>
-            <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">5. Your Rights</h2>
-            <p className="mb-2">You have the right to:</p>
-            <ul className="list-disc list-inside space-y-1 ml-2 text-xs">
-              <li>Access your personal data by viewing your profile</li>
-              <li>Update or correct your information in Profile settings</li>
-              <li>Request deletion of your account by contacting us</li>
-              <li>Withdraw consent for notifications at any time</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">6. Cookies</h2>
-            <p>We use a single HTTP-only session cookie (<code className="text-xs bg-[var(--bg-surface)] px-1 rounded">__Meova_session</code>) to keep you logged in. This cookie expires after 5 days and is deleted when you log out. We do not use third-party tracking cookies.</p>
-          </section>
-
-          <section>
-            <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">7. Children&apos;s Privacy</h2>
-            <p>Meova is not intended for users under 18 years of age. We do not knowingly collect personal information from minors. If we become aware that a minor has provided us with personal information, we will delete it immediately.</p>
-          </section>
-
-          <section>
-            <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">8. Changes to This Policy</h2>
-            <p>We may update this Privacy Policy periodically. We will notify you of significant changes via the Platform. Your continued use of Meova after changes constitutes your acceptance of the updated policy.</p>
-          </section>
-
-          <section>
-            <h2 className="text-sm font-bold text-[var(--text-primary)] mb-3">9. Contact Us</h2>
-            <p>For privacy-related questions or data deletion requests, contact us at <span className="font-bold text-[var(--primary)]">privacy@Meova.app</span></p>
           </section>
         </div>
-      </div>
+      </main>
 
-      <div className="mt-6 text-center">
-        <Link href="/terms" className="text-xs font-bold text-[var(--accent)] hover:underline">Read our Terms of Service →</Link>
-      </div>
+      <LegalFooter />
     </div>
   );
 }

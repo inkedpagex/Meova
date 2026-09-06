@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Meova — Campus Social & Meetup Platform",
   "short_name": "Meova",
-  "description": "Connect with college peers, book 1-on-1 study & coffee meetups, earn Sparks on campus gigs, and join student circles on Meova.",
+  "description": "Connect with verified college peers, book 1-on-1 study & coffee meetups, see who is live on campus, and join student circles on Meova.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
@@ -59,10 +59,10 @@
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Campus Gigs",
-      "short_name": "Gigs",
-      "description": "Apply to earn Sparks on campus tasks",
-      "url": "/gigs",
+      "name": "Discover Peers",
+      "short_name": "Discover",
+      "description": "Find classmates by branch and year",
+      "url": "/discover",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {

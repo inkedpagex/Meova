@@ -18,7 +18,7 @@ export async function POST(request) {
       });
     }
 
-    const { accessToken } = await request.json();
+    const { accessToken, termsAccepted, termsVersion } = await request.json();
     if (!accessToken) {
       return NextResponse.json({ error: 'Access token required' }, { status: 400 });
     }
@@ -90,6 +90,8 @@ export async function POST(request) {
       year: '1st',
       branch: 'General',
       interests: [],
+      termsAccepted: termsAccepted === true,
+      termsVersion: termsVersion || '2026.1',
     });
 
     if (profileRes?.isNewUser || !existingProfile?.profile_complete || !existingProfile?.username) {
@@ -110,12 +112,37 @@ export async function POST(request) {
     
     const token = `header.${sessionPayload}.sig`;
 
+    const isProd = process.env.NODE_ENV === 'production';
+    const host = request.headers.get('host') || '';
+    const isAdminHost = host.startsWith('admin.');
+
+    const adminEmails = (process.env.ADMIN_EMAILS || '')
+      .split(',')
+      .map(e => e.trim().toLowerCase())
+      .filter(Boolean);
+    const userEmail = (googleUser.email || '').toLowerCase();
+    const isAdmin =
+      existingProfile?.role === 'admin' ||
+      adminEmails.includes(userEmail);
+
+    if (isAdminHost || isAdmin) {
+      // Set dedicated host-only admin session cookie
+      cookieStore.set('__Meova_admin_session', token, {
+        maxAge: SESSION_DURATION_MS / 1000,
+        httpOnly: true,
+        secure: isProd,
+        path: '/',
+        sameSite: 'lax',
+      });
+    }
+
     cookieStore.set(SESSION_COOKIE_NAME, token, {
       maxAge: SESSION_DURATION_MS / 1000,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProd,
       path: '/',
       sameSite: 'lax',
+      ...(isProd && { domain: '.meova.in' }),
     });
 
     // Clear stale pc cookie if user needs onboarding
@@ -132,7 +159,9 @@ export async function POST(request) {
         displayName: googleUser.name,
         photoURL: googleUser.picture,
         profile_complete: !isNewUser,
+        role: isAdmin ? 'admin' : (existingProfile?.role || 'user'),
       },
+      isAdmin,
       isNewUser,
     });
   } catch (err) {

@@ -1,30 +1,60 @@
 import { redirect } from 'next/navigation';
 import { getUserWithRole } from '../lib/getAdminUser';
 import FeedClient from './FeedClient';
-import AuthForm from '../features/auth/AuthForm';
+import MarketingHome from '../components/MarketingHome';
+import { supabaseAdmin } from '../lib/supabase/admin';
 
 export const metadata = {
-  title: 'Meova — #1 Campus Social & Meetups | GLA University',
-  description: 'Meova is the official campus social network for GLA University students. Connect with peers, book verified 1-on-1 coffee meetups, join student circles, and earn Sparks. Free to join.',
+  title: 'Meova — Verified Campus Social Network & Student Meetups',
+  description: 'Meova is the verified campus social network for Indian university students. Connect with verified peers, book 1-on-1 coffee meets, and join student circles.',
   keywords: [
     'Meova', 'meova.in', 'www.meova.in', 'GLA University app', 'GLA campus social', 'GLA meet', 'GLA student network',
-    'meetify alternative', 'meetifyy alternative', 'meetify GLA', 'meetifyy GLA', 'campus meetup app', 'student gigs GLA University',
-    'GLA University Mathura', 'college social app India', 'student networking app GLA'
+    'meetify alternative', 'campus meetup app', 'college social app India', 'student networking app India'
   ],
   alternates: { canonical: 'https://meova.in' },
   openGraph: {
-    title: 'Meova — #1 Campus Social & Meetups | GLA University',
-    description: 'Meova is the campus social network for GLA University students. Connect with peers, book 1-on-1 meetups, and join student circles.',
+    title: 'Meova — Verified Campus Social Network & Student Meetups',
+    description: 'Connect with verified university peers, book 1-on-1 coffee meets, and join student circles.',
     url: 'https://meova.in',
     siteName: 'Meova',
-    images: [{ url: '/icon-512.png', width: 512, height: 512, alt: 'Meova Campus App' }],
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Meova — Verified Campus Social Network & Student Meetups',
+      },
+      {
+        url: '/logo.png',
+        width: 1200,
+        height: 800,
+        alt: 'Meova Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Meova — Verified Campus Social Network & Student Meetups',
+    description: 'Connect with verified university peers, book 1-on-1 coffee meets, and join student circles.',
+    images: ['/og-image.png'],
   },
 };
 
 export default async function HomePage() {
   const user = await getUserWithRole();
   if (!user) {
-    return <AuthForm defaultMode="login" />;
+    let colleges = [];
+    try {
+      const { data } = await supabaseAdmin
+        .from('colleges')
+        .select('id, name, city, state, is_active')
+        .eq('is_active', true)
+        .order('name');
+      colleges = data || [];
+    } catch (e) {
+      console.error('Error fetching colleges for marketing homepage:', e);
+    }
+    return <MarketingHome colleges={colleges} />;
   }
   if (!user.profileComplete) {
     redirect('/onboarding');

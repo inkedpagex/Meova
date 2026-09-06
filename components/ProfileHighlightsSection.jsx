@@ -56,7 +56,7 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
           <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
             Interests &amp; Skills
           </span>
-          <span className="ml-2 text-[10px] font-bold text-[var(--accent)] bg-[var(--accent-tint-10)] px-2 py-0.5 rounded-full">
+          <span className="ml-2 text-[10px] font-bold text-[#1C1917] bg-black/5 px-2 py-0.5 rounded-full">
             {interests.length} topics
           </span>
         </div>
@@ -64,14 +64,14 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
           <button 
             type="button"
             onClick={() => setSelectedInterest(null)}
-            className="text-[11px] font-bold text-[var(--accent)] hover:text-[var(--accent-hover)] flex items-center gap-1 cursor-pointer transition-colors"
+            className="text-[11px] font-bold text-[#78716C] hover:text-[#1C1917] flex items-center gap-1 cursor-pointer transition-colors"
           >
             <span>Clear Filter</span>
             <X className="w-3.5 h-3.5" />
           </button>
         ) : (
           <span className="text-[10.5px] font-medium text-[var(--text-muted)] flex items-center gap-1">
-            <Sparkles size={11} className="text-[var(--accent)]" /> Tap to explore peers
+            <Sparkles size={11} className="text-[#78716C]" /> Tap to explore peers
           </span>
         )}
       </div>
@@ -91,10 +91,10 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
               className={`px-3.5 py-2 rounded-full text-[12px] font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-95 shadow-xs select-none border ${
                 isSelected
                   ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md shadow-[var(--accent)]/20'
-                  : 'bg-[var(--bg-base)] text-[var(--text-secondary)] border-[var(--border-hairline)] hover:border-[var(--accent-tint-20)] hover:text-[var(--accent)]'
+                  : 'bg-[var(--bg-base)] text-[var(--text-secondary)] border-[var(--border-hairline)] hover:border-black/20 hover:text-black'
               }`}
             >
-              <Icon size={14} className={isSelected ? 'text-white' : 'text-[var(--accent)]'} />
+              <Icon size={14} className={isSelected ? 'text-white' : 'text-[#78716C]'} />
               <span>{interest}</span>
               {isSelected && (
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
@@ -106,21 +106,21 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
 
       {/* Suggested Students Drawer / Section */}
       {selectedInterest && (
-        <div className="mt-4 p-4 rounded-[20px] bg-[var(--accent-tint-10)]/50 border border-[var(--accent-tint-20)] anim-fade-in">
+        <div className="mt-4 p-4 rounded-[20px] bg-[var(--bg-surface)] border border-[var(--border-hairline)] shadow-xs anim-fade-in">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+              <Sparkles className="w-4 h-4 text-[#1C1917]" />
               <h3 className="text-[12.5px] font-bold text-[var(--text-primary)] tracking-tight">
-                Peers into <span className="text-[var(--accent)]">{selectedInterest}</span>
+                Peers into <span className="text-[#1C1917] font-bold">{selectedInterest}</span>
               </h3>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--accent)] text-white shadow-xs">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black text-white shadow-xs">
                 {matchingUsers.length}
               </span>
             </div>
             
             <Link 
               href={`/discover?interest=${encodeURIComponent(selectedInterest)}`}
-              className="text-[11px] font-bold text-[var(--accent)] hover:underline flex items-center gap-0.5"
+              className="text-[11px] font-bold text-[#1C1917] hover:underline flex items-center gap-0.5"
             >
               Explore All <ChevronRight className="w-3.5 h-3.5" />
             </Link>
@@ -129,7 +129,7 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
           {matchingUsers.length === 0 ? (
             <div className="text-center py-5 bg-[var(--bg-surface)] rounded-[16px] border border-[var(--border-hairline)]">
               <p className="text-[12px] font-semibold text-[var(--text-secondary)]">
-                No other students tagged with <span className="font-bold text-[var(--accent)]">{selectedInterest}</span> yet.
+                No other students tagged with <span className="font-bold text-[#1C1917]">{selectedInterest}</span> yet.
               </p>
             </div>
           ) : (
@@ -138,16 +138,16 @@ export default function ProfileHighlightsSection({ interests = [], allUsers = []
                 <div
                   key={student.id}
                   onClick={() => router.push(`/users/${student.id}`)}
-                  className="w-[160px] flex-shrink-0 bg-[var(--bg-surface)] rounded-[20px] p-3 border border-[var(--border-hairline)] flex flex-col items-center text-center cursor-pointer hover:border-[var(--accent)] hover:shadow-md transition-all group select-none shadow-xs"
+                  className="w-[160px] flex-shrink-0 bg-[var(--bg-surface)] rounded-[20px] p-3 border border-[var(--border-hairline)] flex flex-col items-center text-center cursor-pointer hover:border-black/20 hover:shadow-md transition-all group select-none shadow-xs"
                 >
-                  <div className="w-12 h-12 rounded-full overflow-hidden mb-2 relative ring-2 ring-[var(--accent-tint-20)] group-hover:scale-105 transition-transform bg-[var(--bg-base)]">
+                  <div className="w-12 h-12 rounded-full overflow-hidden mb-2 relative ring-1 ring-[var(--border-hairline)] group-hover:scale-105 transition-transform bg-[var(--bg-base)]">
                     <img 
                       src={getAvatar(student)} 
                       alt={student.full_name || 'Student'} 
                       className="w-full h-full object-cover" 
                     />
                   </div>
-                  <span className="text-[12px] font-bold text-[var(--text-primary)] truncate max-w-full group-hover:text-[var(--accent)] transition-colors leading-tight">
+                  <span className="text-[12px] font-bold text-[var(--text-primary)] truncate max-w-full group-hover:text-black transition-colors leading-tight">
                     {student.full_name || 'Student'}
                   </span>
                   <span className="text-[10px] font-semibold text-[var(--text-secondary)] mt-0.5 truncate">

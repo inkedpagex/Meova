@@ -103,12 +103,13 @@ export const ExternalLink    = ri('ri-external-link-line',     'ri-external-link
 export const ArrowLeft       = ri('ri-arrow-left-line',        'ri-arrow-left-fill');
 export const ArrowRight      = ri('ri-arrow-right-line',       'ri-arrow-right-fill');
 export const ArrowUp         = ri('ri-arrow-up-line',          'ri-arrow-up-fill');
-export const ArrowUpRight    = ri('ri-arrow-up-right-line',    'ri-arrow-up-right-fill');
+export const ArrowUpRight    = ri('ri-arrow-right-up-line',    'ri-arrow-right-up-fill');
 export const ChevronDown     = ri('ri-arrow-down-s-line',      'ri-arrow-down-s-fill');
 export const ChevronUp       = ri('ri-arrow-up-s-line',        'ri-arrow-up-s-fill');
 export const ChevronRight    = ri('ri-arrow-right-s-line',     'ri-arrow-right-s-fill');
 export const ChevronLeft     = ri('ri-arrow-left-s-line',      'ri-arrow-left-s-fill');
 export const MoreHorizontal  = ri('ri-more-2-fill',            'ri-more-2-fill');
+export const MoreVertical    = ri('ri-more-2-fill',            'ri-more-2-fill');
 
 /* ─── Content ──────────────────────────────────────────── */
 export const Heart           = ri('ri-heart-3-line',           'ri-heart-3-fill');
@@ -146,6 +147,7 @@ export const Unlock          = ri('ri-lock-unlock-line',       'ri-lock-unlock-f
 
 /* ─── Layout / UI ──────────────────────────────────────── */
 export const LayoutDashboard = ri('ri-layout-grid-line',       'ri-layout-grid-fill');
+export const PanelLeft       = ri('ri-layout-left-line',       'ri-layout-left-fill');
 export const PanelLeftClose  = ri('ri-layout-left-line',       'ri-layout-left-fill');
 export const PanelLeftOpen   = ri('ri-layout-left-2-line',     'ri-layout-left-2-fill');
 export const Settings        = ri('ri-settings-3-line',        'ri-settings-3-fill');
@@ -170,6 +172,7 @@ export const AtSign          = ri('ri-at-line',                'ri-at-fill');
 export const Gift            = ri('ri-gift-2-line',            'ri-gift-2-fill');
 export const Flag            = ri('ri-flag-line',              'ri-flag-fill');
 export const ShieldStar      = ri('ri-shield-star-line',       'ri-shield-star-fill');
+export const Scale           = ri('ri-scales-3-line',          'ri-scales-3-fill');
 
 /* ─── Missing / Extra ──────────────────────────────────── */
 export const Activity        = ri('ri-pulse-line',              'ri-pulse-fill');
@@ -185,7 +188,6 @@ export const Gamepad2        = ri('ri-gamepad-line',            'ri-gamepad-fill
 export const Inbox           = ri('ri-inbox-line',              'ri-inbox-fill');
 export const Laptop          = ri('ri-computer-line',           'ri-computer-fill');
 export const MicOff          = ri('ri-mic-off-line',            'ri-mic-off-fill');
-export const MoreVertical    = ri('ri-more-fill',               'ri-more-fill');
 export const Music2          = ri('ri-music-2-line',            'ri-music-2-fill');
 export function PhoneOff({ size = 20, className = '', strokeWidth = 2.2, ...props }) {
   return (
@@ -233,7 +235,7 @@ export const Volume1         = ri('ri-volume-down-line',        'ri-volume-down-
 export const Volume2         = ri('ri-volume-up-line',          'ri-volume-up-fill');
 export const LayoutGrid      = ri('ri-layout-grid-line',        'ri-layout-grid-fill');
 export const List            = ri('ri-list-unordered',          'ri-list-check');
-export const TrendingUp      = ri('ri-trending-up-line',        'ri-trending-up-fill');
+export const TrendingUp      = ri('ri-line-chart-line',        'ri-line-chart-fill');
 export const BarChart2       = ri('ri-bar-chart-2-line',        'ri-bar-chart-2-fill');
 export const Sun             = ri('ri-sun-line',                'ri-sun-fill');
 export const Moon            = ri('ri-moon-line',               'ri-moon-fill');
@@ -246,5 +248,6 @@ export const SwitchCamera    = ri('ri-camera-switch-line',      'ri-camera-switc
 export const RotateCcw       = ri('ri-restart-line',            'ri-restart-fill');
 export const Maximize2       = ri('ri-fullscreen-line',         'ri-fullscreen-fill');
 export const Minimize2       = ri('ri-fullscreen-exit-line',    'ri-fullscreen-exit-fill');
-
+export const Instagram       = ri('ri-instagram-line',          'ri-instagram-fill');
+export const Linkedin        = ri('ri-linkedin-box-line',       'ri-linkedin-box-fill');
 

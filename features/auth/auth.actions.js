@@ -1,7 +1,7 @@
 'use server';
 
-import { supabaseAdmin } from '../../lib/supabase/admin';
-import { creditSparks } from '../../lib/wallet';
+import { supabaseAdmin } from '../../lib/supabase/admin.js';
+import { creditSparks } from '../../lib/wallet.js';
 
 export async function createProfileAdmin(profileData) {
   try {
@@ -37,17 +37,25 @@ export async function createProfileAdmin(profileData) {
         interests: profileData.interests || [],
         bio: profileData.bio || '',
         instagram: profileData.instagram || '',
-        age: profileData.age || 20,
-        looking_for: profileData.lookingFor || profileData.looking_for || '',
-        study_style: profileData.studyStyle || profileData.study_style || '',
         is_host: profileData.isHost || profileData.is_host || false,
         role: 'user',
         created_at: new Date().toISOString(),
+        terms_accepted_at: profileData.termsAccepted ? new Date().toISOString() : (profileData.terms_accepted_at || new Date().toISOString()),
+        terms_version: profileData.termsVersion || profileData.terms_version || '2026.1',
       };
 
-      const { error: insertErr } = await supabaseAdmin
+      let { error: insertErr } = await supabaseAdmin
         .from('profiles')
         .insert(newProfile);
+
+      if (insertErr && (insertErr.message?.includes('terms_') || insertErr.code === 'PGRST204')) {
+        console.warn('[createProfileAdmin] terms columns not yet migrated in Supabase, retrying insert without them:', insertErr.message);
+        const fallbackProfile = { ...newProfile };
+        delete fallbackProfile.terms_accepted_at;
+        delete fallbackProfile.terms_version;
+        const retry = await supabaseAdmin.from('profiles').insert(fallbackProfile);
+        insertErr = retry.error;
+      }
 
       if (insertErr) {
         console.error('[createProfileAdmin insert error]', insertErr.message);

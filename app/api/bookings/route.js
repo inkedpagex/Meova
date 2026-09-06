@@ -130,7 +130,7 @@ export async function POST(request) {
     // Tier Verification & Matching Gating
     const { data: peerProfiles, error: profErr } = await supabaseAdmin
       .from('profiles')
-      .select('id, tier, current_meeting_rate, completed_meeting_count, completed_meets_count')
+      .select('id, tier, college_id, current_meeting_rate, completed_meeting_count, completed_meets_count')
       .in('id', [user.uid, meetTargetId]);
 
     const guestProfile = peerProfiles?.find((p) => p.id === user.uid);
@@ -138,6 +138,15 @@ export async function POST(request) {
 
     const guestTier = guestProfile?.tier || 'not_verified';
     const hostTier = hostProfile?.tier || 'not_verified';
+
+    // College scope enforcement: block cross-college bookings server-side
+    if (guestProfile?.college_id && hostProfile?.college_id &&
+        guestProfile.college_id !== hostProfile.college_id) {
+      return NextResponse.json(
+        { error: 'Meetups can only be scheduled with students from your own college.' },
+        { status: 403 }
+      );
+    }
 
     // Enforcement: Verified peers only meet Verified peers; Unverified only meet Unverified
     if (guestTier !== hostTier) {

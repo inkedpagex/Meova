@@ -1,4 +1,4 @@
-﻿import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { getUserWithRole } from '../../lib/getAdminUser';
 import AuthForm from '../../features/auth/AuthForm';
 import { Suspense } from 'react';
@@ -11,7 +11,9 @@ export default async function SignupPage() {
   try {
     const user = await getUserWithRole();
     if (user) {
-      redirect('/');
+      const isProd = process.env.NODE_ENV === 'production';
+      const appUrl = isProd ? 'https://app.meova.in' : 'http://app.localhost:3000';
+      redirect(appUrl);
     }
   } catch (error) {
     if (error?.message?.includes('NEXT_REDIRECT')) throw error;

@@ -23,17 +23,17 @@ const CATEGORY_ICONS = {
   General: Users,
 };
 
-// Unified Royal Purple aesthetic across all categories
+// High-contrast clean neutral badges across categories
 const CATEGORY_COLORS = {
-  Tech: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
-  Gaming: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
-  Music: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
-  Design: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
-  Startup: { bg: 'rgba(124, 58, 237, 0.12)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.25)' },
-  Sports: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
-  Creators: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
-  Entertainment: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
-  default: { bg: 'rgba(124, 58, 237, 0.08)', color: '#7C3AED', border: 'rgba(124, 58, 237, 0.2)' },
+  Tech: { bg: '#FAFAF8', color: '#1C1917', border: '#E7E5E4' },
+  Gaming: { bg: '#FAFAF8', color: '#1C1917', border: '#E7E5E4' },
+  Music: { bg: '#FAFAF8', color: '#1C1917', border: '#E7E5E4' },
+  Design: { bg: '#FAFAF8', color: '#1C1917', border: '#E7E5E4' },
+  Startup: { bg: '#FAFAF8', color: '#1C1917', border: '#E7E5E4' },
+  Sports: { bg: '#FAFAF8', color: '#1C1917', border: '#E7E5E4' },
+  Creators: { bg: '#FAFAF8', color: '#1C1917', border: '#E7E5E4' },
+  Entertainment: { bg: '#FAFAF8', color: '#1C1917', border: '#E7E5E4' },
+  default: { bg: '#FAFAF8', color: '#1C1917', border: '#E7E5E4' },
 };
 
 // Initial database mirror for instant rendering before SWR finishes
@@ -332,11 +332,11 @@ export default function CirclesList({
       <div className="bg-white rounded-[26px] p-5 sm:p-6 text-black shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-black/10 flex items-center justify-between gap-4">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-black/5 text-[#1C1917] border border-black/10 tracking-wider">
               Host Monetization
             </span>
             <span className="text-[10px] font-bold text-black/60 flex items-center gap-1">
-              <Zap size={12} className="fill-[var(--accent)] text-[var(--accent)]" /> 100% Sparks Earnings
+              <Zap size={12} className="fill-amber-500 text-amber-500" /> 100% Sparks Earnings
             </span>
           </div>
           <h3 className="text-sm sm:text-base font-bold tracking-tight text-black">Create Your Campus Channel</h3>
@@ -358,9 +358,9 @@ export default function CirclesList({
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search communities..."
-            className="w-full pl-11 pr-12 py-3.5 rounded-full text-[13px] font-medium outline-none transition-all bg-white border border-black/10 text-black focus:border-[var(--accent)]"
+            className="w-full pl-11 pr-12 py-3.5 rounded-full text-[13px] font-medium outline-none transition-all bg-white border border-black/10 text-black focus:border-black"
           />
-          <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white border border-black/10 text-black/60 hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors">
+          <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white border border-black/10 text-black/60 hover:text-black hover:border-black/30 transition-colors">
             <SlidersHorizontal size={14} />
           </button>
         </div>
@@ -376,7 +376,7 @@ export default function CirclesList({
               onClick={() => setActiveFilter(f)}
               className={`flex-shrink-0 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wide cursor-pointer transition-all active:scale-95 whitespace-nowrap ${
                 isSelected
-                  ? 'bg-[var(--accent)] text-white shadow-[0_2px_10px_rgba(124,58,237,0.25)] border border-[var(--accent)]'
+                  ? 'bg-black text-white shadow-xs border border-black'
                   : 'bg-white text-black/70 hover:text-black border border-black/10'
               }`}
             >
@@ -386,18 +386,16 @@ export default function CirclesList({
         })}
       </div>
 
-      {/* Featured Community Banner (Solid Royal Purple signature) */}
+      {/* Featured Community Banner */}
       {featured && !effectiveSearch && activeFilter === 'All' && (
         <div 
-          className="relative rounded-[26px] p-5 sm:p-6 overflow-hidden shadow-[0_6px_24px_rgba(124,58,237,0.28)] text-white"
-          style={{ background: 'var(--accent, #7C3AED)' }}
+          className="relative rounded-[26px] p-5 sm:p-6 overflow-hidden shadow-md bg-[#1C1917] text-white border border-white/10"
         >
-          <div className="absolute top-0 right-0 w-44 h-44 rounded-full opacity-20 -translate-y-1/3 translate-x-1/3 bg-white blur-xl pointer-events-none" />
           <div className="relative z-10 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                <div className="w-12 h-12 rounded-[20px] bg-white flex items-center justify-center flex-shrink-0 shadow-md">
-                  <Rocket size={22} className="text-[var(--accent)]" />
+                <div className="w-12 h-12 rounded-[20px] bg-white/10 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+                  <Rocket size={22} className="text-white" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -406,7 +404,7 @@ export default function CirclesList({
                       Verified
                     </span>
                   </div>
-                  <p className="text-[12px] text-white/90 mt-1 font-normal line-clamp-2 max-w-md leading-relaxed">
+                  <p className="text-[12px] text-white/85 mt-1 font-normal line-clamp-2 max-w-md leading-relaxed">
                     {featured.desc}
                   </p>
                 </div>
@@ -418,7 +416,7 @@ export default function CirclesList({
                 className={`px-5 h-9 rounded-full text-xs font-bold uppercase tracking-wide cursor-pointer active:scale-95 transition-all flex-shrink-0 whitespace-nowrap shadow-md ${
                   joinedMap[featured.id]
                     ? 'bg-white/20 text-white hover:bg-white/30 border border-white/30'
-                    : 'bg-white text-[var(--accent)] hover:bg-white/95'
+                    : 'bg-[#7C3AED] text-white hover:bg-[#6D28D9]'
                 }`}
               >
                 {joiningId === featured.id ? 'Joining...' : (joinedMap[featured.id] ? 'Open' : 'Join')}
@@ -450,7 +448,7 @@ export default function CirclesList({
       <div className="space-y-3">
         {displayed.length === 0 ? (
           <div className="bg-white rounded-[26px] border border-black/10 p-8 text-center space-y-3.5 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-            <div className="w-14 h-14 rounded-[20px] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] text-[var(--accent)] flex items-center justify-center mx-auto shadow-sm">
+            <div className="w-14 h-14 rounded-[20px] bg-black/5 border border-black/10 text-black flex items-center justify-center mx-auto shadow-xs">
               <Users size={24} />
             </div>
             <div className="space-y-1">
@@ -485,15 +483,15 @@ export default function CirclesList({
         ) : (
           displayed.map(circle => {
             const isJoined = joinedMap[circle.id];
-            const isHost = circle.host_id && circle.host_id === userId;
-            const CategoryIcon = CATEGORY_ICONS[circle.category] || CATEGORY_ICONS.default;
-            const categoryStyle = CATEGORY_COLORS[circle.category] || CATEGORY_COLORS.default;
+            const isHost = circle.host_id === user?.id;
+            const categoryStyle = getCategoryStyle(circle.category);
+            const CategoryIcon = categoryStyle.icon;
 
             return (
               <div
                 key={circle.id}
                 onClick={() => handleJoinClick(circle)}
-                className="bg-white border border-black/10 hover:border-[var(--accent)]/40 rounded-[26px] p-4 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 transition-all duration-150 hover:shadow-[0_4px_16px_rgba(124,58,237,0.06)] active:scale-[0.99] cursor-pointer group"
+                className="bg-white border border-black/10 hover:border-black/30 rounded-[26px] p-4 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 transition-all duration-150 hover:shadow-sm active:scale-[0.99] cursor-pointer group"
               >
                 <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
                   {/* Category Icon */}
@@ -522,7 +520,7 @@ export default function CirclesList({
                     </div>
 
                     {/* Full Title (untruncated) */}
-                    <h4 className="text-[14px] sm:text-[15px] font-bold text-black tracking-tight leading-snug line-clamp-1 group-hover:text-[var(--accent)] transition-colors">
+                    <h4 className="text-[14px] sm:text-[15px] font-bold text-black tracking-tight leading-snug line-clamp-1 group-hover:text-black/80 transition-colors">
                       {circle.name}
                     </h4>
 
@@ -546,14 +544,14 @@ export default function CirclesList({
                           <span>by {circle.host_name.split(' ')[0]}</span>
                         </div>
                       ) : (
-                        <span className="text-[9.5px] font-bold text-[var(--accent)] uppercase bg-[var(--accent-tint-10)] px-1.5 py-0.5 rounded-md border border-[var(--accent-tint-20)]">
+                        <span className="text-[9.5px] font-bold text-black/70 uppercase bg-black/5 px-1.5 py-0.5 rounded-md border border-black/10">
                           Campus Circle
                         </span>
                       )}
                       <span className="text-black/20">·</span>
                       {circle.isPaid ? (
-                        <span className="text-[10px] font-bold text-[var(--accent)] px-2 py-0.5 rounded-full bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center gap-0.5">
-                          <Zap size={10} className="fill-[var(--accent)] text-[var(--accent)]" />
+                        <span className="text-[10px] font-bold text-amber-700 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 flex items-center gap-0.5">
+                          <Zap size={10} className="fill-amber-500 text-amber-500" />
                           {circle.price} Sparks
                         </span>
                       ) : (
@@ -592,7 +590,7 @@ export default function CirclesList({
                   {isHost ? (
                     <button
                       onClick={(e) => { e.stopPropagation(); setManageCircle(circle); }}
-                      className="px-3 h-9 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] hover:bg-[var(--accent-tint-20)] transition-all cursor-pointer whitespace-nowrap"
+                      className="px-3 h-9 rounded-full text-[11px] font-bold uppercase tracking-wider bg-black/5 text-black border border-black/10 hover:bg-black/10 transition-all cursor-pointer whitespace-nowrap"
                     >
                       Manage
                     </button>
@@ -655,12 +653,12 @@ export default function CirclesList({
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 border-b border-black/10 pb-3">
-              <div className="w-11 h-11 rounded-[20px] bg-[var(--accent-tint-10)] flex items-center justify-center flex-shrink-0 border border-[var(--accent-tint-20)]">
-                <Users size={20} className="text-[var(--accent)]" />
+              <div className="w-11 h-11 rounded-[20px] bg-black/5 flex items-center justify-center flex-shrink-0 border border-black/10">
+                <Users size={20} className="text-black" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-bold text-black truncate">{rulesCircle.name}</h3>
-                <p className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-wider">{rulesCircle.category} Community</p>
+                <p className="text-[10px] font-bold text-black/60 uppercase tracking-wider">{rulesCircle.category} Community</p>
               </div>
             </div>
 
@@ -668,15 +666,15 @@ export default function CirclesList({
               <h4 className="text-xs font-bold text-black uppercase tracking-wider">Community Guidelines & Rules:</h4>
               <ul className="space-y-2 text-xs font-medium text-black/70">
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
+                  <span className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
                   <span><strong>Respect & Kindness:</strong> Maintain constructive, friendly discussions with campus peers.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
+                  <span className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
                   <span><strong>No Spam or Promo:</strong> Share relevant projects, meets, or notes only.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-4 h-4 rounded-full bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
+                  <span className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
                   <span><strong>Campus Safety:</strong> Keep meetups in verified public campus spots.</span>
                 </li>
               </ul>

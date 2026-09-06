@@ -92,7 +92,7 @@ function EventCard({ event, userId }) {
           {weekday}
         </span>
 
-        <h3 className="text-[15px] font-bold text-[#1C1917] leading-snug mb-3 group-hover:text-[var(--accent-hover)] transition-colors line-clamp-2">
+        <h3 className="text-[15px] font-bold text-[#1C1917] leading-snug mb-3 group-hover:text-black/80 transition-colors line-clamp-2">
           {event.title}
         </h3>
 
@@ -149,8 +149,8 @@ export default async function EventsPage() {
                 key={f}
                 className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
                   f === 'All'
-                    ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
-                    : 'bg-white text-[#78716C] border-[#E7E5E4] hover:border-[var(--accent)] hover:text-[#1C1917]'
+                    ? 'bg-black text-white border-black shadow-xs'
+                    : 'bg-white text-[#78716C] border-[#E7E5E4] hover:border-black/20 hover:text-[#1C1917]'
                 }`}
               >
                 {f}
@@ -163,8 +163,8 @@ export default async function EventsPage() {
       {/* ── Grid ── */}
       {events.length === 0 ? (
         <div className="rounded-[12px] bg-white border border-[#E7E5E4] p-16 text-center shadow-sm">
-          <div className="w-16 h-16 rounded-[12px] bg-[var(--accent-tint-10)] border border-[var(--accent-tint-20)] flex items-center justify-center mx-auto mb-5">
-            <Calendar size={28} className="text-[var(--accent)]" />
+          <div className="w-16 h-16 rounded-[12px] bg-black/5 border border-black/10 flex items-center justify-center mx-auto mb-5">
+            <Calendar size={28} className="text-[#1C1917]" />
           </div>
           <p className="text-[#1C1917] font-bold text-[16px]">No upcoming events</p>
           <p className="text-[#A8A29E] text-[13px] font-medium mt-2">Check back later or host your own.</p>
