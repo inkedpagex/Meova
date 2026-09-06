@@ -106,32 +106,35 @@ export async function POST(request) {
 }
 
 export async function DELETE(request) {
-  const cookieStore = await cookies();
+  const response = NextResponse.json({ success: true });
   const isProd = process.env.NODE_ENV === 'production';
 
-  // Delete both host-only and wildcard domain session cookies
-  cookieStore.delete({
-    name: SESSION_COOKIE_NAME,
-    path: '/',
-    ...(isProd && { domain: '.meova.in' }),
+  const cookiesToClear = [
+    SESSION_COOKIE_NAME,
+    '__Meova_session',
+    '__Meova_admin_session',
+    '__Meova_profile_overrides',
+    '__Meova_pc',
+    'sb-access-token',
+    'sb-auth-token',
+    'supabase-auth-token',
+  ];
+
+  // Domains to purge: wildcard .meova.in, root meova.in, and host-only
+  const domains = isProd ? ['.meova.in', 'meova.in', ''] : [''];
+
+  cookiesToClear.forEach((name) => {
+    domains.forEach((domain) => {
+      const domainAttr = domain ? `; Domain=${domain}` : '';
+      // Expired cookie with Max-Age=0
+      response.headers.append(
+        'Set-Cookie',
+        `${name}=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${isProd ? '; Secure' : ''}${domainAttr}`
+      );
+    });
   });
-  cookieStore.delete({
-    name: SESSION_COOKIE_NAME,
-    path: '/',
-  });
-  cookieStore.delete({
-    name: '__Meova_admin_session',
-    path: '/',
-  });
-  cookieStore.delete({
-    name: '__Meova_profile_overrides',
-    path: '/',
-    ...(isProd && { domain: '.meova.in' }),
-  });
-  cookieStore.delete({
-    name: '__Meova_profile_overrides',
-    path: '/',
-  });
-  return NextResponse.json({ success: true });
+
+  return response;
 }
+
 

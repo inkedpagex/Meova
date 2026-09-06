@@ -89,8 +89,21 @@ export async function logInUser({ email, password }) {
 }
 
 export async function logOutUser() {
-  await supabase.auth.signOut();
-  await fetch('/api/auth/session', { method: 'DELETE' });
+  try {
+    await supabase.auth.signOut();
+  } catch (e) {
+    console.warn('[logOutUser] Supabase signOut notice:', e);
+  }
+  try {
+    await fetch('/api/auth/session', { method: 'DELETE' });
+  } catch (e) {
+    console.warn('[logOutUser] Session DELETE notice:', e);
+  }
+  try {
+    await fetch('/api/auth/logout', { method: 'POST' });
+  } catch (e) {
+    console.warn('[logOutUser] Logout POST notice:', e);
+  }
 }
 
 export async function logInWithGoogle(idToken = null, accessToken = null, termsAccepted = false, termsVersion = '2026.1') {
