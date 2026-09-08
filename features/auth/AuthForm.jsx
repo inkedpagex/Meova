@@ -20,10 +20,12 @@ export default function AuthForm({ defaultMode = 'login' }) {
   const { loading, logInWithGoogle } = useAuth();
   const [error, setError] = useState(null);
   const [mode, setMode] = useState(defaultMode);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const loginWithGoogleGIS = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setError(null);
+      setIsLoggingIn(true);
       const res = await logInWithGoogle(null, tokenResponse.access_token, true, '2026.1');
       if (res?.success) {
         const isProd = process.env.NODE_ENV === 'production';
@@ -43,14 +45,19 @@ export default function AuthForm({ defaultMode = 'login' }) {
             !nextPath.startsWith('/signup');
           window.location.href = isRelativePath ? `${appBase}${nextPath}` : appBase;
         }
-      } else if (res?.error) {
-        setError(res.error.message || 'Google sign-in failed. Please try again.');
+      } else {
+        setIsLoggingIn(false);
+        if (res?.error) {
+          setError(res.error.message || 'Google sign-in failed. Please try again.');
+        }
       }
     },
     onError: () => {
+      setIsLoggingIn(false);
       setError('Google sign-in failed. Please try again.');
     },
   });
+
 
   const handleInitiateGoogleAuth = () => {
     setError(null);
@@ -67,6 +74,24 @@ export default function AuthForm({ defaultMode = 'login' }) {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] text-black font-sans selection:bg-[#7657D9] selection:text-white flex flex-col justify-between p-4 sm:p-6 relative overflow-hidden">
+      {/* ── Seamless White Transition Screen on Login ── */}
+      {isLoggingIn && (
+        <div className="fixed inset-0 z-[999999] bg-white flex items-center justify-center pointer-events-auto">
+          <img
+            src="/logo.png"
+            alt="Meova"
+            width={76}
+            height={50}
+            style={{
+              width: '76px',
+              height: 'auto',
+              maxHeight: '52px',
+              objectFit: 'contain',
+              userSelect: 'none',
+            }}
+          />
+        </div>
+      )}
       
       {/* ── TOP MINIMAL BRAND HEADER ────────────────────────────────────────── */}
       <header className="w-full max-w-5xl mx-auto flex items-center justify-between py-2">

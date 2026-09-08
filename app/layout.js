@@ -27,6 +27,7 @@ import MainContentWrapper from '../components/MainContentWrapper';
 import NetworkWrapper from '../components/NetworkWrapper';
 import BlockedPage from './blocked/page';
 import TopProgressBar from '../components/TopProgressBar';
+import PWALaunchSplash from '../components/PWALaunchSplash';
 
 export const viewport = {
   width: 'device-width',
@@ -358,62 +359,8 @@ export default async function RootLayout({ children }) {
           />
         </head>
         <body style={{ background: initialMode === 'dark' ? '#0F1115' : '#FFFFFF', color: 'var(--text-primary)', minHeight: '100dvh', fontFamily: "var(--font-inter), 'Inter', sans-serif" }}>
-          {/* ── Instant Pure White Opening Screen (Zero black flicker, logo in middle, no text) ── */}
-          <div
-            id="meova-initial-splash"
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 999999,
-              backgroundColor: initialMode === 'dark' ? '#0F1115' : '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              pointerEvents: 'none',
-              transition: 'opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-            }}
-          >
-            <img
-              src="/logo.png"
-              alt="Meova"
-              width={76}
-              height={50}
-              style={{
-                width: '76px',
-                height: 'auto',
-                maxHeight: '52px',
-                objectFit: 'contain',
-                userSelect: 'none',
-              }}
-            />
-          </div>
-          <script
-            id="meova-splash-remover"
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function() {
-                  function dismissSplash() {
-                    var el = document.getElementById('meova-initial-splash');
-                    if (el) {
-                      el.style.opacity = '0';
-                      el.style.visibility = 'hidden';
-                      setTimeout(function() {
-                        if (el && el.parentNode) el.parentNode.removeChild(el);
-                      }, 300);
-                    }
-                  }
-                  if (document.readyState === 'complete') {
-                    setTimeout(dismissSplash, 60);
-                  } else {
-                    window.addEventListener('load', function() {
-                      setTimeout(dismissSplash, 60);
-                    });
-                    setTimeout(dismissSplash, 1200);
-                  }
-                })();
-              `,
-            }}
-          />
+          {/* ── Installed PWA Launch Opening Screen (Renders ONLY on installed PWA standalone launch) ── */}
+          <PWALaunchSplash />
           <TopProgressBar />
           <ThemeProvider initialMode={initialMode} initialAccent={initialAccent}>
             <GoogleAuthProviderWrapper>
