@@ -463,7 +463,7 @@ export default function CampusGigsPage() {
                             onClick={() => setGigCategory(cat.name)}
                             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border whitespace-nowrap cursor-pointer shrink-0 active:scale-95 ${
                               isSelected
-                                ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md shadow-purple-500/20'
+                                ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm shadow-[#7657D9]/12'
                                 : 'bg-[#FAFAF8] border-[#E7E5E4] text-[#78716C] hover:bg-[#FAFAF8] hover:text-[#1C1917]'
                             }`}
                           >
@@ -610,7 +610,7 @@ export default function CampusGigsPage() {
                     <button 
                       type="submit" 
                       disabled={isSubmitting || !gigTitle.trim() || !gigDesc.trim()} 
-                      className="flex-1 py-3.5 rounded-2xl text-xs font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-lg shadow-purple-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50"
+                      className="flex-1 py-3.5 rounded-2xl text-xs font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-sm shadow-[#7657D9]/12 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer disabled:opacity-50"
                     >
                       <Sparkles size={15} />
                       <span>{isSubmitting ? 'Publishing…' : 'Publish to Campus'}</span>
@@ -626,7 +626,7 @@ export default function CampusGigsPage() {
                       }
                       setModalStep(2);
                     }}
-                    className="w-full py-3.5 rounded-2xl text-xs font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-lg shadow-purple-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer"
+                    className="w-full py-3.5 rounded-2xl text-xs font-bold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-sm shadow-[#7657D9]/12 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer"
                   >
                     <span>Continue to Rewards & Scope</span>
                     <ArrowRight size={14} />

@@ -187,7 +187,7 @@ export default function AdminCollegesPage() {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold active:scale-95 transition-all shadow-md shadow-[#7C3AED]/20 whitespace-nowrap flex-shrink-0 cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white text-xs font-bold active:scale-95 transition-all shadow-sm shadow-[#7657D9]/12 whitespace-nowrap flex-shrink-0 cursor-pointer"
           >
             <Plus size={15} strokeWidth={2.5} />
             <span>Add University</span>
@@ -230,7 +230,7 @@ export default function AdminCollegesPage() {
       {/* Colleges List */}
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-black/40 space-y-3">
-          <Loader2 size={32} className="animate-spin text-[#7C3AED]" />
+          <Loader2 size={32} className="animate-spin text-[#7657D9]" />
           <p className="text-xs font-bold uppercase tracking-wider">Loading universities...</p>
         </div>
       ) : filteredColleges.length === 0 ? (
@@ -426,7 +426,7 @@ export default function AdminCollegesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-3.5 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold shadow-md shadow-[#7C3AED]/20 active:scale-95 transition-all whitespace-nowrap flex-shrink-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3.5 rounded-2xl bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white text-xs font-bold shadow-sm shadow-[#7657D9]/12 active:scale-95 transition-all whitespace-nowrap flex-shrink-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? (
                     <>
@@ -541,7 +541,7 @@ export default function AdminCollegesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-3.5 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold shadow-md shadow-[#7C3AED]/20 active:scale-95 transition-all whitespace-nowrap flex-shrink-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3.5 rounded-2xl bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white text-xs font-bold shadow-sm shadow-[#7657D9]/12 active:scale-95 transition-all whitespace-nowrap flex-shrink-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? (
                     <>

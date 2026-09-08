@@ -154,7 +154,7 @@ export default function HelpCenterClient() {
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#F1EEFB] selection:text-[#7657D9]">
       {/* ── Top Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-18 flex items-center justify-between gap-4">
@@ -184,7 +184,7 @@ export default function HelpCenterClient() {
 
             <Link
               href="/signup"
-              className="px-5 py-2.5 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold shadow-md shadow-[#7C3AED]/20 whitespace-nowrap transition-transform active:scale-95"
+              className="px-5 py-2.5 rounded-full bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white text-xs font-bold shadow-sm shadow-[#7657D9]/12 whitespace-nowrap transition-transform active:scale-95 cursor-pointer"
             >
               Join Campus
             </Link>
@@ -271,7 +271,7 @@ export default function HelpCenterClient() {
             <div className="flex items-center gap-3 flex-wrap justify-center">
               <Link
                 href="/contact"
-                className="px-6 py-3 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all active:scale-95 shadow-md"
+                className="px-6 py-3 rounded-full bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all active:scale-95 shadow-sm shadow-[#7657D9]/12 cursor-pointer"
               >
                 <Mail size={15} />
                 <span>Contact Desk</span>

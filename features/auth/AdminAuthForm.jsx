@@ -57,13 +57,6 @@ export default function AdminAuthForm() {
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 sm:p-6 select-none relative overflow-hidden font-sans">
-      
-      {/* Subtle Purple Ambient Glow Behind Card */}
-      <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#7C3AED]/15 rounded-full blur-[140px] pointer-events-none" 
-        aria-hidden="true" 
-      />
-
       <div className="w-full max-w-[440px] relative z-10 flex flex-col items-center">
         
         {/* Top Operational Status Pill */}
@@ -84,7 +77,7 @@ export default function AdminAuthForm() {
                 className="w-full h-full object-contain filter brightness-0 invert" 
               />
             </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#7C3AED] border-2 border-white flex items-center justify-center text-white shadow-xs">
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#7657D9] border-2 border-white flex items-center justify-center text-white shadow-xs">
               <ShieldCheck size={13} strokeWidth={2.5} />
             </div>
           </div>
@@ -134,7 +127,7 @@ export default function AdminAuthForm() {
 
           {/* Security Compliance Micro-copy */}
           <div className="mt-6 pt-5 border-t border-black/10 w-full flex items-center justify-center gap-2 text-[11.5px] text-black/60 font-medium">
-            <Lock size={12} className="text-[#7C3AED] flex-shrink-0" />
+            <Lock size={12} className="text-[#7657D9] flex-shrink-0" />
             <span>256-bit Encrypted · Role-Gated Access · Session Monitored</span>
           </div>
 

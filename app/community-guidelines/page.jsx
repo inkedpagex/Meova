@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function CommunityGuidelinesPage() {
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#F1EEFB] selection:text-[#7657D9]">
       {/* ── Top Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -18,7 +18,7 @@ export default function CommunityGuidelinesPage() {
             <img src="/logo.png" alt="Meova Logo" className="h-7 sm:h-8 w-auto object-contain" />
             <div className="flex flex-col">
               <span className="font-black text-lg tracking-tight text-black leading-none">Meova</span>
-              <span className="text-[10px] font-bold text-[#7C3AED] tracking-wider uppercase">Guidelines</span>
+              <span className="text-[10px] font-bold text-[#7657D9] tracking-wider uppercase">Guidelines</span>
             </div>
           </Link>
 
@@ -34,7 +34,7 @@ export default function CommunityGuidelinesPage() {
 
       <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
         <div className="mb-10 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#7C3AED]/10 text-[#7C3AED] text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F1EEFB] text-[#7657D9] border border-[#D9D1F2] text-xs font-bold uppercase tracking-wider">
             <ShieldCheck size={13} />
             <span>Campus Code of Conduct</span>
           </div>
@@ -48,8 +48,8 @@ export default function CommunityGuidelinesPage() {
 
         <div className="space-y-10 text-sm text-black/80 leading-relaxed font-medium">
           {/* Principle */}
-          <section className="p-6 sm:p-7 rounded-[26px] bg-[#7C3AED]/5 border border-[#7C3AED]/20 space-y-2">
-            <h2 className="text-base font-black text-[#7C3AED]">Our Core Philosophy</h2>
+          <section className="p-6 sm:p-7 rounded-[26px] bg-[#F1EEFB] border border-[#D9D1F2] space-y-2">
+            <h2 className="text-base font-black text-[#7657D9]">Our Core Philosophy</h2>
             <p className="text-xs sm:text-sm text-black/80 leading-relaxed">
               Meova is built exclusively for verified university students to socialize, study together, and collaborate. We treat each other with mutual respect, academic integrity, and consideration. These guidelines ensure our campuses remain welcoming and secure for everyone.
             </p>
@@ -58,7 +58,7 @@ export default function CommunityGuidelinesPage() {
           {/* Section 1: In-Person Meetups */}
           <section className="space-y-3 p-6 sm:p-7 rounded-[26px] bg-white border border-black/10 shadow-xs">
             <h2 className="text-base sm:text-lg font-black text-black flex items-center gap-2">
-              <Coffee size={18} className="text-[#7C3AED]" />
+              <Coffee size={18} className="text-[#7657D9]" />
               1. In-Person Meetup Standards
             </h2>
             <p>

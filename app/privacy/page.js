@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#F1EEFB] selection:text-[#7657D9]">
       {/* ── Top Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -18,7 +18,7 @@ export default function PrivacyPage() {
             <img src="/logo.png" alt="Meova Logo" className="h-7 sm:h-8 w-auto object-contain" />
             <div className="flex flex-col">
               <span className="font-black text-lg tracking-tight text-black leading-none">Meova</span>
-              <span className="text-[10px] font-bold text-[#7C3AED] tracking-wider uppercase">Privacy</span>
+              <span className="text-[10px] font-bold text-[#7657D9] tracking-wider uppercase">Privacy</span>
             </div>
           </Link>
 
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
 
       <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
         <div className="mb-10 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#7C3AED]/10 text-[#7C3AED] text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F1EEFB] text-[#7657D9] border border-[#D9D1F2] text-xs font-bold uppercase tracking-wider">
             <ShieldCheck size={13} />
             <span>Privacy &amp; Data Protection</span>
           </div>
@@ -78,8 +78,8 @@ export default function PrivacyPage() {
           {/* Section 2: Storage of Verification Docs */}
           <section className="space-y-3 p-6 sm:p-7 rounded-[26px] bg-white border border-black/10 shadow-xs">
             <h2 className="text-base sm:text-lg font-black text-black">2. Private Storage of Student ID Documents</h2>
-            <div className="p-4 rounded-2xl bg-purple-50 border border-[#7C3AED]/20 text-purple-950 text-xs font-medium space-y-1.5">
-              <p className="font-bold text-[#7C3AED] flex items-center gap-1.5">
+            <div className="p-4 rounded-2xl bg-[#F1EEFB] border border-[#D9D1F2] text-[#111827] text-xs font-medium space-y-1.5">
+              <p className="font-bold text-[#7657D9] flex items-center gap-1.5">
                 <Lock size={14} /> Bank-Grade Restricted Storage
               </p>
               <p>

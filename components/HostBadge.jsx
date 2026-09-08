@@ -15,7 +15,7 @@ export default function HostBadge({ role, size = 'sm', className = '' }) {
         title={isAdmin ? 'Administrator' : isLead ? 'Campus Lead' : 'Verified Campus Host'}
         className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8.5px] font-bold uppercase tracking-wider ${
           isAdmin
-            ? 'bg-purple-50 text-purple-700 border border-purple-200'
+            ? 'bg-[#F1EEFB] text-[#7657D9] border border-[#D9D1F2]'
             : isLead
             ? 'bg-blue-50 text-blue-700 border border-blue-200'
             : 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]'
@@ -32,14 +32,14 @@ export default function HostBadge({ role, size = 'sm', className = '' }) {
       title={isAdmin ? 'Administrator' : isLead ? 'Campus Lead' : 'Verified Campus Host'}
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-2xs ${
         isAdmin
-          ? 'bg-purple-50 text-purple-700 border border-purple-200'
+          ? 'bg-[#F1EEFB] text-[#7657D9] border border-[#D9D1F2]'
           : isLead
           ? 'bg-blue-50 text-blue-700 border border-blue-200'
           : 'bg-[var(--accent-tint-10)] text-[var(--accent)] border border-[var(--accent-tint-20)]'
       } ${className}`}
     >
       {isAdmin ? (
-        <Crown size={11} className="text-purple-600" />
+        <Crown size={11} className="text-[#7657D9]" />
       ) : isLead ? (
         <Sparkles size={11} className="text-blue-600" />
       ) : (

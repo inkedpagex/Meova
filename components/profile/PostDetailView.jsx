@@ -207,7 +207,7 @@ export default function PostDetailView({
         )
       ) : (
         <div className="p-8 text-center text-white max-w-md space-y-3">
-          <div className="w-12 h-12 rounded-full bg-white/10 mx-auto flex items-center justify-center text-[#7C3AED]">
+          <div className="w-12 h-12 rounded-full bg-white/10 mx-auto flex items-center justify-center text-[#7657D9]">
             <Sparkles size={22} />
           </div>
           <p className="text-base sm:text-lg font-bold leading-relaxed whitespace-pre-line text-white/95">
@@ -288,7 +288,7 @@ export default function PostDetailView({
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-2 text-black hover:text-[#7C3AED] transition-colors cursor-pointer py-1.5 pr-3 -ml-1 active:scale-95"
+            className="flex items-center gap-2 text-black hover:text-[#7657D9] transition-colors cursor-pointer py-1.5 pr-3 -ml-1 active:scale-95"
             title="Back to profile"
           >
             <ArrowLeft size={20} className="text-black" />
@@ -349,7 +349,7 @@ export default function PostDetailView({
               <button
                 type="button"
                 onClick={handleShare}
-                className="text-black/80 hover:text-[#7C3AED] transition-colors cursor-pointer active:scale-90"
+                className="text-black/80 hover:text-[#7657D9] transition-colors cursor-pointer active:scale-90"
                 title="Share"
               >
                 <Share2 size={21} />
@@ -423,12 +423,12 @@ export default function PostDetailView({
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
             maxLength={500}
-            className="flex-1 px-3.5 py-2 rounded-full bg-black/5 border border-black/10 text-xs font-medium text-black placeholder:text-black/40 focus:outline-none focus:border-[#7C3AED] focus:bg-white transition-all"
+            className="flex-1 px-3.5 py-2 rounded-full bg-black/5 border border-black/10 text-xs font-medium text-black placeholder:text-black/40 focus:outline-none focus:border-[#7657D9] focus:bg-white transition-all"
           />
           <button
             type="submit"
             disabled={!newComment.trim() || submittingComment}
-            className="px-4 py-2 rounded-full bg-[#7C3AED] text-white text-xs font-bold hover:bg-[#6D28D9] disabled:opacity-40 transition-all cursor-pointer whitespace-nowrap flex-shrink-0 active:scale-95 flex items-center gap-1"
+            className="px-4 py-2 rounded-full bg-[#7657D9] text-white text-xs font-bold hover:bg-[#6848C9] active:bg-[#5B3FB3] disabled:opacity-40 transition-all cursor-pointer whitespace-nowrap flex-shrink-0 flex items-center gap-1"
           >
             {submittingComment ? (
               <Loader2 size={13} className="animate-spin" />
@@ -464,7 +464,7 @@ export default function PostDetailView({
               <div className="min-w-0">
                 <Link
                   href={isOwner ? '/profile' : `/users/${post.user_id}`}
-                  className="text-xs font-black text-black hover:text-[#7C3AED] truncate block transition-colors leading-tight"
+                  className="text-xs font-black text-black hover:text-[#7657D9] truncate block transition-colors leading-tight"
                 >
                   {authorName}
                 </Link>
@@ -568,7 +568,7 @@ export default function PostDetailView({
               <button
                 type="button"
                 onClick={handleShare}
-                className="text-black/80 hover:text-[#7C3AED] transition-colors cursor-pointer active:scale-90"
+                className="text-black/80 hover:text-[#7657D9] transition-colors cursor-pointer active:scale-90"
                 title="Share"
               >
                 <Share2 size={21} />
@@ -591,12 +591,12 @@ export default function PostDetailView({
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Add a comment..."
               maxLength={500}
-              className="flex-1 px-3.5 py-2 rounded-full bg-black/5 border border-black/10 text-xs font-medium text-black placeholder:text-black/40 focus:outline-none focus:border-[#7C3AED] focus:bg-white transition-all"
+              className="flex-1 px-3.5 py-2 rounded-full bg-black/5 border border-black/10 text-xs font-medium text-black placeholder:text-black/40 focus:outline-none focus:border-[#7657D9] focus:bg-white transition-all"
             />
             <button
               type="submit"
               disabled={!newComment.trim() || submittingComment}
-              className="px-4 py-2 rounded-full bg-[#7C3AED] text-white text-xs font-bold hover:bg-[#6D28D9] disabled:opacity-40 transition-all cursor-pointer whitespace-nowrap flex-shrink-0 active:scale-95 flex items-center gap-1"
+              className="px-4 py-2 rounded-full bg-[#7657D9] text-white text-xs font-bold hover:bg-[#6848C9] active:bg-[#5B3FB3] disabled:opacity-40 transition-all cursor-pointer whitespace-nowrap flex-shrink-0 flex items-center gap-1"
             >
               {submittingComment ? (
                 <Loader2 size={13} className="animate-spin" />

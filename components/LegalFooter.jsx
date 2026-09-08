@@ -16,7 +16,7 @@ export default function LegalFooter({ className = '' }) {
             <p className="text-xs text-black/70 leading-relaxed font-medium">
               The verified social network and peer meetup ecosystem for Indian university students.
             </p>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7C3AED]/10 text-[#7C3AED] text-[10px] font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1EEFB] text-[#7657D9] border border-[#D9D1F2] text-[10px] font-bold uppercase tracking-wider">
               <span>Made for Indian Campuses</span>
             </div>
           </div>

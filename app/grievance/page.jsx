@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function GrievancePage() {
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#F1EEFB] selection:text-[#7657D9]">
       {/* ── Top Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -18,7 +18,7 @@ export default function GrievancePage() {
             <img src="/logo.png" alt="Meova Logo" className="h-7 sm:h-8 w-auto object-contain" />
             <div className="flex flex-col">
               <span className="font-black text-lg tracking-tight text-black leading-none">Meova</span>
-              <span className="text-[10px] font-bold text-[#7C3AED] tracking-wider uppercase">Compliance</span>
+              <span className="text-[10px] font-bold text-[#7657D9] tracking-wider uppercase">Compliance</span>
             </div>
           </Link>
 
@@ -34,7 +34,7 @@ export default function GrievancePage() {
 
       <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
         <div className="mb-10 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#7C3AED]/10 text-[#7C3AED] text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F1EEFB] text-[#7657D9] border border-[#D9D1F2] text-xs font-bold uppercase tracking-wider">
             <Scale size={13} />
             <span>Statutory Compliance Notice</span>
           </div>
@@ -48,7 +48,7 @@ export default function GrievancePage() {
 
         <div className="space-y-10 text-sm text-black/80 leading-relaxed font-medium">
           {/* Statutory Card */}
-          <section className="p-6 sm:p-8 rounded-[28px] bg-white border border-[#7C3AED]/30 shadow-lg shadow-[#7C3AED]/5 space-y-5">
+          <section className="p-6 sm:p-8 rounded-[28px] bg-white border border-[#D9D1F2] shadow-sm space-y-5">
             <h2 className="text-lg font-black text-black">Designated Grievance Redressal Officer</h2>
             <p className="text-xs sm:text-sm text-black/70 leading-relaxed">
               If you have any grievance or complaint regarding user content, intellectual property violations, harassment, or non-compliance with the Information Technology Act, 2000, you may contact our designated Grievance Officer:
@@ -63,7 +63,7 @@ export default function GrievancePage() {
 
               <div className="p-4 rounded-2xl bg-black/5 space-y-1">
                 <p className="font-bold text-black uppercase tracking-wider text-[11px] text-black/60">Email Address</p>
-                <p className="font-bold text-[#7C3AED] text-sm">
+                <p className="font-bold text-[#7657D9] text-sm">
                   <a href="mailto:grievance@meova.in" className="hover:underline">grievance@meova.in</a>
                 </p>
                 <p className="text-black/70">Monitored 7 days a week</p>
@@ -81,7 +81,7 @@ export default function GrievancePage() {
           {/* SLA Response Commitment */}
           <section className="space-y-3 p-6 sm:p-7 rounded-[26px] bg-white border border-black/10 shadow-xs">
             <h2 className="text-base sm:text-lg font-black text-black flex items-center gap-2">
-              <Clock size={18} className="text-[#7C3AED]" />
+              <Clock size={18} className="text-[#7657D9]" />
               Response Time &amp; Resolution SLA
             </h2>
             <p>Under the statutory guidelines established by the Government of India:</p>

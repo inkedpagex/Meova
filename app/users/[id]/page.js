@@ -132,7 +132,7 @@ export default async function UserProfilePage({ params }) {
 
   const yearLabel = profile.year ? (profile.year.toLowerCase().includes('year') ? profile.year : `${profile.year} Year`) : '1st Year';
   const branchLabel = profile.branch || 'General';
-  const universityLabel = profile.university || 'GLA University, Mathura';
+  const universityLabel = profile.university || 'Campus Student';
 
   return (
     <div className="max-w-[640px] mx-auto px-4 py-2 space-y-4 pb-28">

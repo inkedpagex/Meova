@@ -139,7 +139,7 @@ export default async function CollegePage({ params, searchParams }) {
     : `/signup?college=${encodeURIComponent(college.id)}`;
 
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#F1EEFB] selection:text-[#7657D9]">
       {/* ── Top Header Bar ───────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -183,7 +183,7 @@ export default async function CollegePage({ params, searchParams }) {
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-black tracking-tight leading-[1.1]">
               The Campus Social App for <br className="hidden sm:inline" />
-              <span className="text-[#7C3AED]">{college.name}</span>
+              <span className="text-[#7657D9]">{college.name}</span>
             </h1>
 
             <p className="text-sm sm:text-base text-black/70 font-medium leading-relaxed max-w-xl mx-auto">
@@ -195,7 +195,7 @@ export default async function CollegePage({ params, searchParams }) {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
               <Link
                 href={signupHref}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-sm shadow-xl shadow-[#7C3AED]/25 whitespace-nowrap flex-shrink-0 transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white font-bold text-sm shadow-sm shadow-[#7657D9]/12 whitespace-nowrap flex-shrink-0 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Join with College Email</span>
                 <ArrowRight size={15} />
@@ -425,7 +425,7 @@ export default async function CollegePage({ params, searchParams }) {
             <div className="pt-2">
               <Link
                 href={signupHref}
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-sm shadow-xl shadow-[#7C3AED]/30 whitespace-nowrap flex-shrink-0 transition-transform active:scale-95"
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white font-bold text-sm shadow-sm shadow-[#7657D9]/12 whitespace-nowrap flex-shrink-0 transition-transform active:scale-95 cursor-pointer"
               >
                 <span>Create Free Campus Account</span>
                 <ArrowRight size={15} />

@@ -99,6 +99,7 @@ export function middleware(request) {
       pathname.startsWith('/api/colleges') ||
       pathname.startsWith('/api/cron') ||
       pathname.startsWith('/_next') ||
+      pathname.startsWith('/.well-known/') ||
       pathname === '/manifest.json' ||
       pathname === '/sw.js' ||
       pathname === '/offline' ||
@@ -123,7 +124,29 @@ export function middleware(request) {
   }
 
   // ── ROOT domain (meova.in / localhost) ────────────────────────────────────
-  // In production: if already authenticated and visiting root marketing or auth form, redirect to product app
+  const urlSource = request.nextUrl.searchParams.get('source');
+  const isPWA = urlSource === 'pwa' || request.cookies.get('__meova_pwa')?.value === '1';
+
+  // If request is from installed PWA (source=pwa or __meova_pwa cookie):
+  // Keep execution on current domain so Chrome/Edge PWA stays 100% within scope
+  // and NEVER shows the out-of-scope URL bar!
+  if (isPWA) {
+    if (!hasAuthCookie && (pathname !== '/' && pathname !== '/login' && pathname !== '/signup' && !pathname.startsWith('/college/') && !pathname.startsWith('/ambassador'))) {
+      const loginUrl = new URL('/login', rootBase);
+      loginUrl.searchParams.set('redirect', pathname);
+      const res = NextResponse.redirect(loginUrl);
+      res.cookies.set('__meova_pwa', '1', { path: '/', sameSite: 'lax', maxAge: 31536000 });
+      return res;
+    }
+
+    const res = NextResponse.next();
+    if (urlSource === 'pwa' && request.cookies.get('__meova_pwa')?.value !== '1') {
+      res.cookies.set('__meova_pwa', '1', { path: '/', sameSite: 'lax', maxAge: 31536000 });
+    }
+    return res;
+  }
+
+  // In production (standard browser tab): if already authenticated and visiting root marketing or auth form, redirect to product app
   if (isProd && hasAuthCookie && (pathname === '/' || pathname === '/login' || pathname === '/signup')) {
     return NextResponse.redirect(new URL('/', appBase));
   }
@@ -161,6 +184,7 @@ export function middleware(request) {
     pathname.startsWith('/api/ping') ||
     pathname.startsWith('/api/cron') ||
     pathname.startsWith('/_next') ||
+    pathname.startsWith('/.well-known/') ||
     pathname.startsWith('/icon') ||
     pathname.startsWith('/logo') ||
     pathname.startsWith('/favicon') ||

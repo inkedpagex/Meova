@@ -35,23 +35,21 @@ export const viewport = {
   userScalable: false,
   viewportFit: 'cover',
   interactiveWidget: 'resizes-content',
-  themeColor: 'var(--accent)',
+  themeColor: '#FFFFFF',
 };
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://meova.in'),
   title: {
-    default: 'Meova — #1 Campus Social & Meetups | GLA University',
+    default: 'Meova — Campus Social Network & 1-on-1 Student Meetups',
     template: '%s | Meova',
   },
-  description: 'Meova is the #1 campus social platform for GLA University students in Mathura. Book 1-on-1 meetups, earn Sparks, and join student circles. Free to join.',
+  description: 'Meova is the verified campus social network for university students. Connect with verified peers, book 1-on-1 study & coffee meetups, earn Sparks, and join student circles. Free to join.',
   keywords: [
-    'Meova', 'Meova App', 'meova.in', 'www.meova.in', 'GLA University app', 'GLA campus social',
-    'GLA meet app', 'GLA University Mathura', 'campus meetup app India',
-    'student networking GLA', 'meetify alternative', 'meetifyy alternative', 'meetify GLA University', 'meetifyy GLA University',
-    'earn Sparks GLA', 'student circles GLA', 'college app Mathura',
-    'Campus Life', 'Student Meetups', 'College Networking',
-    'College Circles', 'GLA University', 'Sparks Wallet'
+    'Meova', 'Meova App', 'meova.in', 'www.meova.in', 'campus social network', 'college meetups',
+    'student networking', 'campus meetup app India', 'coffee meetups', 'study sessions',
+    'earn Sparks', 'student circles', 'college app', 'Campus Life', 'Student Meetups',
+    'College Networking', 'College Circles', 'Sparks Wallet'
   ],
   manifest: '/manifest.json',
   verification: {
@@ -67,15 +65,15 @@ export const metadata = {
     locale: 'en_IN',
     url: 'https://meova.in',
     siteName: 'Meova',
-    title: 'Meova — #1 Campus Social & Meetups | GLA University',
-    description: 'Connect with GLA University peers, book verified 1-on-1 coffee meets, and join student circles on Meova.',
+    title: 'Meova — Campus Social Network & 1-on-1 Student Meetups',
+    description: 'Connect with verified university peers, book 1-on-1 study & coffee meets, and join student circles on Meova.',
     images: [
       {
         url: 'https://meova.in/og-image.png',
         secureUrl: 'https://meova.in/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Meova — GLA University Campus Social & Meetup Platform',
+        alt: 'Meova — Campus Social & Meetup Platform',
         type: 'image/png',
       },
       {
@@ -92,18 +90,18 @@ export const metadata = {
     card: 'summary_large_image',
     site: '@meovaapp',
     creator: '@meovaapp',
-    title: 'Meova — #1 Campus Social & Meetups | GLA University',
-    description: 'Connect with GLA University peers, book verified 1-on-1 coffee meets, and join student circles on Meova.',
+    title: 'Meova — Campus Social Network & 1-on-1 Student Meetups',
+    description: 'Connect with verified university peers, book 1-on-1 study & coffee meets, and join student circles on Meova.',
     images: ['https://meova.in/og-image.png'],
   },
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon-48x48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.ico', sizes: '48x48' },
     ],
-    shortcut: '/favicon.ico',
+    shortcut: '/favicon-48x48.png',
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
@@ -143,9 +141,9 @@ export default async function RootLayout({ children }) {
               <meta name="google-site-verification" content="69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w" />
               <link rel="manifest" href="/manifest.json" />
               <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-content" />
-              <meta name="theme-color" content={initialMode === 'dark' ? '#0D0D0D' : '#7C3AED'} />
+              <meta name="theme-color" content={initialMode === 'dark' ? '#0F1115' : '#FFFFFF'} />
             </head>
-            <body style={{ background: 'var(--bg-base)', minHeight: '100dvh', margin: 0, padding: 0 }}>
+            <body style={{ background: initialMode === 'dark' ? '#0F1115' : '#FFFFFF', minHeight: '100dvh', margin: 0, padding: 0 }}>
               <BlockedPage />
             </body>
           </html>
@@ -217,16 +215,17 @@ export default async function RootLayout({ children }) {
           />
           <meta name="google-site-verification" content="69gj3KxRDEUqq1GCnrE6EknJ-3WCbTit6UdLS21Mo0w" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
-          <meta name="theme-color" content={initialMode === 'dark' ? '#0D0D0D' : '#7C3AED'} />
+          <meta name="theme-color" content={initialMode === 'dark' ? '#0F1115' : '#FFFFFF'} />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
           <meta name="apple-mobile-web-app-title" content="Meova" />
           <link rel="manifest" href="/manifest.json" />
-          <link rel="icon" href="/favicon.ico" sizes="any" />
           <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+          <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
           <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-          <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+          <link rel="icon" href="/favicon.ico" sizes="48x48" />
+          <link rel="shortcut icon" href="/favicon.ico" />
           <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
           <link rel="preconnect" href="https://dvqsosbeh.supabase.co" crossOrigin="anonymous" />
           <link rel="dns-prefetch" href="https://dvqsosbeh.supabase.co" />
@@ -240,18 +239,18 @@ export default async function RootLayout({ children }) {
           <meta property="og:type" content="website" />
           <meta property="og:site_name" content="Meova" />
           <meta property="og:url" content="https://meova.in" />
-          <meta property="og:title" content="Meova — #1 Campus Social & Meetups | GLA University" />
-          <meta property="og:description" content="Connect with GLA University peers, book verified 1-on-1 coffee meets, and join student circles on Meova." />
+          <meta property="og:title" content="Meova — Campus Social Network & 1-on-1 Student Meetups" />
+          <meta property="og:description" content="Connect with verified university peers, book 1-on-1 study & coffee meets, and join student circles on Meova." />
           <meta property="og:image" content="https://meova.in/og-image.png" />
           <meta property="og:image:secure_url" content="https://meova.in/og-image.png" />
           <meta property="og:image:type" content="image/png" />
           <meta property="og:image:width" content="1200" />
           <meta property="og:image:height" content="630" />
-          <meta property="og:image:alt" content="Meova — GLA University Campus Social Network" />
+          <meta property="og:image:alt" content="Meova — Campus Social Network & Student Meetups" />
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:site" content="@meovaapp" />
-          <meta name="twitter:title" content="Meova — #1 Campus Social & Meetups | GLA University" />
-          <meta name="twitter:description" content="Connect with GLA University peers, book verified 1-on-1 coffee meets, and join student circles on Meova." />
+          <meta name="twitter:title" content="Meova — Campus Social Network & 1-on-1 Student Meetups" />
+          <meta name="twitter:description" content="Connect with verified university peers, book 1-on-1 study & coffee meets, and join student circles on Meova." />
           <meta name="twitter:image" content="https://meova.in/og-image.png" />
           
           {/* ── Google Search Rich Snippets & Sitelinks Structured Data (JSON-LD) ── */}
@@ -267,22 +266,13 @@ export default async function RootLayout({ children }) {
                     'url': 'https://meova.in',
                     'name': 'Meova',
                     'alternateName': [
-                      'Meova Campus', 'Meova App', 'Meova Web',
-                      'GLA Meet App', 'GLA Campus Social', 'meova.in', 'www.meova.in'
+                      'Meova Campus', 'Meova App', 'Meova Web', 'meova.in', 'www.meova.in'
                     ],
-                    'description': 'Meova is the #1 campus social platform for GLA University students in Mathura. Book 1-on-1 meetups, earn Sparks, and join student circles. Free to join.',
+                    'description': 'Meova is the verified campus social network for university students. Book 1-on-1 study & coffee meetups, earn Sparks, and join student circles. Free to join.',
                     'potentialAction': {
                       '@type': 'SearchAction',
                       'target': 'https://meova.in/discover?q={search_term_string}',
                       'query-input': 'required name=search_term_string'
-                    },
-                    'audience': {
-                      '@type': 'EducationalAudience',
-                      'educationalRole': 'student',
-                      'geographicArea': {
-                        '@type': 'Place',
-                        'name': 'GLA University, Mathura, Uttar Pradesh, India'
-                      }
                     }
                   },
                   {
@@ -292,33 +282,27 @@ export default async function RootLayout({ children }) {
                     'hasPart': [
                       {
                         '@type': 'WebPage',
-                        'name': 'GLA University Campus Feed',
-                        'description': 'Share moments and see what GLA University students are doing on campus',
+                        'name': 'Campus Feed',
+                        'description': 'Share moments and see what students are doing on campus',
                         'url': 'https://meova.in/'
                       },
                       {
                         '@type': 'WebPage',
-                        'name': 'Discover GLA University Peers',
-                        'description': 'Find and connect with GLA University students by branch, year, and skills',
+                        'name': 'Discover Peers',
+                        'description': 'Find and connect with students by college, branch, year, and skills',
                         'url': 'https://meova.in/discover'
                       },
                       {
                         '@type': 'WebPage',
-                        'name': 'Book Campus Meetups — GLA Meet',
-                        'description': 'Book verified 1-on-1 campus meetups with GLA University students. QR verified & Sparks secured.',
+                        'name': 'Book Campus Meetups',
+                        'description': 'Book verified 1-on-1 campus meetups with verified students. QR verified & Sparks secured.',
                         'url': 'https://meova.in/bookings'
                       },
                       {
                         '@type': 'WebPage',
-                        'name': 'GLA Student Circles & Communities',
-                        'description': 'Join GLA University student circles — tech, design, sports, cultural clubs',
+                        'name': 'Student Circles & Communities',
+                        'description': 'Join student circles — tech, design, sports, cultural clubs across universities',
                         'url': 'https://meova.in/circles'
-                      },
-                      {
-                        '@type': 'WebPage',
-                        'name': 'Meova for GLA University',
-                        'description': 'Dedicated landing page for GLA University students on Meova — the campus social platform',
-                        'url': 'https://meova.in/gla-university'
                       }
                     ]
                   },
@@ -332,8 +316,8 @@ export default async function RootLayout({ children }) {
                     'installUrl': 'https://meova.in',
                     'url': 'https://meova.in',
                     'screenshot': 'https://meova.in/icon-512.png',
-                    'description': 'Meova is the campus social and meetup platform for GLA University students in Mathura — with QR-verified meets, Sparks wallet, student circles, and a campus moments feed.',
-                    'keywords': 'GLA University, campus meetup, student networking, meetify alternative, meetifyy alternative, GLA student network, Sparks wallet, campus social Mathura',
+                    'description': 'Meova is the verified campus social and meetup platform for college students — with QR-verified meets, Sparks wallet, student circles, and a campus moments feed.',
+                    'keywords': 'campus social network, college meetups, student networking, campus peer meets, Sparks wallet, student circles',
                     'offers': {
                       '@type': 'Offer',
                       'price': '0',
@@ -364,16 +348,8 @@ export default async function RootLayout({ children }) {
                       'addressCountry': 'IN'
                     },
                     'areaServed': {
-                      '@type': 'EducationalOrganization',
-                      'name': 'GLA University',
-                      'address': {
-                        '@type': 'PostalAddress',
-                        'streetAddress': 'NH-2, Mathura-Delhi Road',
-                        'addressLocality': 'Mathura',
-                        'addressRegion': 'Uttar Pradesh',
-                        'postalCode': '281406',
-                        'addressCountry': 'IN'
-                      }
+                      '@type': 'Country',
+                      'name': 'India'
                     }
                   }
                 ]
@@ -381,7 +357,63 @@ export default async function RootLayout({ children }) {
             }}
           />
         </head>
-        <body style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh', fontFamily: "var(--font-inter), 'Inter', sans-serif" }}>
+        <body style={{ background: initialMode === 'dark' ? '#0F1115' : '#FFFFFF', color: 'var(--text-primary)', minHeight: '100dvh', fontFamily: "var(--font-inter), 'Inter', sans-serif" }}>
+          {/* ── Instant Pure White Opening Screen (Zero black flicker, logo in middle, no text) ── */}
+          <div
+            id="meova-initial-splash"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 999999,
+              backgroundColor: initialMode === 'dark' ? '#0F1115' : '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none',
+              transition: 'opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
+          >
+            <img
+              src="/logo.png"
+              alt="Meova"
+              width={76}
+              height={50}
+              style={{
+                width: '76px',
+                height: 'auto',
+                maxHeight: '52px',
+                objectFit: 'contain',
+                userSelect: 'none',
+              }}
+            />
+          </div>
+          <script
+            id="meova-splash-remover"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  function dismissSplash() {
+                    var el = document.getElementById('meova-initial-splash');
+                    if (el) {
+                      el.style.opacity = '0';
+                      el.style.visibility = 'hidden';
+                      setTimeout(function() {
+                        if (el && el.parentNode) el.parentNode.removeChild(el);
+                      }, 300);
+                    }
+                  }
+                  if (document.readyState === 'complete') {
+                    setTimeout(dismissSplash, 60);
+                  } else {
+                    window.addEventListener('load', function() {
+                      setTimeout(dismissSplash, 60);
+                    });
+                    setTimeout(dismissSplash, 1200);
+                  }
+                })();
+              `,
+            }}
+          />
           <TopProgressBar />
           <ThemeProvider initialMode={initialMode} initialAccent={initialAccent}>
             <GoogleAuthProviderWrapper>
@@ -419,6 +451,14 @@ export default async function RootLayout({ children }) {
             e.preventDefault();
             window.deferredPWAInstallPrompt = e;
           });
+          try {
+            var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            if (isStandalone) {
+              document.cookie = '__meova_pwa=1; path=/; max-age=31536000; SameSite=Lax';
+            } else if (document.cookie.indexOf('__meova_pwa=') !== -1) {
+              document.cookie = '__meova_pwa=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+            }
+          } catch(e) {}
         `}} />
       </body>
     </html>

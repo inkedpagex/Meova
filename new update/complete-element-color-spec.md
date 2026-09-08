@@ -9,19 +9,19 @@
 
 | Token | Hex | Notes |
 |---|---|---|
-| `accent` | `#6D28D9` | Deep plum — flat fill ONLY, never gradient |
-| `accent-hover` | `#5B21B6` | Pressed/hover state |
-| `accent-tint-10` | `#F3EEFC` | Chip/tag backgrounds |
-| `accent-tint-20` | `#E4D9F7` | Hover on chips, active nav bg |
-| `bg-base` | `#FAFAF8` | Warm off-white — NOT pure white (avoids sterile AI-app look) |
-| `bg-surface` | `#FFFFFF` | Cards only, to contrast against warm base |
-| `border-hairline` | `#E7E5E4` | Warm gray border, not cold `#E5E7EB` |
-| `text-primary` | `#1C1917` | Warm near-black |
-| `text-secondary` | `#78716C` | Warm gray |
-| `text-tertiary` | `#A8A29E` | Placeholder-level |
+| `accent` | `#7657D9` | Meova Brand Purple — flat fill ONLY, never gradient (~10-12% presence) |
+| `accent-hover` | `#6848C9` | Hover state |
+| `accent-pressed` | `#5B3FB3` | Pressed state |
+| `accent-tint-10` | `#F1EEFB` | Chip/tag backgrounds, soft tint |
+| `accent-border` | `#D9D1F2` | Subtle purple border |
+| `bg-base` | `#F9FAFB` | Light theme background |
+| `bg-surface` | `#FFFFFF` | Cards & surfaces (pure white — never touched/removed) |
+| `border-hairline` | `#E5E7EB` | Subtle neutral border |
+| `text-primary` | `#111827` | High readability dark text |
+| `text-secondary` | `#4B5563` | Clean secondary text |
+| `text-muted` | `#6B7280` | Quiet metadata |
 | `status-online` | `#10B981` | Dot only |
 | `status-error` | `#DC2626` | Errors/delete only |
-| **ALT accent (if avoiding purple entirely)** | `#C2410C` (terracotta) | Swap `accent` token everywhere, rest of palette stays same |
 
 **Typography note (also de-risks "AI look"):** Use a slightly distinctive font pairing instead of default Inter-everywhere — e.g., headings in **Sora** or **General Sans** (bold, has personality), body text in **Inter** or **DM Sans**. Pure Inter-for-everything is the other big "AI demo" tell.
 

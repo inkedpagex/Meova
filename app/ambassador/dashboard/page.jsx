@@ -215,7 +215,7 @@ export default function AmbassadorDashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#7C3AED] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#7657D9] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -230,7 +230,7 @@ export default function AmbassadorDashboardPage() {
         <p className="text-black/60 text-sm mb-6 max-w-xs">{error}</p>
         <button
           onClick={() => router.push('/ambassador')}
-          className="bg-[#7C3AED] text-white font-bold px-8 py-3 rounded-full whitespace-nowrap flex-shrink-0"
+          className="bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white font-bold px-8 py-3 rounded-full whitespace-nowrap flex-shrink-0 transition-colors cursor-pointer"
         >
           Apply to Become an Ambassador
         </button>
@@ -245,11 +245,11 @@ export default function AmbassadorDashboardPage() {
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
             {isAdmin ? (
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#7C3AED] text-white">
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#7657D9] text-white">
                 Super Admin Access
               </span>
             ) : (
-              <span className={`text-xs font-bold px-3 py-1 rounded-full ${ambassadorTier === 'full' ? 'bg-[#7C3AED] text-white' : 'bg-[#7C3AED]/20 text-[#7C3AED]'}`}>
+              <span className={`text-xs font-bold px-3 py-1 rounded-full ${ambassadorTier === 'full' ? 'bg-[#7657D9] text-white' : 'bg-[#F1EEFB] text-[#7657D9] border border-[#D9D1F2]'}`}>
                 {ambassadorTier === 'full' ? 'Full Ambassador' : 'Probation Ambassador'}
               </span>
             )}
@@ -306,7 +306,7 @@ export default function AmbassadorDashboardPage() {
             </h2>
             <button
               onClick={() => { setFilterUnconfirmed(f => !f); setPage(1); }}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap flex-shrink-0 transition-colors ${filterUnconfirmed ? 'bg-[#7C3AED] text-white' : 'border border-black/15 text-black/60'}`}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap flex-shrink-0 transition-colors cursor-pointer ${filterUnconfirmed ? 'bg-[#7657D9] text-white' : 'border border-black/15 text-black/60'}`}
             >
               {filterUnconfirmed ? 'Showing Unconfirmed' : 'Filter: Unconfirmed'}
             </button>

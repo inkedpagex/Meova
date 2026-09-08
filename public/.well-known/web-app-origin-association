@@ -1,0 +1,20 @@
+{
+  "web_apps": [
+    {
+      "manifest": "https://meova.in/manifest.json",
+      "details": {
+        "paths": [
+          "/*"
+        ]
+      }
+    },
+    {
+      "manifest": "https://app.meova.in/manifest.json",
+      "details": {
+        "paths": [
+          "/*"
+        ]
+      }
+    }
+  ]
+}

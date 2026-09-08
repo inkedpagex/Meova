@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED] flex flex-col justify-between">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#F1EEFB] selection:text-[#7657D9] flex flex-col justify-between">
       {/* ── Top Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -19,7 +19,7 @@ export default function ContactPage() {
             <img src="/logo.png" alt="Meova Logo" className="h-7 sm:h-8 w-auto object-contain" />
             <div className="flex flex-col">
               <span className="font-black text-lg tracking-tight text-black leading-none">Meova</span>
-              <span className="text-[10px] font-bold text-[#7C3AED] tracking-wider uppercase">Contact</span>
+              <span className="text-[10px] font-bold text-[#7657D9] tracking-wider uppercase">Contact</span>
             </div>
           </Link>
 
@@ -36,7 +36,7 @@ export default function ContactPage() {
       {/* ── Focused Single-Column Main Content ──────────────────────── */}
       <main className="max-w-xl mx-auto w-full py-10 sm:py-14 px-4 sm:px-6 space-y-6">
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#7C3AED]/10 text-[#7C3AED] text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F1EEFB] text-[#7657D9] border border-[#D9D1F2] text-xs font-bold uppercase tracking-wider">
             <Sparkles size={13} />
             <span>Meova Support Desk</span>
           </div>
@@ -47,7 +47,7 @@ export default function ContactPage() {
 
           <p className="text-sm text-black/70 font-medium leading-relaxed max-w-md mx-auto">
             Have a question, feedback, or need help? Send us a message below or email us directly at{' '}
-            <a href="mailto:support@meova.in" className="font-bold text-[#7C3AED] hover:underline">
+            <a href="mailto:support@meova.in" className="font-bold text-[#7657D9] hover:underline">
               support@meova.in
             </a>
             .
@@ -60,7 +60,7 @@ export default function ContactPage() {
         {/* Discreet Legal Grievance Link */}
         <p className="text-center text-xs text-black/50 font-medium pt-2">
           Need statutory legal or grievance reporting?{' '}
-          <Link href="/grievance" className="font-bold text-[#7C3AED] hover:underline">
+          <Link href="/grievance" className="font-bold text-[#7657D9] hover:underline">
             Grievance Redressal Portal →
           </Link>
         </p>

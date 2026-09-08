@@ -416,7 +416,7 @@ export default function CirclesList({
                 className={`px-5 h-9 rounded-full text-xs font-bold uppercase tracking-wide cursor-pointer active:scale-95 transition-all flex-shrink-0 whitespace-nowrap shadow-md ${
                   joinedMap[featured.id]
                     ? 'bg-white/20 text-white hover:bg-white/30 border border-white/30'
-                    : 'bg-[#7C3AED] text-white hover:bg-[#6D28D9]'
+                    : 'bg-[#7657D9] text-white hover:bg-[#6848C9] active:bg-[#5B3FB3]'
                 }`}
               >
                 {joiningId === featured.id ? 'Joining...' : (joinedMap[featured.id] ? 'Open' : 'Join')}

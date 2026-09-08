@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function RefundPolicyPage() {
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#F1EEFB] selection:text-[#7657D9]">
       {/* ── Top Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -18,7 +18,7 @@ export default function RefundPolicyPage() {
             <img src="/logo.png" alt="Meova Logo" className="h-7 sm:h-8 w-auto object-contain" />
             <div className="flex flex-col">
               <span className="font-black text-lg tracking-tight text-black leading-none">Meova</span>
-              <span className="text-[10px] font-bold text-[#7C3AED] tracking-wider uppercase">Refunds</span>
+              <span className="text-[10px] font-bold text-[#7657D9] tracking-wider uppercase">Refunds</span>
             </div>
           </Link>
 
@@ -34,7 +34,7 @@ export default function RefundPolicyPage() {
 
       <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
         <div className="mb-10 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#7C3AED]/10 text-[#7C3AED] text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F1EEFB] text-[#7657D9] border border-[#D9D1F2] text-xs font-bold uppercase tracking-wider">
             <RefreshCw size={13} />
             <span>Billing &amp; Payout Terms</span>
           </div>
@@ -137,7 +137,7 @@ export default function RefundPolicyPage() {
               For any recharge queries, UTR reconciliation, or withdrawal delays, please contact our financial desk directly:
             </p>
             <p className="text-xs font-bold text-black">
-              Email: <a href="mailto:billing@meova.in" className="text-[#7C3AED] underline">billing@meova.in</a>
+              Email: <a href="mailto:billing@meova.in" className="text-[#7657D9] underline">billing@meova.in</a>
             </p>
           </section>
         </div>

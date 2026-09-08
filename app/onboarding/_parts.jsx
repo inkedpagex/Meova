@@ -26,7 +26,7 @@ function StepBar({ step }) {
             <div className="flex flex-col items-center gap-1">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
                 done ? 'bg-emerald-500 text-white' :
-                active ? 'bg-[var(--accent)] text-white shadow-lg shadow-purple-500/20' :
+                active ? 'bg-[var(--accent)] text-white shadow-sm shadow-[#7657D9]/12' :
                 'bg-[#FAFAF8] text-[#A8A29E]'
               }`}>
                 {done ? <CheckCircle2 size={16}/> : idx}

@@ -50,7 +50,7 @@ export const Bell            = ri('ri-notification-3-line',    'ri-notification-
 export const MessageSquare   = ri('ri-message-3-line',         'ri-message-3-fill');
 export const MessageCircle   = ri('ri-message-3-line',         'ri-message-3-fill');
 
-export function MessageDotsIcon({ size = 15, className = 'text-[#7C3AED] flex-shrink-0', ...props }) {
+export function MessageDotsIcon({ size = 15, className = 'text-[#7657D9] flex-shrink-0', ...props }) {
   return (
     <svg
       width={size}

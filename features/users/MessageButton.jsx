@@ -49,9 +49,9 @@ export default function MessageButton({ targetUid }) {
       className="meova-message-pill flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-full text-xs font-bold transition-all active:scale-95 whitespace-nowrap cursor-pointer disabled:opacity-50 select-none"
     >
       {loading ? (
-        <Loader2 className="w-4 h-4 text-[#7C3AED] flex-shrink-0 animate-spin" />
+        <Loader2 className="w-4 h-4 text-[#7657D9] flex-shrink-0 animate-spin" />
       ) : (
-        <MessageDotsIcon size={16} className="text-[#7C3AED] flex-shrink-0" />
+        <MessageDotsIcon size={16} className="text-[#7657D9] flex-shrink-0" />
       )}
       <span className="leading-none font-bold tracking-tight">{loading ? 'Connecting...' : 'Message'}</span>
     </button>

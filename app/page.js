@@ -5,16 +5,16 @@ import MarketingHome from '../components/MarketingHome';
 import { supabaseAdmin } from '../lib/supabase/admin';
 
 export const metadata = {
-  title: 'Meova — Verified Campus Social Network & Student Meetups',
-  description: 'Meova is the verified campus social network for Indian university students. Connect with verified peers, book 1-on-1 coffee meets, and join student circles.',
+  title: 'Meova — Campus Social Network & 1-on-1 Student Meetups',
+  description: 'Connect with verified college peers, book 1-on-1 study & coffee meetups, earn Sparks, and join student circles on campus. Free to join.',
   keywords: [
-    'Meova', 'meova.in', 'www.meova.in', 'GLA University app', 'GLA campus social', 'GLA meet', 'GLA student network',
-    'meetify alternative', 'campus meetup app', 'college social app India', 'student networking app India'
+    'Meova', 'meova.in', 'www.meova.in', 'campus social network', 'college meetup app',
+    'student networking app', 'college social app', 'student circles', 'study sessions', 'coffee meets'
   ],
   alternates: { canonical: 'https://meova.in' },
   openGraph: {
-    title: 'Meova — Verified Campus Social Network & Student Meetups',
-    description: 'Connect with verified university peers, book 1-on-1 coffee meets, and join student circles.',
+    title: 'Meova — Campus Social Network & 1-on-1 Student Meetups',
+    description: 'Connect with verified university peers, book 1-on-1 study & coffee meets, and join student circles on campus.',
     url: 'https://meova.in',
     siteName: 'Meova',
     images: [
@@ -22,7 +22,7 @@ export const metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Meova — Verified Campus Social Network & Student Meetups',
+        alt: 'Meova — Campus Social & Meetup Platform',
       },
       {
         url: '/logo.png',
@@ -34,8 +34,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Meova — Verified Campus Social Network & Student Meetups',
-    description: 'Connect with verified university peers, book 1-on-1 coffee meets, and join student circles.',
+    title: 'Meova — Campus Social Network & 1-on-1 Student Meetups',
+    description: 'Connect with verified university peers, book 1-on-1 study & coffee meets, and join student circles on campus.',
     images: ['/og-image.png'],
   },
 };

@@ -10,7 +10,7 @@ export default function robots() {
       },
       {
         userAgent: 'Googlebot-Image',
-        allow: ['/favicon.ico', '/favicon*.png', '/favicon-*.png', '/icon-*.png', '/icon*.png', '/logo*.png', '/apple-touch-icon.png'],
+        allow: '/',
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

@@ -467,7 +467,7 @@ export default function FeedClient() {
           <button
             type="button"
             onClick={handleRefreshToTop}
-            className="pointer-events-auto px-4 py-2 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold shadow-lg shadow-purple-500/30 flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+            className="pointer-events-auto px-4 py-2 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold shadow-md shadow-[#7657D9]/12 flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
           >
             <ArrowUp size={14} strokeWidth={2.5} />
             <span>{newIncomingPostsCount} New Moment{newIncomingPostsCount > 1 ? 's' : ''}</span>

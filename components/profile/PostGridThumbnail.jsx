@@ -64,8 +64,8 @@ export default function PostGridThumbnail({ post, onClick }) {
           )}
         </>
       ) : (
-        /* Solid-color/gradient placeholder + title text centered for text-only posts */
-        <div className="w-full h-full p-2.5 sm:p-3.5 bg-gradient-to-br from-black via-black to-[#7C3AED]/35 text-white flex items-center justify-center text-center transition-transform duration-300 group-hover:scale-105">
+        /* Solid clean placeholder + title text centered for text-only posts */
+        <div className="w-full h-full p-2.5 sm:p-3.5 bg-[#111827] text-white flex items-center justify-center text-center transition-transform duration-300 group-hover:scale-105">
           <p className="text-[11px] sm:text-xs font-bold leading-snug line-clamp-3 text-white/95 px-1">
             {post.content || 'Moment'}
           </p>

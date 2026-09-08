@@ -70,7 +70,7 @@ export default function MarketingHome({ colleges = [] }) {
   }, [colleges, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#F1EEFB] selection:text-[#7657D9]">
       {/* ── 1. STICKY TOP NAVBAR ───────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
@@ -157,7 +157,7 @@ export default function MarketingHome({ colleges = [] }) {
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-black tracking-tight text-black leading-[1.05]">
               Make your college <br />
-              <span className="text-[#7C3AED]">experience count.</span>
+              <span className="text-[#7657D9]">experience count.</span>
             </h1>
 
             {/* Subtitle */}
@@ -309,7 +309,7 @@ export default function MarketingHome({ colleges = [] }) {
               {/* Direct Action CTA */}
               <button
                 onClick={() => loginWithGoogleGIS()}
-                className="w-full py-3.5 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#7C3AED]/20 active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap flex-shrink-0"
+                className="w-full py-3.5 rounded-2xl bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-[#7657D9]/12 active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap flex-shrink-0"
               >
                 <span>Unlock Your Campus Pass</span>
                 <ArrowRight size={14} />
@@ -409,7 +409,7 @@ export default function MarketingHome({ colleges = [] }) {
             </p>
             <Link
               href="/ambassador"
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#7C3AED] text-white text-xs font-bold hover:bg-[#6D28D9] transition-all"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#7657D9] text-white text-xs font-bold hover:bg-[#6848C9] active:bg-[#5B3FB3] transition-all cursor-pointer"
             >
               <span>Apply as Ambassador</span>
               <ArrowRight size={13} />

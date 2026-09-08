@@ -1,13 +1,17 @@
 {
   "id": "/",
-  "name": "Meova — Campus Social & Meetup Platform",
+  "name": "Meova",
   "short_name": "Meova",
   "description": "Connect with verified college peers, book 1-on-1 study & coffee meetups, see who is live on campus, and join student circles on Meova.",
   "start_url": "/?source=pwa",
   "scope": "/",
+  "scope_extensions": [
+    { "origin": "https://meova.in" },
+    { "origin": "https://app.meova.in" }
+  ],
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#7C3AED",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
   "orientation": "portrait-primary",
   "lang": "en-IN",
   "categories": ["social", "education", "lifestyle"],

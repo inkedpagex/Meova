@@ -4,17 +4,16 @@ import AuthForm from '../../features/auth/AuthForm';
 import { Suspense } from 'react';
 
 export const metadata = {
-  title: 'Join Meova — GLA University Campus Social & Meetup App',
-  description: 'Sign up free on Meova — the campus social platform for GLA University students. Book meetups, earn Sparks, join student circles.',
+  title: 'Join Meova — Campus Social & Student Meetup Platform',
+  description: 'Sign up free on Meova — the verified campus social platform for college students. Book meetups, earn Sparks, and join student circles.',
   keywords: [
-    'GLA University app', 'Meova login', 'GLA meet app', 'campus social platform GLA',
-    'meetify GLA alternative', 'meetifyy GLA alternative', 'GLA University social network', 'student meetup app GLA',
-    'college app Mathura', 'GLA University networking app'
+    'Meova', 'Meova login', 'Meova signup', 'campus social platform',
+    'student networking', 'college meetup app', 'campus social network'
   ],
   alternates: { canonical: 'https://meova.in/login' },
   openGraph: {
-    title: 'Join Meova — GLA University Campus Social App',
-    description: 'Book meetups, earn Sparks, and join student circles at GLA University. Free to join.',
+    title: 'Join Meova — Campus Social & Meetup Platform',
+    description: 'Book meetups, earn Sparks, and join student circles on campus. Free to join.',
     url: 'https://meova.in/login',
     siteName: 'Meova',
     images: [{ url: '/icon-512.png', width: 512, height: 512 }],

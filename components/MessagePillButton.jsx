@@ -8,7 +8,7 @@ import { toast } from '@/lib/toast';
 /**
  * MessagePillButton — High-contrast rounded pill action button matching exact reference:
  * - Pure white background (#FFFFFF) with subtle hairline border and elevation
- * - Vibrant purple speech bubble icon with 2 dots (#7C3AED)
+ * - Vibrant purple speech bubble icon with 2 dots (#7657D9)
  * - Deep pitch black bold Inter typography
  * - Generous inset padding so the icon never clips or touches the curved edge
  * - Tactile active scale & zero text wrapping for mobile responsiveness
@@ -55,7 +55,7 @@ export default function MessagePillButton({
     >
       <MessageDotsIcon
         size={isSmall ? 14 : 15}
-        className="text-[#7C3AED] flex-shrink-0"
+        className="text-[#7657D9] flex-shrink-0"
       />
       <span className="leading-none font-bold tracking-tight">Message</span>
     </button>

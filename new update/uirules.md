@@ -26,12 +26,12 @@ Design philosophy: **Neo-minimalist, functional elegance.** Inspired by Stripe /
 | `border-hairline` | `#E5E5E5` | 1px card/input borders |
 | `text-primary` | `#111111` | Headings, primary text |
 | `text-secondary` | `#6B7280` | Subtext, meta info |
-| `accent` | `#0F766E` (teal) or `#7C3AED` (violet) — pick ONE per product | CTAs, active states, links |
-| `accent-tint` | 10% opacity of accent | Hover/active backgrounds |
+| `accent` | `#7657D9` (Meova Brand Purple) | CTAs, active states, links |
+| `accent-tint` | `#F1EEFB` | Soft tint, tag backgrounds |
 | `danger` | `#DC2626` | Errors, destructive actions |
 | `success` | `#16A34A` | Confirmations |
 
-**Rule:** Accent color must cover less than 10% of any given screen's surface area.
+**Rule:** Accent color must cover approximately 10–12% of any given screen's surface area. The majority remains clean neutral and white.
 
 ---
 

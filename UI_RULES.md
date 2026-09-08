@@ -16,13 +16,18 @@ Dull, washed-out, or faded grey makes interfaces look unfinished, cloudy, and lo
 ### ✅ APPROVED HIGH-CONTRAST PALETTE:
 | Element | Class / Color Code | Purpose |
 | :--- | :--- | :--- |
-| **Card & Canvas Background** | `bg-white` (`#ffffff`) | Clean, crisp, high-contrast surface. |
-| **Primary Headings & Text** | `text-black` (`#000000`) with `font-black` or `font-bold` | Strong readability, bold streetwear hierarchy. |
-| **Secondary & Metadata Text** | `text-black/70` or `text-black/65` with `font-bold` | Clear, legible dark text — never faded grey. |
-| **Meova Signature Accent** | `#7C3AED` (`bg-[#7C3AED]`, `text-[#7C3AED]`, `bg-[var(--accent)]`) | Primary CTAs, active highlights, Sparks balances. |
-| **Hairline Subtle Borders** | `border border-black/10` or `border border-black/5` | Clean micro-hairline separation without heavy frames. |
-| **Brand Tinted Surfaces** | `bg-orange-50` with `border-orange-200` | Secondary buttons, subtle info chips, active states. |
-| **High-Contrast Buttons** | `bg-black text-white hover:bg-black/90` or `bg-[#7C3AED] text-white` | Tactile, confident action buttons. |
+| **Card & Canvas Background** | `bg-white` (`#FFFFFF`) | Clean, crisp, high-contrast surface (**NEVER touch or remove pure white**). |
+| **Primary Headings & Text** | `text-[#111827]` or `text-black` with `font-bold` | Strong readability, deliberate hierarchy. |
+| **Secondary & Metadata Text** | `text-[#4B5563]` or `text-black/70` with `font-medium` | Clear, legible dark text — never faded grey. |
+| **Muted Metadata** | `text-[#6B7280]` | Quiet timestamps and micro-labels. |
+| **MEOVA Brand Purple** | `#7657D9` (`bg-[#7657D9]`, `text-[#7657D9]`, `bg-[var(--accent)]`) | Controlled brand accent (~10–12% visual presence). CTAs, active highlights, Sparks balances. |
+| **Purple Hover State** | `#6848C9` (`hover:bg-[#6848C9]`, `hover:text-[#6848C9]`) | Tactile interaction response. |
+| **Purple Pressed State** | `#5B3FB3` (`active:bg-[#5B3FB3]`) | Snappy pressed feedback. |
+| **Purple Soft Tint** | `#F1EEFB` (`bg-[#F1EEFB]`) | Chip backgrounds, subtle active tabs, soft pill containers. |
+| **Purple Accent Border** | `#D9D1F2` (`border-[#D9D1F2]`) | Subtle hairline brand dividers and focused borders. |
+| **Functional Accent Shadow**| `rgba(118, 87, 217, 0.12)` (`shadow-[#7657D9]/12`) | Subtle functional elevation — never neon glow. |
+| **Hairline Subtle Borders** | `border-[#E5E7EB]` or `border border-black/10` | Clean micro-hairline separation without heavy frames. |
+| **High-Contrast Buttons** | `bg-black text-white hover:bg-black/90` or `bg-[#7657D9] text-white hover:bg-[#6848C9]` | Tactile, confident action buttons with pure white text. |
 
 ---
 
@@ -134,3 +139,24 @@ Meova uses a signature rounded streetwear aesthetic:
 - [ ] **Gigs Permanently Excluded:** Zero gigs references in feed, modal, or profile.
 - [ ] **Zero Text Wrapping on Mobile:** `whitespace-nowrap` on all interactive buttons.
 - [ ] **Build Verification:** `npm run build` compiles 100% clean with 0 errors.
+
+---
+
+## 9. 🛡️ MEOVA DESIGN PRINCIPLES (ANTI-VIBE-CODED SPECIFICATION)
+
+1. **Light Theme is the default experience.** Bright, spacious, and calm.
+2. **Purple is a controlled brand accent** occupying approximately 10–12% of the Light Theme. The majority remains clean neutral and crisp white (`bg-white`).
+3. **MEOVA Brand Purple is `#7657D9`** (Hover `#6848C9`, Pressed `#5B3FB3`, Soft Tint `#F1EEFB`, Accent Border `#D9D1F2`, Functional Shadow `rgba(118, 87, 217, 0.12)`).
+4. **Never touch or remove pure white (`#FFFFFF`)** for surfaces, cards, and text on purple buttons.
+5. **The interface must prioritize hierarchy, usability, and clarity over decoration.** No component should exist purely because it makes the interface look "cool."
+6. **Avoid recognizable AI-generated UI patterns:** No predictable "Navbar → giant centered headline → floating gradient blob → three rounded cards".
+7. **Avoid generic SaaS layouts and template compositions.**
+8. **Avoid excessive gradients, glassmorphism, glowing elements, and decorative blobs.** Gradients using purple hues and background blur cones are strictly forbidden.
+9. **Use typography, spacing, composition, and interaction quality to create personality.**
+10. **Transactional interfaces** such as booking and payment screens must feel especially trustworthy, functional, and calm.
+11. **Sparks should feel like a product currency**, not a gaming token: White/light surface panels + subtle purple border (`#D9D1F2`) + `#7657D9` accent typography. Never neon Sparks gradients or glowing coins.
+12. **Buttons:** Primary CTA is `#7657D9` with `#FFFFFF` text. Secondary buttons use neutral surfaces. Never make every button purple.
+13. **Every component must have a clear product purpose.** Consistency is more important than visual novelty.
+14. **Do not copy another product's visual identity.**
+15. **The final interface should feel intentionally designed, human-crafted, and production-grade.**
+

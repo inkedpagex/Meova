@@ -275,7 +275,7 @@ export default function AmbassadorLandingPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-white text-black font-inter selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+    <div className="min-h-screen bg-white text-black font-inter selection:bg-[#F1EEFB] selection:text-[#7657D9]">
       {/* ── Standalone Navigation Bar ───────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-black/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -330,7 +330,7 @@ export default function AmbassadorLandingPage() {
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.12] mb-6">
             Lead your campus.<br />
-            <span className="text-[#7C3AED]">Shape student life.</span>
+            <span className="text-[#7657D9]">Shape student life.</span>
           </h1>
 
           <p className="text-white/80 text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
@@ -366,7 +366,7 @@ export default function AmbassadorLandingPage() {
             <div className="flex flex-col sm:flex-row gap-3.5 justify-center items-center">
               <button
                 onClick={() => setShowForm(true)}
-                className="w-full sm:w-auto bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-8 py-3.5 rounded-full whitespace-nowrap flex-shrink-0 active:scale-95 transition-all shadow-lg shadow-[#7C3AED]/25 flex items-center justify-center gap-2 text-sm cursor-pointer"
+                className="w-full sm:w-auto bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white font-bold px-8 py-3.5 rounded-full whitespace-nowrap flex-shrink-0 active:scale-95 transition-all shadow-sm shadow-[#7657D9]/12 flex items-center justify-center gap-2 text-sm cursor-pointer"
               >
                 Apply for Your Campus <ArrowRight className="w-4 h-4" />
               </button>
@@ -544,7 +544,7 @@ export default function AmbassadorLandingPage() {
             <div className="pt-2">
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black px-8 py-3.5 rounded-full whitespace-nowrap flex-shrink-0 active:scale-95 transition-all shadow-md text-sm inline-flex items-center gap-2 cursor-pointer"
+                className="bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white font-bold px-8 py-3.5 rounded-full whitespace-nowrap flex-shrink-0 active:scale-95 transition-all shadow-sm shadow-[#7657D9]/12 text-sm inline-flex items-center gap-2 cursor-pointer"
               >
                 <span>Apply for Your Campus</span>
                 <ArrowRight className="w-4 h-4" />
@@ -896,7 +896,7 @@ export default function AmbassadorLandingPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-4 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-sm shadow-xl shadow-[#7C3AED]/25 active:scale-[0.98] transition-all whitespace-nowrap flex-shrink-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
+                className="w-full py-4 rounded-2xl bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white font-bold text-sm shadow-sm shadow-[#7657D9]/12 active:scale-[0.98] transition-all whitespace-nowrap flex-shrink-0 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
               >
                 {submitting ? (
                   <>

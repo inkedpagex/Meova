@@ -88,7 +88,7 @@ export default function BlogClient() {
     : POSTS.filter(p => p.tag === activeTag);
 
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#F1EEFB] selection:text-[#7657D9]">
       {/* ── Top Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-18 flex items-center justify-between gap-4">
@@ -141,7 +141,7 @@ export default function BlogClient() {
 
             <h1 className="text-3xl sm:text-5xl font-black text-black tracking-tight leading-[1.15]">
               Insights for Modern <br className="hidden sm:inline" />
-              <span className="text-[#7C3AED]">College Life.</span>
+              <span className="text-[#7657D9]">College Life.</span>
             </h1>
 
             <p className="text-sm sm:text-base text-black/70 font-medium max-w-lg mx-auto">
@@ -157,7 +157,7 @@ export default function BlogClient() {
                   onClick={() => setActiveTag(tag)}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                     activeTag === tag
-                      ? 'bg-[#7C3AED] text-white shadow-xs'
+                      ? 'bg-[#7657D9] text-white shadow-xs'
                       : 'bg-black/5 text-black/70 hover:bg-black/10 hover:text-black'
                   }`}
                 >
@@ -226,7 +226,7 @@ export default function BlogClient() {
             <div className="pt-2 flex items-center justify-center gap-3 flex-wrap">
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-xs sm:text-sm shadow-xl shadow-[#7C3AED]/30 whitespace-nowrap flex-shrink-0 transition-transform active:scale-95"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#7657D9] hover:bg-[#6848C9] active:bg-[#5B3FB3] text-white font-bold text-xs sm:text-sm shadow-sm shadow-[#7657D9]/12 whitespace-nowrap flex-shrink-0 transition-transform active:scale-95 cursor-pointer"
               >
                 <span>Create Free Student Account</span>
                 <ArrowRight size={15} />

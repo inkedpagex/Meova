@@ -10,17 +10,10 @@ export default async function sitemap() {
       priority: 1.0,
     },
     {
-      // GLA University specific landing page — highest priority for local SEO
-      url: `${baseUrl}/gla-university`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 1.0,
-    },
-    {
       url: `${baseUrl}/discover`,
       lastModified: now,
-      changeFrequency: 'hourly',
-      priority: 0.95,
+      changeFrequency: 'daily',
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/circles`,

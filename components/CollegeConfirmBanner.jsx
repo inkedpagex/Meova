@@ -76,7 +76,7 @@ export default function CollegeConfirmBanner({ userId, collegeConfirmed, current
   }));
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-[#7C3AED] text-white px-4 py-3 shadow-lg">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-[#7657D9] text-white px-4 py-3 shadow-lg">
       <div className="max-w-2xl mx-auto">
         {saved ? (
           <div className="flex items-center justify-center gap-2">
@@ -91,11 +91,11 @@ export default function CollegeConfirmBanner({ userId, collegeConfirmed, current
             </p>
             <button
               onClick={() => setShowSelect(true)}
-              className="text-sm font-bold bg-white text-[#7C3AED] px-3 py-1.5 rounded-full whitespace-nowrap flex-shrink-0 flex items-center gap-1"
+              className="text-sm font-bold bg-white text-[#7657D9] px-3 py-1.5 rounded-full whitespace-nowrap flex-shrink-0 flex items-center gap-1 cursor-pointer active:scale-95 transition-all"
             >
               Confirm <ChevronRight className="w-3.5 h-3.5" />
             </button>
-            <button onClick={dismiss} className="text-white/70 hover:text-white flex-shrink-0">
+            <button onClick={dismiss} className="text-white/70 hover:text-white flex-shrink-0 cursor-pointer">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -112,7 +112,7 @@ export default function CollegeConfirmBanner({ userId, collegeConfirmed, current
             <button
               onClick={handleSave}
               disabled={!selectedCollege || saving}
-              className="text-sm font-bold bg-white text-[#7C3AED] px-4 py-2 rounded-full whitespace-nowrap flex-shrink-0 disabled:opacity-50"
+              className="text-sm font-bold bg-white text-[#7657D9] px-4 py-2 rounded-full whitespace-nowrap flex-shrink-0 disabled:opacity-50 cursor-pointer active:scale-95 transition-all"
             >
               {saving ? 'Saving...' : 'Save'}
             </button>

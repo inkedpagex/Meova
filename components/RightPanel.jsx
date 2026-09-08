@@ -79,7 +79,7 @@ export default function RightPanel({ people = [], upcomingEvents = [] }) {
                 <h5 className="text-[13.5px] font-bold text-[var(--text-primary)] leading-snug">{evt.title}</h5>
                 <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)] font-medium">
                   <MapPin size={13} strokeWidth={1.5} className="text-[var(--text-secondary)] flex-shrink-0" />
-                  <span className="truncate">{evt.location || 'GLA Campus'}</span>
+                  <span className="truncate">{evt.location || 'Campus'}</span>
                 </div>
               </div>
             ))

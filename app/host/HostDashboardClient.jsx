@@ -264,7 +264,7 @@ export default function HostDashboardClient({
             onClick={() => handleTabChange('feed')}
             className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'feed'
-                ? 'bg-[var(--accent)] text-white shadow-sm shadow-purple-500/20'
+                ? 'bg-[var(--accent)] text-white shadow-sm shadow-[#7657D9]/12'
                 : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
@@ -277,7 +277,7 @@ export default function HostDashboardClient({
             onClick={() => handleTabChange('students')}
             className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'students'
-                ? 'bg-[var(--accent)] text-white shadow-sm shadow-purple-500/20'
+                ? 'bg-[var(--accent)] text-white shadow-sm shadow-[#7657D9]/12'
                 : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
@@ -290,7 +290,7 @@ export default function HostDashboardClient({
             onClick={() => handleTabChange('logs')}
             className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'logs'
-                ? 'bg-[var(--accent)] text-white shadow-sm shadow-purple-500/20'
+                ? 'bg-[var(--accent)] text-white shadow-sm shadow-[#7657D9]/12'
                 : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
@@ -303,7 +303,7 @@ export default function HostDashboardClient({
             onClick={() => handleTabChange('circles')}
             className={`flex items-center gap-2 px-4 py-2 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'circles'
-                ? 'bg-[var(--accent)] text-white shadow-sm shadow-purple-500/20'
+                ? 'bg-[var(--accent)] text-white shadow-sm shadow-[#7657D9]/12'
                 : 'text-[#78716C] hover:text-[#1C1917] hover:bg-white/80'
             }`}
           >
@@ -537,7 +537,7 @@ export default function HostDashboardClient({
               </p>
               <Link
                 href="/circles"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-[12px] bg-[var(--accent)] text-white text-xs font-bold shadow-md shadow-purple-500/20 hover:bg-[var(--accent-hover)] transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-[12px] bg-[var(--accent)] text-white text-xs font-bold shadow-sm shadow-[#7657D9]/12 hover:bg-[var(--accent-hover)] transition-colors"
               >
                 <Sparkles size={13} />
                 <span>+ Create Instant Circle</span>

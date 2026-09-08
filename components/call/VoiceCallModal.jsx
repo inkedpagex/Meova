@@ -1018,7 +1018,7 @@ export default function VoiceCallModal({
                 onClick={toggleSpeaker}
                 className={`w-12 h-12 sm:w-13 sm:h-13 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-90 shadow-md ${
                   audioOutput === 'speaker'
-                    ? 'bg-[#7C3AED] text-white ring-2 ring-[#7C3AED]/40 shadow-lg shadow-[#7C3AED]/30 border border-[#7C3AED]'
+                    ? 'bg-[#7657D9] text-white ring-2 ring-[#7657D9]/30 shadow-md shadow-[#7657D9]/12 border border-[#7657D9]'
                     : 'bg-white/10 hover:bg-white/20 text-white border border-white/15'
                 }`}
                 title={audioOutput === 'speaker' ? 'Loudspeaker' : 'Earpiece'}

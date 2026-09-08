@@ -190,7 +190,7 @@ export default function OnboardingClient({ initialName = '', initialPhoto = '' }
               </svg>
             </button>
           ) : (
-            <div className="w-7 h-7 rounded-xl bg-[var(--accent)] text-white flex items-center justify-center font-bold text-xs shadow-md shadow-purple-500/20">
+            <div className="w-7 h-7 rounded-xl bg-[var(--accent)] text-white flex items-center justify-center font-bold text-xs shadow-sm shadow-[#7657D9]/12">
               M
             </div>
           )}

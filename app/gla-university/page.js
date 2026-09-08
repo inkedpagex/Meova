@@ -1,8 +1,8 @@
 import { permanentRedirect } from 'next/navigation';
 
 export const metadata = {
-  title: 'Redirecting to GLA University Community | Meova',
-  robots: { index: false, follow: true },
+  title: 'Redirecting | Meova',
+  robots: { index: false, follow: false },
 };
 
 export default function GlaRedirectPage() {

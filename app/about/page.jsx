@@ -21,7 +21,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#7C3AED]/20 selection:text-[#7C3AED]">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-[#F1EEFB] selection:text-[#7657D9]">
       {/* ── Top Header ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -29,7 +29,7 @@ export default function AboutPage() {
             <img src="/logo.png" alt="Meova Logo" className="h-7 sm:h-8 w-auto object-contain" />
             <div className="flex flex-col">
               <span className="font-black text-lg tracking-tight text-black leading-none">Meova</span>
-              <span className="text-[10px] font-bold text-[#7C3AED] tracking-wider uppercase">About</span>
+              <span className="text-[10px] font-bold text-[#7657D9] tracking-wider uppercase">About</span>
             </div>
           </Link>
 
@@ -44,7 +44,7 @@ export default function AboutPage() {
 
             <Link
               href="/signup"
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#7C3AED] text-white text-xs font-bold hover:bg-[#6D28D9] transition-all whitespace-nowrap shadow-xs"
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#7657D9] text-white text-xs font-bold hover:bg-[#6848C9] active:bg-[#5B3FB3] transition-all whitespace-nowrap shadow-xs cursor-pointer"
             >
               <span>Join Your Campus</span>
               <ArrowRight size={13} />
@@ -56,7 +56,7 @@ export default function AboutPage() {
       {/* ── Hero Section ───────────────────────────────────────────── */}
       <main className="max-w-4xl mx-auto py-12 sm:py-16 px-4 sm:px-6 space-y-12">
         <div className="space-y-4 text-center sm:text-left">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#7C3AED]/10 text-[#7C3AED] text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F1EEFB] text-[#7657D9] border border-[#D9D1F2] text-xs font-bold uppercase tracking-wider">
             <Sparkles size={13} />
             <span>Our Mission &amp; Story</span>
           </div>
@@ -146,7 +146,7 @@ export default function AboutPage() {
 
             {/* Pillar 4 */}
             <div className="p-6 rounded-[26px] bg-white border border-black/10 shadow-xs space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-[#F1EEFB] text-[#7657D9] flex items-center justify-center">
                 <Lock size={20} />
               </div>
               <h3 className="text-base font-black text-black">4. Privacy &amp; Data Dignity</h3>

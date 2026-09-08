@@ -197,7 +197,7 @@ export default function ContactForm() {
                 maxLength={LIMITS.college}
                 value={formData.college}
                 onChange={handleChange}
-                placeholder="e.g. GLA University / DU / DTU"
+                placeholder="e.g. Delhi University / IIT / DTU"
                 className="w-full px-4 py-3 rounded-2xl bg-white border border-black/15 text-sm font-medium text-black focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all placeholder:text-black/30"
               />
             </div>
@@ -240,7 +240,7 @@ export default function ContactForm() {
           <button
             type="submit"
             disabled={status.state === 'submitting'}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#7C3AED] text-white text-xs font-bold hover:bg-[#6D28D9] transition-all whitespace-nowrap flex-shrink-0 shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#7657D9] text-white text-xs font-bold hover:bg-[#6848C9] active:bg-[#5B3FB3] transition-all whitespace-nowrap flex-shrink-0 shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
           >
             {status.state === 'submitting' ? (
               <>

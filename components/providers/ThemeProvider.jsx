@@ -5,11 +5,12 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 export const ACCENTS = [
   {
     id: 'purple',
-    name: 'Royal Purple',
-    hex: '#7C3AED',
-    hover: '#6D28D9',
-    tint10: 'rgba(124, 58, 237, 0.12)',
-    tint20: 'rgba(124, 58, 237, 0.22)',
+    name: 'Meova Purple',
+    hex: '#7657D9',
+    hover: '#6848C9',
+    pressed: '#5B3FB3',
+    tint10: '#F1EEFB',
+    tint20: '#D9D1F2',
     badge: 'Permanent',
   },
 ];

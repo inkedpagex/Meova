@@ -70,7 +70,7 @@ export default function AdminAmbassadorsPage() {
       case 'approved':
         return 'bg-emerald-50 text-emerald-800 border-emerald-200';
       case 'shortlisted':
-        return 'bg-purple-50 text-[#7C3AED] border-purple-200';
+        return 'bg-[#F1EEFB] text-[#7657D9] border-[#D9D1F2]';
       case 'rejected':
         return 'bg-rose-50 text-rose-800 border-rose-200';
       default:
@@ -110,7 +110,7 @@ export default function AdminAmbassadorsPage() {
             onClick={() => setFilter(f)}
             className={`px-4 py-2 rounded-full text-xs font-bold capitalize transition-all whitespace-nowrap flex-shrink-0 cursor-pointer ${
               filter === f
-                ? 'bg-[#7C3AED] text-white shadow-xs'
+                ? 'bg-[#7657D9] text-white shadow-xs'
                 : 'bg-white border border-black/10 text-black/70 hover:text-black hover:border-black/20'
             }`}
           >
@@ -137,7 +137,7 @@ export default function AdminAmbassadorsPage() {
       {/* Applications List */}
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-black/40 space-y-3">
-          <Loader2 size={32} className="animate-spin text-[#7C3AED]" />
+          <Loader2 size={32} className="animate-spin text-[#7657D9]" />
           <p className="text-xs font-bold uppercase tracking-wider">Loading applications...</p>
         </div>
       ) : applications.length === 0 ? (
@@ -265,7 +265,7 @@ export default function AdminAmbassadorsPage() {
                       type="button"
                       disabled={isProcessing}
                       onClick={() => handleAction(app.id, 'approve')}
-                      className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#7C3AED] text-white text-xs font-bold hover:bg-[#6D28D9] shadow-xs active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#7657D9] text-white text-xs font-bold hover:bg-[#6848C9] active:bg-[#5B3FB3] shadow-xs active:scale-95 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer disabled:opacity-50"
                     >
                       {isProcessing ? <Loader2 size={13} className="animate-spin" /> : <Check size={14} />}
                       <span>Approve Ambassador</span>

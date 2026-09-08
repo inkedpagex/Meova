@@ -66,12 +66,12 @@ export default function AuthForm({ defaultMode = 'login' }) {
   const rootHomeUrl = isProd ? 'https://meova.in' : `http://${cleanHost}`;
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] text-black font-sans selection:bg-[#7C3AED] selection:text-white flex flex-col justify-between p-4 sm:p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#FAFAF8] text-black font-sans selection:bg-[#7657D9] selection:text-white flex flex-col justify-between p-4 sm:p-6 relative overflow-hidden">
       
       {/* ── TOP MINIMAL BRAND HEADER ────────────────────────────────────────── */}
       <header className="w-full max-w-5xl mx-auto flex items-center justify-between py-2">
         <a href={rootHomeUrl} className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
-          <div className="w-9 h-9 rounded-2xl bg-[#7C3AED] p-1.5 shadow-xs flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-2xl bg-[#7657D9] p-1.5 shadow-xs flex items-center justify-center flex-shrink-0">
             <img 
               src="/logo.png" 
               alt="Meova" 
@@ -95,7 +95,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
         <div className="w-full bg-white rounded-[32px] border border-black/10 p-7 sm:p-9 shadow-xl flex flex-col items-center text-center">
           
           {/* Logo Badge */}
-          <div className="w-14 h-14 rounded-2xl bg-[#7C3AED] p-2.5 shadow-md flex items-center justify-center mb-5 flex-shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-[#7657D9] p-2.5 shadow-md flex items-center justify-center mb-5 flex-shrink-0">
             <img 
               src="/logo.png" 
               alt="Meova" 
@@ -156,7 +156,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
                 <button
                   type="button"
                   onClick={() => setMode('login')}
-                  className="font-bold text-[#7C3AED] hover:underline cursor-pointer"
+                  className="font-bold text-[#7657D9] hover:underline cursor-pointer"
                 >
                   Log in
                 </button>
@@ -167,7 +167,7 @@ export default function AuthForm({ defaultMode = 'login' }) {
                 <button
                   type="button"
                   onClick={() => setMode('signup')}
-                  className="font-bold text-[#7C3AED] hover:underline cursor-pointer"
+                  className="font-bold text-[#7657D9] hover:underline cursor-pointer"
                 >
                   Join free
                 </button>
@@ -184,15 +184,15 @@ export default function AuthForm({ defaultMode = 'login' }) {
           {/* Legal micro-copy */}
           <p className="text-[11px] leading-relaxed text-black/60 text-center mt-3 max-w-[320px]">
             By continuing, you accept our{' '}
-            <a href={`${rootHomeUrl}/terms`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#7C3AED] hover:underline">
+            <a href={`${rootHomeUrl}/terms`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#7657D9] hover:underline">
               Terms
             </a>
             ,{' '}
-            <a href={`${rootHomeUrl}/privacy`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#7C3AED] hover:underline">
+            <a href={`${rootHomeUrl}/privacy`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#7657D9] hover:underline">
               Privacy Policy
             </a>
             , and{' '}
-            <a href={`${rootHomeUrl}/community-guidelines`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#7C3AED] hover:underline">
+            <a href={`${rootHomeUrl}/community-guidelines`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#7657D9] hover:underline">
               Guidelines
             </a>
             .
