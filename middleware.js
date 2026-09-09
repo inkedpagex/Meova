@@ -111,6 +111,9 @@ export function middleware(request) {
     if (isAppPublic) return NextResponse.next();
 
     if (!hasAuthCookie) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
       // In production, redirect to root marketing login. In dev, keep on app.localhost to retain dev cookie scope.
       const targetBase = isProd ? rootBase : `http://${hostname}`;
       const loginUrl = new URL('/login', targetBase);
@@ -127,31 +130,7 @@ export function middleware(request) {
   const urlSource = request.nextUrl.searchParams.get('source');
   const isPWA = urlSource === 'pwa' || request.cookies.get('__meova_pwa')?.value === '1';
 
-  // If request is from installed PWA (source=pwa or __meova_pwa cookie):
-  // Keep execution on current domain so Chrome/Edge PWA stays 100% within scope
-  // and NEVER shows the out-of-scope URL bar!
-  if (isPWA) {
-    if (!hasAuthCookie && (pathname !== '/' && pathname !== '/login' && pathname !== '/signup' && !pathname.startsWith('/college/') && !pathname.startsWith('/ambassador'))) {
-      const loginUrl = new URL('/login', rootBase);
-      loginUrl.searchParams.set('redirect', pathname);
-      const res = NextResponse.redirect(loginUrl);
-      res.cookies.set('__meova_pwa', '1', { path: '/', sameSite: 'lax', maxAge: 31536000 });
-      return res;
-    }
-
-    const res = NextResponse.next();
-    if (urlSource === 'pwa' && request.cookies.get('__meova_pwa')?.value !== '1') {
-      res.cookies.set('__meova_pwa', '1', { path: '/', sameSite: 'lax', maxAge: 31536000 });
-    }
-    return res;
-  }
-
-  // In production (standard browser tab): if already authenticated and visiting root marketing or auth form, redirect to product app
-  if (isProd && hasAuthCookie && (pathname === '/' || pathname === '/login' || pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/', appBase));
-  }
-
-  // Whitelist all public routes, SEO files, static assets, and public college/ambassador paths
+  // Whitelist all public routes, SEO files, static assets, and public APIs
   const isPublic =
     pathname === '/' ||
     pathname === '/ambassador' ||
@@ -192,11 +171,49 @@ export function middleware(request) {
     pathname === '/manifest.json' ||
     pathname === '/sw.js';
 
-  if (isPublic) return NextResponse.next();
+  // 1. Public routes & assets (always pass through)
+  if (isPublic) {
+    // In standard production browser (non-PWA): authenticated users visiting marketing/auth form redirect to app
+    if (!isPWA && isProd && hasAuthCookie && (pathname === '/' || pathname === '/login' || pathname === '/signup')) {
+      return NextResponse.redirect(new URL('/', appBase));
+    }
 
-  // Any other protected route hit directly on root domain:
-  // In production: redirect authenticated user to app.meova.in
-  // In dev: keep on localhost so session cookies are preserved without browser cross-subdomain loss
+    const res = NextResponse.next();
+    if (urlSource === 'pwa' && request.cookies.get('__meova_pwa')?.value !== '1') {
+      res.cookies.set('__meova_pwa', '1', { path: '/', sameSite: 'lax', maxAge: 31536000 });
+    }
+    return res;
+  }
+
+  // 2. Protected API routes: NEVER redirect to an HTML login page
+  if (pathname.startsWith('/api/')) {
+    if (!hasAuthCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.next();
+  }
+
+  // 3. Protected pages in installed PWA (source=pwa or __meova_pwa cookie):
+  // Keep execution on current domain so Chrome/Edge PWA stays 100% within scope
+  // and NEVER shows the out-of-scope URL bar!
+  if (isPWA) {
+    if (!hasAuthCookie) {
+      const loginUrl = new URL('/login', rootBase);
+      loginUrl.searchParams.set('redirect', pathname);
+      const res = NextResponse.redirect(loginUrl);
+      res.cookies.set('__meova_pwa', '1', { path: '/', sameSite: 'lax', maxAge: 31536000 });
+      return res;
+    }
+
+    const res = NextResponse.next();
+    if (urlSource === 'pwa' && request.cookies.get('__meova_pwa')?.value !== '1') {
+      res.cookies.set('__meova_pwa', '1', { path: '/', sameSite: 'lax', maxAge: 31536000 });
+    }
+    return res;
+  }
+
+  // 4. Standard browser tab on root domain:
+  // Redirect authenticated user to app subdomain in prod
   if (hasAuthCookie) {
     if (isProd) {
       return NextResponse.redirect(new URL(pathname + request.nextUrl.search, appBase));
@@ -204,10 +221,11 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  // Otherwise redirect to login on root
+  // Otherwise redirect unauthenticated visitor to login on root
   const loginUrl = new URL('/login', rootBase);
   loginUrl.searchParams.set('redirect', pathname);
   return NextResponse.redirect(loginUrl);
+
 }
 
 export const config = {

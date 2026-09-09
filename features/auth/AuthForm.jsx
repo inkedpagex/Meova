@@ -77,19 +77,45 @@ export default function AuthForm({ defaultMode = 'login' }) {
       {/* ── Seamless White Transition Screen on Login ── */}
       {isLoggingIn && (
         <div className="fixed inset-0 z-[999999] bg-white flex items-center justify-center pointer-events-auto">
-          <img
-            src="/logo.png"
-            alt="Meova"
-            width={76}
-            height={50}
-            style={{
-              width: '76px',
-              height: 'auto',
-              maxHeight: '52px',
-              objectFit: 'contain',
-              userSelect: 'none',
-            }}
-          />
+          <div className="flex flex-col items-center justify-center gap-4">
+            <img
+              src="/logo.png"
+              alt="Meova"
+              width={76}
+              height={50}
+              style={{
+                width: '76px',
+                height: 'auto',
+                maxHeight: '52px',
+                objectFit: 'contain',
+                userSelect: 'none',
+                animation: 'meovaLogoBreathe 1.1s ease-in-out infinite',
+              }}
+            />
+            {/* Minimal Looping Hairline Progress Indicator */}
+            <div
+              style={{
+                width: '44px',
+                height: '3px',
+                backgroundColor: '#F1EEFB',
+                borderRadius: '9999px',
+                overflow: 'hidden',
+                position: 'relative',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  bottom: 0,
+                  width: '50%',
+                  backgroundColor: '#7657D9',
+                  borderRadius: '9999px',
+                  animation: 'meovaTrackShimmer 0.85s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+                }}
+              />
+            </div>
+          </div>
         </div>
       )}
       

@@ -67,18 +67,18 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
     <button
       type="button"
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all cursor-pointer border-b border-[var(--border-hairline)] ${
+      className={`w-full flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-left transition-all duration-150 cursor-pointer relative group ${
         isActive 
-          ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] font-bold' 
-          : 'hover:bg-[var(--bg-base)] bg-[var(--bg-surface)]'
+          ? 'bg-[#7657D9]/10 text-black border border-[#7657D9]/25 shadow-2xs' 
+          : 'hover:bg-black/[0.035] text-black border border-transparent'
       }`}
     >
       <div className="relative flex-shrink-0">
-        <div className="w-12 h-12 rounded-full overflow-hidden p-[1px] ring-1 ring-white/10">
+        <div className="w-12 h-12 rounded-full overflow-hidden border border-black/10 bg-[#FAFAF8] shadow-2xs">
           <img
             src={avatarUrl(otherId, otherName, otherPhoto)}
             alt=""
-            className="w-full h-full rounded-full object-cover bg-[var(--bg-surface)]"
+            className="w-full h-full object-cover"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = getCartoonAvatar(otherName || otherId || 'user');
@@ -86,27 +86,27 @@ function ChatListItem({ chat, currentUid, isActive, onClick, directoryUser }) {
           />
         </div>
         {isUserOnline(otherId) && (
-          <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[var(--bg-surface)] shadow-xs" />
+          <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-white shadow-xs" />
         )}
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-0.5">
-          <span className={`text-[15px] truncate ${unread > 0 ? 'font-bold text-[var(--text-primary)]' : 'font-semibold text-[var(--text-primary)]'}`}>
+        <div className="flex items-center justify-between gap-1 mb-0.5">
+          <span className={`text-[14.5px] truncate tracking-tight ${unread > 0 ? 'font-extrabold text-black' : 'font-bold text-black/90'}`}>
             {otherName}
           </span>
-          <span className="text-[12px] text-[var(--text-muted)] font-medium flex-shrink-0 ml-2">
+          <span className={`text-[11.5px] font-semibold flex-shrink-0 ml-2 ${unread > 0 ? 'text-[#7657D9]' : 'text-black/40'}`}>
             {timeAgo(lastMessageAt)}
           </span>
         </div>
-        <div className="flex items-center justify-between gap-1">
-          <p className={`text-[14px] truncate ${unread > 0 ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-secondary)] font-normal'}`}>
-            {isMe && <span className="text-[var(--text-muted)]">You: </span>}
+        <div className="flex items-center justify-between gap-1.5">
+          <p className={`text-[13px] truncate leading-snug ${unread > 0 ? 'text-black font-semibold' : 'text-black/60 font-normal'}`}>
+            {isMe && <span className="text-black/40 font-medium">You: </span>}
             {lastMessage || 'Sent a message'}
           </p>
           {unread > 0 && (
-            <span className="w-5 h-5 rounded-full bg-[var(--accent)] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 shadow-xs">
-              {unread > 9 ? '9+' : unread}
+            <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-[#7657D9] text-white text-[10.5px] font-extrabold flex items-center justify-center flex-shrink-0 shadow-xs">
+              {unread > 99 ? '99+' : unread}
             </span>
           )}
         </div>
@@ -121,10 +121,10 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
   return (
     <div 
       onClick={() => onSelect(student.id)}
-      className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-[var(--bg-surface)] transition-colors cursor-pointer group"
+      className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl hover:bg-black/[0.035] transition-colors cursor-pointer group"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="w-12 h-12 rounded-full overflow-hidden border border-[var(--border-hairline)] flex-shrink-0 bg-[#FAFAF8] shadow-xs">
+        <div className="w-11 h-11 rounded-full overflow-hidden border border-black/10 flex-shrink-0 bg-[#FAFAF8] shadow-2xs">
           <img 
             src={avatarUrl(student.id, student.full_name, student.photo_url)} 
             alt="" 
@@ -136,17 +136,17 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-black transition-colors">
+          <p className="text-[13.5px] font-bold text-black truncate group-hover:text-[#7657D9] transition-colors">
             {student.full_name || 'Student'}
           </p>
-          <p className="text-xs font-semibold text-[var(--text-muted)] truncate mt-0.5">
+          <p className="text-[11.5px] font-medium text-black/50 truncate mt-0.5">
             @{student.username || 'campus_student'} · {student.branch || 'Campus'}
           </p>
         </div>
       </div>
       <button 
         type="button"
-        className="px-4 py-1.5 rounded-xl bg-[var(--accent)] text-white text-xs font-bold hover:bg-[var(--accent-hover)] active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs"
+        className="px-3.5 py-1.5 rounded-xl bg-black hover:bg-black/80 text-white text-[11px] font-bold active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-xs whitespace-nowrap"
       >
         Chat
       </button>
@@ -728,41 +728,45 @@ function MessagesContent() {
           : 'h-[calc(100dvh-70px)] md:h-[calc(100vh-32px)] rounded-none md:rounded-[28px] border-0 md:border flex-row relative'
       }`}
     >
-      {/* LEFT SIDEBAR (320px per Blueprint Section 4) */}
+      {/* LEFT SIDEBAR (340px on md, 360px on lg) */}
       <div className={`
-        flex flex-col w-full md:w-[320px] lg:w-[320px] md:flex-shrink-0
-        border-r border-[var(--border-hairline)] bg-[var(--bg-surface)]
+        flex flex-col w-full md:w-[340px] lg:w-[360px] md:flex-shrink-0
+        border-r border-black/10 bg-white
         ${!showList ? 'hidden md:flex' : 'flex'}
       `}>
-        <div className="px-4 py-3.5 flex items-center justify-between border-b border-[var(--border-hairline)]">
-          <span className="font-bold text-lg text-[var(--text-primary)] tracking-tight">
-            @{currentUser?.username || currentUser?.full_name?.toLowerCase().replace(/\s+/g, '') || 'messages'}
-          </span>
+        {/* Header Bar */}
+        <div className="px-4 py-3.5 flex items-center justify-between border-b border-black/5 bg-white">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="font-extrabold text-[19px] text-black tracking-tight truncate">
+              @{currentUser?.username || currentUser?.full_name?.toLowerCase().replace(/\s+/g, '') || 'messages'}
+            </span>
+          </div>
           <button
             type="button"
             onClick={() => setShowNewMessageModal(true)}
-            className="w-9 h-9 rounded-full bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] flex items-center justify-center hover:bg-black/5 active:scale-95 transition-all cursor-pointer shadow-2xs"
+            className="w-9 h-9 rounded-2xl bg-black/[0.04] hover:bg-[#F1EEFB] text-black hover:text-[#7657D9] border border-black/8 hover:border-[#7657D9]/25 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-2xs flex-shrink-0"
             title="New Message"
           >
-            <SquarePen size={17} />
+            <SquarePen size={16} />
           </button>
         </div>
 
-        <div className="p-3 border-b border-[var(--border-hairline)]">
-          <div className="flex items-center gap-2 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-xl px-3 py-2">
-            <Search className="w-4 h-4 text-[var(--text-muted)]" />
+        {/* Search Bar */}
+        <div className="p-3 border-b border-black/5">
+          <div className="flex items-center gap-2.5 bg-black/[0.03] hover:bg-black/[0.05] border border-black/8 rounded-2xl px-3.5 py-2.5 transition-all focus-within:bg-white focus-within:border-[#7657D9] focus-within:ring-2 focus-within:ring-[#7657D9]/15">
+            <Search className="w-4 h-4 text-black/40 flex-shrink-0" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search chats or peers..."
-              className="w-full text-[13px] bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none font-medium transition-all"
+              className="w-full text-[13.5px] bg-transparent text-black placeholder:text-black/40 focus:outline-none font-medium"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="w-4 h-4 rounded-full bg-black/10 hover:bg-black/20 text-black/60 flex items-center justify-center text-[10px] font-bold transition-colors"
               >
                 ✕
               </button>
@@ -770,17 +774,18 @@ function MessagesContent() {
           </div>
         </div>
 
-        <div suppressHydrationWarning className="flex-1 overflow-y-auto no-scrollbar py-0 px-0">
+        {/* Chats & Suggested Students List */}
+        <div suppressHydrationWarning className="flex-1 overflow-y-auto no-scrollbar p-2 space-y-1">
           {loadingChats ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-6 h-6 animate-spin text-[var(--text-muted)]" />
+              <Loader2 className="w-6 h-6 animate-spin text-black/40" />
             </div>
           ) : (
             <>
               {filteredChats.length > 0 && (
                 <div>
-                  {q && <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider px-4 py-1">Conversations</p>}
-                  <div>
+                  {q && <p className="text-[10px] font-bold text-black/40 uppercase tracking-wider px-3 py-1.5">Conversations</p>}
+                  <div className="space-y-1">
                     {filteredChats.map(chat => (
                       <ChatListItem
                         key={chat.id}
@@ -796,14 +801,14 @@ function MessagesContent() {
               )}
 
               {(q || chats.length === 0) && filteredSuggested.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between px-4 py-1.5 mt-2">
-                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                <div className="pt-2">
+                  <div className="flex items-center justify-between px-3 py-1.5 mb-1">
+                    <span className="text-[10px] font-bold text-black/40 uppercase tracking-wider">
                       {q ? 'Campus Directory' : 'Suggested for you'}
                     </span>
-                    {!q && <Link href="/discover" className="text-[11px] font-bold text-[var(--accent)] hover:underline">See all</Link>}
+                    {!q && <Link href="/discover" className="text-[11px] font-bold text-[#7657D9] hover:underline">See all</Link>}
                   </div>
-                  <div>
+                  <div className="space-y-1">
                     {filteredSuggested.slice(0, q ? 12 : 6).map(student => (
                       <SuggestedStudentItem
                         key={student.id}

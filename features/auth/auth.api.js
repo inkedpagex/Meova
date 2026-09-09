@@ -115,6 +115,13 @@ export async function logInWithGoogle(idToken = null, accessToken = null, termsA
       body: JSON.stringify({ accessToken, idToken, termsAccepted, termsVersion })
     });
 
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const text = await res.text().catch(() => '');
+      console.error(`Non-JSON response from /api/auth/google (status ${res.status}):`, text.slice(0, 300));
+      throw new Error('Authentication service received an unexpected response. Please refresh and try again.');
+    }
+
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to authenticate with backend');
 

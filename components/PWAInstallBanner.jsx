@@ -22,6 +22,15 @@ export default function PWAInstallBanner() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    // Strictly show ONLY on app.meova.in (or app.localhost in local development)
+    const hostname = window.location.hostname;
+    const isAppHost = hostname === 'app.meova.in' || hostname.startsWith('app.');
+    if (!isAppHost) return;
+
+    // Do not show on auth pages
+    const pathname = window.location.pathname;
+    if (pathname === '/login' || pathname === '/signup') return;
+
     const standalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true;
@@ -29,6 +38,7 @@ export default function PWAInstallBanner() {
     if (standalone) return;
 
     if (localStorage.getItem(DISMISSED_KEY) === '1') return;
+
 
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     if (isIOS) {
@@ -143,7 +153,7 @@ export default function PWAInstallBanner() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={handleInstall}
-            className="flex items-center gap-1.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-[11px] uppercase tracking-wider px-3.5 py-2 rounded-xl active:scale-95 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-[11px] uppercase tracking-wider px-3.5 py-2 rounded-xl active:scale-95 transition-all cursor-pointer whitespace-nowrap flex-shrink-0"
           >
             <Download size={12} />
             Install

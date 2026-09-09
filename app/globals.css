@@ -544,6 +544,7 @@ body {
   box-shadow: 0 2px 6px rgba(118, 87, 217, 0.18) !important;
 }
 
+
 /* ── Instant Pure White Opening Screen Animation (Zero DOM Mutation / No removeChild) ── */
 @keyframes meovaSplashFadeOut {
   0% {
@@ -554,5 +555,31 @@ body {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+  }
+}
+
+/* ── Minimal Brand Loading Animation (Looping) ── */
+@keyframes meovaLogoBreathe {
+  0%, 100% {
+    transform: scale(0.98);
+    opacity: 0.90;
+    filter: drop-shadow(0 2px 6px rgba(118, 87, 217, 0.12));
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+    filter: drop-shadow(0 6px 18px rgba(118, 87, 217, 0.32));
+  }
+}
+
+@keyframes meovaTrackShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(40%);
+  }
+  100% {
+    transform: translateX(200%);
   }
 }

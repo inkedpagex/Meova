@@ -152,7 +152,8 @@ export default function Sidebar({ user: propUser }) {
 
   // Notification Realtime Channel & Initial Fetch
   const fetchApiCount = async () => {
-    if (!user?.id) return;
+    const currentId = user?.id || user?.uid;
+    if (!currentId) return;
     try {
       const res = await fetch('/api/notifications');
       if (!res.ok) return;
@@ -164,19 +165,23 @@ export default function Sidebar({ user: propUser }) {
   };
 
   useEffect(() => {
-    if (!user?.id || !supabase) return;
+    const currentId = user?.id || user?.uid;
+    if (!currentId || !supabase) return;
 
     fetchApiCount();
 
     const channel = supabase
-      .channel(`sidebar-notifications-${user.id}`)
+      .channel(`sidebar-notifications-${currentId}`)
+      .on('broadcast', { event: 'new-notification' }, () => {
+        fetchApiCount();
+      })
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`,
+          filter: `user_id=eq.${currentId}`,
         },
         () => {
           fetchApiCount();
@@ -184,23 +189,30 @@ export default function Sidebar({ user: propUser }) {
       )
       .subscribe();
 
+    const interval = setInterval(() => {
+      fetchApiCount();
+    }, 15000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(interval);
     };
-  }, [user?.id]);
+  }, [user?.id, user?.uid]);
 
   useEffect(() => {
-    if (isOnNotifPage && unreadCount > 0 && user?.id) {
+    const currentId = user?.id || user?.uid;
+    if (isOnNotifPage && unreadCount > 0 && currentId) {
       fetch('/api/notifications', { method: 'PATCH' })
         .then(() => setUnreadCount(0))
         .catch(() => {});
     }
   }, [isOnNotifPage]);
 
-  // ── Unread Messages listener via Supabase Realtime ──────────────────────────
+  // ── Unread Messages listener via Realtime Broadcast & Polling ───────────────
   const pollUnread = async () => {
-    if (!user?.id) return;
-    const isOnMessagesPage = pathname === '/messages';
+    const currentId = user?.id || user?.uid;
+    if (!currentId) return;
+    const isOnMessagesPage = pathname === '/messages' || pathname.startsWith('/messages/');
     try {
       const res = await fetch('/api/chats');
       if (!res.ok) return;
@@ -208,7 +220,8 @@ export default function Sidebar({ user: propUser }) {
       let total = 0;
       (data.chats || []).forEach(c => {
         const counts = c.unread_count || c.unreadCount || {};
-        total += (counts[user.id] || 0);
+        const countForUser = counts[currentId] ?? counts[user.id] ?? counts[user.uid] ?? 0;
+        total += Number(countForUser) || 0;
       });
       setUnreadMsgCount(isOnMessagesPage ? 0 : total);
       prevMsgCountRef.current = total;
@@ -216,12 +229,20 @@ export default function Sidebar({ user: propUser }) {
   };
 
   useEffect(() => {
-    if (!user?.id || !supabase) return;
+    const currentId = user?.id || user?.uid;
+    if (!currentId || !supabase) return;
 
     pollUnread();
 
     const channel = supabase
-      .channel(`sidebar-chats-${user.id}`)
+      .channel(`sidebar-chats-${currentId}`)
+      .on('broadcast', { event: 'new-notification' }, () => {
+        pollUnread();
+        fetchApiCount();
+      })
+      .on('broadcast', { event: 'chat-updated' }, () => {
+        pollUnread();
+      })
       .on(
         'postgres_changes',
         {
@@ -235,10 +256,17 @@ export default function Sidebar({ user: propUser }) {
       )
       .subscribe();
 
+    // 10s polling fallback guarantees message dot updates even if socket drops
+    const interval = setInterval(() => {
+      pollUnread();
+    }, 10000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(interval);
     };
-  }, [user?.id, pathname]);
+  }, [user?.id, user?.uid, pathname]);
+
 
   // ── Pending Bookings listener ───────────────────────────────────────────────
   useEffect(() => {

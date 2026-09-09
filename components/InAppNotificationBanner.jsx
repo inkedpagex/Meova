@@ -137,17 +137,37 @@ export default function InAppNotificationBanner() {
   };
 
   useEffect(() => {
-    if (!user?.id || !supabase) return;
+    const currentId = user?.id || user?.uid;
+    if (!currentId || !supabase) return;
 
     const channel = supabase
-      .channel(`in-app-notifs-${user.id}`)
+      .channel(`user-realtime-${currentId}`)
+      .on('broadcast', { event: 'new-notification' }, ({ payload }) => {
+        if (!payload) return;
+        if (timerRef.current) clearTimeout(timerRef.current);
+
+        setIsExiting(false);
+        setActiveNotif({
+          id: payload.id || `notif_${Date.now()}`,
+          title: payload.title || 'New Notification',
+          message: payload.message || '',
+          type: payload.type || 'default',
+          senderName: payload.senderName || payload.title,
+          senderPhoto: payload.senderPhoto,
+          url: payload.url || '/messages',
+        });
+
+        timerRef.current = setTimeout(() => {
+          dismiss();
+        }, 6000);
+      })
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`,
+          filter: `user_id=eq.${currentId}`,
         },
         (payload) => {
           const newRow = payload.new;
@@ -163,6 +183,7 @@ export default function InAppNotificationBanner() {
             type: newRow.type || 'default',
             senderName: newRow.sender_name,
             senderPhoto: newRow.sender_photo,
+            url: newRow.url,
           });
 
           timerRef.current = setTimeout(() => {
@@ -176,7 +197,8 @@ export default function InAppNotificationBanner() {
       supabase.removeChannel(channel);
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [user?.id]);
+  }, [user?.id, user?.uid]);
+
 
   if (!activeNotif) return null;
 

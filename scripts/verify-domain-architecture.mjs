@@ -147,18 +147,33 @@ async function runTests() {
 
     // 5. Root domain
     const hasAuth = Boolean(cookies['__Meova_session'] || cookies['sb-access-token']);
-    if (hasAuth && (pathname === '/' || pathname === '/login' || pathname === '/signup')) {
-      return { action: 'redirect', status: 307, url: `${appBase}/` };
-    }
+    const isPWA = Boolean(cookies['__meova_pwa'] === '1' || pathname.includes('source=pwa'));
 
     const isPublic =
       pathname === '/' ||
       pathname === '/ambassador' ||
       pathname === '/login' ||
       pathname === '/signup' ||
+      pathname.startsWith('/api/auth') ||
+      pathname.startsWith('/api/health') ||
       pathname.startsWith('/college/');
 
-    if (isPublic) return { action: 'next' };
+    if (isPublic) {
+      if (!isPWA && hasAuth && (pathname === '/' || pathname === '/login' || pathname === '/signup')) {
+        return { action: 'redirect', status: 307, url: `${appBase}/` };
+      }
+      return { action: 'next' };
+    }
+
+    if (pathname.startsWith('/api/')) {
+      if (!hasAuth) return { action: 'json_401' };
+      return { action: 'next' };
+    }
+
+    if (isPWA) {
+      if (!hasAuth) return { action: 'redirect', status: 307, url: `${rootBase}/login?redirect=${pathname}` };
+      return { action: 'next' };
+    }
 
     if (hasAuth) {
       return { action: 'redirect', status: 307, url: `${appBase}${pathname}` };
@@ -206,6 +221,19 @@ async function runTests() {
   // Case 10: ambassador.localhost redirects (308) to root /ambassador
   const r10 = simulateRouting('ambassador.localhost:3000', '/');
   assert(r10.action === 'redirect' && r10.status === 308 && r10.url.includes('/ambassador'), 'ambassador.localhost redirects (308) to meova.in/ambassador', `Target: ${r10.url}`);
+
+  // Case 11: PWA client calls /api/auth/google -> PASSES THROUGH without redirect to /login HTML
+  const r11 = simulateRouting('localhost:3000', '/api/auth/google', { '__meova_pwa': '1' });
+  assert(r11.action === 'next', 'PWA calling /api/auth/google passes through (never redirected to HTML /login)', 'Action: next');
+
+  // Case 12: Authenticated PWA client on root / -> PASSES THROUGH (stays in PWA scope, no app subdomain jump)
+  const r12 = simulateRouting('localhost:3000', '/', { '__meova_pwa': '1', '__Meova_session': 'token123' });
+  assert(r12.action === 'next', 'Authenticated PWA client on root / stays in PWA scope (no URL bar jump)', 'Action: next');
+
+  // Case 13: Unauthenticated request to protected /api/posts returns JSON 401 (not HTML redirect)
+  const r13 = simulateRouting('localhost:3000', '/api/posts');
+  assert(r13.action === 'json_401', 'Unauthenticated API call returns JSON 401 (never redirects to HTML /login)', 'Action: json_401');
+
 
   console.log('\n====================================================');
   console.log(`🎉 ALL TESTS COMPLETE: ${passedTests}/${totalTests} PASSED (100%)`);

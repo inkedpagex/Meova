@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Settings, ArrowLeft, Share2, Zap, Check, Radio, ShieldAlert, ShieldCheck, Crown, Award,
   Edit3, Users, Calendar, Tag, ChevronRight, MapPin, Bell, Camera, X, Briefcase, Coffee, QrCode, ExternalLink, Phone, CheckCircle2, Loader2, Download,
-  Trash2, Heart, Plus, Palette, LayoutGrid
+  Trash2, Heart, Plus, Palette, LayoutGrid, Send
 } from '@/lib/icons';
 import { useTheme } from '../../components/providers/ThemeProvider';
 import { useUserContext } from '../../components/providers/UserProvider';
@@ -202,6 +202,77 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
       }
     } catch (err) {
       console.warn('Notification permission error:', err);
+    }
+  };
+
+  const [isTestingNotif, setIsTestingNotif] = useState(false);
+
+  const handleTestNotification = async () => {
+    setIsTestingNotif(true);
+    try {
+      // 1. Trigger non-blocking native browser notification if granted
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        if (Notification.permission === 'default') {
+          try {
+            const perm = await Promise.race([
+              Notification.requestPermission(),
+              new Promise((resolve) => setTimeout(() => resolve('denied'), 2500)),
+            ]);
+            setNotifStatus(perm);
+          } catch {
+            // Ignore permission request error
+          }
+        }
+
+        if (Notification.permission === 'granted') {
+          try {
+            new Notification('Meova Test Notification', {
+              body: 'Your device push notifications are working perfectly!',
+              icon: '/icon.png',
+              tag: 'meova-test-alert',
+            });
+          } catch {
+            // Mobile Chrome or environment where new Notification throws: attempt via SW if available
+            try {
+              if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                  type: 'SHOW_NOTIFICATION',
+                  title: 'Meova Test Notification',
+                  body: 'Your device push notifications are working perfectly!',
+                });
+              }
+            } catch {}
+          }
+        }
+      }
+
+      // 2. Dispatch full live backend notification pipeline with strict 5s timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const res = await fetch('/api/notifications/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'system' }),
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeoutId));
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        toast.success('Test notification sent! Check your alerts.');
+      } else {
+        toast.error(data.error || 'Failed to dispatch test notification.');
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        toast.error('Test notification request timed out.');
+      } else {
+        console.error('Test notification error:', err);
+        toast.error('Network error while testing notifications.');
+      }
+    } finally {
+      setIsTestingNotif(false);
     }
   };
 
@@ -757,15 +828,49 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                         <p className="text-[10px] text-[#78716C] font-medium">Get chat and booking alerts</p>
                       </div>
                     </div>
-                    {notifStatus === 'granted' ? (
-                      <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100">
-                        <Check size={12} /> Enabled
-                      </span>
-                    ) : notifStatus === 'denied' ? (
-                      <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">Denied</span>
-                    ) : (
-                      <button onClick={requestNotifications} className="text-[10px] font-bold text-white bg-black hover:bg-black/80 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95">Enable</button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleTestNotification}
+                        disabled={isTestingNotif}
+                        className="text-[10px] font-bold text-black hover:text-[#7657D9] bg-black/[0.04] hover:bg-[#F1EEFB] border border-black/10 hover:border-[#7657D9]/25 px-2.5 py-1.5 rounded-lg uppercase tracking-wider transition-all active:scale-95 flex items-center gap-1 cursor-pointer whitespace-nowrap shadow-2xs"
+                        title="Send a live test notification to verify this device"
+                      >
+                        {isTestingNotif ? (
+                          <>
+                            <Loader2 size={11} className="animate-spin" />
+                            <span>Testing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send size={10} />
+                            <span>Test</span>
+                          </>
+                        )}
+                      </button>
+
+                      {notifStatus === 'granted' ? (
+                        <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100">
+                          <Check size={12} /> Enabled
+                        </span>
+                      ) : notifStatus === 'denied' ? (
+                        <button
+                          type="button"
+                          onClick={requestNotifications}
+                          className="text-[10px] font-bold text-rose-500 uppercase tracking-wider hover:underline cursor-pointer"
+                        >
+                          Denied
+                        </button>
+                      ) : (
+                        <button 
+                          type="button"
+                          onClick={requestNotifications} 
+                          className="text-[10px] font-bold text-white bg-black hover:bg-black/80 px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors active:scale-95 whitespace-nowrap cursor-pointer shadow-xs"
+                        >
+                          Enable
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Camera */}

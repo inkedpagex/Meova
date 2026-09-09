@@ -46,6 +46,8 @@ export function useAuth() {
       let errMsg = err.message || 'Google login failed';
       if (err.code === 'auth/operation-not-allowed') {
         errMsg = "Google Sign-In is not enabled. Go to Firebase Console → Authentication → Sign-in Method and enable Google.";
+      } else if (errMsg.includes('is not valid JSON') || errMsg.includes('Unexpected token')) {
+        errMsg = "Unable to connect to authentication server. Please refresh and try again.";
       }
       setError(errMsg);
       return { success: false, error: { message: errMsg } };

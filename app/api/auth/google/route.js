@@ -7,6 +7,9 @@ import { rateLimit, getClientIp } from '@/lib/rateLimit';
 const SESSION_COOKIE_NAME = '__Meova_session';
 const SESSION_DURATION_MS = 60 * 60 * 24 * 5 * 1000; // 5 days
 
+export const dynamic = 'force-dynamic';
+
+
 export async function POST(request) {
   try {
     const ip = getClientIp(request);

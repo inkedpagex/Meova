@@ -255,7 +255,28 @@ export async function POST(request, { params }) {
       const senderName = user.full_name || user.email?.split('@')[0] || 'Someone';
       const senderPhoto = user.photo_url || '';
       const preview = text.trim().length > 60 ? text.trim().slice(0, 60) + '...' : text.trim();
-      
+
+      // 1. Broadcast to active chat room for instant real-time message delivery
+      try {
+        const chatRoomChan = supabaseAdmin.channel(`chat-messages-${chatId}`);
+        await chatRoomChan.send({
+          type: 'broadcast',
+          event: 'new-message',
+          payload: {
+            id: msgRes.data?.id || `msg_${Date.now()}`,
+            senderId: user.uid,
+            text: text.trim(),
+            status: 'sent',
+            timestamp: Date.now(),
+            created_at: nowIso,
+          },
+        });
+        supabaseAdmin.removeChannel(chatRoomChan);
+      } catch (chatBcErr) {
+        console.warn('[POST /api/chats/[id]/messages room broadcast error]', chatBcErr.message);
+      }
+
+      // 2. Dispatch in-app notification banner & push to recipient
       sendPush(otherId, {
         title: `${senderName}`,
         body: preview,

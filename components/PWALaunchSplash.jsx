@@ -34,7 +34,7 @@ export default function PWALaunchSplash() {
 
         const timer = setTimeout(() => {
           setVisible(false);
-        }, 750);
+        }, 550);
 
         return () => clearTimeout(timer);
       }
@@ -57,22 +57,56 @@ export default function PWALaunchSplash() {
         alignItems: 'center',
         justifyContent: 'center',
         pointerEvents: 'none',
-        animation: 'meovaSplashFadeOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards',
+        animation: 'meovaSplashFadeOut 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards',
       }}
     >
-      <img
-        src="/logo.png"
-        alt="Meova"
-        width={76}
-        height={50}
+      <div
         style={{
-          width: '76px',
-          height: 'auto',
-          maxHeight: '52px',
-          objectFit: 'contain',
-          userSelect: 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '16px',
         }}
-      />
+      >
+        <img
+          src="/logo.png"
+          alt="Meova"
+          width={76}
+          height={50}
+          style={{
+            width: '76px',
+            height: 'auto',
+            maxHeight: '52px',
+            objectFit: 'contain',
+            userSelect: 'none',
+            animation: 'meovaLogoBreathe 1.1s ease-in-out infinite',
+          }}
+        />
+        {/* Minimal Looping Hairline Progress Indicator */}
+        <div
+          style={{
+            width: '44px',
+            height: '3px',
+            backgroundColor: '#F1EEFB',
+            borderRadius: '9999px',
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              width: '50%',
+              backgroundColor: '#7657D9',
+              borderRadius: '9999px',
+              animation: 'meovaTrackShimmer 0.85s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
