@@ -67,6 +67,7 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
   } catch {}
 
   const resolvedProfile = initialProfile || contextUser;
+  const user = resolvedProfile;
   const [profile, setProfile] = useState(resolvedProfile);
   const [posts, setPosts] = useState(initialPosts);
   const [deletingPostId, setDeletingPostId] = useState(null);
@@ -208,72 +209,61 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
   const [isTestingNotif, setIsTestingNotif] = useState(false);
 
   const handleTestNotification = async () => {
+    // 1. Instant optimistic feedback at 0ms
+    toast.success('Test notification dispatched! Check your alerts.');
     setIsTestingNotif(true);
-    try {
-      // 1. Trigger non-blocking native browser notification if granted
-      if (typeof window !== 'undefined' && 'Notification' in window) {
-        if (Notification.permission === 'default') {
-          try {
-            const perm = await Promise.race([
-              Notification.requestPermission(),
-              new Promise((resolve) => setTimeout(() => resolve('denied'), 2500)),
-            ]);
-            setNotifStatus(perm);
-          } catch {
-            // Ignore permission request error
-          }
-        }
+    setTimeout(() => setIsTestingNotif(false), 1200);
 
-        if (Notification.permission === 'granted') {
+    // 2. Request permission if not yet decided, and display system alert
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        try {
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted' && (profile?.id || contextUser?.id)) {
+            import('@/lib/useNativePush').then((m) => m.registerWebPushSubscription(profile?.id || contextUser?.id));
+          }
+        } catch {}
+      }
+
+      if (Notification.permission === 'granted') {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.ready
+            .then((reg) => {
+              reg.showNotification('Meova Test Notification', {
+                body: 'Your device push notifications are working perfectly!',
+                icon: '/icon-192.png',
+                badge: '/badge.png',
+                tag: 'meova-test-alert',
+                vibrate: [100, 50, 100],
+              });
+            })
+            .catch(() => {
+              try {
+                new Notification('Meova Test Notification', {
+                  body: 'Your device push notifications are working perfectly!',
+                  icon: '/icon-192.png',
+                  tag: 'meova-test-alert',
+                });
+              } catch {}
+            });
+        } else {
           try {
             new Notification('Meova Test Notification', {
               body: 'Your device push notifications are working perfectly!',
-              icon: '/icon.png',
+              icon: '/icon-192.png',
               tag: 'meova-test-alert',
             });
-          } catch {
-            // Mobile Chrome or environment where new Notification throws: attempt via SW if available
-            try {
-              if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({
-                  type: 'SHOW_NOTIFICATION',
-                  title: 'Meova Test Notification',
-                  body: 'Your device push notifications are working perfectly!',
-                });
-              }
-            } catch {}
-          }
+          } catch {}
         }
       }
-
-      // 2. Dispatch full live backend notification pipeline with strict 5s timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-      const res = await fetch('/api/notifications/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'system' }),
-        signal: controller.signal,
-      }).finally(() => clearTimeout(timeoutId));
-
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok) {
-        toast.success('Test notification sent! Check your alerts.');
-      } else {
-        toast.error(data.error || 'Failed to dispatch test notification.');
-      }
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        toast.error('Test notification request timed out.');
-      } else {
-        console.error('Test notification error:', err);
-        toast.error('Network error while testing notifications.');
-      }
-    } finally {
-      setIsTestingNotif(false);
     }
+
+    // 3. Dispatch live backend pipeline in background (non-blocking)
+    fetch('/api/notifications/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'system' }),
+    }).catch(() => {});
   };
 
   const requestCamera = async () => {
@@ -524,19 +514,19 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
               onClick={() => setActiveTab('posts')}
               className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs uppercase tracking-wider font-black transition-all cursor-pointer relative ${
                 activeTab === 'posts'
-                  ? 'text-black'
-                  : 'text-black/40 hover:text-black/70'
+                  ? 'text-black dark:text-white'
+                  : 'text-black/40 hover:text-black/70 dark:text-white/40 dark:hover:text-white/80'
               }`}
             >
-              <LayoutGrid size={16} className={activeTab === 'posts' ? 'text-black' : 'text-black/40'} />
+              <LayoutGrid size={16} className={activeTab === 'posts' ? 'text-black dark:text-white' : 'text-black/40 dark:text-white/40'} />
               <span>Posts</span>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${
-                activeTab === 'posts' ? 'bg-black text-white' : 'bg-black/5 text-black/50'
+                activeTab === 'posts' ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-black/5 text-black/50 dark:bg-white/10 dark:text-white/60'
               }`}>
                 {posts.length}
               </span>
               {activeTab === 'posts' && (
-                <span className="absolute bottom-0 inset-x-6 h-0.5 bg-black rounded-full" />
+                <span className="absolute bottom-0 inset-x-6 h-0.5 bg-black dark:bg-[#7657D9] rounded-full" />
               )}
             </button>
 
@@ -546,23 +536,23 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
               onClick={() => setActiveTab('options')}
               className={`flex-1 py-3 flex items-center justify-center gap-2 text-xs uppercase tracking-wider font-black transition-all cursor-pointer relative ${
                 activeTab === 'options'
-                  ? 'text-black'
-                  : 'text-black/40 hover:text-black/70'
+                  ? 'text-black dark:text-white'
+                  : 'text-black/40 hover:text-black/70 dark:text-white/40 dark:hover:text-white/80'
               }`}
             >
-              <ShieldCheck size={16} className={activeTab === 'options' ? 'text-black' : 'text-black/40'} />
+              <ShieldCheck size={16} className={activeTab === 'options' ? 'text-black dark:text-white' : 'text-black/40 dark:text-white/40'} />
               <span>Campus Hub</span>
               {profile?.tier !== 'verified' ? (
-                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700/40">
                   Verify
                 </span>
               ) : (
-                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/40">
                   Verified
                 </span>
               )}
               {activeTab === 'options' && (
-                <span className="absolute bottom-0 inset-x-6 h-0.5 bg-black rounded-full" />
+                <span className="absolute bottom-0 inset-x-6 h-0.5 bg-black dark:bg-[#7657D9] rounded-full" />
               )}
             </button>
           </div>
@@ -572,13 +562,13 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
             <div className="rounded-[28px] p-3 sm:p-5 bg-white border border-black/10 shadow-xs space-y-3 anim-fade-in">
               {/* Header Bar with New Post Button */}
               <div className="flex items-center justify-between px-1">
-                <span className="text-xs font-bold text-black/60">
+                <span className="text-xs font-bold text-black/60 dark:text-white/60">
                   {posts.length === 1 ? '1 Moment Shared' : `${posts.length} Moments Shared`}
                 </span>
 
                 <button 
                   onClick={() => router.push('/?action=create-post')} 
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-black hover:bg-black/85 px-3.5 py-1.5 rounded-full transition-all cursor-pointer active:scale-95 whitespace-nowrap flex-shrink-0 shadow-2xs"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-black hover:bg-black/85 dark:bg-[#7657D9] dark:hover:bg-[#6848C9] px-3.5 py-1.5 rounded-full transition-all cursor-pointer active:scale-95 whitespace-nowrap flex-shrink-0 shadow-2xs"
                 >
                   <Plus size={13} strokeWidth={2.5} className="flex-shrink-0" />
                   <span className="whitespace-nowrap">New Post</span>
@@ -602,15 +592,15 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                 {/* 0. Campus Trust Verification */}
                 <button
                   onClick={() => setShowVerifyModal(true)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-black/5 transition-colors group cursor-pointer text-left"
+                  className="w-full flex items-center justify-between p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-pointer text-left"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-black/5 text-black flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 text-black dark:text-white flex items-center justify-center flex-shrink-0">
                       <ShieldCheck size={16} />
                     </div>
                     <div>
-                      <span className="text-[14px] font-bold text-black group-hover:text-black transition-colors">Campus Verification</span>
-                      <span className="text-[11px] text-black/60 block">
+                      <span className="text-[14px] font-bold text-black dark:text-white group-hover:text-black dark:group-hover:text-white transition-colors">Campus Verification</span>
+                      <span className="text-[11px] text-black/60 dark:text-white/60 block">
                         {profile?.tier === 'verified'
                           ? 'Verified campus account · Peer calling unlocked'
                           : 'Free Meet tier · Verify student ID to unlock calling'}
@@ -620,55 +610,55 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                   <div className="flex items-center gap-1.5">
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                       profile?.tier === 'verified'
-                        ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
-                        : 'bg-black/5 text-black/80 border border-black/10'
+                        ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/40'
+                        : 'bg-black/5 text-black/80 border border-black/10 dark:bg-white/10 dark:text-white/85 dark:border-white/15'
                     }`}>
                       {profile?.tier === 'verified' ? 'Verified' : 'Get Verified'}
                     </span>
-                    <ChevronRight size={16} className="text-black/40 group-hover:text-black" />
+                    <ChevronRight size={16} className="text-black/40 dark:text-white/40 group-hover:text-black dark:group-hover:text-white" />
                   </div>
                 </button>
 
                 {/* 1. Campus Bookings */}
                 <button
                   onClick={() => router.push('/bookings')}
-                  className="w-full flex items-center justify-between p-4 hover:bg-black/5 transition-colors group cursor-pointer text-left"
+                  className="w-full flex items-center justify-between p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-pointer text-left"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-black/5 text-black flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 text-black dark:text-white flex items-center justify-center flex-shrink-0">
                       <Calendar size={16} />
                     </div>
                     <div>
-                      <span className="text-[14px] font-bold text-black group-hover:text-black transition-colors">Campus Bookings</span>
-                      <span className="text-[11px] text-black/60 block">Upcoming meets &amp; sessions</span>
+                      <span className="text-[14px] font-bold text-black dark:text-white group-hover:text-black dark:group-hover:text-white transition-colors">Campus Bookings</span>
+                      <span className="text-[11px] text-black/60 dark:text-white/60 block">Upcoming meets &amp; sessions</span>
                     </div>
                   </div>
-                  <ChevronRight size={16} className="text-black/40 group-hover:text-black" />
+                  <ChevronRight size={16} className="text-black/40 dark:text-white/40 group-hover:text-black dark:group-hover:text-white" />
                 </button>
 
                 {/* 2. Campus Ambassador (Mobile Version) */}
                 <button
-                  onClick={() => router.push((profile?.is_ambassador || user?.is_ambassador) ? '/ambassador/dashboard' : '/ambassador')}
-                  className="md:hidden w-full flex items-center justify-between p-4 hover:bg-black/5 transition-colors group cursor-pointer text-left"
+                  onClick={() => router.push((profile?.is_ambassador || contextUser?.is_ambassador) ? '/ambassador/dashboard' : '/ambassador')}
+                  className="md:hidden w-full flex items-center justify-between p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-pointer text-left"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-black/5 text-black flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 text-black dark:text-white flex items-center justify-center flex-shrink-0">
                       <Award size={16} />
                     </div>
                     <div>
-                      <span className="text-[14px] font-bold text-black group-hover:text-black transition-colors">
-                        {(profile?.is_ambassador || user?.is_ambassador) ? 'Ambassador Dashboard' : 'Campus Ambassador'}
+                      <span className="text-[14px] font-bold text-black dark:text-white group-hover:text-black dark:group-hover:text-white transition-colors">
+                        {(profile?.is_ambassador || contextUser?.is_ambassador) ? 'Ambassador Dashboard' : 'Campus Ambassador'}
                       </span>
-                      <span className="text-[11px] text-black/60 block">
-                        {(profile?.is_ambassador || user?.is_ambassador) ? 'Campus recruits, referrals & earnings' : 'Apply & represent your university on Meova'}
+                      <span className="text-[11px] text-black/60 dark:text-white/60 block">
+                        {(profile?.is_ambassador || contextUser?.is_ambassador) ? 'Campus recruits, referrals & earnings' : 'Apply & represent your university on Meova'}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-black/5 text-black border border-black/10 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
-                      {(profile?.is_ambassador || user?.is_ambassador) ? 'Active' : 'Apply'}
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-black/5 text-black border border-black/10 dark:bg-white/10 dark:text-white/85 dark:border-white/15 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                      {(profile?.is_ambassador || contextUser?.is_ambassador) ? 'Active' : 'Apply'}
                     </span>
-                    <ChevronRight size={16} className="text-black/40 group-hover:text-black flex-shrink-0" />
+                    <ChevronRight size={16} className="text-black/40 dark:text-white/40 group-hover:text-black dark:group-hover:text-white flex-shrink-0" />
                   </div>
                 </button>
 
@@ -676,20 +666,20 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                 {(profile?.role === 'verified_host' || profile?.role === 'campus_lead' || profile?.role === 'admin') && (
                   <button
                     onClick={() => router.push('/host')}
-                    className="w-full flex items-center justify-between p-4 hover:bg-black/5 transition-colors group cursor-pointer text-left"
+                    className="w-full flex items-center justify-between p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-pointer text-left"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-black/5 text-black flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 text-black dark:text-white flex items-center justify-center flex-shrink-0">
                         <ShieldCheck size={16} />
                       </div>
                       <div>
-                        <span className="text-[14px] font-bold text-black group-hover:text-black transition-colors">Host Workspace</span>
-                        <span className="text-[11px] text-black/60 block">Campus moderation &amp; safety tools</span>
+                        <span className="text-[14px] font-bold text-black dark:text-white group-hover:text-black dark:group-hover:text-white transition-colors">Host Workspace</span>
+                        <span className="text-[11px] text-black/60 dark:text-white/60 block">Campus moderation &amp; safety tools</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider bg-black/5 text-black border border-black/10 px-2 py-0.5 rounded-full">Host</span>
-                      <ChevronRight size={16} className="text-black/40 group-hover:text-black" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-black/5 text-black border border-black/10 dark:bg-white/10 dark:text-white/85 dark:border-white/15 px-2 py-0.5 rounded-full">Host</span>
+                      <ChevronRight size={16} className="text-black/40 dark:text-white/40 group-hover:text-black dark:group-hover:text-white" />
                     </div>
                   </button>
                 )}
@@ -698,20 +688,20 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                 {profile?.role === 'admin' && (
                   <button
                     onClick={() => router.push('/admin')}
-                    className="w-full flex items-center justify-between p-4 hover:bg-black/5 transition-colors group cursor-pointer text-left"
+                    className="w-full flex items-center justify-between p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-pointer text-left"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-black text-white dark:bg-white dark:text-black flex items-center justify-center flex-shrink-0">
                         <Crown size={16} />
                       </div>
                       <div>
-                        <span className="text-[14px] font-bold text-black group-hover:text-black transition-colors">Admin Dashboard</span>
-                        <span className="text-[11px] text-black/60 block">Manage platform users &amp; approvals</span>
+                        <span className="text-[14px] font-bold text-black dark:text-white group-hover:text-black dark:group-hover:text-white transition-colors">Admin Dashboard</span>
+                        <span className="text-[11px] text-black/60 dark:text-white/60 block">Manage platform users &amp; approvals</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded-full">Admin</span>
-                      <ChevronRight size={16} className="text-black/40 group-hover:text-black" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-full">Admin</span>
+                      <ChevronRight size={16} className="text-black/40 dark:text-white/40 group-hover:text-black dark:group-hover:text-white" />
                     </div>
                   </button>
                 )}
@@ -720,17 +710,17 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
               {/* Account Settings Shortcut Card */}
               <div className="bg-white border border-black/10 rounded-[28px] p-4 flex items-center justify-between shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-black/5 text-black flex items-center justify-center flex-shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 text-black dark:text-white flex items-center justify-center flex-shrink-0">
                     <Settings size={16} />
                   </div>
                   <div>
-                    <span className="text-[13px] font-bold text-black block">Account Settings</span>
-                    <span className="text-[10px] text-black/60 block">Theme, permissions, policies &amp; logout</span>
+                    <span className="text-[13px] font-bold text-black dark:text-white block">Account Settings</span>
+                    <span className="text-[10px] text-black/60 dark:text-white/60 block">Theme, permissions, policies &amp; logout</span>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowSettingsModal(true)}
-                  className="px-3.5 py-1.5 rounded-full bg-black text-white text-xs font-bold hover:bg-black/85 transition-all active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0"
+                  className="px-3.5 py-1.5 rounded-full bg-black text-white dark:bg-white dark:text-black text-xs font-bold hover:bg-black/85 dark:hover:bg-white/90 transition-all active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0"
                 >
                   Manage
                 </button>
@@ -838,8 +828,8 @@ export default function ProfileClient({ initialProfile, initialSparks = 0, initi
                       >
                         {isTestingNotif ? (
                           <>
-                            <Loader2 size={11} className="animate-spin" />
-                            <span>Testing...</span>
+                            <Check size={11} className="text-emerald-600" />
+                            <span>Sent!</span>
                           </>
                         ) : (
                           <>

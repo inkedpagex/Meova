@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { GraduationCap, Building2, BookOpen, PenLine, AtSign, ArrowRight, ArrowLeft, ChevronDown } from '@/lib/icons';
+import { GraduationCap, Building2, BookOpen, PenLine, AtSign, ArrowRight, ArrowLeft, ChevronDown, Check } from '@/lib/icons';
 import UniversitySelector from '../../components/UniversitySelector';
 
 const YEARS = ['1st', '2nd', '3rd', '4th', '5th'];
@@ -100,25 +100,28 @@ export function Step2({ data, onChange, onNext, onBack }) {
           
           {/* Dropdown Menu */}
           {showBranchDropdown && (
-            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-[#E7E5E4] shadow-xl rounded-2xl overflow-hidden z-50 max-h-52 overflow-y-auto anim-scale-in">
-              {BRANCHES.map(b => (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => {
-                    onChange('branch', b);
-                    setShowBranchDropdown(false);
-                  }}
-                  className="w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-colors hover:bg-[var(--accent-tint-10)] hover:text-[var(--accent)] border-b border-[#E7E5E4]/50 last:border-0 cursor-pointer"
-                  style={{ 
-                    color: data.branch === b ? 'var(--accent)' : '#FFFFFF', 
-                    background: data.branch === b ? 'var(--accent-tint-10)' : 'transparent',
-                    fontWeight: data.branch === b ? 700 : 500
-                  }}
-                >
-                  {b}
-                </button>
-              ))}
+            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-[#E7E5E4] shadow-2xl rounded-2xl overflow-hidden z-50 max-h-56 overflow-y-auto anim-scale-in p-1.5">
+              {BRANCHES.map(b => {
+                const isSelected = data.branch === b;
+                return (
+                  <button
+                    key={b}
+                    type="button"
+                    onClick={() => {
+                      onChange('branch', b);
+                      setShowBranchDropdown(false);
+                    }}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer mb-0.5 last:mb-0 ${
+                      isSelected
+                        ? 'bg-[var(--accent-tint-10)] text-[var(--accent)] font-bold'
+                        : 'text-[#1C1917] hover:bg-black/5 hover:text-black'
+                    }`}
+                  >
+                    <span>{b}</span>
+                    {isSelected && <Check size={14} className="text-[var(--accent)] stroke-[2.5]" />}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -232,8 +235,8 @@ export function Step3({ data, onChange, onSubmit, onBack, loading, error }) {
                 className="text-[10.5px] uppercase tracking-wider py-1.5 px-3 rounded-full font-bold transition-all active:scale-95 disabled:opacity-40 cursor-pointer"
                 style={{
                   background: sel ? 'var(--accent)' : '#fff',
-                  color: sel ? '#fff' : '#A3A3A3',
-                  border: `1px solid ${sel ? 'var(--accent)' : '#2A2A2A'}`,
+                  color: sel ? '#fff' : '#1C1917',
+                  border: `1px solid ${sel ? 'var(--accent)' : '#E7E5E4'}`,
                 }}
               >
                 {tag}

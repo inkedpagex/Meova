@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { joinCircleAction, leaveCircleAction } from './circles.actions';
@@ -17,44 +17,36 @@ export default function CircleJoinButton({ circleId, userId, isInitialMember, ac
       return;
     }
 
-    setLoading(true);
+    const previousState = isMember;
+    // 0ms Optimistic UI update
+    setIsMember(!previousState);
+
     try {
-      if (isMember) {
+      if (previousState) {
         const res = await leaveCircleAction(circleId);
         if (!res.success) throw new Error(res.error);
-        setIsMember(false);
       } else {
         const res = await joinCircleAction(circleId);
         if (!res.success) throw new Error(res.error);
-        setIsMember(true);
       }
-      // router.refresh() is not strictly needed if actions revalidatePath, but it's safe to keep
       router.refresh();
     } catch (err) {
+      // Revert if server rejects
+      setIsMember(previousState);
       console.error('Join/Leave failed:', err);
-      alert(err.message || 'Failed to update membership. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <button
       onClick={handleToggleJoin}
-      disabled={loading}
-      className={`w-full relative overflow-hidden text-[13px] font-bold py-1.5 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 disabled:opacity-60 ${
+      className={`w-full relative overflow-hidden text-[13px] font-bold py-1.5 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all duration-200 active:scale-95 cursor-pointer ${
         isMember
           ? "bg-transparent text-white border border-white/30 hover:border-white/50"
           : "bg-[var(--accent)] text-white border border-[var(--accent)] hover:bg-[var(--accent-hover)]"
       }`}
     >
-      {loading ? (
-        <Loader2 size={15} className="animate-spin" />
-      ) : isMember ? (
-        <>Joined</>
-      ) : (
-        <>Join</>
-      )}
+      {isMember ? <>Joined</> : <>Join</>}
     </button>
   );
 }

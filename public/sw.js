@@ -2,7 +2,7 @@
 // Strategy: Network-first for dynamic routes, Stale-While-Revalidate for static shell assets.
 // Offline Fallback support for PWA / Android WebView.
 
-const CACHE_VERSION = '2026-09-09T19:26'; // ← updated on deploy
+const CACHE_VERSION = '2026-09-14T20:35'; // ← updated on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
@@ -115,3 +115,73 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 });
+
+// ── Push Event: Background Push Notifications (Mobile PWA & Desktop) ────────
+self.addEventListener('push', (event) => {
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = { title: 'Meova', body: event.data.text() };
+    }
+  }
+
+  const title = data.title || 'Meova';
+  const options = {
+    body: data.body || '',
+    icon: data.icon || data.senderPhoto || '/icon-192.png',
+    badge: data.badge || '/badge.png',
+    tag: data.tag || `meova-push-${Date.now()}`,
+    data: {
+      url: data.url || '/',
+      ...data,
+    },
+    vibrate: data.isCall ? [300, 100, 300, 100, 300] : [200, 100, 200],
+    renotify: true,
+    requireInteraction: Boolean(data.isCall),
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// ── Notification Click: Focus existing PWA window or open target route ────────
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : '/';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) {
+          if (targetUrl && client.navigate) {
+            client.navigate(targetUrl);
+          }
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+
+// ── In-App Client Messages: Immediate notification through Service Worker ─────
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const { title = 'Meova', body = '', icon = '/icon-192.png', badge = '/badge.png', url = '/', tag, isCall = false } = event.data;
+    event.waitUntil(
+      self.registration.showNotification(title, {
+        body,
+        icon,
+        badge,
+        data: { url },
+        tag: tag || `meova-local-${Date.now()}`,
+        vibrate: isCall ? [300, 100, 300, 100, 300] : [100, 50, 100],
+        renotify: true,
+      })
+    );
+  }
+});
+

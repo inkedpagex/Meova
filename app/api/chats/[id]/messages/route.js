@@ -73,7 +73,7 @@ export async function POST(request, { params }) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { id: chatId } = await params;
-    const { text } = await request.json();
+    const { text, clientMsgId } = await request.json();
     
     if (!text || !text.trim()) {
       return NextResponse.json({ error: 'Message text is required' }, { status: 400 });
@@ -264,6 +264,7 @@ export async function POST(request, { params }) {
           event: 'new-message',
           payload: {
             id: msgRes.data?.id || `msg_${Date.now()}`,
+            clientMsgId: clientMsgId || null,
             senderId: user.uid,
             text: text.trim(),
             status: 'sent',

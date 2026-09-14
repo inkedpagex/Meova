@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Zap, Layers, X, CheckCircle, Loader2, Calendar, MapPin, Clock, Sparkles } from '@/lib/icons';
+import { Zap, Layers, X, CheckCircle, Loader2, Calendar, MapPin, Clock, Sparkles, ShakeHands } from '@/lib/icons';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { calculateMeetupRate } from '../../lib/pricing';
@@ -42,32 +42,59 @@ export default function BookCoffeeButton({
   const [agenda, setAgenda] = useState('');
   const router = useRouter();
 
+  const [activeBooking, setActiveBooking] = useState(null);
+  const [loadingBookingCheck, setLoadingBookingCheck] = useState(false);
+
   useEffect(() => {
     if (!open || !isLoggedIn) return;
     let cancelled = false;
     (async () => {
       setLoadingWallet(true);
+      setLoadingBookingCheck(true);
       setError('');
       try {
-        const res = await fetch('/api/wallet');
-        if (!res.ok) throw new Error('Failed to load wallet');
-        const data = await res.json();
+        const [walletRes, bookingsRes] = await Promise.all([
+          fetch('/api/wallet'),
+          fetch('/api/bookings'),
+        ]);
+
         if (cancelled) return;
-        if (data.wallet) {
-          setWallet(data.wallet);
-        } else {
-          setError('Could not retrieve wallet balance.');
+
+        if (walletRes.ok) {
+          const wData = await walletRes.json();
+          if (wData.wallet) {
+            setWallet(wData.wallet);
+          } else {
+            setError('Could not retrieve wallet balance.');
+          }
+        }
+
+        if (bookingsRes.ok) {
+          const bData = await bookingsRes.json();
+          const allBookings = bData?.bookings || [];
+          const activeStatuses = ['Requested', 'requested', 'Pending', 'pending', 'Accepted', 'accepted', 'Confirmed', 'confirmed', 'in_progress', 'active'];
+          
+          const existingMeet = allBookings.find((b) => {
+            const isPeer = (b.guest_id === targetUserId || b.host_id === targetUserId);
+            const isActive = activeStatuses.includes(b.status);
+            return isPeer && isActive;
+          });
+
+          setActiveBooking(existingMeet || null);
         }
       } catch (err) {
         if (cancelled) return;
         console.error(err);
-        setError('Could not load wallet balance.');
+        setError('Could not load meetup information.');
       } finally {
-        if (!cancelled) setLoadingWallet(false);
+        if (!cancelled) {
+          setLoadingWallet(false);
+          setLoadingBookingCheck(false);
+        }
       }
     })();
     return () => { cancelled = true; };
-  }, [open, isLoggedIn]);
+  }, [open, isLoggedIn, targetUserId]);
 
   function handleClick(e) {
     if (e) {
@@ -144,7 +171,7 @@ export default function BookCoffeeButton({
           onClick={handleClick}
           className={buttonClassName || "w-full h-12 flex items-center justify-center gap-2 px-4 rounded-full text-[14px] font-bold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white transition-all active:scale-95 uppercase tracking-wider cursor-pointer shadow-xs whitespace-nowrap"}
         >
-          <Calendar size={16} className="text-white flex-shrink-0" />
+          <ShakeHands size={16} className="text-white flex-shrink-0" />
           <span>{displayLabel}</span>
         </button>
       )}
@@ -210,6 +237,42 @@ export default function BookCoffeeButton({
                 >
                   Done
                 </button>
+              </div>
+            ) : activeBooking ? (
+              // ── Active Meetup Lock Notice ──
+              <div className="p-6 text-center space-y-4 overflow-y-auto">
+                <div className="w-14 h-14 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-600 shadow-xs">
+                  <Clock className="w-7 h-7" />
+                </div>
+                <h3 className="text-base font-bold text-[#1C1917]">
+                  {['requested', 'pending'].includes((activeBooking.status || '').toLowerCase())
+                    ? (activeBooking.guest_id === targetUserId ? 'Incoming Meetup Request' : 'Meetup Request Pending')
+                    : 'Meetup Already Scheduled'}
+                </h3>
+                <p className="text-xs text-[#78716C] leading-relaxed font-medium">
+                  {['requested', 'pending'].includes((activeBooking.status || '').toLowerCase())
+                    ? (activeBooking.guest_id === targetUserId
+                        ? <><strong className="text-[#1C1917]">{targetName}</strong> has already requested a meetup with you! Please accept, decline, or complete it in Meetups before scheduling another.</>
+                        : <>You have already sent a meetup request to <strong className="text-[#1C1917]">{targetName}</strong>. You can only schedule a new meetup once this one is completed or resolved.</>)
+                    : <>You already have an active meetup scheduled with <strong className="text-[#1C1917]">{targetName}</strong>. Complete or cancel this meetup before requesting another.</>}
+                </p>
+                <div className="flex flex-col gap-2 pt-2">
+                  <Link
+                    href="/bookings"
+                    onClick={() => setOpen(false)}
+                    className="w-full py-3 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-md active:scale-95 transition-all text-center"
+                    style={{ background: 'var(--accent)' }}
+                  >
+                    View in Meetups
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="w-full py-2.5 rounded-full text-xs font-bold text-[#78716C] hover:text-[#1C1917] transition-colors cursor-pointer"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             ) : (
               // ── Booking Configuration ──

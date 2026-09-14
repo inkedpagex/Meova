@@ -14,3 +14,4 @@ Strictly follow `UI_RULES.md` for ALL UI and backend changes:
 6. **MOBILE FIRST & ZERO WRAPPING**: Action buttons must have `whitespace-nowrap` and `flex-shrink-0` so text never breaks into 2 lines on mobile screens.
 7. **CARD GEOMETRY**: Use `rounded-[26px]` to `rounded-[28px]` for cards, `rounded-[32px]` for modals, and subtle hairline borders (`border-black/10` or `#E5E7EB`). Avoid excessive rounding or neon shadows.
 8. **EXCLUSIVE INTER TYPOGRAPHY**: Always use `Inter` font family for all text, headings, buttons, numbers, and micro-labels across the entire platform. Never import or use other fonts.
+9. **FEATURES REGISTRY SYNCHRONIZATION (MANDATORY)**: Whenever ANY feature, function, API endpoint, database schema, or UI workflow is created, modified, or deprecated, you MUST immediately update `FEATURES_REGISTRY.md` in the workspace root. Keep all endpoints, table names, statuses, and capabilities 100% accurate so all agents and developers stay synchronized.

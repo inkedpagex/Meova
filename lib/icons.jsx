@@ -66,8 +66,11 @@ export function MessageDotsIcon({ size = 15, className = 'text-[#7657D9] flex-sh
     </svg>
   );
 }
-export const Calendar        = ri('ri-calendar-schedule-line', 'ri-calendar-schedule-fill');
+export const Calendar        = ri('ri-calendar-check-line',    'ri-calendar-check-fill');
 export const CalendarDays    = ri('ri-calendar-event-line',    'ri-calendar-event-fill');
+export const CalendarCheck   = ri('ri-calendar-check-line',    'ri-calendar-check-fill');
+export const ShakeHands      = ri('ri-shake-hands-line',       'ri-shake-hands-fill');
+export const Handshake       = ri('ri-shake-hands-line',       'ri-shake-hands-fill');
 export const Wallet          = ri('ri-wallet-3-line',          'ri-wallet-3-fill');
 export const Shield          = ri('ri-shield-star-line',       'ri-shield-star-fill');
 export const ShieldCheck     = ri('ri-shield-check-line',      'ri-shield-check-fill');

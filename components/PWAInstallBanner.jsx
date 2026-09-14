@@ -55,8 +55,21 @@ export default function PWAInstallBanner() {
       window.deferredPWAInstallPrompt = e; // Expose globally for manual trigger
       setVisible(true);
     };
+
+    const appInstalledHandler = () => {
+      setVisible(false);
+      try {
+        document.cookie = '__meova_pwa=1; path=/; max-age=31536000; SameSite=Lax';
+        localStorage.setItem('Meova_pwa_installed', '1');
+      } catch {}
+    };
+
     window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    window.addEventListener('appinstalled', appInstalledHandler);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', appInstalledHandler);
+    };
   }, []);
 
   const handleInstall = async () => {
@@ -65,6 +78,10 @@ export default function PWAInstallBanner() {
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
       setVisible(false);
+      try {
+        document.cookie = '__meova_pwa=1; path=/; max-age=31536000; SameSite=Lax';
+        localStorage.setItem('Meova_pwa_installed', '1');
+      } catch {}
     }
     setDeferredPrompt(null);
     window.deferredPWAInstallPrompt = null;

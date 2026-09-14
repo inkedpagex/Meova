@@ -278,20 +278,20 @@ export default function PostDetailView({
   );
 
   return (
-    <div className="w-full h-full bg-white flex flex-col md:flex-row overflow-hidden select-none font-sans text-black">
+    <div className="w-full h-full bg-white dark:bg-[#141414] flex flex-col md:flex-row overflow-hidden select-none font-sans text-black dark:text-white">
       {/* ═══════════════════════════════════════════════════════════════════════
           MOBILE VIEW (< 768px): Instagram Full-screen Post Layout
           ═══════════════════════════════════════════════════════════════════════ */}
-      <div className="flex md:hidden flex-col w-full h-full overflow-hidden bg-white">
+      <div className="flex md:hidden flex-col w-full h-full overflow-hidden bg-white dark:bg-[#141414]">
         {/* Mobile Top Bar */}
-        <div className="h-13 px-3.5 bg-white border-b border-black/10 flex items-center justify-between flex-shrink-0 z-30">
+        <div className="h-13 px-3.5 bg-white dark:bg-[#141414] border-b border-black/10 dark:border-white/10 flex items-center justify-between flex-shrink-0 z-30">
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-2 text-black hover:text-[#7657D9] transition-colors cursor-pointer py-1.5 pr-3 -ml-1 active:scale-95"
+            className="flex items-center gap-2 text-black dark:text-white hover:text-[#7657D9] dark:hover:text-[#7657D9] transition-colors cursor-pointer py-1.5 pr-3 -ml-1 active:scale-95"
             title="Back to profile"
           >
-            <ArrowLeft size={20} className="text-black" />
+            <ArrowLeft size={20} className="text-black dark:text-white" />
             <span className="text-sm font-black tracking-tight">Posts</span>
           </button>
 
@@ -299,14 +299,14 @@ export default function PostDetailView({
             post={post}
             isOwner={isOwner}
             onDelete={onDeletePost}
-            buttonClassName="w-9 h-9 flex items-center justify-center text-black/70 hover:text-black rounded-full transition-colors active:scale-95"
+            buttonClassName="w-9 h-9 flex items-center justify-center text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white rounded-full transition-colors active:scale-95"
           />
         </div>
 
         {/* Mobile Scrollable Post Body */}
         <div className="flex-1 overflow-y-auto flex flex-col">
           {/* Author Header */}
-          <div className="flex items-center justify-between px-3.5 py-2.5 bg-white border-b border-black/5 flex-shrink-0">
+          <div className="flex items-center justify-between px-3.5 py-2.5 bg-white dark:bg-[#141414] border-b border-black/5 dark:border-white/10 flex-shrink-0">
             <Link
               href={isOwner ? '/profile' : `/users/${post.user_id}`}
               className="flex items-center gap-2.5 min-w-0"
@@ -314,13 +314,13 @@ export default function PostDetailView({
               <img
                 src={authorPhoto}
                 alt=""
-                className="w-8 h-8 rounded-full object-cover border border-black/10 flex-shrink-0"
+                className="w-8 h-8 rounded-full object-cover border border-black/10 dark:border-white/15 flex-shrink-0"
               />
               <div className="min-w-0">
-                <span className="text-xs font-black text-black truncate block leading-tight">
+                <span className="text-xs font-black text-black dark:text-white truncate block leading-tight">
                   {authorName}
                 </span>
-                <span className="text-[10px] text-black/60 font-semibold block leading-tight mt-0.5">
+                <span className="text-[10px] text-black/60 dark:text-white/60 font-semibold block leading-tight mt-0.5">
                   {timeAgo(post.created_at)} · Campus
                 </span>
               </div>
@@ -331,17 +331,17 @@ export default function PostDetailView({
           {renderMedia(true)}
 
           {/* Actions Bar (Like + Share) */}
-          <div className="px-3.5 py-2.5 flex items-center justify-between border-b border-black/5 bg-white flex-shrink-0">
+          <div className="px-3.5 py-2.5 flex items-center justify-between border-b border-black/5 dark:border-white/10 bg-white dark:bg-[#141414] flex-shrink-0">
             <div className="flex items-center gap-4">
               <button
                 type="button"
                 onClick={() => handleToggleLike()}
-                className="flex items-center gap-1.5 text-black hover:text-rose-600 transition-colors cursor-pointer active:scale-90"
+                className="flex items-center gap-1.5 text-black dark:text-white hover:text-rose-600 transition-colors cursor-pointer active:scale-90"
                 title="Like"
               >
                 <Heart
                   size={22}
-                  className={isLiked ? 'fill-rose-600 text-rose-600' : 'text-black/80 hover:text-rose-600'}
+                  className={isLiked ? 'fill-rose-600 text-rose-600' : 'text-black/80 dark:text-white/80 hover:text-rose-600'}
                 />
                 <span className="text-xs font-black tabular-nums">{likesCount}</span>
               </button>
@@ -349,29 +349,29 @@ export default function PostDetailView({
               <button
                 type="button"
                 onClick={handleShare}
-                className="text-black/80 hover:text-[#7657D9] transition-colors cursor-pointer active:scale-90"
+                className="text-black/80 dark:text-white/80 hover:text-[#7657D9] transition-colors cursor-pointer active:scale-90"
                 title="Share"
               >
                 <Share2 size={21} />
               </button>
             </div>
 
-            <span className="text-[10px] font-bold text-black/40 uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-black/40 dark:text-white/40 uppercase tracking-wider">
               {timeAgo(post.created_at)}
             </span>
           </div>
 
           {/* Caption */}
           {post.content && (
-            <div className="px-3.5 py-2.5 text-xs text-black/90 leading-relaxed border-b border-black/5 bg-white">
-              <span className="font-black text-black mr-2">{authorName}</span>
+            <div className="px-3.5 py-2.5 text-xs text-black/90 dark:text-white/90 leading-relaxed border-b border-black/5 dark:border-white/10 bg-white dark:bg-[#141414]">
+              <span className="font-black text-black dark:text-white mr-2">{authorName}</span>
               <span className="font-medium whitespace-pre-line">{post.content}</span>
             </div>
           )}
 
           {/* Comments List */}
-          <div className="p-3.5 space-y-3 flex-1 bg-white">
-            <p className="text-[11px] font-black text-black uppercase tracking-wider">
+          <div className="p-3.5 space-y-3 flex-1 bg-white dark:bg-[#141414]">
+            <p className="text-[11px] font-black text-black dark:text-white uppercase tracking-wider">
               Comments ({comments.length})
             </p>
 
@@ -415,7 +415,7 @@ export default function PostDetailView({
         {/* Mobile Pinned Comment Input */}
         <form
           onSubmit={handlePostComment}
-          className="p-3 bg-white border-t border-black/10 flex items-center gap-2 flex-shrink-0"
+          className="p-3 bg-white dark:bg-[#141414] border-t border-black/10 dark:border-white/10 flex items-center gap-2 flex-shrink-0"
         >
           <input
             type="text"
@@ -423,7 +423,7 @@ export default function PostDetailView({
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
             maxLength={500}
-            className="flex-1 px-3.5 py-2 rounded-full bg-black/5 border border-black/10 text-xs font-medium text-black placeholder:text-black/40 focus:outline-none focus:border-[#7657D9] focus:bg-white transition-all"
+            className="flex-1 px-3.5 py-2 rounded-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/15 text-xs font-medium text-black dark:text-white placeholder:text-black/40 dark:placeholder:text-white/40 focus:outline-none focus:border-[#7657D9] focus:bg-white dark:focus:bg-[#1C1E26] transition-all"
           />
           <button
             type="submit"
@@ -447,13 +447,13 @@ export default function PostDetailView({
         {renderMedia(false)}
 
         {/* Right Details Column (~42%) */}
-        <div className="md:w-[42%] h-full max-h-[85vh] border-l border-black/10 flex flex-col justify-between bg-white text-black flex-shrink-0">
+        <div className="md:w-[42%] h-full max-h-[85vh] border-l border-black/10 dark:border-white/10 flex flex-col justify-between bg-white dark:bg-[#141414] text-black dark:text-white flex-shrink-0">
           {/* Author Header */}
-          <div className="flex items-center justify-between p-4 border-b border-black/10 flex-shrink-0">
+          <div className="flex items-center justify-between p-4 border-b border-black/10 dark:border-white/10 flex-shrink-0">
             <div className="flex items-center gap-3 min-w-0">
               <Link
                 href={isOwner ? '/profile' : `/users/${post.user_id}`}
-                className="w-10 h-10 rounded-full overflow-hidden border border-black/10 flex-shrink-0 hover:scale-105 transition-transform"
+                className="w-10 h-10 rounded-full overflow-hidden border border-black/10 dark:border-white/15 flex-shrink-0 hover:scale-105 transition-transform"
               >
                 <img
                   src={authorPhoto}
@@ -464,11 +464,11 @@ export default function PostDetailView({
               <div className="min-w-0">
                 <Link
                   href={isOwner ? '/profile' : `/users/${post.user_id}`}
-                  className="text-xs font-black text-black hover:text-[#7657D9] truncate block transition-colors leading-tight"
+                  className="text-xs font-black text-black dark:text-white hover:text-[#7657D9] dark:hover:text-[#7657D9] truncate block transition-colors leading-tight"
                 >
                   {authorName}
                 </Link>
-                <p className="text-[11px] text-black/60 font-semibold truncate mt-0.5">
+                <p className="text-[11px] text-black/60 dark:text-white/60 font-semibold truncate mt-0.5">
                   {timeAgo(post.created_at)} · Campus
                 </p>
               </div>
@@ -479,12 +479,12 @@ export default function PostDetailView({
                 post={post}
                 isOwner={isOwner}
                 onDelete={onDeletePost}
-                buttonClassName="w-8 h-8 flex items-center justify-center text-black/60 hover:text-black hover:bg-black/5 rounded-full transition-colors active:scale-95"
+                buttonClassName="w-8 h-8 flex items-center justify-center text-black/60 dark:text-white/70 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors active:scale-95"
               />
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center text-black/60 hover:text-black hover:bg-black/5 rounded-full transition-colors active:scale-95 cursor-pointer ml-1"
+                className="w-8 h-8 flex items-center justify-center text-black/60 dark:text-white/70 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors active:scale-95 cursor-pointer ml-1"
                 title="Close (Esc)"
               >
                 <X size={18} />
@@ -496,16 +496,16 @@ export default function PostDetailView({
           <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs font-medium">
             {/* Post Caption */}
             {hasMedia && post.content && (
-              <div className="flex items-start gap-3 pb-3 border-b border-black/5">
+              <div className="flex items-start gap-3 pb-3 border-b border-black/5 dark:border-white/10">
                 <img
                   src={authorPhoto}
                   alt=""
-                  className="w-8 h-8 rounded-full object-cover border border-black/10 flex-shrink-0"
+                  className="w-8 h-8 rounded-full object-cover border border-black/10 dark:border-white/15 flex-shrink-0"
                 />
                 <div className="space-y-0.5 min-w-0 flex-1">
-                  <span className="font-black text-black mr-2 text-xs">{authorName}</span>
-                  <span className="text-black/90 text-xs leading-relaxed whitespace-pre-line">{post.content}</span>
-                  <p className="text-[10px] text-black/40 font-semibold mt-1">{timeAgo(post.created_at)}</p>
+                  <span className="font-black text-black dark:text-white mr-2 text-xs">{authorName}</span>
+                  <span className="text-black/90 dark:text-white/90 text-xs leading-relaxed whitespace-pre-line">{post.content}</span>
+                  <p className="text-[10px] text-black/40 dark:text-white/40 font-semibold mt-1">{timeAgo(post.created_at)}</p>
                 </div>
               </div>
             )}
@@ -513,14 +513,14 @@ export default function PostDetailView({
             {/* Comments Section */}
             <div className="space-y-3.5">
               {loadingComments ? (
-                <div className="py-6 flex items-center justify-center text-black/40 gap-2">
+                <div className="py-6 flex items-center justify-center text-black/40 dark:text-white/40 gap-2">
                   <Loader2 size={16} className="animate-spin" />
                   <span className="text-[11px] font-semibold">Loading comments...</span>
                 </div>
               ) : comments.length === 0 ? (
                 <div className="py-8 text-center space-y-1">
-                  <p className="text-xs font-bold text-black/60">No comments yet.</p>
-                  <p className="text-[11px] text-black/40">Start the conversation below.</p>
+                  <p className="text-xs font-bold text-black/60 dark:text-white/60">No comments yet.</p>
+                  <p className="text-[11px] text-black/40 dark:text-white/40">Start the conversation below.</p>
                 </div>
               ) : (
                 comments.map((c) => {
@@ -530,14 +530,14 @@ export default function PostDetailView({
                       <img
                         src={cPhoto}
                         alt=""
-                        className="w-7 h-7 rounded-full object-cover border border-black/10 flex-shrink-0 mt-0.5"
+                        className="w-7 h-7 rounded-full object-cover border border-black/10 dark:border-white/15 flex-shrink-0 mt-0.5"
                       />
                       <div className="space-y-0.5 min-w-0 flex-1 leading-snug">
-                        <span className="font-black text-black mr-1.5 text-[11.5px]">
+                        <span className="font-black text-black dark:text-white mr-1.5 text-[11.5px]">
                           {c.author_name || 'Student'}
                         </span>
-                        <span className="text-black/85 text-[11.5px] whitespace-pre-line">{c.content}</span>
-                        <p className="text-[9.5px] text-black/40 font-semibold mt-0.5">
+                        <span className="text-black/85 dark:text-white/85 text-[11.5px] whitespace-pre-line">{c.content}</span>
+                        <p className="text-[9.5px] text-black/40 dark:text-white/40 font-semibold mt-0.5">
                           {timeAgo(c.created_at)}
                         </p>
                       </div>
@@ -550,17 +550,17 @@ export default function PostDetailView({
           </div>
 
           {/* Action Row: Like + Share ONLY */}
-          <div className="px-4 py-2.5 border-t border-black/10 flex items-center justify-between flex-shrink-0 bg-white">
+          <div className="px-4 py-2.5 border-t border-black/10 dark:border-white/10 flex items-center justify-between flex-shrink-0 bg-white dark:bg-[#141414]">
             <div className="flex items-center gap-4">
               <button
                 type="button"
                 onClick={() => handleToggleLike()}
-                className="flex items-center gap-1.5 text-black hover:text-rose-600 transition-colors cursor-pointer active:scale-90"
+                className="flex items-center gap-1.5 text-black dark:text-white hover:text-rose-600 transition-colors cursor-pointer active:scale-90"
                 title="Like"
               >
                 <Heart
                   size={22}
-                  className={isLiked ? 'fill-rose-600 text-rose-600' : 'text-black/80 hover:text-rose-600'}
+                  className={isLiked ? 'fill-rose-600 text-rose-600' : 'text-black/80 dark:text-white/80 hover:text-rose-600'}
                 />
                 <span className="text-xs font-black tabular-nums">{likesCount}</span>
               </button>
@@ -568,14 +568,14 @@ export default function PostDetailView({
               <button
                 type="button"
                 onClick={handleShare}
-                className="text-black/80 hover:text-[#7657D9] transition-colors cursor-pointer active:scale-90"
+                className="text-black/80 dark:text-white/80 hover:text-[#7657D9] transition-colors cursor-pointer active:scale-90"
                 title="Share"
               >
                 <Share2 size={21} />
               </button>
             </div>
 
-            <span className="text-[10px] font-bold text-black/40 uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-black/40 dark:text-white/40 uppercase tracking-wider">
               {timeAgo(post.created_at)}
             </span>
           </div>
@@ -583,7 +583,7 @@ export default function PostDetailView({
           {/* Pinned Comment Input Box */}
           <form
             onSubmit={handlePostComment}
-            className="p-3 border-t border-black/10 flex items-center gap-2 bg-white flex-shrink-0"
+            className="p-3 border-t border-black/10 dark:border-white/10 flex items-center gap-2 bg-white dark:bg-[#141414] flex-shrink-0"
           >
             <input
               type="text"
@@ -591,7 +591,7 @@ export default function PostDetailView({
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Add a comment..."
               maxLength={500}
-              className="flex-1 px-3.5 py-2 rounded-full bg-black/5 border border-black/10 text-xs font-medium text-black placeholder:text-black/40 focus:outline-none focus:border-[#7657D9] focus:bg-white transition-all"
+              className="flex-1 px-3.5 py-2 rounded-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/15 text-xs font-medium text-black dark:text-white placeholder:text-black/40 dark:placeholder:text-white/40 focus:outline-none focus:border-[#7657D9] focus:bg-white dark:focus:bg-[#1C1E26] transition-all"
             />
             <button
               type="submit"

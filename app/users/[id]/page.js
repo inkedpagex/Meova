@@ -7,7 +7,7 @@ import {
   ArrowLeft, GraduationCap, Users, Star,
   Code, Music, Dumbbell, Camera, Rocket, Palette, Gamepad2,
   BookOpen, Coffee, MessageCircle, Zap, Calendar, MapPin,
-  CheckCircle, Layers, Heart, Building2, Tag, ShieldAlert
+  CheckCircle, Layers, Heart, Building2, Tag, ShieldAlert, Clock, ShakeHands
 } from '@/lib/icons';
 import { Linkedin, Github } from '../../../components/ui/SocialIcons';
 import BookCoffeeButton from '../../../features/users/BookCoffeeButton';
@@ -68,25 +68,35 @@ export default async function UserProfilePage({ params }) {
   ]);
 
   let activeMeeting = null;
-  let pendingBooking = null;
+  let incomingPendingBooking = null;
+  let outgoingPendingBooking = null;
+  let confirmedMeeting = null;
+
   if (currentUser && currentUser.id !== id) {
     const { data: bookingRows } = await supabaseAdmin
       .from('bookings')
       .select('*')
       .or(`and(host_id.eq.${currentUser.id},guest_id.eq.${id}),and(host_id.eq.${id},guest_id.eq.${currentUser.id})`)
-      .in('status', ['Requested', 'Accepted', 'Confirmed'])
+      .in('status', ['Requested', 'requested', 'Pending', 'pending', 'Accepted', 'accepted', 'Confirmed', 'confirmed', 'in_progress', 'active'])
       .order('created_at', { ascending: false })
       .limit(1);
 
     if (bookingRows && bookingRows.length > 0) {
       activeMeeting = bookingRows[0];
-      if (activeMeeting.status === 'Requested' && activeMeeting.host_id === currentUser.id) {
-        pendingBooking = activeMeeting;
+      const s = (activeMeeting.status || '').toLowerCase();
+      if (s === 'requested' || s === 'pending') {
+        if (activeMeeting.host_id === currentUser.id) {
+          incomingPendingBooking = activeMeeting;
+        } else {
+          outgoingPendingBooking = activeMeeting;
+        }
+      } else if (['accepted', 'confirmed', 'in_progress', 'active'].includes(s)) {
+        confirmedMeeting = activeMeeting;
       }
     }
   }
 
-  const hasActiveMeeting = activeMeeting && ['Accepted', 'Confirmed'].includes(activeMeeting.status);
+  const hasActiveMeeting = Boolean(confirmedMeeting);
 
   if (!profile) {
     return (
@@ -287,9 +297,29 @@ export default async function UserProfilePage({ params }) {
             )}
 
             <div className="flex flex-col sm:flex-row gap-2.5 w-full">
-              {pendingBooking ? (
+              {incomingPendingBooking ? (
                 <div className="flex-1">
-                  <AcceptBookingButton booking={pendingBooking} className="w-full" />
+                  <AcceptBookingButton booking={incomingPendingBooking} className="w-full" />
+                </div>
+              ) : outgoingPendingBooking ? (
+                <div className="flex-1">
+                  <Link
+                    href="/bookings"
+                    className="w-full h-12 flex items-center justify-center gap-2 px-4 rounded-full text-[13px] font-bold bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 transition-all uppercase tracking-wider cursor-pointer shadow-xs whitespace-nowrap"
+                  >
+                    <Clock size={16} className="text-amber-700 flex-shrink-0" />
+                    <span>Meetup Pending · View</span>
+                  </Link>
+                </div>
+              ) : confirmedMeeting ? (
+                <div className="flex-1">
+                  <Link
+                    href="/bookings"
+                    className="w-full h-12 flex items-center justify-center gap-2 px-4 rounded-full text-[13px] font-bold bg-emerald-50 text-emerald-900 border border-emerald-200 hover:bg-emerald-100 transition-all uppercase tracking-wider cursor-pointer shadow-xs whitespace-nowrap"
+                  >
+                    <ShakeHands size={16} className="text-emerald-700 flex-shrink-0" />
+                    <span>Meetup Scheduled · View</span>
+                  </Link>
                 </div>
               ) : profile.isIdOn !== false ? (
                 <div className="flex-1">

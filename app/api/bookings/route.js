@@ -96,6 +96,75 @@ export async function POST(request) {
       return NextResponse.json({ error: 'You cannot book a meetup with yourself.' }, { status: 400 });
     }
 
+    // Safety 0: Mutual Active Meetup Lock
+    // Prevent duplicate meetings: If User A and User B have an active/pending meeting in EITHER direction,
+    // neither user can create a new meeting until the current meeting is completed, declined, or cancelled.
+    const activeStatuses = [
+      'Requested', 'requested',
+      'Pending', 'pending',
+      'Accepted', 'accepted',
+      'Confirmed', 'confirmed',
+      'in_progress', 'active'
+    ];
+
+    const mutualFilter = `and(guest_id.eq.${user.uid},host_id.eq.${meetTargetId}),and(guest_id.eq.${meetTargetId},host_id.eq.${user.uid})`;
+    const { data: existingActiveBooking } = await supabaseAdmin
+      .from('bookings')
+      .select('id, guest_id, host_id, status')
+      .or(mutualFilter)
+      .in('status', activeStatuses)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingActiveBooking) {
+      const isSender = existingActiveBooking.guest_id === user.uid;
+      const statusLower = (existingActiveBooking.status || '').toLowerCase();
+      const isPending = statusLower === 'requested' || statusLower === 'pending';
+
+      if (isSender) {
+        if (isPending) {
+          return NextResponse.json(
+            {
+              error: 'You already sent a meetup request to this student. Please wait for them to respond before scheduling another.',
+              code: 'PENDING_REQUEST_EXISTS',
+              bookingId: existingActiveBooking.id,
+            },
+            { status: 409 }
+          );
+        } else {
+          return NextResponse.json(
+            {
+              error: 'You already have an active meetup scheduled with this student. Complete or cancel the current meetup before scheduling a new one.',
+              code: 'ACTIVE_MEETUP_EXISTS',
+              bookingId: existingActiveBooking.id,
+            },
+            { status: 409 }
+          );
+        }
+      } else {
+        if (isPending) {
+          return NextResponse.json(
+            {
+              error: 'This student has already sent you a meetup request! Please accept or decline their existing request in Meetups before creating a new one.',
+              code: 'INCOMING_REQUEST_EXISTS',
+              bookingId: existingActiveBooking.id,
+            },
+            { status: 409 }
+          );
+        } else {
+          return NextResponse.json(
+            {
+              error: 'You already have an active meetup scheduled with this student. Complete or cancel the current meetup before scheduling a new one.',
+              code: 'ACTIVE_MEETUP_EXISTS',
+              bookingId: existingActiveBooking.id,
+            },
+            { status: 409 }
+          );
+        }
+      }
+    }
+
     // Safety 1: Max 3 active pending outgoing requests
     const { count: pendingCount, error: countErr } = await supabaseAdmin
       .from('bookings')

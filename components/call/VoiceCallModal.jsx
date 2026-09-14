@@ -52,10 +52,9 @@ const ICE_SERVERS = {
 };
 
 const AUDIO_CONSTRAINTS = {
-  echoCancellation: { ideal: true },
-  noiseSuppression: { ideal: true },
-  autoGainControl: { ideal: true },
-  channelCount: { ideal: 1 },
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
 };
 
 export default function VoiceCallModal({
@@ -120,20 +119,37 @@ export default function VoiceCallModal({
   }, [isOpen, callState]);
 
   // ── Attach remote media to elements ─────────────────────────────
-  const attachRemoteStream = useCallback((stream) => {
-    if (!stream) return;
-    remoteStreamRef.current = stream;
+  const attachRemoteStream = useCallback((stream, incomingTrack = null) => {
+    if (!stream && !incomingTrack) return;
 
-    // Attach audio
-    if (remoteAudioRef.current) {
-      remoteAudioRef.current.srcObject = stream;
+    if (!remoteStreamRef.current) {
+      remoteStreamRef.current = new MediaStream();
+    }
+
+    if (stream) {
+      stream.getTracks().forEach((track) => {
+        const alreadyHas = remoteStreamRef.current.getTracks().some((t) => t.id === track.id);
+        if (!alreadyHas) remoteStreamRef.current.addTrack(track);
+      });
+    }
+    if (incomingTrack) {
+      const alreadyHas = remoteStreamRef.current.getTracks().some((t) => t.id === incomingTrack.id);
+      if (!alreadyHas) remoteStreamRef.current.addTrack(incomingTrack);
+    }
+
+    const fullStream = remoteStreamRef.current;
+
+    // Attach audio (only if fullStream contains audio tracks)
+    if (remoteAudioRef.current && fullStream.getAudioTracks().length > 0) {
+      if (remoteAudioRef.current.srcObject !== fullStream) {
+        remoteAudioRef.current.srcObject = fullStream;
+      }
       remoteAudioRef.current.muted = false;
       remoteAudioRef.current.volume = 1.0;
       remoteAudioRef.current.play().catch((err) => {
         console.warn('[Remote audio autoplay blocked]', err.message);
         setTimeout(() => {
           if (remoteAudioRef.current && remoteStreamRef.current) {
-            remoteAudioRef.current.srcObject = remoteStreamRef.current;
             remoteAudioRef.current.play().catch(() => {});
           }
         }, 500);
@@ -141,8 +157,10 @@ export default function VoiceCallModal({
     }
 
     // Attach video if present
-    if (remoteVideoRef.current && stream.getVideoTracks().length > 0) {
-      remoteVideoRef.current.srcObject = stream;
+    if (remoteVideoRef.current && fullStream.getVideoTracks().length > 0) {
+      if (remoteVideoRef.current.srcObject !== fullStream) {
+        remoteVideoRef.current.srcObject = fullStream;
+      }
       remoteVideoRef.current.play().catch(() => {});
       setIsPeerVideoOff(false);
     }
@@ -161,14 +179,32 @@ export default function VoiceCallModal({
   const addLocalTracksToPC = useCallback((stream, pc) => {
     if (!stream || !pc || pc.signalingState === 'closed') return;
     stream.getTracks().forEach((track) => {
-      const existingSender = pc.getSenders().find((s) => s.track?.kind === track.kind);
-      if (existingSender) {
-        existingSender.replaceTrack(track).catch(() => {});
+      // 1. Check existing transceivers (critical when receiver answers an incoming offer so direction changes to sendrecv!)
+      const transceivers = pc.getTransceivers ? pc.getTransceivers() : [];
+      const matchingTransceiver = transceivers.find(
+        (t) =>
+          (t.sender && t.sender.track === track) ||
+          (t.receiver && t.receiver.track && t.receiver.track.kind === track.kind) ||
+          (t.sender && t.sender.track && t.sender.track.kind === track.kind)
+      );
+
+      if (matchingTransceiver) {
+        if (matchingTransceiver.sender) {
+          matchingTransceiver.sender.replaceTrack(track).catch(() => {});
+        }
+        if (matchingTransceiver.direction === 'recvonly' || matchingTransceiver.direction === 'inactive') {
+          matchingTransceiver.direction = 'sendrecv';
+        }
       } else {
-        try {
-          pc.addTrack(track, stream);
-        } catch (e) {
-          console.warn('[WebRTC addTrack error]', e.message);
+        const existingSender = pc.getSenders().find((s) => s.track?.kind === track.kind);
+        if (existingSender) {
+          existingSender.replaceTrack(track).catch(() => {});
+        } else {
+          try {
+            pc.addTrack(track, stream);
+          } catch (e) {
+            console.warn('[WebRTC addTrack error]', e.message);
+          }
         }
       }
     });
@@ -521,8 +557,8 @@ export default function VoiceCallModal({
 
       pc.ontrack = (event) => {
         if (isCancelledRef.current) return;
-        const stream = event.streams?.[0] ?? new MediaStream([event.track]);
-        attachRemoteStream(stream);
+        const stream = event.streams?.[0] ?? null;
+        attachRemoteStream(stream, event.track);
         hasConnectedRef.current = true;
         if (signalingRetryRef.current) {
           clearInterval(signalingRetryRef.current);
@@ -755,6 +791,12 @@ export default function VoiceCallModal({
     toast.success(next === 'speaker' ? 'Loudspeaker' : 'Earpiece');
   };
 
+  const handleModalClick = () => {
+    if (remoteAudioRef.current && remoteAudioRef.current.paused) {
+      remoteAudioRef.current.play().catch(() => {});
+    }
+  };
+
   const formatDuration = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 
   if (!isOpen) return null;
@@ -764,7 +806,10 @@ export default function VoiceCallModal({
   const avatar = peerUser?.photo || getUserAvatarUrl(peerUser) || fallback;
 
   return (
-    <div className="fixed inset-0 z-[999999] bg-[#0C0A09] flex flex-col justify-between items-center text-white select-none overflow-hidden pb-8 pt-8 px-4 anim-fade-in">
+    <div
+      onClick={handleModalClick}
+      className="fixed inset-0 z-[999999] bg-[#0C0A09] flex flex-col justify-between items-center text-white select-none overflow-hidden pb-8 pt-8 px-4 anim-fade-in"
+    >
       {/* Hidden audio element */}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio

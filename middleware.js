@@ -80,6 +80,10 @@ export function middleware(request) {
     );
   });
 
+  // ── PWA Detection ────────────────────────────────────────────────────────
+  const urlSource = request.nextUrl.searchParams.get('source');
+  const isPWA = urlSource === 'pwa' || request.cookies.get('__meova_pwa')?.value === '1';
+
   // ── APP subdomain (app.meova.in / app.localhost) ───────────────────────────
   if (isAppHost) {
     // Whitelist login and signup pages on app host
@@ -114,21 +118,23 @@ export function middleware(request) {
       if (pathname.startsWith('/api/')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-      // In production, redirect to root marketing login. In dev, keep on app.localhost to retain dev cookie scope.
-      const targetBase = isProd ? rootBase : `http://${hostname}`;
+      // If in PWA or dev, keep on app host login to avoid crossing origin and showing browser URL bar
+      const targetBase = (isProd && !isPWA) ? rootBase : `http${isProd ? 's' : ''}://${hostname}`;
       const loginUrl = new URL('/login', targetBase);
       if (pathname !== '/' && !pathname.startsWith('/login') && !pathname.startsWith('/signup')) {
         loginUrl.searchParams.set('redirect', pathname);
       }
-      return NextResponse.redirect(loginUrl);
+      const res = NextResponse.redirect(loginUrl);
+      if (isPWA) {
+        res.cookies.set('__meova_pwa', '1', { path: '/', sameSite: 'lax', maxAge: 31536000 });
+      }
+      return res;
     }
 
     return NextResponse.next();
   }
 
   // ── ROOT domain (meova.in / localhost) ────────────────────────────────────
-  const urlSource = request.nextUrl.searchParams.get('source');
-  const isPWA = urlSource === 'pwa' || request.cookies.get('__meova_pwa')?.value === '1';
 
   // Whitelist all public routes, SEO files, static assets, and public APIs
   const isPublic =
@@ -173,6 +179,14 @@ export function middleware(request) {
 
   // 1. Public routes & assets (always pass through)
   if (isPublic) {
+    // In PWA standalone app mode: unauthenticated visitors on root / MUST NOT see marketing page -> redirect directly to /login
+    if (isPWA && !hasAuthCookie && pathname === '/') {
+      const loginUrl = new URL('/login', rootBase);
+      const res = NextResponse.redirect(loginUrl);
+      res.cookies.set('__meova_pwa', '1', { path: '/', sameSite: 'lax', maxAge: 31536000 });
+      return res;
+    }
+
     // In standard production browser (non-PWA): authenticated users visiting marketing/auth form redirect to app
     if (!isPWA && isProd && hasAuthCookie && (pathname === '/' || pathname === '/login' || pathname === '/signup')) {
       return NextResponse.redirect(new URL('/', appBase));

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Zap, MessageSquare, Calendar, Users, Briefcase, X, Phone, PhoneOff, ArrowRight } from '@/lib/icons';
+import { Bell, Zap, MessageSquare, Calendar, Users, Briefcase, X, Phone, PhoneOff, ArrowRight, ShakeHands } from '@/lib/icons';
 import { supabase } from '../lib/supabase/client';
 import { useUserContext } from './providers/UserProvider';
 import { getCartoonAvatar } from '../utils/avatar';
@@ -41,7 +41,7 @@ const NOTIF_CONFIG = {
     actionText: 'Join',
   },
   booking: {
-    icon: Calendar,
+    icon: ShakeHands,
     accent: 'var(--accent)',
     tag: 'Meetup',
     bg: 'bg-white',
@@ -49,7 +49,7 @@ const NOTIF_CONFIG = {
     actionText: 'View Meetup',
   },
   meetup: {
-    icon: Calendar,
+    icon: ShakeHands,
     accent: 'var(--accent)',
     tag: 'Meetup',
     bg: 'bg-white',

@@ -15,6 +15,7 @@ import Link from "next/link";
 import { getCartoonAvatar } from "../../utils/avatar";
 import { useVoiceCall } from "../../components/providers/VoiceCallProvider";
 import RatingReviewModal from "../../components/RatingReviewModal";
+import { ShakeHands } from '@/lib/icons';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -46,12 +47,12 @@ function normalizeBooking(b) {
 
 function Live20MinMeetingTimer({ booking, onComplete }) {
   const durationMs = (booking.durationMinutes || 20) * 60 * 1000;
-  const startedTime = booking.startedAt ? new Date(booking.startedAt).getTime() : Date.now();
-  const endTime = startedTime + durationMs;
-
-  const [remainingMs, setRemainingMs] = useState(Math.max(0, endTime - Date.now()));
+  const [remainingMs, setRemainingMs] = useState(durationMs);
 
   useEffect(() => {
+    const startedTime = booking.startedAt ? new Date(booking.startedAt).getTime() : Date.now();
+    const endTime = startedTime + durationMs;
+
     const timer = setInterval(() => {
       const rem = Math.max(0, endTime - Date.now());
       setRemainingMs(rem);
@@ -60,8 +61,9 @@ function Live20MinMeetingTimer({ booking, onComplete }) {
         if (onComplete) onComplete(booking);
       }
     }, 1000);
+
     return () => clearInterval(timer);
-  }, [endTime, booking, onComplete]);
+  }, [booking, durationMs, onComplete]);
 
   const totalSecs = Math.floor(remainingMs / 1000);
   const mins = Math.floor(totalSecs / 60);
@@ -197,6 +199,40 @@ export default function BookingsPage() {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [ratingModalData, setRatingModalData] = useState(null);
   const [reviewedBookings, setReviewedBookings] = useState(new Set());
+  const [currentTimestamp, setCurrentTimestamp] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentTimestamp(Date.now());
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    const isAnyModalOpen = Boolean(
+      showQrModal || showScanModal || showDisputeModal || showCancelModal || showRatingModal
+    );
+    if (!isAnyModalOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowQrModal(false);
+        setShowScanModal(false);
+        setShowDisputeModal(false);
+        setShowCancelModal(false);
+        setShowRatingModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow || '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showQrModal, showScanModal, showDisputeModal, showCancelModal, showRatingModal]);
 
   useEffect(() => {
     // Check local storage for reviewed bookings
@@ -208,7 +244,9 @@ export default function BookingsPage() {
           reviewed.add(k.replace('reviewed_booking_', ''));
         }
       }
-      setReviewedBookings(reviewed);
+      queueMicrotask(() => {
+        setReviewedBookings(reviewed);
+      });
     } catch {}
   }, []);
 
@@ -278,8 +316,9 @@ export default function BookingsPage() {
 
   if (!user) return null;
 
-  const now = Date.now();
   const isMeetingTimePassed = (booking) => {
+    const now = currentTimestamp;
+    if (!now) return false;
     if (booking.scheduledAt) {
       return now > new Date(booking.scheduledAt).getTime();
     }
@@ -443,16 +482,16 @@ export default function BookingsPage() {
   return (
     <div className="min-h-screen bg-[var(--bg-base)] pt-[58px] md:pt-0 pb-20 anim-fade-in">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-[#E7E5E4] px-4 py-4 shadow-[0_2px_8px_rgba(28,25,23,0.06)] flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#141414]/90 backdrop-blur-xl border-b border-[#E7E5E4] dark:border-white/10 px-4 py-4 shadow-[0_2px_8px_rgba(28,25,23,0.06)] flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[#1C1917] tracking-tight flex items-center gap-2">
-            <Calendar size={20} className="text-[#1C1917]" />
+          <h1 className="text-xl font-bold text-[#1C1917] dark:text-white tracking-tight flex items-center gap-2">
+            <ShakeHands size={22} className="text-[#1C1917] dark:text-white" />
             My Meetings
           </h1>
         </div>
         {/* Sparks balance — helps user know how many Sparks they have before booking */}
         {sparksBalance !== null && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-black/5 text-[#1C1917] border border-black/10">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white border border-black/10 dark:border-white/15">
             <Zap size={13} className="fill-amber-500 text-amber-500" />
             <span>{sparksBalance.toLocaleString()}</span>
           </div>
@@ -461,21 +500,21 @@ export default function BookingsPage() {
 
       {/* Tabs */}
       <div className="px-4 mt-4">
-        <div className="flex bg-white p-1 rounded-full border border-[#E7E5E4] shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+        <div className="flex bg-white dark:bg-[#141414] p-1 rounded-full border border-[#E7E5E4] dark:border-white/10 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
           {["Active", "History"].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 text-[13px] font-bold rounded-full transition-all duration-200 cursor-pointer ${
                 activeTab === tab
-                  ? "bg-black text-white shadow-xs"
-                  : "text-[#78716C] hover:text-[#1C1917]"
+                  ? "bg-black text-white dark:bg-[#7657D9] shadow-xs"
+                  : "text-[#78716C] dark:text-white/60 hover:text-[#1C1917] dark:hover:text-white"
               }`}
             >
               {tab}
               {tab === "Active" && activeBookings.length > 0 && (
                 <span className={`ml-1.5 inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full ${
-                  activeTab === tab ? "bg-white text-black" : "bg-black/5 text-[#78716C]"
+                  activeTab === tab ? "bg-white text-black dark:bg-white/20 dark:text-white" : "bg-black/5 text-[#78716C] dark:bg-white/10 dark:text-white/60"
                 }`}>
                   {activeBookings.length}
                 </span>
@@ -495,12 +534,12 @@ export default function BookingsPage() {
         )}
 
         {!isLoading && displayList.length === 0 && (
-          <div className="flex flex-col items-center text-center justify-center py-16 px-6 bg-white rounded-[16px] border border-dashed border-[#E7E5E4] shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
-            <div className="w-12 h-12 bg-black/5 rounded-full flex items-center justify-center text-[#1C1917] mb-3 border border-black/10">
-              <Calendar size={20} strokeWidth={2.5} />
+          <div className="flex flex-col items-center text-center justify-center py-16 px-6 bg-white dark:bg-[#141414] rounded-[16px] border border-dashed border-[#E7E5E4] dark:border-white/10 shadow-[0_2px_8px_rgba(28,25,23,0.06)]">
+            <div className="w-12 h-12 bg-black/5 dark:bg-white/10 rounded-full flex items-center justify-center text-[#1C1917] dark:text-white mb-3 border border-black/10 dark:border-white/15">
+              <ShakeHands size={22} />
             </div>
-            <h3 className="text-sm font-bold text-[#1C1917] mb-1">No {activeTab.toLowerCase()} meetings</h3>
-            <p className="text-xs text-[#78716C] font-medium">
+            <h3 className="text-sm font-bold text-[#1C1917] dark:text-white mb-1">No {activeTab.toLowerCase()} meetings</h3>
+            <p className="text-xs text-[#78716C] dark:text-white/60 font-medium">
               {activeTab === "Active" 
                 ? "You don't have any upcoming campus meetups right now." 
                 : "No past meetups found."}
@@ -589,7 +628,7 @@ export default function BookingsPage() {
 
                 {booking.agenda && booking.agenda.toLowerCase().trim() !== booking.title?.toLowerCase().trim() && (
                   <div className="text-[11px] text-[#78716C] italic bg-white rounded-xl px-2.5 py-1.5 border border-[#E7E5E4] mt-1">
-                    "{booking.agenda}"
+                    &quot;{booking.agenda}&quot;
                   </div>
                 )}
               </div>
@@ -831,8 +870,11 @@ export default function BookingsPage() {
 
       {/* ─── MODAL: GUEST QR TICKET ─── */}
       {showQrModal && selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm anim-fade-in">
-          <div className="bg-white rounded-[16px] w-full max-w-[340px] overflow-hidden shadow-2xl anim-scale-in flex flex-col">
+        <div 
+          onClick={() => setShowQrModal(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm anim-fade-in cursor-pointer"
+        >
+          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-[16px] w-full max-w-[340px] overflow-hidden shadow-2xl anim-scale-in flex flex-col cursor-default">
             <div className="p-4 border-b flex items-center justify-between bg-[#FAFAF8]">
               <h3 className="text-sm font-bold text-[#1C1917]">Meeting Ticket</h3>
               <button onClick={() => setShowQrModal(false)} className="w-8 h-8 rounded-full bg-white border border-[#E7E5E4] flex items-center justify-center text-[#78716C] hover:text-white">
@@ -860,8 +902,11 @@ export default function BookingsPage() {
 
       {/* ─── MODAL: CANCEL REQUEST ─── */}
       {showCancelModal && bookingToCancel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm anim-fade-in">
-          <div className="bg-white rounded-[16px] w-full max-w-[340px] p-6 shadow-2xl anim-scale-in text-center border border-[#E7E5E4]">
+        <div 
+          onClick={() => setShowCancelModal(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm anim-fade-in cursor-pointer"
+        >
+          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-[16px] w-full max-w-[340px] p-6 shadow-2xl anim-scale-in text-center border border-[#E7E5E4] cursor-default">
             <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertTriangle size={24} />
             </div>
@@ -902,14 +947,17 @@ export default function BookingsPage() {
 
       {/* ─── MODAL: HOST VERIFICATION ─── */}
       {showScanModal && selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md anim-fade-in">
+        <div 
+          onClick={() => { setShowScanModal(false); setManualCode(""); setIsScanning(true); setScanStatus("idle"); }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md anim-fade-in cursor-pointer"
+        >
           <div className="absolute top-4 right-4 z-50">
              <button onClick={() => { setShowScanModal(false); setManualCode(""); setIsScanning(true); setScanStatus("idle"); }} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
                <X size={20} strokeWidth={2.5} />
              </button>
           </div>
           
-          <div className="w-full max-w-[340px] flex flex-col items-center">
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[340px] flex flex-col items-center cursor-default">
             <h3 className="text-white text-lg font-bold mb-2">Verify Meeting</h3>
             <p className="text-white/60 text-xs font-medium mb-6 text-center">
               Enter the 6-digit code from {selectedBooking.guestName}&apos;s phone to receive your Sparks.
@@ -1011,8 +1059,11 @@ export default function BookingsPage() {
 
       {/* ─── MODAL: REPORT ISSUE ─── */}
       {showDisputeModal && selectedBooking && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4 bg-black/50 backdrop-blur-sm anim-fade-in">
-          <div className="bg-white rounded-[16px] w-full max-w-[380px] overflow-hidden shadow-2xl anim-scale-in">
+        <div 
+          onClick={() => { setShowDisputeModal(false); setDisputeSuccess(false); }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20 md:pb-4 bg-black/50 backdrop-blur-sm anim-fade-in cursor-pointer"
+        >
+          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-[16px] w-full max-w-[380px] overflow-hidden shadow-2xl anim-scale-in cursor-default">
             <div className="p-5 border-b border-[#E7E5E4] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center">

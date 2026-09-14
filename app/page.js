@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { cookies, headers } from 'next/headers';
 import { getUserWithRole } from '../lib/getAdminUser';
 import FeedClient from './FeedClient';
 import MarketingHome from '../components/MarketingHome';
@@ -42,7 +43,18 @@ export const metadata = {
 
 export default async function HomePage() {
   const user = await getUserWithRole();
+  const cookieStore = await cookies();
+  const headerStore = await headers();
+  const hostname = headerStore.get('host') || '';
+  const isAppHost = hostname.startsWith('app.');
+  const isPWA = cookieStore.get('__meova_pwa')?.value === '1';
+
   if (!user) {
+    // If in PWA standalone app or on app subdomain, NEVER render marketing website: redirect directly to login
+    if (isPWA || isAppHost) {
+      redirect('/login');
+    }
+
     let colleges = [];
     try {
       const { data } = await supabaseAdmin

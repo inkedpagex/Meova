@@ -16,7 +16,18 @@ export default function PWAInstallModal({ isOpen, onClose }) {
     } else {
       setDeviceTab('desktop');
     }
-  }, [isOpen]);
+
+    const appInstalledHandler = () => {
+      try {
+        document.cookie = '__meova_pwa=1; path=/; max-age=31536000; SameSite=Lax';
+        localStorage.setItem('Meova_pwa_installed', '1');
+      } catch {}
+      onClose();
+    };
+
+    window.addEventListener('appinstalled', appInstalledHandler);
+    return () => window.removeEventListener('appinstalled', appInstalledHandler);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 

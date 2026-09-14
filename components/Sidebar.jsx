@@ -14,6 +14,8 @@ import {
   Compass, 
   MessageSquare, 
   Bell, 
+  Calendar,
+  ShakeHands,
   User as UserIcon, 
   Wallet,
   Shield, 
@@ -66,11 +68,13 @@ export default function Sidebar({ user: propUser }) {
         window.location.pathname.startsWith('/help') ||
         AUTH_PATHS.includes(window.location.pathname);
       const isRootMarketing = window.location.pathname === '/' && !currentUserId;
-      if (isIsolatedSub || isPublicAmbassadorPage || isCollegePage || isContentPage || isRootMarketing) {
-        setIsStandaloneHost(true);
-      } else {
-        setIsStandaloneHost(false);
-      }
+      queueMicrotask(() => {
+        if (isIsolatedSub || isPublicAmbassadorPage || isCollegePage || isContentPage || isRootMarketing) {
+          setIsStandaloneHost(true);
+        } else {
+          setIsStandaloneHost(false);
+        }
+      });
     }
   }, [pathname, currentUserId]);
 
@@ -83,7 +87,9 @@ export default function Sidebar({ user: propUser }) {
     AUTH_PATHS.includes(pathname);
 
   useEffect(() => {
-    setPendingPath(null);
+    queueMicrotask(() => {
+      setPendingPath(null);
+    });
   }, [pathname]);
 
   const initialSparks = wallet
@@ -95,7 +101,9 @@ export default function Sidebar({ user: propUser }) {
   useEffect(() => {
     if (wallet) {
       const total = (wallet.purchased || 0) + (wallet.bonus || 0) + (wallet.creator || 0);
-      setSparks(total);
+      queueMicrotask(() => {
+        setSparks(total);
+      });
     }
   }, [wallet]);
 
@@ -104,11 +112,13 @@ export default function Sidebar({ user: propUser }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('sidebar_collapsed');
-      if (saved === 'true') setIsCollapsed(true);
-    }
+    queueMicrotask(() => {
+      setMounted(true);
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('sidebar_collapsed');
+        if (saved === 'true') setIsCollapsed(true);
+      }
+    });
   }, []);
 
   const toggleCollapse = () => {
@@ -168,7 +178,9 @@ export default function Sidebar({ user: propUser }) {
     const currentId = user?.id || user?.uid;
     if (!currentId || !supabase) return;
 
-    fetchApiCount();
+    queueMicrotask(() => {
+      fetchApiCount();
+    });
 
     const channel = supabase
       .channel(`sidebar-notifications-${currentId}`)
@@ -232,7 +244,9 @@ export default function Sidebar({ user: propUser }) {
     const currentId = user?.id || user?.uid;
     if (!currentId || !supabase) return;
 
-    pollUnread();
+    queueMicrotask(() => {
+      pollUnread();
+    });
 
     const channel = supabase
       .channel(`sidebar-chats-${currentId}`)
@@ -283,7 +297,9 @@ export default function Sidebar({ user: propUser }) {
       } catch {}
     };
 
-    fetchPendingBookings();
+    queueMicrotask(() => {
+      fetchPendingBookings();
+    });
 
     const channel = supabase
       .channel(`sidebar-bookings-${user.id}`)
@@ -317,6 +333,7 @@ export default function Sidebar({ user: propUser }) {
     { href: '/',              label: 'Home',          Icon: Home },
     { href: '/discover',      label: 'Discover',      Icon: Compass },
     { href: '/messages',      label: 'Messages',      Icon: MessageSquare, badge: unreadMsgCount },
+    { href: '/bookings',      label: 'Meetups',       Icon: ShakeHands, badge: pendingBookingsCount },
     { href: '/notifications', label: 'Notifications', Icon: Bell, badge: unreadCount },
     { href: '/wallet',        label: 'Wallet',        Icon: Wallet },
     { href: '/profile',       label: 'Profile',       Icon: UserIcon },
@@ -328,8 +345,8 @@ export default function Sidebar({ user: propUser }) {
     { href: '/',              label: 'Home',          Icon: Home },
     { href: '/discover',      label: 'Discover',      Icon: Compass },
     { href: '/messages',      label: 'Messages',      Icon: MessageSquare, badge: unreadMsgCount },
-    { href: '/notifications', label: 'Notifications', Icon: Bell, badge: unreadCount },
-    { href: '/profile',       label: 'Profile',       Icon: UserIcon },
+    { href: '/bookings',      label: 'Meetups',       Icon: ShakeHands, badge: pendingBookingsCount },
+    { href: user ? '/profile' : '/login', label: user ? 'Profile' : 'Login', Icon: user ? UserIcon : LogIn },
   ];
 
   const avatarSrc = getUserAvatarUrl(user);
@@ -347,39 +364,32 @@ export default function Sidebar({ user: propUser }) {
         <div className="flex items-center gap-2 flex-shrink-0">
           {user ? (
             <>
-              {/* Top-Right Create Post / Plus CTA */}
-              <button
-                type="button"
-                onClick={() => setShowCreateModal(true)}
-                className="w-8.5 h-8.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] hover:bg-black/5 active:scale-95 transition-all cursor-pointer shadow-2xs flex-shrink-0"
-                title="Create Post / Story"
-              >
-                <Plus size={17} strokeWidth={2.2} />
-              </button>
-
-              {/* Wallet Pill */}
+              {/* Premium Sparks Wallet Pill */}
               <Link 
                 href="/wallet" 
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] hover:bg-black/5 hover:border-black/20 transition-all active:scale-95 shadow-2xs whitespace-nowrap flex-shrink-0"
+                className="flex items-center gap-1.5 h-8 px-2.5 sm:px-3 rounded-full text-xs font-black bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 dark:border-amber-400/35 hover:bg-amber-500/20 active:scale-95 transition-all shadow-xs whitespace-nowrap flex-shrink-0 group"
+                title="Wallet & Sparks"
               >
-                <Zap size={12} strokeWidth={2} className="fill-amber-500 text-amber-500 flex-shrink-0" />
-                <span className="tabular-nums font-bold leading-none">{sparks.toLocaleString()}</span>
+                <Zap size={13} strokeWidth={2.5} className="fill-amber-500 text-amber-500 drop-shadow-[0_0_6px_rgba(245,158,11,0.5)] group-hover:scale-110 transition-transform flex-shrink-0" />
+                <span className="tabular-nums font-black tracking-tight leading-none text-[12px]">{sparks.toLocaleString()}</span>
               </Link>
 
-              {/* Own Avatar */}
+              {/* Top-Right Notifications Bell */}
               <Link
-                href="/profile"
-                className="w-8.5 h-8.5 rounded-full overflow-hidden p-[1px] border border-[var(--border-hairline)] flex-shrink-0 relative active:scale-95 transition-transform bg-[var(--bg-surface)]"
+                href="/notifications"
+                className={`relative w-8.5 h-8.5 rounded-full flex items-center justify-center border transition-all active:scale-95 cursor-pointer shadow-2xs flex-shrink-0 ${
+                  pathname === '/notifications'
+                    ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
+                    : 'bg-[var(--bg-surface)] text-[var(--text-primary)] border-[var(--border-hairline)] hover:bg-black/5 dark:hover:bg-white/10'
+                }`}
+                title="Notifications"
               >
-                <img
-                  src={avatarSrc}
-                  alt={user.full_name || 'Profile'}
-                  className="w-full h-full rounded-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = getCartoonAvatar(user.full_name || user.id || 'user');
-                  }}
-                />
+                <Bell size={16} strokeWidth={pathname === '/notifications' ? 2.2 : 1.8} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[15px] h-[15px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center leading-none ring-2 ring-[var(--bg-surface)]">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </Link>
             </>
           ) : (
@@ -562,27 +572,6 @@ export default function Sidebar({ user: propUser }) {
           }}
         >
         {MOBILE_NAV.map(({ href, label, Icon, badge }) => {
-          if ((href === '/profile') && !user) {
-            return (
-              <Link
-                key={href}
-                href="/login"
-                prefetch={true}
-                onClick={() => {
-                  setPendingPath('/login');
-                  if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-                    try { navigator.vibrate(10); } catch {}
-                  }
-                }}
-                className="flex-1 flex flex-col items-center justify-center h-full text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors active:scale-95"
-              >
-                <div className="relative flex items-center justify-center">
-                  <LogIn size={21} strokeWidth={1.5} />
-                </div>
-                <span className="text-[10px] font-medium tracking-tight mt-0.5">Login</span>
-              </Link>
-            );
-          }
           const active = pendingPath ? pendingPath === href : isActive(href);
           const badgeCount = typeof badge === 'number' && badge > 0 ? badge : 0;
           const showDot = badgeCount > 0;

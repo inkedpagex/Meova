@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { rsvpToEventAction, cancelRsvpAction } from './events.actions';
@@ -12,33 +12,32 @@ export default function RsvpButton({ eventId, userId, isInitialRsvp }) {
 
   const handleRsvp = async () => {
     if (!userId) { router.push('/login'); return; }
-    setLoading(true);
+    const previous = isRsvp;
+    // 0ms Optimistic UI update
+    setIsRsvp(!previous);
+
     try {
-      if (isRsvp) { 
+      if (previous) { 
         const res = await cancelRsvpAction(eventId);
         if (!res.success) throw new Error(res.error);
-        setIsRsvp(false); 
       } else { 
         const res = await rsvpToEventAction(eventId);
         if (!res.success) throw new Error(res.error);
-        setIsRsvp(true); 
       }
       router.refresh();
     } catch (e) {
+      // Revert if error
+      setIsRsvp(previous);
       console.error(e);
-      alert(e.message || 'Failed to update RSVP. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <button
       onClick={handleRsvp}
-      disabled={loading}
       className={`
         text-[11px] font-bold tracking-wide px-4 py-1.5 rounded-full
-        transition-all duration-200 active:scale-95 disabled:opacity-50
+        transition-all duration-200 active:scale-95 cursor-pointer
         border
         ${isRsvp
           ? 'border-[#333] text-[#888] hover:border-[#555] hover:text-white bg-transparent'
@@ -46,13 +45,7 @@ export default function RsvpButton({ eventId, userId, isInitialRsvp }) {
         }
       `}
     >
-      {loading ? (
-        <Loader2 size={11} className="animate-spin" />
-      ) : isRsvp ? (
-        'Going ✓'
-      ) : (
-        'RSVP'
-      )}
+      {isRsvp ? 'Going ✓' : 'RSVP'}
     </button>
   );
 }

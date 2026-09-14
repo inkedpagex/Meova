@@ -154,6 +154,38 @@ function SuggestedStudentItem({ student, currentUid, onSelect }) {
   );
 }
 
+// Robust deduplication helper: matches by ID, tempId, clientMsgId, opt- preview, or identical sender+text within 7s
+function mergeMessageIntoList(prev, newMsg) {
+  if (!newMsg) return prev;
+  const matchIdx = prev.findIndex(m => {
+    if (m.id && newMsg.id && m.id === newMsg.id) return true;
+    if (newMsg.clientMsgId && (m.tempId === newMsg.clientMsgId || m.id === newMsg.clientMsgId)) return true;
+    if (newMsg.tempId && (m.tempId === newMsg.tempId || m.id === newMsg.tempId)) return true;
+    if (m.id?.startsWith('opt-') && m.text?.trim() === newMsg.text?.trim()) return true;
+    if (
+      String(m.senderId) === String(newMsg.senderId) &&
+      m.text?.trim() === newMsg.text?.trim() &&
+      Math.abs((m.timestamp || 0) - (newMsg.timestamp || 0)) < 7000
+    ) {
+      return true;
+    }
+    return false;
+  });
+
+  if (matchIdx !== -1) {
+    const copy = [...prev];
+    copy[matchIdx] = {
+      ...copy[matchIdx],
+      ...newMsg,
+      id: newMsg.id || copy[matchIdx].id,
+      status: 'sent',
+    };
+    return copy;
+  }
+
+  return [...prev, newMsg];
+}
+
 // ─── Message Bubble ──────────────────────────────────────────────────
 
 function MessageBubble({ msg, isMe, showAvatar, senderPhoto, senderName, senderId }) {
@@ -346,10 +378,9 @@ function MessagesContent() {
         { event: 'new-message' },
         ({ payload }) => {
           const newMsg = payload;
-          if (newMsg?.senderId === currentUid) return; // skip own broadcast
+          if (!newMsg) return;
           setMessages(prev => {
-            if (prev.some(m => m.id === newMsg.id || (newMsg.tempId && m.id === newMsg.tempId))) return prev;
-            const updated = [...prev, newMsg];
+            const updated = mergeMessageIntoList(prev, newMsg);
             messagesCacheRef.current[activeChatId] = updated;
             return updated;
           });
@@ -366,20 +397,17 @@ function MessagesContent() {
         },
         (payload) => {
           const newMsg = payload.new;
+          if (!newMsg) return;
+          const formatted = {
+            id: newMsg.id,
+            senderId: newMsg.sender_id,
+            text: newMsg.text,
+            status: newMsg.status || 'sent',
+            timestamp: newMsg.created_at ? new Date(newMsg.created_at).getTime() : Date.now(),
+            created_at: newMsg.created_at,
+          };
           setMessages(prev => {
-            if (prev.some(m => m.id === newMsg.id)) return prev;
-            const formatted = {
-              id: newMsg.id,
-              senderId: newMsg.sender_id,
-              text: newMsg.text,
-              status: newMsg.status || 'sent',
-              timestamp: newMsg.created_at ? new Date(newMsg.created_at).getTime() : Date.now(),
-              created_at: newMsg.created_at,
-            };
-            const updated = [
-              ...prev.filter(m => !m.id?.startsWith('temp-') || m.text !== newMsg.text),
-              formatted
-            ];
+            const updated = mergeMessageIntoList(prev, formatted);
             messagesCacheRef.current[activeChatId] = updated;
             return updated;
           });
@@ -452,10 +480,18 @@ function MessagesContent() {
         .then(res => res.json())
         .then(data => {
           if (data?.messages) {
-            messagesCacheRef.current[chatId] = data.messages;
             setActiveChatId(currId => {
               if (currId === chatId) {
-                setMessages(data.messages);
+                setMessages(prev => {
+                  let list = [...data.messages];
+                  prev.forEach(p => {
+                    if (p.id?.startsWith('temp-') && !list.some(m => m.id === p.id || (m.text?.trim() === p.text?.trim() && String(m.senderId) === String(p.senderId)))) {
+                      list.push(p);
+                    }
+                  });
+                  messagesCacheRef.current[chatId] = list;
+                  return list;
+                });
                 setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'instant' }), 30);
               }
               return currId;
@@ -559,14 +595,36 @@ function MessagesContent() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
 
-  // Send message
+  // Send message: Instant 0ms optimistic dispatch & zero duplicate guarantee
   const sendMessage = async () => {
     const text = inputText.trim();
-    if (!text || !activeChatId || !currentUid || sendingMsg) return;
+    if (!text || !activeChatId || !currentUid) return;
 
+    // Instant 0ms response: clear input, scroll, and render optimistic bubble immediately
     setInputText('');
-    setSendingMsg(true);
     inputRef.current?.focus();
+
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const newMsg = {
+      id: tempId,
+      tempId,
+      senderId: currentUid,
+      text,
+      timestamp: Date.now(),
+      created_at: new Date().toISOString(),
+      status: 'sent'
+    };
+
+    setMessages(prev => {
+      const updated = mergeMessageIntoList(prev, newMsg);
+      if (activeChatId) {
+        messagesCacheRef.current[activeChatId] = updated;
+      }
+      return updated;
+    });
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 20);
+
+    const targetChatId = activeChatId;
 
     if (activeChat?.isMock) {
       const otherUserId = activeChat.participants.find(p => p !== currentUid);
@@ -579,72 +637,53 @@ function MessagesContent() {
         const createData = await createRes.json();
         if (!createRes.ok) {
           import('@/lib/toast').then(m => m.toast.error(createData.error || 'Failed to start chat (Need 5 Sparks)'));
-          setSendingMsg(false);
+          setMessages(prev => prev.filter(m => m.id !== tempId));
           return;
         }
         setActiveChat(prev => ({ ...prev, isMock: false }));
       } catch (err) {
         console.error('Failed to create chat:', err);
-        setSendingMsg(false);
+        setMessages(prev => prev.filter(m => m.id !== tempId));
         return;
       }
     }
 
-    const tempId = `temp-${Date.now()}`;
-    const newMsg = {
-      id: tempId,
-      tempId,
-      senderId: currentUid,
-      text,
-      timestamp: Date.now(),
-      status: 'sent'
-    };
-
-    setMessages(prev => {
-      const updated = [...prev, newMsg];
-      if (activeChatId) {
-        messagesCacheRef.current[activeChatId] = updated;
-      }
-      return updated;
-    });
-    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 30);
-
-    // Instant WebSocket broadcast to active recipient
-    if (activeChannelRef.current) {
-      activeChannelRef.current.send({
-        type: 'broadcast',
-        event: 'new-message',
-        payload: {
-          id: tempId,
-          tempId,
-          senderId: currentUid,
-          text,
-          status: 'sent',
-          timestamp: Date.now(),
-          created_at: new Date().toISOString(),
-        }
-      }).catch(() => {});
-    }
-
     try {
-      const res = await fetch(`/api/chats/${activeChatId}/messages`, {
+      const res = await fetch(`/api/chats/${targetChatId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, clientMsgId: tempId })
       });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || `Server error ${res.status}`);
       }
+
+      const data = await res.json();
+      if (data?.messageId) {
+        setMessages(prev => {
+          const updated = mergeMessageIntoList(prev, {
+            id: data.messageId,
+            clientMsgId: tempId,
+            tempId,
+            senderId: currentUid,
+            text,
+            timestamp: Date.now(),
+            status: 'sent',
+          });
+          if (targetChatId) {
+            messagesCacheRef.current[targetChatId] = updated;
+          }
+          return updated;
+        });
+      }
       mutateChats();
     } catch (err) {
       console.error('Failed to send message:', err.message);
       setMessages(prev => prev.filter(m => m.id !== tempId));
       setInputText(text);
-      import('@/lib/toast').then(m => m.toast.error('Failed to send message. Try again.'));
-    } finally {
-      setSendingMsg(false);
+      import('@/lib/toast').then(m => m.toast.error(err.message || 'Failed to send message. Try again.'));
     }
   };
 

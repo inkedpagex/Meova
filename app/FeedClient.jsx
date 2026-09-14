@@ -264,9 +264,41 @@ export default function FeedClient() {
 
   useEffect(() => {
     if (searchParams?.get('action') === 'create-post') {
-      setShowPostModal(true);
+      queueMicrotask(() => {
+        setShowPostModal(true);
+      });
     }
   }, [searchParams]);
+
+  // ── Body scroll lock & Escape key listener for open modals ─────────
+  useEffect(() => {
+    const isAnyModalOpen = Boolean(showPostModal || deletingPostId || hostModeratingPost);
+    if (!isAnyModalOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (showPostModal) {
+          setShowPostModal(false);
+          setPostMediaList([]);
+          setPostCaption('');
+        } else if (deletingPostId && !isDeletingPost) {
+          setDeletingPostId(null);
+        } else if (hostModeratingPost && !isHostDeleting) {
+          setHostModeratingPost(null);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow || '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showPostModal, deletingPostId, hostModeratingPost, isDeletingPost, isHostDeleting]);
 
   const handlePostFilesSelect = async (e) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -500,33 +532,20 @@ export default function FeedClient() {
 
           <div className="flex gap-3.5 overflow-x-auto no-scrollbar py-3 px-3 -mx-2 -my-2 scroll-smooth">
             
-            {/* User's Story Button */}
-            <div 
+            {/* Direct Add / Plus Button (Pure Plus button, no profile avatar) */}
+            <button 
+              type="button"
               onClick={() => setShowPostModal(true)}
-              className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group select-none"
+              className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group select-none outline-none focus:outline-none"
+              title="Add Moment / Post"
             >
-              <div className="relative w-[58px] h-[58px] rounded-full p-[2.5px] bg-[var(--accent-tint-20)] group-hover:bg-[var(--accent)] transition-all duration-200 ease-out group-hover:scale-108 group-hover:-translate-y-1 shadow-xs group-hover:shadow-[0_6px_16px_rgba(240,90,0,0.3)] group-active:scale-95">
-                <div className="w-full h-full rounded-full overflow-hidden bg-[var(--bg-surface)] ring-2 ring-[var(--bg-surface)]">
-                  <img
-                    src={optimizeAvatarUrl(getUserAvatarUrl(currentUser))}
-                    alt=""
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = getCartoonAvatar(currentUser?.full_name || 'user');
-                    }}
-                  />
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[var(--accent)] text-white flex items-center justify-center ring-2 ring-[var(--bg-surface)] shadow-xs">
-                  <Plus size={11} strokeWidth={3} />
-                </div>
+              <div className="w-[58px] h-[58px] rounded-full flex items-center justify-center border-2 border-dashed border-[var(--accent)] bg-[var(--accent-tint-10)] dark:bg-[#7657D9]/20 text-[var(--accent)] group-hover:bg-[var(--accent)] group-hover:text-white group-hover:border-solid transition-all duration-200 ease-out group-hover:scale-105 active:scale-95 shadow-2xs">
+                <Plus size={22} strokeWidth={2.4} className="transition-transform duration-200 group-hover:rotate-90 flex-shrink-0" />
               </div>
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors truncate max-w-[62px] text-center">
-                You
+              <span className="text-[11px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--accent)] transition-colors truncate max-w-[62px] text-center">
+                Post
               </span>
-            </div>
+            </button>
 
             {/* Peer Stories (Live online peers with electric green rings) */}
             {campusPeers.slice(0, 18).map((peer) => {
@@ -663,14 +682,14 @@ export default function FeedClient() {
 
                         {/* Name + meta */}
                         <div className="min-w-0">
-                          <h4 className="text-[14px] font-bold text-black group-hover/author:text-black transition-colors leading-tight truncate">
+                          <h4 className="text-[14px] font-bold text-black dark:text-white group-hover/author:text-black dark:group-hover/author:text-white transition-colors leading-tight truncate">
                             {post.authorName}
                           </h4>
-                          <p className="text-[12px] text-black/70 font-semibold mt-0.5 flex items-center gap-1.5 leading-none truncate">
+                          <p className="text-[12px] text-black/70 dark:text-white/70 font-semibold mt-0.5 flex items-center gap-1.5 leading-none truncate">
                             <span>{post.authorBranch?.split('(')?.[0]?.trim() || 'Student'}</span>
-                            <span className="text-black/35">·</span>
+                            <span className="text-black/35 dark:text-white/40">·</span>
                             <span>{post.location || 'Campus'}</span>
-                            <span className="text-black/35">·</span>
+                            <span className="text-black/35 dark:text-white/40">·</span>
                             <span>{post.timeAgo}</span>
                           </p>
                         </div>
@@ -678,21 +697,12 @@ export default function FeedClient() {
 
                       {/* Header Right Actions */}
                       <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                        {!isOwnPost && post.authorId && (
-                          <MessagePillButton
-                            targetUserId={post.authorId}
-                            targetName={post.authorName}
-                            currentUserId={currentUser?.id}
-                            size="sm"
-                          />
-                        )}
-
                         {/* 3-dot menu */}
                         <div className="relative flex-shrink-0">
                           <button
                             type="button"
                             onClick={() => setOpenMenuPostId(openMenuPostId === post.id ? null : post.id)}
-                            className="w-8 h-8 flex items-center justify-center text-black/60 hover:text-black hover:bg-black/5 rounded-full transition-colors cursor-pointer"
+                            className="w-8 h-8 flex items-center justify-center text-black/60 dark:text-white/70 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer"
                           >
                             <MoreHorizontal size={18} />
                           </button>
@@ -832,7 +842,7 @@ export default function FeedClient() {
                                 toast.success('Link copied!');
                               }
                             }}
-                            className="p-1.5 rounded-full hover:bg-black/5 text-black/70 hover:text-black transition-colors cursor-pointer active:scale-90 whitespace-nowrap flex-shrink-0"
+                            className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-black/70 hover:text-black dark:text-white/70 dark:hover:text-white transition-colors cursor-pointer active:scale-90 whitespace-nowrap flex-shrink-0"
                             title="Share"
                           >
                             <Share2 size={19} />
@@ -842,8 +852,8 @@ export default function FeedClient() {
 
                       {/* Caption */}
                       {post.caption && (
-                        <p className="text-[13.5px] text-black leading-relaxed font-normal">
-                          <span className="font-bold text-black mr-1.5">{post.authorName}</span>
+                        <p className="text-[13.5px] text-black dark:text-white leading-relaxed font-normal">
+                          <span className="font-bold text-black dark:text-white mr-1.5">{post.authorName}</span>
                           <span>{post.caption}</span>
                         </p>
                       )}
@@ -874,8 +884,20 @@ export default function FeedClient() {
 
       {/* ── CREATE POST MODAL ──────────────────────────────────── */}
       {showPostModal && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 anim-fade-in">
-          <div className="w-full max-w-lg bg-white rounded-[28px] border border-[#E7E5E4] p-6 shadow-2xl space-y-4 relative max-h-[90vh] overflow-y-auto">
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowPostModal(false);
+              setPostMediaList([]);
+              setPostCaption('');
+            }
+          }}
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 anim-fade-in cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-white rounded-[28px] border border-[#E7E5E4] p-6 shadow-2xl space-y-4 relative max-h-[90vh] overflow-y-auto cursor-default"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-[#E7E5E4]">
               <div>
                 <h3 className="text-base font-bold text-[#1C1917]">Share Campus Moment</h3>

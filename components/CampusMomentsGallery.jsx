@@ -114,12 +114,12 @@ export default function CampusMomentsGallery({
   // Empty State — Clean Instagram Style
   if (!posts || posts.length === 0) {
     return (
-      <div className="text-center py-14 px-4 rounded-[24px] bg-black/[0.02] border border-dashed border-black/10">
-        <div className="w-16 h-16 rounded-full border border-black/15 flex items-center justify-center mx-auto mb-3.5 text-black/50">
+      <div className="text-center py-14 px-4 rounded-[24px] bg-black/[0.02] dark:bg-white/[0.02] border border-dashed border-black/10 dark:border-white/10">
+        <div className="w-16 h-16 rounded-full border border-black/15 dark:border-white/15 flex items-center justify-center mx-auto mb-3.5 text-black/50 dark:text-white/50">
           <Camera size={26} />
         </div>
-        <p className="text-sm font-black text-black tracking-tight">No Moments Shared Yet</p>
-        <p className="text-xs text-black/60 mt-1 max-w-xs mx-auto font-medium">
+        <p className="text-sm font-black text-black dark:text-white tracking-tight">No Moments Shared Yet</p>
+        <p className="text-xs text-black/60 dark:text-white/60 mt-1 max-w-xs mx-auto font-medium">
           Photos and moments shared on campus will appear here in your grid.
         </p>
       </div>

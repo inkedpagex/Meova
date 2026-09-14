@@ -48,6 +48,7 @@ export function ThemeProvider({ children, initialMode = 'light', initialAccent =
     root.setAttribute('data-mode', newMode);
     root.setAttribute('data-accent', newAccent);
     root.setAttribute('data-theme', `${newMode}-${newAccent}`);
+    root.classList.toggle('dark', newMode === 'dark');
 
     // Update meta theme-color for mobile browser address bar
     const selectedAccent = ACCENTS.find((a) => a.id === newAccent) || ACCENTS[0];
