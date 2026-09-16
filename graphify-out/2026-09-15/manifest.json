@@ -6,9 +6,9 @@
     "semantic_hash": "4e68e737909536f8f872598195567cb0"
   },
   "app/FeedClient.jsx": {
-    "mtime": 1789417380.445091,
-    "seen": 1789417459.116117,
-    "ast_hash": "a16ae489467513de57432471272178cc",
+    "mtime": 1789417732.1239321,
+    "seen": 1789418157.5747058,
+    "ast_hash": "d7e801c77394517c60a5bdb18d53c43c",
     "semantic_hash": ""
   },
   "app/about/page.jsx": {
@@ -726,9 +726,9 @@
     "semantic_hash": "412f8e1f80d35915180888f9b65582c0"
   },
   "app/bookings/page.js": {
-    "mtime": 1789416102.5449495,
-    "seen": 1789416770.3163538,
-    "ast_hash": "77897398d9e63324edcf31d7a01c1f53",
+    "mtime": 1789418073.0942016,
+    "seen": 1789418157.5963807,
+    "ast_hash": "434bad2de11acea10a66d9b2283fcd65",
     "semantic_hash": ""
   },
   "app/circles/[id]/page.js": {
@@ -996,9 +996,9 @@
     "semantic_hash": "07b740dcb587d32fd662e246d521269d"
   },
   "app/users/[id]/page.js": {
-    "mtime": 1789417585.81789,
-    "seen": 1789417721.362542,
-    "ast_hash": "3bda9d94c2a86de64f6ca7f16841850a",
+    "mtime": 1789418101.808569,
+    "seen": 1789418157.6049066,
+    "ast_hash": "223a8f7b4b4e50a3d95642222936c5b4",
     "semantic_hash": ""
   },
   "app/wallet/buy/page.js": {
@@ -1050,10 +1050,10 @@
     "semantic_hash": "cd4f69832ccf2afcb8a7bdc3734ac92d"
   },
   "components/CreateMenuModal.jsx": {
-    "mtime": 1788589685.2899919,
-    "seen": 1789049946.6902676,
-    "ast_hash": "9619b4b4d6f24e5ca3b44965fe9e4a22",
-    "semantic_hash": "9619b4b4d6f24e5ca3b44965fe9e4a22"
+    "mtime": 1789417750.4804094,
+    "seen": 1789418157.6069057,
+    "ast_hash": "c4028ca1f126448bb4909c451de1cb0f",
+    "semantic_hash": ""
   },
   "components/CustomSelect.jsx": {
     "mtime": 1788677174.6746929,
@@ -1092,10 +1092,10 @@
     "semantic_hash": "6ad02970e1ca86ecaffc0a899baefd54"
   },
   "components/InAppNotificationBanner.jsx": {
-    "mtime": 1788980292.2266648,
-    "seen": 1789049946.6902676,
-    "ast_hash": "7564b6cf0d6a926b4be403849ce5d3a7",
-    "semantic_hash": "7564b6cf0d6a926b4be403849ce5d3a7"
+    "mtime": 1789418042.6035507,
+    "seen": 1789418157.6079066,
+    "ast_hash": "cdcea97da137e62b527ef8d0a5cca80d",
+    "semantic_hash": ""
   },
   "components/InstagramEmbed.jsx": {
     "mtime": 1788589685.2931492,
@@ -1194,9 +1194,9 @@
     "semantic_hash": "78edd39a20343fb4f49d0e6a6e7d251f"
   },
   "components/Sidebar.jsx": {
-    "mtime": 1789417293.3658473,
-    "seen": 1789417363.8560374,
-    "ast_hash": "8d37c29953939422c88a878e1d4a5ded",
+    "mtime": 1789418001.4529707,
+    "seen": 1789418157.6099064,
+    "ast_hash": "53783536a1299967516dd887a7b2f5f9",
     "semantic_hash": ""
   },
   "components/Skeleton.jsx": {
@@ -1434,9 +1434,9 @@
     "semantic_hash": "cdc440adc3b1091a45a37467c4717a20"
   },
   "features/users/BookCoffeeButton.jsx": {
-    "mtime": 1789417614.2366548,
-    "seen": 1789417721.3821177,
-    "ast_hash": "098df01e7b2d4a9f0bb0972848ba3fee",
+    "mtime": 1789418031.6139262,
+    "seen": 1789418157.6164293,
+    "ast_hash": "d56e5ac513e0b1415910c2b995683f67",
     "semantic_hash": ""
   },
   "features/users/MessageButton.jsx": {
@@ -1494,9 +1494,9 @@
     "semantic_hash": "91d8b2e8266c46f8db3a702f9850c5e6"
   },
   "lib/icons.jsx": {
-    "mtime": 1789416636.603976,
-    "seen": 1789416770.3339329,
-    "ast_hash": "65946be0ae6c62f6365564a3b1ce4967",
+    "mtime": 1789417983.9322653,
+    "seen": 1789418157.6174278,
+    "ast_hash": "f1724709183e090c4271f03a75854682",
     "semantic_hash": ""
   },
   "lib/paymentReservations.js": {
@@ -1644,9 +1644,9 @@
     "semantic_hash": "db3f1d67c476870d7b65f4a0593f0804"
   },
   "public/sw.js": {
-    "mtime": 1789417631.7041924,
-    "seen": 1789417721.390854,
-    "ast_hash": "17fd5360eb36d90bc6ce402b70f1b6d2",
+    "mtime": 1789418108.7932904,
+    "seen": 1789418157.6214259,
+    "ast_hash": "c720332e13a630e98eea1a04d0cdb734",
     "semantic_hash": ""
   },
   "scratch/test_contact_api.mjs": {
@@ -2016,9 +2016,9 @@
     "semantic_hash": ""
   },
   "FEATURES_REGISTRY.md": {
-    "mtime": 1789417687.902003,
-    "seen": 1789417721.4005923,
-    "ast_hash": "3b340e4e3839548dffa95015c1ab5757",
+    "mtime": 1789418160.968987,
+    "seen": 1789418184.1504054,
+    "ast_hash": "7600a6f4618797e587618386f99c3908",
     "semantic_hash": ""
   },
   "scripts/test-pwa-standalone-routing.mjs": {

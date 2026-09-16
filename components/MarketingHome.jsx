@@ -403,7 +403,7 @@ export default function MarketingHome({ colleges = [] }) {
         {filteredColleges.length === 0 && (
           <div className="text-center py-12 p-8 rounded-[26px] bg-white border border-black/10 space-y-3">
             <Building2 size={32} className="mx-auto text-black/30" />
-            <p className="text-sm font-bold text-black">No college found matching "{searchQuery}"</p>
+            <p className="text-sm font-bold text-black">No college found matching &quot;{searchQuery}&quot;</p>
             <p className="text-xs text-black/60 max-w-md mx-auto">
               Want to launch Meova at your college? Apply as a founding Campus Ambassador and bring your university live.
             </p>
@@ -442,7 +442,7 @@ export default function MarketingHome({ colleges = [] }) {
             <div className="space-y-2">
               <h3 className="text-lg font-black text-black">Campus Radar</h3>
               <p className="text-xs text-black/70 font-medium leading-relaxed">
-                Broadcast when you're hanging out at the canteen or studying in the library. See who is free right now without creepy GPS tracking.
+                Broadcast when you&apos;re hanging out at the canteen or studying in the library. See who is free right now without creepy GPS tracking.
               </p>
             </div>
             <span className="text-[11px] font-bold text-[#78716C] uppercase tracking-wider">Live &amp; Ephemeral</span>
@@ -549,7 +549,47 @@ export default function MarketingHome({ colleges = [] }) {
         </div>
       </section>
 
-      {/* ── 7. COMPREHENSIVE LEGAL FOOTER ──────────────────────────────── */}
+      {/* ── 7. ABOUT MEOVA (CANONICAL ENTITY DEFINITION & AI OVERVIEW ANCHOR) ──────────────── */}
+      <section id="about" className="py-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <article className="p-8 sm:p-12 rounded-[32px] bg-white border border-[#E7E5E4] shadow-xs space-y-8">
+          <div className="space-y-3">
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#7657D9] bg-[#7657D9]/10 px-3.5 py-1.5 rounded-full inline-block">
+              Platform Overview
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-[#1C1917] leading-tight">
+              What is Meova?
+            </h2>
+            <p className="text-base sm:text-lg text-[#1C1917]/85 font-medium leading-relaxed max-w-4xl">
+              <strong>Meova</strong> is India&apos;s verified campus social network and 1-on-1 peer meetup platform designed specifically for university students. On Meova, verified college students discover peers by university, branch, year, and skills, schedule in-person campus study &amp; coffee meetups, earn Sparks, and participate in active student circles.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+            <div className="p-6 rounded-[24px] bg-[#FAFAF8] border border-[#E7E5E4] space-y-2.5">
+              <h3 className="font-bold text-base text-[#1C1917]">Verified Campus Peers</h3>
+              <p className="text-xs sm:text-sm text-[#1C1917]/70 font-medium leading-relaxed">
+                Connect exclusively with verified university students using official student IDs and institutional domains, ensuring zero fake profiles.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-[24px] bg-[#FAFAF8] border border-[#E7E5E4] space-y-2.5">
+              <h3 className="font-bold text-base text-[#1C1917]">1-on-1 Campus Meetups</h3>
+              <p className="text-xs sm:text-sm text-[#1C1917]/70 font-medium leading-relaxed">
+                Schedule study sessions and coffee meets with classmates. Sessions are secured with mutual QR code verification and live meetup timers.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-[24px] bg-[#FAFAF8] border border-[#E7E5E4] space-y-2.5">
+              <h3 className="font-bold text-base text-[#1C1917]">Sparks Economy</h3>
+              <p className="text-xs sm:text-sm text-[#1C1917]/70 font-medium leading-relaxed">
+                An internal reward economy where students earn and exchange Sparks for mentoring, peer collaboration, and campus leadership.
+              </p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      {/* ── 8. COMPREHENSIVE LEGAL FOOTER ──────────────────────────────── */}
       <LegalFooter />
     </div>
   );

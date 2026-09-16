@@ -21,32 +21,12 @@ import { getUserAvatarUrl } from '../../utils/avatar';
 import { startIncomingRingtone, startOutgoingRingtone, playConnectedSound, stopRingtone } from '../../lib/ringtone';
 import { toast } from '../../lib/toast';
 
-// TURN + STUN — for reliable NAT & campus Wi-Fi traversal
-const ICE_SERVERS = {
+// Fallback STUN-only config — TURN credentials are fetched dynamically from /api/calls/ice-servers
+const FALLBACK_ICE_SERVERS = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun2.l.google.com:19302' },
-    {
-      urls: 'turn:openrelay.metered.ca:80',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:80?transport=tcp',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
   ],
   iceCandidatePoolSize: 10,
 };
@@ -56,6 +36,42 @@ const AUDIO_CONSTRAINTS = {
   noiseSuppression: true,
   autoGainControl: true,
 };
+
+// ── Helper: force-play an audio/video element with retries (mobile autoplay workaround) ──
+async function forcePlay(el, retries = 4) {
+  if (!el) return;
+  for (let i = 0; i < retries; i++) {
+    try {
+      el.muted = false;
+      el.volume = 1.0;
+      await el.play();
+      return; // success
+    } catch {
+      // Wait progressively longer between retries (200, 500, 1000, 2000ms)
+      await new Promise((r) => setTimeout(r, Math.min(200 * Math.pow(2, i), 2000)));
+    }
+  }
+}
+
+// ── Helper: resume AudioContext (required on mobile before any audio can play) ──
+function resumeAudioContext() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      // Create a silent oscillator to unlock audio on iOS
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(0);
+      osc.stop(0.001);
+      setTimeout(() => ctx.close().catch(() => {}), 100);
+    }
+  } catch {}
+}
 
 export default function VoiceCallModal({
   isOpen,
@@ -67,6 +83,7 @@ export default function VoiceCallModal({
   channel,
   roomId,
   onClose,
+  onCleanupRef, // ref callback from provider for camera safety net
 }) {
   const [callState, setCallState] = useState(mode === 'incoming' ? 'incoming' : 'calling');
   const [isMuted, setIsMuted] = useState(false);
@@ -91,6 +108,7 @@ export default function VoiceCallModal({
   const bufferedOfferRef = useRef(null);
   const signalingRetryRef = useRef(null);
   const hasConnectedRef = useRef(false);
+  const iceRestartAttemptedRef = useRef(false);
 
   const isVideoCall = callType === 'video' || isVideoEnabled;
 
@@ -139,24 +157,15 @@ export default function VoiceCallModal({
 
     const fullStream = remoteStreamRef.current;
 
-    // Attach audio (only if fullStream contains audio tracks)
+    // Attach audio — force-play with retries for mobile autoplay policy
     if (remoteAudioRef.current && fullStream.getAudioTracks().length > 0) {
       if (remoteAudioRef.current.srcObject !== fullStream) {
         remoteAudioRef.current.srcObject = fullStream;
       }
-      remoteAudioRef.current.muted = false;
-      remoteAudioRef.current.volume = 1.0;
-      remoteAudioRef.current.play().catch((err) => {
-        console.warn('[Remote audio autoplay blocked]', err.message);
-        setTimeout(() => {
-          if (remoteAudioRef.current && remoteStreamRef.current) {
-            remoteAudioRef.current.play().catch(() => {});
-          }
-        }, 500);
-      });
+      forcePlay(remoteAudioRef.current);
     }
 
-    // Attach video if present
+    // Attach video — always try since element is now always in DOM
     if (remoteVideoRef.current && fullStream.getVideoTracks().length > 0) {
       if (remoteVideoRef.current.srcObject !== fullStream) {
         remoteVideoRef.current.srcObject = fullStream;
@@ -179,7 +188,7 @@ export default function VoiceCallModal({
   const addLocalTracksToPC = useCallback((stream, pc) => {
     if (!stream || !pc || pc.signalingState === 'closed') return;
     stream.getTracks().forEach((track) => {
-      // 1. Check existing transceivers (critical when receiver answers an incoming offer so direction changes to sendrecv!)
+      // 1. Check existing transceivers
       const transceivers = pc.getTransceivers ? pc.getTransceivers() : [];
       const matchingTransceiver = transceivers.find(
         (t) =>
@@ -210,27 +219,68 @@ export default function VoiceCallModal({
     });
   }, []);
 
-  // ── Cleanup ─────────────────────────────────────────────────────
+  // ── Cleanup — stops ALL media tracks and closes PC ──────────────
   const cleanup = useCallback(() => {
     stopRingtone();
     isCancelledRef.current = true;
+
     if (signalingRetryRef.current) {
       clearInterval(signalingRetryRef.current);
       signalingRetryRef.current = null;
     }
+
+    // 1. Stop tracks from PC senders (ensures browser releases camera even if localStreamRef is stale)
+    if (pcRef.current) {
+      try {
+        pcRef.current.getSenders().forEach((sender) => {
+          if (sender.track) {
+            sender.track.stop();
+          }
+        });
+      } catch {}
+    }
+
+    // 2. Stop all local stream tracks
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((t) => t.stop());
       localStreamRef.current = null;
     }
+
+    // 3. Stop remote stream tracks
+    if (remoteStreamRef.current) {
+      remoteStreamRef.current.getTracks().forEach((t) => t.stop());
+      remoteStreamRef.current = null;
+    }
+
+    // 4. Close peer connection
     if (pcRef.current) {
       try {
         if (pcRef.current.signalingState !== 'closed') pcRef.current.close();
       } catch {}
       pcRef.current = null;
     }
-    remoteStreamRef.current = null;
+
+    // 5. Clear video element srcObjects to release handles
+    if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null;
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+
     pendingCandidatesRef.current = [];
   }, []);
+
+  // ── Expose cleanup to VoiceCallProvider for safety-net camera release ──
+  useEffect(() => {
+    if (onCleanupRef) {
+      onCleanupRef.current = cleanup;
+    }
+  }, [cleanup, onCleanupRef]);
+
+  // ── Beforeunload — release camera if tab/window closes during call ──
+  useEffect(() => {
+    const handleBeforeUnload = () => cleanup();
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [cleanup]);
 
   // ── Flush pending ICE candidates ───────────────────────────────
   const flushPendingCandidates = async (pc) => {
@@ -403,6 +453,9 @@ export default function VoiceCallModal({
     setCallState('connecting');
     stopRingtone();
 
+    // Resume AudioContext on user gesture (critical for mobile audio)
+    resumeAudioContext();
+
     try {
       if (remoteAudioRef.current) {
         remoteAudioRef.current.muted = false;
@@ -483,6 +536,7 @@ export default function VoiceCallModal({
 
     isCancelledRef.current = false;
     hasConnectedRef.current = false;
+    iceRestartAttemptedRef.current = false;
     pendingCandidatesRef.current = [];
 
     // ── Synchronous Channel Listeners ─────────────────────────────
@@ -539,7 +593,7 @@ export default function VoiceCallModal({
 
     // ── Initialize RTCPeerConnection ──────────────────────────────
     const initPeerConnection = async () => {
-      let iceConfig = ICE_SERVERS;
+      let iceConfig = FALLBACK_ICE_SERVERS;
       try {
         const r = await fetch('/api/calls/ice-servers');
         if (r.ok) {
@@ -589,6 +643,57 @@ export default function VoiceCallModal({
         }
       };
 
+      // ── ICE Connection State — with restart logic ──
+      pc.oniceconnectionstatechange = () => {
+        const state = pc.iceConnectionState;
+
+        if (state === 'connected' || state === 'completed') {
+          iceRestartAttemptedRef.current = false; // reset restart flag on success
+          hasConnectedRef.current = true;
+          // Force re-attach remote stream to ensure audio plays after ICE completes
+          if (remoteStreamRef.current) attachRemoteStream(remoteStreamRef.current);
+        }
+
+        if (state === 'disconnected') {
+          // Wait 3 seconds then attempt ICE restart (handles temporary network blips)
+          setTimeout(() => {
+            if (
+              pcRef.current &&
+              pcRef.current.iceConnectionState === 'disconnected' &&
+              !isCancelledRef.current &&
+              !iceRestartAttemptedRef.current
+            ) {
+              console.log('[WebRTC] ICE disconnected — attempting restart');
+              iceRestartAttemptedRef.current = true;
+              try {
+                pcRef.current.restartIce();
+                if (mode === 'outgoing') createAndSendOffer();
+              } catch (e) {
+                console.warn('[WebRTC] ICE restart failed:', e.message);
+              }
+            }
+          }, 3000);
+        }
+
+        if (state === 'failed') {
+          if (!iceRestartAttemptedRef.current) {
+            // One ICE restart attempt before giving up
+            console.log('[WebRTC] ICE failed — attempting restart before disconnect');
+            iceRestartAttemptedRef.current = true;
+            try {
+              pc.restartIce();
+              if (mode === 'outgoing') createAndSendOffer();
+            } catch {
+              endCall();
+            }
+          } else {
+            // Already tried restart, give up
+            toast.info('Connection lost');
+            endCall();
+          }
+        }
+      };
+
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === 'connected') {
           if (remoteStreamRef.current) attachRemoteStream(remoteStreamRef.current);
@@ -600,10 +705,14 @@ export default function VoiceCallModal({
           stopRingtone();
           playConnectedSound();
           setCallState('connected');
-        } else if (pc.connectionState === 'failed') {
-          endCall();
         }
+        // Note: 'failed' handled in oniceconnectionstatechange with restart logic
       };
+
+      // ── Resume AudioContext for outgoing call (user already clicked "Call") ──
+      if (mode === 'outgoing') {
+        resumeAudioContext();
+      }
 
       // Caller mic + camera acquisition and immediate offer dispatch
       if (mode === 'outgoing') {
@@ -792,8 +901,10 @@ export default function VoiceCallModal({
   };
 
   const handleModalClick = () => {
+    // On any tap inside call modal, try to resume audio (mobile autoplay workaround)
+    resumeAudioContext();
     if (remoteAudioRef.current && remoteAudioRef.current.paused) {
-      remoteAudioRef.current.play().catch(() => {});
+      forcePlay(remoteAudioRef.current);
     }
   };
 
@@ -805,12 +916,15 @@ export default function VoiceCallModal({
   const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(peerName)}&background=7C3AED&color=ffffff&size=256&bold=true&format=png`;
   const avatar = peerUser?.photo || getUserAvatarUrl(peerUser) || fallback;
 
+  // Determine if remote video should be visible (full screen)
+  const showRemoteVideo = callState === 'connected' && isVideoCall && !isPeerVideoOff;
+
   return (
     <div
       onClick={handleModalClick}
       className="fixed inset-0 z-[999999] bg-[#0C0A09] flex flex-col justify-between items-center text-white select-none overflow-hidden pb-8 pt-8 px-4 anim-fade-in"
     >
-      {/* Hidden audio element */}
+      {/* Hidden audio element — ALWAYS rendered (never conditionally removed) */}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio
         ref={remoteAudioRef}
@@ -819,16 +933,23 @@ export default function VoiceCallModal({
         style={{ position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none' }}
       />
 
+      {/* Remote video element — ALWAYS in DOM, visibility toggled via CSS.
+          This ensures remoteVideoRef is never null when ontrack fires. */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <video
+        ref={remoteVideoRef}
+        autoPlay
+        playsInline
+        className={
+          showRemoteVideo
+            ? 'absolute inset-0 z-0 w-full h-full object-cover'
+            : 'absolute w-0 h-0 opacity-0 pointer-events-none'
+        }
+      />
+
       {/* ── REMOTE VIDEO VIEW (Full Screen Background in Video Call) ── */}
-      {callState === 'connected' && isVideoCall && !isPeerVideoOff ? (
-        <div className="absolute inset-0 z-0 bg-black">
-          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-          <video
-            ref={remoteVideoRef}
-            autoPlay
-            playsInline
-            className="w-full h-full object-cover"
-          />
+      {showRemoteVideo ? (
+        <div className="absolute inset-0 z-0 bg-black pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none" />
         </div>
       ) : (

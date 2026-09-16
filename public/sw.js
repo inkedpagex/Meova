@@ -2,7 +2,7 @@
 // Strategy: Network-first for dynamic routes, Stale-While-Revalidate for static shell assets.
 // Offline Fallback support for PWA / Android WebView.
 
-const CACHE_VERSION = '2026-09-14T20:35'; // ← updated on deploy
+const CACHE_VERSION = '2026-09-15T06:45'; // ← updated on deploy
 const CACHE_NAME = `Meova-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',

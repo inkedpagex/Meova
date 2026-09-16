@@ -431,7 +431,6 @@ function MessagesContent() {
     setActiveChatId(chatId);
     setActiveChat(chat);
     setShowList(false);
-    setLoadingMessages(false);
 
     // Optimistically clear unread badge in state
     setChats(prev => prev.map(c => {
@@ -454,12 +453,15 @@ function MessagesContent() {
     const cached = messagesCacheRef.current[chatId];
     if (cached && Array.isArray(cached) && cached.length > 0) {
       setMessages(cached);
+      setLoadingMessages(false);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'instant' }), 20);
     } else if (chat.isMock || !chat.last_message || chat.last_message.startsWith('Say hi')) {
       // New conversation with 0 messages: ready immediately with 0 delay
       setMessages([]);
+      setLoadingMessages(false);
     } else {
-      // Show optimistic last message while fetching recent messages in background
+      // Show loading state + optimistic last message while fetching full history
+      setLoadingMessages(true);
       if (chat.last_message) {
         setMessages([{
           id: `opt-${chatId}`,
@@ -474,31 +476,46 @@ function MessagesContent() {
       }
     }
 
-    // 2. Fast background sync (fetches max 25 recent messages)
+    // 2. Fast background sync (fetches max 25 recent messages) — with retry
     if (!chat.isMock) {
-      fetch(`/api/chats/${chatId}/messages?limit=25`)
-        .then(res => res.json())
-        .then(data => {
-          if (data?.messages) {
-            setActiveChatId(currId => {
-              if (currId === chatId) {
-                setMessages(prev => {
-                  let list = [...data.messages];
-                  prev.forEach(p => {
-                    if (p.id?.startsWith('temp-') && !list.some(m => m.id === p.id || (m.text?.trim() === p.text?.trim() && String(m.senderId) === String(p.senderId)))) {
-                      list.push(p);
-                    }
+      const fetchMessages = (attempt = 0) => {
+        fetch(`/api/chats/${chatId}/messages?limit=25`)
+          .then(res => res.json())
+          .then(data => {
+            if (data?.messages) {
+              setActiveChatId(currId => {
+                if (currId === chatId) {
+                  setMessages(prev => {
+                    let list = [...data.messages];
+                    // Preserve any optimistic temp messages not yet confirmed by server
+                    prev.forEach(p => {
+                      if (p.id?.startsWith('temp-') && !list.some(m => m.id === p.id || (m.text?.trim() === p.text?.trim() && String(m.senderId) === String(p.senderId)))) {
+                        list.push(p);
+                      }
+                    });
+                    messagesCacheRef.current[chatId] = list;
+                    return list;
                   });
-                  messagesCacheRef.current[chatId] = list;
-                  return list;
-                });
-                setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'instant' }), 30);
-              }
-              return currId;
-            });
-          }
-        })
-        .catch(err => console.error('Failed to sync messages:', err));
+                  setLoadingMessages(false);
+                  setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'instant' }), 30);
+                }
+                return currId;
+              });
+            } else {
+              setLoadingMessages(false);
+            }
+          })
+          .catch(err => {
+            console.error('Failed to sync messages:', err);
+            // Retry once after 1.5 seconds on failure (mobile network can be flaky)
+            if (attempt < 1) {
+              setTimeout(() => fetchMessages(attempt + 1), 1500);
+            } else {
+              setLoadingMessages(false);
+            }
+          });
+      };
+      fetchMessages();
     }
   }, [currentUid]);
 
@@ -1105,7 +1122,14 @@ function MessagesContent() {
 
             {/* Messages Scroll Area */}
             <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-1 no-scrollbar bg-[var(--bg-base)]">
-              {messages.length === 0 ? (() => {
+              {/* Loading indicator while fetching message history */}
+              {loadingMessages && (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 size={18} className="animate-spin text-[#7657D9]" />
+                  <span className="text-xs font-bold text-black/50 ml-2">Loading messages...</span>
+                </div>
+              )}
+              {messages.length === 0 && !loadingMessages ? (() => {
                 const isGroup = activeChat?.isGroup || activeChatId?.startsWith('group_') || Boolean(activeChat?.name);
                 return (
                   <div className="flex flex-col items-center justify-center h-full text-center py-10">

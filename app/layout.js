@@ -335,23 +335,58 @@ export default async function RootLayout({ children }) {
                     '@type': 'Organization',
                     '@id': 'https://meova.in/#org',
                     'name': 'Meova',
+                    'alternateName': ['Meova App', 'Meova Campus', 'Meova Network'],
                     'url': 'https://meova.in',
                     'logo': 'https://meova.in/icon-512.png',
+                    'description': "Meova is India's verified campus social network and 1-on-1 student meetup platform designed for university students to connect, schedule coffee & study sessions, join student circles, and earn Sparks.",
+                    'foundingLocation': {
+                      '@type': 'Country',
+                      'name': 'India'
+                    },
                     'sameAs': [
                       'https://instagram.com/meova.in',
                       'https://twitter.com/meovaapp',
-                      'https://linkedin.com/company/meova'
+                      'https://linkedin.com/company/meova',
+                      'https://github.com/inkedpagex/Meova'
+                    ],
+                    'knowsAbout': [
+                      'Campus Social Network',
+                      'Student Networking',
+                      'College Meetups',
+                      'Peer Mentorship',
+                      'Student Circles',
+                      'Sparks Wallet'
                     ],
                     'address': {
                       '@type': 'PostalAddress',
-                      'addressLocality': 'Mathura',
-                      'addressRegion': 'Uttar Pradesh',
                       'addressCountry': 'IN'
                     },
                     'areaServed': {
                       '@type': 'Country',
                       'name': 'India'
                     }
+                  },
+                  {
+                    '@type': 'FAQPage',
+                    '@id': 'https://meova.in/#faq',
+                    'mainEntity': [
+                      {
+                        '@type': 'Question',
+                        'name': 'What is Meova?',
+                        'acceptedAnswer': {
+                          '@type': 'Answer',
+                          'text': 'Meova is India\'s verified campus social network and 1-on-1 student meetup platform for university students. It allows verified college peers to discover classmates, schedule in-person coffee & study meetups, join campus circles, and earn Sparks.'
+                        }
+                      },
+                      {
+                        '@type': 'Question',
+                        'name': 'How do campus meetups work on Meova?',
+                        'acceptedAnswer': {
+                          '@type': 'Answer',
+                          'text': 'Students can discover peers by branch, year, or skills and request a 1-on-1 campus meetup. Sessions are verified via mutual QR code scanning and a live 20-minute meetup timer.'
+                        }
+                      }
+                    ]
                   }
                 ]
               })

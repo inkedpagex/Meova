@@ -864,10 +864,10 @@
     "semantic_hash": "b60397b3e4d48e2abb9a983303891719"
   },
   "app/layout.js": {
-    "mtime": 1788888583.0426733,
-    "seen": 1789049946.6902676,
-    "ast_hash": "2935e260e69775a982b002e16c33f37a",
-    "semantic_hash": "2935e260e69775a982b002e16c33f37a"
+    "mtime": 1789418746.5517683,
+    "seen": 1789418864.814998,
+    "ast_hash": "0e4aef330e493584cdfa8d2f30df4489",
+    "semantic_hash": ""
   },
   "app/login/page.js": {
     "mtime": 1788886410.1456285,
@@ -1128,10 +1128,10 @@
     "semantic_hash": "2f01121dbec698026b18dfe581b91f1d"
   },
   "components/MarketingHome.jsx": {
-    "mtime": 1788884511.9637213,
-    "seen": 1789049946.6902676,
-    "ast_hash": "fa7376b586431355b0e0f88f627a1ef3",
-    "semantic_hash": "fa7376b586431355b0e0f88f627a1ef3"
+    "mtime": 1789418792.7656848,
+    "seen": 1789418864.8424935,
+    "ast_hash": "a9f727ec9ff245ff533e51a0c736c24b",
+    "semantic_hash": ""
   },
   "components/MessagePillButton.jsx": {
     "mtime": 1788884923.3878212,
@@ -2016,9 +2016,9 @@
     "semantic_hash": ""
   },
   "FEATURES_REGISTRY.md": {
-    "mtime": 1789418160.968987,
-    "seen": 1789418184.1504054,
-    "ast_hash": "7600a6f4618797e587618386f99c3908",
+    "mtime": 1789418823.0706959,
+    "seen": 1789418864.8849962,
+    "ast_hash": "5a9242cab9a8bdf077fdd5a091b26b00",
     "semantic_hash": ""
   },
   "scripts/test-pwa-standalone-routing.mjs": {

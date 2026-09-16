@@ -1,11 +1,11 @@
 # Graph Report - Meova  (2026-09-15)
 
 ## Corpus Check
-- 328 files · ~277,336 words
+- 328 files · ~277,706 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1381 nodes · 3620 edges · 102 communities (71 shown, 25 thin omitted)
+- 1383 nodes · 3628 edges · 102 communities (74 shown, 22 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 11 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
@@ -17,16 +17,16 @@
 ## Community Hubs (Navigation)
 - getUserAdmin
 - getAdminUser.js
-- Sidebar.jsx
-- admin.js
 - requireAuth
+- admin.js
+- rateLimit
 - getUserWithRole
 - app/layout.js
-- getCollegeBySlug
+- MarketingHome.jsx
 - icons.jsx
 - Loader2
 - sendPush
-- messages/page.jsx
+- getCartoonAvatar
 - wallet.js
 - ProfileClient.jsx
 - creditSparks
@@ -43,46 +43,46 @@
 - VoiceCallModal.jsx
 - users/[id]/page.js
 - manifest.json
-- approve-withdrawal/route.js
-- react
-- CirclesList.jsx
-- UI Rules — "Pulse" Social Media App
-- useUserContext
 - ambassador/page.jsx
-- admin/feature-flags/route.js
+- FeedClient.jsx
+- PostMediaGallery.jsx
+- UI Rules — "Pulse" Social Media App
+- messages/page.jsx
+- BlogClient.jsx
+- gigs/route.js
 - circles/[id]/page.js
-- calculateMeetupRate
-- users/route.js
+- ShieldCheck
+- recommendationEngine.js
 - devDependencies
 - Meova UI / UX Master Design System & Rules (`UI_RULES.md`)
 - audit-colors.mjs
 - test-middleware.mjs
-- admin/page.js
+- AdminClient.jsx
 - next.config.mjs
 - scripts
 - update-sw-version.js
 - logout/route.js
 - profile.actions.js
 - audit-prompt-purple.mjs
-- AdminPaymentsPage
+- Clock
 - AdminUsersPage
-- blog/page.jsx
-- help/page.jsx
+- ArrowLeft
+- wallet/page.js
 - events/constants.js
 - check-icons.mjs
 - verify-remixicon-classes.mjs
 - index.ts
-- bookings/page.js
+- CustomSelect.jsx
 - sync/route.js
 - bookings/layout.js
 - circles/page.js
 - gigs/layout.js
 - gla-university/page.js
-- test-message-notifications.js
-- BuyPage
+- useAuth
+- RefreshCw
 - middleware.js
 - verify-theme-default.mjs
-- ThemeSelectorModal.jsx
+- session/route.js
 - eslint.config.mjs
 - lib/constants.js
 - postcss.config.mjs
@@ -98,19 +98,19 @@
 - Complete Element-Level Color Spec — "M" Campus App
 - UI/UX Design Rules
 - test-notification-test-feature.js
-- AdminCampaignsPage
+- events.actions.js
+- campaigns/page.js
 - Campus App Architecture Rules (Next.js App Router)
-- notifications/page.js
+- react
 - README.md
 - AGENTS.md
+- @supabase/ssr
 - rules/graphify.md
 - workflows/graphify.md
-- WithdrawPage
-- useNativePush.js
+- utils.ts
+- overrides
 - @supabase/supabase-js
-- cancel_old_bookings.js
 - test-posts-comments.js
-- test-mobile-pwa-push-pipeline.mjs
 
 ## God Nodes (most connected - your core abstractions)
 1. `requireAuth()` - 124 edges
@@ -125,89 +125,89 @@
 10. `Sparkles` - 31 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `AdminPage()` --calls--> `requireAdmin()`  [EXTRACTED]
-  app/admin/page.js → lib/getAdminUser.js
-- `POST()` --calls--> `requireAuth()`  [EXTRACTED]
-  app/api/admin/circles/approve/route.js → lib/getAdminUser.js
-- `GET()` --calls--> `requireAuth()`  [EXTRACTED]
-  app/api/admin/circles/list/route.js → lib/getAdminUser.js
 - `GET()` --calls--> `requireAdmin()`  [EXTRACTED]
   app/api/admin/verifications/route.js → lib/getAdminUser.js
+- `GET()` --calls--> `getUserWithRole()`  [EXTRACTED]
+  app/api/auth/session/route.js → lib/getAdminUser.js
 - `GET()` --calls--> `requireAuth()`  [EXTRACTED]
   app/api/bookings/route.js → lib/getAdminUser.js
+- `GET()` --calls--> `requireAuth()`  [EXTRACTED]
+  app/api/chats/[id]/messages/route.js → lib/getAdminUser.js
+- `GET()` --calls--> `requireAuth()`  [EXTRACTED]
+  app/api/chats/route.js → lib/getAdminUser.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (102 total, 25 thin omitted)
+## Communities (102 total, 22 thin omitted)
 
 ### Community 0 - "getUserAdmin"
-Cohesion: 0.18
-Nodes (13): SinglePostPage(), PostCardClient(), dynamic, metadata, ProfilePage(), CircleJoinButton(), joinCircleAction(), leaveCircleAction() (+5 more)
+Cohesion: 0.24
+Nodes (9): SinglePostPage(), dynamic, metadata, ProfilePage(), CircleJoinButton(), joinCircleAction(), leaveCircleAction(), getUserAdmin() (+1 more)
 
 ### Community 1 - "getAdminUser.js"
-Cohesion: 0.07
-Nodes (34): AdminHeaderClient(), AdminCommunitiesPage(), metadata, PendingCommunitiesClient(), AdminLayout(), dynamic, generateReferralCode(), GET() (+26 more)
+Cohesion: 0.06
+Nodes (37): AdminHeaderClient(), AdminCommunitiesPage(), metadata, PendingCommunitiesClient(), AdminLayout(), dynamic, AdminPage(), metadata (+29 more)
 
-### Community 2 - "Sidebar.jsx"
-Cohesion: 0.20
-Nodes (9): CreateMenuModal(), Logo(), PWAInstallBanner(), AUTH_PATHS, Compass, LogIn, PanelLeft, PanelLeftClose (+1 more)
+### Community 2 - "requireAuth"
+Cohesion: 0.05
+Nodes (32): POST(), GET(), GET(), POST(), dynamic, GET(), POST(), PATCH() (+24 more)
 
 ### Community 3 - "admin.js"
-Cohesion: 0.04
-Nodes (31): POST(), GET(), DEFAULT_GIGS, DEFAULT_MOCK_POSTS, POST(), GET(), POST(), GET() (+23 more)
+Cohesion: 0.09
+Nodes (14): DEFAULT_GIGS, DEFAULT_MOCK_POSTS, POST(), GET(), POST(), GET(), requireAmbassador(), POST() (+6 more)
 
-### Community 4 - "requireAuth"
-Cohesion: 0.08
-Nodes (47): GET(), POST(), dynamic, GET(), POST(), GET(), POST(), DELETE() (+39 more)
+### Community 4 - "rateLimit"
+Cohesion: 0.10
+Nodes (31): dynamic, POST(), POST(), dynamic, GET(), PATCH(), POST(), dynamic (+23 more)
 
 ### Community 5 - "getUserWithRole"
-Cohesion: 0.05
-Nodes (38): checkRateLimit(), GET(), loginAttempts, POST(), dynamic, LoginPage(), metadata, INITIAL (+30 more)
+Cohesion: 0.12
+Nodes (16): dynamic, LoginPage(), metadata, dynamic, metadata, OnboardingPage(), dynamic, HomePage() (+8 more)
 
 ### Community 6 - "app/layout.js"
-Cohesion: 0.13
-Nodes (13): BlockedPage(), metadata, inter, metadata, viewport, GenderPromptModal(), GoogleAuthProviderWrapper(), MainContentWrapper() (+5 more)
+Cohesion: 0.08
+Nodes (29): BlockedPage(), metadata, inter, metadata, viewport, FCMInitializer(), GenderPromptModal(), GoogleAuthProviderWrapper() (+21 more)
 
-### Community 7 - "getCollegeBySlug"
-Cohesion: 0.23
-Nodes (9): CollegePage(), generateMetadata(), COLLEGE_ALIASES, getCollegeBySlug(), slugifyCollege(), runVerification(), supabase, runTests() (+1 more)
+### Community 7 - "MarketingHome.jsx"
+Cohesion: 0.19
+Nodes (12): CollegePage(), dynamic, generateMetadata(), MarketingHome(), createProfileAdmin(), COLLEGE_ALIASES, getCollegeBySlug(), slugifyCollege() (+4 more)
 
 ### Community 8 - "icons.jsx"
-Cohesion: 0.06
-Nodes (39): ADMIN_TABS, metadata, Activity, AlertOctagon, ArrowDown, ArrowUpRight, BarChart2, Bookmark (+31 more)
+Cohesion: 0.05
+Nodes (40): PWAInstallBanner(), PWAInstallModal(), Activity, Apple, ArrowDown, ArrowUp, BarChart2, Bookmark (+32 more)
 
 ### Community 9 - "Loader2"
-Cohesion: 0.10
-Nodes (25): STATUS_STYLE, STATUS_STYLE, REJECTION_REASONS, PACKS, formatDate(), PACKS, WalletPage(), getCachedClaimData() (+17 more)
+Cohesion: 0.11
+Nodes (14): REJECTION_REASONS, INQUIRY_CATEGORIES, LIMITS, BuyPage(), PACKS, WithdrawPage(), AlertCircle, ArrowUpRight (+6 more)
 
 ### Community 10 - "sendPush"
-Cohesion: 0.18
-Nodes (11): POST(), GET(), PATCH(), isCircularPair(), POST(), POST(), POST(), getGoogleOAuth2AccessToken() (+3 more)
+Cohesion: 0.13
+Nodes (16): POST(), GET(), POST(), GET(), PATCH(), isCircularPair(), POST(), POST() (+8 more)
 
-### Community 11 - "messages/page.jsx"
-Cohesion: 0.12
-Nodes (25): FeedClient(), fetcher(), getPostsKey(), avatarUrl(), ChatListItem(), fetcher(), formatTime(), mergeMessageIntoList() (+17 more)
+### Community 11 - "getCartoonAvatar"
+Cohesion: 0.17
+Nodes (15): NotifIcon(), PostDetailView(), timeAgo(), getAvatar(), INTEREST_META, ProfileHighlightsSection(), Sidebar(), HostCircleDashboardModal() (+7 more)
 
 ### Community 12 - "wallet.js"
-Cohesion: 0.16
-Nodes (24): GET(), POST(), GET(), GET(), GET(), defaultWallet(), getOrCreateWallet(), getTransactions() (+16 more)
+Cohesion: 0.10
+Nodes (30): POST(), GET(), POST(), GET(), GET(), GET(), sanitizeText(), approveWithdrawal() (+22 more)
 
 ### Community 13 - "ProfileClient.jsx"
-Cohesion: 0.10
-Nodes (21): PREMIUM_FEATURES, CampusMomentsGallery(), HostBadge(), PostOptionsMenu(), PWAInstallModal(), VerificationModal(), Apple, Camera (+13 more)
+Cohesion: 0.16
+Nodes (11): ProfileClient(), AvatarZoomModal(), CampusMomentsGallery(), VerificationModal(), ZoomableProfileAvatar(), Camera, ChevronLeft, ChevronRight (+3 more)
 
 ### Community 14 - "creditSparks"
 Cohesion: 0.13
-Nodes (17): dynamic, POST(), GET(), PATCH(), POST(), GET(), POST(), POST() (+9 more)
+Nodes (17): GET(), POST(), GET(), PATCH(), POST(), GET(), POST(), POST() (+9 more)
 
 ### Community 15 - "paymentReservations.js"
-Cohesion: 0.32
-Nodes (10): GET(), POST(), ADMIN_UPI_ID, approvePaymentReservation(), autoExpireStaleReservations(), checkReservationTable(), checkUserReservationLimits(), getActiveUserReservation() (+2 more)
+Cohesion: 0.29
+Nodes (11): GET(), POST(), GET(), ADMIN_UPI_ID, approvePaymentReservation(), autoExpireStaleReservations(), checkReservationTable(), checkUserReservationLimits() (+3 more)
 
 ### Community 16 - "ProfileEditForm.jsx"
-Cohesion: 0.12
-Nodes (19): INTEREST_TAGS, YEARS, BRANCHES, INTEREST_TAGS, YEARS, UniversitySelector(), updateProfileAdmin(), INTEREST_TAGS (+11 more)
+Cohesion: 0.08
+Nodes (29): INITIAL, OnboardingClient(), slideVariants, INTEREST_TAGS, Step1(), StepBar(), YEARS, BRANCHES (+21 more)
 
 ### Community 17 - "dependencies"
 Cohesion: 0.08
@@ -222,76 +222,76 @@ Cohesion: 0.50
 Nodes (3): DUMMY_WORDS, InstagramEmbed(), isValidInstagram()
 
 ### Community 20 - "gigs/page.js"
-Cohesion: 0.13
-Nodes (20): ApplicantsDrawer(), fetcher(), fetcher(), MyGigsActivity(), STATUS_STYLE, CATEGORIES, QUICK_TAGS_GIG, QUICK_TAGS_MEETING (+12 more)
+Cohesion: 0.11
+Nodes (20): ApplicantsDrawer(), fetcher(), fetcher(), MyGigsActivity(), STATUS_STYLE, CampusGigsPage(), CATEGORIES, fetcher() (+12 more)
 
 ### Community 21 - "compilerOptions"
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowJs, esModuleInterop, forceConsistentCasingInFileNames, incremental, isolatedModules, jsx, lib (+11 more)
 
 ### Community 22 - "DiscoverClient.jsx"
-Cohesion: 0.21
-Nodes (10): DiscoverClient(), fetcher(), FILTERS, useAlgoliaSearch(), metadata, DEFAULT_CAMPUS, haversineDistance(), useCampusPresence() (+2 more)
+Cohesion: 0.15
+Nodes (12): DiscoverClient(), fetcher(), FILTERS, useAlgoliaSearch(), metadata, BookCoffeeButton(), Layers, ShakeHands (+4 more)
 
 ### Community 23 - "slide-button.tsx"
-Cohesion: 0.16
-Nodes (15): Button, ButtonProps, buttonVariants, ANIMATION_CONFIG, BUTTON_STATES, DRAG_CONSTRAINTS, SlideButton, SlideButtonProps (+7 more)
+Cohesion: 0.19
+Nodes (13): Button, ButtonProps, buttonVariants, ANIMATION_CONFIG, BUTTON_STATES, DRAG_CONSTRAINTS, SlideButton, SlideButtonProps (+5 more)
 
 ### Community 24 - "package.json"
-Cohesion: 0.10
-Nodes (20): jose, name, overrides, jwks-rsa, private, version, canvas-confetti, eslint (+12 more)
+Cohesion: 0.11
+Nodes (17): name, private, version, canvas-confetti, eslint, eslint-config-next, next, pg (+9 more)
 
 ### Community 25 - "VoiceCallModal.jsx"
 Cohesion: 0.19
 Nodes (17): AUDIO_CONSTRAINTS, ICE_SERVERS, VoiceCallModal(), Maximize2, MicOff, Minimize2, PhoneHangup(), PhoneOff() (+9 more)
 
 ### Community 26 - "users/[id]/page.js"
-Cohesion: 0.12
-Nodes (19): avatarUrl(), UserProfilePage(), AvatarZoomModal(), INTEREST_META, Github(), Instagram(), Linkedin(), ZoomableProfileAvatar() (+11 more)
+Cohesion: 0.21
+Nodes (12): GET(), avatarUrl(), generateMetadata(), UserProfilePage(), AcceptBookingButton(), BlockUserButton(), Dumbbell, fetchJoinedCirclesAdmin() (+4 more)
 
 ### Community 27 - "manifest.json"
 Cohesion: 0.12
 Nodes (15): background_color, categories, description, display, icons, id, lang, name (+7 more)
 
-### Community 28 - "approve-withdrawal/route.js"
-Cohesion: 0.24
-Nodes (6): POST(), sanitizeText(), approveWithdrawal(), rejectWithdrawal(), sendAdminAlert(), logger
+### Community 28 - "ambassador/page.jsx"
+Cohesion: 0.13
+Nodes (13): ADMIN_TABS, FAQS, FIELD_LIMITS, PERKS, STEPS, Building2, CreditCard, Instagram (+5 more)
 
-### Community 29 - "react"
+### Community 29 - "FeedClient.jsx"
 Cohesion: 0.12
-Nodes (19): ROLES, INQUIRY_CATEGORIES, LIMITS, HostDashboardClient(), metadata, CustomSelect(), MessagePillButton(), ArrowUp (+11 more)
+Nodes (27): ROLES, FeedClient(), fetcher(), getPostsKey(), HostDashboardClient(), PostCardClient(), HostBadge(), MessagePillButton() (+19 more)
 
-### Community 30 - "CirclesList.jsx"
-Cohesion: 0.11
-Nodes (26): GallerySlide(), PostMediaGallery(), PostGridThumbnail(), CATEGORY_COLORS, CATEGORY_ICONS, CirclesList(), EMPTY_SET, FILTERS (+18 more)
+### Community 30 - "PostMediaGallery.jsx"
+Cohesion: 0.32
+Nodes (12): GallerySlide(), PostMediaGallery(), PostGridThumbnail(), Image, Play, VolumeX, getCloudinaryLqipUrl(), getCloudinaryVideoThumbnail() (+4 more)
 
 ### Community 31 - "UI Rules — "Pulse" Social Media App"
 Cohesion: 0.13
 Nodes (14): 1. Core Principles, 2. Color Palette, 3. Typography, 4. Spacing & Layout Grid, 5. Components, 6. Content Layout Rules, 7. Motion & Interaction, 8. What to Avoid (Explicit Anti-Patterns) (+6 more)
 
-### Community 32 - "useUserContext"
-Cohesion: 0.15
-Nodes (13): CampusGigsPage(), fetcher(), ProfileClient(), FCMInitializer(), InAppNotificationBanner(), LiveUserStatusBadge(), UserContext, UserProvider() (+5 more)
+### Community 32 - "messages/page.jsx"
+Cohesion: 0.09
+Nodes (29): BookingsPage(), fetcher(), normalizeBooking(), avatarUrl(), ChatListItem(), fetcher(), formatTime(), mergeMessageIntoList() (+21 more)
 
-### Community 33 - "ambassador/page.jsx"
-Cohesion: 0.07
-Nodes (33): metadata, FAQS, FIELD_LIMITS, PERKS, STEPS, POSTS, dynamic, metadata (+25 more)
+### Community 33 - "BlogClient.jsx"
+Cohesion: 0.12
+Nodes (14): metadata, BlogClient(), POSTS, metadata, metadata, metadata, LegalFooter(), ArrowRight (+6 more)
 
-### Community 34 - "admin/feature-flags/route.js"
-Cohesion: 0.26
-Nodes (10): dynamic, GET(), POST(), dynamic, GET(), GET(), cache, getAllFeatureFlags() (+2 more)
+### Community 34 - "gigs/route.js"
+Cohesion: 0.22
+Nodes (12): dynamic, GET(), POST(), dynamic, GET(), dynamic, GET(), POST() (+4 more)
 
 ### Community 35 - "circles/[id]/page.js"
 Cohesion: 0.39
 Nodes (7): CircleDetailPage(), generateMetadata(), CircleAvatar(), fetchCircleDetailAdmin(), fetchCircleEventsAdmin(), fetchCircleMembersAdmin(), formatEventDate()
 
-### Community 36 - "calculateMeetupRate"
-Cohesion: 0.24
-Nodes (5): GET(), POST(), BookCoffeeButton(), calculateMeetupRate(), PRICING_TIERS
+### Community 36 - "ShieldCheck"
+Cohesion: 0.13
+Nodes (14): CATEGORY_COLORS, CATEGORY_ICONS, CirclesList(), EMPTY_SET, FILTERS, OFFICIAL_CAMPUS_CIRCLES, Code2, Gamepad2 (+6 more)
 
-### Community 37 - "users/route.js"
-Cohesion: 0.27
-Nodes (9): GET(), RootLayout(), generateMetadata(), calculateActivityScore(), calculateAffinityScore(), normalizeInterests(), rankPeersForUser(), fetchProfileAdmin() (+1 more)
+### Community 37 - "recommendationEngine.js"
+Cohesion: 0.53
+Nodes (4): calculateActivityScore(), calculateAffinityScore(), normalizeInterests(), rankPeersForUser()
 
 ### Community 38 - "devDependencies"
 Cohesion: 0.22
@@ -309,9 +309,9 @@ Nodes (5): bwPercent, exts, perFilePurple, purplePercent, searchDirs
 Cohesion: 0.29
 Nodes (5): ./_temp_middleware_test.mjs, code, middlewarePath, tempTestPath, tests
 
-### Community 42 - "admin/page.js"
-Cohesion: 0.33
-Nodes (5): AdminClient(), fmt(), fmtDate(), AdminPage(), metadata
+### Community 42 - "AdminClient.jsx"
+Cohesion: 0.47
+Nodes (5): AdminClient(), fmt(), fmtDate(), AlertOctagon, Inbox
 
 ### Community 43 - "next.config.mjs"
 Cohesion: 0.33
@@ -337,6 +337,18 @@ Nodes (4): INTEREST_TAGS, TABLE_CIRCLE_MEMBERS, TABLE_CIRCLES, TABLE_PROFILES
 Cohesion: 0.40
 Nodes (3): exts, fileCounts, searchDirs
 
+### Community 49 - "Clock"
+Cohesion: 0.18
+Nodes (6): AdminPaymentsPage(), fmtDate(), STATUS_STYLE, metadata, Clock, Wallet
+
+### Community 51 - "ArrowLeft"
+Cohesion: 0.16
+Nodes (8): ContactForm(), metadata, metadata, metadata, ArrowLeft, Mail, MapPin, Scale
+
+### Community 52 - "wallet/page.js"
+Cohesion: 0.18
+Nodes (9): FAQS, HelpCenterClient(), metadata, formatDate(), PACKS, WalletPage(), ChevronDown, ChevronUp (+1 more)
+
 ### Community 53 - "events/constants.js"
 Cohesion: 0.50
 Nodes (3): TABLE_CIRCLES, TABLE_EVENTS, TABLE_RSVPS
@@ -345,17 +357,17 @@ Nodes (3): TABLE_CIRCLES, TABLE_EVENTS, TABLE_RSVPS
 Cohesion: 0.50
 Nodes (3): css, iconsJs, invalid
 
-### Community 57 - "bookings/page.js"
-Cohesion: 0.17
-Nodes (7): BookingsPage(), fetcher(), normalizeBooking(), ProfileCallButton(), useVoiceCall(), RatingReviewModal(), lucide-react
+### Community 63 - "useAuth"
+Cohesion: 0.30
+Nodes (10): AdminAuthForm(), createSessionCookie(), logInUser(), logInWithGoogle(), logOutUser(), signUpUser(), LogoutButton(), useAuth() (+2 more)
 
-### Community 63 - "test-message-notifications.js"
+### Community 64 - "RefreshCw"
+Cohesion: 0.33
+Nodes (4): NetworkWrapper(), Radio, RefreshCw, WifiOff
+
+### Community 72 - "session/route.js"
 Cohesion: 0.40
-Nodes (3): admin, anon, { createClient }
-
-### Community 72 - "ThemeSelectorModal.jsx"
-Cohesion: 0.23
-Nodes (9): ACCENTS, MODES, ThemeContext, ThemeProvider(), useTheme(), ThemeSelectorModal(), Moon, Palette (+1 more)
+Nodes (4): checkRateLimit(), GET(), loginAttempts, POST()
 
 ### Community 80 - "test-pwa-standalone-routing.mjs"
 Cohesion: 0.29
@@ -366,8 +378,8 @@ Cohesion: 0.14
 Nodes (13): Breakpoint System, 🖥️ DESKTOP LAYOUTS, Desktop Screen 4: Discover, Desktop Screen 5: Home, Global Desktop Shell (applies to Discover, Home, and all desktop screens), Global Mobile Shell (applies to every mobile screen), 📱 MOBILE LAYOUTS, Mobile Screen 1: Chat List (+5 more)
 
 ### Community 82 - "supabaseQueries.js"
-Cohesion: 0.17
-Nodes (8): GET(), dynamic, GET(), dynamic, GET(), fetchCirclesAdmin(), fetchPendingCirclesAdmin(), fetchUpcomingEventsAdmin()
+Cohesion: 0.23
+Nodes (5): GET(), dynamic, GET(), fetchCirclesAdmin(), fetchPendingCirclesAdmin()
 
 ### Community 83 - "Card Layout + Structure Spec — "M" Campus App"
 Cohesion: 0.17
@@ -378,8 +390,8 @@ Cohesion: 0.18
 Nodes (10): 1. 🤝 Instant 1-on-1 Campus Meetups, 2. 📍 Real-Time Presence ("Free Now" Mode), 3. ⚡ Campus Micro-Gigs & Earning ("Earn Sparks"), 4. 👥 Campus Circles & Communities, 5. 🛡️ High-Trust & Safe Environment, 💡 Isse Kya Hoga? (Key Benefits & Solutions), 🚀 Main Problem Solved (Kaunsi Problem Solve Hoti Hai?), Meetify (Meetuply) — Campus Community & Networking Platform (+2 more)
 
 ### Community 85 - "events/page.js"
-Cohesion: 0.25
-Nodes (8): CATEGORY_THEMES, dynamic, EventCard(), EventsPage(), getTheme(), metadata, Mic, Trophy
+Cohesion: 0.15
+Nodes (14): dynamic, GET(), CATEGORY_THEMES, dynamic, EventCard(), EventsPage(), getTheme(), metadata (+6 more)
 
 ### Community 86 - "Complete Element-Level Color Spec — "M" Campus App"
 Cohesion: 0.22
@@ -393,57 +405,57 @@ Nodes (8): 1. No Emojis, 2. Minimal Design, 3. Short, Context-Aware Text (Max 3-
 Cohesion: 0.25
 Nodes (6): admin, anon, { createClient }, envPath, fs, path
 
+### Community 89 - "events.actions.js"
+Cohesion: 0.80
+Nodes (3): cancelRsvpAction(), rsvpToEventAction(), RsvpButton()
+
+### Community 90 - "campaigns/page.js"
+Cohesion: 0.33
+Nodes (4): AdminCampaignsPage(), fmtDate(), STATUS_STYLE, ExternalLink
+
 ### Community 91 - "Campus App Architecture Rules (Next.js App Router)"
 Cohesion: 0.33
 Nodes (5): Before writing any new feature, Campus App Architecture Rules (Next.js App Router), Folder structure, Goal check, Hard rules
 
-### Community 92 - "notifications/page.js"
-Cohesion: 0.16
-Nodes (9): FILTERS, NotificationsPage(), NotifIcon(), timeAgo(), NOTIF_CONFIG, Skeleton(), Bell, Briefcase (+1 more)
+### Community 92 - "react"
+Cohesion: 0.13
+Nodes (16): FILTERS, NotificationsPage(), timeAgo(), CreateMenuModal(), InAppNotificationBanner(), NOTIF_CONFIG, Logo(), AUTH_PATHS (+8 more)
 
 ### Community 93 - "README.md"
 Cohesion: 0.40
 Nodes (4): AI review test, Deploy on Vercel, Getting Started, Learn More
 
-### Community 99 - "useNativePush.js"
-Cohesion: 0.42
-Nodes (7): registerDeviceTokenOnServer(), registerWebPushSubscription(), requestNativePushPermission(), urlBase64ToUint8Array(), useNativePush(), @capacitor/core, @capacitor/push-notifications
+### Community 99 - "overrides"
+Cohesion: 0.67
+Nodes (3): jose, overrides, jwks-rsa
 
 ### Community 100 - "@supabase/supabase-js"
-Cohesion: 0.25
-Nodes (4): @supabase/supabase-js, sb, PUBLIC_PAGES, supabase
-
-### Community 101 - "cancel_old_bookings.js"
-Cohesion: 0.29
-Nodes (5): { createClient }, env, envVars, fs, supabase
+Cohesion: 0.10
+Nodes (12): @supabase/supabase-js, { createClient }, env, envVars, fs, supabase, admin, anon (+4 more)
 
 ### Community 102 - "test-posts-comments.js"
 Cohesion: 0.29
 Nodes (5): { createClient }, env, envVars, fs, supabaseAdmin
 
-### Community 106 - "test-mobile-pwa-push-pipeline.mjs"
-Cohesion: 0.40
-Nodes (4): web-push, __dirname, __filename, rootDir
-
 ## Knowledge Gaps
-- **386 isolated node(s):** `metadata`, `ADMIN_TABS`, `STATUS_STYLE`, `metadata`, `dynamic` (+381 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 525 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **387 isolated node(s):** `metadata`, `ADMIN_TABS`, `STATUS_STYLE`, `metadata`, `dynamic` (+382 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 526 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `react` to `getUserAdmin`, `Sidebar.jsx`, `getUserWithRole`, `app/layout.js`, `icons.jsx`, `Loader2`, `messages/page.jsx`, `ProfileClient.jsx`, `ProfileEditForm.jsx`, `InstagramEmbed.jsx`, `gigs/page.js`, `DiscoverClient.jsx`, `slide-button.tsx`, `package.json`, `VoiceCallModal.jsx`, `users/[id]/page.js`, `CirclesList.jsx`, `useUserContext`, `ambassador/page.jsx`, `bookings/page.js`, `ThemeSelectorModal.jsx`, `notifications/page.js`, `useNativePush.js`?**
-  _High betweenness centrality (0.128) - this node is a cross-community bridge._
-- **Why does `supabaseAdmin` connect `admin.js` to `getUserAdmin`, `getAdminUser.js`, `admin/feature-flags/route.js`, `ambassador/page.jsx`, `calculateMeetupRate`, `requireAuth`, `users/route.js`, `getUserWithRole`, `sendPush`, `wallet.js`, `creditSparks`, `paymentReservations.js`, `profile.actions.js`, `supabaseQueries.js`, `users/[id]/page.js`?**
-  _High betweenness centrality (0.077) - this node is a cross-community bridge._
-- **Why does `@supabase/supabase-js` connect `@supabase/supabase-js` to `admin.js`, `cancel_old_bookings.js`, `test-posts-comments.js`, `getCollegeBySlug`, `test-mobile-pwa-push-pipeline.mjs`, `package.json`, `test-notification-test-feature.js`, `test-message-notifications.js`?**
-  _High betweenness centrality (0.054) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `getUserAdmin`, `getAdminUser.js`, `getUserWithRole`, `app/layout.js`, `MarketingHome.jsx`, `icons.jsx`, `Loader2`, `getCartoonAvatar`, `ProfileClient.jsx`, `ProfileEditForm.jsx`, `InstagramEmbed.jsx`, `gigs/page.js`, `DiscoverClient.jsx`, `slide-button.tsx`, `package.json`, `VoiceCallModal.jsx`, `ambassador/page.jsx`, `FeedClient.jsx`, `PostMediaGallery.jsx`, `messages/page.jsx`, `BlogClient.jsx`, `ShieldCheck`, `AdminClient.jsx`, `Clock`, `wallet/page.js`, `CustomSelect.jsx`, `useAuth`, `RefreshCw`, `events.actions.js`, `campaigns/page.js`?**
+  _High betweenness centrality (0.125) - this node is a cross-community bridge._
+- **Why does `supabaseAdmin` connect `admin.js` to `getUserAdmin`, `getAdminUser.js`, `requireAuth`, `gigs/route.js`, `rateLimit`, `getUserWithRole`, `MarketingHome.jsx`, `sendPush`, `wallet.js`, `creditSparks`, `paymentReservations.js`, `profile.actions.js`, `supabaseQueries.js`, `events.actions.js`, `users/[id]/page.js`?**
+  _High betweenness centrality (0.086) - this node is a cross-community bridge._
+- **Why does `@supabase/supabase-js` connect `@supabase/supabase-js` to `admin.js`, `test-posts-comments.js`, `MarketingHome.jsx`, `sendPush`, `package.json`, `test-notification-test-feature.js`?**
+  _High betweenness centrality (0.056) - this node is a cross-community bridge._
 - **What connects `metadata`, `ADMIN_TABS`, `STATUS_STYLE` to the rest of the system?**
-  _386 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _387 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `getAdminUser.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.06734006734006734 - nodes in this community are weakly interconnected._
-- **Should `admin.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.04491228070175438 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.061581920903954805 - nodes in this community are weakly interconnected._
 - **Should `requireAuth` be split into smaller, more focused modules?**
-  _Cohesion score 0.075990675990676 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05454545454545454 - nodes in this community are weakly interconnected._
+- **Should `admin.js` be split into smaller, more focused modules?**
+  _Cohesion score 0.09230769230769231 - nodes in this community are weakly interconnected._

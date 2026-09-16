@@ -18,9 +18,16 @@ export function VoiceCallProvider({ children }) {
   const activeChannelRef = useRef(null);
   // Track whether we're already in a call to prevent double-invites
   const inCallRef = useRef(false);
+  // Safety-net cleanup ref — populated by VoiceCallModal to stop camera/mic
+  const cleanupRef = useRef(null);
 
   const handleCloseCall = useCallback(() => {
     inCallRef.current = false;
+
+    // Safety net: call modal's cleanup to release camera/mic tracks
+    if (cleanupRef.current) {
+      try { cleanupRef.current(); } catch {}
+    }
 
     if (activeChannelRef.current) {
       try {
@@ -246,6 +253,7 @@ export function VoiceCallProvider({ children }) {
           channel={activeChannel}
           roomId={activeCall.roomId}
           onClose={handleCloseCall}
+          onCleanupRef={cleanupRef}
         />
       )}
     </VoiceCallContext.Provider>

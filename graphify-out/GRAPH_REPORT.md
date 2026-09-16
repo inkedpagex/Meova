@@ -1,7 +1,7 @@
 # Graph Report - Meova  (2026-09-15)
 
 ## Corpus Check
-- 328 files · ~277,706 words
+- 328 files · ~278,160 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7a70aa5b`
+- Built from commit: `f78a3240`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

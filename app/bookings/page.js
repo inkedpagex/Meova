@@ -173,9 +173,12 @@ function MeetingCountdownTimer({ booking }) {
   if (!timeLeft) return null;
 
   return (
-    <div className={`mt-2 flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-extrabold border ${
-      isLive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse' : 'bg-black/5 text-[#1C1917] border border-black/10'
+    <div className={`flex items-center justify-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold border transition-all ${
+      isLive 
+        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25 animate-pulse' 
+        : 'bg-[#7657D9]/8 dark:bg-[#7657D9]/15 text-[#7657D9] dark:text-[#A78BFA] border-[#7657D9]/20'
     }`}>
+      <Clock size={13} className={isLive ? 'text-emerald-600' : 'text-[#7657D9]'} />
       <span>{timeLeft}</span>
     </div>
   );
@@ -462,13 +465,23 @@ export default function BookingsPage() {
   };
 
   const statusColor = (status) => {
-    if (status === "Completed" || status === "Meeting Completed") return "text-emerald-600 bg-emerald-50 border-emerald-100";
-    if (status === "In Progress" || status === "in_progress") return "text-emerald-700 bg-emerald-50 border-emerald-200 animate-pulse";
-    if (status === "Rejected" || status === "Cancelled" || status === "Canceled") return "text-rose-600 bg-rose-50 border-rose-100";
-    if (status === "AutoRefunded") return "text-amber-600 bg-amber-50 border-amber-100";
-    if (status === "Disputed") return "text-rose-600 bg-rose-50 border-rose-200";
-    if (status === "Booking Closed") return "text-[#78716C] bg-[#FAFAF8] border-[#E7E5E4]";
-    return "text-[#1C1917] bg-black/5 border border-black/10";
+    if (status === "Completed" || status === "Meeting Completed") 
+      return "text-emerald-700 bg-emerald-500/10 border-emerald-500/20 dark:text-emerald-400 dark:bg-emerald-500/15";
+    if (status === "In Progress" || status === "in_progress") 
+      return "text-emerald-700 bg-emerald-500/10 border-emerald-500/20 dark:text-emerald-400 animate-pulse";
+    if (status === "Rejected" || status === "Cancelled" || status === "Canceled") 
+      return "text-rose-700 bg-rose-500/10 border-rose-500/20 dark:text-rose-400";
+    if (status === "AutoRefunded") 
+      return "text-amber-700 bg-amber-500/10 border-amber-500/20 dark:text-amber-400";
+    if (status === "Disputed") 
+      return "text-rose-700 bg-rose-500/10 border-rose-500/20 dark:text-rose-400";
+    if (status === "Confirmed" || status === "Accepted")
+      return "text-emerald-700 bg-emerald-500/10 border-emerald-500/25 dark:text-emerald-400 dark:bg-emerald-500/15";
+    if (status === "Requested")
+      return "text-[#7657D9] bg-[#7657D9]/10 border-[#7657D9]/25 dark:text-[#A78BFA]";
+    if (status === "Booking Closed") 
+      return "text-black/60 bg-black/5 border-black/10 dark:text-white/60 dark:bg-white/5 dark:border-white/10";
+    return "text-black bg-black/5 border border-black/10 dark:text-white dark:bg-white/10 dark:border-white/15";
   };
 
   const statusLabel = (status) => {
@@ -570,24 +583,24 @@ export default function BookingsPage() {
             <div 
               key={booking.id} 
               onClick={() => router.push(`/users/${otherPersonId}`)}
-              className="bg-white rounded-[16px] p-5 border border-[#E7E5E4] shadow-[0_2px_8px_rgba(28,25,23,0.06)] hover:border-black/30 transition-all cursor-pointer space-y-3.5"
+              className="bg-white dark:bg-[#1A1A1A] rounded-[26px] p-5 border border-[#EBEBEB] dark:border-white/8 shadow-[0_2px_16px_rgba(28,25,23,0.07)] hover:shadow-[0_4px_24px_rgba(28,25,23,0.11)] hover:border-black/20 dark:hover:border-white/15 transition-all cursor-pointer space-y-4"
             >
               {/* Card Header Row: Status Badge & Sparks Pill */}
               <div className="flex justify-between items-center">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-bold uppercase tracking-wider border ${statusColor(booking.status)}`}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10.5px] font-black uppercase tracking-widest border ${statusColor(booking.status)}`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-current opacity-90" />
                   <span>{statusLabel(booking.status)}</span>
                 </span>
                 
-                <span className="text-[11px] font-bold text-amber-900 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full flex items-center gap-1 shadow-2xs">
-                  <Zap size={13} className="fill-amber-500 text-amber-500" />
+                <span className="text-[11px] font-bold text-amber-800 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                  <Zap size={12} className="fill-amber-500 text-amber-500" />
                   <span>{booking.price} Sparks</span>
                 </span>
               </div>
 
               {/* Person & Title Hero */}
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full overflow-hidden bg-[#FAFAF8] border border-[#E7E5E4] flex-shrink-0">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-[#F5F5F5] dark:bg-white/8 border border-black/8 dark:border-white/10 flex-shrink-0 shadow-xs">
                   <img
                     src={finalAvatar}
                     alt={otherPerson}
@@ -599,35 +612,35 @@ export default function BookingsPage() {
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[15px] font-bold text-[#1C1917] truncate tracking-tight">
+                  <h3 className="text-[15px] font-black text-[#1C1917] dark:text-white truncate tracking-tight">
                     {booking.title}
                   </h3>
-                  <p className="text-[12px] font-medium text-[#78716C] truncate mt-0.5">
-                    {roleLabel} <span className="text-[#1C1917] font-bold">{otherPerson}</span>
+                  <p className="text-[12px] font-medium text-black/50 dark:text-white/50 truncate mt-0.5">
+                    {roleLabel} <span className="text-[#1C1917] dark:text-white/85 font-bold">{otherPerson}</span>
                   </p>
                 </div>
               </div>
 
               {/* Clean Schedule Box */}
-              <div className="bg-[#FAFAF8] border border-[#E7E5E4] rounded-[16px] p-3 space-y-2">
+              <div className="bg-[#F8F8F8] dark:bg-white/5 border border-[#EBEBEB] dark:border-white/8 rounded-[18px] px-4 py-3 space-y-2.5">
                 <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 text-[#1C1917] font-bold">
-                    <Calendar size={14} className="text-black/60" />
+                  <div className="flex items-center gap-2 text-[#1C1917] dark:text-white font-bold">
+                    <Calendar size={13} className="text-black/40 dark:text-white/40" />
                     <span>{booking.date || "Any Day"}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[#78716C] font-semibold text-[11px]">
-                    <Clock size={13} className="text-[#A8A29E]" />
+                  <div className="flex items-center gap-1.5 text-black/50 dark:text-white/50 font-semibold text-[11.5px]">
+                    <Clock size={12} className="text-black/35 dark:text-white/35" />
                     <span>{booking.time || "Flexible"}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-[#78716C] font-medium truncate pt-1.5 border-t border-[#E7E5E4]">
-                  <MapPin size={14} className="text-black/60 flex-shrink-0" />
-                  <span className="truncate font-semibold text-[#1C1917]">{booking.location || "Campus"}</span>
+                <div className="flex items-center gap-2 text-xs text-black/50 dark:text-white/50 font-medium truncate pt-2 border-t border-black/6 dark:border-white/8">
+                  <MapPin size={13} className="text-black/35 dark:text-white/35 flex-shrink-0" />
+                  <span className="truncate font-bold text-[#1C1917] dark:text-white/85">{booking.location || "Campus"}</span>
                 </div>
 
                 {booking.agenda && booking.agenda.toLowerCase().trim() !== booking.title?.toLowerCase().trim() && (
-                  <div className="text-[11px] text-[#78716C] italic bg-white rounded-xl px-2.5 py-1.5 border border-[#E7E5E4] mt-1">
+                  <div className="text-[11px] text-black/50 dark:text-white/45 italic bg-white dark:bg-white/5 rounded-xl px-2.5 py-1.5 border border-black/6 dark:border-white/8 mt-1">
                     &quot;{booking.agenda}&quot;
                   </div>
                 )}
@@ -665,7 +678,7 @@ export default function BookingsPage() {
 
               {/* Action Buttons (Only for Active tab) */}
               {activeTab === "Active" && (
-                <div className="pt-1 flex items-center gap-2">
+                <div className="flex items-center gap-2 pt-1">
                   {isGuest ? (
                     <>
                       {/* Cancel button */}
@@ -673,7 +686,7 @@ export default function BookingsPage() {
                         <button
                           onClick={(e) => { e.stopPropagation(); initiateCancel(booking); }}
                           disabled={cancelLoading === booking.id}
-                          className="w-10 h-10 bg-black/5 hover:bg-rose-50 hover:text-rose-600 text-[#78716C] rounded-xl flex items-center justify-center transition-all cursor-pointer flex-shrink-0 disabled:opacity-50"
+                          className="w-10 h-10 bg-black/5 dark:bg-white/8 hover:bg-rose-500/10 hover:text-rose-600 text-black/40 dark:text-white/40 rounded-full flex items-center justify-center transition-all cursor-pointer flex-shrink-0 disabled:opacity-50 border border-transparent hover:border-rose-500/20"
                           title="Cancel Meetup (100% Refund)"
                         >
                           {cancelLoading === booking.id
@@ -685,7 +698,7 @@ export default function BookingsPage() {
                       {/* Chat with Host */}
                       <button
                         onClick={(e) => { e.stopPropagation(); router.push(`/messages?uid=${otherPersonId}`); }}
-                        className="w-10 h-10 bg-[#FAFAF8] hover:bg-black/5 hover:text-[#1C1917] text-[#78716C] border border-[#E7E5E4] rounded-full flex items-center justify-center transition-all cursor-pointer flex-shrink-0"
+                        className="w-10 h-10 bg-black/5 dark:bg-white/8 hover:bg-black/10 dark:hover:bg-white/12 text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white rounded-full flex items-center justify-center transition-all cursor-pointer flex-shrink-0 border border-black/6 dark:border-white/8"
                         title="Chat with Host"
                       >
                         <MessageCircle size={16} />
@@ -704,7 +717,7 @@ export default function BookingsPage() {
                               location: booking.location,
                             });
                           }}
-                          className="w-10 h-10 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200/80 rounded-full flex items-center justify-center transition-all cursor-pointer flex-shrink-0 shadow-[0_2px_8px_rgba(28,25,23,0.06)]"
+                          className="w-10 h-10 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center transition-all cursor-pointer flex-shrink-0 border border-emerald-500/25"
                           title="Call Host"
                         >
                           <Phone size={16} />

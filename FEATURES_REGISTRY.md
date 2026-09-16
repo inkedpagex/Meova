@@ -34,6 +34,7 @@
 - **Optimistic UI Perception**: Message sending, likes, and profile updates reflect at 0ms with instant feedback and background reconciliation.
 - **Strict Anti-Wrapping**: Action buttons, tabs, and labels use `whitespace-nowrap flex-shrink-0` to avoid broken lines on mobile screens.
 - **Universal Modal UX & Background Scroll Lock**: All modals and popup dialogs (`FeedClient` Post creation, `CreateMenuModal`, `bookings` QR/Scan/Cancel/Dispute/Rating, etc.) strictly freeze background scrolling (`document.body.style.overflow = 'hidden'`) upon opening and restore it cleanly upon closing or unmounting. Every modal supports outside backdrop tap-to-dismiss (`if (e.target === e.currentTarget) close()`) with `e.stopPropagation()` on the dialog content, plus standard Escape key dismissal.
+- **Search Engine & AI Overview Entity Optimization (White Hat GEO)**: `app/layout.js` injects rich JSON-LD Schema (`Organization`, `SoftwareApplication`, and `FAQPage` with official entity definitions and sameAs social graph) ensuring Google's AI Overview (Gemini) recognizes Meova as India's campus social platform. PWA manifest and install prompts strictly preserve the clean app name `"Meova"`.
 
 ---
 
@@ -289,6 +290,48 @@
   - `app/contact/page.jsx` & `ContactForm.jsx` (Contact inquiry form)
 - **Robots & SEO**:
   - Clean `sitemap.xml` & `robots.txt` indexing only universal platform pages.
+
+---
+
+## Module 15: WebRTC Voice & Video Calling
+
+### Status: Active Development
+
+### Architecture
+- **Provider**: `components/providers/VoiceCallProvider.jsx` — Wraps app, provides `startCall` hook, manages call state + signaling channels via Supabase Realtime Broadcast
+- **Call UI**: `components/call/VoiceCallModal.jsx` — Full-screen call modal with voice/video, PiP local preview, ICE restart, mobile audio autoplay workaround
+- **Trigger**: `components/call/ProfileCallButton.jsx` — Profile-level call button
+- **Signaling**: Supabase Realtime Broadcast channels (`call-user-{uid}` for invites, `call_{roomId}` for WebRTC signaling)
+- **ICE/TURN**: `app/api/calls/ice-servers/route.js` — Dynamic Metered.ca TURN credentials + STUN-only fallback
+- **Call Invite**: `app/api/calls/invite/route.js` — Tier verification + push notification + call log insert
+
+### Key Features
+- Voice and Video calls (both peer verified required)
+- Mobile audio autoplay via AudioContext resume + forcePlay retry
+- Remote video element always in DOM (CSS visibility toggle, never null ref)
+- ICE restart on disconnected (3s delay) and failed (1 attempt before disconnect)
+- Bulletproof camera cleanup: PC sender tracks stopped, beforeunload listener, provider-level cleanupRef safety net
+- TURN via Metered.ca API (3s timeout), STUN-only fallback (no stale OpenRelay)
+
+### Database Tables
+- `calls` — Call log (caller_id, callee_id, call_type, room_id, status)
+
+### Recent Fixes (2026-09-15)
+- Fixed mobile audio not playing (autoplay policy workaround)
+- Fixed video not showing between mobile↔laptop (video element now always in DOM)
+- Fixed call dropping after seconds (removed dead OpenRelay TURN, added ICE restart)
+- Fixed camera staying on after hangup (bulletproof cleanup in modal + provider)
+
+---
+
+### Module 4 Update Notes (Push Notifications — 2026-09-15)
+- **Auto-Permission Request**: `useNativePush.js` now auto-requests `Notification.permission` on first load (2s delay), then registers WebPush subscription
+- **Dual Engine**: Capacitor FCM for native APK + Web Push (VAPID) for PWA
+- **device_tokens table**: Stores both web (platform='web') and native (platform='android') tokens, upserted via `/api/fcm/register`
+
+### Module 3 Update Notes (Chat & DM — 2026-09-15)
+- **Message Loading Fix**: Added `loadingMessages` state with spinner UI, retry logic (1 attempt after 1.5s), and `!loadingMessages` guard on empty state
+- **Consistent History**: Both sender and receiver now see full message history via background API fetch with proper loading indication
 
 ---
 
